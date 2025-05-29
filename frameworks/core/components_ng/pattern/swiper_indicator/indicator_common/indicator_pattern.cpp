@@ -544,6 +544,15 @@ void IndicatorPattern::HandleDragEnd(double dragVelocity)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+RectF IndicatorPattern::CalcBoundsRect() const
+{
+    RectF boundsRect;
+    if (GetDotIndicatorModifier()) {
+        boundsRect = GetDotIndicatorModifier()->GetBoundsRect();
+    }
+    return boundsRect;
+}
+
 void IndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     SwiperIndicatorPattern::InitTouchEvent(gestureHub);
@@ -628,5 +637,18 @@ std::pair<int32_t, int32_t> IndicatorPattern::CalMouseClickIndexStartAndEnd(
         start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
     }
     return { start, end };
+}
+
+void IndicatorPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto indicatorNode = GetHost();
+    CHECK_NULL_VOID(indicatorNode);
+    if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty();
+    } else if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {
+        SaveDigitIndicatorProperty();
+        UpdateDigitalIndicator();
+    }
 }
 } // namespace OHOS::Ace::NG

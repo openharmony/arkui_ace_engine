@@ -24,6 +24,7 @@ class ACE_FORCE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationM
 public:
     void Create() override;
     void Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) override;
+    void RegisterBackgroundColorUpdateCallback(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
     void SetHideTitleBar(bool hideTitleBar, bool animated) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetTitle(const std::string& title, bool hasSubTitle) override;
@@ -31,9 +32,28 @@ public:
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, const std::string& src,
         const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
         bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& resObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIconTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& resObj) override;
+    void SetBackButtonIconSrcAndTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& backButtonResObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& backButtonTextResObj) override;
+    void UpdateBackButtonIcon(const std::vector<std::string>& nameList,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonIconResObj) override;
+    void UpdateBackButtonIconText(bool userDefinedAccessibilityText,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonTextResObj) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
+    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
+    void UpdateTitleHeight(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj) override;
     void SetOnShown(std::function<void()>&& onShow) override;
     void SetOnHidden(std::function<void()>&& onHidden) override;
     void SetOnWillAppear(std::function<void()>&& willAppear) override;
@@ -47,6 +67,7 @@ public:
     void SetHideToolBar(bool hideToolBar, bool animated) override;
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
     void SetHideItemText(bool isHideItemText) override;
     void SetToolBarOptions(NavigationToolbarOptions&& opt) override;
@@ -58,6 +79,8 @@ public:
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
         bool noPixMap, RefPtr<PixelMap>& pixMap);
+    static void SetBackButtonIcon(FrameNode* frameNode, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const RefPtr<ResourceObject>& backButtonIconResObj);
     static void SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
 
@@ -74,6 +97,12 @@ public:
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo);
+    static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
+        const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj);
+    static void UpdateMainTitleInfo(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj);
+    static void UpdateSubTitleInfo(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
     static void SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems);
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
@@ -111,6 +140,13 @@ public:
     void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) override;
     static void SetEnableNavigationIndicator(
         FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
+    bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
+        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
+    void UpdateMainTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) override;
+    void UpdateSubTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) override;
+    static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

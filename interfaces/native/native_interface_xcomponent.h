@@ -1174,6 +1174,97 @@ int32_t OH_NativeXComponent_GetKeyEventCapsLockState(OH_NativeXComponent_KeyEven
  */
 int32_t OH_NativeXComponent_GetKeyEventScrollLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isScrollLockOn);
 
+/**
+ * @brief Set the Expected FrameRateRange for the XComponent node.
+ *
+ * @param node Indicates the pointer to the XComponent node.
+ * @param range Indicates the expected rate range.
+ * @return Returns the status code of the execution.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_ArkUI_XComponent_SetExpectedFrameRateRange(
+    ArkUI_NodeHandle node, OH_NativeXComponent_ExpectedRateRange range);
+
+/**
+ * @brief Registers an onFrame callback for the XComponent node.
+ *
+ * @param node Indicates the pointer to the XComponent node.
+ * @param callback Indicates the pointer to an onFrame callback.
+ * @return Returns the status code of the execution.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_ArkUI_XComponent_RegisterOnFrameCallback(ArkUI_NodeHandle node,
+    void (*callback)(ArkUI_NodeHandle node, uint64_t timestamp, uint64_t targetTimestamp));
+
+/**
+ * @brief UnRegister the onFrame callback for the XComponent node.
+ *
+ * @param node Indicates the pointer to the XComponent node.
+ * @return Returns the status code of the execution.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_ArkUI_XComponent_UnregisterOnFrameCallback(ArkUI_NodeHandle node);
+
+/**
+ * @brief Set whether the XComponent node needs soft keyboard when focused.
+ * @param node Indicates the pointer to the XComponent node.
+ * @param needSoftKeyboard Indicates whether the XComponent node needs soft keyboard or not.
+ *        Default value is false.
+ * @return Returns the status code of the execution.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+int32_t OH_ArkUI_XComponent_SetNeedSoftKeyboard(ArkUI_NodeHandle node, bool needSoftKeyboard);
+
+/**
+ * @brief Create a <b>ArkUI_AccessibilityProvider</b> object from an XComponent node.
+ *
+ * @param node Indicates the pointer to the XComponent node.
+ * @return Returns the created <b>ArkUI_AccessibilityProvider</b> object's pointer.
+ * @since 20
+ */
+ArkUI_AccessibilityProvider* OH_ArkUI_AccessibilityProvider_Create(ArkUI_NodeHandle node);
+
+/**
+ * @brief Disposes of an <b>ArkUI_AccessibilityProvider</b> object.
+ *
+ * @param provider Indicates the pointer to <b>ArkUI_AccessibilityProvider</b> object needed to dispose.
+ * @since 20
+ */
+void OH_ArkUI_AccessibilityProvider_Dispose(ArkUI_AccessibilityProvider* provider);
+
+/**
+ * @brief Set the surface show event of the surface callback.
+ *
+ * @param callback Indicated the pointer to the surface callback.
+ * @param onSurfaceShow Indicates the surface show callback event which will called when the surface is shown.
+ * @since 20
+ */
+void OH_ArkUI_SurfaceCallback_SetSurfaceShowEvent(
+    OH_ArkUI_SurfaceCallback* callback,
+    void (*onSurfaceShow)(OH_ArkUI_SurfaceHolder* surfaceHolder));
+
+/**
+ * @brief Set the surface hide event of the surface callback.
+ *
+ * @param callback Indicated the pointer to the surface callback.
+ * @param onSurfaceHide Indicates the surface hide callback event which will called when the surface is hide.
+ * @since 20
+ */
+void OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent(
+    OH_ArkUI_SurfaceCallback* callback,
+    void (*onSurfaceHide)(OH_ArkUI_SurfaceHolder* surfaceHolder));
+
 #ifdef __cplusplus
 };
 #endif

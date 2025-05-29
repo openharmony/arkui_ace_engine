@@ -143,6 +143,13 @@ public:
         windowPattern->OnAppRemoveStartingWindow();
     }
 
+    void OnUpdateSnapshotWindow() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnUpdateSnapshotWindow();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
@@ -562,7 +569,10 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     session_->SetNeedSnapshot(false);
     isBlankForSnapshot_ = false;
 
-    if (IsSnapshotSizeChanged()) {
+    int32_t imageFit = 0;
+    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
+        session_->GetPersistentId(), imageFit);
+    if (IsSnapshotSizeChanged() && isPersistentImageFit == false) {
         isBlankForSnapshot_ = true;
         CreateBlankWindow(snapshotWindow_);
         return;
@@ -581,7 +591,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
-        if (session_->GetSystemConfig().IsPhoneWindow() && session_->GetShowRecent()) {
+        if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
             auto context = GetContext();
             CHECK_NULL_VOID(context);
             auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;

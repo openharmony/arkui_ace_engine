@@ -88,16 +88,28 @@ void UpdateWhenNonNegative(BorderRadiusPropertyT<Dimension>& result, const Borde
         result.radiusBottomRight = value.radiusBottomRight;
     }
 }
+} // namespace
 
-void ShowBorderRadiusAndShadowAnimation(const RefPtr<RenderContext>& context, const RefPtr<FrameNode>& frameNode,
-    bool isShowHoverImage, const MenuParam& menuParam)
+bool MenuPreviewPattern::GetHoverScaleInterruption() const
 {
-    CHECK_NULL_VOID(context && frameNode);
-    auto pipeline = frameNode->GetContext();
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    return menuWrapperPattern->GetHoverScaleInterruption();
+}
+
+void MenuPreviewPattern::ShowBorderRadiusAndShadowAnimation(const MenuParam& menuParam)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
 
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
     auto shadow = context->GetBackShadow();
     if (!shadow.has_value()) {
         shadow = Shadow::CreateShadow(ShadowStyle::None);
@@ -110,10 +122,10 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<RenderContext>& context, co
     if (menuParam.previewBorderRadius.has_value()) {
         UpdateWhenNonNegative(borderRadius, menuParam.previewBorderRadius.value());
     }
-    auto delay = isShowHoverImage ? menuTheme->GetHoverImageDelayDuration() : 0;
+    auto delay = isShowHoverImage_ ? menuTheme->GetHoverImageDelayDuration(GetHoverScaleInterruption()) : 0;
     AnimationOption option;
     option.SetDuration(previewAnimationDuration);
-    if (isShowHoverImage) {
+    if (isShowHoverImage_) {
         option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
     } else {
         option.SetCurve(Curves::SHARP);
@@ -121,7 +133,7 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<RenderContext>& context, co
     option.SetDelay(delay);
 
     context->UpdateBorderRadius(context->GetBorderRadius().value_or(BorderRadiusProperty()));
-    pipeline->AddAfterLayoutTask([option, context, borderRadius, shadow, isShowHoverImage]() {
+    pipeline->AddAfterLayoutTask([option, context, borderRadius, shadow, isShowHoverImage = isShowHoverImage_]() {
         AnimationUtils::Animate(
             option,
             [context, borderRadius, shadow, isShowHoverImage]() mutable {
@@ -136,7 +148,7 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<RenderContext>& context, co
             option.GetOnFinishEvent());
     });
 }
-} // namespace
+
 void MenuPreviewPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -173,7 +185,7 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto menuWrapperPattern = previewMenuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, false);
     auto menuParam = menuWrapperPattern->GetMenuParam();
-    ShowBorderRadiusAndShadowAnimation(context, host, isShowHoverImage_, menuParam);
+    ShowBorderRadiusAndShadowAnimation(menuParam);
     auto menuWrapper = GetMenuWrapper();
     auto menuPattern = GetMenuPattern(menuWrapper);
     DragAnimationHelper::UpdateGatherNodeToTop();

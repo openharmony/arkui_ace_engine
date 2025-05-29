@@ -48,6 +48,7 @@
 
 namespace OHOS::Ace::NG {
 class BackgroundModifier;
+class TransitionModifier;
 class BorderImageModifier;
 class DebugBoundaryModifier;
 class MouseSelectModifier;
@@ -234,6 +235,7 @@ public:
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
+    void OnTransform3DMatrixUpdate(const Matrix4& matrix) override;
 
     void UpdateTransition(const TransitionOptions& options) override;
     void CleanTransition() override;
@@ -260,6 +262,7 @@ public:
     void UpdateWindowFocusState(bool isFocused) override;
     void UpdateWindowActiveState(bool isActive) override;
     void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
+    void ResetContentClip() override;
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
@@ -377,8 +380,13 @@ public:
 
     void OnBackgroundAlignUpdate(const Alignment& align) override;
     void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) override;
+    void OnCustomBackgroundColorUpdate(const Color& color) override;
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
+    void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) override {}
+    void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) override;
+    void UpdateCustomBackground() override;
 
+    void ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor);
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
     void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) override;
@@ -447,7 +455,7 @@ public:
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
     void SetOpacityMultiplier(float opacity) override;
-    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) override;
+    void UpdateOcclusionCullingStatus(bool enable) override;
     bool IsDisappearing() const override
     {
         return isDisappearing_;
@@ -649,6 +657,7 @@ protected:
     void PaintPixmapBgImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+    void UpdateBlurStyleForColorMode(const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
     bool UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle);
@@ -715,6 +724,8 @@ protected:
     void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
     void InitFocusStateModidifer(const RoundRect&, const Color&, float);
     void InitFocusAnimationModidifer(const RoundRect&, const Color&, float);
+    std::shared_ptr<TransitionModifier> GetOrCreateTransitionModifier();
+    std::shared_ptr<BackgroundModifier> GetOrCreateBackgroundModifier();
 
     std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(const std::optional<ContextParam>& param,
         bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
@@ -749,10 +760,8 @@ protected:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
-    int32_t densityChangedCallbackId_ = DEFAULT_CALLBACK_ID;
-    static constexpr int32_t DEFAULT_CALLBACK_ID = -1;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
-    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
+    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 8;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;
@@ -764,10 +773,12 @@ protected:
     TransitionFinishCallback transitionUserCallback_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BackgroundModifier> backgroundModifier_;
+    std::shared_ptr<TransitionModifier> transitionModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     RefPtr<MoonProgressModifier> moonProgressModifier_;
     std::shared_ptr<Rosen::RSClipBoundsModifier> clipBoundModifier_;
+    std::shared_ptr<Rosen::RSCustomClipToFrameModifier> customClipToFrameModifier_;
     std::shared_ptr<Rosen::RSMaskModifier> clipMaskModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;
@@ -841,6 +852,9 @@ protected:
     friend class RosenPivotTransitionEffect;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
+
+private:
+    void ModifyCustomBackground();
 };
 } // namespace OHOS::Ace::NG
 

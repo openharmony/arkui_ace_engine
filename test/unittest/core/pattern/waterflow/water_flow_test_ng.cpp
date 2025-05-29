@@ -27,10 +27,10 @@
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "water_flow_test_ng.h"
 
-#include "core/components/refresh/refresh_theme.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
@@ -54,8 +54,8 @@ void WaterFlowTestNg::SetUpTestSuite()
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     auto refreshThemeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
-    auto refreshTheme = RefreshTheme::Builder().Build(refreshThemeConstants);
-    EXPECT_CALL(*themeManager, GetTheme(RefreshTheme::TypeId())).WillRepeatedly(Return(refreshTheme));
+    auto refreshTheme = RefreshThemeNG::Builder().Build(refreshThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(RefreshThemeNG::TypeId())).WillRepeatedly(Return(refreshTheme));
     MockAnimationManager::Enable(true);
     auto container = Container::Current();
     ASSERT_TRUE(container);

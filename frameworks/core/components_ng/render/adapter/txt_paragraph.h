@@ -88,6 +88,7 @@ public:
     void Layout(float width) override;
     // interfaces for reLayout
     void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) override;
+    void ReLayoutForeground(const TextStyle& textStyle) override;
     float GetHeight() override;
     float GetTextWidth() override;
     size_t GetLineCount() override;

@@ -1270,6 +1270,8 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent001, TestSize.Level1)
      */
     itemPattern->isTextFadeOut_ = true;
     selectTheme->menuItemFocusedShadowStyle_ = 2.0;
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(itemNode->GetRenderContext());
+    EXPECT_CALL(*mockRenderContext, SetClipToBounds(itemPattern->focusPadding_ == 0.0_vp));
     itemPattern->InitFocusEvent();
     itemPattern->HandleFocusEvent();
     EXPECT_EQ(itemPattern->isFocused_, true);
@@ -1332,6 +1334,8 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent002, TestSize.Level1)
     itemPattern->isFocusBGColorSet_ = true;
     itemPattern->isFocusShadowSet_ = true;
     selectTheme->menuItemFocusedShadowStyle_ = 2.0;
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(itemNode->GetRenderContext());
+    EXPECT_CALL(*mockRenderContext, SetClipToBounds(true));
     itemPattern->InitFocusEvent();
     itemPattern->HandleBlurEvent();
     EXPECT_EQ(itemPattern->isFocused_, false);
@@ -1610,7 +1614,7 @@ HWTEST_F(MenuItemPatternTestOneNg, ISNeedAddExpandIcon001, TestSize.Level1)
 
 /**
  * @tc.name: AddExpandIcon002
- * @tc.desc: Verify AddExpandIcon().
+ * @tc.desc: Verify AddExpandIcon()
  * @tc.type: FUNC
  */
 HWTEST_F(MenuItemPatternTestOneNg, AddExpandIcon002, TestSize.Level1)

@@ -18,5 +18,6 @@ ace_unittest("badge_test_ng") {
   sources = [
     "badge_layout_algorithm_test_ng.cpp",
     "badge_test_ng.cpp",
+    "badge_test_tojson.cpp",
   ]
 }

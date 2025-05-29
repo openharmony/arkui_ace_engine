@@ -83,15 +83,9 @@ public:
 
     void SetNavDestinationMode(NavDestinationMode mode);
 
-    NavDestinationMode GetNavDestinationMode() const
-    {
-        return mode_;
-    }
+    NavDestinationMode GetNavDestinationMode() const;
 
-    void SetIndex(int32_t index)
-    {
-        index_ = index;
-    }
+    void SetIndex(int32_t index, bool updatePrimary = true);
 
     int32_t GetIndex() const
     {
@@ -118,15 +112,9 @@ public:
         return isAnimated_;
     }
 
-    void SetCanReused(bool canReused)
-    {
-        canReused_ = canReused;
-    }
+    void SetCanReused(bool canReused);
 
-    bool GetCanReused() const
-    {
-        return canReused_;
-    }
+    bool GetCanReused() const;
 
     void SetInCurrentStack(bool inStack)
     {
@@ -249,6 +237,24 @@ public:
 
     RefPtr<UINode> GetNavigationNode() override;
 
+    void SetIsShowInPrimaryPartition(bool show)
+    {
+        isShowInPrimaryPartition_ = show;
+    }
+    bool IsShowInPrimaryPartition() const
+    {
+        return isShowInPrimaryPartition_;
+    }
+    RefPtr<NavDestinationGroupNode> GetOrCreatePlaceHolder();
+    void SetPrimaryNode(const WeakPtr<NavDestinationGroupNode>& node)
+    {
+        primaryNode_ = node;
+    }
+    RefPtr<NavDestinationGroupNode> GetPrimaryNode() const
+    {
+        return primaryNode_.Upgrade();
+    }
+
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
     int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);
@@ -289,6 +295,10 @@ private:
     float userSetOpacity_ = 1.0f;
 
     NavDestinationTransitionDelegate navDestinationTransitionDelegate_;
+
+    bool isShowInPrimaryPartition_ = false;
+    RefPtr<NavDestinationGroupNode> placeHolderNode_;
+    WeakPtr<NavDestinationGroupNode> primaryNode_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -55,7 +55,7 @@ struct AIMenuInfo {
 };
 
 const size_t MAX_CACHE_SIZE = 100;
-const size_t MAX_SELECTED_TEXT_SIZE = 150;
+const size_t MAX_SELECTED_TEXT_SIZE = 255;
 
 using DataDetectorResult = std::vector<EntityMatch>; // for single node
 

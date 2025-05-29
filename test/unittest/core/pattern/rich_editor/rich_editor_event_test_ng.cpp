@@ -145,6 +145,22 @@ HWTEST_F(RichEditorEventTestNg, HandleBlurEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleBlurEvent002
+ * @tc.desc: test HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, HandleBlurEvent002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    WeakPtr<Pattern> pattern;
+    richEditorPattern->magnifierController_ = nullptr;
+    richEditorPattern->textSelector_.Update(3, 4);
+    richEditorPattern->HandleBlurEvent();
+    EXPECT_FALSE(richEditorPattern->isEditing_);
+}
+
+/**
  * @tc.name: HandleFocusEvent001
  * @tc.desc: test HandleFocusEvent
  * @tc.type: FUNC
@@ -336,22 +352,6 @@ HWTEST_F(RichEditorEventTestNg, HandleUserGestureEvent001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleBlurEvent002
- * @tc.desc: test HandleBlurEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEventTestNg, HandleBlurEvent002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    WeakPtr<Pattern> pattern;
-    richEditorPattern->magnifierController_ = nullptr;
-    richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->HandleBlurEvent();
-    EXPECT_FALSE(richEditorPattern->isEditing_);
-}
-
-/**
  * @tc.name: HandleFocusEvent002
  * @tc.desc: test HandleFocusEvent
  * @tc.type: FUNC
@@ -364,4 +364,96 @@ HWTEST_F(RichEditorEventTestNg, HandleFocusEvent002, TestSize.Level1)
     richEditorPattern->HandleFocusEvent();
     EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
 }
+
+/**
+ * @tc.name: GetThumbnailCallback001
+ * @tc.desc: test GetThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto host = richEditorPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    gestureHub->InitDragDropEvent();
+    gestureHub->SetThumbnailCallback(richEditorPattern->GetThumbnailCallback());
+    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
+}
+
+
+/**
+ * @tc.name: GetThumbnailCallback002
+ * @tc.desc: test GetThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    richEditorPattern->InitDragDropEvent();
+    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
+}
+
+/**
+ * @tc.name: GetThumbnailCallback003
+ * @tc.desc: test GetThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    richEditorPattern->InitDragDropEvent();
+    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
+}
+
+/**
+ * @tc.name: GetThumbnailCallback004
+ * @tc.desc: test GetThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetThumbnailCallback()(Offset(1.0f, 10.0f));
+    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
+}
+
+/**
+ * @tc.name: GetThumbnailCallback005
+ * @tc.desc: test GetThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 10;
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    auto thumbnailCallback = richEditorPattern->GetThumbnailCallback();
+    Offset point(10, 10);
+    thumbnailCallback(point);
+    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
+}
+
 }

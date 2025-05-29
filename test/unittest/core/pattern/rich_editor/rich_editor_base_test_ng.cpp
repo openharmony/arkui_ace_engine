@@ -558,6 +558,22 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel018
+ * @tc.desc: test SetEnableHapticFeedback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel018, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    richEditorModel.SetEnableHapticFeedback(richEditorNode, false);
+    EXPECT_FALSE(pattern->isEnableHapticFeedback_);
+}
+
+/**
  * @tc.name: CreateImageSourceInfo001
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
@@ -570,26 +586,6 @@ HWTEST_F(RichEditorBaseTestNg, CreateImageSourceInfo001, TestSize.Level1)
     ImageSpanOptions info;
     auto ret = richEditorPattern->CreateImageSourceInfo(info);
     EXPECT_NE(ret, nullptr);
-}
-
-/**
- * @tc.name: NeedSoftKeyboard001
- * @tc.desc: test NeedSoftKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, NeedSoftKeyboard001, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Get frameNode and pattern.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test whether rich editor need soft keyboard.
-     */
-    EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
 }
 
 /**

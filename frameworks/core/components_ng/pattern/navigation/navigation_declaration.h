@@ -154,6 +154,11 @@ struct BarItem {
     NavToolbarItemStatus status;
     std::optional<std::string> activeIcon;
     std::optional<std::function<void(WeakPtr<NG::FrameNode>)>> activeIconSymbol;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, BarItem&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
     std::string ToString() const
     {
         std::string result;
@@ -162,6 +167,22 @@ struct BarItem {
         result.append(", icon: ");
         result.append(icon.value_or("na"));
         return result;
+    }
+
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, BarItem&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 
@@ -264,6 +285,12 @@ enum class NavigationSystemTransitionType {
     EXPLODE = 1 << 3,
     SLIDE_RIGHT = 1 << 4,
     SLIDE_BOTTOM = 1 << 5,
+};
+
+enum class NavDestinationType {
+    DETAIL = 0,
+    HOME = 1,
+    PLACE_HOLDER = 2,
 };
 
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)

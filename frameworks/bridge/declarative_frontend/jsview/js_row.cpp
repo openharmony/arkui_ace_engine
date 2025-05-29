@@ -43,11 +43,12 @@ namespace OHOS::Ace::Framework {
 void JSRow::Create(const JSCallbackInfo& info)
 {
     std::optional<CalcDimension> space;
+    RefPtr<ResourceObject> spaceResObj;
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> spaceVal = obj->GetProperty("space");
         CalcDimension value;
-        if (ParseJsDimensionVp(spaceVal, value)) {
+        if (ParseJsDimensionVp(spaceVal, value, spaceResObj)) {
             space = value;
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             space = Dimension();
@@ -62,7 +63,11 @@ void JSRow::Create(const JSCallbackInfo& info)
         }
     }
 
-    RowModel::GetInstance()->Create(space, declaration, "");
+    if (SystemProperties::ConfigChangePerform() && spaceResObj) {
+        RowModel::GetInstance()->Create(spaceResObj, declaration, "");
+    } else {
+        RowModel::GetInstance()->Create(space, declaration, "");
+    }
 }
 
 void JSRow::CreateWithWrap(const JSCallbackInfo& info)

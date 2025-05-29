@@ -2443,4 +2443,26 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTypeTest001, TestSize.Level1)
     panRecognizer.HandleReports(info, GestureCallbackType::END);
     EXPECT_EQ(panRecognizer.GetRecognizerType(), GestureTypeName::PAN_GESTURE);
 }
+
+/**
+ * @tc.name: OnResetStatus001
+ * @tc.desc: Test OnResetStatus function
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, OnResetStatus001, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create PanRecognizer.
+      */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+  
+    /**
+      * @tc.steps: step2. call OnResetStatus function.
+      * @tc.expected: result equals.
+      */
+    panRecognizer.OnResetStatus();
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+    EXPECT_EQ(panRecognizer.isStartTriggered_, false);
+}
 } // namespace OHOS::Ace::NG

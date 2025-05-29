@@ -165,7 +165,10 @@ bool RosenWindow::GetIsRequestFrame()
 
 void RosenWindow::RequestFrame()
 {
-    CHECK_NULL_VOID(onShow_);
+    if (!forceVsync_ && !onShow_) {
+        return;
+    }
+    SetForceVsyncRequests(false);
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(!isRequestVsync_);
     auto taskExecutor = taskExecutor_.Upgrade();
@@ -253,11 +256,16 @@ void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
     rsUIDirector_->SetTimeStamp(timeStamp, name);
 }
 
-void RosenWindow::FlushTasks()
+void RosenWindow::FlushTasks(std::function<void()> callback)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rsUIDirector_);
-    rsUIDirector_->SendMessages();
+    if (!callback) {
+        rsUIDirector_->SendMessages();
+    } else {
+        rsUIDirector_->SendMessages(callback);
+    }
+    
     JankFrameReport::GetInstance().JsAnimationToRsRecord();
 }
 
@@ -350,6 +358,12 @@ void RosenWindow::NotifyExtensionTimeout(int32_t errorCode)
 bool RosenWindow::GetIsRequestVsync()
 {
     return isRequestVsync_;
+}
+
+void RosenWindow::NotifySnapshotUpdate()
+{
+    CHECK_NULL_VOID(rsWindow_);
+    rsWindow_->NotifySnapshotUpdate();
 }
 
 } // namespace OHOS::Ace::NG

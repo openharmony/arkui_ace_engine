@@ -50,9 +50,11 @@ public:
     void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
     void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject> &resObj, std::string &bundleName,
-        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override{};
+        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override {};
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(BackgroundImageSize& bgImgSize) override;
+    void SetBackgroundImageSizeUpdateFunc(
+        BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction) override {};
     void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override;
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override;
     void SetPadding(const CalcDimension& value) override;
@@ -92,6 +94,7 @@ public:
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) override {}
     void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) override {}
     void SetOuterBorderWidth(const Dimension& value) override {}
+    void SetOuterBorderWidthNew(const NG::BorderWidthProperty& property) override {}
     void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override {}
     void SetOuterBorderStyle(const BorderStyle& value) override {}
@@ -129,6 +132,7 @@ public:
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
+    void SetTransform3DMatrix(const std::vector<float>& matrix) override {};
 
     void SetOpacity(double opacity, bool passThrough = false) override;
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override;
@@ -224,6 +228,9 @@ public:
     void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override;
     void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
+    void SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) override;
+    void SetOnDragSpringLoadingConfiguration(
+        const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
@@ -281,6 +288,13 @@ public:
     void DisableOnFocusAxisEvent() override {};
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
+    void SetBackground(std::function<void()>&& buildFunc) override {};
+    void SetBackgroundAlign(const Alignment& align) override {};
+    void SetCustomBackgroundColor(const Color& color) override {};
+    void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) override {};
+    void SetIsTransitionBackground(bool val) override {};
+    void SetIsBuilderBackground(bool val) override {};
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& sapnString) override;
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
@@ -384,6 +398,7 @@ public:
     void SetDisableDataPrefetch(bool disableDataPrefetch) override {};
     void SetBackgroundImageResizableSlice(ImageResizableSlice& Slice) override {};
     // global light
+    void SetLightPosition(const NG::TranslateOptions& option) override {};
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
     void SetLightIntensity(const float value) override {};
@@ -395,6 +410,14 @@ public:
     void SetMarkAnchorStart(Dimension& markAnchorStart) override {};
     void ResetMarkAnchorStart() override {};
     void SetOffsetLocalizedEdges(bool needLocalized) override {};
+    void CreateWithColorResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) override {};
+    void CreateWithBoolResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) override {};
+    void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) override {};
+    void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override {};
 };
 
 } // namespace OHOS::Ace::Framework

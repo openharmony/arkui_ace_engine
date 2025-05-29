@@ -526,14 +526,6 @@ public:
             theme->hoverDuration_ = radioPattern->GetAttr<double>("hover_animation_duration", 0.0);
             theme->hoverToTouchDuration_ = radioPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = radioPattern->GetAttr<double>("touch_animation_duration", 0.0);
-            if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
-                return;
-            }
-            theme->width_ = radioPattern->GetAttr<Dimension>(RADIO_WIDTH, 26.0_vp);
-            theme->height_ = theme->width_;
-            theme->hotZoneHorizontalPadding_ = radioPattern->GetAttr<Dimension>(RADIO_PADDING, 11.0_vp);
-            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-            SetRadioSize(themeConstants, theme);
         }
 
         void SetRadioSize(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const

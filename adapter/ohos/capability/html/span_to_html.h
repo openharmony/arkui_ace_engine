@@ -36,6 +36,7 @@ private:
     static std::string ColorToHtml(const std::optional<Color>& value);
     static std::string StrokeWidthToHtml(const std::optional<Dimension>& value);
     static std::string StrokeColorToHtml(const std::optional<Color>& value);
+    static std::string FontSuperscriptToHtml(const std::optional<SuperscriptStyle>& value);
     static std::string FontFamilyToHtml(const std::optional<std::vector<std::string>>& value);
     static std::string TextDecorationToHtml(const std::vector<TextDecoration>& decoration);
     static std::string TextDecorationStyleToHtml(TextDecorationStyle decorationStyle);
@@ -73,6 +74,9 @@ private:
     static bool CreateDirectory(const std::string& path);
     static void HandleSingleSpanItemHtml(const RefPtr<NG::SpanItem>& item, std::string& out,
         size_t& paragrapStart, bool& newLine);
+    static std::string BackgroundColorToHtml(const std::optional<TextBackgroundStyle>& value);
+    static std::string NormalStyleToHtml(const RefPtr<NG::SpanItem>& item);
+    static std::string WrapWithAnchorIfNeeded(const RefPtr<NG::SpanItem>& item, const std::string& content);
 };
 }; // namespace OHOS::Ace
 #endif

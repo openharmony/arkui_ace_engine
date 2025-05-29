@@ -624,7 +624,7 @@ HWTEST_F(NavDestinationBaseTestNg, SetMenuOptionsTest001, TestSize.Level1)
     auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarNode());
     auto navBarPattern = navBarNode->GetPattern<NavDestinationPatternBase>();
     ASSERT_NE(navBarPattern, nullptr);
-    navBarPattern->SetMenuOptions(std::move(opt));
+    navBarPattern->SetMenuOptions(opt);
     EXPECT_EQ(navBarPattern->GetMenuOptions().mbOptions.bgOptions.color.value(), Color(0xff0000ff));
 }
 

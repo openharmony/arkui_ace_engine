@@ -321,4 +321,23 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest004, TestSize.Level1)
     dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
     EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), testProperty.vertical);
 }
+
+/**
+ * @tc.name: CreateWithDividerColorResourceObj
+ * @tc.desc: Test CreateWithDividerColorResourceObj of Divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerTestNg, ResObjDividerColorTest1, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
+    updateFunc(resObj);
+    pattern->AddResObj("divider.Color", resObj, std::move(updateFunc));
+    std::string divider = pattern->GetResCacheMapByKey("divider.Color");
+    EXPECT_EQ(divider, "");
+}
 } // namespace OHOS::Ace::NG

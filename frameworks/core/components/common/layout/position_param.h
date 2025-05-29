@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_POSITION_PARAM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_POSITION_PARAM_H
 
+#include <functional>
 #include <optional>
 
 #include "base/geometry/animatable_dimension.h"
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/constants.h"
 
@@ -47,6 +49,11 @@ struct EdgesParam {
     std::optional<Dimension> right;
     std::optional<Dimension> start;
     std::optional<Dimension> end;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, EdgesParam&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
     EdgesParam() = default;
 
     void SetTop(const CalcDimension& top)
@@ -83,6 +90,24 @@ struct EdgesParam {
         str.append("right: [").append(right.has_value() ? right->ToString() : "NA").append("]");
         str.append("bottom: [").append(bottom.has_value() ? bottom->ToString() : "NA").append("]");
         return str;
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, EdgesParam&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 
@@ -139,11 +164,34 @@ struct GuidelineInfo {
     LineDirection direction = LineDirection::VERTICAL;
     std::optional<Dimension> start;
     std::optional<Dimension> end;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, GuidelineInfo&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
 
     bool operator==(const GuidelineInfo& right) const
     {
         return ((this->id == right.id) && (this->direction == right.direction) &&
                 (this->start == right.start) && (this->end == right.end));
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, GuidelineInfo&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 

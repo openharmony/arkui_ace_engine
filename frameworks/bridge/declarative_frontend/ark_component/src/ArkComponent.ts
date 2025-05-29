@@ -170,6 +170,9 @@ const SAFE_AREA_EDGE_ALL = 15;
 
 const SAFE_AREA_TYPE_LIMIT = 3;
 const SAFE_AREA_EDGE_LIMIT = 4;
+const SAFE_AREA_LOWER_LIMIT = 0;
+const LAYOUT_SAFE_AREA_TYPE_LIMIT = 2;
+const LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
 const DIRECTION_RANGE = 3;
 
 type KNode = number | null
@@ -573,6 +576,23 @@ class TransformModifier extends ModifierWithKey<object> {
   }
 }
 
+class Transform3DModifier extends ModifierWithKey<object> {
+  constructor(value: Matrix4Transit | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('transform3D');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetTransform3D(node);
+    } else {
+      getUINativeModule().common.setTransform3D(node, (this.value as Matrix).matrix4x4);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !deepCompareArrays((this.stageValue as Matrix).matrix4x4, (this.value as Matrix).matrix4x4);
+  }
+}
+
 class BorderStyleModifier extends ModifierWithKey<BorderStyle | EdgeStyles> {
   constructor(value: BorderStyle | EdgeStyles) {
     super(value);
@@ -924,12 +944,12 @@ class RadialGradientModifier extends ModifierWithKey<{ center: Array<any>; radiu
 class SweepGradientModifier extends ModifierWithKey<{
   center: Array<any>; start?: number |
   string; end?: number | string; rotation?: number | string;
-  colors: Array<any>; repeating?: boolean;
+  colors: Array<any>; metricsColors?: Array<any>; repeating?: boolean;
 }> {
   constructor(value: {
     center: Array<any>;
     start?: number | string; end?: number | string;
-    rotation?: number | string; colors: Array<any>; repeating?: boolean;
+    rotation?: number | string; colors: Array<any>; metricsColors?: Array<any>; repeating?: boolean;
   }) {
     super(value);
   }
@@ -941,7 +961,7 @@ class SweepGradientModifier extends ModifierWithKey<{
       getUINativeModule().common.setSweepGradient(node,
         this.value.center,
         this.value.start, this.value.end, this.value.rotation,
-        this.value.colors, this.value.repeating);
+        this.value.colors, this.value.metricsColors, this.value.repeating);
     }
   }
   checkObjectDiff(): boolean {
@@ -950,6 +970,7 @@ class SweepGradientModifier extends ModifierWithKey<{
       (this.stageValue.end === this.value.end) &&
       (this.stageValue.rotation === this.value.rotation) &&
       (this.stageValue.colors === this.value.colors) &&
+      (this.stageValue.metricsColors === this.value.metricsColors) &&
       (this.stageValue.repeating === this.value.repeating));
   }
 }
@@ -1831,6 +1852,24 @@ class DragEnterModifier extends ModifierWithKey<DragEnterCallback> {
   }
 }
 
+class DragSpringLoadingModifier extends ModifierWithKey<ArkDragSpringLoading> {
+  constructor(value: ArkDragSpringLoading) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragSpringLoading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragSpringLoading(node);
+    } else {
+      getUINativeModule().common.setOnDragSpringLoading(node, this.value.callback, this.value.configuration);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+
 declare type DragMoveCallback = (event?: DragEvent, extraParams?: string) => void;
 class DragMoveModifier extends ModifierWithKey<DragMoveCallback> {
   constructor(value: DragMoveCallback) {
@@ -1861,9 +1900,8 @@ class DragLeaveModifier extends ModifierWithKey<DragLeaveCallback> {
   }
 }
 
-declare type DropCallback = (event?: DragEvent, extraParams?: string) => void;
-class DropModifier extends ModifierWithKey<DropCallback> {
-  constructor(value: DropCallback) {
+class DropModifier extends ModifierWithKey<ArkOnDrop> {
+  constructor(value: ArkOnDrop) {
     super(value);
   }
   static identity: Symbol = Symbol('onDrop');
@@ -1871,7 +1909,7 @@ class DropModifier extends ModifierWithKey<DropCallback> {
     if (reset) {
       getUINativeModule().common.resetOnDrop(node);
     } else {
-      getUINativeModule().common.setOnDrop(node, this.value);
+      getUINativeModule().common.setOnDrop(node, this.value.event, this.value.disableDataPrefetch);
     }
   }
 }
@@ -2142,7 +2180,8 @@ class OnGestureJudgeBeginModifier extends ModifierWithKey<GestureJudgeBeginCallb
   }
 }
 
-declare type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
+declare type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>,
+  touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult;
 class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecognizerJudgeBeginCallback> {
   constructor(value: GestureRecognizerJudgeBeginCallback) {
     super(value);
@@ -2442,6 +2481,24 @@ class SafeAreaPaddingModifier extends ModifierWithKey<ArkPadding> {
       !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
       !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
       !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+
+class IgnoreLayoutSafeAreaCommonModifier extends ModifierWithKey<ArkSafeAreaExpandOpts | undefined> {
+  constructor(value: ArkSafeAreaExpandOpts | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('ignoreLayoutSafeAreaCommon');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetIgnoreLayoutSafeArea(node);
+    } else {
+      getUINativeModule().common.setIgnoreLayoutSafeArea(node, this.value.type, this.value.edges);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
+      !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges);
   }
 }
 
@@ -3953,7 +4010,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(this._modifiersWithKeys, OnGestureJudgeBeginModifier.identity, OnGestureJudgeBeginModifier, callback);
     return this;
   }
-  onGestureRecognizerJudgeBegin(callback: (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult): this {
+  onGestureRecognizerJudgeBegin(callback: (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>,
+    touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult): this {
     this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
     return this;
@@ -4198,6 +4256,48 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, SafeAreaPaddingModifier.identity, SafeAreaPaddingModifier, arkValue);
     } else {
       modifierWithKey(this._modifiersWithKeys, SafeAreaPaddingModifier.identity, SafeAreaPaddingModifier, undefined);
+    }
+    return this;
+  }
+
+  ignoreLayoutSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+    let opts = new ArkSafeAreaExpandOpts();
+    if (types && types.length >= 0) {
+      let safeAreaType: string | number = '';
+      for (let param of types) {
+        if (!isNumber(param) || param > LAYOUT_SAFE_AREA_TYPE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
+          safeAreaType = undefined;
+          break;
+        }
+        if (safeAreaType) {
+          safeAreaType += '|';
+          safeAreaType += param.toString();
+        } else {
+          safeAreaType += param.toString();
+        }
+      }
+      opts.type = safeAreaType;
+    }
+    if (edges && edges.length >= 0) {
+      let safeAreaEdge: string | number = '';
+      for (let param of edges) {
+        if (!isNumber(param) || param > LAYOUT_SAFE_AREA_EDGE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
+          safeAreaEdge = undefined;
+          break;
+        }
+        if (safeAreaEdge) {
+          safeAreaEdge += '|';
+          safeAreaEdge += param.toString();
+        } else {
+          safeAreaEdge += param.toString();
+        }
+      }
+      opts.edges = safeAreaEdge;
+    }
+    if (opts.type === undefined && opts.edges === undefined) {
+      modifierWithKey(this._modifiersWithKeys, IgnoreLayoutSafeAreaCommonModifier.identity, IgnoreLayoutSafeAreaCommonModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, IgnoreLayoutSafeAreaCommonModifier.identity, IgnoreLayoutSafeAreaCommonModifier, opts);
     }
     return this;
   }
@@ -5002,6 +5102,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onDragSpringLoading(callback: (context: ArkSpringLoadingContext) => void, configuration? DragSpringLoadingConfiguration): this {
+    let arkDragSpringLoading = new ArkDragSpringLoading();
+    if (typeof callback === 'function') {
+      arkDragSpringLoading.callback = callback;
+    }
+    arkDragSpringLoading.configuration.stillTimeLimit = configuration?.stillTimeLimit;
+    arkDragSpringLoading.configuration.updateInterval = configuration?.updateInterval;
+    arkDragSpringLoading.configuration.updateNotifyCount = configuration?.updateNotifyCount;
+    arkDragSpringLoading.configuration.updateToFinishInterval = configuration?.updateToFinishInterval;
+
+    modifierWithKey(this._modifiersWithKeys, DragSpringLoadingModifier.identity, DragSpringLoadingModifier, arkDragSpringLoading);
+    return this;
+  }
+
   onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this {
     modifierWithKey(this._modifiersWithKeys, DragMoveModifier.identity, DragMoveModifier, event);
     return this;
@@ -5012,8 +5126,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  onDrop(event: (event?: DragEvent, extraParams?: string) => void): this {
-    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, event);
+  onDrop(event: (event?: DragEvent, extraParams?: string) => void, dropOptions: DropOptions): this {
+    let arkOnDrop = new ArkOnDrop();
+    if (typeof event === 'function') {
+      arkOnDrop.event = event;
+    }
+    if (typeof dropOptions === 'object') {
+      arkOnDrop.disableDataPrefetch = dropOptions.disableDataPrefetch;
+    }
+    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, arkOnDrop);
     return this;
   }
 
@@ -5094,6 +5215,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     end?: number | string;
     rotation?: number | string;
     colors: Array<any>;
+    metricsColors?: Array<any>; 
     repeating?: boolean;
   }): this {
     modifierWithKey(this._modifiersWithKeys, SweepGradientModifier.identity, SweepGradientModifier, value);

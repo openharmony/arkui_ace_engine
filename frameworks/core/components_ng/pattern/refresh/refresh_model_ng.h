@@ -59,6 +59,7 @@ public:
     void SetTextStyle(const TextStyle& textStyle) override {}
     void SetProgressBackgroundColor(const Color& backgroundColor) override {}
     void SetProgressColor(const Color& progressColor) override {}
+    void CreateWithResourceObj(const RefPtr<ResourceObject>& resObj) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetRefreshing(FrameNode* frameNode, bool isRefreshing);

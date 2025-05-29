@@ -321,4 +321,45 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
             (info.GetAction() == MouseAction::WINDOW_LEAVE || info.GetAction() == MouseAction::CANCEL));
     }
 }
+
+void HyperlinkPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutPropertyPtr<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    using Handler = std::function<void(HyperlinkLayoutProperty*, RefPtr<PropertyValueBase>)>;
+    static const std::unordered_map<std::string, Handler> handlers = {
+        { "Color",
+            [node = WeakClaim(RawPtr((frameNode))), weak = WeakClaim(this)](
+                HyperlinkLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    prop->UpdateTextColor(intVal->value);
+                    prop->UpdateColor(intVal->value);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, intVal->value, frameNode);
+                }
+            } },
+        { "Content",
+            [](HyperlinkLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                    prop->UpdateContent(intVal->value);
+                }
+            } },
+        { "Address",
+            [](HyperlinkLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                    prop->UpdateAddress(intVal->value);
+                }
+            } },
+    };
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        it->second(property, value);
+    }
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
 } // namespace OHOS::Ace::NG

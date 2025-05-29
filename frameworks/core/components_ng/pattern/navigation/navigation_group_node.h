@@ -68,6 +68,15 @@ public:
         return false;
     }
 
+    void SetPrimaryContentNode(const RefPtr<UINode>& content)
+    {
+        primaryContentNode_ = content;
+    }
+    const RefPtr<UINode>& GetPrimaryContentNode() const
+    {
+        return primaryContentNode_;
+    }
+
     void SetNavBarNode(const RefPtr<UINode>& navBarNode)
     {
         navBarNode_ = navBarNode;
@@ -360,6 +369,7 @@ private:
     void RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
         int32_t preAnimationId);
 
+    RefPtr<UINode> primaryContentNode_;
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
@@ -382,6 +392,7 @@ private:
     std::string navigationPathInfo_;
     std::string navigationModuleName_;
     int32_t preLastStandardIndex_ = -1;
+    std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

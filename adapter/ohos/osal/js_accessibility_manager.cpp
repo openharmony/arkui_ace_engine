@@ -797,18 +797,17 @@ void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list
 }
 
 bool FindFrameNodeByAccessibilityId(int64_t id, const std::list<RefPtr<NG::UINode>>& children,
-    std::queue<NG::UINode*>& nodes, RefPtr<NG::FrameNode>& result)
+    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>& result)
 {
-    NG::FrameNode* frameNode = nullptr;
     for (const auto& child : children) {
-        frameNode = AceType::DynamicCast<NG::FrameNode>(Referenced::RawPtr(child));
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
         if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
             if (frameNode->GetAccessibilityId() == id) {
                 result = AceType::DynamicCast<NG::FrameNode>(child);
                 return true;
             }
         }
-        nodes.push(Referenced::RawPtr(child));
+        nodes.push(child);
     }
     return false;
 }
@@ -819,8 +818,8 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
     if (root->GetAccessibilityId() == id) {
         return root;
     }
-    std::queue<NG::UINode*> nodes;
-    nodes.push(Referenced::RawPtr(root));
+    std::queue<RefPtr<NG::UINode>> nodes;
+    nodes.push(root);
     RefPtr<NG::FrameNode> frameNodeResult = nullptr;
 
     while (!nodes.empty()) {
@@ -2812,6 +2811,15 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
     eventInfo.SetBeginIndex(accessibilityEvent.startIndex);
     eventInfo.SetEndIndex(accessibilityEvent.endIndex);
+    if (accessibilityEvent.extraEventInfo.size() > 0) {
+        ExtraEventInfo extraEventInfo;
+        for (const auto& info : accessibilityEvent.extraEventInfo) {
+            auto ret = extraEventInfo.SetExtraEventInfo(info.first, info.second);
+            TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "The result of SetExtraEventInfo:%{public}d, keyStrLen:%{public}d",
+                ret, static_cast<int>(info.first.length()));
+        }
+        eventInfo.SetExtraEvent(extraEventInfo);
+    }
 }
 } // namespace
 

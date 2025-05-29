@@ -147,7 +147,7 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
 
 TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& lastPoint, const TouchEvent& event)
 {
-    TouchLocationInfo changedInfo("onTouch", lastPoint.originalId);
+    TouchLocationInfo changedInfo("onTouch", lastPoint.GetOriginalReCovertId());
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
     NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     auto localX = static_cast<float>(lastLocalPoint.GetX());
@@ -182,7 +182,7 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
-    TouchLocationInfo info("onTouch", pointItem.originalId);
+    TouchLocationInfo info("onTouch", pointItem.GetOriginalReCovertId());
     info.SetGlobalLocation(Offset(globalX, globalY));
     info.SetLocalLocation(Offset(localX, localY));
     info.SetScreenLocation(Offset(screenX, screenY));
@@ -212,7 +212,7 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
-    TouchLocationInfo historyInfo("onTouch", eventItem.originalId);
+    TouchLocationInfo historyInfo("onTouch", eventItem.GetOriginalReCovertId());
     historyInfo.SetTimeStamp(eventItem.time);
     historyInfo.SetGlobalLocation(Offset(globalX, globalY));
     historyInfo.SetLocalLocation(Offset(localX, localY));

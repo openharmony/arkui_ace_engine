@@ -27,7 +27,6 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -102,7 +101,6 @@ UIExtensionPattern::~UIExtensionPattern()
     }
     NotifyDestroy();
     FireModalOnDestroy();
-    OverlayMaskManager::GetInstance().OnUIExtDestroy(uiExtensionId_);
     UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -554,7 +552,6 @@ void UIExtensionPattern::InitBusinessDataHandleCallback()
     RegisterEventProxyFlagCallback();
     RegisterGetAvoidInfoCallback();
     RegisterReplyPageModeCallback();
-    OverlayMaskManager::GetInstance().RegisterOverlayHostMaskMountCallback(uiExtensionId_, GetHost());
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -1133,6 +1130,10 @@ void UIExtensionPattern::HandleFocusEvent()
         }
 
         DispatchFocusState(true);
+        UIEXT_LOGD("focus by tab is %{public}d.", pipeline->GetIsFocusingByTab());
+        if (!pipeline->GetIsFocusingByTab()) {
+            SetForceProcessOnKeyEventInternal(true);
+        }
         needReSendFocusToUIExtension_ = false;
     } else {
         needReSendFocusToUIExtension_ = true;
@@ -1147,6 +1148,7 @@ void UIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
     DispatchFocusState(false);
+    SetForceProcessOnKeyEventInternal(false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();

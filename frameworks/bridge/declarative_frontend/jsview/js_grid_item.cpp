@@ -129,23 +129,6 @@ void JSGridItem::SetSelectable(const JSCallbackInfo& info)
     GridItemModel::GetInstance()->SetSelectable(selectable);
 }
 
-void JSGridItem::SelectCallback(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-
-    RefPtr<JsMouseFunction> jsOnSelectFunc = AceType::MakeRefPtr<JsMouseFunction>(JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onSelectId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc), node = targetNode](
-                          bool isSelected) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        PipelineContext::SetCallBackNode(node);
-        func->SelectExecute(isSelected);
-    };
-    GridItemModel::GetInstance()->SetOnSelect(std::move(onSelectId));
-}
-
 void JSGridItem::SetSelected(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

@@ -17,12 +17,9 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/pattern/text/text_base.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
 
 void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
 {
@@ -75,9 +72,6 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     auto lastViewSize = scrollPattern->GetViewSize();
     auto lastViewPortExtent = scrollPattern->GetViewPortExtent();
-    if (axis == Axis::VERTICAL && LessNotEqual(selfSize.Height(), lastViewSize.Height())) {
-        OnSurfaceChanged(layoutWrapper, selfSize.Height());
-    }
     if (layoutWrapper->ConstraintChanged() || lastViewSize != selfSize || lastViewPortExtent != childSize) {
         scrollPattern->AddScrollMeasureInfo(constraint, childLayoutConstraint, selfSize, childSize);
     }
@@ -162,7 +156,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void ScrollLayoutAlgorithm::MarkAndCheckNewOpIncNode(const RefPtr<LayoutWrapper>& layoutWrapper, Axis axis)
 {
     auto childNode = AceType::DynamicCast<FrameNode>(layoutWrapper);
-    if (childNode->GetSuggestOpIncActivatedOnce()) {
+    if (childNode && childNode->GetSuggestOpIncActivatedOnce()) {
         childNode->SetSuggestOpIncActivatedOnce();
         for (auto& child : childNode->GetChildren()) {
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
@@ -216,37 +210,6 @@ void ScrollLayoutAlgorithm::UpdateScrollAlignment(Alignment& scrollAlignment)
         scrollAlignment = Alignment::CENTER_LEFT;
     } else if (scrollAlignment == Alignment::CENTER_LEFT) {
         scrollAlignment = Alignment::CENTER_RIGHT;
-    }
-}
-
-void ScrollLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize)
-{
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    // textField not in Scroll
-    if (!focusHub->IsCurrentFocus()) {
-        return;
-    }
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    CHECK_NULL_VOID(textFieldManager);
-    // only when textField is onFocus
-    auto textField = textFieldManager->GetOnFocusTextField().Upgrade();
-    CHECK_NULL_VOID(textField);
-    auto textFieldHost = textField->GetHost();
-    CHECK_NULL_VOID(textFieldHost);
-    auto textBase = DynamicCast<TextBase>(textField);
-    CHECK_NULL_VOID(textBase);
-    auto caretPos = textFieldHost->GetTransformRelativeOffset().GetY() + textBase->GetCaretRect().Bottom();
-    auto globalOffset = host->GetTransformRelativeOffset();
-    auto offset = contentMainSize + globalOffset.GetY() - caretPos - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
-    if (LessOrEqual(offset, 0.0)) {
-        // negative offset to scroll down
-        currentOffset_ += static_cast<float>(offset);
-        TAG_LOGI(AceLogTag::ACE_SCROLL, "update offset on virtual keyboard height change, %{public}f", offset);
     }
 }
 

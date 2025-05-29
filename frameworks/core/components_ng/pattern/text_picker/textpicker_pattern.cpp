@@ -33,6 +33,8 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1639,18 +1641,23 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
-    if (!SystemProperties::ConfigChangePerform()) {
-        auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-        auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-        auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
-        auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
-        CHECK_NULL_VOID(pickerProperty);
-        pickerProperty->UpdateColor(
-            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-        pickerProperty->UpdateDisappearColor(
-            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
-        pickerProperty->UpdateSelectedColor(
-            GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+    auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateColor(
+        GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearColor(
+        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    pickerProperty->UpdateSelectedColor(
+        GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    if (pickerProperty && pickerProperty->GetDisableTextStyleAnimation().value_or(false)) {
+        auto textTheme = context->GetTheme<TextTheme>(host->GetThemeScopeId());
+        CHECK_NULL_VOID(textTheme);
+        auto defaultTextStyle = textTheme->GetTextStyle();
+        pickerProperty->UpdateDefaultColor(
+            GetTextProperties().defaultTextStyle_.textColor.value_or(defaultTextStyle.GetTextColor()));
     }
     if (isPicker_) {
         return;
@@ -1933,7 +1940,7 @@ void TextPickerPattern::UpdateTextStyleCommon(
         if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
             fontSize = textStyle.fontSize.value();
         }
-            updateFontSizeFunc(ConvertFontScaleValue(fontSize));
+        updateFontSizeFunc(ConvertFontScaleValue(fontSize));
 
         updateFontFamilyFunc(textStyle.fontFamily.value_or(defaultTextStyle.GetFontFamilies()));
     }
@@ -2043,4 +2050,72 @@ void TextPickerPattern::UpdateDefaultTextStyle(const PickerTextStyle& textStyle)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
+
+void TextPickerPattern::ParseRangeResult(NG::TextCascadePickerOptions& option)
+{
+    std::string textStr = "";
+
+    if (option.rangeResultResObj && ResourceParseUtils::ParseResString(option.rangeResultResObj, textStr)) {
+        std::vector<std::string> rangeResultValue;
+        rangeResultValue.emplace_back(textStr);
+        option.rangeResult = rangeResultValue;
+    }
+
+    for (auto& child : option.children) {
+        ParseRangeResult(child);
+    }
+}
+
+void TextPickerPattern::ParseCascadeRangeOptions(std::vector<NG::TextCascadePickerOptions>& options)
+{
+    for (auto& option : options) {
+        ParseRangeResult(option);
+    }
+}
+
+void TextPickerPattern::GetRealSelectedIndex(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,
+    const std::vector<std::string>& valueArr, uint32_t depth, std::vector<uint32_t>& selectedArr)
+{
+    for (size_t j = 0; j < rangeOptions.size(); j++) {
+        if (rangeOptions[j].rangeResult[0] == valueArr[depth]) {
+            selectedArr[depth] = j;
+            if (!rangeOptions[j].children.empty()) {
+                ++depth;
+                GetRealSelectedIndex(rangeOptions[j].children, valueArr, depth, selectedArr);
+            } else {
+                break;
+            }
+        }
+    }
+}
+
+void TextPickerPattern::GetAndUpdateRealSelectedArr(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,
+    const std::vector<RefPtr<ResourceObject>>& valueArrResObj)
+{
+    if (isHasSelectAttr_) {
+        return;
+    }
+
+    std::vector<std::string> valueArr;
+
+    for (auto& valueResObj : valueArrResObj) {
+        std::string result = "";
+        if (valueResObj) {
+            ResourceParseUtils::ParseResString(valueResObj, result);
+        }
+        valueArr.emplace_back(result);
+    }
+
+    SetValues(valueArr);
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateValues(valueArr);
+
+    std::vector<uint32_t> selectedArr(valueArr.size(), 0);
+    GetRealSelectedIndex(rangeOptions, valueArr, 0, selectedArr);
+    SetSelecteds(selectedArr);
+    pickerProperty->UpdateSelecteds(selectedArr);
+    pickerProperty->UpdateSelectedIndex(selectedArr);
+}
+
 } // namespace OHOS::Ace::NG

@@ -915,4 +915,103 @@ HWTEST_F(TextTimerTestNg, TextTimerTest015, TestSize.Level1)
     auto result = TextTimerModelNG::GetJSTextTimerController(node);
     EXPECT_NE(result, nullptr);
 }
+
+/**
+ * @tc.name: TextTimerPatternTest001
+ * @tc.desc: Test UpdateTextColor with different conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextTimer node and get pattern
+     */
+    auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test UpdateTextColor with isFirstLoad=true
+     */
+    Color testColor = Color::BLUE;
+    pattern->UpdateTextColor(testColor, true);
+    
+    /**
+     * @tc.expected: step3. Verify property and render context updated
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetForegroundColor(), testColor);
+}
+
+/**
+ * @tc.name: TextTimerPatternTest002
+ * @tc.desc: Test UpdateFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level1)
+{
+    auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: Test with different font weights
+     */
+    pattern->UpdateFontWeight(FontWeight::BOLD, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetFontWeight(), FontWeight::BOLD);
+    
+    // Test no update when isFirstLoad=false
+    pattern->UpdateFontWeight(FontWeight::LIGHTER, false);
+    EXPECT_EQ(layoutProperty->GetFontWeight(), FontWeight::BOLD);
+}
+
+/**
+ * @tc.name: TextTimerPatternTest003
+ * @tc.desc: Test UpdateFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest003, TestSize.Level1)
+{
+    auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    const double testSizeValue = 20.0;
+    Dimension testSize(testSizeValue, DimensionUnit::VP);
+    pattern->UpdateFontSize(testSize, true);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetFontSize(), testSize);
+}
+
+/**
+ * @tc.name: TextTimerPatternTest004
+ * @tc.desc: Test OnColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest005, TestSize.Level1)
+{
+    auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    std::vector<std::string> fontFamilies = {"Arial", "sans-serif"};
+    pattern->UpdateFontFamily(fontFamilies, true);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetFontFamily(), fontFamilies);
+}
 } // namespace OHOS::Ace::NG

@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_MODEL_H
 
+#include <functional>
 #include <memory>
 #include <mutex>
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,9 +34,32 @@ enum class SplitType {
 struct ItemDivider final {
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, NG::ItemDivider&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
     bool operator==(const ItemDivider& itemDivider) const
     {
         return (startMargin == itemDivider.startMargin) && (endMargin == itemDivider.endMargin);
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, NG::ItemDivider&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 

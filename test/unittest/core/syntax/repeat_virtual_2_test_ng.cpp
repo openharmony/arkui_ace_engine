@@ -53,7 +53,8 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(u
     onRecycleItems_ = [](IndexType fromIndex, IndexType toIndex) -> void {
         return;
     };
-    onActiveRange_ = [](int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop) -> void {
+    onActiveRange_ = [](int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop,
+        bool forceUpdate) -> void {
         return;
     };
     onMoveFromTo_ = [](IndexType, IndexType) -> void {
@@ -649,5 +650,56 @@ HWTEST_F(RepeatVirtual2TestNg, ConvertFromToIndex002, TestSize.Level1)
     EXPECT_EQ(mappedIndex, 5);
     mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(6);
     EXPECT_EQ(mappedIndex, 6);
+}
+
+/**
+ * @tc.name: UpdateFrameChildIndexRecord001
+ * @tc.desc: Test node.updateFrameChildIndexRecord
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, UpdateFrameChildIndexRecord001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(6);
+    repeatNode->minFrameChildIndex_ = 0;
+    repeatNode->maxFrameChildIndex_ = 0;
+    repeatNode->needRecordFirstFrameChild_ = true;
+
+    /**
+     * @tc.steps: step1.
+     * @tc.expected: minFrameChildIndex_ is 2, maxFrameChildIndex_ is 2, needRecordFirstFrameChild_ is false.
+     */
+    repeatNode->updateFrameChildIndexRecord(2);
+    EXPECT_EQ(repeatNode->minFrameChildIndex_, 2);
+    EXPECT_EQ(repeatNode->maxFrameChildIndex_, 2);
+    EXPECT_EQ(repeatNode->needRecordFirstFrameChild_, false);
+
+    /**
+     * @tc.steps: step2.
+     * @tc.expected: minFrameChildIndex_ is 1, maxFrameChildIndex_ is 3
+     */
+    repeatNode->updateFrameChildIndexRecord(1);
+    repeatNode->updateFrameChildIndexRecord(3);
+    EXPECT_EQ(repeatNode->minFrameChildIndex_, 1);
+    EXPECT_EQ(repeatNode->maxFrameChildIndex_, 3);
+}
+
+/**
+ * @tc.name: NotifyColorModeChange001
+ * @tc.desc: Test caches.NotifyColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, NotifyColorModeChange001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+    repeatNode->caches_.l1Rid4Index_ = {
+        {0, 1}, {1, 2}, {2, 3}, {3, 4}
+    };
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2016, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = {
+        { 1, cacheItem }, { 2, cacheItem }, { 3, cacheItem }, { 4, cacheItem }
+    };
+    repeatNode->NotifyColorModeChange(1);
+    EXPECT_EQ(repeatNode->GetChildren().size(), 4);
 }
 } // namespace OHOS::Ace::NG

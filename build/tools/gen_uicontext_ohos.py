@@ -44,6 +44,8 @@ def main(input_path, output_path):
         export_content += " };\n"
         export_content += "globalThis.__getUIContext__ = __getUIContext__;\n"
         export_content += "globalThis.__getFrameNodeByNodeId__ = __getFrameNodeByNodeId__;\n"
+        export_content += "globalThis.__addAvailableInstanceId__ = __addAvailableInstanceId__;\n"
+        export_content += "globalThis.__removeAvailableInstanceId__ = __removeAvailableInstanceId__;\n"
         export_content += "globalThis.__checkRegexValid__ = __checkRegexValid__;"
         ohos.write("\n" + export_content)
 

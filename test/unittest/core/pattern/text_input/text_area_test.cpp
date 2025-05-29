@@ -1801,4 +1801,24 @@ HWTEST_F(TextFieldUXTest, TextFieldEnableAutoSpacing, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetEnableAutoSpacing(), false);
     EXPECT_EQ(TextFieldModelNG::GetEnableAutoSpacing(AceType::RawPtr(frameNode_)), false);
 }
+
+/**
+ * @tc.name: TextAreaMaxLines001
+ * @tc.desc: Test the enable or disable the TextAreaMaxLines attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMaxLines001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLines(3);
+    });
+    /**
+     * @tc.expected: Get TextAreaMaxLines Value
+     */
+    EXPECT_EQ(layoutProperty_->GetMaxLines(), 3);
+    EXPECT_EQ(TextFieldModelNG::GetMaxLines(AceType::RawPtr(frameNode_)), 3);
+}
 } // namespace OHOS::Ace::NG

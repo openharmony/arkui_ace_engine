@@ -17,6 +17,7 @@
 
 #include "base/utils/device_config.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace {
 void PatternResourceManager::AddResource(
@@ -69,5 +70,39 @@ void PatternResourceManager::ReloadResources()
 bool PatternResourceManager::Empty()
 {
     return resMap_.empty();
+}
+
+void PatternResourceManager::ParsePropertyValue(
+    const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase)
+{
+    if (auto castdVal = AceType::DynamicCast<PropertyValue<std::string>>(valueBase)) {
+        std::string value;
+        ResourceParseUtils::ParseResString(resObj, value);
+        castdVal->SetValue(value);
+    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<std::u16string>>(valueBase)) {
+        std::u16string value;
+        ResourceParseUtils::ParseResString(resObj, value);
+        castdVal->SetValue(value);
+    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<Color>>(valueBase)) {
+        Color value;
+        ResourceParseUtils::ParseResColor(resObj, value);
+        castdVal->SetValue(value);
+    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<double>>(valueBase)) {
+        double value;
+        ResourceParseUtils::ParseResDouble(resObj, value);
+        castdVal->SetValue(value);
+    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<CalcDimension>>(valueBase)) {
+        CalcDimension value;
+        ResourceParseUtils::ParseResDimensionFpNG(resObj, value);
+        castdVal->SetValue(value);
+    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<float>>(valueBase)) {
+        double value;
+        ResourceParseUtils::ParseResDouble(resObj, value);
+        castdVal->SetValue(static_cast<float>(value));
+    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<std::vector<std::string>>>(valueBase)) {
+        std::vector<std::string> value;
+        ResourceParseUtils::ParseResFontFamilies(resObj, value);
+        castdVal->SetValue(value);
+    }
 }
 }

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
+#include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/path_painter.h"
 
@@ -24,6 +25,7 @@ constexpr float HALF = 0.5f;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr double DEFAULT_SCALE_VALUE = 1.0;
+constexpr int32_t STEPS_MIN_NUMBER = 2;
 } // namespace
 SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     std::function<void(float)> updateImageCenterX, std::function<void(float)> updateImageCenterY)
@@ -140,6 +142,14 @@ void SliderContentModifier::onDraw(DrawingContext& context)
     DrawShadow(context);
     DrawBlock(context);
     DrawHoverOrPress(context);
+    UpdateSliderEndsPosition();
+}
+
+void SliderContentModifier::UpdateSliderEndsPosition()
+{
+    if (StepPointCallback_) {
+        StepPointCallback_();
+    }
 }
 
 void SetStartEndPointLocation(Axis& direction, RSRect& trackRect, RSPoint& startPoint, RSPoint& endPoint)
@@ -218,18 +228,24 @@ void SliderContentModifier::AddStepPoint(float startX, float startY, float endX,
 
     auto stepsLengthX = (endX - startX) * stepRatio;
     auto stepsLengthY = (endY - startY) * stepRatio;
-    auto stepSize = stepSize_->Get();
-    auto trackThickness = trackThickness_->Get();
-    if (GreatNotEqual(stepSize, trackThickness)) {
-        stepSize = trackThickness;
-    }
+    int numberOfSteps = std::max(static_cast<int>(std::round((endX - startX) / stepsLengthX) + 1),
+        static_cast<int>(std::round((endY - startY) / stepsLengthY) + 1));
+    if (numberOfSteps <= STEPS_MIN_NUMBER && hasPrefix_ && hasSuffix_) {
+        // If there are less than or equal to 2 steps, skip drawing
+        canvas.DetachBrush();
+        return;
+     }
 
     if (reverse_) {
+        int32_t stepIndex = 0;
         while (GreatOrEqual(endX, startX) && GreatOrEqual(endY, startY)) {
-            canvas.DrawCircle(RSPoint(endX, endY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
-            stepPointVec_.emplace_back(PointF(endX, endY));
+        DrawStepPoint(endX, endY, stepIndex, canvas, numberOfSteps);
+            if (NearEqual(endX, startX) && NearEqual(endY, startY)) {
+                    return;
+            }
             endX -= stepsLengthX;
             endY -= stepsLengthY;
+            stepIndex++;
         }
         endX += stepsLengthX;
         endY += stepsLengthY;
@@ -237,11 +253,15 @@ void SliderContentModifier::AddStepPoint(float startX, float startY, float endX,
             stepPointVec_.emplace_back(PointF(startX, startY));
         }
     } else {
+        int32_t stepIndex = 0;
         while (LessOrEqual(startX, endX) && LessOrEqual(startY, endY)) {
-            canvas.DrawCircle(RSPoint(startX, startY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
-            stepPointVec_.emplace_back(PointF(startX, startY));
+        DrawStepPoint(startX, startY, stepIndex, canvas, numberOfSteps);
+            if (NearEqual(startX, endX) && NearEqual(startY, endY)) {
+                return;
+            }
             startX += stepsLengthX;
             startY += stepsLengthY;
+            stepIndex++;
         }
         startX -= stepsLengthX;
         startY -= stepsLengthY;
@@ -249,6 +269,42 @@ void SliderContentModifier::AddStepPoint(float startX, float startY, float endX,
             stepPointVec_.emplace_back(PointF(endX, endY));
         }
     }
+}
+
+void SliderContentModifier::DrawStepPoint(float x, float y, int32_t index, RSCanvas& canvas, int32_t numberOfSteps)
+{
+    int32_t noneModeNum = 2;
+    int32_t insetModeNum = 1;
+    auto stepSize = stepSize_->Get();
+    auto trackThickness = trackThickness_->Get();
+    if (GreatNotEqual(stepSize, trackThickness)) {
+        stepSize = trackThickness;
+    }
+    int noneModeSteps = numberOfSteps - noneModeNum;
+    int insetModeSteps = numberOfSteps - insetModeNum;
+    auto model = static_cast<SliderModel::SliderMode>(sliderMode_->Get());
+    if (model == SliderModel::SliderMode::NONE) {
+        if (index == 1 && hasPrefix_) {
+            stepPointVec_.emplace_back(PointF(x, y));
+            return;
+        }
+        if (index == noneModeSteps && hasSuffix_) {
+            stepPointVec_.emplace_back(PointF(x, y));
+            return;
+        }
+    }
+    if (model == SliderModel::SliderMode::INSET) {
+        if (index == 0 && hasPrefix_) {
+            stepPointVec_.emplace_back(PointF(x, y));
+            return;
+        }
+        if (index == insetModeSteps && hasSuffix_) {
+            stepPointVec_.emplace_back(PointF(x, y));
+            return;
+        }
+    }
+    canvas.DrawCircle(RSPoint(x, y), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
+    stepPointVec_.emplace_back(PointF(x, y));
 }
 
 void SliderContentModifier::DrawStep(DrawingContext& context)

@@ -143,6 +143,9 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
         return Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
     }
     if (value->IsObject(vm)) {
+        if (ParseColorMetricsToColor(vm, value, result)) {
+            return true;
+        }
         return ParseJsColorFromResource(vm, value, result, resourceObject);
     }
     return false;
@@ -548,6 +551,33 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
     if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
         result.SetResourceId(resId->Int32Value(vm));
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseColorMetricsToColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result)
+{
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto obj = jsValue->ToObject(vm);
+    auto toNumericProp = obj->Get(vm, "toNumeric");
+    auto colorSpaceProp = obj->Get(vm, "getColorSpace");
+    if (toNumericProp->IsFunction(vm) && colorSpaceProp->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = toNumericProp;
+        auto colorVal = func->Call(vm, obj, nullptr, 0);
+        result.SetValue(colorVal->Uint32Value(vm));
+
+        func = colorSpaceProp;
+        auto colorSpaceVal = func->Call(vm, obj, nullptr, 0);
+        if (colorSpaceVal->IsNumber() &&
+            colorSpaceVal->Uint32Value(vm) == static_cast<uint32_t>(ColorSpace::DISPLAY_P3)) {
+            result.SetColorSpace(ColorSpace::DISPLAY_P3);
+        } else {
+            result.SetColorSpace(ColorSpace::SRGB);
+        }
+
         return true;
     }
     return false;
@@ -2418,5 +2448,106 @@ Local<panda::ArrayRef> ArkTSUtils::ChoosePointToJSValue(const EcmaVM* vm, std::v
         arr->SetValueAt(vm, arr, i, ToJSValueWithVM(vm, input[i]));
     }
     return arr;
+}
+
+void ArkTSUtils::ParseJsAngle(const EcmaVM *vm, const Local<JSValueRef> &value, std::optional<float> &angle)
+{
+    if (value->IsNumber()) {
+        angle = static_cast<float>(value->ToNumber(vm)->Value());
+        return;
+    }
+    if (value->IsString(vm)) {
+        angle = static_cast<float>(StringUtils::StringToDegree(value->ToString(vm)->ToString(vm)));
+        return;
+    }
+    return;
+}
+
+bool ArkTSUtils::ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result)
+{
+    if (value->IsNumber()) {
+        result = value->Int32Value(vm);
+        return true;
+    }
+    if (value->IsString(vm)) {
+        result = StringUtils::StringToInt(value->ToString(vm)->ToString(vm));
+        return true;
+    }
+
+    return false;
+}
+
+void ArkTSUtils::ParseGradientCenter(
+    const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values)
+{
+    bool hasValueX = false;
+    bool hasValueY = false;
+    CalcDimension valueX;
+    CalcDimension valueY;
+    if (value->IsArray(vm)) {
+        auto array = panda::Local<panda::ArrayRef>(value);
+        auto length = array->Length(vm);
+        if (length == NUM_2) {
+            hasValueX =
+                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_0), valueX, false);
+            hasValueY =
+                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_1), valueY, false);
+        }
+    }
+    values.push_back({.i32 = static_cast<ArkUI_Int32>(hasValueX)});
+    values.push_back({.f32 = static_cast<ArkUI_Float32>(valueX.Value())});
+    values.push_back({.i32 = static_cast<ArkUI_Int32>(valueX.Unit())});
+    values.push_back({.i32 = static_cast<ArkUI_Int32>(hasValueY)});
+    values.push_back({.f32 = static_cast<ArkUI_Float32>(valueY.Value())});
+    values.push_back({.i32 = static_cast<ArkUI_Int32>(valueY.Unit())});
+}
+
+void ArkTSUtils::ParseGradientColorStops(
+    const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors)
+{
+    if (!value->IsArray(vm)) {
+        return;
+    }
+    auto array = panda::Local<panda::ArrayRef>(value);
+    auto length = array->Length(vm);
+    for (uint32_t index = 0; index < length; index++) {
+        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
+        if (!item->IsArray(vm)) {
+            continue;
+        }
+        auto itemArray = panda::Local<panda::ArrayRef>(item);
+        auto itemLength = itemArray->Length(vm);
+        if (itemLength < NUM_1) {
+            continue;
+        }
+        Color color;
+        auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_0);
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
+            continue;
+        }
+        bool hasDimension = false;
+        double dimension = 0.0;
+        if (itemLength > NUM_1) {
+            auto stopDimension = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_1);
+            if (ArkTSUtils::ParseJsDouble(vm, stopDimension, dimension)) {
+                hasDimension = true;
+            }
+        }
+        colors.push_back({.u32 = static_cast<ArkUI_Uint32>(color.GetValue())});
+        colors.push_back({.i32 = static_cast<ArkUI_Int32>(hasDimension)});
+        colors.push_back({.f32 = static_cast<ArkUI_Float32>(dimension)});
+    }
+}
+
+void ArkTSUtils::ParseGradientAngle(
+    const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values)
+{
+    std::optional<float> degree;
+    ParseJsAngle(vm, value, degree);
+    auto angleHasValue = degree.has_value();
+    auto angleValue = angleHasValue ? degree.value() : 0.0f;
+    degree.reset();
+    values.push_back({ .i32 = static_cast<ArkUI_Int32>(angleHasValue) });
+    values.push_back({ .f32 = static_cast<ArkUI_Float32>(angleValue) });
 }
 } // namespace OHOS::Ace::NG

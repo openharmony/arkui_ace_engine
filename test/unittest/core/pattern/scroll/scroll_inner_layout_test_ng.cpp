@@ -318,6 +318,37 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBarRect007
+ * @tc.desc: Test scrollBar rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect007, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollBarWidth(Dimension(BAR_WIDTH));
+    CreateContent();
+    CreateScrollDone();
+    float ratio = HEIGHT / CONTENT_MAIN_SIZE;
+    float activeBarHeight = HEIGHT * ratio;
+    EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(230, 0, BAR_WIDTH, activeBarHeight)));
+    EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(230, 0, BAR_WIDTH, activeBarHeight)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(230, 0, BAR_WIDTH, HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(230, 0, BAR_WIDTH, activeBarHeight)));
+
+    /**
+     * @tc.steps: step1. Scroll some distance
+     * @tc.expected: The ScrollBar rect has changed
+     */
+    scrollBar_->padding_ = Edge(4.0, 0, 4.0, 4.0);
+    ScrollTo(ITEM_MAIN_SIZE);
+    float offsetY = ITEM_MAIN_SIZE * ratio;
+    EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(226, offsetY, BAR_WIDTH, activeBarHeight)));
+    EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(226, offsetY, BAR_WIDTH, activeBarHeight)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(226, 0, BAR_WIDTH, HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(226, offsetY, BAR_WIDTH, activeBarHeight)));
+}
+
+/**
  * @tc.name: ScrollBarWidth001
  * @tc.desc: Test scrollbar diff width
  * @tc.type: FUNC

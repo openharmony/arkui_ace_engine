@@ -237,12 +237,15 @@ public:
     void HandleDragEnd(double dragVelocity) override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub) override; 
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
+    RectF CalcBoundsRect() const override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     std::shared_ptr<SwiperParameters> GetIndicatorParameters() const
     {
         return swiperParameters_;
     }
+    std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
+    void OnColorModeChange(uint32_t colorMode) override;
 
     int32_t currentIndexInSingleMode_ = 0;
     int32_t hasSetInitialIndex_ = false;
@@ -258,7 +261,6 @@ protected:
 
 private:
     std::shared_ptr<SwiperParameters> GetSwiperParameters();
-    std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
     void SaveDotIndicatorProperty();
     void SaveDigitIndicatorProperty();
     void UpdatePaintProperty();

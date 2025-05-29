@@ -112,6 +112,10 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
     if (font_.strokeColor.has_value()) {
         spanItem->fontStyle->UpdateStrokeColor(font_.strokeColor.value());
     }
+
+    if (font_.superscript.has_value()) {
+        spanItem->fontStyle->UpdateSuperscript(font_.superscript.value());
+    }
 }
 
 void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
@@ -123,6 +127,7 @@ void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->fontStyle->ResetFontWeight();
     spanItem->fontStyle->ResetStrokeWidth();
     spanItem->fontStyle->ResetStrokeColor();
+    spanItem->fontStyle->ResetSuperscript();
 }
 
 Font FontSpan::GetFont() const
@@ -166,6 +171,9 @@ std::string FontSpan::ToString() const
     }
     if (font_.strokeColor.has_value()) {
         ss << " StrokeColor:" << font_.strokeColor.value().ColorToString();
+    }
+    if (font_.superscript.has_value()) {
+        ss << " superscript:" << static_cast<int32_t>(font_.superscript.value());
     }
     std::string output = ss.str();
     return output;
@@ -1195,6 +1203,7 @@ void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
         pipelineContext->HyperlinkStartAbility(address);
     };
     spanItem->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+    spanItem->urlAddress = std::u16string(address.begin(), address.end());
 }
 
 void UrlSpan::RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem)

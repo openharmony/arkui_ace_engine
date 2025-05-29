@@ -19,7 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
-
+#include "core/common/resource/resource_parse_utils.h"
 namespace OHOS::Ace::NG {
 RefPtr<TextClockController> TextClockModelNG::Create()
 {
@@ -53,7 +53,24 @@ void TextClockModelNG::SetFormat(const std::string& format)
 
 void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        std::vector<Shadow> shadows = value;
+        for (auto& shadow : shadows) {
+            shadow.ReloadResources();
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, shadows, frameNode);
+    };
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value);
+    updateFunc(resObj);
 }
 
 void TextClockModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
@@ -295,5 +312,75 @@ void TextClockModelNG::SetOnDateChange(FrameNode* frameNode, std::function<void(
     auto eventHub = frameNode->GetOrCreateEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDateChange(std::move(onChange));
+}
+
+void TextClockModelNG::CreateWithTextColorResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "textClockColor";
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+        Color result;
+        std::string color = pattern->GetResCacheMapByKey(key);
+        if (color.empty()) {
+            if (ResourceParseUtils::ParseResColor(resObj, result)) {
+                pattern->AddResCache(key, result.ColorToString());
+                pattern->UpdateTextClockColor(result);
+            }
+        } else {
+            result = Color::ColorFromString(color);
+            LOGE("litecache color cache is %s", key.c_str());
+            pattern->UpdateTextClockColor(result);
+        }
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TextClockModelNG::CreateWithFontSizeResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "textClockFontSize";
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension fontSize;
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        if (!ResourceParseUtils::ParseResDimensionFpNG(resObj, fontSize, false) || fontSize.IsNegative() ||
+            fontSize.Unit() == DimensionUnit::PERCENT) {
+            fontSize = theme->GetTextStyle().GetFontSize();
+        }
+        pattern->UpdateTextClockFontSize(fontSize);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TextClockModelNG::CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "textClockFontFamily";
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+        std::vector<std::string> fontFamilies;
+        if (ResourceParseUtils::ParseResFontFamilies(resObj, fontFamilies)) {
+            pattern->UpdateTextClockFontFamily(fontFamilies);
+        }
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

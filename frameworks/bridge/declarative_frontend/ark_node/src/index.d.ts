@@ -15,12 +15,21 @@
 
 declare class UIContext {
   instanceId_: number;
+  isAvailable(): boolean;
 }
 
 declare interface TouchEvent {
 }
 
+declare interface MouseEvent {
+}
+
+declare interface AxisEvent {
+}
+
 declare interface Position { x?: number; y?: number; }
+
+declare type InputEventType = TouchEvent | MouseEvent | AxisEvent;
 
 interface UpdateFuncRecord {
   updateFunc: UpdateFunc;
@@ -59,6 +68,7 @@ declare interface BuildOptions {
   nestingBuilderSupported?: boolean;
   lazyBuildSupported?: boolean;
   bindedViewOfBuilderNode?:ViewPU;
+  localStorage?:LocalStorage;
 }
 
 declare interface RegisterParams {

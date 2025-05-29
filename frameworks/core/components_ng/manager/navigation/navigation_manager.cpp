@@ -27,6 +27,15 @@ constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
 constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
 constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
 
+bool NavigationManager::IsOuterMostNavigation(int32_t nodeId, int32_t depth)
+{
+    if (dumpMap_.empty()) {
+        return false;
+    }
+    auto outerMostKey = dumpMap_.begin()->first;
+    return outerMostKey == DumpMapKey(nodeId, depth);
+}
+
 void NavigationManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
 {
     CHECK_RUN_ON(UI);
@@ -111,14 +120,14 @@ std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPt
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find parent navigation node failed");
         return nullptr;
     }
-    
+
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(current);
     CHECK_NULL_RETURN(navigation, nullptr);
     auto pattern = navigation->GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto stack = pattern->GetNavigationStack();
     CHECK_NULL_RETURN(stack, nullptr);
-    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack);
+    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack, navigation->GetId());
 }
 
 bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& addCallback)
@@ -216,6 +225,42 @@ void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
     auto name = curNavPattern == nullptr ? "NavBar" : curNavPattern->GetName();
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache CurNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
         state ? "yes" : "no");
+}
+
+void NavigationManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set navigation force split %{public}s, homePage:%{public}s",
+        (isForceSplit ? "enable" : "disable"), homePage.c_str());
+    /**
+     * As long as the application supports force split, regardless of whether it is enabled or not,
+     * the SetForceSplitleEnable interface will be called.
+     */
+    isForceSplitSupported_ = true;
+    if (isForceSplitEnable_ == isForceSplit && homePageName_ == homePage) {
+        return;
+    }
+    isForceSplitEnable_ = isForceSplit;
+    homePageName_ = homePage;
+
+    auto listeners = forceSplitListeners_;
+    for (auto& listener : listeners) {
+        if (listener.second) {
+            listener.second();
+        }
+    }
+}
+
+void NavigationManager::AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener)
+{
+    forceSplitListeners_[nodeId] = std::move(listener);
+}
+
+void NavigationManager::RemoveForceSplitListener(int32_t nodeId)
+{
+    auto it = forceSplitListeners_.find(nodeId);
+    if (it != forceSplitListeners_.end()) {
+        forceSplitListeners_.erase(it);
+    }
 }
 
 void NavigationManager::ResetCurNavNodeRenderGroupProperty()
@@ -548,10 +593,9 @@ NavigationIntentInfo NavigationManager::ParseNavigationIntentInfo(const std::str
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, intent info is an invalid json object!");
         return intentInfo;
     }
-    auto paramJson = intentJson->GetObject(INTENT_PARAM_KEY);
-    intentInfo.param = paramJson == nullptr ? "" : paramJson->ToString();
-    intentInfo.navigationInspectorId = GetJsonIntentInfo(intentJson->GetObject(INTENT_NAVIGATION_ID_KEY));
-    intentInfo.navDestinationName = GetJsonIntentInfo(intentJson->GetObject(INTENT_NAVDESTINATION_NAME_KEY));
+    intentInfo.param = intentJson->GetObject(INTENT_PARAM_KEY)->ToString();
+    intentInfo.navigationInspectorId = intentJson->GetString(INTENT_NAVIGATION_ID_KEY, "");
+    intentInfo.navDestinationName = intentJson->GetString(INTENT_NAVDESTINATION_NAME_KEY, "");
     return intentInfo;
 }
 
@@ -584,16 +628,5 @@ bool NavigationManager::FireNavigationIntentActively(int32_t pageId, bool needTr
         "error, specified navigation(id: %{public}s) doesn't exist in current page(id: %{public}d)",
         navigationIntentInfo_.value().navigationInspectorId.c_str(), pageId);
     return false;
-}
-
-std::string NavigationManager::GetJsonIntentInfo(std::unique_ptr<JsonValue> intentJson)
-{
-    if (!intentJson || !intentJson->IsObject()) {
-        return "";
-    }
-    if (!intentJson->GetChild() || !intentJson->GetChild()->IsString()) {
-        return "";
-    }
-    return intentJson->GetChild()->GetString();
 }
 } // namespace OHOS::Ace::NG

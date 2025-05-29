@@ -2696,4 +2696,21 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNG310, TestSize.Level1)
     EXPECT_EQ(res, geometryNode);
 }
 
+/**
+ * @tc.name: FrameNodeTestNg311
+ * @tc.desc: Test OnAttachAtapter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg311, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childNode1 =
+        FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), false);
+    auto pattern_ = frameNode->GetPattern();
+    EXPECT_NE(pattern_, nullptr);
+    bool result = pattern_->OnAttachAtapter(frameNode, childNode1);
+    EXPECT_EQ(result, false);
+    pattern_ = nullptr;
+}
 } // namespace OHOS::Ace::NG

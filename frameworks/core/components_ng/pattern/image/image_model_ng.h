@@ -128,6 +128,7 @@ public:
     static ImageRepeat GetObjectRepeat(FrameNode* frameNode);
     static std::vector<float> GetColorFilter(FrameNode* frameNode);
     static bool GetAutoResize(FrameNode* frameNode);
+    static bool GetSyncLoad(FrameNode* frameNode);
     static ImageSourceInfo GetAlt(FrameNode* frameNode);
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
@@ -150,6 +151,8 @@ public:
     static void ResetImageAlt(FrameNode* frameNode);
     static void SetAltPixelMap(FrameNode* frameNode, void* pixelMap);
     static void SetAltResource(FrameNode* frameNode, void* resource);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject);
 
 private:
     ImagePattern* GetImagePattern();

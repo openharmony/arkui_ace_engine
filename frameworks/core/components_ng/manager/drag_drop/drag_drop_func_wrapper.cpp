@@ -155,13 +155,14 @@ void EnvelopedDragData(
     auto pointerId = dragAction->dragPointerEvent.pointerId;
     std::string udKey;
     std::map<std::string, int64_t> summary;
+    std::map<std::string, int64_t> detailedSummary;
     int32_t dataSize = 1;
     if (dragAction->unifiedData) {
         int32_t ret = UdmfClient::GetInstance()->SetData(dragAction->unifiedData, udKey);
         if (ret != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
         } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
             if (ret != 0) {
                 TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
             }
@@ -185,7 +186,7 @@ void EnvelopedDragData(
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
         dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
-        summary };
+        summary, false, detailedSummary };
 }
 
 void DragDropFuncWrapper::HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -961,7 +962,7 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
 
     if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
         touchRestrict.inputEventType == InputEventType::AXIS ||
-        touchRestrict.touchEvent.originInputEventType == InputEventType::AXIS) {
+        touchRestrict.touchEvent.convertInfo.first == UIInputEventType::AXIS) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
             "frameNode draggable is %{public}d, custom set is %{public}d",

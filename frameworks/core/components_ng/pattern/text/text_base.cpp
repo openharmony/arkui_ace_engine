@@ -20,6 +20,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension SELECTED_BLANK_LINE_WIDTH = 2.0_vp;
+constexpr size_t UTF16_SURROGATE_PAIR_LENGTH = 2;
+constexpr size_t UTF16_SINGLE_CHAR_LENGTH = 1;
 }; // namespace
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
@@ -239,6 +241,35 @@ std::u16string TextBase::ConvertStr8toStr16(const std::string& value)
     return result;
 }
 
+std::u16string TextBase::TruncateText(const std::u16string& text, const size_t& length) const
+{
+    const size_t maxLength = length;
+    size_t charCount = 0;
+    size_t byteIndex = 0;
+
+    while (byteIndex < text.size() && charCount < maxLength) {
+        charCount++;
+        byteIndex += (text[byteIndex] >= 0xD800 && text[byteIndex] <= 0xDBFF) ?
+            UTF16_SURROGATE_PAIR_LENGTH : UTF16_SINGLE_CHAR_LENGTH;
+    }
+
+    if (charCount >= maxLength) {
+        return text.substr(0, byteIndex);
+    }
+    return text;
+}
+
+size_t TextBase::CountUtf16Chars(const std::u16string& s)
+{
+    size_t charCount = 0;
+    size_t i = 0;
+    while (i < s.size()) {
+        charCount++;
+        i += (s[i] >= 0xD800 && s[i] <= 0xDBFF) ? UTF16_SURROGATE_PAIR_LENGTH : UTF16_SINGLE_CHAR_LENGTH;
+    }
+    return charCount;
+}
+
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 {
     if (!isStarted_ || info.GetChangedTouches().empty()) {
@@ -276,5 +307,42 @@ void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
     auto start = std::min(index, start_);
     auto end = std::max(index, end_);
     OnTextGestureSelectionUpdate(start, end, info);
+}
+
+std::pair<std::string, std::string> TextBase::DetectTextDiff(const std::string& latestContent)
+{
+    const std::string& beforeText = textCache_;
+    std::string addedText;
+    std::string removedText;
+    size_t prefixLen = 0;
+    size_t minLength = std::min(beforeText.length(), latestContent.length());
+    while (prefixLen < minLength && beforeText[prefixLen] == latestContent[prefixLen]) {
+        prefixLen++;
+    }
+    while (prefixLen > 0 && ((beforeText[prefixLen] & 0xC0) == 0x80)) {
+        prefixLen--;
+    }
+    size_t suffixLen = 0;
+    size_t remainBefore = beforeText.length() - prefixLen;
+    size_t remainAfter = latestContent.length() - prefixLen;
+    size_t minSuffix = std::min(remainBefore, remainAfter);
+    while (suffixLen < minSuffix &&
+        beforeText[beforeText.length() - 1 - suffixLen] == latestContent[latestContent.length() - 1 - suffixLen]) {
+        suffixLen++;
+    }
+    while (suffixLen > 0 && ((beforeText[beforeText.size() - suffixLen] & 0xC0) == 0x80)) {
+        suffixLen--;
+    }
+    size_t removeStart = prefixLen;
+    size_t removeEnd = beforeText.length() - suffixLen;
+    if (removeEnd > removeStart) {
+        removedText = beforeText.substr(removeStart, removeEnd - removeStart);
+    }
+    size_t addStart = prefixLen;
+    size_t addEnd = latestContent.length() - suffixLen;
+    if (addEnd > addStart) {
+        addedText = latestContent.substr(addStart, addEnd - addStart);
+    }
+    return {std::move(addedText), std::move(removedText)};
 }
 }

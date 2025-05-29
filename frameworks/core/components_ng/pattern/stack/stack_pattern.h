@@ -64,7 +64,7 @@ public:
         return true;
     }
 
-    bool IsEnableWrap() override
+    bool IsEnableFix() override
     {
         return true;
     }

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/blank/blank_pattern.h"
 
@@ -83,6 +84,33 @@ void BlankModelNG::SetHeight(const Dimension& height)
 void BlankModelNG::SetColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(BlankPaintProperty, Color, color);
+}
+
+void BlankModelNG::SetColor(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto blockPattern = frameNode->GetPattern<BlankPattern>();
+    CHECK_NULL_VOID(blockPattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto blockPattern = frameNode->GetPattern<BlankPattern>();
+        CHECK_NULL_VOID(blockPattern);
+        std::string blankColor = blockPattern->GetResCacheMapByKey("blank.Color");
+        Color result;
+        if (blankColor.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            blockPattern->AddResCache("blank.Color", result.ColorToString());
+        } else {
+            result = Color::ColorFromString(blankColor);
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(BlankPaintProperty, Color, result, frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    };
+    updateFunc(resObj);
+    blockPattern->AddResObj("blank.Color", resObj, std::move(updateFunc));
 }
 
 void BlankModelNG::SetColor(FrameNode* frameNode, const Color& color)

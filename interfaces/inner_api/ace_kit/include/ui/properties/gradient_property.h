@@ -21,6 +21,8 @@
 #include <optional>
 #include <regex>
 #include <vector>
+#include <map>
+#include <functional>
 
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/geometry/ng/offset_t.h"
@@ -29,6 +31,7 @@
 #include "ui/base/utils/utils.h"
 #include "ui/properties/color.h"
 #include "ui/properties/linear_color.h"
+#include "ui/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
@@ -459,11 +462,25 @@ public:
         linearGradientInfo_ = std::make_shared<LinearGradientInfo>(linearGradientInfo);
     }
 
+    template<class T>
+    static bool CmpSharedPtr(const std::shared_ptr<T>& a, const std::shared_ptr<T>& b)
+    {
+        if (a == b) {
+            return true;
+        }
+        if (a && b) {
+            return *a == *b;
+        }
+        return false;
+    }
+
     bool operator==(const Gradient& other) const
     {
         return (type_ == other.GetType() && repeat_ == other.GetRepeat() && colors_ == other.GetColors() &&
-                radialGradient_ == other.GetRadialGradient() && linearGradient_ == other.GetLinearGradient() &&
-                sweepGradient_ == other.GetSweepGradient() && beginOffset_ == other.GetBeginOffset() &&
+                CmpSharedPtr(radialGradient_, other.GetRadialGradient()) &&
+                CmpSharedPtr(linearGradient_, other.GetLinearGradient()) &&
+                CmpSharedPtr(sweepGradient_, other.GetSweepGradient()) &&
+                beginOffset_ == other.GetBeginOffset() &&
                 endOffset_ == other.GetEndOffset() && spreadMethod_ == other.GetSpreadMethod() &&
                 gradientTransform_ == other.GetGradientTransform() &&
                 linearGradientInfo_ == other.GetLinearGradientInfo() &&
@@ -473,6 +490,29 @@ public:
     bool operator!=(const Gradient& other) const
     {
         return !(*this == other);
+    }
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, NG::Gradient&)> updateFunc;
+    };
+    std::map<std::string, resourceUpdater> resMap_;
+        
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, NG::Gradient&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 
 private:

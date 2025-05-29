@@ -15,6 +15,8 @@
 
 #include "grid_test_ng.h"
 
+#include "test/mock/core/animation/mock_animation_manager.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -1861,4 +1863,118 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll006, TestSize.Level1
     EXPECT_EQ(willScrollState, ScrollState::SCROLL);
     EXPECT_EQ(scrollState, didScrollState);
 }
+
+/**
+ * @tc.name: SpringAnimationTest001
+ * @tc.desc: Test Grid onReachEnd when change height during spring animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerEventTestNg, SpringAnimationTest001, TestSize.Level1)
+{
+    int32_t reachEndTimes = 0;
+    auto onReachEnd = [&reachEndTimes]() { ++reachEndTimes; };
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(2);
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetOnReachEnd(std::move(onReachEnd));
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Simulate a scrolling gesture.
+     * @tc.expected: Grid trigger spring animation.
+     */
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+
+    /**
+     * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
+     * @tc.expected: reachEnd will not trigger by height change
+     */
+
+    MockAnimationManager::GetInstance().Tick();
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 100))));
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0.f);
+    EXPECT_EQ(reachEndTimes, 2);
+}
+
+/**
+ * @tc.name: SpringAnimationTest002
+ * @tc.desc: Test Grid onReachEnd when change height during spring animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerEventTestNg, SpringAnimationTest002, TestSize.Level1)
+{
+    int32_t reachEndTimes = 0;
+    auto onReachEnd = [&reachEndTimes]() { ++reachEndTimes; };
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(2);
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetOnReachEnd(std::move(onReachEnd));
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Simulate a scrolling gesture.
+     * @tc.expected: Grid trigger spring animation.
+     */
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+
+    /**
+     * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
+     * @tc.expected: reachEnd will not trigger by height change
+     */
+
+    MockAnimationManager::GetInstance().Tick();
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 100))));
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0.f);
+    EXPECT_EQ(reachEndTimes, 2);
+}
+
 } // namespace OHOS::Ace::NG

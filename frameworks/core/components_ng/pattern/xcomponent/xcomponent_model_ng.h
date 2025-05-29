@@ -97,6 +97,13 @@ public:
         float& surfaceWidth, float& surfaceHeight);
     static bool GetXComponentEnableAnalyzer(FrameNode* frameNode);
     static void SetScreenId(FrameNode* frameNode, uint64_t screenId);
+    static int32_t SetExpectedRateRange(FrameNode* frameNode, int32_t min, int32_t max, int32_t expected);
+    static int32_t SetOnFrameCallback(FrameNode* frameNode,
+        void(*callback)(void*, uint64_t, uint64_t), void* arkuiNode);
+    static int32_t UnregisterOnFrameCallback(FrameNode* frameNode);
+    static int32_t SetNeedSoftKeyboard(FrameNode* frameNode, bool needSoftKeyboard);
+    static void* CreateAccessibilityProvider(FrameNode* frameNode);
+    static void DisposeAccessibilityProvider(ArkUI_AccessibilityProvider* provider);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

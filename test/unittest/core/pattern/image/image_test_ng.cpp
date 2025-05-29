@@ -36,6 +36,10 @@ public:
     {
         return ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
+
+    static void setSrcType(ImageSourceInfo& info, SrcType value) {
+        info.srcType_ = value;
+    };
 };
 
 /**
@@ -1750,6 +1754,36 @@ HWTEST_F(ImageTestNg, TestSyncLoad001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestSyncLoad002
+ * @tc.desc: Test image syncLoad.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestSyncLoad002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->syncLoad_, false);
+
+    /**
+     * @tc.steps: step3. set syncLoad
+     */
+    pattern->SetSyncLoad(true);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->syncLoad_, true);
+    pattern->SetSyncLoad(false);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->syncLoad_, false);
+}
+
+/**
  * @tc.name: TestDraggable001
  * @tc.desc: Test image draggable.
  * @tc.type: FUNC
@@ -2163,5 +2197,67 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius004, TestSize.Level1)
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
+}
+/**
+ * @tc.name: TestIsSurportCachePixelmap001
+ * @tc.desc: Test IsSurportCachePixelmap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image Info.
+     */
+    ImageSourceInfo sourceInfo;
+    ImageTestNg::setSrcType(sourceInfo, SrcType::ASSET);
+    EXPECT_EQ(sourceInfo.srcType_, SrcType::ASSET);
+
+    /**
+     * @tc.steps: step2. Test IsSurportCachePixelmap
+     */
+    bool result = sourceInfo.IsSurportCachePixelmap();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: TestIsSurportCachePixelmap002
+ * @tc.desc: Test IsSurportCachePixelmap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image Info.
+     */
+    ImageSourceInfo sourceInfo;
+    ImageTestNg::setSrcType(sourceInfo, SrcType::NETWORK);
+    EXPECT_EQ(sourceInfo.srcType_, SrcType::NETWORK);
+
+    /**
+     * @tc.steps: step2. Test IsSurportCachePixelmap
+     */
+    bool result = sourceInfo.IsSurportCachePixelmap();
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: TestIsSurportCachePixelmap003
+ * @tc.desc: Test IsSurportCachePixelmap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image Info.
+     */
+    ImageSourceInfo sourceInfo;
+    ImageTestNg::setSrcType(sourceInfo, SrcType::RESOURCE);
+    EXPECT_EQ(sourceInfo.srcType_, SrcType::RESOURCE);
+
+    /**
+     * @tc.steps: step2. Test IsSurportCachePixelmap
+     */
+    bool result = sourceInfo.IsSurportCachePixelmap();
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG

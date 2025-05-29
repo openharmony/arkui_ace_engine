@@ -278,6 +278,7 @@ public:
     int GetInputFieldType() const override;
     std::string GetSelectionText() const override;
     void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const override;
+    bool IsAILink() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -603,7 +604,8 @@ public:
         : webDelegate_(webDelegate), context_(context) {}
     ~WebAvoidAreaChangedListener() = default;
 
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type,
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
 private:
     WeakPtr<WebDelegate> webDelegate_;
     WeakPtr<PipelineBase> context_;
@@ -828,6 +830,7 @@ public:
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
     void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
+    void UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port);
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
@@ -893,6 +896,7 @@ public:
     void OnQuickMenuDismissed();
     void HideHandleAndQuickMenuIfNecessary(bool hide);
     void ChangeVisibilityOfQuickMenu();
+    bool ChangeVisibilityOfQuickMenuV2();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -1214,7 +1218,12 @@ public:
     void SetDataDetectorEnable(bool enable);
     void OnDataDetectorSelectText();
     void OnDataDetectorCopy(const std::vector<std::string>& recordMix);
+    int GetLastHitTestResult();
+    int GetHitTestResult();
 
+    void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
+    void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
+    void SendPipEvent(int delegate_id, int child_id, int frame_routing_id, int event);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1249,7 +1258,6 @@ private:
     bool ZoomIn();
     bool ZoomOut();
     int ConverToWebHitTestType(int hitType);
-    int GetHitTestResult();
     void GetHitTestValue(HitTestResult& result);
     int GetPageHeight();
     std::string GetTitle();

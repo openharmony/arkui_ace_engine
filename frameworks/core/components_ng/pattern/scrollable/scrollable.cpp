@@ -1289,7 +1289,6 @@ void Scrollable::StartSpringMotion(
     } else {
         springOffsetProperty_->Set(mainPosition);
     }
-    springOffsetProperty_->Set(mainPosition);
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(springResponse_, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);

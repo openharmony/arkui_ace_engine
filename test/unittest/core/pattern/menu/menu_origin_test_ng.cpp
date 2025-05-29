@@ -1871,7 +1871,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNg008, TestSize.Level1)
     menuParam.type = MenuType::MENU;
     menuParam.maskType = NG::MenuMaskType();
     menuParam.maskType->maskColor = Color::RED;
-    menuParam.maskType->maskBackGroundBlueStyle = BlurStyle::BACKGROUND_THIN;
+    menuParam.maskType->maskBackGroundBlurStyle = BlurStyle::BACKGROUND_THIN;
     auto menuWrapperNode2 = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
     ASSERT_NE(menuWrapperNode2, nullptr);
     ASSERT_EQ(menuWrapperNode2->GetChildren().size(), 1);
@@ -1971,5 +1971,19 @@ HWTEST_F(MenuTestNg, MenuPreviewTestNg002, TestSize.Level1)
     auto customPreview =  menuWrapperPattern->GetHoverImageCustomPreview();
     ASSERT_NE(customPreview, nullptr);
     EXPECT_EQ(customPreview->GetTag(), V2::MENU_PREVIEW_ETS_TAG);
+}
+
+/**
+ * @tc.name: CreateMenuTest001
+ * @tc.desc: Test CreateMenu creates a FrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, CreateMenuTest001, TestSize.Level1)
+{
+    auto menuNode = MenuModelNG::CreateMenu();
+    ASSERT_NE(menuNode, nullptr);
+
+    auto layoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
 }
 } // namespace OHOS::Ace::NG

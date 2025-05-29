@@ -198,6 +198,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextShadow, std::vector<Shadow>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Superscript, SuperscriptStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(VariableFontWeight, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableVariableFontWeight, bool);
@@ -223,7 +224,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontForegroudGradiantColor, FontForegroudGradiantColor);
-
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(GradientShaderStyle, Gradient);
+    
     void UpdateColorByResourceId();
 
     TextDecoration GetTextDecorationFirst() const
@@ -257,6 +259,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HalfLeading, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ParagraphSpacing, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
 };
 
 struct HandleInfoNG {

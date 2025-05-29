@@ -61,20 +61,33 @@ enum class ResponseType : int32_t {
     LONG_PRESS,
 };
 class SpanString;
+enum PopupType { POPUPTYPE_TEXTCOLOR, POPUPTYPE_POPUPCOLOR, POPUPTYPE_MASKCOLOR };
 class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
     virtual ~ViewAbstractModel() = default;
 
+    virtual void CreateWithForegroundColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithOuterBorderColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
+    virtual void SetWidth(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetHeight(const CalcDimension& height) = 0;
     virtual void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) = 0;
+    virtual void SetHeight(const RefPtr<ResourceObject>& resObj) {}
     virtual void ClearWidthOrHeight(bool isWidth) = 0;
     virtual void SetMinWidth(const CalcDimension& minWidth) = 0;
+    virtual void SetMinWidth(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetMinHeight(const CalcDimension& minHeight) = 0;
+    virtual void SetMinHeight(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetMaxWidth(const CalcDimension& maxWidth) = 0;
+    virtual void SetMaxWidth(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetMaxHeight(const CalcDimension& maxHeight) = 0;
+    virtual void SetMaxHeight(const RefPtr<ResourceObject>& resObj) {}
     virtual void ResetMinSize(bool resetWidth) = 0;
     virtual void ResetMaxSize(bool resetWidth) = 0;
 
@@ -86,6 +99,8 @@ public:
         std::string& moduleName, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(BackgroundImageSize& bgImgSize) = 0;
+    virtual void SetBackgroundImageSizeUpdateFunc(
+        BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction) = 0;
     virtual void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(
         const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) = 0;
@@ -103,10 +118,12 @@ public:
     virtual void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
     virtual void SetPaddings(const NG::PaddingProperty& paddings) = 0;
+    virtual void SetPadding(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetMargin(const CalcDimension& value) = 0;
     virtual void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
     virtual void SetMargins(const NG::MarginProperty& margins) = 0;
+    virtual void SetMargin(const RefPtr<ResourceObject>& resObj) {}
     virtual void ResetSafeAreaPadding() = 0;
     virtual void SetSafeAreaPadding(const CalcDimension& value) = 0;
     virtual void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) = 0;
@@ -118,15 +135,19 @@ public:
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) = 0;
     virtual void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) = 0;
+    virtual void SetBorderRadius(const RefPtr<ResourceObject>& resobj) {}
     virtual void SetBorderColor(const Color& value) = 0;
     virtual void SetBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
     virtual void SetBorderColor(const NG::BorderColorProperty& borderColors) = 0;
+    virtual void SetBorderColor(const RefPtr<ResourceObject>& resobj) {}
     virtual void SetBorderWidth(const Dimension& value) = 0;
     virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
     virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom, bool isLocalized) = 0;
+    virtual void SetBorderWidth(const RefPtr<ResourceObject>& resobj) {}
+    virtual void SetBorderWidth(const NG::BorderWidthProperty& value) {}
     virtual void SetBorderStyle(const BorderStyle& value) = 0;
     virtual void SetBorderStyle(const std::optional<BorderStyle>& styleLeft,
         const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
@@ -134,9 +155,11 @@ public:
     virtual void SetDashGap(const Dimension& value) {}
     virtual void SetDashGap(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) {}
+    virtual void SetDashGap(const NG::BorderWidthProperty& value) {}
     virtual void SetDashWidth(const Dimension& value) {}
     virtual void SetDashWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) {}
+    virtual void SetDashWidth(const NG::BorderWidthProperty& value) {}
     virtual void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) = 0;
     virtual void SetBorderImageGradient(const NG::Gradient& gradient) = 0;
 
@@ -158,6 +181,7 @@ public:
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
     virtual void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) = 0;
     virtual void SetOuterBorderWidth(const Dimension& value) = 0;
+    virtual void SetOuterBorderWidthNew(const NG::BorderWidthProperty& property) = 0;
     virtual void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
     virtual void SetOuterBorderStyle(const BorderStyle& value) = 0;
@@ -185,10 +209,16 @@ public:
 
     // position
     virtual void SetPosition(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetPosition(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) {}
     virtual void SetOffset(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetOffset(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) {}
     virtual void SetPositionEdges(const EdgesParam& value) {};
     virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
+    virtual void MarkAnchor(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) {}
     virtual void ResetPosition() {};
 
     // transforms
@@ -197,9 +227,11 @@ public:
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
+    virtual void SetTransform3DMatrix(const std::vector<float>& matrix) = 0;
 
     // display props
     virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
+    virtual void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj) {};
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
     virtual void CleanTransition() {};
     virtual void SetChainedTransition(
@@ -251,6 +283,7 @@ public:
     virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetBlendApplyType(BlendApplyType blendApplyType) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
+    virtual void CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resobj) {};
     virtual void SetWindowBlur(float progress, WindowBlurStyle blurStyle) = 0;
     virtual void SetBrightness(const Dimension& value) = 0;
     virtual void SetGrayScale(const Dimension& value) = 0;
@@ -302,6 +335,9 @@ public:
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
+    virtual void SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) = 0;
+    virtual void SetOnDragSpringLoadingConfiguration(
+        const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration) = 0;
     virtual void SetOnDragEnd(OnNewDragFunc&& onDragEnd) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
@@ -382,9 +418,15 @@ public:
 
     // toolbar
     virtual void SetToolbarBuilder(std::function<void()>&& buildFunc) = 0;
-    
+
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
+    virtual void SetBackground(std::function<void()>&& buildFunc) = 0;
+    virtual void SetBackgroundAlign(const Alignment& align) = 0;
+    virtual void SetCustomBackgroundColor(const Color& color) = 0;
+    virtual void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) = 0;
+    virtual void SetIsTransitionBackground(bool val) = 0;
+    virtual void SetIsBuilderBackground(bool val) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
@@ -447,6 +489,7 @@ public:
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
+    virtual void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) {};
     // foregroundColor
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
@@ -467,6 +510,7 @@ public:
     // global light
     virtual void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
+    virtual void SetLightPosition(const NG::TranslateOptions& options) = 0;
     virtual void SetLightIntensity(const float value) = 0;
     virtual void SetLightColor(const Color& value) = 0;
     virtual void SetLightIlluminated(const uint32_t value) = 0;
@@ -476,6 +520,14 @@ public:
     virtual void SetMarkAnchorStart(Dimension& markAnchorStart) = 0;
     virtual void ResetMarkAnchorStart() = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
+    virtual void CreateWithColorResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) = 0;
+    virtual void CreateWithBoolResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) = 0;
+    virtual void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) = 0;
+    virtual void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

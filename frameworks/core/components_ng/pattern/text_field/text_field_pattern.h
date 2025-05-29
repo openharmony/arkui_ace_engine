@@ -30,6 +30,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/clipboard/clipboard.h"
@@ -602,6 +603,7 @@ public:
     float GetBorderBottom(BorderWidthProperty border) const;
     float GetBorderRight(BorderWidthProperty border) const;
 
+    void OnDragNodeDetachFromMainTree() override;
     const RectF& GetTextRect() const override
     {
         return textRect_;
@@ -1935,6 +1937,8 @@ private:
     void RemoveFillContentMap();
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
+    void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
+    std::pair<std::string, std::string> GetTextDiffObscured(const std::string& latestContent);
 
     RectF frameRect_;
     RectF textRect_;

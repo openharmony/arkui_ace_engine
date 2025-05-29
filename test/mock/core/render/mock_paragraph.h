@@ -50,6 +50,7 @@ public:
     MOCK_METHOD1(Layout, void(float width));
     MOCK_METHOD3(ReLayout, void(float width, const ParagraphStyle& paraStyle,
         const std::vector<TextStyle>& textStyles));
+    MOCK_METHOD1(ReLayoutForeground, void(const TextStyle& style));
     MOCK_METHOD1(AddPlaceholder, int32_t(const PlaceholderRun& span));
     MOCK_METHOD1(GetRectsForPlaceholders, void(std::vector<RectF>& selectedRects));
     MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));
@@ -76,7 +77,15 @@ public:
     bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest) override
     {
-        return false;
+        CHECK_NULL_RETURN(enableCalcCaretMetricsByPosition_, false);
+        CHECK_NULL_RETURN(extent >= 0, false);
+        if (textAffinity == TextAffinity::UPSTREAM) {
+            caretCaretMetric = CaretMetricsF(OffsetF(0, 10), 50);
+        }
+        if (textAffinity == TextAffinity::DOWNSTREAM) {
+            caretCaretMetric = CaretMetricsF(OffsetF(50, 10), 50);
+        }
+        return true;
     }
 
     bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffsetF,
@@ -109,6 +118,7 @@ public:
 
     static RefPtr<MockParagraph> paragraph_;
     static bool enabled_;
+    static bool enableCalcCaretMetricsByPosition_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_RENDER_MOCK_PARAGRAPH_H

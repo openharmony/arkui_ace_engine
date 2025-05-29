@@ -117,6 +117,11 @@ struct UndoRedoRecord {
         return rangeBefore.GetLength() == 0 && rangeAfter.GetLength() == 0;
     }
 
+    bool IsRestoreBuilderSpan() const
+    {
+        return isOnlyStyleChange || restoreBuilderSpan;
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -145,6 +150,7 @@ public:
     virtual void SetOperationBefore(TextRange range, TextRange selection, CaretAffinityPolicy caretAffinity,
         UndoRedoRecord& record) = 0;
     virtual void UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record) = 0;
+    virtual void RemoveBuilderSpanOptions(const RefPtr<NG::UINode> customNode) {}
 
     static std::unique_ptr<RichEditorUndoManager> Create(bool isSpanStringMode,
         const WeakPtr<RichEditorPattern>& pattern);
@@ -243,6 +249,7 @@ public:
     void SetOperationBefore(TextRange range, TextRange selection, CaretAffinityPolicy caretAffinity,
         UndoRedoRecord& record) override;
     void UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record) override;
+    void RemoveBuilderSpanOptions(const RefPtr<NG::UINode> customNode) override;
 private:
     OptionsList CreateOptionsListByRange(TextRange range);
     SpanOptions CreateSpanOptionsBySpanObject(const ResultObject& object);
@@ -254,6 +261,8 @@ private:
     SymbolSpanOptions CreateSymbolSpanOptions(const RefPtr<SpanItem>& item);
     BuilderSpanOptions CreateBuilderSpanOptions(const ResultObject& object);
     BuilderSpanOptions CreateBuilderSpanOptions(const RefPtr<PlaceholderSpanItem>& item);
+    void RemoveBuilderSpanOptions(std::deque<UndoRedoRecord>& records, const RefPtr<NG::UINode> customNode);
+    void RemoveBuilderSpanOptions(OptionsList& optionsList, const RefPtr<NG::UINode> customNode);
 };
 }
 

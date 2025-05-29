@@ -27,6 +27,16 @@ std::string GetNavigationId(const RefPtr<NavDestinationPattern>& pattern)
     CHECK_NULL_RETURN(pattern, "");
     return pattern->GetNavigationId();
 }
+
+int32_t GetNavigationUniqueId(const RefPtr<NavDestinationPattern>& pattern)
+{
+    auto uniqueId = -1;
+    CHECK_NULL_RETURN(pattern, uniqueId);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(pattern->GetNavigationNode());
+    CHECK_NULL_RETURN(navigationNode, uniqueId);
+    auto navigationUniqueId = navigationNode->GetId();
+    return navigationUniqueId;
+}
 } // namespace
 
 UIObserverHandler& UIObserverHandler::GetInstance()
@@ -64,7 +74,8 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     }
     pathInfo->OpenScope();
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
-        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId,
+        GetNavigationUniqueId(pattern));
     navigationHandleFunc_(info);
     pathInfo->CloseScope();
 }

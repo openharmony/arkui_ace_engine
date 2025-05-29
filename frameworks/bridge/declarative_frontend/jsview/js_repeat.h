@@ -27,6 +27,7 @@ public:
 
     static void StartRender();
     static void FinishRender(const JSCallbackInfo& info);
+    static void IsInAnimation(const JSCallbackInfo& info);
     // signature is
     // fromIndex: number
     static void MoveChild(const JSCallbackInfo& info);

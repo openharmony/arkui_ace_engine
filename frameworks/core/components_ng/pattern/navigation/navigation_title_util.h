@@ -50,7 +50,7 @@ public:
         bool isButtonEnabled, const std::string& field, const std::string& parentId,
         bool isCreateLandscapeMenu = false);
     static void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
-        const RefPtr<FrameNode>& barMenuNode);
+        const RefPtr<FrameNode>& barMenuNode, const MenuParam& menuParam);
 
     static bool BuildMoreButton(bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme,
         const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<FrameNode>& menuNode,

@@ -173,9 +173,10 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     clickEffect(value: ClickEffect | null): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
-    onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDrop(event: (event?: DragEvent, extraParams?: string) => void, dropOptions?: DropOptions): this;
     onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this;
     onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
     allowDrop(value: Array<UniformDataType>): this;
@@ -200,6 +201,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
         end?: number | string;
         rotation?: number | string;
         colors: Array<any>;
+        metricsColors?: Array<any>;
         repeating?: boolean;
     }): this;
     radialGradient(value: {
@@ -626,6 +628,7 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     clickEffect(value: ClickEffect | null): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
@@ -751,6 +754,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     }): TextAttribute;
     letterSpacing(value: number | string): TextAttribute;
     lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute;
+    optimizeTrailingSpace(trim: boolean): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;
@@ -767,6 +771,14 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     marqueeOptions(value: MarqueeOptions): TextAttribute;
     onMarqueeStateChange(callback: (value: MarqueeState) => void): TextAttribute;
+    shaderStyle(value: {
+        center: Array<any>;
+        radius: number | string;
+        angle?: number | string;
+        direction?: GradientDirection;
+        colors: Array<any>;
+        repeating?: boolean;
+    }): this;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1046,6 +1058,8 @@ declare class ArkSliderComponent extends ArkComponent implements SliderAttribute
     blockSize(value: SizeOptions): this;
     blockStyle(value: SliderBlockStyle): this;
     stepSize(value: Length): this;
+    prefix(value: CustomBuilder, options?: SliderCustomContentOptions): this;
+    suffix(value: CustomBuilder, options?: SliderCustomContentOptions): this;
 }
 declare class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1704,6 +1718,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     clickEffect(value: ClickEffect): this;
     onDragStart(event: (event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event: DragEvent, extraParams?: string) => void): this;
+    onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event: DragEvent, extraParams?: string) => void): this;

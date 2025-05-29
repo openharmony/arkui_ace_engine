@@ -101,6 +101,8 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup) override;
+    
+    void AdjustScrollPosition(int32_t nextIndex, int32_t curIndex) override;
 
     bool OnScrollCallback(float offset, int32_t source) override;
 

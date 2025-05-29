@@ -27,6 +27,8 @@
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
@@ -116,6 +118,8 @@ public:
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
     virtual void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) = 0;
     virtual void SetValidSlideRange(float fromValue, float toValue) {};
+    virtual void SetPrefix(const RefPtr<NG::UINode>& content, const NG::SliderPrefixOptions& options) = 0;
+    virtual void SetSuffix(const RefPtr<NG::UINode>& content, const NG::SliderSuffixOptions& options) = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {};
 #endif

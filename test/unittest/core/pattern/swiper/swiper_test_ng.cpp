@@ -230,6 +230,9 @@ AssertionResult SwiperTestNg::CurrentIndex(int32_t expectIndex)
     if (!GetChildFrameNode(frameNode_, expectIndex)) {
         return AssertionFailure() << "There is no item at expectIndex: " << expectIndex;
     }
+    if (!GetChildFrameNode(frameNode_, expectIndex)->IsActive()) {
+        return AssertionFailure() << "The expectIndex item is not active";
+    }
     if (GetChildFrameNode(frameNode_, expectIndex)->GetLayoutProperty()->GetVisibility() != VisibleType::GONE) {
         if (NearZero(GetChildWidth(frameNode_, expectIndex))) {
             return AssertionFailure() << "The expectIndex item width is 0";

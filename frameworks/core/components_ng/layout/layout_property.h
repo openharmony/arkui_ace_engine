@@ -139,6 +139,11 @@ public:
 
     TextDirection GetNonAutoLayoutDirection() const;
 
+    uint32_t GetBackgroundIgnoresLayoutSafeAreaEdges() const
+    {
+        return backgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::SAFE_AREA_EDGE_NONE);
+    }
+
     RefPtr<GeometryTransition> GetGeometryTransition() const;
 
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
@@ -173,6 +178,7 @@ public:
     }
 
     void UpdateLayoutDirection(TextDirection value);
+    void UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value);
 
     void UpdateGeometryTransition(const std::string& id,
         bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
@@ -204,6 +210,8 @@ public:
 
     void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth);
 
+    bool UpdateLayoutPolicyWithCheck(const LayoutCalPolicy layoutPolicy, bool isWidth);
+
     std::optional<NG::LayoutPolicyProperty> GetLayoutPolicyProperty();
 
     void ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight);
@@ -214,7 +222,7 @@ public:
 
     std::pair<std::vector<std::string>, std::vector<std::string>> CalcToString(const CalcSize& calcSize);
 
-    void ExpandConstraintWithSafeArea();
+    virtual void ExpandConstraintWithSafeArea();
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
@@ -433,6 +441,7 @@ public:
     void CheckLocalizedBorderImageWidth(const TextDirection& direction);
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
     void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
+    void CheckIgnoreLayoutSafeArea(const TextDirection& direction);
 
     virtual void OnPropertyChangeMeasure() {}
 
@@ -495,6 +504,7 @@ private:
     std::optional<TextDirection> layoutDirection_;
     std::optional<RectF> layoutRect_;
     std::optional<Dimension> markAnchorStart_;
+    std::optional<uint32_t> backgroundIgnoresLayoutSafeAreaEdges_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 

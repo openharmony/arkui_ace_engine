@@ -23,8 +23,8 @@
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
-#include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/refresh/refresh_model.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace {
@@ -165,10 +165,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    RefPtr<RefreshTheme> theme = GetTheme<RefreshTheme>();
-    if (!theme) {
-        return;
-    }
+
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto refreshing = paramObject->GetProperty("refreshing");
     auto jsOffset = paramObject->GetProperty("offset");
@@ -191,9 +188,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
     CalcDimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
-        if (LessNotEqual(offset.Value(), 0.0) || offset.Unit() == DimensionUnit::PERCENT) {
-            RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
-        } else {
+        if (GreatOrEqual(offset.Value(), 0.0) && offset.Unit() != DimensionUnit::PERCENT) {
             RefreshModel::GetInstance()->SetIndicatorOffset(offset);
         }
     }
@@ -204,7 +199,15 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
 
     std::string loadingStr = "";
-    if (ParseJsString(promptText, loadingStr)) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsString(promptText, loadingStr, resObj)) {
+            RefreshModel::GetInstance()->CreateWithResourceObj(resObj);
+            RefreshModel::GetInstance()->SetLoadingText(loadingStr);
+        } else {
+            RefreshModel::GetInstance()->ResetLoadingText();
+        }
+    } else if (ParseJsString(promptText, loadingStr)) {
         RefreshModel::GetInstance()->SetLoadingText(loadingStr);
     } else {
         RefreshModel::GetInstance()->ResetLoadingText();
@@ -259,61 +262,6 @@ bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
         RefreshModel::GetInstance()->SetCustomBuilder(customNode);
         return false;
     }
-}
-
-void JSRefresh::OnStateChange(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                             const int32_t& value) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Refresh.OnStateChange");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-        func->ExecuteJS(1, &newJSVal);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Refresh.OnStateChange");
-    };
-    RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
-}
-
-void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Refresh.OnRefreshing");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make();
-        func->ExecuteJS(1, &newJSVal);
-    };
-    RefreshModel::GetInstance()->SetOnRefreshing(std::move(onRefreshing));
-}
-
-void JSRefresh::OnOffsetChange(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        RefreshModel::GetInstance()->ResetOnOffsetChange();
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto offsetChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                            const float& value) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Refresh.OnOffsetChange");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-        func->ExecuteJS(1, &newJSVal);
-    };
-    RefreshModel::GetInstance()->SetOnOffsetChange(std::move(offsetChange));
 }
 
 void JSRefresh::ParsFrictionData(const JsiRef<JsiValue>& friction)

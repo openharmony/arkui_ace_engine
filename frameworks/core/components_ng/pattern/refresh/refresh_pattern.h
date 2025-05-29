@@ -30,6 +30,7 @@
 #include "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "frameworks/core/components_ng/pattern/text/text_layout_property.h"
@@ -84,6 +85,8 @@ public:
     }
 
     void OnColorConfigurationUpdate() override;
+
+    void OnColorModeChange(uint32_t colorMode) override;
 
     Axis GetAxis() const override
     {
@@ -157,8 +160,8 @@ private:
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
-    float scrollOffset_;
-    float lastScrollOffset_;
+    float scrollOffset_ = 0.0f;
+    float lastScrollOffset_ = 0.0f;
     bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
@@ -199,6 +202,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
     Dimension loadingProgressSizeTheme_ = 32.0_vp;
     Dimension triggerLoadingDistanceTheme_ = 16.0_vp;
+    bool isHigherVersion_ = true;
+    RefPtr<RefreshThemeNG> refreshTheme_;
 };
 } // namespace OHOS::Ace::NG
 

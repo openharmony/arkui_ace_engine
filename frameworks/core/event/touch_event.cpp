@@ -16,6 +16,8 @@
 #include "core/event/touch_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/common/ace_application_info.h"
+#include "core/event/mouse_event.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace {
@@ -24,6 +26,20 @@ void TouchPoint::CovertId()
     if (sourceTool == SourceTool::PEN) {
         originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
         id = id + originalId;
+    }
+}
+
+int32_t TouchPoint::GetOriginalReCovertId() const
+{
+    if (!AceApplicationInfo::GetInstance().GetTouchPadIdChanged()) {
+        return originalId;
+    }
+    if (sourceTool == SourceTool::PEN) {
+        return originalId - TOUCH_TOOL_BASE_ID - static_cast<int32_t>(sourceTool);
+    } else if (sourceTool == SourceTool::MOUSE) {
+        return originalId - MOUSE_BASE_ID - static_cast<int32_t>(MouseButton::LEFT_BUTTON);
+    } else {
+        return originalId;
     }
 }
 
@@ -131,12 +147,6 @@ TouchEvent& TouchEvent::SetSourceType(SourceType sourceType)
 TouchEvent& TouchEvent::SetSourceTool(SourceTool sourceTool)
 {
     this->sourceTool = sourceTool;
-    return *this;
-}
-
-TouchEvent& TouchEvent::SetOriginInputEventType(InputEventType inputEventType)
-{
-    this->originInputEventType = inputEventType;
     return *this;
 }
 
@@ -270,7 +280,8 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.width = width;
     event.height = height;
     event.pressedTime = pressedTime;
-    event.originInputEventType = originInputEventType;
+    event.convertInfo = convertInfo;
+    event.passThrough = passThrough;
     return event;
 }
 
@@ -351,6 +362,20 @@ void TouchEvent::CovertId()
     if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
         id = id + TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
         originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+    }
+}
+
+int32_t TouchEvent::GetOriginalReCovertId() const
+{
+    if (!AceApplicationInfo::GetInstance().GetTouchPadIdChanged()) {
+        return originalId;
+    }
+    if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
+        return originalId - TOUCH_TOOL_BASE_ID - static_cast<int32_t>(sourceTool);
+    } else if (sourceType == SourceType::MOUSE) {
+        return originalId - MOUSE_BASE_ID - static_cast<int32_t>(MouseButton::LEFT_BUTTON);
+    } else {
+        return originalId;
     }
 }
 

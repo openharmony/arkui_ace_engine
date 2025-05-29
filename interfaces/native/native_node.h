@@ -2372,6 +2372,76 @@ typedef enum {
      * @since 20
      */
     NODE_TEXT_LINE_COUNT = 1031,
+    
+    /**
+     * @brief Defines whether to optimize whitespace at the end of each line,
+     * which can be set, reset, and obtained as required through APIs.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * value[0].i32: whether to optimize whitespace at the end of each line. The default value is false. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * value[0].i32: whether to optimize whitespace at the end of each line. \n
+     * 
+     * @since 20
+     */
+    NODE_TEXT_OPTIMIZE_TRAILING_SPACE = 1032,
+
+    /**
+     * @brief 设置文本颜色渐变效果，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：线性渐变的起始角度。
+     * 当direction属性设置为ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM时，angle属性生效；否则，以direction属性为主要布局方式。
+     * 0点方向顺时针旋转为正向角度，默认值：180 \n
+     * .value[1].i32：线性渐变的方向。设置除ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM之外的线性渐变方向后，angle不生效。
+     * 数据类型{@link ArkUI_LinearGradientDirection}。 \n
+     * .value[2].i32：为渐变的颜色重复着色，默认值：false \n
+     * .object: 参数类型为{@link ArkUI_ColorStop}。指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：线性渐变的起始角度。
+     * 当direction属性设置为ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM时，angle为设置值，其他情况angle均为默认值。\n
+     * .value[1].i32：线性渐变的方向。\n
+     * .value[2].i32：为渐变的颜色重复着色。\n
+     * .object: 参数类型为{@link ArkUI_ColorStop}。指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
+     *
+     * @since 20
+     */
+    NODE_TEXT_LINEAR_GRADIENT = 1033,
+
+    /**
+     * @brief 设置文本径向渐变渐变效果，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0]?.f32：为径向渐变的中心点，即相对于当前文本左上角的X轴坐标。 \n
+     * .value[1]?.f32：为径向渐变的中心点，即相对于当前文本左上角的Y轴坐标。 \n
+     * .value[2]?.f32：径向渐变的半径，默认值0。 \n
+     * .value[3]?.i32：为渐变的颜色重复着色，0表示不重复着色，1表示重复着色。 \n
+     * .object：参数类型为{@link ArkUI_ColorStop}。指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：为径向渐变的中心点，即相对于当前文本左上角的X轴坐标。 \n
+     * .value[1].f32：为径向渐变的中心点，即相对于当前文本左上角的Y轴坐标。 \n
+     * .value[2].f32：径向渐变的半径，默认值0。 \n
+     * .value[3].i32：为渐变的颜色重复着色，0表示不重复着色，1表示重复着色。 \n
+     * .object：参数类型为{@link ArkUI_ColorStop}。指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
+     *
+     * @since 20
+     */
+    NODE_TEXT_RADIAL_GRADIENT = 1034,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -4025,6 +4095,20 @@ typedef enum {
      */
     NODE_DATE_PICKER_ENABLE_HAPTIC_FEEDBACK = 13008,
     /**
+     * @brief Defines whether to support scroll looping for the date picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to support scroll looping. The value <b>true</b> means to support scroll looping, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: The value <b>1</b> means to support scroll looping, and <b>0</b> means the opposite. \n
+     *
+     * @since 20
+     */
+     NODE_DATE_PICKER_CAN_LOOP = 13009,
+    /**
      * @brief Defines the time of the selected item. in the timer picker.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4671,6 +4755,32 @@ typedef enum {
      * @since 18
      */
     NODE_SLIDER_ENABLE_HAPTIC_FEEDBACK = 17013,
+
+    /**
+     * @brief Sets a custom component on the leading side of the Slider component.
+     *
+     * Attribute setting method {@link ArkUI_AttributeItem} parameter format: \n
+     * .object: Parameter type {@link ArkUI_NodeHandle}.
+     *
+     * The prefix component will be placed at the start position of the Slider,
+     * typically on the left side in LTR layouts.
+	 *
+	 * @since 20
+     */
+    NODE_SLIDER_PREFIX,
+
+    /**
+     * @brief Sets a custom component on the trailing side of the Slider component.
+     *
+     * Attribute setting method {@link link ArkUI_AttributeItem} parameter format: \n
+     * .object: Parameter type {@link ArkUI_NodeHandle}.
+     *
+     * The suffix component will be placed at the end position of the Slider,
+     * typically on the right side in LTR layouts.
+	 *
+	 * @since 20
+     */
+    NODE_SLIDER_SUFFIX,
 
     /**
      * @brief Sets whether the radio button is selected.
@@ -7970,6 +8080,10 @@ typedef enum {
     ARKUI_NODE_CUSTOM_EVENT_ON_FOREGROUND_DRAW = 1 << 3,
     /** Overlay type. */
     ARKUI_NODE_CUSTOM_EVENT_ON_OVERLAY_DRAW = 1 << 4,
+    /** Draw front type. */
+    ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_FRONT = 1 << 5,
+    /** Draw behind type. */
+    ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_BEHIND = 1 << 6,
 } ArkUI_NodeCustomEventType;
 
 /**

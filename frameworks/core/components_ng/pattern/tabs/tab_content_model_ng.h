@@ -36,6 +36,10 @@ public:
     void Create(std::function<void()>&& deepRenderFunc) override;
     void Create() override;
     void Pop() override;
+    void CreateWithResourceObj(TabContentJsType jsType, const RefPtr<ResourceObject>& resObj) override;
+    void CreatePaddingWithResourceObj(const RefPtr<ResourceObject>& resObjLeft,
+        const RefPtr<ResourceObject>& resObjRight, const RefPtr<ResourceObject>& resObjTop,
+        const RefPtr<ResourceObject>& resObjBottom) override;
     void SetTabBar(const std::optional<std::string> &text, const std::optional<std::string> &icon,
         const std::optional<TabBarSymbol> &tabBarSymbol, TabBarBuilderFunc &&builder, bool useContentOnly) override;
     void SetTabBarWithContent(const RefPtr<NG::UINode>& content) override;
@@ -66,6 +70,10 @@ public:
     static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
     static void SetOnWillShow(FrameNode* node,  std::function<void()>&& onWillShow);
     static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
+    static bool CreatePaddingLeftWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjLeft);
+    static bool CreatePaddingRightWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjRight);
+    static bool CreatePaddingTopWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjTop);
+    static bool CreatePaddingBottomWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjBottom);
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);

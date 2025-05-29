@@ -46,7 +46,7 @@ struct Index {
         .height('auto')
         .margin({top:160})
         .hdrBrightness(this.bright) // 设置图片的HDR亮度，值由bright状态控制
-      Button("图片动态提亮 0->1")
+      Button('图片动态提亮 0->1')
         .onClick(() => {
           // 动画过渡，切换亮度值
           this.getUIContext()?.animateTo({}, () => {

@@ -154,8 +154,10 @@ public:
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
     virtual void SetHalfLeading(bool halfLeading) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
+    virtual void SetOptimizeTrailingSpace(bool trim) = 0;
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
     virtual void SetLineThicknessScale(float value) = 0;
+    virtual void SetGradientShaderStyle(NG::Gradient& gradient) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

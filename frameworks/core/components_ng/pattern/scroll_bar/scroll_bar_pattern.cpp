@@ -258,10 +258,10 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
         }
         scrollBar_->ScheduleDisappearDelayTask();
     }
-    auto paintProperty = host->GetLayoutProperty<ScrollBarPaintProperty>();
+    auto paintProperty = host->GetPaintProperty<ScrollBarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto barColor = scrollBar_->GetForegroundColor();
-    paintProperty->SetDefaultScrollBarColor(barColor); 
+    paintProperty->SetDefaultScrollBarColor(barColor);
 }
 
 PositionMode ScrollBarPattern::GetPositionMode()
@@ -430,10 +430,10 @@ void ScrollBarPattern::OnColorConfigurationUpdate()
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto paintProperty = host->GetLayoutProperty<ScrollBarPaintProperty>();
+    auto paintProperty = host->GetPaintProperty<ScrollBarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto barColor = scrollBar_->GetForegroundColor();
-    paintProperty->SetDefaultScrollBarColor(barColor); 
+    paintProperty->SetDefaultScrollBarColor(barColor);
 }
 
 bool ScrollBarPattern::UpdateScrollBarDisplay()

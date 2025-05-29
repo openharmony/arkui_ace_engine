@@ -217,8 +217,6 @@ public:
         detachState_ = t;
     }
 
-    void ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
-    void CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
     void SwitchFollowParentWindowLayout(bool freeMultiWindowEnable) override;
     bool NeedFollowParentWindowLayout() override
     {
@@ -292,6 +290,7 @@ private:
     bool isShowed_ = false;
     bool isClosing_ = false;
     bool needAvoidKeyboard_ = false;
+    bool ifNeedSetCurrentWindow_ = true;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
     int32_t callbackId_ = 0;
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;

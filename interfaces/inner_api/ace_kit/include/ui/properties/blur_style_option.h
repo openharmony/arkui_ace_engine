@@ -21,6 +21,8 @@
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/inspector_filter.h"
 #include "ui/base/utils/utils.h"
+#include "ui/resource/resource_object.h"
+#include <functional>
 
 namespace OHOS::Ace {
 enum class BlurStyle {
@@ -108,6 +110,12 @@ struct EffectOption {
         json->PutExtAttr("backgroundEffect", ToJsonValue(), filter);
     }
 
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, EffectOption&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+
     std::unique_ptr<JsonValue> ToJsonValue() const
     {
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
@@ -133,6 +141,24 @@ struct EffectOption {
         jsonBrightnessOption->Put("blurOption", grayscale);
         jsonEffect->Put("options", jsonBrightnessOption);
         return jsonEffect;
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, EffectOption&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 
@@ -179,6 +205,11 @@ struct BlurStyleOption {
     Color inactiveColor { Color::TRANSPARENT };
     bool isValidColor = false;
     bool isWindowFocused = true;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, BlurStyleOption&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
     bool operator==(const BlurStyleOption& other) const
     {
         return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor &&
@@ -213,6 +244,24 @@ struct BlurStyleOption {
         jsonBlurStyle->Put("options", jsonBlurStyleOption);
 
         json->PutExtAttr("backgroundBlurStyle", jsonBlurStyle, filter);
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, BlurStyleOption&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 

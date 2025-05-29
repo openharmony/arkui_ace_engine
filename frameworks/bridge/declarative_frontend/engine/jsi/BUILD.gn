@@ -315,11 +315,15 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_utils_bridge.cpp",
       "nativeModule/arkts_native_video_bridge.cpp",
       "nativeModule/arkts_native_water_flow_bridge.cpp",
-      "nativeModule/arkts_native_web_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
     ]
 
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      sources += ["nativeModule/arkts_native_web_bridge.cpp",]
+    }
+    
     if (!ace_engine_feature_wearable) {
       sources += [ "nativeModule/arkts_native_folder_stack_bridge.cpp" ]
     }

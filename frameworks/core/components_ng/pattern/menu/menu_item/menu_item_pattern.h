@@ -94,7 +94,7 @@ public:
 
     inline RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<MenuItemLayoutAlgorithm>(isOptionPattern_);
+        return MakeRefPtr<MenuItemLayoutAlgorithm>(isOptionPattern_, showDefaultSelectedIcon_);
     }
 
     inline RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -349,6 +349,10 @@ public:
     {
         return isSelectOption_;
     }
+    inline bool GetShowDefaultSelectedIcon() const
+    {
+        return showDefaultSelectedIcon_;
+    }
     inline void SetHasOptionWidth(bool hasOptionWidth)
     {
         hasOptionWidth_ = hasOptionWidth;
@@ -390,6 +394,10 @@ public:
         return isExpanded_;
     }
     void AttachBottomDivider();
+    inline bool IsOptionPattern()
+    {
+        return isOptionPattern_;
+    }
     void RemoveBottomDivider();
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
     void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
@@ -399,6 +407,9 @@ public:
     void ResetSelectTextProps();
     void ApplyOptionThemeStyles();
     void ApplySelectedThemeStyles();
+    void UpdateCheckMarkColor(const Color& color);
+    void SetShowDefaultSelectedIcon(bool show);
+    void SetCheckMarkVisibleType(VisibleType type);
 
 protected:
     void RegisterOnKeyEvent();
@@ -499,10 +510,8 @@ private:
     void UpdateDividerHoverStatus(bool isHover);
     void UpdateDividerPressStatus(bool isPress);
     void ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu);
-    inline bool IsOptionPattern()
-    {
-        return isOptionPattern_;
-    }
+
+    RefPtr<FrameNode> CreateCheckMarkNode(const RefPtr<FrameNode>& parent, uint32_t index);
     // make render after measure and layout
     inline bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
@@ -537,6 +546,7 @@ private:
     RefPtr<FrameNode> label_ = nullptr;
     RefPtr<FrameNode> startIcon_ = nullptr;
     RefPtr<FrameNode> endIcon_ = nullptr;
+    RefPtr<FrameNode> checkMarkNode_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
     RefPtr<FrameNode> expandIcon_ = nullptr;
     RefPtr<FrameNode> embeddedMenu_ = nullptr;
@@ -548,6 +558,7 @@ private:
     std::function<void(UIState)> onPressEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<ClickEvent> onClickEvent_;
+    RefPtr<FrameNode> endRowNode_ = nullptr;
     bool onTouchEventSet_ = false;
     bool onPressEventSet_ = false;
     bool onHoverEventSet_ = false;
@@ -575,6 +586,7 @@ private:
     bool hasOptionWidth_ = false;
     bool isHover_ = false;
     bool isOptionPattern_ = false;  // if it is OptionPattern
+    bool showDefaultSelectedIcon_ = false;
     bool isSelectOption_ = false;
     bool isWidthModifiedBySelect_ = false;
 

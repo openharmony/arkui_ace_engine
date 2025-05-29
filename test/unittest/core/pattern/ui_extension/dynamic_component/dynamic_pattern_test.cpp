@@ -438,6 +438,12 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest010, TestSize.Level1)
      */
     dynamicPattern->HandleVisibleAreaChange(false, 1.0);
     EXPECT_TRUE(dynamicPattern->isVisible_);
+
+    /**
+     * @tc.steps: step4. test HandleVisibleAreaChange(true, 0.0001)
+     */
+    dynamicPattern->HandleVisibleAreaChange(false, 0.0001);
+    EXPECT_FALSE(dynamicPattern->isVisible_);
 #endif
 }
 

@@ -26,6 +26,7 @@ public:
     void Create() override;
     void Vertical(bool value) override;
     void DividerColor(const Color& value) override;
+    void DividerColor(const RefPtr<ResourceObject>& resobj) override;
     void StrokeWidth(const Dimension& value) override;
     void LineCap(const enum LineCap& value) override;
     void ResetDividerColor() override;

@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DATA_PANEL_H
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 namespace OHOS::Ace::Framework {
 
 class JSDataPanel : public JSViewAbstract {
@@ -29,6 +30,13 @@ public:
     static void StrokeWidth(const JSCallbackInfo& info);
     static void ShadowOption(const JSCallbackInfo& info);
     static void BorderRadius(const JSCallbackInfo& info);
+    static void ParseShadowColors(const JSRef<JSVal>& colors, std::vector<OHOS::Ace::NG::Gradient>& shadowColors);
+    static void HandleShadowRadius(const JSRef<JSVal>& jsRadius, double& radius, RefPtr<ResourceObject>& resR,
+        OHOS::Ace::NG::DataPanelShadow& shadow);
+    static void HandleShadowOffsetX(const JSRef<JSVal>& jsOffsetX, double& offsetX, RefPtr<ResourceObject>& resX,
+        OHOS::Ace::NG::DataPanelShadow& shadow);
+    static void HandleShadowOffsetY(const JSRef<JSVal>& jsOffsetY, double& offsetY, RefPtr<ResourceObject>& resY,
+        OHOS::Ace::NG::DataPanelShadow& shadow);
 
 private:
     static bool ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient);

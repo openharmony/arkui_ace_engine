@@ -39,6 +39,7 @@ void ScrollerImpl::AddObserver(const Observer& observer, int32_t id)
     scrollerObserver.onScrollStartEvent = observer.onScrollStartEvent;
     scrollerObserver.onScrollStopEvent = observer.onScrollStopEvent;
     scrollerObserver.onDidScrollEvent = observer.onDidScrollEvent;
+    scrollerObserver.onScrollerAreaChangeEvent = observer.onScrollerAreaChangeEvent;
     jsScroller_->AddObserver(scrollerObserver, id);
 }
 

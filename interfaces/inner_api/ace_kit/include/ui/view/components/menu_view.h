@@ -58,6 +58,8 @@ class ACE_FORCE_EXPORT MenuView {
 public:
     // create menu with menuItems
     static RefPtr<FrameNode> Create(std::vector<OptionParam>&& params, MenuType type, const MenuParam& menuParam);
+    static std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> NavigationCreateMenu(
+        std::vector<OptionParam>&& params, const MenuParam& menuParam);
 };
 } // OHOS::Ace::Kit
 

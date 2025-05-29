@@ -49,6 +49,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/components_ng/base/inspector.h"
@@ -270,6 +271,37 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         ResourceManager::GetInstance().RegisterMainResourceAdapter(
             bundleName, moduleName, INSTANCE_ID_UNDEFINED, resourceAdapter);
     }
+}
+
+void InitNavigationManagerCallback(const RefPtr<NG::PipelineContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    auto getColorCallback = [weakContext = WeakPtr(context)](const std::string& name, Color& color) -> bool {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_RETURN(context, false);
+        RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+        RefPtr<ThemeConstants> themeConstants = nullptr;
+        if (SystemProperties::GetResourceDecoupling()) {
+            auto container = Container::GetContainer(context->GetInstanceId());
+            CHECK_NULL_RETURN(container, false);
+            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+                container->GetBundleName(), container->GetModuleName(), context->GetInstanceId());
+            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+            CHECK_NULL_RETURN(resourceAdapter, false);
+        } else {
+            auto themeManager = context->GetThemeManager();
+            CHECK_NULL_RETURN(themeManager, false);
+            themeConstants = themeManager->GetThemeConstants();
+            CHECK_NULL_RETURN(themeConstants, false);
+        }
+        auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+        CHECK_NULL_RETURN(resourceWrapper, false);
+        color = resourceWrapper->GetColorByName(name);
+        return true;
+    };
+    navMgr->SetGetSystemColorCallback(std::move(getColorCallback));
 }
 
 std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
@@ -1232,13 +1264,19 @@ void AceContainer::InitializeCallback()
             CHECK_NULL_VOID(markProcess);
             markProcess();
         };
+        auto asyncCrownTask = [context, event, markProcess, id]() {
+            ContainerScope scope(id);
+            context->OnNonPointerEvent(event);
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
             crownTask();
             return result;
         }
         context->GetTaskExecutor()->PostTask(
-            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
+            asyncCrownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
         return result;
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
@@ -1666,19 +1704,19 @@ private:
         bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
                         placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
                         placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
-        if (rectf.GetY() > size.height + edge + minEdge) {
+        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
+                   (size.height + edge * POPUP_CALCULATE_RATIO + bottomAvoidHeight)) {
+            // popup will display at the bottom of the container
+            if (isBottom) {
+                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY();
+            } else {
+                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge * POPUP_CALCULATE_RATIO;
+            }
+        } else if (rectf.GetY() > size.height + edge + minEdge) {
             if (isBottom) {
                 deltaY = rect_.top - trans.GetY() + rect_.height + size.height + edge * POPUP_CALCULATE_RATIO;
             } else {
                 deltaY = rect_.top - trans.GetY();
-            }
-        } else if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
-                   (size.height + edge * POPUP_CALCULATE_RATIO + bottomAvoidHeight)) {
-            // popup will display at the bottom of the container
-            if (isBottom) {
-                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY() + edge;
-            } else {
-                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge;
             }
         } else {
             // popup will display in the middle of the container
@@ -1696,7 +1734,7 @@ private:
     {
         auto node = node_.Upgrade();
         CHECK_NULL_RETURN(node, 0);
-        auto rectf = node->GetRectWithRender();
+        auto rectf = node->GetTransformRectRelativeToWindow();
         double deltaX = 0;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
@@ -1704,7 +1742,7 @@ private:
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
             double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            deltaX = rect_.left - edgeDist;
+            deltaX = rect_.left - rectf.Left() - edgeDist;
             if (deltaX > edgeDist) {
                 deltaX = edgeDist;
             }
@@ -2657,9 +2695,14 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             context->SetupRootElement();
         }
     };
+
     if (GetSettings().usePlatformAsUIThread) {
         initThemeManagerTask();
         setupRootElementTask();
+        auto newPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+        if (newPipeline) {
+            InitNavigationManagerCallback(newPipeline);
+        }
     } else {
         taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI, "ArkUIInitThemeManager");
         taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI, "ArkUISetupRootElement");
@@ -3197,6 +3240,10 @@ void AceContainer::UpdateColorMode(uint32_t colorMode)
 {
     ACE_SCOPED_TRACE("AceContainer::UpdateColorMode %u", colorMode);
     CHECK_NULL_VOID(pipelineContext_);
+    if (SystemProperties::ConfigChangePerform()) {
+        pipelineContext_->ClearImageCache();
+        NG::ImageDecoder::ClearPixelMapCache();
+    }
     auto themeManager = pipelineContext_->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     if (!IsUseCustomBg() && !IsTransparentBg()) {
@@ -3208,6 +3255,26 @@ void AceContainer::UpdateColorMode(uint32_t colorMode)
     pipelineContext_->NotifyColorModeChange(colorMode);
 }
 
+void AceContainer::CheckForceVsync(const ParsedConfig& parsedConfig)
+{
+    if (pipelineContext_ && !pipelineContext_->GetOnShow() && !parsedConfig.colorMode.empty()) {
+        auto window = pipelineContext_->GetWindow();
+        if (window) {
+            window->SetForceVsyncRequests(true);
+        }
+    }
+}
+
+void  AceContainer::OnFrontUpdated(
+    const ConfigurationChange& configurationChange, const std::string& configuration)
+{
+    auto front = GetFrontend();
+    CHECK_NULL_VOID(front);
+    if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {
+        front->OnConfigurationUpdated(configuration);
+    }
+}
+
 void AceContainer::UpdateConfiguration(
     const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
 {
@@ -3215,6 +3282,7 @@ void AceContainer::UpdateConfiguration(
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
         return;
     }
+    CheckForceVsync(parsedConfig);
     ConfigurationChange configurationChange;
     CHECK_NULL_VOID(pipelineContext_);
     auto themeManager = pipelineContext_->GetThemeManager();
@@ -3246,11 +3314,7 @@ void AceContainer::UpdateConfiguration(
         UpdateColorMode(static_cast<uint32_t>(resConfig.GetColorMode()));
         return;
     }
-    auto front = GetFrontend();
-    CHECK_NULL_VOID(front);
-    if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {
-        front->OnConfigurationUpdated(configuration);
-    }
+    OnFrontUpdated(configurationChange, configuration);
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (configurationChange.IsNeedUpdate()) {
         OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig);
@@ -4168,12 +4232,13 @@ void AceContainer::DispatchUIExtDataConsume(
     }
 }
 
-void AceContainer::DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId)
+void AceContainer::DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistentId)
 {
     CHECK_NULL_VOID(uiWindow_);
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "DispatchExtensionDataToHostWindow code=%{public}u, want=%{public}s, persistenId=%{public}d.",
-        code, data.ToString().c_str(), persistenId);
+        "DispatchExtensionDataToHostWindow code=%{public}u, want=%{public}s, persistentId=%{public}d.",
+        code, data.ToString().c_str(), persistentId);
+    uiWindow_->OnExtensionMessage(code, persistentId, data);
 }
 
 bool AceContainer::FireUIExtDataSendToHost(
@@ -4277,6 +4342,11 @@ Rect AceContainer::GetDisplayAvailableRect() const
     }
 
     return displayManager_->GetDisplayAvailableRect(uiWindow_->GetDisplayId());
+}
+
+Rect AceContainer::GetFoldExpandAvailableRect() const
+{
+    return displayManager_->GetFoldExpandAvailableRect();
 }
 
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want)

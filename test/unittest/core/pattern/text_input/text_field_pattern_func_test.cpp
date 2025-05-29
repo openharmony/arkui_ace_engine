@@ -152,9 +152,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc007, TestSize.Level1)
     MouseInfo info;
     pattern->InitMouseEvent();
     pattern->mouseEvent_->onMouseCallback_(info);
-    pattern->hoverEvent_->onHoverCallback_(false);
+    HoverInfo hoverInfo;
+    pattern->hoverEvent_->onHoverEventCallback_(false, hoverInfo);
     EXPECT_TRUE(pattern->mouseEvent_->onMouseCallback_ != nullptr);
-    EXPECT_TRUE(pattern->hoverEvent_->onHoverCallback_ != nullptr);
+    EXPECT_TRUE(pattern->hoverEvent_->onHoverEventCallback_ != nullptr);
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc008, TestSize.Level1)

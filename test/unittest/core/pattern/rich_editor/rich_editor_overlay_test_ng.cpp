@@ -491,24 +491,6 @@ HWTEST_F(RichEditorOverlayTestNg, HandleLevel002, TestSize.Level1)
 }
 
 /**
- * @tc.name: PaintPreviewTextDecoration001
- * @tc.desc: test PaintPreviewTextDecoration
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, PaintPreviewTextDecoration001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto overlayMod = richEditorNode_->GetOverlayNode();
-    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    richEditorOverlay->SetPreviewTextStyle(PreviewTextStyle::NORMAL);
-    Testing::MockCanvas canvas;
-    DrawingContext context { canvas, 100, 100 };
-    richEditorOverlay->PaintPreviewTextDecoration(context);
-    EXPECT_NE(richEditorOverlay->previewTextUnderlineWidth_, 0);
-}
-
-/**
  * @tc.name: OnCloseOverlay001
  * @tc.desc: test OnCloseOverlay
  * @tc.type: FUNC

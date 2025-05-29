@@ -260,30 +260,6 @@ HWTEST_F(RichEditorDeleteTestNg, HandleOnDelete001, TestSize.Level1)
     richEditorPattern->HandleOnDelete(false);
 }
 
-// /**
-//  * @tc.name: DeleteSelectOperation001
-//  * @tc.desc: test DeleteSelectOperation
-//  * @tc.type: FUNC
-//  */
-// HWTEST_F(RichEditorDeleteTestNg, DeleteSelectOperation001, TestSize.Level1)
-// {
-//     ASSERT_NE(richEditorNode_, nullptr);
-//     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-//     ASSERT_NE(richEditorPattern, nullptr);
-
-//     RichEditorPattern::OperationRecord record;
-//     richEditorPattern->DeleteSelectOperation(&record);
-
-//     RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
-//     richEditorPattern->CreateHandles();
-//     richEditorPattern->textSelector_.Update(0, testNumber5);
-//     richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
-
-//     EXPECT_TRUE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
-//     richEditorPattern->DeleteSelectOperation(nullptr);
-//     EXPECT_FALSE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
-// }
-
 /**
  * @tc.name: DeleteBackward001
  * @tc.desc: test DeleteBackward

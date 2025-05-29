@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/shape_abstract_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -308,8 +309,20 @@ void JSShapeAbstract::ObjectWidth(const JSCallbackInfo& info)
 void JSShapeAbstract::ObjectWidth(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
+    RefPtr<ResourceObject> widthResObj;
+    if (!ParseJsDimensionVp(jsValue, value, widthResObj)) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && widthResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            CalcDimension shapeValue;
+            ResourceParseUtils::ParseResDimensionVp(resObj, shapeValue);
+            if (LessNotEqual(shapeValue.Value(), 0.0)) {
+                return;
+            }
+            basicShape.SetWidth(shapeValue);
+        };
+        basicShape_->AddResource("shapeAbstract.width", widthResObj, std::move(updateFunc));
     }
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
@@ -329,11 +342,35 @@ void JSShapeAbstract::ObjectHeight(const JSCallbackInfo& info)
     ObjectHeight(info[0]);
 }
 
+void JSShapeAbstract::ObjectHeightUpdate(const RefPtr<ResourceObject>& heightResObj)
+{
+    if (heightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            CalcDimension shapeValue;
+            ResourceParseUtils::ParseResDimensionVp(resObj, shapeValue);
+            if (LessNotEqual(shapeValue.Value(), 0.0)) {
+                return;
+            }
+            basicShape.SetHeight(shapeValue);
+        };
+        basicShape_->AddResource("shapeAbstract.height", heightResObj, std::move(updateFunc));
+    }
+}
+
 void JSShapeAbstract::ObjectHeight(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (!ParseJsDimensionVp(jsValue, value)) {
+            return;
+        }
+    } else {
+        RefPtr<ResourceObject> heightResObj;
+        if (!ParseJsDimensionVp(jsValue, value, heightResObj)) {
+            LOGE("fail to parse the Dimension!");
+            return;
+        }
+        ObjectHeightUpdate(heightResObj);
     }
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
@@ -358,6 +395,28 @@ void JSShapeAbstract::ObjectSize(const JSCallbackInfo& info)
     ObjectHeight(sizeObj->GetProperty("height"));
 }
 
+void JSShapeAbstract::ObjectOffsetUpdate(const RefPtr<ResourceObject>& xResObj, RefPtr<ResourceObject> yResObj)
+{
+    if (xResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            CalcDimension shapeValueX;
+            ResourceParseUtils::ParseResDimensionVp(resObj, shapeValueX);
+            CalcDimension shapeValueY = basicShape.GetOffset().GetY();
+            basicShape.SetOffset(DimensionOffset(shapeValueX, shapeValueY));
+        };
+        basicShape_->AddResource("shapeAbstract.ObjectOffset.X", xResObj, std::move(updateFunc));
+    }
+    if (yResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            CalcDimension shapeValueY;
+            ResourceParseUtils::ParseResDimensionVp(resObj, shapeValueY);
+            CalcDimension shapeValueX = basicShape.GetOffset().GetX();
+            basicShape.SetOffset(DimensionOffset(shapeValueX, shapeValueY));
+        };
+        basicShape_->AddResource("shapeAbstract.ObjectOffset.Y", yResObj, std::move(updateFunc));
+    }
+}
+
 void JSShapeAbstract::ObjectOffset(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
@@ -367,9 +426,30 @@ void JSShapeAbstract::ObjectOffset(const JSCallbackInfo& info)
         JSRef<JSVal> yVal = sizeObj->GetProperty("y");
         CalcDimension x;
         CalcDimension y;
-        if (basicShape_ && ParseJsDimensionVp(xVal, x) && ParseJsDimensionVp(yVal, y)) {
-            basicShape_->SetOffset(DimensionOffset(x, y));
+        if (!SystemProperties::ConfigChangePerform()) {
+            if (basicShape_ && ParseJsDimensionVp(xVal, x) && ParseJsDimensionVp(yVal, y)) {
+                basicShape_->SetOffset(DimensionOffset(x, y));
+            }
+        } else {
+            RefPtr<ResourceObject> xResObj;
+            RefPtr<ResourceObject> yResObj;
+            if (basicShape_ && ParseJsDimensionVp(xVal, x, xResObj) && ParseJsDimensionVp(yVal, y, yResObj)) {
+                ObjectOffsetUpdate(xResObj, yResObj);
+                basicShape_->SetOffset(DimensionOffset(x, y));
+            }
         }
+    }
+}
+
+void JSShapeAbstract::ObjectFillUpdate(const RefPtr<ResourceObject>& fillResObj)
+{
+    if (fillResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            Color shapeValue;
+            ResourceParseUtils::ParseResColor(resObj, shapeValue);
+            basicShape.SetColor(shapeValue);
+        };
+        basicShape_->AddResource("shapeAbstract.fill", fillResObj, std::move(updateFunc));
     }
 }
 
@@ -381,8 +461,16 @@ void JSShapeAbstract::ObjectFill(const JSCallbackInfo& info)
     }
 
     Color color;
-    if (ParseJsColor(info[0], color) && basicShape_) {
-        basicShape_->SetColor(color);
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsColor(info[0], color) && basicShape_) {
+            basicShape_->SetColor(color);
+        }
+    } else {
+        RefPtr<ResourceObject> fillResObj;
+        if (ParseJsColor(info[0], color, fillResObj) && basicShape_) {
+            ObjectFillUpdate(fillResObj);
+            basicShape_->SetColor(color);
+        }
     }
 }
 
@@ -426,22 +514,43 @@ void JSShapeAbstract::SetSize(const JSCallbackInfo& info)
 void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
-    if (info.Length() > 0 && info[0]->IsObject()) {
-        JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> xVal = sizeObj->GetProperty("x");
-        JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-        CalcDimension x;
-        CalcDimension y;
-        DimensionOffset position(x, y);
-        CHECK_NULL_VOID(basicShape_);
-        if (ParseJsDimensionVp(xVal, x)) {
-            position.SetX(x);
-        }
-        if (ParseJsDimensionVp(yVal, y)) {
-            position.SetY(y);
-        }
-        basicShape_->SetPosition(position);
+    if (!(info.Length() > 0 && info[0]->IsObject())) {
+        LOGE("Info is invalid!");
+        return;
     }
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> xVal = sizeObj->GetProperty("x");
+    JSRef<JSVal> yVal = sizeObj->GetProperty("y");
+    CalcDimension x;
+    CalcDimension y;
+    DimensionOffset position(x, y);
+    CHECK_NULL_VOID(basicShape_);
+    RefPtr<ResourceObject> xResObj;
+    RefPtr<ResourceObject> yResObj;
+    if (ParseJsDimensionVp(xVal, x, xResObj)) {
+        position.SetX(x);
+    }
+    if (ParseJsDimensionVp(yVal, y, yResObj)) {
+        position.SetY(y);
+    }
+    if (SystemProperties::ConfigChangePerform() && (xResObj || yResObj)) {
+        auto&& updateFunc = [position](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            DimensionOffset& value = const_cast<DimensionOffset&>(position);
+            CalcDimension x;
+            CalcDimension y;
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, x)) {
+                x = basicShape.GetPosition().GetX();
+            }
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, y)) {
+                y = basicShape.GetPosition().GetY();
+            }
+            value.SetX(x);
+            value.SetY(y);
+            basicShape.SetPosition(value);
+        };
+        basicShape_->AddResource("shapeAbstract.position.xResObj", xResObj, std::move(updateFunc));
+    }
+    basicShape_->SetPosition(position);
 }
 
 void JSShapeAbstract::SetForegroundColor(const JSCallbackInfo& info)

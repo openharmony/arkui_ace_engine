@@ -808,6 +808,42 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragEndScrollBar001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MouseEventScrollBar001
+ * @tc.desc: Test scroll bar hover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, MouseEventScrollBar001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. hover in bar slider.
+     * @tc.expected: IsHover is true, IsHoverSlider is true.
+     */
+    MouseOnScrollBar(MouseButton::NONE_BUTTON, MouseAction::MOVE, Offset(239, 10));
+    EXPECT_TRUE(scrollBar_->IsHover());
+    EXPECT_TRUE(scrollBar_->IsHoverSlider());
+
+    /**
+     * @tc.steps: step2. hover in bar but out of slider.
+     * @tc.expected: IsHover is true, IsHoverSlider is false.
+     */
+    MouseOnScrollBar(MouseButton::NONE_BUTTON, MouseAction::MOVE, Offset(239, 350));
+    EXPECT_TRUE(scrollBar_->IsHover());
+    EXPECT_FALSE(scrollBar_->IsHoverSlider());
+
+    /**
+     * @tc.steps: step3. hover out of bar and out of slider.
+     * @tc.expected: IsHover is false, IsHoverSlider is false.
+     */
+    MouseOnScrollBar(MouseButton::NONE_BUTTON, MouseAction::MOVE, Offset(200, 350));
+    EXPECT_FALSE(scrollBar_->IsHover());
+    EXPECT_FALSE(scrollBar_->IsHoverSlider());
+}
+
+/**
  * @tc.name: ScrollBarSetOpacity001
  * @tc.desc: Test scrollBar SetOpacity
  * @tc.type: FUNC

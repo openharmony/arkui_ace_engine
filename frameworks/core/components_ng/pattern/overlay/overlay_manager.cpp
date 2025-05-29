@@ -74,7 +74,6 @@
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
-#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
@@ -353,6 +352,7 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     if (previewPattern->IsHoverImageScalePlaying()) {
         menuWrapperPattern->SetIsStopHoverImageAnimation(true);
         previewPattern->SetIsHoverImageScalePlaying(false);
+        MenuView::ShowMenuTargetScaleToOrigin(menuWrapperPattern, previewPattern);
         StopHoverImageDelayAnimation(menuWrapperPattern, previewPosition);
     }
 
@@ -1273,7 +1273,10 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     BlurLowerNode(menu);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    wrapperPattern->CallMenuAboutToAppearCallback();
+    // delay until end of target hoverScale for interruption
+    if (!wrapperPattern->GetHoverScaleInterruption()) {
+        wrapperPattern->CallMenuAboutToAppearCallback();
+    }
     wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
     SetIsMenuShow(true, menu);
     ResetContextMenuDragHideFinished();
@@ -1394,7 +1397,9 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->CallMenuDisappearCallback();
+    if (MenuView::GetMenuHoverScaleStatus(menuWrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT) {
+        menuWrapperPattern->CallMenuDisappearCallback();
+    }
     menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
     menuWrapperPattern->SetOnMenuDisappear(false);
     menuWrapperPattern->CallMenuStateChangeCallback("false");
@@ -1447,7 +1452,10 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabledInternal(false);
 
-    wrapperPattern->CallMenuAboutToDisappearCallback();
+    if (MenuView::GetMenuHoverScaleStatus(wrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT) {
+        wrapperPattern->CallMenuAboutToDisappearCallback();
+    }
+
     wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
     wrapperPattern->SetOnMenuDisappear(true);
     if (wrapperPattern->HasTransitionEffect() || wrapperPattern->HasFoldModeChangedTransition()) {
@@ -2531,6 +2539,53 @@ void OverlayManager::HideAllPopups()
     }
 }
 
+void OverlayManager::HideAllPopupsWithoutAnimation()
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all popup without animation enter");
+    auto tempPopupMap = popupMap_;
+    for (const auto& popup : tempPopupMap) {
+        auto targetId = popup.first;
+        auto popupNode = popup.second.popupNode;
+        CHECK_NULL_CONTINUE(popupNode);
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        CHECK_NULL_CONTINUE(popupPattern);
+        popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
+        popupPattern->CallDoubleBindCallback("false");
+        popupNode->GetOrCreateEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
+        ErasePopup(targetId);
+    }
+}
+
+void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all menu without animation enter");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto tempMenuMap = menuMap_;
+    for (const auto& menu : tempMenuMap) {
+        auto targetId = menu.first;
+        auto menuNode = menu.second;
+        CHECK_NULL_CONTINUE(menuNode);
+        auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_CONTINUE(menuWrapperPattern);
+        menuWrapperPattern->CallMenuAboutToAppearCallback();
+        menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+        menuWrapperPattern->SetOnMenuDisappear(false);
+        menuWrapperPattern->CallMenuStateChangeCallback("false");
+        auto containerId = menuWrapperPattern->GetContainerId();
+        RemoveChildWithService(rootNode, menuNode);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu without animation, targetId: %{public}d", targetId);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (showInSubwindow) {
+            SubwindowManager::GetInstance()->DeleteHotAreas(containerId, menuNode->GetId(), SubwindowType::TYPE_MENU);
+        }
+        RemoveMenuFilter(menuNode, false);
+        EraseMenuInfo(targetId);
+    }
+}
+
 void OverlayManager::ErasePopup(int32_t targetId)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "erase popup enter, targetId: %{public}d", targetId);
@@ -2688,7 +2743,8 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
 
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuWrapperPattern->IsContextMenu() && menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+    if ((menuWrapperPattern->IsContextMenu() || menuWrapperPattern->GetIsOpenMenu()) &&
+        (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE || menuWrapperPattern->GetMenuMaskEnable())) {
         auto filterNode = menuWrapperPattern->GetFilterColumnNode();
         if (filterNode && menuWrapperPattern->GetIsFilterInSubwindow()) {
             SetHasFilter(true);
@@ -3022,7 +3078,6 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
 {
     DialogProperties Maskarg;
     Maskarg.isMask = true;
-    Maskarg.isUECHostMask = dialogProps.isUECHostMask;
     Maskarg.autoCancel = dialogProps.autoCancel;
     Maskarg.onWillDismiss = dialogProps.onWillDismiss;
     Maskarg.maskColor = dialogProps.maskColor;
@@ -3034,7 +3089,7 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     RefPtr<UINode> customNode;
     // create custom builder content
     if (buildFunc) {
@@ -3787,7 +3842,7 @@ RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "close dialog enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog enter");
     DeleteDialogHotAreas(dialogNode);
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
     CHECK_NULL_VOID(dialogLayoutProp);
@@ -3852,20 +3907,27 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         return;
     }
 
-    auto pipeline = GetMainPipelineContext(dialogNode);
-    CHECK_NULL_VOID(pipeline);
-    ContainerScope scope(pipeline->GetInstanceId());
-    auto mainPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_VOID(mainPipeline);
-    auto overlayManager = mainPipeline->GetOverlayManager();
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
+    }
+    ContainerScope scope(currentId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->ResetLowerNodeFocusable(dialogNode);
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
-    auto dialogProperties = dialogPattern->GetDialogProperties();
-    auto transitionEffect = dialogProperties.transitionEffect;
-    auto dialogTransitionEffect = dialogProperties.dialogTransitionEffect;
-    auto maskTransitionEffect = dialogProperties.maskTransitionEffect;
+    auto transitionEffect = dialogPattern->GetDialogProperties().transitionEffect;
+    auto dialogTransitionEffect = dialogPattern->GetDialogProperties().dialogTransitionEffect;
+    auto maskTransitionEffect = dialogPattern->GetDialogProperties().maskTransitionEffect;
     dialogNode->MarkRemoving();
     if (dialogTransitionEffect != nullptr || maskTransitionEffect != nullptr) {
         CloseMaskAndContentMatchTransition(dialogNode);
@@ -3875,16 +3937,11 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         CloseDialogAnimation(dialogNode);
     }
     dialogCount_--;
-    if (dialogPattern->IsUIExtensionSubWindow() && !dialogPattern->GetUECHostMaskInfo().uuid.empty()) {
-        OverlayMaskManager::GetInstance().SendDialogMaskInfoToHost(dialogNode, UECHostMaskAction::UNMOUNT);
-    } else {
-        overlayManager->RemoveMaskFromMap(dialogNode);
-    }
+    overlayManager->RemoveMaskFromMap(dialogNode);
     // set close button enable
     if (dialogCount_ == 0) {
         SetContainerButtonEnable(true);
     }
-    SubwindowManager::GetInstance()->CloseDialogMaskNG(dialogNode);
     FireNavigationLifecycle(dialogNode, static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE), true,
         static_cast<int32_t>(NavDestinationActiveReason::DIALOG));
     CallOnHideDialogCallback();
@@ -4103,11 +4160,6 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         }
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
         CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
-        if (dialogPattern->GetDialogProperties().isUECHostMask) {
-            OverlayMaskManager::GetInstance().SendDialogMaskEventToUEA(overlay, UECHostMaskAction::PRESS_BACK);
-            return OVERLAY_REMOVE;
-        }
-
         if (dialogPattern->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK))) {
             return OVERLAY_REMOVE;
         } else if (dialogPattern->ShouldDismiss()) {
@@ -4872,7 +4924,9 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
             targetModalPattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
             targetModalPattern->SetType(modalTransition.value());
             targetModalPattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
+            targetModalPattern->SetEnableSafeArea(contentCoverParam.enableSafeArea);
             modalRenderContext->UpdateChainedTransition(contentCoverParam.transitionEffect);
+            targetModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             return;
         }
         if (onWillAppear) {
@@ -4921,6 +4975,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalPagePattern->SetProhibitedRemoveByRouter(modalStyle.prohibitedRemoveByRouter);
     modalPagePattern->SetProhibitedRemoveByNavigation(modalStyle.prohibitedRemoveByNavigation);
     modalPagePattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
+    modalPagePattern->SetEnableSafeArea(contentCoverParam.enableSafeArea);
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
     auto levelOrder = GetLevelOrder(modalNode);
     if (targetId < 0) {
@@ -5067,9 +5122,8 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
     auto modalPositionY = modalNode->GetGeometryNode()->GetFrameRect().GetY();
     auto showHeight = rootHeight - modalPositionY;
 
-    auto pipelineContext = modalNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(true, modalNode);
+    ACE_SCOPED_TRACE("PlayDefaultModalTransition Start");
+    modalNode->AddToOcclusionMap(true);
 
     if (isTransitionIn) {
         PlayDefaultModalIn(modalNode, context, option, showHeight);
@@ -5091,9 +5145,8 @@ void OverlayManager::PlayDefaultModalIn(
             modal->GetPattern<ModalPresentationPattern>()->OnAppear();
             // Fire hidden event of navdestination on the disappeared modal
             overlayManager->FireNavigationStateChange(false);
-            auto pipelineContext = modal->GetContextWithCheck();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
+            ACE_SCOPED_TRACE("PlayDefaultModalIn Finished");
+            modal->AddToOcclusionMap(false);
         });
     }
     AnimationUtils::Animate(
@@ -5132,9 +5185,8 @@ void OverlayManager::PlayDefaultModalOut(
             root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             // Fire shown event of navdestination under the disappeared modal
             overlayManager->FireNavigationStateChange(true);
-            auto pipelineContext = modal->GetContextWithCheck();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
+            ACE_SCOPED_TRACE("PlayDefaultModalOut Finished");
+            modal->AddToOcclusionMap(false);
         });
     context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     AnimationUtils::Animate(
@@ -5807,7 +5859,6 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
         std::move(onDetentsDidChange), std::move(onWidthDidChange),
         std::move(onTypeDidChange), std::move(sheetSpringBack));
-    sheetNode->MarkModifyDone();
     SaveSheetPageNode(sheetNode, sheetContentNode, targetNode, isStartByUIContext);
     InitSheetWrapperAction(sheetNode, targetNode, sheetStyle);
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -5866,6 +5917,7 @@ void OverlayManager::InitSheetWrapperAction(const RefPtr<FrameNode>& sheetNode, 
     if (IsTopOrder(levelOrder)) {
         FireModalPageShow();
     }
+    sheetNode->MarkModifyDone();
     auto rootNode = FindWindowScene(targetNode);
     CHECK_NULL_VOID(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -6951,14 +7003,13 @@ void OverlayManager::RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool
     }
 
     if (hasAnimation) {
-        overlayManager->ShowFilterDisappearAnimation(filterNode, menuWrapper);
+        overlayManager->ShowFilterDisappearAnimation(filterNode);
     } else {
         overlayManager->RemoveFilterWithNode(filterNode);
     }
 }
 
-void OverlayManager::ShowFilterDisappearAnimation(
-    const RefPtr<FrameNode>& filterNode, const RefPtr<FrameNode>& menuWrapper)
+void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode)
 {
     CHECK_NULL_VOID(filterNode);
     auto filterContext = filterNode->GetRenderContext();
@@ -6983,20 +7034,12 @@ void OverlayManager::ShowFilterDisappearAnimation(
     AddFilterOnDisappear(filterNode->GetId());
     AnimationUtils::Animate(
         option,
-        [filterContext, menuWrapper]() {
+        [filterContext]() {
             CHECK_NULL_VOID(filterContext);
-            auto wrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
-            auto maskEnable = wrapperPattern ? wrapperPattern->GetMenuMaskEnable() : false;
             BlurStyleOption styleOption;
-            Color maskColor = Color::TRANSPARENT;
-            BlurStyle maskBlurStyle = BlurStyle::NO_MATERIAL;
-            if (maskEnable) {
-                maskColor = wrapperPattern->GetMenuMaskColor();
-                maskBlurStyle = wrapperPattern->GetMenuMaskblurStyle();
-            }
-            styleOption.blurStyle = maskBlurStyle;
+            styleOption.blurStyle = BlurStyle::NO_MATERIAL;
             filterContext->UpdateBackBlurStyle(styleOption);
-            filterContext->UpdateBackgroundColor(maskColor);
+            filterContext->UpdateBackgroundColor(Color::TRANSPARENT);
         },
         option.GetOnFinishEvent());
 }
@@ -7004,7 +7047,7 @@ void OverlayManager::ShowFilterDisappearAnimation(
 void OverlayManager::RemoveFilterAnimation()
 {
     if (!hasFilter_) {
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "filter node is not exist");
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter node is not exist");
         return;
     }
     auto filterNode = filterColumnNodeWeak_.Upgrade();
@@ -8088,6 +8131,8 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, co
     AnimationOption option;
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
+    auto hoverDelay = menuWrapperPattern->GetHoverScaleInterruption();
+    option.SetDelay(hoverDelay ? menuTheme->GetHoverImageDelayDuration(true) : 0);
     option.SetOnFinishEvent([weak = WeakClaim(this), filterId = columnNode->GetId()] {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "show filter animation finish");
         auto overlayManager = weak.Upgrade();
@@ -8097,9 +8142,6 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, co
     filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
     if (maskEnable || !menuTheme->GetHasBackBlur()) {
         filterRenderContext->UpdateBackgroundColor(maskColor.ChangeOpacity(0.0f));
-        if (maskEnable) {
-            filterRenderContext->UpdateBackBlurStyle(styleOption);
-        }
     }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "start show filter animation");
     AnimationUtils::Animate(
@@ -8665,19 +8707,44 @@ bool OverlayManager::IsFilterOnDisappear(int32_t filterId) const
     return onDisappearFilterIds_.find(filterId) != onDisappearFilterIds_.end();
 }
 
-void OverlayManager::UpdateFilterMaskType(const RefPtr<FrameNode>& menuWrapperNode)
+bool OverlayManager::IsNeedAvoidFoldCrease(
+    const RefPtr<FrameNode>& frameNode, bool checkSenboard, bool expandDisplay, std::optional<bool> enableHoverMode)
 {
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto filterNode = menuWrapperPattern->GetFilterColumnNode();
-    if (filterNode) {
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = menuWrapperPattern->GetMenuMaskblurStyle();
-        auto filterRenderContext = filterNode->GetRenderContext();
-        CHECK_NULL_VOID(filterRenderContext);
-        filterRenderContext->UpdateBackBlurStyle(styleOption);
-        filterRenderContext->UpdateBackgroundColor(menuWrapperPattern->GetMenuMaskColor());
+    CHECK_NULL_RETURN(frameNode, false);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+
+    auto currentId = pipeline->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(currentId);
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "container is null");
+        return false;
     }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "parent container is null");
+            return false;
+        }
+    }
+    // Check is half fold status
+    auto halfFoldStatus = container->GetFoldStatusFromListener() == FoldStatus::HALF_FOLD;
+    // Check is waterfall window
+    auto isWaterfallWindow = container->IsWaterfallWindow();
+    // Check whether the senboard scenario needs to be filtered for crease avoidance
+    auto isSceneBoard = checkSenboard && container->IsSceneBoardWindow();
+    TAG_LOGD(AceLogTag::ACE_OVERLAY,
+        "avoid foldCrease halfFoldStatus %{public}d, isWaterfallWindow %{public}d, isSceneBoard %{public}d",
+        halfFoldStatus, isWaterfallWindow, isSceneBoard);
+    // Judge whether to avoid the foldCrease according to the conditions
+    // Condition1. is isWaterfallWindow mode and user not set enableHoverMode or set true
+    // Condition2. isSceneBoard and halfFoldStatus and is pc mode and user not set enableHoverMode or set true
+    // Condition3. halfFoldStatus and is phone mode and user set enableHoverMode true
+    auto isNeedAvoidFoldCrease = (isWaterfallWindow && enableHoverMode.value_or(true)) ||
+        (isSceneBoard && halfFoldStatus && expandDisplay && enableHoverMode.value_or(true)) ||
+        (halfFoldStatus && !expandDisplay && enableHoverMode.value_or(false));
+    return isNeedAvoidFoldCrease;
 }
 } // namespace OHOS::Ace::NG

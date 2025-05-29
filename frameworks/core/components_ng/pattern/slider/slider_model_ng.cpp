@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
+#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -221,6 +222,38 @@ void SliderModelNG::SetBlockShape(const RefPtr<BasicShape>& value)
 void SliderModelNG::SetStepSize(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, StepSize, value);
+}
+void SliderModelNG::SetPrefix(const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPrefix(content, options);
+}
+void SliderModelNG::SetSuffix(const RefPtr<UINode>& content, const NG::SliderSuffixOptions& options)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSuffix(content, options);
+}
+void SliderModelNG::SetPrefix(
+    FrameNode* frameNode, const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPrefix(content, options);
+}
+void SliderModelNG::SetSuffix(
+    FrameNode* frameNode, const RefPtr<UINode>& content, const NG::SliderSuffixOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSuffix(content, options);
 }
 #ifdef SUPPORT_DIGITAL_CROWN
 void SliderModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
@@ -521,6 +554,22 @@ void SliderModelNG::ResetBlockImage(FrameNode* frameNode)
 void SliderModelNG::ResetValidSlideRange(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ValidSlideRange, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetPrefix(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetPrefix();
+}
+
+void SliderModelNG::ResetSuffix(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSuffix();
 }
 
 RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)

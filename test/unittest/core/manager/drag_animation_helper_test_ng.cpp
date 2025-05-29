@@ -28,6 +28,7 @@ constexpr float GRID_WIDTH = 480.0f;
 constexpr float GRID_HEIGHT = 800.0f;
 constexpr float ITEM_WIDTH = 120.0f;
 constexpr float ITEM_HEIGHT = 200.0f;
+constexpr int32_t DEFAULT_BADGE_NUM = 2;
 } // namespace
 
 void DragAnimationHelperTestNg::SetUpTestSuite()
@@ -687,5 +688,20 @@ HWTEST_F(DragAnimationHelperTestNg, CreateBadgeTextNodeTest001, TestSize.Level1)
      */
     auto textNode = DragAnimationHelper::CreateBadgeTextNode(2);
     EXPECT_NE(textNode, nullptr);
+}
+
+/**
+ * @tc.name: CreateTextNode001
+ * @tc.desc: Test CreateTextNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CreateTextNode001, TestSize.Level1)
+{
+    PreparedInfoForDrag data;
+    data.badgeNumber = DEFAULT_BADGE_NUM;
+    EXPECT_EQ(data.textRowNode, nullptr);
+    DragAnimationHelper::CreateTextNode(data);
+    data.deviceType = SourceType::MOUSE;
+    EXPECT_NE(data.textRowNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

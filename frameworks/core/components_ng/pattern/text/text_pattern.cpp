@@ -1009,22 +1009,16 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
         context->AddAfterLayoutTask([weak = WeakClaim(this), selectionStart, selectionEnd, eventHub]() {
             auto textPattern = weak.Upgrade();
             CHECK_NULL_VOID(textPattern);
+            auto host = textPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto frameRect = geometryNode->GetFrameRect();
+            if (frameRect.IsEmpty()) {
+                return;
+            }
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (textLayoutProperty->GetCalcLayoutConstraint() &&
-                textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value()) {
-                auto selfIdealSizeWidth = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width();
-                auto selfIdealSizeHeight = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height();
-                auto constraint = textLayoutProperty->GetLayoutConstraint();
-                if ((selfIdealSizeWidth.has_value() && NearZero(selfIdealSizeWidth->GetDimension().ConvertToPxWithSize(
-                            constraint->percentReference.Width()))) ||
-                    (selfIdealSizeHeight.has_value() &&
-                        NearZero(selfIdealSizeHeight->GetDimension().ConvertToPxWithSize(
-                            constraint->percentReference.Height())))) {
-                    return;
-                }
-            }
-
             auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
             if (mode == TextSelectableMode::UNSELECTABLE ||
                 textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
@@ -3190,6 +3184,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
         textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
         textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
     }
+    textStyle.optimizeTrailingSpace = node->GetOptimizeTrailingSpaceValue(false);
     textStyle.halfLeading = node->GetHalfLeadingValue(false);
     textStyle.fontFeature = node->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1"));
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = lm.size.Width().ToString();
@@ -4083,7 +4078,7 @@ void TextPattern::CollectSymbolSpanNodes(const RefPtr<SpanNode>& spanNode, const
 {
     spanNode->CleanSpanItemChildren();
     spanNode->MountToParagraph();
-    textForDisplay_.append(u"    ");
+    textForDisplay_.append(u"  ");
     dataDetectorAdapter_->textForAI_.append(SYMBOL_TRANS);
     childNodes_.push_back(node);
 }
@@ -4418,9 +4413,9 @@ void TextPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
-    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" ")).c_str();
+    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" "));
     if (!IsSetObscured() && textValue[0] != '\0') {
-        json->Put("content", textValue);
+        json->Put("content", textValue.c_str());
         return;
     }
 
@@ -6164,6 +6159,60 @@ void TextPattern::HandleFormVisibleChange(bool visible)
         contentMod_->ResumeAnimation();
     } else {
         contentMod_->PauseAnimation();
+    }
+}
+#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                   \
+    {                                                                              \
+        #KEY_TYPE, [](TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) { \
+            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {  \
+                prop->UPDATE_METHOD(castedVal->value);                             \
+            }                                                                      \
+        }                                                                          \
+    }
+
+void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutPropertyPtr<TextLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    using Handler = std::function<void(TextLayoutProperty*, RefPtr<PropertyValueBase>)>;
+    static const std::unordered_map<std::string, Handler> handlers = {
+        DEFINE_PROP_HANDLER(FontSize, CalcDimension, UpdateFontSize),
+        DEFINE_PROP_HANDLER(TextIndent, CalcDimension, UpdateTextIndent),
+        DEFINE_PROP_HANDLER(MinFontScale, float, UpdateMinFontScale),
+        DEFINE_PROP_HANDLER(MaxFontScale, float, UpdateMaxFontScale),
+        DEFINE_PROP_HANDLER(LineHeight, CalcDimension, UpdateLineHeight),
+        DEFINE_PROP_HANDLER(AdaptMaxFontSize, CalcDimension, UpdateAdaptMaxFontSize),
+        DEFINE_PROP_HANDLER(AdaptMinFontSize, CalcDimension, UpdateAdaptMinFontSize),
+        DEFINE_PROP_HANDLER(BaselineOffset, CalcDimension, UpdateBaselineOffset),
+        DEFINE_PROP_HANDLER(TextCaretColor, Color, UpdateCursorColor),
+        DEFINE_PROP_HANDLER(SelectedBackgroundColor, Color, UpdateSelectedBackgroundColor),
+        DEFINE_PROP_HANDLER(TextDecorationColor, Color, UpdateTextDecorationColor),
+        DEFINE_PROP_HANDLER(Content, std::u16string, UpdateContent),
+        DEFINE_PROP_HANDLER(FontFamily, std::vector<std::string>, UpdateFontFamily),
+        { "TextColor",
+            [node = WeakClaim(RawPtr((frameNode))), weak = WeakClaim(this)](
+                TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    prop->UpdateTextColorByRender(intVal->value);
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, intVal->value, frameNode);
+                    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+                    pattern->UpdateFontColor(intVal->value);
+                }
+            } },
+    };
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        it->second(property, value);
+    }
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -105,10 +105,12 @@ public:
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {},
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info = nullptr) override;
     void UpdateViewportConfigWithAnimation(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {},
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info = nullptr);
     void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor = true) override;
     void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
@@ -366,7 +368,7 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter = true) override;
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
@@ -398,6 +400,21 @@ public:
         const std::function<void(bool)>& callback) override;
 
     bool ConfigCustomWindowMask(bool enable) override;
+
+    void SetUIExtensionImeShow(const Rect& keyboardRect, int32_t instanceId);
+
+    bool UIExtensionKeyboardAvoid(const RefPtr<PipelineBase>& pipelineContext, int32_t instanceId,
+        const Rect keyboardRect, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info);
+
+    bool LaterAvoid(const Rect& keyboardRect, double positionY, double height);
+
+    void SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext, float height);
+
+    void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceId,
+        const RefPtr<PipelineBase>& pipelineContext, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+        const RefPtr<Platform::AceContainer>& container,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction);
+
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
@@ -406,18 +423,22 @@ public:
     void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
     void InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+    bool SendUIExtProprtyByPersistentId(uint32_t code, const AAFwk::Want& data,
+        const std::unordered_set<int32_t>& persistentIds, uint8_t subSystemId) override;
     void EnableContainerModalCustomGesture(bool enable) override;
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback) override;
     void AddKeyFrameCanvasNodeCallback(const std::function<
         void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) override;
+
     void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode) override;
     void CacheAnimateInfo(const ViewportConfig& config,
         OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
     void ExecKeyFrameCachedAnimateAction();
+
     void KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context);
     bool KeyFrameActionPolicy(const ViewportConfig& config,
         OHOS::Rosen::WindowSizeChangeReason reason,
@@ -468,10 +489,12 @@ private:
     OHOS::Rosen::Window* window_ = nullptr;
     std::string startUrl_;
     int32_t instanceId_ = -1;
+    int32_t lastRotation = -1;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IWaterfallModeChangeListener> waterfallModeChangeListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IWindowRectChangeListener> windowRectChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IDisplayModeListener> foldDisplayModeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IAvailableAreaListener> availableAreaChangedListener_ = nullptr;

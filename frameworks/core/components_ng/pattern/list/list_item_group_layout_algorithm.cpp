@@ -14,6 +14,7 @@
  */
 
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
@@ -51,7 +52,9 @@ uint32_t GetMaxGridCounts(int32_t currentColumns)
 
 void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
+    auto totalChildCount = layoutWrapper->GetTotalChildCount();
+    totalItemCount_ = totalChildCount - itemStartIndex_ - footerCount_;
+    footerIndex_ = (footerCount_ > 0) ? (totalChildCount - footerCount_) : -1;
     CHECK_NULL_VOID(listLayoutProperty_);
     auto layoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -280,6 +283,9 @@ void ListItemGroupLayoutAlgorithm::MeasureHeaderFooter(LayoutWrapper* layoutWrap
 
 void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show)
 {
+    if (measureInNextFrame_) {
+        return;
+    }
     if (!itemPosition_.empty()) {
         auto start = itemStartIndex_ + itemPosition_.begin()->first;
         auto end = itemStartIndex_ + itemPosition_.rbegin()->first;
@@ -457,7 +463,7 @@ void ListItemGroupLayoutAlgorithm::CheckNeedAllLayout(const RefPtr<LayoutWrapper
         needAllLayout_ = true;
         return;
     }
-    int32_t totalItemCount = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
+    int32_t totalItemCount = layoutWrapper->GetTotalChildCount() - itemStartIndex_ - footerCount_;
     if (!(forwardLayout && itemPosition_.rbegin()->first == totalItemCount - 1) &&
         !(!forwardLayout && itemPosition_.begin()->first == 0)) {
         needAllLayout_ = true;
@@ -674,7 +680,7 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineForward(LayoutWrapper* layoutW
     if (currentIndex + 1 >= totalItemCount_) {
         return cnt;
     }
-    for (int32_t i = 0; i < lanes && currentIndex + 1 <= totalItemCount_; i++) {
+    for (int32_t i = 0; i < lanes && currentIndex + 1 <= totalItemCount_ - 1; i++) {
         auto wrapper = GetListItem(layoutWrapper, currentIndex + 1);
         if (!wrapper) {
             ReportGetChildError("MeasureALineForward", currentIndex + 1);
@@ -772,6 +778,10 @@ void ListItemGroupLayoutAlgorithm::MeasureJumpToItemForward(LayoutWrapper* layou
     float currentEndPos = startPos;
     int32_t currentIndex = startIndex - 1;
     while (LessOrEqual(currentEndPos, endPos_)) {
+        if (ReachResponseDeadline(layoutWrapper)) {
+            measureInNextFrame_ = true;
+            return;
+        }
         currentStartPos = currentEndPos;
         int32_t count = MeasureALineForward(layoutWrapper, layoutConstraint, currentIndex,
             currentStartPos, currentEndPos);
@@ -791,6 +801,10 @@ void ListItemGroupLayoutAlgorithm::MeasureJumpToItemBackward(LayoutWrapper* layo
     float currentStartPos = endPos;
     int32_t currentIndex = endIndex + 1;
     while (GreatOrEqual(currentStartPos, startPos_)) {
+        if (ReachResponseDeadline(layoutWrapper)) {
+            measureInNextFrame_ = true;
+            return;
+        }
         currentEndPos = currentStartPos;
         int32_t count = MeasureALineBackward(layoutWrapper, layoutConstraint, currentIndex,
             currentEndPos, currentStartPos);
@@ -929,6 +943,10 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
     float currentStartPos = 0.0f;
     int32_t currentIndex = startIndex - 1;
     while (LessOrEqual(currentEndPos, endPos_ - referencePos_)) {
+        if (ReachResponseDeadline(layoutWrapper)) {
+            measureInNextFrame_ = true;
+            return;
+        }
         currentStartPos = currentEndPos;
         int32_t count = MeasureALineForward(layoutWrapper, layoutConstraint, currentIndex,
             currentStartPos, currentEndPos);
@@ -947,8 +965,15 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
 
     currentStartPos = startPos - spaceWidth_;
     currentIndex = startIndex;
-    float th = std::max(startPos_ - referencePos_, headerMainSize_);
+    float th = startPos_ - referencePos_;
+    if (!prevMeasureBreak_) {
+        th = std::max(th, headerMainSize_);
+    }
     while (currentIndex > 0  && GreatNotEqual(currentStartPos, th)) {
+        if (ReachResponseDeadline(layoutWrapper)) {
+            measureInNextFrame_ = true;
+            return;
+        }
         currentEndPos = currentStartPos;
         int32_t count = MeasureALineBackward(layoutWrapper, layoutConstraint, currentIndex,
             currentEndPos, currentStartPos);
@@ -968,6 +993,10 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
     float currentEndPos = 0.0f;
     auto currentIndex = endIndex + 1;
     while (GreatOrEqual(currentStartPos, startPos_ - (referencePos_ - totalMainSize_))) {
+        if (ReachResponseDeadline(layoutWrapper)) {
+            measureInNextFrame_ = true;
+            return;
+        }
         currentEndPos = currentStartPos;
         int32_t count = MeasureALineBackward(layoutWrapper, layoutConstraint, currentIndex,
             currentEndPos, currentStartPos);
@@ -986,6 +1015,10 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
     currentIndex = endIndex;
     currentEndPos = endPos + spaceWidth_;
     while (childrenSize_ && LessOrEqual(currentEndPos, endPos_ - (referencePos_ - totalMainSize_))) {
+        if (ReachResponseDeadline(layoutWrapper)) {
+            measureInNextFrame_ = true;
+            return;
+        }
         currentStartPos = currentEndPos;
         int32_t count = MeasureALineForward(layoutWrapper, layoutConstraint, currentIndex,
             currentStartPos, currentEndPos);

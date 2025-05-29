@@ -586,10 +586,10 @@ enum class ImageRotateOrientation {
     RIGHT = 2,
     DOWN = 3,
     LEFT = 4,
-    UP_MIRROR = 5,    // Reflected across x-axis
-    RIGHT_MIRROR = 6, // Reflected across x-axis, Rotated 90 CW
-    DOWN_MIRROR = 7,  // Reflected across y-axis
-    LEFT_MIRROR = 8,  // Reflected across x-axis, Rotated 90 CCW
+    UP_MIRRORED = 5,    // Reflected across x-axis
+    RIGHT_MIRRORED = 6, // Reflected across x-axis, Rotated 90 CW
+    DOWN_MIRRORED = 7,  // Reflected across y-axis
+    LEFT_MIRRORED = 8,  // Reflected across x-axis, Rotated 90 CCW
 };
 
 enum class OrientationFit {
@@ -1054,7 +1054,8 @@ enum class GestureTypeName {
     CLICK = 7,
     BOXSELECT = 8,
     WEBSCROLL = 9,
-    TEXTFIELD_BOXSELECT = 10
+    TEXTFIELD_BOXSELECT = 10,
+    CONTEXT_MENU_HOVER = 11,
 };
 
 enum class ModifierKey {

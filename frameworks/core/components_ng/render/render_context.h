@@ -338,6 +338,7 @@ public:
      * @param rect - offset of @c rect is relative to FrameRect.
      */
     virtual void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) {}
+    virtual void ResetContentClip() {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -566,6 +567,7 @@ public:
     virtual void PaintDebugBoundary(bool flag) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Transform3DMatrix, Matrix4);
 
     // Transform
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
@@ -612,6 +614,9 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(CustomBackground, CustomBackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundPixelMap, RefPtr<PixelMap>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundAlign, Alignment);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, CustomBackgroundColor, Color);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, IsTransitionBackground, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BuilderBackgroundFlag, bool);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -803,7 +808,7 @@ public:
 
     virtual void SetDrawNode() {}
 
-    virtual void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
+    virtual void UpdateOcclusionCullingStatus(bool enable) {}
 
     virtual void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) {}
 
@@ -813,6 +818,8 @@ public:
     {
         return {};
     }
+
+    virtual void UpdateCustomBackground() {}
 
 protected:
     RenderContext() = default;
@@ -837,6 +844,9 @@ protected:
 
     virtual void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) {}
     virtual void OnBackgroundAlignUpdate(const Alignment& align) {}
+    virtual void OnCustomBackgroundColorUpdate(const Color& color) {}
+    virtual void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) {}
+    virtual void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}
@@ -868,6 +878,7 @@ protected:
 
     virtual void OnTransformRotateUpdate(const Vector5F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
+    virtual void OnTransform3DMatrixUpdate(const Matrix4& matrix) {}
 
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
 

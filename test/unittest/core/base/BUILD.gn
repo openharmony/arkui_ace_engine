@@ -122,6 +122,12 @@ ace_unittest("extension_handler_test_ng") {
   sources = [ "extension_handler_test_ng.cpp" ]
 }
 
+ace_unittest("node_render_status_monitor_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "node_render_status_monitor_test_ng.cpp" ]
+}
+
 group("core_base_unittest") {
   testonly = true
   deps = [
@@ -131,6 +137,7 @@ group("core_base_unittest") {
     ":frame_node_test_ng",
     ":geometry_node_test_ng",
     ":inspector_test_ng",
+    ":node_render_status_monitor_test_ng",
     ":observer_test_ng",
     ":short_cuts_little_test_ng",
     ":short_cuts_test_ng",

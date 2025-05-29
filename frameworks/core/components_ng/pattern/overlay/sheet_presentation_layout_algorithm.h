@@ -42,7 +42,7 @@ public:
         : sheetType_(sheetType), sheetPopupInfo_(popupInfo) {}
     ~SheetPresentationLayoutAlgorithm() override = default;
 
-    void InitParameter();
+    void InitParameter(LayoutWrapper* layoutWrapper);
     void OnReset() override {}
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -74,7 +74,7 @@ public:
     void UpdatePopupInfoAndRemeasure(LayoutWrapper* layoutWrapper, const SheetPopupInfo& sheetPopupInfo,
         const float& sheetWidth, const float& sheetHeight);
 
-    void CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper);
+    float CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper, const float heightBefore) const;
     void CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper);
 
     void LayoutTitleBuilder(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
@@ -112,6 +112,7 @@ private:
     SheetStyle sheetStyle_;
     bool isKeyBoardShow_ = false;
     bool isHoverMode_ = false;
+    bool isWaterfallWindowMode_ = false;
     HoverModeAreaType hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
     using DirectionCheckFunc = bool (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
     std::unordered_map<Placement, DirectionCheckFunc> directionCheckFunc_;

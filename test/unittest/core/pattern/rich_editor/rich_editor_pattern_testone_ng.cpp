@@ -76,21 +76,6 @@ void RichEditorPatternTestOneNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: RemoveEmptySpanNodes001
- * @tc.desc: test RichEditorPattern RemoveEmptySpanNodes
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, RemoveEmptySpanNodes001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->RemoveEmptySpanNodes();
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-}
-
-/**
  * @tc.name: GetParagraphLength001
  * @tc.desc: test RichEditorPattern GetParagraphLength
  * @tc.type: FUNC
@@ -155,25 +140,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CursorMoveHome001, TestSize.Level1)
     richEditorPattern->caretPosition_ = 0;
     bool res = richEditorPattern->CursorMoveHome();
     ASSERT_EQ(res, false);
-}
-
-/**
- * @tc.name: ResetAfterPaste001
- * @tc.desc: test RichEditorPattern ResetAfterPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, ResetAfterPaste001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->previewLongPress_ = true;
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = false;
-    richEditorPattern->ResetAfterPaste();
-    ASSERT_NE(richEditorPattern->previewLongPress_, true);
 }
 
 /**
@@ -249,21 +215,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CreateAndShowSingleHandle001, TestSize.Leve
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->CreateAndShowSingleHandle();
     EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
-}
-
-/**
- * @tc.name: CloseKeyboard001
- * @tc.desc: test CloseKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CloseKeyboard001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->CloseKeyboard(false);
-    EXPECT_EQ(richEditorPattern->HasConnection(), false);
 }
 
 /**
@@ -374,33 +325,6 @@ HWTEST_F(RichEditorPatternTestOneNg, UpdateTextFieldManager001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertValueInStyledString002
- * @tc.desc: test RichEditorPattern InsertValueInStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, InsertValueInStyledString002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    auto host = richEditorPattern->GetHost();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    TextSpanOptions options2;
-    options2.value = INIT_VALUE_1;
-    richEditorController->AddTextSpan(options2);
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->FireOnSelectionChange(-1, 0);
-    richEditorPattern->FireOnSelectionChange(0, -1);
-    richEditorPattern->FireOnSelectionChange(-1, -1);
-    ASSERT_EQ(richEditorPattern->HasFocus(), true);
-}
-
-/**
  * @tc.name: CreateImageSourceInfo002
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
@@ -486,27 +410,6 @@ HWTEST_F(RichEditorPatternTestOneNg, AddTextSpan001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->previewTextRecord_.IsValid(), true);
     int32_t res = richEditorPattern->AddTextSpan(options, true, 0);
     EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: CopyGestureOption001
- * @tc.desc: test CopyGestureOption
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CopyGestureOption001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    RefPtr<SpanNode> source = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
-    RefPtr<SpanNode> target = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
-    GestureEventFunc func = [](GestureEvent& info) {};
-    source->GetSpanItem()->SetOnClickEvent(std::move(func));
-    source->GetSpanItem()->SetLongPressEvent(std::move(func));
-    richEditorPattern->CopyGestureOption(source, target);
-    ASSERT_NE(source->GetSpanItem(), nullptr);
-    ASSERT_NE(target->GetSpanItem(), nullptr);
 }
 
 /**

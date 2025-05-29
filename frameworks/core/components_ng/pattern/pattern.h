@@ -85,6 +85,8 @@ public:
         return false;
     }
 
+    virtual void OnForegroundColorUpdate() {}
+
     virtual void ProcessSafeAreaPadding() {}
 
     virtual bool IsNeedPercent() const
@@ -128,7 +130,7 @@ public:
         return false;
     }
 
-    virtual bool IsEnableWrap()
+    virtual bool IsEnableFix()
     {
         return false;
     }
@@ -632,8 +634,10 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        // Reset for safeAreaExpand's Cache in GeometryNode
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
+        layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
@@ -716,6 +720,30 @@ public:
     };
 
     virtual bool BorderUnoccupied() const
+    {
+        return false;
+    }
+
+    void UnRegisterResource(const std::string& key);
+
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    {
+        if (resourceMgr_ == nullptr) {
+            resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+        }
+        auto&& propUpdateFunc = [weakptr = AceType::WeakClaim(this)](
+                                    const std::string& key, const RefPtr<PropertyValueBase>& valueBase) {
+            auto pattern = weakptr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdatePropertyImpl(key, valueBase);
+        };
+        resourceMgr_->RegisterResource<T>(std::move(propUpdateFunc), key, resObj, value);
+    }
+
+    virtual void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> valueBase) {};
+
+    virtual bool OnAttachAtapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child)
     {
         return false;
     }

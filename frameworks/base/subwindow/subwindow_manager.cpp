@@ -37,11 +37,6 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
         instance_ = std::make_shared<SubwindowManager>();
         if (instance_) {
             instance_->isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
-            auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-            CHECK_NULL_RETURN(pipeline, instance_);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_RETURN(theme, instance_);
-            instance_->expandDisplay_ = theme->GetExpandDisplay();
         }
     }
     return instance_;
@@ -402,6 +397,24 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId, bool isForceCle
     }
     if (subwindow) {
         subwindow->ClearPopupNG(isForceClear);
+    }
+}
+
+void SubwindowManager::ClearAllMenuPopup(int32_t instanceId)
+{
+    auto allSubcontainerId = GetAllSubContainerId(instanceId);
+    for (auto subContainerId : allSubcontainerId) {
+        auto subContainer = Container::GetContainer(subContainerId);
+        CHECK_NULL_CONTINUE(subContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+        CHECK_NULL_CONTINUE(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_CONTINUE(overlayManager);
+        overlayManager->HideAllPopupsWithoutAnimation();
+        overlayManager->HideAllMenusWithoutAnimation(true);
+        auto subwindow = GetSubwindowById(subContainerId);
+        CHECK_NULL_CONTINUE(subwindow);
+        subwindow->HideSubWindowNG();
     }
 }
 
@@ -1483,6 +1496,8 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId, Subwin
     }
 
     searchKey.displayId = displayId;
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Get current subwindow searchKey is %{public}s.",
+        searchKey.ToString().c_str());
     return searchKey;
 }
 
@@ -1703,7 +1718,11 @@ const std::vector<RefPtr<Subwindow>> SubwindowManager::GetSortSubwindow(int32_t 
 
 bool SubwindowManager::GetIsExpandDisplay()
 {
-    return expandDisplay_;
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    return theme->GetExpandDisplay();
 }
 
 RefPtr<Subwindow> SubwindowManager::GetOrCreateMenuSubWindow(int32_t instanceId)
@@ -1779,71 +1798,5 @@ void SubwindowManager::AddSubwindowBySearchKey(const SubwindowKey& searchKey, co
         return;
     }
     AddInstanceSubwindowMap(subwindow->GetChildContainerId(), subwindow);
-}
-
-void SubwindowManager::AddMaskSubwindowMap(int32_t dialogId, const RefPtr<Subwindow>& subwindow)
-{
-    std::lock_guard<std::mutex> lock(maskSubwindowMutex_);
-    maskSubWindowMap_.try_emplace(dialogId, subwindow);
-}
-
-void SubwindowManager::RemoveMaskSubwindowMap(int32_t dialogId)
-{
-    std::lock_guard<std::mutex> lock(maskSubwindowMutex_);
-    maskSubWindowMap_.erase(dialogId);
-}
-
-const RefPtr<Subwindow> SubwindowManager::GetMaskSubwindow(int32_t dialogId)
-{
-    std::lock_guard<std::mutex> lock(maskSubwindowMutex_);
-    auto result = maskSubWindowMap_.find(dialogId);
-    if (result != maskSubWindowMap_.end()) {
-        return result->second;
-    } else {
-        return nullptr;
-    }
-}
-
-void SubwindowManager::ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog)
-{
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show dialog mask ng enter");
-    CHECK_NULL_VOID(dialog);
-    auto dialogId = dialog->GetId();
-    auto maskSubwindow = GetMaskSubwindow(dialogId);
-    if (maskSubwindow) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "maskSubwindow is exist, dialogId: %{public}d, subContainerId: %{public}d",
-            dialogId, maskSubwindow->GetChildContainerId());
-        return;
-    }
-
-    auto pipeline = NG::PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_VOID(pipeline);
-    auto subwindow = Subwindow::CreateSubwindow(pipeline->GetInstanceId());
-    CHECK_NULL_VOID(subwindow);
-    subwindow->InitContainer();
-    CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
-    AddMaskSubwindowMap(dialogId, subwindow);
-    AddInstanceSubwindowMap(subwindow->GetChildContainerId(), subwindow);
-    subwindow->ShowDialogMaskNG(dialog);
-}
-
-void SubwindowManager::CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog)
-{
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close dialog mask ng enter");
-    CHECK_NULL_VOID(dialog);
-    auto maskSubwindow = GetMaskSubwindow(dialog->GetId());
-    CHECK_NULL_VOID(maskSubwindow);
-    maskSubwindow->CloseDialogMaskNG(dialog);
-}
-
-void SubwindowManager::CloseMaskSubwindow(int32_t dialogId)
-{
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close mask subwindow enter, dialogId: %{public}d", dialogId);
-    auto maskSubwindow = GetMaskSubwindow(dialogId);
-    CHECK_NULL_VOID(maskSubwindow);
-
-    if (maskSubwindow->Close()) {
-        RemoveMaskSubwindowMap(dialogId);
-    }
 }
 } // namespace OHOS::Ace

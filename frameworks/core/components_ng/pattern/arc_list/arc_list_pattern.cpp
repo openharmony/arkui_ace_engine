@@ -182,6 +182,14 @@ bool ArcListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int
     return true;
 }
 
+void ArcListPattern::AdjustScrollPosition(int32_t nextIndex, int32_t curIndex)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    ScrollToIndex(nextIndex, smooth_, ScrollAlign::CENTER);
+    pipeline->FlushUITasks();
+}
+
 void ArcListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollablePattern::ToJsonValue(json, filter);

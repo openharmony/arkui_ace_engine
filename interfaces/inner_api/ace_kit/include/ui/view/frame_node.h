@@ -47,7 +47,7 @@ class UIContext;
 class Property;
 using NodeHandle = void*;
 
-class FrameNode : public AceType {
+class ACE_FORCE_EXPORT FrameNode : public AceType {
     DECLARE_ACE_TYPE(FrameNode, AceType);
 
 public:

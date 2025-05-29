@@ -94,7 +94,7 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
 
     int32_t fd = dataProvider->ReadMovingPhotoVideo(value);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd);
-    GetXmageHeight();
+    SetXmagePosition();
 }
 
 void MovingPhotoModelNG::SetMuted(bool value)
@@ -243,5 +243,14 @@ void MovingPhotoModelNG::GetXmageHeight()
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->GetXmageHeight();
+}
+
+void MovingPhotoModelNG::SetXmagePosition()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->SetXmagePosition();
 }
 } // namespace OHOS::Ace::NG

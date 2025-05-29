@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/event/touch_event.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,6 +37,10 @@ public:
     ~PostEventManager() override = default;
 
     bool PostEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent& touchEvent);
+    bool PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent&& touchEvent);
+    bool PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEvent&& mouseEvent);
+    bool PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent);
+    void SetPassThroughResult(bool passThroughResult);
 
 private:
     bool CheckPointValidity(const TouchEvent& touchEvent);
@@ -51,6 +56,7 @@ private:
     bool HaveReceiveUpOrCancelEvent(const RefPtr<NG::UINode>& targetNode, int32_t id);
     std::list<PostEventAction> postEventAction_;
     std::map<int32_t, PostEventAction> lastEventMap_;
+    bool passThroughResult_ = false;
 };
 } // namespace OHOS::Ace::NG
 

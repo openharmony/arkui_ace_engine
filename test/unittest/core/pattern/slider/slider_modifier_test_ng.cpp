@@ -1905,4 +1905,339 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest032, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
     EXPECT_EQ(sliderContentModifier.blockBorderWidth_->Get(), SLIDER_CONTENT_MODIFIER_BLOCK_BORDER_WIDTH);
 }
+
+/**
+ * @tc.name: SliderContentModifierTest033
+ * @tc.desc: TEST slider_content_modifier AddStepPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode and sliderContentModifier.
+     */
+    sliderContentModifier.SetHasPrefix(true);
+    sliderContentModifier.SetHasSuffix(true);
+    sliderContentModifier.reverse_ = false;
+    sliderContentModifier.SetSliderMode(SliderModel::SliderMode::NONE);
+    sliderContentModifier.SetStepRatio(.0f);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.AddStepPoint(0, 0, 100, 0, context.canvas);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_TRUE(sliderContentModifier.GetStepPointVec().empty());
+}
+
+/**
+ * @tc.name: SliderContentModifierTest034
+ * @tc.desc: TEST SliderContentModifier AddStepPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode and sliderContentModifier.
+     */
+    sliderContentModifier.SetHasPrefix(false);
+    sliderContentModifier.SetHasSuffix(false);
+    sliderContentModifier.reverse_ = false;
+    sliderContentModifier.SetSliderMode(SliderModel::SliderMode::INSET);
+    sliderContentModifier.SetStepRatio(0.5f);
+
+    Testing::MockCanvas canvas;
+    sliderContentModifier.AddStepPoint(0, 0, 100, 0, canvas);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_EQ(sliderContentModifier.GetStepPointVec().size(), 3);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest035
+ * @tc.desc: TEST SliderContentModifier AddStepPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    Testing::MockCanvas canvas;
+
+    /**
+     * @tc.steps: step2. create frameNode and sliderContentModifier.
+     */
+    sliderContentModifier.reverse_ = true;
+    sliderContentModifier.SetHasPrefix(true);
+    sliderContentModifier.SetHasSuffix(true);
+    sliderContentModifier.SetStepRatio(0.3f);
+    sliderContentModifier.AddStepPoint(0, 0, 100, 0, canvas);
+    auto& points = sliderContentModifier.GetStepPointVec();
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    ASSERT_GT(points.size(), 3);
+    EXPECT_EQ(points.back(), PointF(0, 0));
+}
+
+/**
+ * @tc.name: SliderContentModifierTest036
+ * @tc.desc: TEST SliderContentModifier AddStepPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    Testing::MockCanvas canvas;
+
+    /**
+     * @tc.steps: step2. create frameNode and sliderContentModifier.
+     */
+    sliderContentModifier.SetStepRatio(0.25f);
+    sliderContentModifier.reverse_ = false;
+    sliderContentModifier.AddStepPoint(0, 0, 100, 0, canvas);
+    auto& points = sliderContentModifier.GetStepPointVec();
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_EQ(points.back(), PointF(100, 0));
+}
+
+/**
+ * @tc.name: SliderContentModifierTest037
+ * @tc.desc: TEST SliderContentModifier DrawStepPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    Testing::MockCanvas canvas;
+    
+    /**
+     * @tc.steps: step2. create frameNode and sliderContentModifier.
+     */
+    sliderContentModifier.DrawStepPoint(10.0f, 20.0f, 2, canvas, 5);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    ASSERT_EQ(sliderContentModifier.GetStepPointVec().size(), 1);
+    EXPECT_EQ(sliderContentModifier.GetStepPointVec()[0], PointF(10.0f, 20.0f));
+}
+
+/**
+ * @tc.name: SliderContentModifierTest038
+ * @tc.desc: TEST SliderContentModifier DrawStepPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    Testing::MockCanvas canvas;
+    sliderContentModifier.SetSliderMode(SliderModel::SliderMode::NONE);
+
+    /**
+     * @tc.steps: step2. create frameNode and sliderContentModifier.
+     */
+    sliderContentModifier.DrawStepPoint(10.0f, 20.0f, 1, canvas, 5);
+    sliderContentModifier.DrawStepPoint(30.0f, 40.0f, 3, canvas, 5);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    ASSERT_EQ(sliderContentModifier.GetStepPointVec().size(), 2);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest039
+ * @tc.desc: TEST SliderContentModifier DrawStepPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    Testing::MockCanvas canvas;
+
+    /**
+     * @tc.steps: step2. create frameNode and sliderContentModifier.
+     */
+    sliderContentModifier.SetSliderMode(SliderModel::SliderMode::INSET);
+
+    sliderContentModifier.DrawStepPoint(0.0f, 0.0f, 0, canvas, 5);
+    sliderContentModifier.DrawStepPoint(100.0f, 0.0f, 4, canvas, 5);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    ASSERT_EQ(sliderContentModifier.GetStepPointVec().size(), 2);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest040
+ * @tc.desc: TEST SliderContentModifier DrawStepPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    Testing::MockCanvas canvas;
+
+    /**
+     * @tc.steps: step2. create frameNode and sliderContentModifier.
+     */
+    sliderContentModifier.SetHasPrefix(false);
+    sliderContentModifier.SetHasSuffix(false);
+    sliderContentModifier.SetSliderMode(SliderModel::SliderMode::NONE);
+    sliderContentModifier.DrawStepPoint(10.0f, 20.0f, 1, canvas, 5);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    ASSERT_EQ(sliderContentModifier.GetStepPointVec().size(), 1);
+}
 } // namespace OHOS::Ace::NG

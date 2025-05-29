@@ -56,6 +56,7 @@ struct TouchPoint final {
     int32_t height;
 
     void CovertId();
+    int32_t GetOriginalReCovertId() const;
 };
 
 /**
@@ -66,7 +67,6 @@ struct TouchEvent final : public PointerEvent {
     // the active changed point info
     // The ID is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
-    int32_t postEventNodeId = 0;
     int32_t id = 0;
     TouchType type = TouchType::UNKNOWN;
     TouchType pullType = TouchType::UNKNOWN;
@@ -79,7 +79,6 @@ struct TouchEvent final : public PointerEvent {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
-    InputEventType originInputEventType = InputEventType::TOUCH_SCREEN;
     int32_t touchEventId = 0;
     int32_t operatingHand = 0;
     bool isInterpolated = false;
@@ -135,7 +134,6 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetTargetDisplayId(int32_t targetDisplayId);
     TouchEvent& SetSourceType(SourceType sourceType);
     TouchEvent& SetSourceTool(SourceTool sourceTool);
-    TouchEvent& SetOriginInputEventType(InputEventType inputEventType);
     TouchEvent& SetTouchEventId(int32_t touchEventId);
     TouchEvent& SetIsInterpolated(bool isInterpolated);
     TouchEvent& SetPointers(std::vector<TouchPoint> pointers);
@@ -158,6 +156,7 @@ struct TouchEvent final : public PointerEvent {
     Offset GetScreenOffset() const;
     int32_t GetTargetDisplayId() const;
     void CovertId();
+    int32_t GetOriginalReCovertId() const;
     TouchEvent CreateScalePoint(float scale) const;
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const;
     TouchEvent UpdatePointers() const;

@@ -23,6 +23,7 @@
 #include "movingphoto_utils.h"
 
 #include "base/image/pixel_map.h"
+#include "base/image/image_source.h"
 #include "base/memory/referenced.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/components_ng/event/event_hub.h"
@@ -124,6 +125,11 @@ public:
         return isXmageMode_;
     }
 
+    int32_t GetXmageModeValue()
+    {
+        return xmageModeValue_;
+    }
+
     void EnableAnalyzer(bool enabled);
 
     void SetImageAIOptions(void* options);
@@ -133,6 +139,10 @@ public:
     void GetXmageHeight();
 
     float CalculateRatio(SizeF layoutSize);
+
+    void SetXmagePosition();
+ 
+    SizeF CalculateXmageOffsetRatio(SizeF layoutSize);
 
 protected:
     int32_t instanceId_;
@@ -169,7 +179,10 @@ private:
     void UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode);
     void MovingPhotoFormatConvert(MovingPhotoFormat format);
     void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
+    void UpdateRoundXmageProperty(
+        RefPtr<ImageSource> imageSrc, SizeF& imageSize, float imageW, float imageL, RefPtr<FrameNode>& host);
     void SetRenderContextBounds(const SizeF& movingPhotoNodeSize, const SizeF& VideoFrameSize);
+    void SetRenderContextBoundsInRoundXmage(const SizeF& movingPhotoNodeSize, const SizeF& videoFrameSize);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
@@ -262,6 +275,7 @@ private:
     int64_t autoPlayPeriodStartTime_ = -1;
     int64_t autoPlayPeriodEndTime_ = -1;
     std::string uri_ = "";
+    int32_t xmageModeValue_ = 0;
     bool isXmageMode_ = false;
     bool startAnimationFlag_ = false;
     bool isPrepared_ = false;

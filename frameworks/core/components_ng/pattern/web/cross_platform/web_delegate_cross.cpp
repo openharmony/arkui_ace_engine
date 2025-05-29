@@ -74,6 +74,7 @@ constexpr char WEB_EVENT_PAGESTART[] = "onPageStarted";
 constexpr char WEB_EVENT_PAGEFINISH[] = "onPageFinished";
 constexpr char WEB_EVENT_DOWNLOADSTART[] = "onDownloadStart";
 constexpr char WEB_EVENT_LOADINTERCEPT[] = "onLoadIntercept";
+constexpr char WEB_EVENT_ONINTERCEPTREQUEST[] = "onInterceptRequest";
 constexpr char WEB_EVENT_RUNJSCODE_RECVVALUE[] = "onRunJSRecvValue";
 constexpr char WEB_EVENT_SCROLL[] = "onScroll";
 constexpr char WEB_EVENT_SCALECHANGE[] = "onScaleChange";
@@ -930,6 +931,15 @@ void WebDelegateCross::RegisterWebObjectEvent()
             }
             return false;
         });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithResponseReturn(
+        MakeEventHash(WEB_EVENT_ONINTERCEPTREQUEST),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> RefPtr<WebResponse> {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnInterceptRequest(object);
+            }
+            return nullptr;
+        });
     WebObjectEventManager::GetInstance().RegisterObjectEvent(
         MakeEventHash(WEB_EVENT_REFRESH_HISTORY),
         [weak = WeakClaim(this)](const std::string& param, void* object) {
@@ -1422,6 +1432,43 @@ bool WebDelegateCross::OnLoadIntercept(void* object)
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebLoadInterceptEvent");
+    return result;
+}
+
+RefPtr<WebResponse> WebDelegateCross::OnInterceptRequest(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_RETURN(object, nullptr);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    RefPtr<WebResponse> result = nullptr;
+    auto webResourceRequest = AceType::MakeRefPtr<WebResourceRequsetImpl>(object);
+    CHECK_NULL_RETURN(webResourceRequest, nullptr);
+    auto requestHeader = webResourceRequest->GetRequestHeader();
+    auto method = webResourceRequest->GetMethod();
+    auto url = webResourceRequest->GetRequestUrl();
+    auto hasGesture = webResourceRequest->IsRequestGesture();
+    auto isMainFrame = webResourceRequest->IsMainFrame();
+    auto isRedirect = webResourceRequest->IsRedirect();
+    auto request = AceType::MakeRefPtr<WebRequest>(requestHeader, method, url, hasGesture, isMainFrame, isRedirect);
+
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask(
+        [weak = WeakClaim(this), request, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnInterceptRequestEvent = webEventHub->GetOnInterceptRequestEvent();
+                CHECK_NULL_VOID(propOnInterceptRequestEvent);
+                auto param = std::make_shared<OnInterceptRequestEvent>(request);
+                result = propOnInterceptRequestEvent(param);
+            }
+        },
+        "ArkUIWebInterceptRequest");
     return result;
 }
 

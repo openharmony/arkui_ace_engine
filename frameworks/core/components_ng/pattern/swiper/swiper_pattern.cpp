@@ -1445,13 +1445,6 @@ void SwiperPattern::HandleTabsAncestor()
 
 void SwiperPattern::UpdateLayoutProperties(const RefPtr<SwiperLayoutAlgorithm>& algo)
 {
-    for (const auto& item : itemPosition_) {
-        if (algo->GetItemPosition().find(item.first) == algo->GetItemPosition().end() &&
-            algo->GetItemPosition().find(GetLoopIndex(item.first)) == algo->GetItemPosition().end() &&
-            item.second.node) {
-            item.second.node->SetActive(false);
-        }
-    }
     autoLinearReachBoundary_ = false;
     startMainPos_ = algo->GetStartPosition();
     endMainPos_ = algo->GetEndPosition();
@@ -1609,7 +1602,6 @@ void SwiperPattern::FireAnimationStartEvent(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
-    SuggestOpIncGroup();
 }
 
 void SwiperPattern::FireAnimationEndEvent(
@@ -2613,7 +2605,6 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionStartTask()
         pattern->CheckAndReportEvent();
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d, id:%{public}d",
             info.GetSourceTool(), pattern->swiperId_);
-        pattern->SuggestOpIncGroup();
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             pattern->isFirstAxisAction_ = true;
             return;
@@ -3421,6 +3412,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     }
 
     HandleScroll(static_cast<float>(mainDelta), SCROLL_FROM_UPDATE, NestedState::GESTURE, velocity);
+    UpdateItemRenderGroup(true);
     isTouchPad_ = false;
 }
 
@@ -3715,6 +3707,7 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
                 parent->HandleScrollVelocity(dragVelocity);
             }
             StartAutoPlay();
+            UpdateItemRenderGroup(false);
             return true;
         }
     }
@@ -3934,6 +3927,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
 
     // enable lazy load feature.
     SetLazyLoadFeature(true);
+    UpdateItemRenderGroup(true);
 }
 
 void SwiperPattern::UpdateOffsetAfterPropertyAnimation(float offset)
@@ -4282,6 +4276,7 @@ void SwiperPattern::PlayTranslateAnimation(
         });
 
     SetLazyLoadFeature(true);
+    UpdateItemRenderGroup(true);
 }
 
 void SwiperPattern::OnSpringAnimationStart(float velocity)
@@ -4383,6 +4378,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
     currentIndexOffset_ = indexStartPos;
     springOffset_ = EstimateSpringOffset(currentIndexOffset_);
+    UpdateItemRenderGroup(false);
     NotifyParentScrollEnd();
 
     if (!isTouchDown_) {
@@ -5272,6 +5268,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop(bool isInterrupt)
             GetCustomPropertyOffset() + Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     }
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info, isInterrupt);
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
@@ -5469,28 +5466,6 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
     }
 }
 
-void SwiperPattern::SuggestOpIncGroup() const
-{
-    if (!SystemProperties::IsOpIncEnable()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GetSuggestOpIncActivatedOnce()) {
-        return;
-    }
-    auto parent = host->GetParent();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-    while (parent) {
-        if (frameNode && frameNode->GetSuggestOpIncMarked()) {
-            frameNode->MarkSuggestOpIncGroup(false, false);
-        }
-        parent = parent->GetParent();
-        frameNode = AceType::DynamicCast<FrameNode>(parent);
-    }
-    host->SetSuggestOpIncActivatedOnce();
-}
-
 void SwiperPattern::OnTranslateFinish(
     int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop, bool isInterrupt)
 {
@@ -5517,6 +5492,7 @@ void SwiperPattern::OnTranslateFinish(
     if (NeedAutoPlay() && isUserFinish_ && !forceStop) {
         PostTranslateTask(delayTime);
     }
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::OnWindowShow()
@@ -6650,7 +6626,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
         return;
     }
 
-    if (GetDisplayCount() > 1) {
+    if (GetDisplayCount() > 1 || IsAutoLinear()) {
         UpdateBottomTypeOnMultipleRTL(currentFirstIndex);
     }
 }
@@ -6724,7 +6700,7 @@ void SwiperPattern::HandleTouchBottomLoop()
         }
     }
 
-    if (GetDisplayCount() > 1) {
+    if (GetDisplayCount() > 1 || IsAutoLinear()) {
         UpdateBottomTypeOnMultiple(currentFirstIndex);
     }
 }
@@ -7604,5 +7580,19 @@ void SwiperPattern::NotifyDataChange(int32_t index, int32_t count)
     if (GetMaintainVisibleContentPosition() && index < curretIndex) {
         jumpIndex_ = jumpIndex_.value_or(CheckIndexRange(curretIndex + count));
     }
+}
+
+void SwiperPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto swiperNode = GetHost();
+    CHECK_NULL_VOID(swiperNode);
+    if (!isBindIndicator_) {
+        InitIndicator();
+    } else if (NeedForceMeasure()) {
+        MarkDirtyBindIndicatorNode();
+    }
+    InitArrow();
+    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

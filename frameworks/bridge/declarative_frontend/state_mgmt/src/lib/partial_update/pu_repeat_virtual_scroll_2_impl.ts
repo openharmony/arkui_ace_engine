@@ -308,6 +308,9 @@ class __RepeatVirtualScroll2Impl<T> {
     // reuse node in L2 cache or not
     private allowUpdate_?: boolean = true;
 
+    // tell if UINode subtree reuse / item update is allowed at all
+    private allowItemUpdate_: boolean = true;
+
     // factory for interface RepeatItem<T> objects
     private mkRepeatItem_: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
 
@@ -586,6 +589,9 @@ class __RepeatVirtualScroll2Impl<T> {
         this.index4Key_.clear();
         this.oldDuplicateKeys_.clear();
 
+        // tell if UINode subtree reuse / item update is allowed at all
+        this.allowItemUpdate_ = this.allowItemUpdate();
+
         // step 1. move data items to newActiveDataItems that are unchanged
         // (same item / same key, still at same index, same ttype)
         // create createMissingDataItem -type entries for all other new data items.
@@ -770,7 +776,12 @@ class __RepeatVirtualScroll2Impl<T> {
     private addRemovedItemsToSpare(): void {
         for (let oldIndex in this.activeDataItems_) {
             if (this.activeDataItems_[oldIndex].rid) {
-                this.spareRid_.add(this.activeDataItems_[oldIndex].rid);
+                // deleted node with animation should not be added into L2 and then be reused, otherwise the animation will be interrupted
+                if (this.allowItemUpdate_) {
+                    this.spareRid_.add(this.activeDataItems_[oldIndex].rid);
+                } else {
+                    this.purgeNode(this.activeDataItems_[oldIndex].rid);
+                }
                 const index = parseInt(oldIndex);
                 this.index4Key_.delete(this.key4Index_.get(index));
                 this.key4Index_.delete(index);
@@ -788,7 +799,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 continue;
             }
 
-            const optRid = this.canUpdate(newActiveDataItemAtActiveIndex.ttype);
+            const optRid = this.allowItemUpdate_ ? this.canUpdate(newActiveDataItemAtActiveIndex.ttype) : /* no rid to update */ -1;
             if (optRid <= 0) {
                 stateMgmtConsole.debug(`active range index ${activeIndex}: no rid found to update`);
                 continue;
@@ -904,7 +915,7 @@ class __RepeatVirtualScroll2Impl<T> {
             }
         }
         stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}): `,
-            `Detected duplicate key ${origKey} for index ${curIndex}! `,
+            `Detected duplicate key for index ${curIndex}! `,
             `Generated random key will decrease Repeat performance. Fix the key gen function in your application!`);
         return curKey;
     }
@@ -947,6 +958,23 @@ class __RepeatVirtualScroll2Impl<T> {
         return result;
     }
 
+    /**
+     * tell if UINode subtree reuse / item update is allowed at all.
+     * currently the only scenario when re-use is not allowed is when rerendering in response to
+     * a source data array changed by animateTo.
+     * 
+     * if item update is not allowed then
+     * - never use a item from L2 and update it
+     * do not during Repeat rerender (step 4)
+     * do not when GetFrameChildByIndex (C++) ask for item at index
+     */
+    private allowItemUpdate(): boolean {
+        // ask from C++ PipelineContext is inside an animation closure
+        const res = RepeatVirtualScroll2Native.isInAnimation();
+        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) allowItemUpdate: isInAnimation ${res}`);
+        return !res;
+    }
+
     // return RID of Node that can be updated (matching ttype), 
     // or -1 if none
     private canUpdate(ttype: string): number {
@@ -969,11 +997,12 @@ class __RepeatVirtualScroll2Impl<T> {
         if (!this.allowUpdate_) {
             return -1;
         }
+
         // 1. round: find matching RID, also data item matches
         for (const rid of this.spareRid_) {
             const ridMeta = this.meta4Rid_.get(rid);
             // compare ttype and data item, or ttype and key
-            if (ridMeta && ridMeta.ttype_ === ttype &&
+            if (ridMeta && ridMeta.ttype_ === ttype && this.allowItemUpdate_ &&
                 ((!this.useKeys_ && ridMeta.repeatItem_?.item === dataItem) ||
                 (this.useKeys_ && ridMeta.key_ === key))) {
                 stateMgmtConsole.debug(
@@ -984,7 +1013,8 @@ class __RepeatVirtualScroll2Impl<T> {
 
         // just find a matching RID
         for (const rid of this.spareRid_) {
-            if (this.meta4Rid_.get(rid).ttype_ === ttype) {
+            const ridMeta = this.meta4Rid_.get(rid);
+            if (ridMeta && ridMeta.ttype_ === ttype && this.allowItemUpdate_) {
                 stateMgmtConsole.debug(`canUpdateTryMatch: Found spare rid ${rid} for ttype '${ttype}'`);
                 return rid;
             }
@@ -1256,7 +1286,8 @@ class __RepeatVirtualScroll2Impl<T> {
         return true;
     }
 
-    private onActiveRange(nStart: number, nEnd: number, vStart: number, vEnd: number, isLoop: boolean): void {
+    private onActiveRange(nStart: number, nEnd: number, vStart: number, vEnd: number, isLoop: boolean,
+        forceUpdate: boolean): void {
         if (Number.isNaN(this.activeRange_[0])) {
             // first call to onActiveRange / no active node
             this.activeRange_ = [nStart, nEnd];
@@ -1270,7 +1301,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 this.activeRange_ = [vStart, vEnd];
                 this.visibleRangeAdjustedStart_ = vStart;
             }
-            if (!isLoop) {
+            if (!isLoop && !forceUpdate) {
                 stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,
                     `(nStart: ${nStart}, nEnd: ${nEnd})`,
                     `data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - unchanged, skipping.`);

@@ -649,4 +649,46 @@ HWTEST_F(GestureRecognizerTestNg, TagGestureJudgeCallbackTest001, TestSize.Level
     auto result = clickRecognizerPtr->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
 }
+
+/**
+ * @tc.name: LongPressGestureJudgeTest001
+ * @tc.desc: Test function: Create LongpresRecognizer TriggerGestureJudgeCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, LongPressGestureJudgeTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create GestureEventHub, Recognizer, TargetComponent.
+    */
+    RefPtr<LongPressRecognizer> longPressRecognizerPtr = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    ASSERT_NE(longPressRecognizerPtr, nullptr);
+    longPressRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    ASSERT_NE(longPressRecognizerPtr->gestureInfo_, nullptr);
+    longPressRecognizerPtr->gestureInfo_->type_ = GestureTypeName::PAN_GESTURE;
+    auto gestureJudgeNativeFunc = [](const RefPtr<GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::CONTINUE;};
+    auto gestureJudgeNativeFuncForMenu = [](const RefPtr<GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    gestureHub->SetOnGestureJudgeNativeBegin(gestureJudgeNativeFunc);
+    gestureHub->SetOnGestureJudgeNativeBeginForMenu(gestureJudgeNativeFuncForMenu);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    ASSERT_NE(targetComponent, nullptr);
+    auto callbackNative = gestureHub->GetOnGestureJudgeNativeBeginCallback();
+    targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
+
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.expected: step2. result equals REJECT.
+     */
+    longPressRecognizerPtr->SetTargetComponent(targetComponent);
+    auto result = longPressRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
 } // namespace OHOS::Ace::NG

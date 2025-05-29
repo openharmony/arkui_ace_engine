@@ -69,6 +69,9 @@ public:
     }
 
 private:
+    float UpdateChildPositionWidthIgnoreLayoutSafeArea(const RefPtr<FrameNode>& host,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset, const OffsetF& paddingOffset,
+        bool needExpandMainAxis);
     void InitFlexProperties(LayoutWrapper* layoutWrapper);
     void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper);
     void UpdateAllocatedSize(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossAxisSize);
@@ -90,7 +93,7 @@ private:
     void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
     void UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& layoutConstraint, float size);
-    void AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper);
+    void AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper, bool includeLayoutPolicyChildren = false);
     void CheckIsGrowOrShrink(std::function<float(const RefPtr<LayoutWrapper>&)>& getFlex, float remainSpace,
         float& spacePerFlex, FlexItemProperties& flexItemProperties, RefPtr<LayoutWrapper>& lastChild);
     void CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
@@ -98,12 +101,14 @@ private:
     bool MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper);
     bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
     bool CheckSetConstraint(const std::unique_ptr<MeasureProperty>& propertyPtr);
-    void CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
+    void CheckMainAxisSizeAuto(
+        LayoutWrapper* layoutWrapper, const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
     void ApplyPatternOperation(LayoutWrapper* layoutWrapper, FlexOperatorType operation, uintptr_t addr = 0,
         FlexLayoutResult layoutResult = {});
     void SetInitMainAxisSize(LayoutWrapper* layoutWrapper);
-    void SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& realSize);
-    void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos);
+    void SetFinalRealSize(
+        LayoutWrapper* layoutWrapper, SizeF& realSize, std::optional<NG::LayoutPolicyProperty> layoutPolicy);
+    void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos, const float& crossAxisSize);
     void AddElementIntoMagicNodes(int32_t childDisplayPriority, MagicLayoutNode node, float childLayoutWeight);
     bool AddElementIntoLayoutPolicyChildren(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child);
     std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator FirstMeasureInWeightMode();

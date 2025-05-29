@@ -24,7 +24,11 @@ build_component_ng("qrcode_pattern_ng") {
     "qrcode_paint_method.cpp",
     "qrcode_pattern.cpp",
   ]
-  external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+  if (is_arkui_x) {
+    deps = [ "//third_party/qrcodegen:ace_engine_qrcode" ]
+  } else {
+    external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+  }
 }
 
 build_component_plugin("qrcode_source") {
@@ -37,5 +41,9 @@ build_component_plugin("qrcode_source") {
     "qrcode_paint_method.cpp",
     "qrcode_pattern.cpp",
   ]
-  external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+  if (is_arkui_x) {
+    deps = [ "//third_party/qrcodegen:ace_engine_qrcode" ]
+  } else {
+    external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+  }
 }

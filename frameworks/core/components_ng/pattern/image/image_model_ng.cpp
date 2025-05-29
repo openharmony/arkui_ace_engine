@@ -976,6 +976,14 @@ bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
     return layoutProperty->GetImageSizeStyle()->GetAutoResize().value_or(defaultAutoResize);
 }
 
+bool ImageModelNG::GetSyncLoad(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, false);
+    return imagePattern->GetSyncLoad();
+}
+
 ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)
 {
     ImageSourceInfo defaultImageSourceInfo;
@@ -1168,6 +1176,12 @@ void ImageModelNG::CreateWithResourceObj(ImageResourceType resourceType, const R
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode , resourceType, resObj);
+}
+
+void ImageModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObj)
+{
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
 

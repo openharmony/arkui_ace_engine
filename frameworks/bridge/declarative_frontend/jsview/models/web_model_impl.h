@@ -79,6 +79,8 @@ public:
     void SetDatabaseAccessEnabled(bool isDatabaseAccessEnabled) override;
     void SetTextZoomRatio(int32_t textZoomRatioNum) override;
     void SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled) override;
+    void SetWebDebuggingAccessEnabledAndPort(
+        bool isWebDebuggingAccessEnabled, int32_t webDebuggingPort) override;
     void SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback) override;
     void SetResourceLoadId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScaleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;

@@ -45,6 +45,7 @@ EventController& EventController::Get()
 void EventController::Register(const std::string& config, const std::shared_ptr<UIEventObserver>& observer)
 {
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "Register config");
+    CHECK_NULL_VOID(observer);
     UIEventClient client;
     client.config.Init(config);
     if (!client.config.IsEnable()) {
@@ -52,7 +53,7 @@ void EventController::Register(const std::string& config, const std::shared_ptr<
     }
     client.observer = observer;
     std::unique_lock<std::shared_mutex> lock(cacheLock_);
-    clientList_.emplace_back(std::move(client));
+    clientList_.emplace_back(client);
     lock.unlock();
     bool isOriginExposureEnable = EventRecorder::Get().IsExposureRecordEnable();
     NotifyConfigChange();
@@ -60,7 +61,7 @@ void EventController::Register(const std::string& config, const std::shared_ptr<
     if (isExposureChanged) {
         ApplyNewestConfig(isExposureChanged);
     }
-    NotifyCacheEventsIfNeed();
+    NotifyCacheEventsIfNeed(client);
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "Register config end");
 }
 
@@ -116,6 +117,7 @@ void EventController::NotifyConfigChange()
 bool IsAllowNotify(const EventConfig& config, EventCategory category, int32_t eventType,
     const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
 {
+    CHECK_NULL_RETURN(eventParams, false);
     auto enable = config.IsEnable() && config.IsCategoryEnable(static_cast<int32_t>(category));
     if (!enable) {
         return false;
@@ -126,16 +128,17 @@ bool IsAllowNotify(const EventConfig& config, EventCategory category, int32_t ev
     return true;
 }
 
-void EventController::NotifyCacheEventsIfNeed() const
+void EventController::NotifyCacheEventsIfNeed(const UIEventClient& client) const
 {
-    std::shared_lock<std::shared_mutex> lock(cacheLock_);
+    std::shared_lock<std::shared_mutex> lock(cacheEventLock_);
     if (cacheEvents_.empty()) {
         return;
     }
-    BackgroundTaskExecutor::GetInstance().PostTask([events = cacheEvents_, client = clientList_.back()]() {
+    BackgroundTaskExecutor::GetInstance().PostTask([events = cacheEvents_, client]() {
         for (const auto& event : events) {
             if (IsAllowNotify(client.config, event.category, event.eventType, event.eventParams)) {
-                client.observer->NotifyUIEvent(event.eventType, *event.eventParams);
+                std::unordered_map<std::string, std::string> params(*event.eventParams);
+                client.observer->NotifyUIEvent(event.eventType, params);
             }
         }
     });
@@ -233,6 +236,7 @@ void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observe
 void EventController::CacheEventIfNeed(EventCategory category, int32_t eventType,
     const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
 {
+    std::unique_lock<std::shared_mutex> lock(cacheEventLock_);
     if (cacheEvents_.empty()) {
         if (hasCached_) {
             return;
@@ -251,9 +255,9 @@ void EventController::CacheEventIfNeed(EventCategory category, int32_t eventType
 void EventController::NotifyEvent(EventCategory category, int32_t eventType,
     const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
 {
+    CacheEventIfNeed(category, eventType, eventParams);
     {
         std::shared_lock<std::shared_mutex> lock(cacheLock_);
-        CacheEventIfNeed(category, eventType, eventParams);
         if (clientList_.empty()) {
             return;
         }
@@ -269,7 +273,8 @@ void EventController::NotifyEventSync(EventCategory category, int32_t eventType,
     std::shared_lock<std::shared_mutex> lock(cacheLock_);
     for (auto&& client : clientList_) {
         if (IsAllowNotify(client.config, category, eventType, eventParams)) {
-            client.observer->NotifyUIEvent(eventType, *eventParams);
+            std::unordered_map<std::string, std::string> params(*eventParams);
+            client.observer->NotifyUIEvent(eventType, params);
         }
     }
 }

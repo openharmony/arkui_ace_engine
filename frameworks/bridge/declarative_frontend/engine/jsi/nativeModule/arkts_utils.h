@@ -68,6 +68,7 @@ public:
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
         RefPtr<ResourceObject>& resourceObject);
+    static bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result);
     static bool ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDimensionFromResourceNG(
@@ -165,6 +166,14 @@ public:
         std::optional<CalcDimension>& optionalDimension);
     static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
         std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
+    static void ParseJsAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::optional<float>& angle);
+    static bool ParseJsInt32(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result);
+    static void ParseGradientCenter(
+        const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
+    static void ParseGradientColorStops(
+        const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors);
+    static void ParseGradientAngle(
+        const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
     template <class T>
     static bool ParseArray(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
         std::function<T(const EcmaVM *, const Local<JSValueRef> &)> getValue)

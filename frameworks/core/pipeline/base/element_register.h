@@ -65,7 +65,7 @@ public:
     bool AddElementProxy(const WeakPtr<V2::ElementProxy>& element);
     bool AddElement(const RefPtr<Element>& element);
 
-    RefPtr<NG::UINode> GetUINodeById(ElementIdType elementId);
+    ACE_FORCE_EXPORT RefPtr<NG::UINode> GetUINodeById(ElementIdType elementId);
     NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
 
     ACE_FORCE_EXPORT bool AddUINode(const RefPtr<NG::UINode>& node);

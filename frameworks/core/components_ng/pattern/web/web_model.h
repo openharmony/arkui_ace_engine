@@ -87,6 +87,8 @@ public:
     virtual void SetDatabaseAccessEnabled(bool isDatabaseAccessEnabled) = 0;
     virtual void SetTextZoomRatio(int32_t textZoomRatioNum) = 0;
     virtual void SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled) = 0;
+    virtual void SetWebDebuggingAccessEnabledAndPort(
+        bool isWebDebuggingAccessEnabled, int32_t webDebuggingPort) = 0;
     virtual void SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback) = 0;
     virtual void SetResourceLoadId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetScaleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;

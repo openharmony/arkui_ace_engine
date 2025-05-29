@@ -55,6 +55,7 @@ struct SubwindowKey {
         json->Put("instanceId", instanceId);
         json->Put("displayId", (double)displayId);
         json->Put("windowType", subwindowType);
+        json->Put("foldStatus", static_cast<int32_t>(foldStatus));
         return json->ToString();
     }
 };
@@ -127,6 +128,7 @@ public:
     void ClearMenu();
     void ClearMenuNG(int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1, bool isForceClear = false);
+    void ClearAllMenuPopup(int32_t instanceId);
     ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
@@ -217,12 +219,6 @@ public:
     const RefPtr<Subwindow> GetSubwindowByType(int32_t instanceId, SubwindowType windowType);
     void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow);
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
-    void AddMaskSubwindowMap(int32_t dialogId, const RefPtr<Subwindow>& subwindow);
-    void RemoveMaskSubwindowMap(int32_t dialogId);
-    const RefPtr<Subwindow> GetMaskSubwindow(int32_t dialogId);
-    void ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog);
-    void CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog);
-    void CloseMaskSubwindow(int32_t dialogId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
@@ -262,11 +258,6 @@ private:
     RefPtr<Subwindow> currentDialogSubwindow_;
     Rect uiExtensionWindowRect_;
     bool isSuperFoldDisplayDevice_ = false;
-    bool expandDisplay_ = false;
-
-    std::mutex maskSubwindowMutex_;
-    std::unordered_map<int32_t, RefPtr<Subwindow>> maskSubWindowMap_;
-
 };
 
 } // namespace OHOS::Ace

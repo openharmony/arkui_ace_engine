@@ -594,7 +594,7 @@ public:
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();
-    bool IsSelectAll();
+    virtual bool IsSelectAll();
     void HandleOnCopy();
     virtual void HandleAIMenuOption(const std::string& labelInfo = "");
     void HandleOnCopySpanString();
@@ -934,6 +934,7 @@ protected:
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
     virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     void HandleSpanStringTouchEvent(TouchEventInfo& info);
     bool enabled_ = true;
     Status status_ = Status::NONE;

@@ -212,4 +212,163 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest002, TestSize.Level1)
     EXPECT_EQ(size3, SizeF(500.0f, 300.0f));
     EXPECT_EQ(offset3, OffsetF(0.0f, 300.0f));
 }
+
+/**
+ * @tc.name: LinearIgnoreLayoutSafeArea001
+ * @tc.desc: test linear ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea001, TestSize.Level1)
+{
+    RefPtr<FrameNode> row1;
+    RefPtr<FrameNode> row2;
+
+    auto frameNode = CreateRow([this, &row1, &row2](RowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+
+        row1 = CreateRow([this](RowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+        row2 = CreateRow([this](RowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+    });
+    IgnoreLayoutSafeAreaOpts opts = {.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL};
+    row1->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+    EXPECT_EQ(row1->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
+    EXPECT_EQ(row1->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(row2->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
+    EXPECT_EQ(row2->GetGeometryNode()->GetFrameOffset(), OffsetF(110.0f, 10.0f));
+}
+
+
+/**
+ * @tc.name: LinearIgnoreLayoutSafeArea002
+ * @tc.desc: test linear ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea002, TestSize.Level1)
+{
+    RefPtr<FrameNode> row1;
+    RefPtr<FrameNode> row2;
+
+    auto frameNode = CreateRow([this, &row1, &row2](RowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+
+        row1 = CreateRow([this](RowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+        row2 = CreateRow([this](RowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+    });
+    IgnoreLayoutSafeAreaOpts opts = {.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL};
+    row1->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsReverse(true);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+    EXPECT_EQ(row1->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
+    EXPECT_EQ(row1->GetGeometryNode()->GetFrameOffset(), OffsetF(200.0f, 0.0f));
+    EXPECT_EQ(row2->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
+    EXPECT_EQ(row2->GetGeometryNode()->GetFrameOffset(), OffsetF(90.0f, 10.0f));
+}
+
+/**
+ * @tc.name: LinearIgnoreLayoutSafeArea003
+ * @tc.desc: test linear ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea003, TestSize.Level1)
+{
+    RefPtr<FrameNode> column1;
+    RefPtr<FrameNode> column2;
+
+    auto frameNode = CreateColumn([this, &column1, &column2](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+
+        column1 = CreateColumn([this](ColumnModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+        column2 = CreateColumn([this](ColumnModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+    });
+    IgnoreLayoutSafeAreaOpts opts = {.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL};
+    column1->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+    EXPECT_EQ(column1->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
+    EXPECT_EQ(column1->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(column2->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
+    EXPECT_EQ(column2->GetGeometryNode()->GetFrameOffset(), OffsetF(10.0f, 60.0f));
+}
+
+/**
+ * @tc.name: LinearIgnoreLayoutSafeArea004
+ * @tc.desc: test linear ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea004, TestSize.Level1)
+{
+    RefPtr<FrameNode> column1;
+    RefPtr<FrameNode> column2;
+
+    auto frameNode = CreateColumn([this, &column1, &column2](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+
+        column1 = CreateColumn([this](ColumnModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+        column2 = CreateColumn([this](ColumnModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+    });
+    IgnoreLayoutSafeAreaOpts opts = {.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL};
+    column1->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_END);
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+    EXPECT_EQ(column1->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
+    EXPECT_EQ(column1->GetGeometryNode()->GetFrameOffset(), OffsetF(200.0f, 190.0f));
+    EXPECT_EQ(column2->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
+    EXPECT_EQ(column2->GetGeometryNode()->GetFrameOffset(), OffsetF(190.0f, 240.0f));
+}
 } // namespace OHOS::Ace::NG

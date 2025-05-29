@@ -359,31 +359,6 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText001, TestSize.Level
 }
 
 /**
- * @tc.name: CalcInsertValueObj002
- * @tc.desc: test CalcInsertValueObj
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("test1");
-    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
-    auto it = richEditorPattern->spans_.front();
-    TextInsertValueInfo info;
-    it->content = u"test123\n";
-    it->position = 4;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->moveLength_ = 2;
-    richEditorPattern->CalcInsertValueObj(info, richEditorPattern->caretPosition_, true);
-    EXPECT_EQ(info.spanIndex_, 0);
-}
-
-/**
  * @tc.name: CalcInsertValueObj001
  * @tc.desc: test CalcInsertValueObj
  * @tc.type: FUNC
@@ -409,6 +384,66 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj001, TestSize.Level1)
         richEditorPattern->CalcInsertValueObj(info);
         EXPECT_EQ(info.spanIndex_, testCase.second);
     }
+}
+
+/**
+ * @tc.name: CalcInsertValueObj002
+ * @tc.desc: test CalcInsertValueObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+    */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test1");
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    auto it = richEditorPattern->spans_.front();
+    TextInsertValueInfo info;
+    it->content = u"test123\n";
+    it->position = 4;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->moveLength_ = 2;
+    richEditorPattern->CalcInsertValueObj(info, richEditorPattern->caretPosition_, true);
+    EXPECT_EQ(info.spanIndex_, 0);
+}
+
+/**
+ * @tc.name: CalcInsertValueObj003
+ * @tc.desc: test CalcInsertValueObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->spans_.clear();
+    AddSpan(u"");
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    auto it = richEditorPattern->spans_.front();
+    TextInsertValueInfo info;
+    it->content = u"";
+    it->position = 0;
+    int textIndex = 1;
+    richEditorPattern->CalcInsertValueObj(info, textIndex, false);
+    EXPECT_NE(info.GetSpanIndex(), richEditorPattern->spans_.size());
+
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    it->content = u"test123\n";
+    it->position = 18;
+    textIndex = 18;
+    richEditorPattern->CalcInsertValueObj(info, textIndex, false);
+    EXPECT_NE(info.GetSpanIndex(), richEditorPattern->spans_.size());
 }
 
 /**
@@ -694,192 +729,6 @@ HWTEST_F(RichEditorEditTestNg, RichEditorDeleteBackwardEmoji, TestSize.Level1)
     ASSERT_EQ(richEditorPattern->caretPosition_, 2);
     richEditorPattern->DeleteBackward(1);
     ASSERT_EQ(richEditorPattern->caretPosition_, 0);
-}
-
-/**
- * @tc.name: HandleOnCopy001
- * @tc.desc: test HandleOnCopy
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, HandleOnCopy001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = MockPipelineContext::GetCurrent();
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
-    richEditorPattern->clipboard_ = clipboard;
-    AddSpan("test1");
-    richEditorPattern->HandleOnCopy();
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-    richEditorPattern->HandleOnCopy();
-    ClearSpan();
-    AddImageSpan();
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->HandleOnCopy();
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-}
-
-/**
- * @tc.name: HandleOnCopy002
- * @tc.desc: test InsertValueByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, HandleOnCopy002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init callback
-     */
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(host, nullptr);
-    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = MockPipelineContext::GetCurrent();
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
-    richEditorPattern->clipboard_ = clipboard;
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    bool isEventCalled = false;
-    auto onCopyWithEvent = [&isEventCalled](NG::TextCommonEvent& event) { isEventCalled = true; };
-    richEditorModel.SetOnCopy(std::move(onCopyWithEvent));
-
-    /**
-     * @tc.steps: step2. call the callback function
-     * @tc.expected: UpdateType_ and isEventCalled is valid
-     */
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
-    richEditorPattern->HandleOnCopy();
-    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
-    EXPECT_EQ(isEventCalled, true);
-}
-
-/**
- * @tc.name: HandleOnCopy003
- * @tc.desc: test InsertValueByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, HandleOnCopy003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init callback
-     */
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(host, nullptr);
-    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = MockPipelineContext::GetCurrent();
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
-    richEditorPattern->clipboard_ = clipboard;
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    bool isEventCalled = false;
-    auto onCopyWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {
-        isEventCalled = true;
-        event.SetPreventDefault(true);
-    };
-    richEditorModel.SetOnCopy(std::move(onCopyWithEvent));
-
-    /**
-     * @tc.steps: step2. call the callback function
-     * @tc.expected: when PreventDefault is true, UpdateType_ and isEventCalled is valid
-     */
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->HandleOnCopy();
-    EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
-    EXPECT_EQ(isEventCalled, true);
-}
-
-/**
- * @tc.name: HandleOnCut002
- * @tc.desc: test InsertValueByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, HandleOnCut002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init callback
-     */
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(host, nullptr);
-    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    bool isEventCalled = false;
-    auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) { isEventCalled = true; };
-    richEditorModel.SetOnCut(std::move(onCutWithEvent));
-
-    /**
-     * @tc.steps: step2. call the callback function
-     * @tc.expected: UpdateType_ and isEventCalled is valid
-     */
-    auto pipeline = MockPipelineContext::GetCurrent();
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
-    richEditorPattern->clipboard_ = clipboard;
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
-    richEditorPattern->HandleOnCut();
-    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
-    EXPECT_EQ(isEventCalled, true);
-}
-
-/**
- * @tc.name: HandleOnCut003
- * @tc.desc: test InsertValueByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, HandleOnCut003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init callback
-     */
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(host, nullptr);
-    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    bool isEventCalled = false;
-    auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {
-        isEventCalled = true;
-        event.SetPreventDefault(true);
-    };
-    richEditorModel.SetOnCut(std::move(onCutWithEvent));
-
-    /**
-     * @tc.steps: step2. call the callback function
-     * @tc.expected: when PreventDefault is true, UpdateType_ and isEventCalled is valid
-     */
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->HandleOnCut();
-    EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
-    EXPECT_EQ(isEventCalled, true);
 }
 
 /**
@@ -1381,4 +1230,167 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder011, TestSize.Level1)
     EXPECT_FALSE(options.fontWeight.has_value());
     frameNode.Reset();
 }
+
+/**
+ * @tc.name: ProvidePlaceHolderText001
+ * @tc.desc: test provide placeholder information to inputmethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, ProvidePlaceHolderText, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = richEditorPattern->GetMiscTextConfig();
+    auto textconfig = miscTextConfig.value();
+    auto placeholder = UtfUtils::Str16ToStr8(textconfig.inputAttribute.placeholder).c_str();
+    size_t count = 0;
+    size_t i = 0;
+    while (i < placeholder.size()) {
+        count++;
+        i += (placeholder[i] >= 0xD800 && placeholder[i] <= 0xDBFF) ? 2 : 1;
+    }
+    EXPECT_NE(count, 0);
+#endif
+}
+
+/**
+ * @tc.name: InsertValueOperation001
+ * @tc.desc: test InsertValueOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, InsertValueOperation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    std::u16string insertValue = u"test123";
+    RichEditorPattern::OperationRecord record;
+
+    richEditorPattern->InsertValueOperation(insertValue, &record, OperationType::DEFAULT);
+
+    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
+}
+
+/**
+ * @tc.name: ProcessInsertValue001
+ * @tc.desc: test ProcessInsertValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, ProcessInsertValue001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    std::u16string insertValue = u"abc";
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->isSpanStringMode_ = false;
+    auto size = richEditorPattern->operationRecords_.size();
+    richEditorPattern->ProcessInsertValue(insertValue, OperationType::IME, true);
+    EXPECT_TRUE(richEditorPattern->IsEditing());
+    EXPECT_NE(size, richEditorPattern->operationRecords_.size());
+}
+
+/**
+ * @tc.name: ProcessInsertValue002
+ * @tc.desc: test ProcessInsertValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, ProcessInsertValue002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::u16string insertValue = u"abc";
+    richEditorPattern->isDragSponsor_ = true;
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->previewTextRecord_.needReplacePreviewText = true;
+    richEditorPattern->ProcessInsertValue(insertValue, OperationType::DEFAULT, false);
+
+    ASSERT_EQ(richEditorPattern->previewTextRecord_.IsValid(), false);
+}
+
+/**
+ * @tc.name: TestRichEditorBeforeChangeText002
+ * @tc.desc: test BeforeChangeText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    RichEditorChangeValue changeValue;
+    TextSpanOptions options;
+    options.style = std::optional<TextStyle>(TextStyle(5));
+    richEditorPattern->spans_.clear();
+    auto ret = richEditorPattern->BeforeChangeText(changeValue, options);
+    EXPECT_EQ(ret, true);
+    /**
+     * @tc.steps: step2. change parameters and call function.
+     */
+    options.offset = 200;
+    ret = richEditorPattern->BeforeChangeText(changeValue, options);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: BeforeChangeText001
+ * @tc.desc: test BeforeChangeText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, BeforeChangeText001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RichEditorChangeValue changeValue;
+    RichEditorPattern::OperationRecord operationRecord;
+    OHOS::Ace::NG::RecordType recodrType = OHOS::Ace::NG::RecordType::DEL_BACKWARD;
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
+    eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
+    auto ret = richEditorPattern->BeforeChangeText(changeValue, operationRecord, recodrType, 100);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: BeforeChangeText002
+ * @tc.desc: test BeforeChangeText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, BeforeChangeText002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RichEditorChangeValue changeValue;
+    TextSpanOptions options;
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem);
+    options.offset = -1;
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
+    eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
+    auto ret = richEditorPattern->BeforeChangeText(changeValue, options);
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+    EXPECT_TRUE(ret);
+}
+
+
 } // namespace OHOS::Ace::NG

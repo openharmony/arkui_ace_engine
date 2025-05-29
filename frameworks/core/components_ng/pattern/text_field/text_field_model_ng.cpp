@@ -2472,4 +2472,12 @@ bool TextFieldModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
         TextFieldLayoutProperty, EnableAutoSpacing, value, frameNode, value);
     return value;
 }
+
+void TextFieldModelNG::SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSecurityStateChange(std::move(func));
+}
 } // namespace OHOS::Ace::NG

@@ -586,6 +586,8 @@ public:
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void ProcessColorModeUpdate(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
+    void CheckForceVsync(const ParsedConfig& parsedConfig);
+    void OnFrontUpdated(const ConfigurationChange& configurationChange, const std::string& configuration);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel = false);
     void UpdateConfigurationSyncForAll(
@@ -824,6 +826,9 @@ public:
     bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
 
     Rect GetDisplayAvailableRect() const override;
+    
+    // Get the available rect of the full screen.
+    Rect GetFoldExpandAvailableRect() const override;
 
     void GetExtensionConfig(AAFwk::WantParams& want);
 
@@ -848,7 +853,7 @@ public:
         foldStatusFromListener_ = GetCurrentFoldStatus();
     }
 
-    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId);
+    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistentId);
 
     void DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
         const std::function<void()>&& loadPageCallback);

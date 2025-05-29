@@ -38,6 +38,23 @@ void LinearSplitModelNG::SetResizable(NG::SplitType splitType, bool resizable)
 
 void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ItemDivider& divider)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<LinearSplitPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [divider, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ItemDivider &value = const_cast<ItemDivider &>(divider);
+            value.ReloadResources();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, value, frameNode);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        };
+        pattern->AddResObj("ColumnSplit.divider", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider);
 }
 

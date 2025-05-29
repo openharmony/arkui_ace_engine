@@ -207,13 +207,10 @@ HWTEST_F(ImageAnimatorPatternTestNg, CreatePictureAnimation, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     /**
-     * @tc.steps: step2. get childNode of frameNode and its imageLayoutProperty.
-     * @tc.expected: step2. check whether childNode, imageLayoutProperty exists and tag of childNode is correct.
+     * @tc.steps: step2. get childNode of frameNode.
+     * @tc.expected: step2. check whether childNode is empty.
      */
-    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    EXPECT_TRUE(childNode != nullptr && childNode->GetTag() == V2::IMAGE_ETS_TAG);
-    auto imageLayoutProperty = childNode->GetLayoutProperty<ImageLayoutProperty>();
-    EXPECT_NE(imageLayoutProperty, nullptr);
+    EXPECT_TRUE(frameNode->GetChildren().empty());
 
     auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
     EXPECT_NE(imageAnimatorPattern_, nullptr);

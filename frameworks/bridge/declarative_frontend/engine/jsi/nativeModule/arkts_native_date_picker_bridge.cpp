@@ -246,7 +246,8 @@ ArkUINativeModuleValue DatePickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         GetArkUINodeModifiers()->getDatePickerModifier()->resetDatePickerBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getDatePickerModifier()->setDatePickerBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getDatePickerModifier()->setDatePickerBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace());
     }
     return panda::JSValueRef::Undefined(vm);
 }

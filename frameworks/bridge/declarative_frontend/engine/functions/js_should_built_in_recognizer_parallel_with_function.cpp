@@ -94,5 +94,4 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     currentRecognizer->Update(target);
     return recognizerObj;
 }
-
 } // namespace OHOS::Ace::Framework

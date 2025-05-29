@@ -92,6 +92,8 @@ public:
     void SetDigitalCrownSensitivity(int32_t sensitivity) override;
     void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) override;
     void SetMaintainVisibleContentPosition(bool value) override;
+    void ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    void ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
@@ -175,6 +177,10 @@ public:
     static std::shared_ptr<SwiperDigitalParameters> GetDigitIndicator(FrameNode* frameNode);
     static void SetMaintainVisibleContentPosition(FrameNode* frameNode, bool value);
     static bool GetMaintainVisibleContentPosition(FrameNode* frameNode);
+    static void CreateDotWithResourceObj(FrameNode*  frameNode, const SwiperParameters& swiperParameters);
+    static void CreateDigitWithResourceObj(FrameNode*  frameNode,
+        const SwiperDigitalParameters& swiperDigitalParameters);
+    static void CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters);
 };
 
 } // namespace OHOS::Ace::NG

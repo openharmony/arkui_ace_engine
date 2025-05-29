@@ -108,6 +108,9 @@ void JSSecButtonBase::SetFontStyle(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetFontWeight(const JSCallbackInfo& info)
 {
+    if (!(info[0]->IsString() || info[0]->IsNumber())) {
+        return;
+    }
     std::string value = info[0]->ToString();
     SecurityComponentModelNG::SetFontWeight(ConvertStrToFontWeight(value));
 }

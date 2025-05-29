@@ -1976,4 +1976,26 @@ HWTEST_F(FormPatternTest, FormPatternTest_053, TestSize.Level1)
     pattern->FireOnUpdateFormDone(id);
     EXPECT_FALSE(pattern->isSnapshot_);
 }
+
+
+/**
+ * @tc.name: FormPatternTest_054
+ * @tc.desc: CreateColumnNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_054, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    pattern->frameNode_ = nullptr;
+    auto res = pattern->CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    EXPECT_EQ(res, nullptr);
+    pattern->frameNode_ = formNode;
+
+    res = pattern->CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    EXPECT_NE(res, nullptr);
+    EXPECT_EQ(res->GetTag(), "Column");
+}
 } // namespace OHOS::Ace::NG

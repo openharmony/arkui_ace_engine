@@ -72,6 +72,7 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
+class DragDropRelatedConfigurations;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -401,6 +402,8 @@ public:
     const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
         const std::unique_ptr<FocusPaintParam>& paintParamsPtr);
     const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern);
+
+    const RefPtr<DragDropRelatedConfigurations>& GetOrCreateDragDropRelatedConfigurations();
 
     void CreateEventHubInner();
 
@@ -945,6 +948,7 @@ public:
         uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
     RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index) override;
     bool CheckNeedForceMeasureAndLayout() override;
+    bool ReachResponseDeadline() const override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
     void ForceSyncGeometryNode();
@@ -1382,6 +1386,15 @@ public:
 
     bool HasMultipleChild();
 
+    void UpdateOcclusionCullingStatus(bool enable)
+    {
+        if (renderContext_) {
+            renderContext_->UpdateOcclusionCullingStatus(enable);
+        }
+    }
+
+    void AddToOcclusionMap(bool enable);
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1538,6 +1551,7 @@ private:
     const char* GetLayoutPropertyTypeName() const;
     const char* GetPaintPropertyTypeName() const;
     void AddNodeToRegisterTouchTest();
+    void CleanupPipelineResources();
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1697,6 +1711,7 @@ private:
     std::unordered_map<uint32_t, std::function<void()>> removeToolbarItemCallbacks_;
 
     RefPtr<FrameNode> cornerMarkNode_ = nullptr;
+    RefPtr<DragDropRelatedConfigurations> dragDropRelatedConfigurations_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -1024,6 +1024,19 @@ void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
+void SetTextInputBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void ResetTextInputBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1978,6 +1991,13 @@ void ResetTextInputOnWillChange(ArkUINodeHandle node)
     TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
 }
 
+void ResetTextInputOnSecurityStateChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnSecurityStateChange(frameNode, nullptr);
+}
+
 void SetTextInputStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2120,6 +2140,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .getTextInputFontSize = GetTextInputFontSize,
         .getTextInputCancelButtonStyle = GetTextInputCancelButtonStyle,
         .setTextInputBackgroundColor = SetTextInputBackgroundColor,
+        .setTextInputBackgroundColorWithColorSpace = SetTextInputBackgroundColorWithColorSpace,
         .resetTextInputBackgroundColor = ResetTextInputBackgroundColor,
         .setTextInputNormalUnderlineColor = SetTextInputNormalUnderlineColor,
         .setTextInputUserUnderlineColor = SetTextInputUserUnderlineColor,
@@ -2259,6 +2280,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .getTextInputStrokeColor = GetTextInputStrokeColor,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
+        .resetTextInputOnSecurityStateChange = ResetTextInputOnSecurityStateChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2349,6 +2371,7 @@ const CJUITextInputModifier* GetCJUITextInputModifier()
         .getTextInputFontSize = GetTextInputFontSize,
         .getTextInputCancelButtonStyle = GetTextInputCancelButtonStyle,
         .setTextInputBackgroundColor = SetTextInputBackgroundColor,
+        .setTextInputBackgroundColorWithColorSpace = SetTextInputBackgroundColorWithColorSpace,
         .resetTextInputBackgroundColor = ResetTextInputBackgroundColor,
         .setTextInputTextSelection = SetTextInputTextSelection,
         .getTextInputTextSelectionIndex = GetTextInputTextSelectionIndex,

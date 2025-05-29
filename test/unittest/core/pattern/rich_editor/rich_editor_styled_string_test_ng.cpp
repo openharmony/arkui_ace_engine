@@ -20,6 +20,8 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1043,7 +1045,8 @@ HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle, TestSize.L
     /**
      * @tc.steps: step5. test CreateStyledStringByTextStyle
      */
-    richEditorPattern->CreateStyledStringByTextStyle(INIT_VALUE_2, updateSpanStyle, textStyle);
+    auto& styledString = richEditorPattern->styledString_;
+    richEditorPattern->styleManager_->CreateStyledStringByTypingStyle(INIT_VALUE_2, styledString, 0, 0);
     auto spanItem = richEditorPattern->spans_.back();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);
@@ -1254,4 +1257,50 @@ HWTEST_F(RichEditorStyledStringTestNg, HandleOnPaste001, TestSize.Level1)
     richEditorPattern->ProcessSpanStringData(tlvDatas, styledString->GetString(), false);
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
+
+/**
+ * @tc.name: InsertValueInStyledString002
+ * @tc.desc: test InsertValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    richEditorPattern->InsertValueInStyledString(PREVIEW_TEXT_VALUE1);
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+}
+
+/**
+ * @tc.name: InsertValueInStyledString003
+ * @tc.desc: test RichEditorPattern InsertValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto host = richEditorPattern->GetHost();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(options2);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->FireOnSelectionChange(-1, 0);
+    richEditorPattern->FireOnSelectionChange(0, -1);
+    richEditorPattern->FireOnSelectionChange(-1, -1);
+    ASSERT_EQ(richEditorPattern->HasFocus(), true);
+}
+
 } // namespace OHOS::Ace::NG

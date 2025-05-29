@@ -97,6 +97,7 @@ protected:
     virtual void OnAddSnapshot() {}
     virtual void OnRemoveSnapshot() {}
     virtual void OnAppRemoveStartingWindow() {}
+    virtual void OnUpdateSnapshotWindow() {}
 
     RefPtr<FrameNode> startingWindow_;
     RefPtr<StartingWindowLayoutHelper> startingWindowLayoutHelper_;

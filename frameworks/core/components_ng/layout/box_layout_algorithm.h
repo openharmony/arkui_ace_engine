@@ -50,9 +50,11 @@ public:
 
     void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& frameSize);
 
+protected:
+    std::list<RefPtr<LayoutWrapper>> layoutPolicyChildren_;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BoxLayoutAlgorithm);
-    std::list<RefPtr<LayoutWrapper>> layoutPolicyChildren_;
 };
 } // namespace OHOS::Ace::NG
 

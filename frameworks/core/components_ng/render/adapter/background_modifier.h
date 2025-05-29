@@ -47,13 +47,12 @@ public:
         SizeF srcSize(mediaPixelMap->GetWidth(), mediaPixelMap->GetHeight());
         NG::OffsetF offset1 = Alignment::GetAlignPosition(srcSize, desSize, align_);
         NG::OffsetF offset2 = Alignment::GetAlignPosition(desSize, srcSize, align_);
-        RSRect srcRSRect = RSRect(offset1.GetX(), offset1.GetY(), srcSize.Width() + offset1.GetX(),
-            srcSize.Height() + offset1.GetY());
-        RSRect desRSRect = RSRect(offset2.GetX() * curWidth / initialNodeWidth_,
-            offset2.GetY() * curHeight / initialNodeHeight_,
-            srcSize.Width() * curWidth / initialNodeWidth_ + offset2.GetX() * curWidth / initialNodeWidth_,
-            srcSize.Height() * curHeight / initialNodeHeight_ +
-            offset2.GetY() * curHeight / initialNodeHeight_);
+        RSRect srcRSRect =
+            RSRect(offset1.GetX(), offset1.GetY(), srcSize.Width() + offset1.GetX(), srcSize.Height() + offset1.GetY());
+        RSRect desRSRect =
+            RSRect(offset2.GetX() * curWidth / initialNodeWidth_, offset2.GetY() * curHeight / initialNodeHeight_,
+                srcSize.Width() * curWidth / initialNodeWidth_ + offset2.GetX() * curWidth / initialNodeWidth_,
+                srcSize.Height() * curHeight / initialNodeHeight_ + offset2.GetY() * curHeight / initialNodeHeight_);
         if (srcSize.Width() > desSize.Width()) {
             srcRSRect.SetRight(offset1.GetX() + desSize.Width());
             desRSRect.SetRight(curWidth);

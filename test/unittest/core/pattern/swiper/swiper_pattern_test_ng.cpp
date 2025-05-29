@@ -134,8 +134,8 @@ HWTEST_F(SwiperPatternTestNg, CalcWillScrollOffset003, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -182,8 +182,8 @@ HWTEST_F(SwiperPatternTestNg, CalcWillScrollOffset004, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -230,8 +230,8 @@ HWTEST_F(SwiperPatternTestNg, CalcWillScrollOffset005, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -278,8 +278,8 @@ HWTEST_F(SwiperPatternTestNg, CalcWillScrollOffset006, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -327,8 +327,8 @@ HWTEST_F(SwiperPatternTestNg, CalcWillScrollOffset007, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -375,8 +375,8 @@ HWTEST_F(SwiperPatternTestNg, CalcWillScrollOffset008, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -424,8 +424,8 @@ HWTEST_F(SwiperPatternTestNg, CalcWillScrollOffset009, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -473,8 +473,8 @@ HWTEST_F(SwiperPatternTestNg, CalcWillScrollOffset010, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -1064,8 +1064,8 @@ HWTEST_F(SwiperPatternTestNg, FindLazyForEachNode002, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -1117,8 +1117,8 @@ HWTEST_F(SwiperPatternTestNg, FindForEachNode002, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -1154,8 +1154,8 @@ HWTEST_F(SwiperPatternTestNg, FindForEachNode004, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -1199,8 +1199,8 @@ HWTEST_F(SwiperPatternTestNg, HasRepeatTotalCountDifference001, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -1348,8 +1348,8 @@ HWTEST_F(SwiperPatternTestNg, AutoLinearIsOutOfBoundary001, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -1441,8 +1441,8 @@ HWTEST_F(SwiperPatternTestNg, GetDistanceToEdge001, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
@@ -1666,5 +1666,61 @@ HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey006, TestSize.Level1)
     EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
     EXPECT_EQ(pattern_->currentFocusIndex_, 0);
     EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoop001
+ * @tc.desc: Test SwiperPattern HandleTouchBottomLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, HandleTouchBottomLoop001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = -2;
+    pattern_->targetIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = -2;
+    pattern_->targetIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoopOnRTL001
+ * @tc.desc: Test SwiperPattern HandleTouchBottomLoopOnRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, HandleTouchBottomLoopOnRTL001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = -2;
+    pattern_->targetIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = -2;
+    pattern_->targetIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
 }
 } // namespace OHOS::Ace::NG

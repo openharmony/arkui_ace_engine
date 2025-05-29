@@ -47,6 +47,5 @@ void ScrollBarPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(barColor);
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    
 }
 } // namespace OHOS::Ace::NG

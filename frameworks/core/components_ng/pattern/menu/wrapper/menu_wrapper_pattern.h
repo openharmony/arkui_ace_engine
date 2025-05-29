@@ -236,6 +236,16 @@ public:
         return isShowHoverImage_;
     }
 
+    void SetHoverScaleInterruption(bool interruption)
+    {
+        hoverScaleInterruption_ = interruption;
+    }
+
+    bool GetHoverScaleInterruption() const
+    {
+        return hoverScaleInterruption_;
+    }
+
     void SetIsStopHoverImageAnimation(bool isStop)
     {
         isStopHoverImageAnimation_ = isStop;
@@ -567,14 +577,19 @@ public:
         return isOpenMenu_;
     }
 
-    void SetHoverMode(bool enableFold)
+    void SetHoverMode(std::optional<bool> enableFold)
     {
         enableFold_ = enableFold;
     }
 
-    bool GetHoverMode() const
+    std::optional<bool> GetHoverMode() const
     {
-        return enableFold_.value_or(false);
+        return enableFold_;
+    }
+
+    bool HasHoverMode() const
+    {
+        return enableFold_.has_value();
     }
 
     bool GetIsSelectOverlaySubWindowWrapper() const
@@ -607,16 +622,17 @@ public:
         hasCustomOutlineColor_ = hasCustomOutlineColor;
     }
 
-    bool GetMenuMaskEnable();
-    Color GetMenuMaskColor();
-    BlurStyle GetMenuMaskblurStyle();
+    bool GetMenuMaskEnable() const;
+    Color GetMenuMaskColor() const;
+    BlurStyle GetMenuMaskblurStyle() const;
     void SetMenuMaskEnable(bool maskEnable);
     void SetMenuMaskColor(Color maskColor);
     void SetMenuMaskblurStyle(BlurStyle maskBlurStyle);
     void UpdateFilterMaskType();
+    void CheckAndShowAnimation();
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
-    void CheckAndShowAnimation();
 
 private:
     bool AvoidKeyboard() const override
@@ -652,7 +668,8 @@ private:
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);
-    bool IsTouchWithinParentMenuZone(std::list<RefPtr<UINode>>::reverse_iterator& child,
+    bool HasSideSubMenu();
+    bool IsTouchWithinParentMenuItemZone(std::list<RefPtr<UINode>>::reverse_iterator& child,
         const std::list<RefPtr<UINode>>& children, const PointF& position);
     RefPtr<FrameNode> GetParentMenu(const RefPtr<UINode>& subMenu);
     void MenuFocusViewShow(const RefPtr<FrameNode>& menuNode);
@@ -676,6 +693,7 @@ private:
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
     bool isShowHoverImage_ = false;
+    bool hoverScaleInterruption_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
     bool onMenuDisappear_ = false;

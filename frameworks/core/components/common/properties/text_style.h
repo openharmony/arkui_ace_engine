@@ -30,6 +30,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/pipeline/base/render_component.h"
 #include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "frameworks/core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 // The normal weight is W400, the larger the number after W, the thicker the font will be.
@@ -139,6 +140,13 @@ struct FontForegroudGradiantColor {
         return isScalarEq && (points == fontForegroudGradiantColor.points) &&
                (colors == fontForegroudGradiantColor.colors);
     }
+};
+
+enum class SuperscriptStyle {
+    NORMAL,
+    SUPERSCRIPT,
+    SUBSCRIPT,
+    NONE
 };
 
 namespace StringUtils {
@@ -386,6 +394,7 @@ enum class TextStyleAttribute {
     FONT_COLOR = 18,
     SHADOWS = 19,
     HALF_LEADING = 20,
+    FOREGROUND_BRUSH = 21,
     MAX_TEXT_STYLE
 };
 
@@ -443,6 +452,12 @@ public:                                                    \
             needReCreateParagraph_ = true;                 \
         }                                                  \
         prop##name##_ = newValue;                          \
+    }                                                      \
+    void Set##name(const std::optional<type>& value)       \
+    {                                                      \
+        if (value.has_value()) {                           \
+            Set##name(value.value());                      \
+        }                                                  \
     }
 
 #define ACE_DEFINE_TEXT_STYLE(name, type, changeflag)  \
@@ -558,28 +573,34 @@ public:                                                    \
 private:                                                   \
     type prop##name##_;
 
-#define ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(name, type, value, changeflag) \
-public:                                                                              \
-    const type& Get##name() const                                                    \
-    {                                                                                \
-        return prop##name##_;                                                        \
-    }                                                                                \
-    void Set##name(const type& newValue)                                             \
-    {                                                                                \
-        if (NearEqual(prop##name##_, newValue)) {                                    \
-            return;                                                                  \
-        }                                                                            \
-        auto flag = static_cast<int32_t>(changeflag);                                \
-        if (GreatOrEqual(flag, 0)) {                                                 \
-            reLayoutParagraphStyleBitmap_.set(flag);                                 \
-        } else {                                                                     \
-            needReCreateParagraph_ = true;                                           \
-        }                                                                            \
-        prop##name##_ = newValue;                                                    \
-    }                                                                                \
-                                                                                     \
-private:                                                                             \
-    type prop##name##_ = value;
+#define ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(name, type, initValue, changeflag) \
+public:                                                                                  \
+    const type& Get##name() const                                                        \
+    {                                                                                    \
+        return prop##name##_;                                                            \
+    }                                                                                    \
+    void Set##name(const type& newValue)                                                 \
+    {                                                                                    \
+        if (NearEqual(prop##name##_, newValue)) {                                        \
+            return;                                                                      \
+        }                                                                                \
+        auto flag = static_cast<int32_t>(changeflag);                                    \
+        if (GreatOrEqual(flag, 0)) {                                                     \
+            reLayoutParagraphStyleBitmap_.set(flag);                                     \
+        } else {                                                                         \
+            needReCreateParagraph_ = true;                                               \
+        }                                                                                \
+        prop##name##_ = newValue;                                                        \
+    }                                                                                    \
+    void Set##name(const std::optional<type>& newValue)                                  \
+    {                                                                                    \
+        if (newValue.has_value()) {                                                      \
+            Set##name(newValue.value());                                                 \
+        }                                                                                \
+    }                                                                                    \
+                                                                                         \
+private:                                                                                 \
+    type prop##name##_ = initValue;
 
 // For symbol
 #define ACE_DEFINE_SYMBOL_STYLE(name, type, changeflag) \
@@ -700,12 +721,16 @@ public:
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         TextDirection, TextDirection, TextDirection::AUTO, ParagraphStyleAttribute::DIRECTION);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(HeightOnly, bool, false, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
+        OptimizeTrailingSpace, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(EnableAutoSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(LineThicknessScale, float, 1.0f, TextStyleAttribute::RE_CREATE);
 
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         StrokeWidth, Dimension, Dimension(0.0f, DimensionUnit::PX), TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(StrokeColor, Color, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
+        Superscript, SuperscriptStyle, SuperscriptStyle::NORMAL, TextStyleAttribute::RE_CREATE);    
 
     // used for gradiant color
     ACE_DEFINE_PARAGRAPH_STYLE(FontForegroudGradiantColor, FontForegroudGradiantColor,
@@ -768,6 +793,13 @@ public:
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_VARIATIONS));
     }
 
+    void SetFontWeight(const std::optional<FontWeight>& fontWeight) const
+    {
+        if (fontWeight.has_value()) {
+            SetFontWeight(fontWeight.value());
+        }
+    }
+
     const std::list<std::pair<std::string, int32_t>>& GetFontFeatures() const
     {
         return fontFeatures_;
@@ -780,6 +812,13 @@ public:
         }
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_FEATURES));
         fontFeatures_ = fontFeatures;
+    }
+
+    void SetFontFeatures(const std::optional<std::list<std::pair<std::string, int32_t>>>& fontFeatures)
+    {
+        if (fontFeatures.has_value()) {
+            SetFontFeatures(fontFeatures.value());
+        }
     }
 
     const Dimension& GetLineHeight() const
@@ -1031,6 +1070,22 @@ public:
         symbolUid_ = symbolUid;
     }
 
+    void SetGradient(const std::optional<Gradient>& gradient)
+    {
+        gradient_ = gradient;
+        reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FOREGROUND_BRUSH));
+    }
+
+    void SetForeGroundBrushBitMap()
+    {
+        reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FOREGROUND_BRUSH));
+    }
+
+    const std::optional<Gradient>& GetGradient() const
+    {
+        return gradient_;
+    }
+
 private:
     std::bitset<static_cast<size_t>(TextStyleAttribute::MAX_TEXT_STYLE)> reLayoutTextStyleBitmap_;
     std::bitset<static_cast<size_t>(ParagraphStyleAttribute::MAX_TEXT_STYLE)> reLayoutParagraphStyleBitmap_;
@@ -1041,6 +1096,7 @@ private:
     std::list<std::pair<std::string, int32_t>> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
+    std::optional<Gradient> gradient_;
     // use 14px for normal font size.
     DimensionWithActual fontSize_ { Dimension(14, DimensionUnit::PX), 14.0f };
     FontWeight fontWeight_ { FontWeight::NORMAL };

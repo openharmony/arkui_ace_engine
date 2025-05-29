@@ -312,6 +312,7 @@ public:
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
+    virtual void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle) = 0;
     virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;

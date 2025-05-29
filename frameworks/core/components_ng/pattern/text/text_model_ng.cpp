@@ -1293,6 +1293,24 @@ size_t TextModelNG::GetLineCount(FrameNode* frameNode)
     return textPattern->GetLineCount();
 }
 
+void TextModelNG::SetOptimizeTrailingSpace(bool trim)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, OptimizeTrailingSpace, trim);
+}
+
+void TextModelNG::SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, OptimizeTrailingSpace, trim, frameNode);
+}
+
+bool TextModelNG::GetOptimizeTrailingSpace(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, OptimizeTrailingSpace, value, frameNode, value);
+    return value;
+}
+
 void TextModelNG::SetEnableAutoSpacing(bool enabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EnableAutoSpacing, enabled);
@@ -1310,5 +1328,35 @@ bool TextModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     bool value = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, EnableAutoSpacing, value, frameNode, value);
     return value;
+}
+
+void TextModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient);
+}
+
+void TextModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient, frameNode);
+}
+
+NG::Gradient TextModelNG::GetGradientStyle(FrameNode* frameNode)
+{
+    NG::Gradient value;
+    value.CreateGradientWithType(NG::GradientType::LINEAR);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    return layoutProperty->GetGradientShaderStyle().value_or(value);
+}
+
+void TextModelNG::ResetTextGradient(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->ResetGradientShaderStyle();
+    }
 }
 } // namespace OHOS::Ace::NG

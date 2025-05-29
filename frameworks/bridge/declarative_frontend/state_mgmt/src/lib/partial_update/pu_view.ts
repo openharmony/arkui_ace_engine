@@ -179,6 +179,8 @@ abstract class ViewPU extends PUV2ViewBase
     if (localStorage) {
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);
+    } else if (parent instanceof ViewBuildNodeBase) {
+      this.localStorage_ = parent.getShareLocalStorage();
     }
 
     SubscriberManager.Add(this);
@@ -206,6 +208,11 @@ abstract class ViewPU extends PUV2ViewBase
     }
     // tell UINodeRegisterProxy that all elmtIds under
     // this ViewPU should be treated as already unregistered
+
+    // un-register all repeat sub-components
+    this.elmtId2Repeat_.forEach(<I>(repeat: __Repeat<I>) => {
+      repeat.aboutToBeDeleted();
+    });
 
     stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 

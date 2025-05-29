@@ -664,6 +664,9 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg016, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetSideBarWidth(), DEFAULT_SIDE_BAR_WIDTH);
     EXPECT_EQ(layoutProperty->GetMinSideBarWidth(), DEFAULT_MIN_SIDE_BAR_WIDTH);
     EXPECT_EQ(layoutProperty->GetMaxSideBarWidth(), DEFAULT_MAX_SIDE_BAR_WIDTH);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    SideBarContainerModelInstance.SetSideBarWidth(AceType::RawPtr(frameNode), resObj);
+    EXPECT_EQ(layoutProperty->GetSideBarWidth(), DEFAULT_SIDE_BAR_WIDTH);
 }
 
 /**

@@ -83,6 +83,8 @@ constexpr int32_t FORM_UNLOCK_ANIMATION_DUATION = 250;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DELAY = 200;
 constexpr int32_t FORM_COMPONENT_UPDATE_VALID_DURATION = 1000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
+constexpr char NO_FORM_DUMP[] = "-noform";
+constexpr char PID_FLAG[] = "pidflag";
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -356,7 +358,7 @@ void FormPattern::TakeSurfaceCaptureForUI()
         TAG_LOGI(AceLogTag::ACE_FORM, "Frs node is detached, cancel snapshot.");
         return;
     }
-    
+
     if (isDynamic_) {
         formLinkInfos_.clear();
         TAG_LOGI(AceLogTag::ACE_FORM, "formLinkInfos_ clear.");
@@ -393,7 +395,7 @@ void FormPattern::TakeSurfaceCaptureForUI()
         },
         DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA, "ArkUIFormDelaySnapshotSurfaceNode");
 }
- 
+
 void FormPattern::SnapshotSurfaceNode()
 {
     auto externalContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
@@ -746,7 +748,7 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         TAG_LOGW(AceLogTag::ACE_FORM, "Invalid form size.");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f  borderWidth: %{public}f",
+    TAG_LOGW(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f  borderWidth: %{public}f",
         info.width.Value(), info.height.Value(), info.borderWidth);
     cardInfo_ = info;
     if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)
@@ -1324,7 +1326,7 @@ void FormPattern::CreateSkeletonView(
             fillColor, params->GetContentOpacity());
         CHECK_NULL_VOID(contentLineNode);
     }
-    
+
     // 3. Set ending line if form dimension height greater than 1
     if (dimensionHeight > 1) {
         MarginProperty endingMargin;
@@ -2071,7 +2073,7 @@ void FormPattern::RemoveFormChildNode(FormChildNodeType formChildNodeType)
         return;
     }
     renderContext->RemoveChild(childNode->GetRenderContext());
-    
+
     if (formChildNodeType == FormChildNodeType::FORM_STATIC_IMAGE_NODE) {
         auto formNode = DynamicCast<FormNode>(host);
         auto subContainer = GetSubContainer();
@@ -2109,7 +2111,7 @@ double FormPattern::GetTimeLimitFontSize()
     double density = PipelineBase::GetCurrentDensity();
     TAG_LOGD(AceLogTag::ACE_FORM, "Density is %{public}f, font scale is %{public}f.",
         density, fontScale);
-   
+
     int32_t dimensionHeight = GetFormDimensionHeight(cardInfo_.dimension);
     if (dimensionHeight == FORM_DIMENSION_MIN_HEIGHT) {
         if (isTibetanLanguage_) {
@@ -2263,7 +2265,7 @@ void FormPattern::DoSkeletonAnimation()
         SetExternalRenderOpacity(NON_TRANSPARENT_VAL);
         return;
     }
-    
+
     std::function<void()> finishCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -2601,14 +2603,60 @@ bool FormPattern::ShouldAddChildAtReuildFrame()
     return true;
 }
 
+bool FormPattern::GetFormDumpInfo(std::vector<std::string> &dumpInfo)
+{
+    ACE_FUNCTION_TRACE();
+    TAG_LOGI(AceLogTag::ACE_FORM, "dump form info in string format");
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return false;
+    }
+
+    auto container = Platform::AceContainer::GetContainer(Container::CurrentId());
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "container is null");
+        return false;
+    }
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -noform to choose not dump form info
+    if (std::find(params.begin(), params.end(), NO_FORM_DUMP) != params.end()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "Not Support Dump Form Info");
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
+    if (dumpNodeIter != params.end()) {
+        params.erase(dumpNodeIter);
+    }
+    if (!container->IsFormRender()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+    formManagerBridge_->NotifyFormDump(params, dumpInfo);
+    return true;
+}
+
 void FormPattern::DumpInfo()
 {
-    TAG_LOGW(AceLogTag::ACE_FORM, "not supported");
+    std::vector<std::string> dumpInfo;
+    if (!GetFormDumpInfo(dumpInfo)) {
+        return;
+    }
+    for (const std::string& info : dumpInfo) {
+        DumpLog::GetInstance().AddDesc("Form info: ", info);
+    }
 }
 
 void FormPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
-    TAG_LOGW(AceLogTag::ACE_FORM, "not supported");
+    std::vector<std::string> dumpInfo;
+    if (!GetFormDumpInfo(dumpInfo)) {
+        return;
+    }
+    for (const std::string& info : dumpInfo) {
+        json->Put("Form info: ", info.c_str());
+    }
 }
 
 bool FormPattern::IsFormBundleExempt(int64_t formId) const

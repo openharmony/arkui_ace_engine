@@ -1429,4 +1429,55 @@ HWTEST_F(EventHubTestNg, EventHubTest028, TestSize.Level1)
     bool retFlag = eventHub->stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED);
     EXPECT_FALSE(retFlag);
 }
+
+/**
+ * @tc.name: EventHubTest029
+ * @tc.desc: AddSupportedUIStateWithCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AddSupportedUIStateWithCallback.
+     * @tc.expected: userSubscribersExcludeConfigs_ value is correct.
+     */
+    UIState uiState = UI_STATE_DISABLED | UI_STATE_FOCUSED | UI_STATE_PRESSED | UI_STATE_NORMAL;
+    uint64_t expectedValue = uiState;
+    std::function<void(UIState)> callback = [](UIState state) {};
+    eventHub->AddSupportedUIStateWithCallback(uiState, callback, false, true);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    expectedValue = UI_STATE_FOCUSED | UI_STATE_PRESSED | UI_STATE_NORMAL;
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_DISABLED, callback, false, false);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_FOCUSED, callback, true, false);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    expectedValue =  UI_STATE_PRESSED | UI_STATE_NORMAL;
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_FOCUSED, callback, false);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    /**
+     * @tc.steps: step3. Call RemoveSupportedUIState.
+     * @tc.expected: userSubscribersExcludeConfigs_ value is correct.
+     */
+    uiState = UI_STATE_FOCUSED | UI_STATE_PRESSED | UI_STATE_NORMAL;
+    expectedValue = uiState;
+    eventHub->AddSupportedUIStateWithCallback(uiState, callback, false, true);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    expectedValue =  UI_STATE_PRESSED | UI_STATE_NORMAL;
+    eventHub->RemoveSupportedUIState(UI_STATE_FOCUSED, false);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+    eventHub->RemoveSupportedUIState(UI_STATE_PRESSED, false);
+    EXPECT_EQ(EXCLUDE_INNER_FLAG_NONE, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+}
 } // namespace OHOS::Ace::NG

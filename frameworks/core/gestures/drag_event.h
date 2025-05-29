@@ -16,6 +16,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_DRAG_EVENT_H
 
 #include <map>
+#include <string_view>
 
 #include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
@@ -23,6 +24,7 @@
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace {
 constexpr Dimension DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD = 10.0_vp;
@@ -54,6 +56,13 @@ enum class DragDropInitiatingStatus : int32_t {
     PRESS,
     LIFTING,
     MOVING,
+};
+
+enum class DragSpringLoadingState {
+    BEGIN = 0,
+    UPDATE,
+    END,
+    CANCEL,
 };
 
 enum class DragRet {
@@ -452,6 +461,81 @@ private:
     double y_ = 0.0;
 };
 
+class DragSpringLoadingContext : public AceType {
+    DECLARE_ACE_TYPE(DragSpringLoadingContext, AceType)
+public:
+    explicit DragSpringLoadingContext() = default;
+    ~DragSpringLoadingContext() override = default;
+
+    void SetState(DragSpringLoadingState state)
+    {
+        state_ = state;
+    }
+
+    DragSpringLoadingState GetState() const
+    {
+        return state_;
+    }
+
+    void SetCurrentNotifySequence(int32_t currentNotifySequence)
+    {
+        currentNotifySequence_ = currentNotifySequence;
+    }
+
+    int32_t GetCurrentNotifySequence() const
+    {
+        return currentNotifySequence_;
+    }
+
+    void SetExtraInfos(std::string_view extraInfos)
+    {
+        extraInfos_ = extraInfos.data();
+    }
+
+    const std::string& GetExtraInfos() const
+    {
+        return extraInfos_;
+    }
+
+    void SetSummary(const std::map<std::string, int64_t>& summary)
+    {
+        summary_ = summary;
+    }
+
+    const std::map<std::string, int64_t>& GetSummary() const
+    {
+        return summary_;
+    }
+
+    void SetSpringLoadingAborted()
+    {
+        isSpringLoadingAborted_ = true;
+    }
+
+    bool IsSpringLoadingAborted() const
+    {
+        return isSpringLoadingAborted_;
+    }
+
+    const RefPtr<NG::DragSpringLoadingConfiguration>& GetDragSpringLoadingConfiguration() const
+    {
+        return DragSpringLoadingConfiguration_;
+    }
+
+    void SetDragSpringLoadingConfiguration(
+        const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
+    {
+        DragSpringLoadingConfiguration_ = dragSpringLoadingConfiguration;
+    }
+
+private:
+    DragSpringLoadingState state_;
+    int32_t currentNotifySequence_ = 0;
+    std::string extraInfos_;
+    std::map<std::string, int64_t> summary_;
+    bool isSpringLoadingAborted_ = false;
+    RefPtr<NG::DragSpringLoadingConfiguration> DragSpringLoadingConfiguration_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_CLICK_RECOGNIZER_H

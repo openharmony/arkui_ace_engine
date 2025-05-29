@@ -156,6 +156,7 @@ void LayoutProperty::Reset()
     layoutDirection_.reset();
     propVisibility_.reset();
     propIsBindOverlay_.reset();
+    backgroundIgnoresLayoutSafeAreaEdges_.reset();
     CleanDirty();
 }
 
@@ -396,6 +397,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     isOverlayNode_ = layoutProperty->isOverlayNode_;
     overlayOffsetX_ = layoutProperty->overlayOffsetX_;
     overlayOffsetY_ = layoutProperty->overlayOffsetY_;
+    backgroundIgnoresLayoutSafeAreaEdges_ = layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
@@ -434,19 +436,28 @@ void LayoutProperty::ExpandConstraintWithSafeArea()
         return;
     }
     RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
-    if (parent) {
-        IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
-            .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
-        if (ignoreLayoutSafeAreaOpts_) {
-            options = *ignoreLayoutSafeAreaOpts_;
-        }
-        ExpandEdges sae = parent->GetAccumulatedSafeAreaExpand(true, options);
-        auto contentSize = host->GetGeometryNode()->GetParentLayoutConstraint()->parentIdealSize;
-        layoutConstraint_->parentIdealSize.SetWidth(
-            contentSize.Width().value_or(0) + sae.left.value_or(0) + sae.right.value_or(0));
-        layoutConstraint_->parentIdealSize.SetHeight(
-            contentSize.Height().value_or(0) + sae.top.value_or(0) + sae.bottom.value_or(0));
+    CHECK_NULL_VOID(parent);
+    IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    if (ignoreLayoutSafeAreaOpts_) {
+        options = *ignoreLayoutSafeAreaOpts_;
     }
+    ExpandEdges sae = parent->GetAccumulatedSafeAreaExpand(true, options);
+    auto parentConstraint = host->GetGeometryNode()->GetParentLayoutConstraint();
+    OptionalSizeF contentSize;
+    if (parentConstraint) {
+        contentSize = parentConstraint->parentIdealSize;
+    } else {
+        auto rect = parent->GetGeometryNode()->GetFrameSize();
+        auto padding = parent->GetLayoutProperty()->CreatePaddingAndBorder();
+        MinusPaddingToNonNegativeSize(padding, rect);
+        contentSize.SetWidth(rect.Width());
+        contentSize.SetHeight(rect.Height());
+    }
+    layoutConstraint_->parentIdealSize.SetWidth(
+        contentSize.Width().value_or(0.0f) + sae.left.value_or(0.0f) + sae.right.value_or(0.0f));
+    layoutConstraint_->parentIdealSize.SetHeight(
+        contentSize.Height().value_or(0.0f) + sae.top.value_or(0.0f) + sae.bottom.value_or(0.0f));
 }
 
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
@@ -1009,7 +1020,7 @@ void LayoutProperty::UpdateIgnoreLayoutSafeAreaOpts(const IgnoreLayoutSafeAreaOp
     if (!ignoreLayoutSafeAreaOpts_) {
         ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
     }
-    if (*ignoreLayoutSafeAreaOpts_ != opts) {
+    if (ignoreLayoutSafeAreaOpts_->NeedUpdateWithCheck(opts)) {
         *ignoreLayoutSafeAreaOpts_ = opts;
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
@@ -1023,12 +1034,11 @@ bool LayoutProperty::IsExpandConstraintNeeded()
     }
     auto edges = ignoreLayoutSafeAreaOpts_->edges;
     bool res = false;
-    if ((edges | LAYOUT_SAFE_AREA_EDGE_TOP) || (edges | LAYOUT_SAFE_AREA_EDGE_BOTTOM)) {
-        res |=
-            (layoutPolicy_->heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH) == LayoutCalPolicy::MATCH_PARENT);
+    if ((edges & LAYOUT_SAFE_AREA_EDGE_TOP) || (edges & LAYOUT_SAFE_AREA_EDGE_BOTTOM)) {
+        res |= layoutPolicy_->IsHeightMatch();
     }
-    if ((edges | LAYOUT_SAFE_AREA_EDGE_START) || (edges | LAYOUT_SAFE_AREA_EDGE_END)) {
-        res |= (layoutPolicy_->widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH) == LayoutCalPolicy::MATCH_PARENT);
+    if ((edges & LAYOUT_SAFE_AREA_EDGE_START) || (edges & LAYOUT_SAFE_AREA_EDGE_END)) {
+        res |= layoutPolicy_->IsWidthMatch();
     }
     return res;
 }
@@ -1152,6 +1162,15 @@ void LayoutProperty::UpdateLayoutDirection(TextDirection value)
     OnPropertyChangeMeasure();
 }
 
+void LayoutProperty::UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value)
+{
+    if (backgroundIgnoresLayoutSafeAreaEdges_ == value) {
+        return;
+    }
+    backgroundIgnoresLayoutSafeAreaEdges_ = value;
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+}
+
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
 {
     auto direction = layoutDirection_.value_or(TextDirection::AUTO);
@@ -1258,12 +1277,25 @@ void LayoutProperty::UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPoli
     if (!layoutPolicy_) {
         layoutPolicy_ = NG::LayoutPolicyProperty();
     }
+    if (UpdateLayoutPolicyWithCheck(layoutPolicy, isWidth)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+bool LayoutProperty::UpdateLayoutPolicyWithCheck(const LayoutCalPolicy layoutPolicy, bool isWidth)
+{
     if (isWidth) {
+        if (layoutPolicy_->widthLayoutPolicy_ && layoutPolicy_->widthLayoutPolicy_.value() == layoutPolicy) {
+            return false;
+        }
         layoutPolicy_->widthLayoutPolicy_ = layoutPolicy;
     } else {
+        if (layoutPolicy_->heightLayoutPolicy_ && layoutPolicy_->heightLayoutPolicy_.value() == layoutPolicy) {
+            return false;
+        }
         layoutPolicy_->heightLayoutPolicy_ = layoutPolicy;
     }
-    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    return true;
 }
 
 std::optional<NG::LayoutPolicyProperty> LayoutProperty::GetLayoutPolicyProperty()
@@ -1943,6 +1975,38 @@ void LayoutProperty::CheckLocalizedSafeAreaPadding(const TextDirection& directio
         safeAreaPadding.left = std::optional<CalcLength>(CalcLength(0));
     }
     LocalizedPaddingOrMarginChange(safeAreaPadding, safeAreaPadding_);
+}
+
+void LayoutProperty::CheckIgnoreLayoutSafeArea(const TextDirection& direction)
+{
+    CHECK_NULL_VOID(ignoreLayoutSafeAreaOpts_);
+    auto rawEdges = ignoreLayoutSafeAreaOpts_->rawEdges;
+    LayoutSafeAreaEdge edges = LAYOUT_SAFE_AREA_EDGE_NONE;
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_TOP) {
+        edges |= LAYOUT_SAFE_AREA_EDGE_TOP;
+    }
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_BOTTOM) {
+        edges |= LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+    }
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_START) {
+        if (direction == TextDirection::RTL) {
+            edges |= LAYOUT_SAFE_AREA_EDGE_END;
+        } else {
+            edges |= LAYOUT_SAFE_AREA_EDGE_START;
+        }
+    }
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_END) {
+        if (direction == TextDirection::RTL) {
+            edges |= LAYOUT_SAFE_AREA_EDGE_START;
+        } else {
+            edges |= LAYOUT_SAFE_AREA_EDGE_END;
+        }
+    }
+
+    if (edges != ignoreLayoutSafeAreaOpts_->edges) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        ignoreLayoutSafeAreaOpts_->edges = edges;
+    }
 }
 
 void LayoutProperty::LocalizedPaddingOrMarginChange(

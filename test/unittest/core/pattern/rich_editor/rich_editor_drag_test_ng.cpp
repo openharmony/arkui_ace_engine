@@ -98,6 +98,9 @@ RefPtr<RichEditorPattern> RichEditorDragTestNg::GetRichEditorPattern()
  */
 HWTEST_F(RichEditorDragTestNg, RichEditorDragTest001, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -133,9 +136,11 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest001, TestSize.Level1)
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
     EXPECT_EQ(pattern->status_, Status::DRAGGING);
     eventHub->FireOnDragMove(event, "");
+    pattern->isMousePressed_ = true;
     auto onDragEnd = eventHub->GetOnDragEnd();
     onDragEnd(event);
     EXPECT_EQ(pattern->status_, Status::NONE);
+    EXPECT_FALSE(pattern->isMousePressed_);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -148,6 +153,9 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest001, TestSize.Level1)
  */
 HWTEST_F(RichEditorDragTestNg, RichEditorDragTest002, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -202,6 +210,9 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest002, TestSize.Level1)
  */
 HWTEST_F(RichEditorDragTestNg, RichEditorDragTest003, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -242,6 +253,9 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest003, TestSize.Level1)
  */
 HWTEST_F(RichEditorDragTestNg, RichEditorDragTest004, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -530,40 +544,6 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropTextOperation001, TestSize.Level1
     auto temp = richEditorPattern->caretPosition_;
     richEditorPattern->HandleOnDragDropTextOperation(INIT_VALUE_1, false);
     EXPECT_NE(richEditorPattern->caretPosition_, temp);
-}
-
-/**
- * @tc.name: GetThumbnailCallback001
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, GetThumbnailCallback001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto host = richEditorPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-
-    gestureHub->InitDragDropEvent();
-    gestureHub->SetThumbnailCallback(richEditorPattern->GetThumbnailCallback());
-    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
-}
-
-
-/**
- * @tc.name: GetThumbnailCallback002
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, GetThumbnailCallback002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-
-    richEditorPattern->InitDragDropEvent();
-    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
 }
 
 /**

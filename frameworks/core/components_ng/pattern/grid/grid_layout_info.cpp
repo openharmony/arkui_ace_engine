@@ -17,6 +17,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const int32_t MAX_CUMULATIVE_LINES = 100;
+}
 int32_t GridLayoutInfo::GetItemIndexByPosition(int32_t position)
 {
     auto iter = positionItemIndexMap_.find(position);
@@ -1080,4 +1083,30 @@ bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
     }
     return true;
 }
+
+bool GridLayoutInfo::IsAllItemsMeasured() const
+{
+    if (gridMatrix_.empty()) {
+        return false;
+    }
+    auto allItemsMeasured = false;
+    auto firstLine = gridMatrix_.begin();
+    if (firstLine->first == 0) {
+        if (firstLine->second.empty()) {
+            return false;
+        }
+        auto firstItem = firstLine->second.begin();
+        allItemsMeasured |= firstItem->second == 0;
+    }
+    if (allItemsMeasured) {
+        auto lastLine = gridMatrix_.rbegin();
+        if (lastLine->second.empty() || lastLine->first - firstLine->first > MAX_CUMULATIVE_LINES) {
+            return false;
+        }
+        auto lastItem = lastLine->second.rbegin();
+        allItemsMeasured &= lastItem->second == GetChildrenCount() - 1;
+    }
+    return allItemsMeasured;
+}
+
 } // namespace OHOS::Ace::NG

@@ -89,11 +89,14 @@ const uint32_t MIXTURE = 0x03;
 struct RangeContent {
     std::string icon_;
     std::string text_;
+    RefPtr<ResourceObject> iconResObj_;
+    RefPtr<ResourceObject> textResObj_;
 };
 
 struct TextCascadePickerOptions {
     std::vector<std::string> rangeResult;
     std::vector<TextCascadePickerOptions> children;
+    RefPtr<ResourceObject> rangeResultResObj;
 };
 
 struct TextCascadePickerOptionsAttr {

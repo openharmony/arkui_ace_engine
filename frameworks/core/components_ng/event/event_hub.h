@@ -126,6 +126,8 @@ public:
     void SetOnPreDrag(OnPreDragFunc&& onPreDragFunc);
     const OnPreDragFunc& GetOnPreDrag() const;
     void SetOnDragStart(OnDragStartFunc&& onDragStart);
+    void SetCustomerOnDragSpringLoading(OnDrapDropSpringLoadingFunc&& onDragSpringLoading);
+    const OnDrapDropSpringLoadingFunc& GetCustomerOnDragSpringLoading() const;
 
     const OnDragStartFunc& GetOnDragStart() const
     {
@@ -163,6 +165,7 @@ public:
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
     bool HasOnDrop() const;
     bool HasCustomerOnDragEnter() const;
+    bool HasCustomerOnDragSpringLoading() const;
     bool HasCustomerOnDragLeave() const;
     bool HasCustomerOnDragMove() const;
     bool HasCustomerOnDragEnd() const;
@@ -196,7 +199,8 @@ public:
     bool HasStateStyle(UIState state) const;
     void AddSupportedState(UIState state);
     void SetSupportedStates(UIState state);
-    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner);
+    void AddSupportedUIStateWithCallback(
+        UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner = false);
     void RemoveSupportedUIState(UIState state, bool isInner);
     bool GetUserSetStateStyle();
     void SetScrollingFeatureForbidden(bool isSetStateStyle);
@@ -239,6 +243,7 @@ public:
     void ClearCustomerOnDragFunc();
     void ClearCustomerOnDragStart();
     void ClearCustomerOnDragEnter();
+    void ClearCustomerOnDragSpringLoading();
     void ClearCustomerOnDragMove();
     void ClearCustomerOnDragLeave();
     void ClearCustomerOnDrop();
@@ -318,6 +323,8 @@ protected:
     std::function<void()> onJSFrameNodeAppear_;
 
 private:
+    void AddPressedListener();
+
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
     RefPtr<InputEventHub> inputEventHub_;
@@ -348,6 +355,7 @@ private:
 
     OnDragStartFunc defaultOnDragStart_;
     OnDragFunc customerOnDragEnter_;
+    OnDrapDropSpringLoadingFunc customerOnDragSpringLoading_;
     OnDragFunc customerOnDragLeave_;
     OnDragFunc customerOnDragMove_;
     OnDragFunc customerOnDrop_;

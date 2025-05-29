@@ -411,6 +411,9 @@
       OHOS::Ace::V2::COLUMN_ETS_TAG;
       OHOS::Ace::V2::IMAGE_ETS_TAG;
       OHOS::Ace::V2::MOVING_PHOTO_ETS_TAG;
+      OHOS::Ace::V2::ROOT_ETS_TAG;
+      OHOS::Ace::V2::STAGE_ETS_TAG;
+      OHOS::Ace::V2::PAGE_ETS_TAG;
       OHOS::Ace::NG::AccessibilityProperty::*;
       OHOS::Ace::NG::BoxLayoutAlgorithm::*;
       OHOS::Ace::NG::EventHub::*;
@@ -473,6 +476,7 @@
       OHOS::Ace::NG::BuildMenuBarRow*;
       OHOS::Ace::RegistAppBarNodeBuilder*;
       OHOS::Ace::RegisterBeforeCreateLayoutBuilder*;
+      OHOS::Ace::Kit::FrameNode::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
@@ -483,6 +487,7 @@
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
       "OHOS::Ace::ElementRegister::AddUINode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::ElementRegister::GetNodeById(int)";
+      "OHOS::Ace::ElementRegister::GetUINodeById(int)";
 
       construction?vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm-in-OHOS::Ace::NG::MovingPhotoLayoutAlgorithm;
       construction?vtable?for?OHOS::Ace::NG::EventHub-in-OHOS::Ace::NG::MovingPhotoEventHub;
@@ -549,6 +554,7 @@
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
       OHOS::Ace::NG::PanRecognizer::GetDistance*;
+      OHOS::Ace::NG::NodeRenderStatusMonitor::*;
     };
   local:
     *;

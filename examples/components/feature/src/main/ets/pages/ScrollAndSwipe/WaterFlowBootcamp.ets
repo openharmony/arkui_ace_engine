@@ -121,6 +121,10 @@ export struct WaterFlowBootcamp {
   @State fadingEdgeLengthValue: number = 32;
   @State enableFadingEdgeLengthUnit: boolean = false;
   @State fadingEdgeLengthUnit: LengthUnit = LengthUnit.VP;
+  @State enableScrollBarMarginStart: boolean = false;
+  @State scrollBarMarginStart: number = 0;
+  @State enableScrollBarMarginEnd: boolean = false;
+  @State scrollBarMarginEnd: number = 0;
   @State enableLayoutDirection: boolean = false;
   @State layoutDirection: FlexDirection = FlexDirection.Column;
   @State enableLayoutMode: boolean = false;
@@ -750,6 +754,10 @@ export struct WaterFlowBootcamp {
             .borderRadius(12)
           }, (item: string) => item)
         }
+        .scrollBarMargin({
+          start: useEnabled(this.enableScrollBarMarginStart, LengthMetrics.vp(this.scrollBarMarginStart)),
+          end: useEnabled(this.enableScrollBarMarginEnd, LengthMetrics.vp(this.scrollBarMarginEnd))
+        })
         .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
         .columnsTemplate(useEnabled(this.enableColumnsTemplate, this.columnsTemplate))
         .rowsTemplate(useEnabled(this.enableRowsTemplate, this.rowsTemplate))
@@ -1431,6 +1439,22 @@ export struct WaterFlowBootcamp {
             { label: 'ALWAYS_TOP_DOWN', value: WaterFlowLayoutMode.ALWAYS_TOP_DOWN },
             { label: 'SLIDING_WINDOW', value: WaterFlowLayoutMode.SLIDING_WINDOW }
           ]
+        })
+
+        SliderBlock({
+          title: 'scrollBarMargin.start',
+          isEnabled: $enableScrollBarMarginStart,
+          value: $scrollBarMarginStart,
+          min: 0,
+          max: 32
+        })
+
+        SliderBlock({
+          title: 'scrollBarMargin.end',
+          isEnabled: $enableScrollBarMarginEnd,
+          value: $scrollBarMarginEnd,
+          min: 0,
+          max: 32
         })
 
         RadioBlock({

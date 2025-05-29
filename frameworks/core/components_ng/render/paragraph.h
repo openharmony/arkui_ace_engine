@@ -157,6 +157,7 @@ struct ParagraphStyle {
     Dimension paragraphSpacing;
     bool isEndAddParagraphSpacing = false;
     int32_t textStyleUid = 0;
+    bool optimizeTrailingSpace = false;
     bool isOnlyBetweenLines = false;
     bool isFirstParagraphLineSpacing = true;
     bool enableAutoSpacing = false;
@@ -263,6 +264,7 @@ public:
     virtual void Layout(float width) = 0;
     // interfaces for reLayout
     virtual void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) = 0;
+    virtual void ReLayoutForeground(const TextStyle& textStyle) = 0;
     virtual float GetHeight() = 0;
     virtual float GetTextWidth() = 0;
     virtual size_t GetLineCount() = 0;

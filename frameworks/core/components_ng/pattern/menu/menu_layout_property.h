@@ -70,6 +70,7 @@ public:
         value->propBorderRadius_ = CloneBorderRadius();
         value->propMenuWidth_ = CloneMenuWidth();
         value->propShowInSubWindow_ = CloneShowInSubWindow();
+        value->propShowDefaultSelectedIcon_ = CloneShowDefaultSelectedIcon();
         value->propExpandingMode_ = CloneExpandingMode();
         value->propItemDivider_ = CloneItemDivider();
         value->propItemGroupDivider_ = CloneItemGroupDivider();
@@ -91,6 +92,7 @@ public:
         ResetBorderRadius();
         ResetMenuWidth();
         ResetShowInSubWindow();
+        ResetShowDefaultSelectedIcon();
         ResetExpandingMode();
         ResetItemDivider();
         ResetItemGroupDivider();
@@ -143,6 +145,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectAvoidanceMode, AvoidanceMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowDefaultSelectedIcon, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE)
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;

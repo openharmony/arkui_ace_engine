@@ -85,6 +85,8 @@ public:
     static ArkUINativeModuleValue ResetForegroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOptimizeTrailingSpace(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOptimizeTrailingSpace(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSelection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTextSelectableMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -109,6 +111,8 @@ public:
     static ArkUINativeModuleValue ResetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMarqueeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMarqueeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnMarqueeStateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);

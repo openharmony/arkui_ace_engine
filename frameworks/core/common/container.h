@@ -756,6 +756,11 @@ public:
         return Rect();
     }
 
+    virtual Rect GetFoldExpandAvailableRect() const
+    {
+        return Rect();
+    }
+
     static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
     virtual void UpdateColorMode(uint32_t colorMode) {};

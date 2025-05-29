@@ -69,6 +69,32 @@ JSRef<JSVal> JSRouteInfo::GetParam() const
     return param_;
 }
 
+void JSNavigationStack::RemoveByIndexes(const std::vector<int32_t>& indexes)
+{
+    if (indexes.empty()) {
+        return;
+    }
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto remove = dataSourceObj_->GetProperty("removeByIndexes");
+    if (!remove->IsFunction()) {
+        return;
+    }
+    auto removeFunc = JSRef<JSFunc>::Cast(remove);
+    auto indexArr = JSRef<JSArray>::New();
+    if (indexArr->IsEmpty()) {
+        return;
+    }
+    for (int32_t idx = 0; idx < static_cast<int32_t>(indexes.size()); ++idx) {
+        indexArr->SetValueAt(idx, JSRef<JSVal>::Make(ToJSValue(indexes[idx])));
+    }
+    JSRef<JSVal> params[1];
+    params[0] = indexArr;
+    removeFunc->Call(dataSourceObj_, 1, params);
+}
+
 void JSNavigationStack::SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
 {
     // clean callback from old JSNavPathStack

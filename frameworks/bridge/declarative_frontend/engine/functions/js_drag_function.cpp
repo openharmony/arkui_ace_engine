@@ -471,10 +471,135 @@ JSRef<JSObject> JsDragEvent::CreateRectangle(const Rect& info)
     return rectObj;
 }
 
+void JsDragSpringLoadingContext::JSBind(BindingTarget globalObj)
+{
+    JSClass<JsDragSpringLoadingContext>::Declare("SpringLoadingContext");
+    JSClass<JsDragSpringLoadingContext>::CustomProperty(
+        "state", &JsDragSpringLoadingContext::GetState, &JsDragSpringLoadingContext::SetState);
+    JSClass<JsDragSpringLoadingContext>::CustomProperty("currentNotifySequence",
+        &JsDragSpringLoadingContext::GetCurrentNotifySequence, &JsDragSpringLoadingContext::SetCurrentNotifySequence);
+    JSClass<JsDragSpringLoadingContext>::CustomProperty(
+        "dragInfos", &JsDragSpringLoadingContext::GetDragInfos, &JsDragSpringLoadingContext::SetDragInfos);
+    JSClass<JsDragSpringLoadingContext>::CustomProperty(
+        "currentConfig", &JsDragSpringLoadingContext::GetCurrentConfig, &JsDragSpringLoadingContext::SetCurrentConfig);
+    JSClass<JsDragSpringLoadingContext>::CustomMethod("abort", &JsDragSpringLoadingContext::Abort);
+    JSClass<JsDragSpringLoadingContext>::CustomMethod(
+        "updateConfiguration", &JsDragSpringLoadingContext::UpdateConfiguration);
+    JSClass<JsDragSpringLoadingContext>::Bind(
+        globalObj, &JsDragSpringLoadingContext::Constructor, &JsDragSpringLoadingContext::Destructor);
+}
+
+void JsDragSpringLoadingContext::GetState(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(context_);
+    auto state = JSVal(ToJSValue(static_cast<int32_t>(context_->GetState())));
+    auto stateRef = JSRef<JSVal>::Make(state);
+    args.SetReturnValue(stateRef);
+}
+
+void JsDragSpringLoadingContext::SetState(const JSCallbackInfo& args)
+{
+    TAG_LOGD(AceLogTag::ACE_DRAG, "JsDragSpringLoadingContext can not support set state value.");
+}
+
+void JsDragSpringLoadingContext::GetCurrentNotifySequence(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(context_);
+    auto state = JSVal(ToJSValue(static_cast<int32_t>(context_->GetCurrentNotifySequence())));
+    auto stateRef = JSRef<JSVal>::Make(state);
+    args.SetReturnValue(stateRef);
+}
+
+void JsDragSpringLoadingContext::SetCurrentNotifySequence(const JSCallbackInfo& args)
+{
+    TAG_LOGD(AceLogTag::ACE_DRAG, "JsDragSpringLoadingContext can not support set currentNotifySequence value.");
+}
+
+void JsDragSpringLoadingContext::GetDragInfos(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(context_);
+    JSRef<JSObject> dragInfosObj = JSRef<JSObject>::New();
+    auto summary = context_->GetSummary();
+    napi_value nativeValue = UdmfClient::GetInstance()->TransformSummary(summary);
+    CHECK_NULL_VOID(nativeValue);
+    auto jsValue = JsConverter::ConvertNapiValueToJsVal(nativeValue);
+    dragInfosObj->SetPropertyObject("dataSummary", jsValue);
+    dragInfosObj->SetProperty<std::string>("extraInfos", context_->GetExtraInfos());
+    JSRef<JSVal> dragInfosRef = JSRef<JSObject>::Cast(dragInfosObj);
+    args.SetReturnValue(dragInfosRef);
+}
+
+void JsDragSpringLoadingContext::SetDragInfos(const JSCallbackInfo& args)
+{
+    TAG_LOGD(AceLogTag::ACE_DRAG, "JsDragSpringLoadingContext can not support set dragInfos value.");
+}
+
+void JsDragSpringLoadingContext::GetCurrentConfig(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(context_);
+    JSRef<JSObject> curConfigObj = JSRef<JSObject>::New();
+    const auto& config = context_->GetDragSpringLoadingConfiguration();
+    CHECK_NULL_VOID(config);
+    curConfigObj->SetProperty<int32_t>("stillTimeLimit", config->stillTimeLimit);
+    curConfigObj->SetProperty<int32_t>("updateInterval", config->updateInterval);
+    curConfigObj->SetProperty<int32_t>("updateNotifyCount", config->updateNotifyCount);
+    curConfigObj->SetProperty<int32_t>("updateToFinishInterval", config->updateToFinishInterval);
+    JSRef<JSVal> curConfigRef = JSRef<JSObject>::Cast(curConfigObj);
+    args.SetReturnValue(curConfigRef);
+}
+
+void JsDragSpringLoadingContext::SetCurrentConfig(const JSCallbackInfo& args)
+{
+    TAG_LOGD(AceLogTag::ACE_DRAG, "JsDragSpringLoadingContext can not support set currentConfig value.");
+}
+
+void JsDragSpringLoadingContext::Abort(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(context_);
+    context_->SetSpringLoadingAborted();
+}
+
+void JsDragSpringLoadingContext::UpdateConfiguration(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+    CHECK_NULL_VOID(context_);
+    auto config = MakeRefPtr<NG::DragSpringLoadingConfiguration>();
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[0]);
+    int32_t stillTimeLimit = jsObj->GetPropertyValue<int32_t>("stillTimeLimit", NG::DEFAULT_STILL_TIME_LIMIT);
+    int32_t updateInterval = jsObj->GetPropertyValue<int32_t>("updateInterval", NG::DEFAULT_UPDATE_INTERVAL);
+    int32_t updateNotifyCount = jsObj->GetPropertyValue<int32_t>("updateNotifyCount", NG::DEFAULT_UPDATE_NOTIFY_COUNT);
+    int32_t updateToFinishInterval =
+        jsObj->GetPropertyValue<int32_t>("updateToFinishInterval", NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL);
+    config->stillTimeLimit = (stillTimeLimit >= 0) ? stillTimeLimit : NG::DEFAULT_STILL_TIME_LIMIT;
+    config->updateInterval = (updateInterval >= 0) ? updateInterval : NG::DEFAULT_UPDATE_INTERVAL;
+    config->updateNotifyCount = (updateNotifyCount >= 0) ? updateNotifyCount : NG::DEFAULT_UPDATE_NOTIFY_COUNT;
+    config->updateToFinishInterval =
+        (updateToFinishInterval >= 0) ? updateToFinishInterval : NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL;
+    context_->SetDragSpringLoadingConfiguration(std::move(config));
+}
+
+void JsDragSpringLoadingContext::Constructor(const JSCallbackInfo& args)
+{
+    auto springLoadingContext = Referenced::MakeRefPtr<JsDragSpringLoadingContext>();
+    CHECK_NULL_VOID(springLoadingContext);
+    springLoadingContext->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(springLoadingContext));
+}
+
+void JsDragSpringLoadingContext::Destructor(JsDragSpringLoadingContext* springLoadingContext)
+{
+    if (springLoadingContext != nullptr) {
+        springLoadingContext->DecRefCount();
+    }
+}
+
 void JsDragFunction::JSBind(BindingTarget globalObj)
 {
     JsPasteData::JSBind(globalObj);
     JsDragEvent::JSBind(globalObj);
+    JsDragSpringLoadingContext::JSBind(globalObj);
 }
 
 void JsDragFunction::Execute()
@@ -494,6 +619,13 @@ JSRef<JSVal> JsDragFunction::Execute(const RefPtr<DragEvent>& info)
 {
     JSRef<JSVal> dragInfo = JSRef<JSObject>::Cast(CreateDragEvent(info));
     JSRef<JSVal> params[] = { dragInfo };
+    return JsFunction::ExecuteJS(1, params);
+}
+
+JSRef<JSVal> JsDragFunction::DragSpringLoadingExecute(const RefPtr<DragSpringLoadingContext>& info)
+{
+    JSRef<JSVal> springLoadingContext = JSRef<JSObject>::Cast(CreateSpringLoadingContext(info));
+    JSRef<JSVal> params[] = { springLoadingContext };
     return JsFunction::ExecuteJS(1, params);
 }
 
@@ -565,6 +697,15 @@ JSRef<JSObject> JsDragFunction::CreatePasteData(const RefPtr<PasteData>& info)
     CHECK_NULL_RETURN(pasteData, pasteObj);
     pasteData->SetPasteData(info);
     return pasteObj;
+}
+
+JSRef<JSObject> JsDragFunction::CreateSpringLoadingContext(const RefPtr<DragSpringLoadingContext>& info)
+{
+    JSRef<JSObject> contextObj = JSClass<JsDragSpringLoadingContext>::NewInstance();
+    auto springLoadingContext = Referenced::Claim(contextObj->Unwrap<JsDragSpringLoadingContext>());
+    CHECK_NULL_RETURN(springLoadingContext, contextObj);
+    springLoadingContext->SetContext(info);
+    return contextObj;
 }
 
 JSRef<JSObject> JsDragFunction::CreateItemDragInfo(const ItemDragInfo& info)

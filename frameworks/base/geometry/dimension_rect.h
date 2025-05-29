@@ -18,11 +18,13 @@
 
 #include <cmath>
 #include <limits>
+#include <functional>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/dimension_size.h"
 #include "base/json/json_util.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -103,11 +105,31 @@ public:
         jsonValue->Put("height", height_.ToString().c_str());
         return jsonValue->ToString();
     }
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, DimensionRect&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
 
 private:
     Dimension width_ = 0.0_vp;
     Dimension height_ = 0.0_vp;
     DimensionOffset offset_;
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, DimensionRect&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
 };
 
 } // namespace OHOS::Ace

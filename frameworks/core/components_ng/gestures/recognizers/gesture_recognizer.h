@@ -437,6 +437,8 @@ public:
         bool isPostEventResult = false, int32_t postEventNodeId = -1);
 
     void SetPreventDefault(bool preventDefault);
+
+    std::string GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback);
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -501,7 +503,6 @@ protected:
     SourceType deviceType_ = SourceType::NONE;
     SourceTool deviceTool_ = SourceTool::UNKNOWN;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
-    InputEventType originInputEventType_ = InputEventType::TOUCH_SCREEN;
     int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;

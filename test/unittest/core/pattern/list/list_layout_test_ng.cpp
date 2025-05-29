@@ -85,7 +85,6 @@ void ListLayoutTestNg::PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t e
     auto modifier = paintMethod->GetContentModifier(nullptr);
     auto listContentModifier = AceType::DynamicCast<ListContentModifier>(modifier);
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(isClip ? 1 : 0);
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
@@ -503,13 +502,13 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     auto group1 = GetChildFrameNode(frameNode_, 1);
     auto groupRect = group1->GetGeometryNode()->GetFrameRect();
     float groupPos = groupRect.Top();
-    auto item1Rect = GetChildRect(group1, 2);
+    auto item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset - groupPos);
 
     JumpToItemInGroup(2, 1, false, ScrollAlign::END);
     auto group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    auto item2Rect = GetChildRect(group1, 3);
+    auto item2Rect = GetChildRect(group1, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
@@ -518,7 +517,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     group1 = GetChildFrameNode(frameNode_, 1);
     groupRect = group1->GetGeometryNode()->GetFrameRect();
     groupPos = groupRect.Top();
-    item1Rect = GetChildRect(group1, 2);
+    item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
@@ -526,7 +525,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    item2Rect = GetChildRect(group1, 3);
+    item2Rect = GetChildRect(group1, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - groupPos);
 }
 
@@ -562,9 +561,9 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     EXPECT_EQ(header0Rect.Top(), contentStartOffset - groupPos);
 
     auto group1 = GetChildFrameNode(frameNode_, 1);
-    groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
-    auto footer1Rect = GetChildRect(group1, 1);
-    EXPECT_EQ(footer1Rect.Bottom(), 100.f);
+    auto footerIndex = 1/*HeaderCount*/ + GROUP_ITEM_NUMBER;
+    auto footer1Rect = GetChildRect(group1, footerIndex);
+    EXPECT_EQ(footer1Rect.Bottom(), 100.f); 
 
     /**
      * @tc.steps: step3. Scroll To ListItem in group.
@@ -573,13 +572,13 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     JumpToItemInGroup(1, 0, false, ScrollAlign::START);
     group1 = GetChildFrameNode(frameNode_, 1);
     groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
-    auto item1Rect = GetChildRect(group1, 2);
+    auto item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset + GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(2, 1, false, ScrollAlign::END);
     auto group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    auto item2Rect = GetChildRect(group2, 3);
+    auto item2Rect = GetChildRect(group2, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
@@ -587,7 +586,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     FlushUITasks();
     group1 = GetChildFrameNode(frameNode_, 1);
     groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
-    item1Rect = GetChildRect(group1, 2);
+    item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset + GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
@@ -595,7 +594,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    item2Rect = GetChildRect(group2, 3);
+    item2Rect = GetChildRect(group2, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - GROUP_HEADER_LEN - groupPos);
 }
 
@@ -1725,8 +1724,8 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea001, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
     CreateDone();
     EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
-        .Times(1)
-        .WillOnce(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+        .Times(2)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
     FlushUITasks();
     EXPECT_EQ(pattern_->contentEndOffset_, 100);
@@ -1752,6 +1751,34 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea002, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(WIDTH, HEIGHT)));
+}
+
+/**
+ * @tc.name: ListLayout_SafeArea003
+ * @tc.desc: Test list layout with expandSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    model.SetScrollBar(DisplayMode::ON);
+    CreateListItems(TOTAL_ITEM_NUMBER * 2);
+    CreateDone();
+
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
+        .Times(2)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+    FlushUITasks();
+    EXPECT_EQ(pattern_->contentEndOffset_, 100);
+
+    RefPtr<ListPaintMethod> paintMethod = UpdateOverlayModifier();
+    auto scrollBar = paintMethod->scrollBar_.Upgrade();
+    EXPECT_EQ(scrollBar->GetEstimatedHeigh(), 2000);
 }
 
 /**

@@ -79,6 +79,7 @@ using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
+class NodeRenderStatusMonitor;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -582,7 +583,7 @@ public:
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
     void FlushModifier() override;
-    void FlushMessages() override;
+    void FlushMessages(std::function<void()> callback = nullptr) override;
 
     void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
     void FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node);
@@ -1094,7 +1095,6 @@ public:
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
-    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode);
 
     bool IsHoverModeChange() const
     {
@@ -1209,6 +1209,12 @@ public:
     void NotifyDragTouchEvent(const TouchEvent& event);
     void NotifyDragMouseEvent(const MouseEvent& event);
     void NotifyDragOnHide();
+
+    void AddToOcclusionMap(int32_t frameNodeId, bool enable)
+    {
+        keyOcclusionNodes_[frameNodeId] = enable;
+    }
+    const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1355,6 +1361,8 @@ private:
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
 
     void FlushAnimationDirtysWhenExist(const AnimationOption& option);
+
+    void UpdateOcclusionCullingStatus();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -1532,6 +1540,8 @@ private:
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
+    std::unordered_map<int32_t, bool> keyOcclusionNodes_;
+    RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
 };
 
 /**

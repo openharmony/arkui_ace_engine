@@ -25,6 +25,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RowModelNG : public RowModel {
 public:
     void Create(const std::optional<Dimension>& space, AlignDeclaration*, const std::string& tag) override;
+    void Create(
+        const RefPtr<ResourceObject>& spaceResObj, AlignDeclaration* declaration, const std::string& tag) override;
     void SetAlignItems(FlexAlign flexAlign) override;
     void SetJustifyContent(FlexAlign flexAlign) override;
     void SetIsReverse(bool isReverse) override;

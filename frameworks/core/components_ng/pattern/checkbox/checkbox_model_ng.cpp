@@ -160,6 +160,10 @@ void CheckBoxModelNG::SetResponseRegion(const std::vector<DimensionRect>& respon
 
 void CheckBoxModelNG::SetSelect(FrameNode* frameNode, bool isSelected)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected, frameNode);
 }
 

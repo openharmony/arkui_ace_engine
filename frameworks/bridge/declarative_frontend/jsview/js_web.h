@@ -154,8 +154,18 @@ public:
     static void RunJavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
+    static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
+    static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
+    static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);
+    static JSRef<JSVal> CreatPermissionRequestHandler(const WebPermissionRequestEvent& eventInfo);
+    static JSRef<JSVal> CreatGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo);
+    static JSRef<JSVal> CreatNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo);
+    static JSRef<JSVal> CreatFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo);
+    static JSRef<JSVal> CreatCommonDialogResultHandler(const WebDialogEvent& eventInfo);
+
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
+    static int32_t webDebuggingPort_;
     static JSwebEventCallback OnControllerAttachedCallback_;
     static void CopyOption(int32_t copyOption);
     static void OnOverrideUrlLoading(const JSCallbackInfo& args);

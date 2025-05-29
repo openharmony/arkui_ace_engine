@@ -77,6 +77,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
     style.enableAutoSpace = paraStyle.enableAutoSpacing;
     style.defaultTextStyleUid = paraStyle.textStyleUid;
+    style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
     if (paraStyle.isOnlyBetweenLines) {
         style.textHeightBehavior =
             paraStyle.isFirstParagraphLineSpacing
@@ -217,6 +218,28 @@ void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const 
     ConvertTypographyStyle(style, paraStyle_);
     style.relayoutChangeBitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
     paragraph_->Relayout(width, style, txtStyles);
+}
+
+void TxtParagraph::ReLayoutForeground(const TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
+    Rosen::TextStyle txtStyle;
+    Constants::ConvertForegroundPaint(textStyle, paragraph_->GetMaxWidth(), paragraph_->GetHeight(), txtStyle);
+    std::vector<Rosen::TextStyle> txtStyles;
+    txtStyles.emplace_back(txtStyle);
+    Rosen::TypographyStyle style;
+    ConvertTypographyStyle(style, paraStyle_);
+    bool isTextStyleChange = std::any_of(txtStyles.begin(), txtStyles.end(), [](const Rosen::TextStyle& style) {
+        return style.relayoutChangeBitmap.any();
+    });
+    if (SystemProperties::GetTextTraceEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "ReLayoutForeground id:%{public}d ReLayoutForeground: %{public}s parid:%{public}d "
+            "isTextStyleChange:%{public}d",
+            textStyle.GetTextStyleUid(), txtStyles.front().relayoutChangeBitmap.to_string().c_str(),
+            paraStyle_.textStyleUid, isTextStyleChange);
+    }
+    paragraph_->Relayout(paragraph_->GetMaxWidth(), style, txtStyles);
 }
 
 float TxtParagraph::GetHeight()

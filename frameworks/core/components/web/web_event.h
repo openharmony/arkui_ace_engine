@@ -1391,6 +1391,7 @@ public:
     virtual int GetInputFieldType() const = 0;
     virtual std::string GetSelectionText() const = 0;
     virtual void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const {}
+    virtual bool IsAILink() const { return false; }
 };
 
 class ACE_EXPORT ContextMenuResult : public AceType {

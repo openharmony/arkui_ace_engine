@@ -154,7 +154,7 @@ void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
-    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, isExcludeInner);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false, isExcludeInner);
     func = nullptr;
 }
 
@@ -1980,6 +1980,12 @@ ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handle, uint32_t backgrou
     return CustomDialog::SetDialogBackgroundColor(handle, backgroundColor);
 }
 
+ArkUI_Int32 SetDialogBackgroundColorWithColorSpace(
+    ArkUIDialogHandle handle, uint32_t backgroundColor, int32_t ColorSpace)
+{
+    return CustomDialog::SetDialogBackgroundColor(handle, backgroundColor);
+}
+
 ArkUI_Int32 SetDialogCornerRadius(
     ArkUIDialogHandle handle, float topLeft, float topRight, float bottomLeft, float bottomRight)
 {
@@ -2181,6 +2187,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .setAutoCancel = SetDialogAutoCancel,
         .setMask = SetDialogMask,
         .setBackgroundColor = SetDialogBackgroundColor,
+        .setBackgroundColorWIthColorSpace = SetDialogBackgroundColorWithColorSpace,
         .setCornerRadius = SetDialogCornerRadius,
         .setGridColumnCount = SetDialogGridColumnCount,
         .enableCustomStyle = EnableDialogCustomStyle,
@@ -2748,6 +2755,7 @@ const CJUIDialogAPI* GetCJUIDialogAPI()
         .setAutoCancel = SetDialogAutoCancel,
         .setMask = SetDialogMask,
         .setBackgroundColor = SetDialogBackgroundColor,
+        .setBackgroundColorWithColorSpace = SetDialogBackgroundColorWithColorSpace,
         .setCornerRadius = SetDialogCornerRadius,
         .setGridColumnCount = SetDialogGridColumnCount,
         .enableCustomStyle = EnableDialogCustomStyle,

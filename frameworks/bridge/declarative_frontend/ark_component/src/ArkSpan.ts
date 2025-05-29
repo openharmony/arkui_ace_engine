@@ -675,6 +675,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new Error('Method not implemented.');
   }
 
+  transform3D(value: object): this {
+    throw new Error('Method not implemented.');
+  }
+
   onAppear(event: () => void): this {
     throw new Error('Method not implemented.');
   }
@@ -777,6 +781,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 
   onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this {
+    throw new Error('Method not implemented.');
+  }
+
+  onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this {
     throw new Error('Method not implemented.');
   }
 

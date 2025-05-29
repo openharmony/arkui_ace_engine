@@ -67,6 +67,19 @@ void SetCounterBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     CounterModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
+void SetCounterBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    CounterModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void ResetCounterBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -126,6 +139,7 @@ const ArkUICounterModifier* GetCounterModifier()
         .setCounterWidth = SetCounterWidth,
         .resetCounterWidth = ResetCounterWidth,
         .setCounterBackgroundColor = SetCounterBackgroundColor,
+        .setCounterBackgroundColorWithColorSpace = SetCounterBackgroundColorWithColorSpace,
         .resetCounterBackgroundColor = ResetCounterBackgroundColor,
         .setCounterOnInc = SetCounterOnInc,
         .resetCounterOnInc = ResetCounterOnInc,
@@ -150,6 +164,7 @@ const CJUICounterModifier* GetCJUICounterModifier()
         .setCounterWidth = SetCounterWidth,
         .resetCounterWidth = ResetCounterWidth,
         .setCounterBackgroundColor = SetCounterBackgroundColor,
+        .setCounterBackgroundColorWithColorSpace = SetCounterBackgroundColorWithColorSpace,
         .resetCounterBackgroundColor = ResetCounterBackgroundColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

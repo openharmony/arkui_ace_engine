@@ -43,6 +43,11 @@ void RepeatModelNG::FinishRender(std::list<int32_t>& removedElmtId)
     stack->PopContainer();
 }
 
+bool RepeatModelNG::IsInAnimation()
+{
+    return AnimationUtils::IsImplicitAnimationOpen();
+}
+
 void RepeatModelNG::MoveChild(uint32_t fromIndex)
 {
     ACE_SCOPED_TRACE("RepeatModelNG::MoveChild()");

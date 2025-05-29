@@ -155,6 +155,12 @@ class ArkBorderRadius {
   }
 
   isEqual(another: ArkBorderRadius): boolean {
+    if (this == undefined && another == undefined) {
+      return true;
+    }
+    if ((this == undefined && another != undefined) || (this != undefined && another == undefined)) {
+      return false
+    }
     return (
       (this.topLeft === another.topLeft &&
         this.topRight === another.topRight &&
@@ -237,6 +243,7 @@ class ArkSweepGradient {
   end: number | string | undefined;
   rotation: number | string | undefined;
   colors: Array<any>;
+  metricsColors: Array<any>;
   repeating: boolean | undefined;
 
   constructor(center: Array<any>,
@@ -244,12 +251,14 @@ class ArkSweepGradient {
     end: number | string | undefined,
     rotation: number | string | undefined,
     colors: Array<any>,
+    metricsColors: Array<any>,
     repeating: boolean | undefined) {
     this.center = center;
     this.start = start;
     this.end = end;
     this.rotation = rotation;
     this.colors = colors;
+    this.metricsColors = metricsColors;
     this.repeating = repeating;
   }
 
@@ -260,6 +269,7 @@ class ArkSweepGradient {
       this.end === another.end &&
       this.rotation === another.rotation &&
       deepCompareArrays(this.colors, another.colors) &&
+      deepCompareArrays(this.metricsColors, another.metricsColors) &&
       this.repeating === another.repeating
     );
   }
@@ -465,6 +475,20 @@ class ArkMenuAlignType {
   }
 }
 
+class ArkPrefixOrSuffix {
+  value: CustomBuilder;
+  options: SliderCustomContentOptions;
+
+  constructor(value: CustomBuilder, options?:SliderCustomContentOptions) {
+    this.value = value;
+    this.options = options;
+  }
+
+  isEqual(another: ArkPrefixOrSuffix): boolean {
+    return this.value === another.value && this.options === another.options;
+  }
+}
+
 class ArkSliderTips {
   showTip: boolean;
   tipText: string | ResourceStr;
@@ -496,6 +520,20 @@ class ArkStarStyle {
       this.foregroundUri === another.foregroundUri &&
       this.secondaryUri === another.secondaryUri
     );
+  }
+}
+
+class ArkRegisterNativeEmbedRule {
+  tag: string;
+  type: string;
+
+  constructor() {
+    this.tag = undefined;
+    this.type = undefined;
+  }
+
+  isEqual(another: ArkRegisterNativeEmbedRule): boolean {
+    return (this.tag === another.tag && this.type === another.type);
   }
 }
 
@@ -1584,6 +1622,88 @@ class ArkDragPreview {
   }
 }
 
+class ArkOnDrop {
+  event: (event?: DragEvent, extraParams?: string) => void;
+  disableDataPrefetch: boolean | undefined;
+  constructor() {
+    this.event = undefined;
+    this.disableDataPrefetch = false;
+  }
+
+  isEqual(another: ArkOnDrop): boolean {
+    return (
+      this.event === another.event &&
+      this.disableDataPrefetch === another.disableDataPrefetch
+    );
+  }
+}
+
+class ArkDragSpringLoading {
+  callback: (context: ArkSpringLoadingContext) => void;
+  configuration: ArkDragSpringLoadingConfiguration | undefined;
+  constructor() {
+    this.configuration = undefined;
+    this.callback = undefined;
+  }
+
+  isEqual(another: ArkDragSpringLoading): boolean {
+    return (
+      this.callback === another.callback &&
+      this.configuration.isEqual(another.configuration)
+    );
+  }
+}
+
+class ArkSpringLoadingContext {
+  state: DragSpringLoadingState | undefined;
+  currentNotifySequence: number | undefined;
+  dragInfos: SpringLoadingDragInfos | undefined;
+  currentConfig: ArkDragSpringLoadingConfiguration | undefined;
+  abort: () => void;
+  updateConfiguration: (config: ArkDragSpringLoadingConfiguration) => void;
+  constructor() {
+    this.state = undefined;
+    this.currentNotifySequence = undefined;
+    this.dragInfos = undefined;
+    this.currentConfig = undefined;
+    this.abort = undefined;
+    this.updateConfiguration = undefined;
+  }
+
+  isEqual(another: ArkSpringLoadingContext): boolean {
+    return (
+      this.state === another.state &&
+      this.currentNotifySequence === another.currentNotifySequence &&
+      this.dragInfos === another.dragInfos &&
+      this.currentConfig.isEqual(another.currentConfig) &&
+      this.abort === another.abort &&
+      this.updateConfiguration === another.updateConfiguration
+    );
+  }
+}
+
+class ArkDragSpringLoadingConfiguration {
+  stillTimeLimit: number | undefined;
+  updateInterval: number | undefined;
+  updateNotifyCount: number | undefined;
+  updateToFinishInterval: number | undefined;
+  constructor() {
+    this.stillTimeLimit = undefined;
+    this.updateInterval = undefined;
+    this.updateNotifyCount = undefined;
+    this.updateToFinishInterval = undefined;
+  }
+
+  isEqual(another: ArkDragSpringLoadingConfiguration): boolean {
+    return (
+      this.stillTimeLimit === another.stillTimeLimit &&
+      this.updateInterval === another.updateInterval &&
+      this.updateNotifyCount === another.updateNotifyCount &&
+      this.updateToFinishInterval === another.updateToFinishInterval
+    );
+  }
+}
+
 class ArkRelativeContainerGuideLine {
   ids: Array<string> | undefined;
   directions: Array<Axis> | undefined;
@@ -1793,5 +1913,22 @@ class ArkAutoPlay {
 
   isEqual(another: ArkAutoPlay): boolean {
     return this.autoPlay === another.autoPlay && this.needStopWhenTouched === another.needStopWhenTouched;
+  }
+}
+
+class ArkWebScriptItem {
+  scripts: Array<string> | undefined;
+  scriptRules: Array<Array<string>> | undefined;
+
+  constructor() {
+    this.scripts = undefined;
+    this.scriptRules = undefined;
+  }
+
+  isEqual(another: ArkWebScriptItem): boolean {
+    return (
+      this.scripts === another.scripts &&
+      this.scriptRules === another.scriptRules
+    );
   }
 }

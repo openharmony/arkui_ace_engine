@@ -1846,11 +1846,11 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg040, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsTouchWithinParentMenuZoneTest01
- * @tc.desc: test IsTouchWithinParentMenuZone
+ * @tc.name: IsTouchWithinParentMenuItemZoneTest01
+ * @tc.desc: test IsTouchWithinParentMenuItemZone
  * @tc.type: FUNC
  */
-HWTEST_F(MenuWrapperTestNg, IsTouchWithinParentMenuZoneTest01, TestSize.Level1)
+HWTEST_F(MenuWrapperTestNg, IsTouchWithinParentMenuItemZoneTest01, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create menuWrapper、menu、image
@@ -1860,52 +1860,71 @@ HWTEST_F(MenuWrapperTestNg, IsTouchWithinParentMenuZoneTest01, TestSize.Level1)
         FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
-
     auto children = wrapperNode->GetChildren();
     auto child = children.rbegin();
-    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuZone(child, children, PointF(0.0f, 0.0f)));
+    /**
+     * @tc.steps: step2. test PointF(0.0f, 0.0f)
+     * @tc.expected: return true
+     */
+    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuItemZone(child, children, PointF(0.0f, 0.0f)));
 
-    auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 11, AceType::MakeRefPtr<MenuItemPattern>());
+    auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
     ASSERT_NE(menuItemNode1, nullptr);
     auto menuNode1 = FrameNode::GetOrCreateFrameNode(
-        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+        V2::MENU_ETS_TAG, 3, []() { return AceType::MakeRefPtr<MenuPattern>(3, V2::MENU_ETS_TAG, MenuType::MENU); });
     ASSERT_NE(menuNode1, nullptr);
-    menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    auto menuNodeInner1 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 4, []() { return AceType::MakeRefPtr<MenuPattern>(4, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNodeInner1, nullptr);
+
     menuNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
-    menuItemNode1->MountToParent(menuNode1);
+    auto mockMenuNodeContext1 = AceType::DynamicCast<MockRenderContext>(menuNode1->GetRenderContext());
+    mockMenuNodeContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
     menuNode1->MountToParent(wrapperNode);
+
+    menuNodeInner1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    auto mockMenuNodeInnerContext1 = AceType::DynamicCast<MockRenderContext>(menuNodeInner1->GetRenderContext());
+    mockMenuNodeInnerContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
+    menuNodeInner1->MountToParent(menuNode1);
+
+    menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    auto mockmenuItemNodeContext1 = AceType::DynamicCast<MockRenderContext>(menuItemNode1->GetRenderContext());
+    mockmenuItemNodeContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
+    menuItemNode1->MountToParent(menuNodeInner1);
+
     auto imageNode =
-        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 5, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(imageNode, nullptr);
     imageNode->MountToParent(wrapperNode);
-    auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
-    ASSERT_NE(menuItemNode2, nullptr);
+
     auto menuNode2 = FrameNode::GetOrCreateFrameNode(
-        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+        V2::MENU_ETS_TAG, 7, []() { return AceType::MakeRefPtr<MenuPattern>(7, V2::MENU_ETS_TAG, MenuType::MENU); });
     ASSERT_NE(menuNode2, nullptr);
-    menuItemNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
     menuNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
-    menuItemNode2->MountToParent(menuNode2);
+    auto mockMenuNodeContext2 = AceType::DynamicCast<MockRenderContext>(menuNode2->GetRenderContext());
+    mockMenuNodeContext2->SetPaintRectWithTransform(RectF(30.0f, 30.0f, 60.0f, 60.0f));
     menuNode2->MountToParent(wrapperNode);
-    auto mockMenuContext1 = AceType::DynamicCast<MockRenderContext>(menuNode1->GetRenderContext());
-    mockMenuContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
-    auto mockMenuContext2 = AceType::DynamicCast<MockRenderContext>(menuNode2->GetRenderContext());
-    mockMenuContext2->SetPaintRectWithTransform(RectF(30.0f, 30.0f, 60.0f, 60.0f));
+
+    auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 6, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode2, nullptr);
+    menuItemNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    menuItemNode2->MountToParent(menuNode2);
+
+    auto menuNodeParrent2 = menuNode2->GetPattern<MenuPattern>();
+    menuNodeParrent2->SetParentMenuItem(menuItemNode1);
 
     children = wrapperNode->GetChildren();
     child = children.rbegin();
-
     /**
-     * @tc.steps: step2. test PointF(1.0f, 1.0f)
+     * @tc.steps: step3. test PointF(1.0f, 1.0f)
      * @tc.expected: return true
      */
-    EXPECT_TRUE(wrapperPattern->IsTouchWithinParentMenuZone(child, children, PointF(1.0f, 1.0f)));
-
+    EXPECT_TRUE(wrapperPattern->IsTouchWithinParentMenuItemZone(child, children, PointF(1.0f, 1.0f)));
     /**
-     * @tc.steps: step3. test PointF(31.0f, 31.0f)
+     * @tc.steps: step4. test PointF(31.0f, 31.0f)
      * @tc.expected: return false
      */
-    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuZone(child, children, PointF(31.0f, 31.0f)));
+    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuItemZone(child, children, PointF(31.0f, 31.0f)));
 }
 
 /**
@@ -1993,61 +2012,5 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg002, TestSize.Level1)
         menuPattern->UpdateMenuPathParams(params);
         paintMethod->PaintDoubleBorder(canvas, paintWrapper);
     }
-}
-
-/**
- * @tc.name: RegisterAccessibilityChildActionNotify001
- * @tc.desc: Test callback function.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuWrapperTestNg, RegisterAccessibilityChildActionNotify001, TestSize.Level1)
-{
-    auto wrapperNode =
-        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
-    ASSERT_NE(wrapperNode, nullptr);
-    /**
-     * @tc.steps: step1. create outter menu and set show in subwindow true
-     */
-    auto outterMenuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    ASSERT_NE(outterMenuNode, nullptr);
-    auto outterMenuLayoutProps = outterMenuNode->GetLayoutProperty<MenuLayoutProperty>();
-    ASSERT_NE(outterMenuLayoutProps, nullptr);
-    outterMenuLayoutProps->UpdateShowInSubWindow(true);
-    /**
-     * @tc.steps: step2. create inner menu and set show in subwindow false
-     */
-    auto innerMenuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    ASSERT_NE(innerMenuNode, nullptr);
-    auto innerMenuLayoutProps = innerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
-    ASSERT_NE(innerMenuLayoutProps, nullptr);
-    innerMenuLayoutProps->UpdateShowInSubWindow(false);
-    innerMenuLayoutProps->UpdateExpandingMode(SubMenuExpandingMode::STACK);
-    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
-    ASSERT_NE(menuItemNode, nullptr);
-    menuItemNode->MountToParent(innerMenuNode);
-    innerMenuNode->MountToParent(outterMenuNode);
-    outterMenuNode->MountToParent(wrapperNode);
-    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
-    ASSERT_NE(menuItemPattern, nullptr);
-    menuItemPattern->expandingMode_ = innerMenuLayoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-
-    /**
-     * @tc.steps: step3. call ShowSubMenu to create submenu
-     * @tc.expected: expect subMenu's showInSubwindow param is true
-     */
-    std::function<void()> buildFun = []() {
-        MenuModelNG MenuModelInstance;
-        MenuModelInstance.Create();
-    };
-    menuItemPattern->SetSubBuilder(buildFun);
-    menuItemPattern->ShowSubMenu(ShowSubMenuType::LONG_PRESS);
-    auto menuwrapperAccessibilityProperty = wrapperNode->GetAccessibilityProperty<AccessibilityProperty>();
-    ASSERT_NE(menuwrapperAccessibilityProperty, nullptr);
-    auto callback = menuwrapperAccessibilityProperty->GetNotifyChildActionFunc();
-    ASSERT_NE(callback, nullptr);
-    auto reuslt = callback(menuItemNode, NotifyChildActionType::ACTION_CLICK);
-    EXPECT_EQ(reuslt, AccessibilityActionResult::ACTION_RISE);
 }
 } // namespace OHOS::Ace::NG

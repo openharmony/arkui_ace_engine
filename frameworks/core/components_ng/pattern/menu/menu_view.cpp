@@ -69,6 +69,26 @@ constexpr int32_t HALF_NUMBER = 2;
 constexpr int32_t HALF_NUMBER_NEGATIVE = -2;
 constexpr int32_t MENU_ANIMATION_DURATION = 300;
 
+static RefPtr<MenuTheme> GetMenuTheme(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<NG::MenuTheme>();
+}
+
+static RefPtr<RenderContext> GetMenuTargetRenderContext(const RefPtr<MenuWrapperPattern>& wrapperPattern)
+{
+    CHECK_NULL_RETURN(wrapperPattern, nullptr);
+    auto menu = wrapperPattern->GetMenu();
+    CHECK_NULL_RETURN(menu, nullptr);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, nullptr);
+    auto targetNode = FrameNode::GetFrameNodeOnly(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    return targetNode->GetRenderContext();
+}
+
 void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& previewCustomNode = nullptr)
 {
     CHECK_NULL_VOID(previewCustomNode);
@@ -472,10 +492,11 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
 
     AnimationUtils::Animate(
         scaleOption,
-        [stackContext, scaleTo, clipRect, clipRadius, animateProperty]() {
+        [stackContext, scaleTo, clipRect, clipRadius, animateProperty, previewPattern]() {
             CHECK_NULL_VOID(stackContext);
             stackContext->UpdateTransformScale(VectorF(scaleTo, scaleTo));
             stackContext->ClipWithRRect(clipRect, clipRadius);
+            MenuView::UpdateHoverImagePreivewPosition(previewPattern);
 
             CHECK_NULL_VOID(animateProperty);
             animateProperty->Set(1.0);
@@ -496,6 +517,10 @@ void SetHoverImageFinishEvent(const RefPtr<FrameNode>& hoverImageStackNode, cons
     // if the animation is interrupted during the image hover phase, the next dynamic effects are not processed.
     CHECK_NULL_VOID(!wrapperPattern->IsStopHoverImageAnimation());
 
+    if (!MenuView::CheckHoverImageFinishForInterruption(wrapperPattern, previewPattern, hoverImageStackNode)) {
+        return;
+    }
+
     UpdateOpacityInFinishEvent(previewNode, imageContext, menuTheme);
 
     UpdateHoverImagePreviewScale(hoverImageStackNode, previewPattern, menuTheme);
@@ -505,6 +530,11 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
     const RefPtr<RenderContext>& imageContext, const RefPtr<MenuWrapperPattern>& wrapperPattern)
 {
     CHECK_NULL_VOID(wrapperPattern && wrapperPattern->GetIsShowHoverImage());
+    if (wrapperPattern->GetHoverScaleInterruption()) {
+        MenuView::ShowHoverImageForInterruption(hoverImageStackNode, previewNode, imageContext, wrapperPattern);
+        return;
+    }
+
     CHECK_NULL_VOID(hoverImageStackNode && previewNode);
     auto stackContext = hoverImageStackNode->GetRenderContext();
     CHECK_NULL_VOID(stackContext);
@@ -649,11 +679,9 @@ float GetHoverImageCustomPreviewBaseScaleInfo(const MenuParam& menuParam, int32_
     if (LessOrEqual(previewWidth / width, previewHeight / height)) {
         CHECK_EQUAL_RETURN(previewWidth, 0, scaleRet);
         scaleRet = width / previewWidth;
-        previewPattern->SetIsWidthDistLarger(false);
     } else {
         CHECK_EQUAL_RETURN(previewHeight, 0, scaleRet);
         scaleRet = height / previewHeight;
-        previewPattern->SetIsWidthDistLarger(true);
     }
     return scaleRet;
 }
@@ -679,14 +707,6 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
     // get actual area size for clip visible area
     previewPattern->SetHoverImageAfterScaleWidth(width / baseScale);
     previewPattern->SetHoverImageAfterScaleHeight(height  / baseScale);
-
-    // stack attr will not changed by the scale animation, but a start cooradinate is required to calc the clip diff
-    previewPattern->SetClipStartWidth(previewPattern->GetStackAfterScaleActualWidth() * hoverImageScaleToNew);
-    previewPattern->SetClipStartHeight(previewPattern->GetStackAfterScaleActualHeight() * hoverImageScaleToNew);
-    previewPattern->SetClipStartValue(previewPattern->GetIsWidthDistLarger() ? previewPattern->GetClipStartWidth() :
-        previewPattern->GetClipStartHeight());
-    previewPattern->SetClipEndValue(previewPattern->GetIsWidthDistLarger() ?
-        previewPattern->GetStackAfterScaleActualWidth() : previewPattern->GetStackAfterScaleActualHeight());
 
     previewPattern->SetHoverImageAfterScaleOffset(OffsetF((previewPattern->GetStackAfterScaleActualWidth() -
         previewPattern->GetHoverImageAfterScaleWidth()) / HALF_DIVIDE,
@@ -823,50 +843,23 @@ static RefPtr<FrameNode> CreateFilterColumnNode()
     return columnNode;
 }
 
-static void ShowFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<OverlayManager>& manager,
-    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<Container>& container)
+static RefPtr<UINode> GetFilterParentNode(
+    const RefPtr<UINode>& targetNode, const RefPtr<OverlayManager>& manager, bool isShowInSubWindow)
 {
-    CHECK_NULL_VOID(targetNode && manager && columnNode && menuWrapperNode && container);
-    auto parent = targetNode->GetParent();
-    CHECK_NULL_VOID(parent);
-    while (parent->GetDepth() != 1) {
-        parent = parent->GetParent();
-        CHECK_NULL_VOID(parent);
-    }
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto menuNode = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
-    auto showFilter = [columnNode, manager, menuWrapperNode](const RefPtr<UINode>& parent) {
-        columnNode->MountToParent(parent);
-        columnNode->OnMountToParentDone();
-        manager->SetHasFilter(true);
-        manager->SetFilterActive(true);
-        manager->SetFilterColumnNode(columnNode);
-        parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        manager->ShowFilterAnimation(columnNode, menuWrapperNode);
-    };
-    if ((menuWrapperPattern->GetMenuMaskEnable() &&
-            (menuPattern->GetMenuType() == MenuType::MENU || menuWrapperPattern->GetIsOpenMenu()) &&
-            !isShowInSubWindow)) {
-        auto rootNodeWeak = manager->GetRootNode();
-        auto rootNode = rootNodeWeak.Upgrade();
-        CHECK_NULL_VOID(rootNode);
-        showFilter(rootNode);
-    } else if (container->IsSceneBoardWindow()) {
-        auto windowScene = manager->FindWindowScene(targetNode);
-        manager->MountFilterToWindowScene(columnNode, windowScene);
-        manager->ShowFilterAnimation(columnNode, menuWrapperNode);
-    } else if (container->IsUIExtensionWindow()) {
-        // mount filter node on subwindow to ensure filter node's size equals to host window's size
-        menuWrapperPattern->SetIsFilterInSubwindow(true);
+    CHECK_NULL_RETURN((targetNode && manager), nullptr);
+    RefPtr<UINode> parent = nullptr;
+    if (isShowInSubWindow) {
+        parent = targetNode->GetParent();
+        CHECK_NULL_RETURN(parent, nullptr);
+        while (parent->GetDepth() != 1) {
+            parent = parent->GetParent();
+            CHECK_NULL_RETURN(parent, nullptr);
+        }
     } else {
-        showFilter(parent);
+        auto rootNodeWeak = manager->GetRootNode();
+        parent = rootNodeWeak.Upgrade();
     }
+    return parent;
 }
 
 static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
@@ -895,8 +888,31 @@ static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNod
         // insert columnNode to rootNode
         auto columnNode = CreateFilterColumnNode();
         CHECK_NULL_VOID(columnNode);
+        // set filter
         menuWrapperPattern->SetFilterColumnNode(columnNode);
-        ShowFilter(targetNode, manager, columnNode, menuWrapperNode, container);
+        auto menuNode = menuWrapperPattern->GetMenu();
+        auto menuPattern = menuNode ? menuNode->GetPattern<MenuPattern>() : nullptr;
+        auto layoutProperty = menuPattern ? menuPattern->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
+        CHECK_NULL_VOID(layoutProperty);
+        auto isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
+        if (container->IsSceneBoardWindow()) {
+            auto windowScene = manager->FindWindowScene(targetNode);
+            manager->MountFilterToWindowScene(columnNode, windowScene);
+            manager->ShowFilterAnimation(columnNode, menuWrapperNode);
+        } else if (container->IsUIExtensionWindow() && isShowInSubWindow) {
+            // mount filter node on subwindow to ensure filter node's size equals to host window's size
+            menuWrapperPattern->SetIsFilterInSubwindow(true);
+        } else {
+            auto parent = GetFilterParentNode(targetNode, manager, isShowInSubWindow);
+            CHECK_NULL_VOID(parent);
+            columnNode->MountToParent(parent);
+            columnNode->OnMountToParentDone();
+            manager->SetHasFilter(true);
+            manager->SetFilterActive(true);
+            manager->SetFilterColumnNode(columnNode);
+            parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            manager->ShowFilterAnimation(columnNode, menuWrapperNode);
+        }
     }
 }
 
@@ -1090,38 +1106,152 @@ void UpdateMenuMaskType(const RefPtr<FrameNode>& wrapperNode)
     CHECK_NULL_VOID(menuWrapperPattern);
     auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
     if (maskEnable) {
-        auto context = wrapperNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto container = Container::GetContainer(context->GetInstanceId());
-        CHECK_NULL_VOID(container);
-        if (container->IsUIExtensionWindow()) {
-            menuWrapperPattern->UpdateFilterMaskType();
-        } else {
-            auto manager = context->GetOverlayManager();
-            CHECK_NULL_VOID(manager);
-            manager->UpdateFilterMaskType(wrapperNode);
-        }
-    }
-}
-
-void UpdateMenuMask(
-    const RefPtr<FrameNode>& wrapperNode, int32_t targetId, const std::string& targetTag, const MenuParam& menuParam)
-{
-    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuParam.maskEnable.value_or(false)) {
-        menuWrapperPattern->SetMenuMaskEnable(menuParam.maskEnable.value());
-        if (menuParam.maskType.has_value() && menuParam.maskType->maskColor.has_value()) {
-            menuWrapperPattern->SetMenuMaskColor(menuParam.maskType->maskColor.value());
-        }
-        if (menuParam.maskType.has_value() && menuParam.maskType->maskBackGroundBlueStyle.has_value()) {
-            menuWrapperPattern->SetMenuMaskblurStyle(menuParam.maskType->maskBackGroundBlueStyle.value());
-        }
-        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        SetFilter(targetNode, wrapperNode);
+        menuWrapperPattern->UpdateFilterMaskType();
     }
 }
 } // namespace
+
+thread_local std::unordered_map<int32_t, MenuHoverScaleStatus> menuHoverStatus_;
+
+void MenuView::SetMenuHoverScaleStatus(int32_t targetId, MenuHoverScaleStatus status)
+{
+    menuHoverStatus_[targetId] = status;
+}
+
+void MenuView::RemoveMenuHoverScaleStatus(int32_t targetId)
+{
+    menuHoverStatus_.erase(targetId);
+}
+
+MenuHoverScaleStatus MenuView::GetMenuHoverScaleStatus(int32_t targetId)
+{
+    auto result = menuHoverStatus_.find(targetId);
+    return result != menuHoverStatus_.end() ? result->second : MenuHoverScaleStatus::NONE;
+}
+
+void MenuView::ShowMenuTargetScaleToOrigin(
+    const RefPtr<MenuWrapperPattern>& wrapperPattern, const RefPtr<MenuPreviewPattern>& previewPattern)
+{
+    CHECK_NULL_VOID(wrapperPattern);
+    auto menuParam = wrapperPattern->GetMenuParam();
+    auto scaleFrom = menuParam.hoverImageAnimationOptions.scaleFrom;
+
+    CHECK_NULL_VOID(previewPattern);
+    auto scale = previewPattern->GetHoverTargetOriginScale() * scaleFrom;
+
+    auto targetRenderContext = GetMenuTargetRenderContext(wrapperPattern);
+    CHECK_NULL_VOID(targetRenderContext);
+
+    auto menuTheme = GetMenuTheme(wrapperPattern->GetHost());
+    CHECK_NULL_VOID(menuTheme);
+    AnimationOption option = AnimationOption(Curves::SHARP, menuTheme->GetHoverImageDelayDuration(true));
+    AnimationUtils::Animate(option, [targetRenderContext, scale]() {
+        CHECK_NULL_VOID(targetRenderContext);
+        targetRenderContext->UpdateTransformScale(scale);
+    });
+}
+
+void MenuView::UpdateHoverImagePreivewPosition(const RefPtr<MenuPreviewPattern>& previewPattern)
+{
+    CHECK_NULL_VOID(previewPattern);
+    auto menuWrapper = previewPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
+    CHECK_NULL_VOID(flexNode);
+    auto flexRenderContext = flexNode->GetRenderContext();
+    CHECK_NULL_VOID(flexRenderContext);
+
+    auto previewGeometryNode = flexNode->GetGeometryNode();
+    CHECK_NULL_VOID(previewGeometryNode);
+    auto previewPosition = previewGeometryNode->GetFrameOffset();
+
+    flexRenderContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
+}
+
+void MenuView::ShowHoverImageForInterruption(const RefPtr<FrameNode>& hoverImageStackNode,
+    const RefPtr<FrameNode>& previewNode, const RefPtr<RenderContext>& imageContext,
+    const RefPtr<MenuWrapperPattern>& wrapperPattern)
+{
+    CHECK_NULL_VOID(wrapperPattern);
+    auto stackContext = hoverImageStackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackContext);
+
+    CHECK_NULL_VOID(previewNode);
+    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+    auto menuTheme = GetMenuTheme(previewNode);
+    CHECK_NULL_VOID(menuTheme);
+
+    auto menuParam = wrapperPattern->GetMenuParam();
+    auto scaleFrom = menuParam.hoverImageAnimationOptions.scaleFrom;
+    auto scaleTo = menuParam.hoverImageAnimationOptions.scaleTo;
+
+    scaleFrom = LessOrEqual(scaleFrom, 0.0) ? PREVIEW_ORIGIN_SCALE : scaleFrom;
+    scaleTo = LessOrEqual(scaleTo, 0.0) ? PREVIEW_ORIGIN_SCALE : scaleTo;
+    scaleTo += NearEqual(scaleFrom, scaleTo) ? MIN_HOVER_SCALE_DIFF : 0.f;
+
+    auto targetRenderContext = GetMenuTargetRenderContext(wrapperPattern);
+    CHECK_NULL_VOID(targetRenderContext);
+    auto targetScale = targetRenderContext->GetTransformScaleValue({ 1.0f, 1.0f });
+    previewPattern->SetHoverTargetOriginScale(targetScale);
+
+    stackContext->UpdateClipEdge(true);
+    stackContext->UpdateOpacity(0.0);
+    targetRenderContext->UpdateTransformScale(targetScale * scaleFrom);
+
+    previewPattern->SetIsHoverImageScalePlaying(true);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
+
+    AnimationOption option = AnimationOption(Curves::SHARP, menuTheme->GetHoverImageDelayDuration(true));
+    option.SetOnFinishEvent([hoverImageStackNode, previewNode, imageContext, menuTheme, wrapperPattern]() {
+        DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED);
+        SetHoverImageFinishEvent(hoverImageStackNode, previewNode, imageContext, menuTheme, wrapperPattern);
+    });
+    AnimationUtils::Animate(
+        option,
+        [targetRenderContext, scale = targetScale * scaleTo]() {
+            CHECK_NULL_VOID(targetRenderContext);
+            targetRenderContext->UpdateTransformScale(scale);
+        },
+        option.GetOnFinishEvent());
+}
+
+bool MenuView::CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPattern>& wrapperPattern,
+    const RefPtr<MenuPreviewPattern>& previewPattern, const RefPtr<FrameNode>& hoverImageStackNode)
+{
+    CHECK_NULL_RETURN(wrapperPattern, false);
+    if (!wrapperPattern->GetHoverScaleInterruption()) {
+        return true;
+    }
+
+    MenuView::ShowMenuTargetScaleToOrigin(wrapperPattern, previewPattern);
+    auto targetId = wrapperPattern->GetTargetId();
+    auto hoverStatus = MenuView::GetMenuHoverScaleStatus(targetId);
+    TAG_LOGI(AceLogTag::ACE_MENU, "menu hoverScale animation finish, hoverStatus: %{public}d", hoverStatus);
+    if (hoverStatus != MenuHoverScaleStatus::MENU_SHOW) {
+        auto menu = wrapperPattern->GetMenu();
+        CHECK_NULL_RETURN(menu, false);
+        auto menuRenderContext = menu->GetRenderContext();
+        CHECK_NULL_RETURN(menuRenderContext, false);
+        menuRenderContext->UpdateOpacity(0.0);
+        MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
+        SubwindowManager::GetInstance()->HideMenuNG(wrapperPattern->GetHost(), targetId);
+        return false;
+    }
+
+    CHECK_NULL_RETURN(hoverImageStackNode, false);
+    auto stackContext = hoverImageStackNode->GetRenderContext();
+    CHECK_NULL_RETURN(stackContext, false);
+    stackContext->UpdateOpacity(1.0);
+
+    wrapperPattern->CallMenuAboutToAppearCallback();
+    wrapperPattern->CheckAndShowAnimation();
+    return true;
+}
 
 void MenuView::SetHasCustomOutline(
     const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
@@ -1269,8 +1399,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     scroll->MarkModifyDone();
     menuNode->MarkModifyDone();
 
-    if (type == MenuType::MENU) {
-        UpdateMenuMask(wrapperNode, targetId, targetTag, menuParam);
+    if (menuParam.maskEnable.value_or(false)) {
+        menuWrapperPattern->SetMenuParam(menuParam);
+        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+        SetFilter(targetNode, wrapperNode);
     }
     return wrapperNode;
 }
@@ -1339,6 +1471,7 @@ void MenuView::ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, co
         auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
         menuWrapperPattern->SetIsShowHoverImage(menuParam.isShowHoverImage);
+        menuWrapperPattern->SetHoverScaleInterruption(menuParam.hoverScaleInterruption);
         auto previewRenderContext = previewNode->GetRenderContext();
         CHECK_NULL_VOID(previewRenderContext);
         previewRenderContext->UpdateOpacity(0.0);
@@ -1393,11 +1526,9 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
         MountTextNode(wrapperNode, previewCustomNode);
-    } else if (type == MenuType::MENU) {
-        if (menuParam.maskEnable.value_or(false)) {
-            auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-            SetFilter(targetNode, wrapperNode);
-        }
+    } else if (type == MenuType::MENU && menuParam.maskEnable.value_or(false)) {
+        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+        SetFilter(targetNode, wrapperNode);
     }
     return wrapperNode;
 }
@@ -1918,7 +2049,6 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-
     TAG_LOGI(AceLogTag::ACE_MENU, "MenuView::CreateText autoWrapFlag: %{public}d", autoWrapFlag);
     if (!autoWrapFlag) {
         textProperty->UpdateMaxLines(1);

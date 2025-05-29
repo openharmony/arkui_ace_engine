@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/utils/utf_helper.h"
@@ -46,6 +47,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
+#include "core/components_ng/pattern/select/select_layout_property.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -72,6 +74,8 @@ constexpr Dimension CALIBERATE_Y = 4.0_vp;
 constexpr Dimension SELECT_SMALL_PADDING_VP = 4.0_vp;
 
 constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
+
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
 
 static std::string ConvertControlSizeToString(ControlSize controlSize)
 {
@@ -214,6 +218,14 @@ void SelectPattern::ShowSelectMenu()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     UpdateTargetSize();
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false)) {
+        ShowSelectMenuInSubWindow();
+        return;
+    }
     auto offset = host->GetPaintRectOffset(false, true);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
@@ -224,6 +236,32 @@ void SelectPattern::ShowSelectMenu()
     ShowScrollBar();
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
     overlayManager->ShowMenu(host->GetId(), offset, menuWrapper_);
+}
+
+void SelectPattern::ShowSelectMenuInSubWindow()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto offset = host->GetPositionToScreenWithTransform();
+    offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
+    offset.AddX(-CALIBERATE_X.ConvertToPx());
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateShowInSubWindow(true);
+    auto subwindowManager = SubwindowManager::GetInstance();
+    CHECK_NULL_VOID(subwindowManager);
+    MenuParam menuParam {};
+    menuParam.type = MenuType::MENU;
+    menuParam.isShowInSubWindow = true;
+    menuParam.isShow = true;
+    menuParam.setShow = true;
+    subwindowManager->ShowMenuNG(menuWrapper_, menuParam, host, offset);
 }
 
 void SelectPattern::UpdateOptionsWidth(float selectWidth)
@@ -1091,18 +1129,32 @@ void SelectPattern::UpdateSelectedOptionCustomProperties(const RefPtr<MenuItemPa
 
 void SelectPattern::ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern)
 {
+    CHECK_NULL_VOID(optionPattern);
     optionPattern->SetSelected(false);
     optionPattern->UpdateNextNodeDivider(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    if (selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+        optionPattern->SetCheckMarkVisibleType(VisibleType::INVISIBLE);
+    }
 }
 
 void SelectPattern::ResetOptionProps()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
     for (const auto& option : options_) {
         auto pattern = option->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSelected(false);
         ResetOptionToInitProps(pattern);
         UpdateOptionCustomProperties(pattern);
+        if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+            pattern->SetCheckMarkVisibleType(VisibleType::INVISIBLE);
+        }
     }
 }
 
@@ -1133,6 +1185,74 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
     }
 }
 
+void SelectPattern::SetShowInSubWindow(bool isShowInSubWindow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    selectLayoutProps->UpdateShowInSubWindow(isShowInSubWindow);
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateShowInSubWindow(isShowInSubWindow);
+}
+
+void SelectPattern::ResetShowInSubWindow()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    bool isExpandDisplay = selectTheme->GetExpandDisplay();
+    bool isShowInSubWindow = isExpandDisplay;
+    SetShowInSubWindow(isShowInSubWindow);
+}
+
+void SelectPattern::SetShowDefaultSelectedIcon(bool show)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    selectLayoutProps->UpdateShowDefaultSelectedIcon(show);
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateShowDefaultSelectedIcon(show);
+    if (show) {
+        ResetOptionProps();
+    }
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto menuItemPattern = options_[i]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->SetShowDefaultSelectedIcon(show);
+    }
+}
+
+void SelectPattern::ResetShowDefaultSelectedIcon()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    selectLayoutProps->ResetShowDefaultSelectedIcon();
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->ResetShowDefaultSelectedIcon();
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto menuItemPattern = options_[i]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->SetShowDefaultSelectedIcon(false);
+    }
+}
+
 // update selected option props
 void SelectPattern::UpdateSelectedProps(int32_t index)
 {
@@ -1144,6 +1264,13 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     ResetSelectedOptionToInitProps(newSelected);
     UpdateSelectedOptionCustomProperties(newSelected);
     newSelected->SetSelected(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+        newSelected->SetCheckMarkVisibleType(VisibleType::VISIBLE);
+        return;
+    }
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
     CHECK_NULL_VOID(newSelectedNode);
@@ -1216,6 +1343,7 @@ void SelectPattern::InitSpinner(
     spinnerLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
     spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
     spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize());
+    spinnerLayoutProperty->UpdateSymbolRenderingStrategy(RENDERINGSTRATEGY_MULTIPLE_COLOR);
 }
 
 // XTS inspector code
@@ -1605,6 +1733,11 @@ void SelectPattern::OnColorConfigurationUpdate()
     for (auto child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
         optionsPattern->SetFontColor(selectTheme->GetFontColor());
+
+        auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+        if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+             optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
+        }
 
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

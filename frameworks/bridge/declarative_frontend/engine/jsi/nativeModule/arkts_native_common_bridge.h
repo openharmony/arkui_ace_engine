@@ -21,6 +21,7 @@
 #include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::NG {
+using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
 class CommonBridge {
 public:
     static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -37,6 +38,8 @@ public:
     static ArkUINativeModuleValue ResetPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTransform(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTransform(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTransform3D(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTransform3D(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOutlineColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -293,6 +296,12 @@ public:
     static Local<panda::ObjectRef> SetUniqueAttributes(
         EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateRecognizerObject(EcmaVM* vm, const RefPtr<NG::NGGestureRecognizer>& target);
+    static Local<panda::ArrayRef> CreateTouchRecognizersObject(
+        EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& target);
+    static TouchRecognizerMap CreateTouchRecognizerMap(
+        const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current);
+    static void CollectTouchEventTarget(TouchRecognizerMap& dict, std::list<RefPtr<TouchEventTarget>>& targets,
+        NG::FrameNode* borderNode, int32_t fingerId);
     static Local<panda::ObjectRef> CreateFingerInfo(EcmaVM* vm, const FingerInfo& fingerInfo);
     static Local<panda::ObjectRef> CreateEventTargetObject(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateAreaObject(EcmaVM* vm, const RectF& rect, const OffsetF& origin);
@@ -343,6 +352,8 @@ public:
     static ArkUINativeModuleValue ResetOnDragStart(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnDragEnter(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnDragEnter(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnDragSpringLoading(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnDragSpringLoading(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnDragMove(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnDragMove(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnDragLeave(ArkUIRuntimeCallInfo* runtimeCallInfo);

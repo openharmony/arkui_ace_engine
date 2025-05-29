@@ -753,7 +753,8 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
         case WindowSizeChangeReason::RESIZE:
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
-        case WindowSizeChangeReason::DRAG_END: {
+        case WindowSizeChangeReason::DRAG_END:
+        case WindowSizeChangeReason::OCCUPIED_AREA_CHANGE: {
             break;
         }
         default: {
@@ -897,5 +898,65 @@ void BubblePattern::UpdateAgingTextSize()
     }
     CHECK_NULL_VOID(messageNode_);
     messageNode_->MarkDirtyNode();
+}
+
+void BubblePattern::UpdateBubbleText(const Color& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto popupTheme = context->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
+    auto textNode = DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto parentNode = host->GetParent();
+    if (parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG &&
+        !(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        textLayoutProperty->UpdateTextColor(value);
+    } else if (!isSetMessageColor_) {
+        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());
+        } else {
+            textLayoutProperty->UpdateTextColor(popupTheme->GetFontPrimaryColor());
+        }
+    }
+    textNode->MarkModifyDone();
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void BubblePattern::UpdateBubbleBackGroundColor(const Color& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(popupPaintProp);
+    popupPaintProp->UpdateBackgroundColor(value);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void BubblePattern::UpdateMaskColor(const Color& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(popupPaintProp);
+    popupPaintProp->UpdateMaskColor(value);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void BubblePattern::UpdateMask(bool maskValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupPaintProp = host->GetPaintProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(popupPaintProp);
+    popupPaintProp->UpdateBlockEvent(maskValue);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 } // namespace OHOS::Ace::NG

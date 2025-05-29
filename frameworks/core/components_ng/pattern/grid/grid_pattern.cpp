@@ -362,6 +362,9 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
     if (!isInitialized_) {
         FireObserverOnReachEnd();
     }
+    if (!NearZero(mainSizeChanged_)) {
+        info_.prevHeight_ += mainSizeChanged_;
+    }
     auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
     if (!NearZero(finalOffset)) {
         bool scrollDownToEnd =
@@ -521,6 +524,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     bool indexChanged =
         (gridLayoutInfo.startIndex_ != info_.startIndex_) || (gridLayoutInfo.endIndex_ != info_.endIndex_);
+    bool offsetEnd = info_.offsetEnd_;
+    mainSizeChanged_ = info_.lastMainSize_ - gridLayoutInfo.lastMainSize_;
     info_ = gridLayoutInfo;
     info_.synced_ = true;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
@@ -532,7 +537,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool sizeDiminished =
         IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
-    if (info_.offsetEnd_) {
+    if (info_.offsetEnd_ && (!offsetEnd || !NearZero(mainSizeChanged_))) {
         endHeight_ = GetTotalHeight() - GetMainContentSize();
     }
     ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);
@@ -562,6 +567,7 @@ void GridPattern::CheckScrollable()
     CHECK_NULL_VOID(host);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
+    auto lastScrollable = scrollable_;
     if (((info_.endIndex_ - info_.startIndex_ + 1) < info_.childrenCount_) ||
         (GreatNotEqual(info_.GetTotalHeightOfItemsInView(GetMainGap()), GetMainContentSize()))) {
         scrollable_ = true;
@@ -573,6 +579,10 @@ void GridPattern::CheckScrollable()
 
     if (!gridLayoutProperty->GetScrollEnabled().value_or(scrollable_)) {
         SetScrollEnabled(false);
+    }
+
+    if (lastScrollable && !scrollable_) {
+        StopAnimate();
     }
 }
 
@@ -588,6 +598,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
         FireOnScroll(finalOffset, onScroll);
     }
     FireObserverOnDidScroll(finalOffset);
+    FireObserverOnScrollerAreaChange(finalOffset);
     auto onDidScroll = gridEventHub->GetOnDidScroll();
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
@@ -893,6 +904,9 @@ float GridPattern::GetTotalHeight() const
         return info_.GetIrregularHeight(mainGap);
     }
     if (props->HasLayoutOptions()) {
+        if (info_.IsAllItemsMeasured()) {
+            return info_.GetTotalLineHeight(mainGap);
+        }
         return info_.GetContentHeight(*props->GetLayoutOptions(), info_.childrenCount_, mainGap);
     }
     return info_.GetContentHeight(mainGap);

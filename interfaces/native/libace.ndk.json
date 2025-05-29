@@ -3390,5 +3390,37 @@
     {
         "first_introduced": "20",
         "name": "OH_NativeXComponent_GetKeyEventScrollLockState"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_XComponent_SetExpectedFrameRateRange"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_XComponent_RegisterOnFrameCallback"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_XComponent_UnregisterOnFrameCallback"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_XComponent_SetNeedSoftKeyboard"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_AccessibilityProvider_Create"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_AccessibilityProvider_Dispose"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_SurfaceCallback_SetSurfaceShowEvent"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent"
     }
 ]

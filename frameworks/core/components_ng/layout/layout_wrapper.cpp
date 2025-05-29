@@ -111,6 +111,18 @@ void LayoutWrapper::OffsetNodeToSafeArea()
     geometryNode->SetMarginFrameOffset(offset);
 }
 
+RectF LayoutWrapper::GetBackGroundAccumulatedSafeAreaExpand()
+{
+    auto ignoreLayoutSafeAreaEdges = GetLayoutProperty()->GetBackgroundIgnoresLayoutSafeAreaEdges();
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = ignoreLayoutSafeAreaEdges };
+    auto expandEdges = GetAccumulatedSafeAreaExpand(false, opts);
+    auto geometryNode = GetGeometryNode();
+    RectF res = geometryNode->GetFrameRect();
+    res.SetOffset(OffsetF() - OffsetF(expandEdges.left.value_or(0.0f), expandEdges.top.value_or(0.0f)));
+    res.SetSize(res.GetSize() + SizeF(expandEdges.Width(), expandEdges.Height()));
+    return res;
+}
+
 bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
     auto host = GetHostNode();
@@ -134,11 +146,8 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         if (GetHostTag() == V2::PAGE_ETS_TAG && lastChild && lastChild->GetTag() == V2::DIALOG_ETS_TAG) {
             keyboardOffset = 0.0f;
         }
-        ACE_LAYOUT_SCOPED_TRACE("AvoidKeyboard isFocusOnPage: %d, isFocusOnOverlay: %d,"
+        ACE_MEASURE_SCOPED_TRACE("AvoidKeyboard isFocusOnPage: %d, isFocusOnOverlay: %d,"
             "pageCurrentOffset: %f, keyboardOffset: %f", isFocusOnPage, isFocusOnOverlay,
-            pageCurrentOffset, keyboardOffset);
-        TAG_LOGD(ACE_LAYOUT, "AvoidKeyboard isFocusOnPage: %{public}d, isFocusOnOverlay: %{public}d,"
-            "pageCurrentOffset: %{public}f, keyboardOffset: %{public}f", isFocusOnPage, isFocusOnOverlay,
             pageCurrentOffset, keyboardOffset);
         if (!(isFocusOnPage || (isFocusOnOverlay && isOverlay) || pageHasOffset) && LessNotEqual(keyboardOffset, 0.0)) {
             renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
@@ -413,10 +422,10 @@ bool LayoutWrapper::AccumulateExpandCacheHit(ExpandEdges& totalExpand, const Pad
 }
 
 ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(
-    bool includingSelf, IgnoreLayoutSafeAreaOpts options, bool fromMarginRect)
+    bool includingSelf, IgnoreLayoutSafeAreaOpts options, IgnoreStrategy strategy)
 {
     StartPoint startPoint = StartPoint::NORMAL;
-    if (fromMarginRect) {
+    if (strategy == IgnoreStrategy::FROM_MARGIN) {
         startPoint = StartPoint::FROM_MARGIN;
     } else if (includingSelf) {
         startPoint = StartPoint::INCLUDING_SELF;
@@ -668,8 +677,6 @@ float LayoutWrapper::GetPageCurrentOffset()
     auto safeArea = safeAreaManager->GetSafeArea();
     auto safeAreaTop = safeAreaManager->IsAtomicService() ? 0 : safeArea.top_.Length();
     auto paintRect = pageRenderContext->GetPaintRectWithoutTransform();
-    TAG_LOGD(ACE_LAYOUT, "PageCurrentOffset paintRect.GetY(): %{public}f, safeAreaTop: %{public}d",
-        paintRect.GetY(), safeAreaTop);
     return paintRect.GetY() - safeAreaTop;
 }
 

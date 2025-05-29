@@ -78,10 +78,7 @@ void LongPressRecognizer::OnAccepted()
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     UpdateFingerListInfo();
-    {
-        ACE_SCOPED_TRACE("LongPressRecognizer onAction");
-        SendCallbackMsg(onAction_, false, GestureCallbackType::START);
-    }
+    SendCallbackMsg(onAction_, false, GestureCallbackType::START);
     if (isLimitFingerCount_ && hasRepeated_) {
         return;
     }
@@ -204,12 +201,10 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
         if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
-            ACE_SCOPED_TRACE("LongPressRecognizer onAction");
             SendCallbackMsg(onAction_, false, GestureCallbackType::START);
         }
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
             hasRepeated_ = false;
-            ACE_SCOPED_TRACE("LongPressRecognizer onActionEnd");
             SendCallbackMsg(onActionEnd_, false, GestureCallbackType::END);
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
@@ -263,7 +258,6 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         touchPoints_.erase(event.id);
     }
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
-        ACE_SCOPED_TRACE("LongPressRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
@@ -349,7 +343,6 @@ void LongPressRecognizer::DoRepeat()
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
-        ACE_SCOPED_TRACE("LongPressRecognizer onAction");
         SendCallbackMsg(onAction_, true, GestureCallbackType::START);
         StartRepeatTimer();
     }
@@ -391,6 +384,8 @@ double LongPressRecognizer::ConvertPxToVp(double offset) const
 void LongPressRecognizer::SendCallbackMsg(
     const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type)
 {
+    std::string callbackName = GetCallbackName(callback);
+    ACE_SCOPED_TRACE("LongPressRecognizer %s", callbackName.c_str());
     auto extraHandlingResult = GestureExtraHandler::IsGestureShouldBeAbandoned(AceType::Claim(this));
     if ((gestureInfo_ && gestureInfo_->GetDisposeTag()) || extraHandlingResult ||
         (!isOnActionTriggered_ && type != GestureCallbackType::START)) {
@@ -431,6 +426,7 @@ void LongPressRecognizer::SendCallbackMsg(
         Platform::UpdatePressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetInputEventType(inputEventType_);
+        info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -549,7 +545,8 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
     auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    if (!callback && !gestureRecognizerJudgeFunc) {
+    auto callbackNative = targetComponent->GetOnGestureJudgeNativeBeginCallback();
+    if (!callback && !callbackNative && !gestureRecognizerJudgeFunc) {
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<LongPressGestureEvent>();
@@ -577,10 +574,19 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
         info->SetRollAngle(trackPoint.rollAngle.value());
     }
     info->SetSourceTool(trackPoint.sourceTool);
-    if (gestureRecognizerJudgeFunc) {
-        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
+    if (gestureRecognizerJudgeFunc &&
+        gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_) == GestureJudgeResult::REJECT) {
+        return GestureJudgeResult::REJECT;
     }
-    return callback(gestureInfo_, info);
+    if (!gestureRecognizerJudgeFunc && callback && callback(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback exits, prioritize checking outer callback. If outer reject, return reject.
+        return GestureJudgeResult::REJECT;
+    }
+    if (callbackNative && callbackNative(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback doesn't exit or accept, check inner callback. If inner reject, return reject.
+        return GestureJudgeResult::REJECT;
+    }
+    return GestureJudgeResult::CONTINUE;
 }
 
 RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()

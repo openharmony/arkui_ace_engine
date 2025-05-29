@@ -150,8 +150,6 @@ void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
     deviceType_ = point.sourceType;
     deviceTool_ = point.sourceTool;
     inputEventType_ = (deviceType_ == SourceType::MOUSE) ? InputEventType::MOUSE_BUTTON : InputEventType::TOUCH_SCREEN;
-    originInputEventType_ =
-        (point.originInputEventType == InputEventType::AXIS) ? InputEventType::AXIS : inputEventType_;
     auto result = AboutToAddCurrentFingers(point);
     if (result) {
         HandleTouchDownEvent(point);
@@ -201,7 +199,6 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             deviceType_ = event.sourceType;
             deviceTool_ = event.sourceTool;
             inputEventType_ = InputEventType::AXIS;
-            originInputEventType_ = InputEventType::AXIS;
             HandleTouchDownEvent(event);
             break;
         case AxisAction::UPDATE:
@@ -242,8 +239,6 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
             } else {
                 inputEventType_ = InputEventType::TOUCH_SCREEN;
             }
-            originInputEventType_ =
-                (point.originInputEventType == InputEventType::AXIS) ? InputEventType::AXIS : inputEventType_;
             auto result = AboutToAddCurrentFingers(point);
             if (result) {
                 HandleTouchDownEvent(point);
@@ -293,7 +288,6 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const AxisEvent& event)
             deviceType_ = event.sourceType;
             deviceTool_ = event.sourceTool;
             inputEventType_ = InputEventType::AXIS;
-            originInputEventType_ = InputEventType::AXIS;
             HandleTouchDownEvent(event);
             break;
         case AxisAction::UPDATE:
@@ -681,5 +675,25 @@ void NGGestureRecognizer::CheckPendingRecognizerIsInAttachedNode(const TouchEven
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
+}
+
+std::string NGGestureRecognizer::GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback)
+{
+    if (callback == onAction_) {
+        return "onAction";
+    }
+    if (callback == onActionStart_) {
+        return "onActionStart";
+    }
+    if (callback == onActionUpdate_) {
+        return "onActionUpdate";
+    }
+    if (callback == onActionEnd_) {
+        return "onActionEnd";
+    }
+    if (callback == onActionCancel_) {
+        return "onActionCancel";
+    }
+    return "";
 }
 } // namespace OHOS::Ace::NG

@@ -207,6 +207,16 @@ void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& 
     }
 }
 
+void NavDestinationPattern::UpdateBackgroundColor()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    if (hostNode->GetRerenderable()) {
+        ContainerScope scope(hostNode->GetInstanceId());
+        UpdateBackgroundColorIfNeeded(hostNode);
+    }
+}
+
 void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode)
 {
     auto renderContext = hostNode->GetRenderContext();

@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/common/resource/resource_object.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
@@ -301,6 +302,11 @@ public:
         isHasSelectAttr_ = value;
     }
 
+    bool GetHasSelectAttr()
+    {
+        return isHasSelectAttr_;
+    }
+
     void SetResizePickerItemHeight(double resizePickerItemHeight)
     {
         resizePickerItemHeight_ = resizePickerItemHeight;
@@ -540,6 +546,22 @@ public:
     void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
     void UpdateDefaultTextStyle(const PickerTextStyle& textStyle);
 
+    void UpdateMeasureOnColorModeChange()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+
+        if (pipelineContext->IsSystmColorChange() && host->GetRerenderable()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+
+    void ParseCascadeRangeOptions(std::vector<NG::TextCascadePickerOptions>& options);
+    void GetAndUpdateRealSelectedArr(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,
+        const std::vector<RefPtr<ResourceObject>>& valueArrResObj);
+
 private:
     void OnModifyDone() override;
     void InitCrownAndKeyEvent();
@@ -613,6 +635,9 @@ private:
         std::function<void(const Dimension&)> updateFontSizeFunc,
         std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
 
+    void ParseRangeResult(NG::TextCascadePickerOptions& option);
+    void GetRealSelectedIndex(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,
+        const std::vector<std::string>& valueArr, uint32_t depth, std::vector<uint32_t>& selectedArray);
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_ = 0.0;

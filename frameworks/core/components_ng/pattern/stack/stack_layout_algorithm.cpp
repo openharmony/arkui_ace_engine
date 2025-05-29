@@ -25,6 +25,10 @@ StackLayoutAlgorithm::StackLayoutAlgorithm() = default;
 
 void StackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    if (host && !host->GetIgnoreLayoutProcess() && GetNeedPostponeForIgnore()) {
+        return;
+    }
     PerformLayout(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout();
@@ -55,9 +59,24 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto translate =
-            CalculateStackAlignment(contentSize, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
-        child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        auto childNode = child->GetHostNode();
+        auto host = layoutWrapper->GetHostNode();
+        if (host && childNode && childNode->GetLayoutProperty() &&
+            childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {
+            IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
+            auto sae = host->GetAccumulatedSafeAreaExpand(true, opts);
+            auto adjustContentSize = contentSize + sae.Size();
+            auto translate =
+                CalculateStackAlignment(adjustContentSize, child->GetGeometryNode()->GetMarginFrameSize(), align) +
+                paddingOffset;
+            translate -= sae.Offset();
+            child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        } else {
+            auto translate =
+                CalculateStackAlignment(contentSize, child->GetGeometryNode()->GetMarginFrameSize(), align) +
+                paddingOffset;
+            child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        }
     }
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();

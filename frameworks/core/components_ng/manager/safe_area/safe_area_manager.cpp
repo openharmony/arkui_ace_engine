@@ -40,6 +40,18 @@ SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::Op
     return cutoutArea;
 }
 
+bool SafeAreaManager::IsModeResize()
+{
+    return keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE ||
+           keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET;
+}
+
+bool SafeAreaManager::IsModeOffset()
+{
+    return keyboardAvoidMode_ == KeyBoardAvoidMode::OFFSET ||
+           keyboardAvoidMode_ == KeyBoardAvoidMode::OFFSET_WITH_CARET;
+}
+
 bool SafeAreaManager::CheckCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
     return cutoutSafeArea_ != GenerateCutOutAreaWithRoot(safeArea, rootSize);
@@ -309,8 +321,28 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess, LayoutS
         }
 #endif
     }
+    SafeAreaInsets combinedSafeArea;
     auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
-    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
+
+    bool includeSystem = ignoreType & LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    bool includeKeyboard = ignoreType & LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
+
+    if (includeSystem) {
+        combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
+    }
+    if (includeKeyboard) {
+        if (IsModeResize()) {
+            combinedSafeArea.bottom_ = combinedSafeArea.bottom_.Combine(keyboardInset_);
+        } else if (IsModeOffset()) {
+            auto keyboardHeight = keyboardInset_.Length();
+            auto bottomLength = GetSafeArea().bottom_.Length();
+            auto distance = bottomLength - GetKeyboardOffset(withoutProcess);
+            if (GreatNotEqual(keyboardHeight, 0.0f) && distance <= keyboardHeight) {
+                combinedSafeArea = combinedSafeArea.Combine(navSafeArea_);
+            }
+        }
+    }
+
     PaddingPropertyF result;
     if (combinedSafeArea.left_.IsValid()) {
         result.left = combinedSafeArea.left_.Length();
@@ -394,13 +426,16 @@ std::vector<WeakPtr<FrameNode>> SafeAreaManager::GetExpandNodeSet()
 
 void SafeAreaManager::SetKeyboardInfo(float height)
 {
-    SetRawKeyboardHeight(height);
     keyboardOrientation_ = -1;
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
-    keyboardOrientation_ = static_cast<int32_t>(displayInfo->GetRotation());
+    auto keyboardOrientation = static_cast<int32_t>(displayInfo->GetRotation());
+    ACE_LAYOUT_SCOPED_TRACE("SetKeyboardInfo keyboardOrientation %d, rawKeyboardHeight %f",
+        keyboardOrientation, height);
+    SetRawKeyboardHeight(height);
+    keyboardOrientation_ = keyboardOrientation;
 }
 
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)

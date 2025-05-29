@@ -22,13 +22,13 @@ struct Index {
   @State borderRadiusValue: number = 10;
   build() {
     Column() {
-      Image($r("app.media.sky"))
+      Image($r('app.media.sky'))
         .sourceSize({width:1393, height:1080})
         .height(300)
         .width(300)
         .objectFit(ImageFit.Contain)
         .borderWidth(1)
-      Image($r("app.media.sky"))
+      Image($r('app.media.sky'))
         .sourceSize({width:13, height:10})
         .height(300)
         .width(300)

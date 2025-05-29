@@ -59,6 +59,7 @@ build_component_ng("web_pattern_ng") {
       "ipc:ipc_core",
       "webview:libnweb",
       "window_manager:libwm",
+      "window_manager:libpip_ndk",
     ]
   }
 }

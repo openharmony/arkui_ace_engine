@@ -54,14 +54,15 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
     UpdateFadingGradient(renderContext);
 
-    if (TryContentClip(paintWrapper)) {
-        listContentModifier_->SetClip(false);
-    } else {
+    if (!TryContentClip(paintWrapper)) {
         const bool hasPadding = padding && padding->HasValue();
         bool clip = hasPadding && (!renderContext || renderContext->GetClipEdge().value_or(true));
-        listContentModifier_->SetClipOffset(paddingOffset);
-        listContentModifier_->SetClipSize(frameSize);
-        listContentModifier_->SetClip(clip);
+        if (clip) {
+            RectF rect(paddingOffset, frameSize);
+            renderContext->SetContentClip(rect);
+        } else {
+            renderContext->ResetContentClip();
+        }
     }
 
     float contentSize = vertical_ ? frameSize.Width() : frameSize.Height();

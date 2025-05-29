@@ -1192,6 +1192,12 @@ void ViewAbstractModelImpl::SetOnDragEnd(OnNewDragFunc&& onDragEnd)
     box->SetOnDragEndId(onDragEnd);
 }
 
+void ViewAbstractModelImpl::SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) {}
+
+void ViewAbstractModelImpl::SetOnDragSpringLoadingConfiguration(
+    const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
+{}
+
 void ViewAbstractModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();

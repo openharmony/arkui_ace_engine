@@ -144,11 +144,15 @@ void FormRenderWindow::OnHide()
 #endif
 }
 
-void FormRenderWindow::FlushTasks()
+void FormRenderWindow::FlushTasks(std::function<void()> callback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(rsUIDirector_);
-    rsUIDirector_->SendMessages();
+    if (!callback) {
+        rsUIDirector_->SendMessages();
+    } else {
+        rsUIDirector_->SendMessages(callback);
+    }
 #endif
 }
 

@@ -792,7 +792,10 @@ void WindowScene::OnRemoveBlank()
 
 void WindowScene::OnAddSnapshot()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    int32_t imageFit = 0;
+    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
+        session_->GetPersistentId(), imageFit);
+    auto uiTask = [weakThis = WeakClaim(this), isPersistentImageFit]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
@@ -804,9 +807,13 @@ void WindowScene::OnAddSnapshot()
                 self->session_->GetPersistentId(), host->GetId());
             return;
         }
-        self->RemoveChild(host, self->appWindow_, self->appWindowName_);
-        self->CreateSnapshotWindow(self->session_->GetSnapshot());
+        if (isPersistentImageFit && self->session_->GetSnapshot() == nullptr) {
+            self->CreateSnapshotWindow();
+        } else {
+            self->CreateSnapshotWindow(self->session_->GetSnapshot());
+        }
         self->AddChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+        self->RemoveChild(host, self->appWindow_, self->appWindowName_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "OnAddSnapshot id %{public}d host id %{public}d", self->session_->GetPersistentId(), host->GetId());
@@ -820,13 +827,19 @@ void WindowScene::OnAddSnapshot()
 
 void WindowScene::OnRemoveSnapshot()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    int32_t imageFit = 0;
+    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
+        session_->GetPersistentId(), imageFit);
+    auto uiTask = [weakThis = WeakClaim(this), isPersistentImageFit]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         if (self->snapshotWindow_) {
+            if (isPersistentImageFit) {
+                self->SetSubSessionVisible();
+            }
             self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
@@ -854,6 +867,32 @@ void WindowScene::OnAppRemoveStartingWindow()
     CHECK_EQUAL_VOID(session_->GetEnableRemoveStartingWindow(), false);
     session_->SetAppBufferReady(true);
     BufferAvailableCallback();
+}
+
+void WindowScene::OnUpdateSnapshotWindow()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self->snapshotWindow_);
+        CHECK_NULL_VOID(self->session_);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+        self->snapshotWindow_.Reset();
+        self->CreateSnapshotWindow();
+        self->AddChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "OnUpdateSnapshotWindow id %{public}d host id %{public}d",
+            self->session_->GetPersistentId(), host->GetId());
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(
+        std::move(uiTask), "ArkUIWindowSceneUpdateSnapshotWindow", TaskExecutor::TaskType::UI);
 }
 
 bool WindowScene::IsWindowSizeEqual()

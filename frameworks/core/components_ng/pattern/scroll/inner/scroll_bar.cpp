@@ -205,21 +205,20 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
         double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
         auto scrollBarMarginStart = scrollBarMargin_.value_or(ScrollBarMargin()).start_.ConvertToPxWithSize(mainSize);
         auto scrollBarMarginEnd = scrollBarMargin_.value_or(ScrollBarMargin()).end_.ConvertToPxWithSize(mainSize);
-        double height = std::max(size.Height() - NormalizeToPx(startReservedHeight_) -
-            NormalizeToPx(endReservedHeight_) - scrollBarMarginStart - scrollBarMarginEnd, 0.0);
+        double reserved = NormalizeToPx(startReservedHeight_) + NormalizeToPx(endReservedHeight_) +
+            scrollBarMarginStart + scrollBarMarginEnd;
+        double height = std::max(size.Height() - reserved, 0.0);
         auto hoverWidth = isUserNormalWidth_ ? barWidth_ : NormalizeToPx(hoverWidth_);
         if (positionMode_ == PositionMode::LEFT) {
-            barRect_ = Rect(NormalizeToPx(padding_.Left()), 0.0, hoverWidth, height) + offset;
+            auto padding = isUserNormalWidth_ ? NormalizeToPx(padding_.Left()) : 0.0;
+            barRect_ = Rect(padding, 0.0, hoverWidth, height) + offset;
         } else if (positionMode_ == PositionMode::RIGHT) {
-            barRect_ =
-                Rect(size.Width() - hoverWidth - NormalizeToPx(padding_.Right()), 0.0, hoverWidth, height) + offset;
+            auto padding = isUserNormalWidth_ ? NormalizeToPx(padding_.Right()) : 0.0;
+            barRect_ = Rect(size.Width() - hoverWidth - padding, 0.0, hoverWidth, height) + offset;
         } else if (positionMode_ == PositionMode::BOTTOM) {
-            auto trackWidth =
-                std::max(size.Width() - NormalizeToPx(startReservedHeight_) - NormalizeToPx(endReservedHeight_) -
-                    scrollBarMarginStart - scrollBarMarginEnd, 0.0);
-            barRect_ =
-                Rect(0.0, size.Height() - hoverWidth - NormalizeToPx(padding_.Bottom()), trackWidth, hoverWidth) +
-                offset;
+            auto trackWidth = std::max(size.Width() - reserved, 0.0);
+            auto padding = isUserNormalWidth_ ? NormalizeToPx(padding_.Bottom()) : 0.0;
+            barRect_ = Rect(0.0, size.Height() - hoverWidth - padding, trackWidth, hoverWidth) + offset;
         }
     }
 }
@@ -457,18 +456,19 @@ void ScrollBar::SetMouseEvent()
             }
             scrollBar->isShowScrollBar_ = true;
         }
-        if (inHoverRegion && !scrollBar->IsHover()) {
+        if (inBarRegion && !scrollBar->IsHover()) {
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarGrowAnimation();
             }
             scrollBar->SetHover(true);
         }
-        if (scrollBar->IsHover() && !inHoverRegion) {
+        if (scrollBar->IsHover() && !inBarRegion) {
             scrollBar->SetHover(false);
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
             }
         }
+        scrollBar->SetHoverSlider(inHoverRegion);
         if (!inBarRegion && !inHoverRegion && !scrollBar->IsPressed() && scrollBar->isShowScrollBar_) {
             scrollBar->ScheduleDisappearDelayTask();
             scrollBar->isShowScrollBar_ = false;
@@ -488,6 +488,7 @@ void ScrollBar::SetHoverEvent()
         CHECK_NULL_VOID(scrollBar && scrollBar->IsScrollable());
         if (scrollBar->IsHover() && !isHover) {
             scrollBar->SetHover(false);
+            scrollBar->SetHoverSlider(false);
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
                 scrollBar->ScheduleDisappearDelayTask();
@@ -992,7 +993,7 @@ Color ScrollBar::GetForegroundColor() const
     if (IsPressed()) {
         return foregroundColor_.BlendColor(foregroundPressedBlendColor_);
     }
-    if (IsHover()) {
+    if (IsHoverSlider()) {
         return foregroundColor_.BlendColor(foregroundHoverBlendColor_);
     }
     return foregroundColor_;

@@ -36,8 +36,8 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -253,24 +253,29 @@ BubbleLayoutAlgorithm::BubbleLayoutAlgorithm(int32_t id, const std::string& tag,
         Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 }
 
-void BubbleLayoutAlgorithm::FitAvaliableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow)
+void BubbleLayoutAlgorithm::FitAvailableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow)
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
     auto pipelineContext = bubbleNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
-    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
-    auto containerId = Container::CurrentId();
+    auto containerId = pipelineContext->GetInstanceId();
     auto container = AceEngine::Get().GetContainer(containerId);
-    if (containerId >= MIN_SUBCONTAINER_ID) {
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_VOID(container);
     }
-    CHECK_NULL_VOID(container);
-    auto isFreeMultiWindow = container->IsFreeMultiWindow();
-    CHECK_EQUAL_VOID(expandDisplay || isFreeMultiWindow, false);
-    auto availableRect = OverlayManager::GetDisplayAvailableRect(bubbleNode,
-        static_cast<int32_t>(SubwindowType::TYPE_POPUP));
+    CHECK_EQUAL_VOID(expandDisplay_, false);
+    Rect availableRect;
+    // In superFoldDisplayDevice, the rect is the full screen's available rect when the displayId is 0.
+    if (SystemProperties::IsSuperFoldDisplayDevice() && container->GetDisplayId() == 0 && !showInSubWindow) {
+        availableRect = container->GetFoldExpandAvailableRect();
+    } else {
+        availableRect = OverlayManager::GetDisplayAvailableRect(bubbleNode,
+            static_cast<int32_t>(SubwindowType::TYPE_POPUP));
+    }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup currentId: %{public}d, displayAvailableRect: %{public}s",
         containerId, availableRect.ToString().c_str());
     if (showInSubWindow) {
@@ -285,6 +290,7 @@ void BubbleLayoutAlgorithm::FitAvaliableRect(LayoutWrapper* layoutWrapper, bool 
                                     wrapperOffset.GetY() + displayWindowRect.Top(),
                                     wrapperSize_.Width(), wrapperSize_.Height());
         auto commonRect = availableRect.IntersectRect(realWrapperRect);
+        CHECK_EQUAL_VOID(commonRect.IsValid(), false);
         wrapperSize_.SetHeight(commonRect.Top() + commonRect.Height() - realWrapperRect.Top());
         wrapperSize_.SetWidth(commonRect.Left() + commonRect.Width() - realWrapperRect.Left());
         marginTop_ = std::max(marginTop_, static_cast<float>(commonRect.Top() -
@@ -307,7 +313,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
-    FitAvaliableRect(layoutWrapper, showInSubWindow);
+    FitAvailableRect(layoutWrapper, showInSubWindow);
     const auto& layoutConstraint = bubbleLayoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
         LOGE("fail to measure bubble due to layoutConstraint is nullptr");
@@ -708,8 +714,8 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     showArrow_ = false;
     minHeight_ = popupTheme->GetMinHeight();
     maxColumns_ = popupTheme->GetMaxColumns();
-    isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
-    InitWrapperRect(layoutWrapper);
+    expandDisplay_ = DialogManager::GetInstance().IfNeedAvoidDock(layoutWrapper->GetHostNode());
+    InitWrapperRect(layoutWrapper, layoutProp);
     if (!useCustom_) {
         UpdateScrollHeight(layoutWrapper, showInSubWindow);
     }
@@ -802,8 +808,17 @@ void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(LayoutWrapper* layoutWrapp
     }
 }
 
-void BubbleLayoutAlgorithm::InitWrapperRect(LayoutWrapper* layoutWrapper)
+void BubbleLayoutAlgorithm::InitWrapperRect(
+    LayoutWrapper* layoutWrapper, const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
+    auto bubbleNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(bubbleNode);
+    CHECK_NULL_VOID(layoutProp);
+    auto enableHoverMode = layoutProp->GetEnableHoverMode();
+    auto context = bubbleNode->GetContext();
+    CHECK_NULL_VOID(context);
+
+    isHalfFoldHover_ = OverlayManager::IsNeedAvoidFoldCrease(bubbleNode, true, expandDisplay_, enableHoverMode);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
@@ -818,23 +833,20 @@ void BubbleLayoutAlgorithm::InitWrapperRect(LayoutWrapper* layoutWrapper)
     auto targetOffset = targetNode->GetPaintRectOffset();
     float getY = 0;
     getY = targetOffset.GetY();
-    auto bubbleNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(bubbleNode);
     auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
-    auto enableHoverMode = bubblePattern->GetEnableHoverMode();
-    dumpInfo_.enableHoverMode = enableHoverMode;
-    if (!enableHoverMode) {
-        isHalfFoldHover_ = false;
-    }
-    if (isHalfFoldHover_ && enableHoverMode) {
-        if (getY < foldCreaseTop_) {
+    dumpInfo_.enableHoverMode = enableHoverMode.value_or(false);
+    if (isHalfFoldHover_) {
+        auto creaseHeightOffset = static_cast<float>(context->GetCustomTitleHeight().ConvertToPx());
+        auto foldCreaseTop = foldCreaseTop_ - creaseHeightOffset;
+        auto foldCreaseBottom = foldCreaseBottom_ - creaseHeightOffset;
+        if (LessNotEqual(getY, foldCreaseTop)) {
             wrapperRect_.SetRect(marginStart_, marginTop_,
-                wrapperSize_.Width() - marginEnd_ - marginStart_, foldCreaseTop_ - marginTop_);
-        } else if (getY > foldCreaseBottom_) {
-            wrapperRect_.SetRect(marginStart_, foldCreaseBottom_,
+                wrapperSize_.Width() - marginEnd_ - marginStart_, foldCreaseTop - marginTop_);
+        } else if (GreatNotEqual(getY, foldCreaseBottom)) {
+            wrapperRect_.SetRect(marginStart_, foldCreaseBottom,
                 wrapperSize_.Width() - marginEnd_ - marginStart_,
-                    wrapperSize_.Height() - foldCreaseBottom_ - marginBottom_);
+                    wrapperSize_.Height() - foldCreaseBottom - marginBottom_);
         } else {
             isHalfFoldHover_ = false;
         }
@@ -845,10 +857,10 @@ void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper, boo
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
-    auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
-    CHECK_NULL_VOID(bubblePattern);
-    auto enableHoverMode = bubblePattern->GetEnableHoverMode();
-    if (!enableHoverMode) {
+    auto layoutProp = bubbleNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto enableHoverMode = layoutProp->GetEnableHoverMode();
+    if (!enableHoverMode.value_or(false)) {
         return;
     }
 

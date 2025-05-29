@@ -19,10 +19,12 @@
 #include <cmath>
 #include <limits>
 #include <optional>
+#include <functional>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -87,11 +89,31 @@ public:
     {
         return deltaX_ == dimensionOffset.deltaX_ && deltaY_ == dimensionOffset.deltaY_ && deltaZ_ == deltaZ_;
     }
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, DimensionOffset&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
 
 private:
     Dimension deltaX_;
     Dimension deltaY_;
     std::optional<Dimension> deltaZ_;
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, DimensionOffset&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
 };
 
 } // namespace OHOS::Ace

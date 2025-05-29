@@ -955,7 +955,7 @@ void AddSupportedUIStates(
         FuncType func = reinterpret_cast<FuncType>(statesChangeHandler);
         func(static_cast<int32_t >(currentState), userData);
     };
-    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), onStatesChange, isExcludeInner);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), onStatesChange, false, isExcludeInner);
 }
 
 void RemoveSupportedUIStates(ArkUINodeHandle node, int32_t state)

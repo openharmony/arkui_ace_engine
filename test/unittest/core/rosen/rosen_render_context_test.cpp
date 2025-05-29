@@ -875,6 +875,26 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest035, TestSize.Level1)
     EXPECT_EQ(rectAfterUpdate.GetTop(), 2.0f);
     EXPECT_EQ(rectAfterUpdate.GetRight(), 18.0f);
     EXPECT_EQ(rectAfterUpdate.GetBottom(), 18.0f);
+
+    Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
+    auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
+    auto diffRadiusValueX = borderPaddingPx + paintWidthPx / 2;
+    auto diffRadiusValueY = borderPaddingPx + paintWidthPx / 2;
+
+    auto roundRectAfterUpdate = rosenRenderContext->accessibilityFocusStateModifier_->roundRect_;
+    auto focusPaintCornerTopLeftAfter = roundRectAfterUpdate.GetCornerRadius(RSRoundRect::RoundRect::CornerPos::TOP_LEFT_POS);
+    auto focusPaintCornerTopRightAfter = roundRectAfterUpdate.GetCornerRadius(RSRoundRect::RoundRect::CornerPos::TOP_RIGHT_POS);
+    auto focusPaintCornerBottomLeftAfter = roundRectAfterUpdate.GetCornerRadius(RSRoundRect::RoundRect::CornerPos::BOTTOM_LEFT_POS);
+    auto focusPaintCornerBottomRightAfter = roundRectAfterUpdate.GetCornerRadius(RSRoundRect::RoundRect::CornerPos::BOTTOM_RIGHT_POS);
+
+    EXPECT_EQ(focusPaintCornerTopLeftAfter.GetX(), diffRadiusValueX);
+    EXPECT_EQ(focusPaintCornerTopLeftAfter.GetY(), diffRadiusValueY);
+    EXPECT_EQ(focusPaintCornerTopRightAfter.GetX(), diffRadiusValueX);
+    EXPECT_EQ(focusPaintCornerTopRightAfter.GetY(), diffRadiusValueY);
+    EXPECT_EQ(focusPaintCornerBottomLeftAfter.GetX(), diffRadiusValueX);
+    EXPECT_EQ(focusPaintCornerBottomLeftAfter.GetY(), diffRadiusValueY);
+    EXPECT_EQ(focusPaintCornerBottomRightAfter.GetX(), diffRadiusValueX);
+    EXPECT_EQ(focusPaintCornerBottomRightAfter.GetY(), diffRadiusValueY);
 }
 
 /**
@@ -1067,10 +1087,19 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
     const Color value = Color::RED;
     rosenRenderContext->OnBackgroundColorUpdate(value);
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
-    rosenRenderContext->rsNode_->SetBackgroundColor(value.GetValue());
+    OHOS::Rosen::RSColor rsColor = OHOS::Rosen::RSColor::FromArgbInt(value.GetValue());
+    GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+    if (ColorSpace::DISPLAY_P3 == value.GetColorSpace()) {
+        colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
+    }
+    rsColor.SetColorSpace(colorSpace);
+    rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
     rosenRenderContext->PaintBackground();
     auto backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
-    EXPECT_EQ(backgroundColorVal, OHOS::Rosen::RSColor::FromArgbInt(value.GetValue()));
+    EXPECT_EQ(backgroundColorVal.GetRed(), rsColor.GetRed());
+    EXPECT_EQ(backgroundColorVal.GetGreen(), rsColor.GetGreen());
+    EXPECT_EQ(backgroundColorVal.GetBlue(), rsColor.GetBlue());
+    EXPECT_EQ(backgroundColorVal.GetAlpha(), rsColor.GetAlpha());
 }
 
 /**
@@ -1395,5 +1424,65 @@ HWTEST_F(RosenRenderContextTest, SetAlwaysSnapshot001, TestSize.Level1)
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
     rosenRenderContext->SetAlwaysSnapshot(true);
     EXPECT_EQ(rosenRenderContext->rsNode_->GetStagingProperties().GetAlwaysSnapshot(), false);
+}
+
+/**
+ * @tc.name: OnCustomBackgroundColorUpdate001
+ * @tc.desc: Test OnCustomBackgroundColorUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnCustomBackgroundColorUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    const Color value = Color::RED;
+    rosenRenderContext->OnCustomBackgroundColorUpdate(value);
+}
+
+/**
+ * @tc.name: OnTransform3DMatrixUpdate001
+ * @tc.desc: Test OnTransform3DMatrixUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    float INDEX_0 = 0.0f;
+    float INDEX_1 = 1.0f;
+    float INDEX_100 = 100.0f;
+    Matrix4 matrix4(INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1,
+        INDEX_0, INDEX_100, INDEX_0, INDEX_0, INDEX_1);
+    rosenRenderContext->OnTransform3DMatrixUpdate(matrix4);
+    auto perspectiveValue = rosenRenderContext->transformMatrixModifier_->perspectiveValue.get()->Get();
+    auto xyTranslateValue = rosenRenderContext->transformMatrixModifier_->translateXYValue.get()->Get();
+    auto translateZValue = rosenRenderContext->transformMatrixModifier_->translateZValue.get()->Get();
+    auto scaleXYValue = rosenRenderContext->transformMatrixModifier_->scaleXYValue.get()->Get();
+    auto scaleZValue = rosenRenderContext->transformMatrixModifier_->scaleZValue.get()->Get();
+    auto skewValue = rosenRenderContext->transformMatrixModifier_->skewValue.get()->Get();
+    auto quaternionValue = rosenRenderContext->transformMatrixModifier_->quaternionValue.get()->Get();
+    EXPECT_NE(perspectiveValue[0], 0);
+    EXPECT_EQ(perspectiveValue[1], 0);
+    EXPECT_EQ(perspectiveValue[2], 0);
+    EXPECT_NE(perspectiveValue[3], 0);
+    EXPECT_EQ(xyTranslateValue[0], 0);
+    EXPECT_EQ(perspectiveValue[1], 0);
+    EXPECT_EQ(translateZValue, 0);
+    EXPECT_NE(scaleXYValue[0], 0);
+    EXPECT_NE(scaleXYValue[1], 0);
+    EXPECT_NE(scaleZValue, 0);
+    EXPECT_EQ(skewValue[0], 0);
+    EXPECT_EQ(skewValue[1], 0);
+    EXPECT_EQ(skewValue[2], 0);
+    EXPECT_EQ(quaternionValue[0], 0);
+    EXPECT_EQ(quaternionValue[1], 0);
+    EXPECT_EQ(quaternionValue[2], 0);
+    EXPECT_NE(quaternionValue[3], 0);
 }
 } // namespace OHOS::Ace::NG

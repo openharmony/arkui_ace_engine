@@ -564,6 +564,18 @@ public:
     void SetWebDebuggingAccessEnabled(bool isEnabled)
     {
         isWebDebuggingAccessEnabled_ = isEnabled;
+        webDebuggingPort_ = 0;
+    }
+
+    const std::tuple<bool, int32_t> GetWebDebuggingAccessEnabledAndPort() const
+    {
+        return std::make_tuple(isWebDebuggingAccessEnabled_, webDebuggingPort_);
+    }
+
+    void SetWebDebuggingAccessEnabledAndPort(bool isEnabled, int32_t port)
+    {
+        isWebDebuggingAccessEnabled_ = isEnabled;
+        webDebuggingPort_ = port;
     }
 
     bool GetPinchSmoothModeEnabled() const
@@ -1185,6 +1197,7 @@ private:
     int32_t textZoomRatioNum_ = DEFAULT_TEXT_ZOOM_RATIO;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
+    int32_t webDebuggingPort_ = 0;
     bool isMultiWindowAccessEnabled_ = false;
     bool isAllowWindowOpenMethod_ = false;
     OnMouseCallback onMouseEvent_;

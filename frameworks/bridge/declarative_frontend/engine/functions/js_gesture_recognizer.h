@@ -399,5 +399,36 @@ private:
     SwipeDirection direction_;
     double speed_ = 100.0;
 };
+
+class JSTouchRecognizer : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj);
+    
+    void GetEventTargetInfo(const JSCallbackInfo& args);
+    void CancelTouch(const JSCallbackInfo& args);
+    void SetTouchData(const WeakPtr<TouchEventTarget>& target, const std::unordered_set<int32_t>& fingerIds)
+    {
+        target_ = std::move(target);
+        fingerIds_ = std::move(fingerIds);
+    }
+    
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsTouchRecognizer = Referenced::MakeRefPtr<JSTouchRecognizer>();
+        jsTouchRecognizer->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsTouchRecognizer));
+    }
+    
+    static void Destructor(JSTouchRecognizer* jsTouchRecognizer)
+    {
+        if (jsTouchRecognizer != nullptr) {
+            jsTouchRecognizer->DecRefCount();
+        }
+    }
+    
+    WeakPtr<TouchEventTarget> target_;
+    std::unordered_set<int32_t> fingerIds_;
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_GESTURE_RECOGNIZER_H

@@ -48,7 +48,8 @@ public:
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;
     virtual int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) = 0;
     virtual int32_t GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key) = 0;
-    virtual int32_t GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap) = 0;
+    virtual int32_t GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap,
+        std::map<std::string, int64_t>& detailedSummaryMap) = 0;
     virtual bool GetRemoteStatus(std::string& key) = 0;
     virtual void AddFormRecord(
         const RefPtr<UnifiedData>& unifiedData, int32_t formId, const RequestFormInfo& cardInfo) = 0;
@@ -82,6 +83,7 @@ public:
     virtual void GetLinkEntry(const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) = 0;
     virtual bool GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
     virtual std::vector<uint8_t> GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData) = 0;
+    virtual bool IsBelongsTo(const std::string& summary, const std::string& allowDropType) = 0;
 };
 } // namespace OHOS::Ace
 #endif

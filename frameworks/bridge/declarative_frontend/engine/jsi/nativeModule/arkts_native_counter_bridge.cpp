@@ -149,7 +149,8 @@ ArkUINativeModuleValue CounterBridge::SetCounterBackgroundColor(ArkUIRuntimeCall
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getCounterModifier()->resetCounterBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getCounterModifier()->setCounterBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getCounterModifier()->setCounterBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace());
     }
     return panda::JSValueRef::Undefined(vm);
 }

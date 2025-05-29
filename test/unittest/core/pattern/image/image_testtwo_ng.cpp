@@ -1791,4 +1791,84 @@ HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level1)
     image.Create(imageInfoConfig, pixMap);
     EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
 }
+
+/**
+ * @tc.name: TestUpdateImageSourceinfo001
+ * @tc.desc: Test ImagePattern::UpdateImageSourceinfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestUpdateImageSourceinfo001, TestSize.Level1)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageSourceInfo sourceInfo("test_source");
+    auto host = imagePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    pipelineContext->isSystemColorChange_ = true;
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    imagePattern->UpdateImageSourceinfo(sourceInfo);
+    sourceInfo.src_ = "test_source2";
+    EXPECT_NE(imageLayoutProperty->GetImageSourceInfo(), sourceInfo);
+}
+
+/**
+ * @tc.name: TestUpdateImageFill001
+ * @tc.desc: Test ImagePattern::UpdateImageFill function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestUpdateImageFill001, TestSize.Level1)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    Color testColor(Color::RED);
+    imagePattern->UpdateImageFill(testColor);
+
+    auto renderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(renderProperty, nullptr);
+    EXPECT_EQ(renderProperty->GetSvgFillColor(), testColor);
+
+    auto host = imagePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto renderContext = host->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetForegroundColor(), testColor);
+}
+
+/**
+ * @tc.name: TestUpdateImageAlt001
+ * @tc.desc: Test ImagePattern::UpdateImageAlt function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestUpdateImageAlt001, TestSize.Level1)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageSourceInfo sourceInfo("test_alt_source");
+    auto host = imagePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    pipelineContext->isSystemColorChange_ = true;
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    imagePattern->UpdateImageAlt(sourceInfo);
+    sourceInfo.src_ = "test_alt_source2";
+    EXPECT_NE(imageLayoutProperty->GetAlt(), sourceInfo);
+}
 } // namespace OHOS::Ace::NG

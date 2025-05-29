@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
@@ -40,8 +41,39 @@ enum class DialogType {
     PROGRESS_DIALOG,
 };
 
+enum class DialogResourceType {
+    BACKGROUND_COLOR = 1,
+    MASK_COLOR,
+    WIDTH,
+    HEIGHT,
+    TITLE,
+    SUBTITLE,
+    MESSAGE,
+};
 class DialogTypeUtils {
 public:
+    static std::string ConvertDialogTypeToString(const DialogResourceType type)
+    {
+        switch (type) {
+            case DialogResourceType::BACKGROUND_COLOR:
+                return "backgroundColor";
+            case DialogResourceType::MASK_COLOR:
+                return "maskColor";
+            case DialogResourceType::WIDTH:
+                return "width";
+            case DialogResourceType::HEIGHT:
+                return "height";
+            case DialogResourceType::TITLE:
+                return "title";
+            case DialogResourceType::SUBTITLE:
+                return "subtitle";
+            case DialogResourceType::MESSAGE:
+                return "message";
+            default:
+                break;
+        }
+        return "";
+    }
     static std::string ConvertDialogTypeToString(DialogType type)
     {
         switch (type) {
@@ -211,7 +243,9 @@ struct ButtonInfo {
     std::optional<NG::BorderRadiusProperty> borderRadius;
     bool isPrimary = false;
     bool isAcceptButton = false;
-
+    RefPtr<ResourceObject> resourceTextObj;
+    RefPtr<ResourceObject> resourceFontColorObj;
+    RefPtr<ResourceObject> resourceBgColorObj;
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const
     {
@@ -247,7 +281,6 @@ struct DialogProperties {
     bool isShowInSubWindow = false;
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
-    bool isUECHostMask = false;
     bool isModal = true;
     std::optional<bool> enableHoverMode;
     bool isSceneBoardDialog = false;
@@ -305,6 +338,14 @@ struct DialogProperties {
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
+    RefPtr<ResourceObject> resourceBgColorObj;
+    RefPtr<ResourceObject> resourceTitleObj;
+    RefPtr<ResourceObject> resourceSubTitleObj;
+    RefPtr<ResourceObject> resourceContentObj;
+    RefPtr<ResourceObject> resourceMaskColorObj;
+    RefPtr<ResourceObject> resourceWidthObj;
+    RefPtr<ResourceObject> resourceHeightObj;
+    RefPtr<ResourceObject> resourceBdColorObj;
 };
 
 struct PromptDialogAttr {
@@ -357,21 +398,6 @@ struct PromptDialogAttr {
     WeakPtr<NG::UINode> customCNode;
 };
 
-enum class UECHostMaskAction {
-    NONE = 0,
-    MOUNT,
-    UNMOUNT,
-    UPDATE,
-    CLICK,
-    PRESS_BACK,
-};
-
-enum class UECHostMaskType {
-    NONE = 0,
-    DIALOG,
-    BIND_SHEET,
-};
-
 enum class PromptActionCommonState {
     UNINITIALIZED = 0,
     INITIALIZED = 1,
@@ -379,35 +405,6 @@ enum class PromptActionCommonState {
     APPEARED = 3,
     DISAPPEARING = 4,
     DISAPPEARED  = 5,
-};
-
-struct UECHostMaskInfo {
-    std::string uuid;
-    int32_t instanceId = -1;
-
-    std::string overlayTag; // the tag of overlay node on UEA
-    int32_t overlayId = -1; // the id of overlay node on UEA
-
-    std::optional<Color> maskColor;
-    UECHostMaskAction maskAction = UECHostMaskAction::NONE;
-    UECHostMaskType maskType = UECHostMaskType::NONE;
-
-    std::string ToString() const
-    {
-        std::stringstream ss;
-        ss << "uuid: " << uuid << ", ";
-        ss << "instanceId: " << instanceId << ", ";
-        ss << "overlayTag: " << overlayTag << ", ";
-        ss << "overlayId: " << overlayId << ", ";
-        if (maskColor.has_value()) {
-            ss << "maskColor: " << maskColor.value().ToString() << ", ";
-        }
-        ss << "maskAction: " << static_cast<int32_t>(maskAction) << ", ";
-        ss << "maskType: " << static_cast<int32_t>(maskType);
-
-        std::string output = ss.str();
-        return output;
-    };
 };
 
 } // namespace OHOS::Ace

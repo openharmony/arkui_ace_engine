@@ -80,20 +80,29 @@ constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
 constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
+constexpr Dimension MIN_HOTSPOT_WIDTH = 40.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
 
-std::unordered_map<TextDataDetectType, std::string> AI_TYPE_ID_MAP = {
-    { TextDataDetectType::PHONE_NUMBER, OH_DEFAULT_AI_MENU_PHONE },
-    { TextDataDetectType::URL, OH_DEFAULT_AI_MENU_URL },
-    { TextDataDetectType::EMAIL, OH_DEFAULT_AI_MENU_EMAIL },
-    { TextDataDetectType::ADDRESS, OH_DEFAULT_AI_MENU_ADDRESS },
-    { TextDataDetectType::DATE_TIME, OH_DEFAULT_AI_MENU_DATETIME }
+std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
+    { TextDataDetectType::PHONE_NUMBER, std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
+    { TextDataDetectType::URL, std::make_pair(OH_DEFAULT_AI_MENU_URL, &TextSystemMenu::IsShowAIUrl) },
+    { TextDataDetectType::EMAIL, std::make_pair(OH_DEFAULT_AI_MENU_EMAIL, &TextSystemMenu::IsShowAIEmail) },
+    { TextDataDetectType::ADDRESS, std::make_pair(OH_DEFAULT_AI_MENU_ADDRESS, &TextSystemMenu::IsShowAIAddress) },
+    { TextDataDetectType::DATE_TIME, std::make_pair(OH_DEFAULT_AI_MENU_DATETIME, &TextSystemMenu::IsShowAIDatetime) },
 };
 
 bool IsAIMenuOption(const std::string& id)
 {
     return id == OH_DEFAULT_AI_MENU_PHONE || id == OH_DEFAULT_AI_MENU_URL || id == OH_DEFAULT_AI_MENU_EMAIL ||
             id == OH_DEFAULT_AI_MENU_ADDRESS || id == OH_DEFAULT_AI_MENU_DATETIME;
+}
+
+bool IsShowAIMenuOption(OHOS::Ace::TextDataDetectType type)
+{
+    auto isShowAIMenu = type != TextDataDetectType::INVALID;
+    auto findIter = AI_TYPE_ID_MAP.find(type);
+    isShowAIMenu = isShowAIMenu && (findIter != AI_TYPE_ID_MAP.end()) && findIter->second.second();
+    return isShowAIMenu;
 }
 
 const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>> isMenuItemEnabledFuncMap = {
@@ -153,6 +162,30 @@ enum class SelectOverlayMenuButtonType {
     NORMAL,
     AIBUTTON
 };
+
+void SetMoreOrBackButtonResponse(RefPtr<FrameNode>& node)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        return;
+    }
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(textOverlayTheme);
+    auto gestureHub = node->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    std::vector<DimensionRect> vector;
+    auto menuPadding = textOverlayTheme->GetMenuPadding();
+    auto buttonWidth = textOverlayTheme->GetMenuButtonWidth();
+    auto top = menuPadding.Top();
+    auto responseHeight = top.Value() + menuPadding.Bottom().Value() + textOverlayTheme->GetMenuButtonHeight().Value();
+    auto responseWidth = std::max(buttonWidth, MIN_HOTSPOT_WIDTH);
+    constexpr int32_t centerDivider = 2;
+    vector.emplace_back(DimensionRect(responseWidth, Dimension(responseHeight, DimensionUnit::VP),
+        DimensionOffset(
+            Dimension(-(responseWidth - buttonWidth) / centerDivider), Dimension(-top.Value(), top.Unit()))));
+    gestureHub->SetResponseRegion(vector);
+}
 
 void SetResponseRegion(RefPtr<FrameNode>& node)
 {
@@ -629,6 +662,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     button->MarkModifyDone();
+    SetMoreOrBackButtonResponse(button);
     return button;
 }
 
@@ -694,6 +728,47 @@ std::function<void()> ConvertToVoidFunction(std::function<void(std::string)> fun
     };
 }
 
+void GetOptionsParamsHasSymbol(
+    const std::shared_ptr<SelectOverlayInfo>& info, RefPtr<TextOverlayTheme>& theme, std::vector<OptionParam>& params)
+{
+    CHECK_NULL_VOID(info);
+    CHECK_NULL_VOID(theme);
+    params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
+        theme->GetCutLabelInfo(), info->menuInfo.showCut, theme->GetCutSymbolId());
+    params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
+        theme->GetCopyLabelInfo(), info->menuInfo.showCopy, theme->GetCopySymbolId());
+    params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
+        theme->GetPasteLabelInfo(), info->menuInfo.showPaste, theme->GetPasteSymbolId());
+    params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
+        theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll, theme->GetCopyAllSymbolId());
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
+        TextSystemMenu::IsShowTranslate()) {
+        params.emplace_back(theme->GetTranslateLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onTranslate),
+            "", info->menuInfo.showTranslate);
+        params.back().symbolId = theme->GetTranslateSymbolId();
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (TextSystemMenu::IsShowShare()) {
+            params.emplace_back(theme->GetShareLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onShare), "",
+                info->menuInfo.showShare);
+            params.back().symbolId = theme->GetShareSymbolId();
+        }
+        if (TextSystemMenu::IsShowSearch()) {
+            params.emplace_back(theme->GetSearchLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSearch),
+                "", info->menuInfo.showSearch);
+            params.back().symbolId = theme->GetSearchSymbolId();
+        }
+    }
+    if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
+        auto inheritFunc = ConvertToVoidFunction(info->menuCallback.onAIMenuOption, "From_Right_Click");
+        params.emplace_back(theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType),
+            GetMenuCallbackWithContainerId(inheritFunc), "", true);
+        params.back().symbolId = theme->GetAIMenuSymbolId();
+        params.back().isAIMenuOption = true;
+    }
+}
+
 std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<OptionParam> params;
@@ -702,25 +777,17 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, params);
     if (theme->GetShowShortcut()) {
-        params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
-            theme->GetCutLabelInfo(), info->menuInfo.showCut, theme->GetCutSymbolId());
-        params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
-            theme->GetCopyLabelInfo(), info->menuInfo.showCopy, theme->GetCopySymbolId());
-        params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
-            theme->GetPasteLabelInfo(), info->menuInfo.showPaste, theme->GetPasteSymbolId());
-        params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
-            theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll, theme->GetCopyAllSymbolId());
-    } else {
-        params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
-            theme->GetCutLabelInfo(), info->menuInfo.showCut);
-        params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
-            theme->GetCopyLabelInfo(), info->menuInfo.showCopy);
-        params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
-            theme->GetPasteLabelInfo(), info->menuInfo.showPaste);
-        params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
-            theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll);
+        GetOptionsParamsHasSymbol(info, theme, params);
+        return params;
     }
-
+    params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
+        theme->GetCutLabelInfo(), info->menuInfo.showCut);
+    params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
+        theme->GetCopyLabelInfo(), info->menuInfo.showCopy);
+    params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
+        theme->GetPasteLabelInfo(), info->menuInfo.showPaste);
+    params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
+        theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
         TextSystemMenu::IsShowTranslate()) {
         params.emplace_back(theme->GetTranslateLabel(),
@@ -736,7 +803,8 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
                 "", info->menuInfo.showSearch);
         }
     }
-    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) {
+
+    if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
         auto inheritFunc = ConvertToVoidFunction(info->menuCallback.onAIMenuOption, "From_Right_Click");
         params.emplace_back(theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType),
             GetMenuCallbackWithContainerId(inheritFunc), "", true);
@@ -862,6 +930,17 @@ void CloseOverlayIfNecessary(const RefPtr<SelectOverlayManager>& overlayManager)
     contentOverlayManager->CloseCurrent(true, CloseReason::CLOSE_REASON_TOOL_BAR);
 }
 
+void SetMenuOptionsItem(std::vector<OptionParam>& params, MenuOptionsParam& item,
+    const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    if (item.symbolId.has_value()) {
+        params.back().symbolId = item.symbolId.value();
+    }
+    params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
+    params.back().disableSystemClick = true;
+    params.back().isAIMenuOption = IsAIMenuOption(item.id);
+}
+
 std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOptionsParam>& menuOptionItems,
     const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex)
 {
@@ -905,16 +984,9 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
                 CloseOverlayIfNecessary(overlayManager);
             }
         };
-        if (item.symbolId.has_value()) {
-            params.emplace_back(
-                GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback, item.symbolId.value_or(0));
-        } else {
-            params.emplace_back(
-                GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback);
-        }
-        params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
-        params.back().disableSystemClick = true;
-        params.back().isAIMenuOption = IsAIMenuOption(item.id);
+        params.emplace_back(
+            GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback);
+        SetMenuOptionsItem(params, item, info);
         itemNum++;
     }
     return params;
@@ -1029,9 +1101,13 @@ void SetMenuItemIcon(const RefPtr<FrameNode>& menuItem, const OptionParam& param
     layoutProperty->UpdateFontSize(theme->GetEndIconWidth());
     layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
     layoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
-    layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(param.symbolId));
     MarginProperty margin;
-    margin.right = CalcLength(theme->GetIconContentPadding());
+    if (param.symbolId != 0) {
+        layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(param.symbolId));
+        margin.right = CalcLength(theme->GetIconContentPadding());
+    } else {
+        margin.right = CalcLength(theme->GetIconContentPadding() + theme->GetIconSideLength());
+    }
     layoutProperty->UpdateMargin(margin);
     symbol->MountToParent(leftRow);
 }
@@ -1047,7 +1123,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
-    if (!isPaste && param.symbolId != 0) {
+    if (!isPaste) {
         SetMenuItemIcon(menuItem, param, leftRow);
     }
     auto leftTextNode = CreateMenuTextNode(content, leftRow, param.isAIMenuOption);
@@ -1747,17 +1823,23 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
     CHECK_NULL_RETURN(pipeline, symbol);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, symbol);
-
+    std::vector<Color> symbolColor;
+    if (symbolId == OH_DEFAULT_AI_MENU_PHONE) {
+        symbolColor = { textOverlayTheme->GetAIMenuSymbolColor() };
+    }
     auto symbolIdFunc = getSymbolIdMap.find(symbolId);
     if (symbolIdFunc != getSymbolIdMap.end()) {
         auto symbolId = (symbolIdFunc->second)(textOverlayTheme);
         auto symbolSize = textOverlayTheme->GetSymbolSize();
-        symbol = [symbolId, symbolSize](WeakPtr<NG::FrameNode> weak) {
+        symbol = [symbolId, symbolSize, symbolColor](WeakPtr<NG::FrameNode> weak) {
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
             auto symbolNode = Referenced::RawPtr(node);
             SymbolModelNG::InitialSymbol(symbolNode, symbolId);
             SymbolModelNG::SetFontSize(symbolNode, symbolSize);
+            if (!symbolColor.empty()) {
+                SymbolModelNG::SetFontColor(symbolNode, symbolColor);
+            }
         };
     }
     return symbol;
@@ -1988,24 +2070,30 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
             systemEvent = clickCallback->second;
         }
         auto callback = CreateExtensionMenuOptionCallback(id, info->onCreateCallback, systemEvent, item);
-        auto content = GetItemContent(item.id, item.content.value_or(""));
+        auto content = GetItemContent(item.id, item.content.value_or(""), info);
         std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
         auto symbolIdFunc = getSymbolIdMap.find(item.id);
+        std::vector<Color> symbolColor;
+        if (IsAIMenuOption(item.id)) {
+            symbolColor = { textOverlayTheme->GetAIMenuSymbolColor() };
+        }
         if (symbolIdFunc != getSymbolIdMap.end()) {
             auto symbolId = (symbolIdFunc->second)(textOverlayTheme);
             auto symbolSize = textOverlayTheme->GetSymbolSize();
-            symbol = [symbolId, symbolSize](WeakPtr<NG::FrameNode> weak) {
+            symbol = [symbolId, symbolSize, symbolColor](WeakPtr<NG::FrameNode> weak) {
                 auto symbolNode = weak.Upgrade();
                 SymbolModelNG::InitialSymbol(RawPtr(symbolNode), symbolId);
                 SymbolModelNG::SetFontSize(RawPtr(symbolNode), symbolSize);
+                if (!symbolColor.empty()) {
+                    SymbolModelNG::SetFontColor(RawPtr(symbolNode), symbolColor);
+                }
             };
         }
         auto param = OptionParam(content, GetSystemIconPath(item.id, item.icon.value_or(" ")), callback, symbol);
         if (item.id == OH_DEFAULT_PASTE) {
             param.isPasteOption = true;
-        } else if (IsAIMenuOption(item.id)) {
-            param.isAIMenuOption = true;
         }
+        param.isAIMenuOption = IsAIMenuOption(item.id) ? true : false;
         params.emplace_back(param);
         itemNum++;
     }
@@ -2369,7 +2457,7 @@ void SelectOverlayNode::ShowCamera(
 void SelectOverlayNode::ShowAIMenuOptions(
     float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
-    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) {
+    if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
         auto button = BuildButton(label, info->menuCallback.onAIMenuOption, GetId(), buttonWidth,
@@ -2527,15 +2615,11 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         OH_DEFAULT_CAMERA_INPUT, theme->GetCameraInput(), systemItemParams);
     AddMenuItemParamIf(menuInfo.showAIWrite && TextSystemMenu::IsShowAIWriter(), OH_DEFAULT_AI_WRITE,
         theme->GetAIWrite(), systemItemParams);
-    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) { // editMenuOptions route
-        MenuItemParam param;
-        MenuOptionsParam menuOptionsParam;
+
+    if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
         auto findIter = AI_TYPE_ID_MAP.find(info->menuInfo.aiMenuOptionType);
-        CHECK_EQUAL_RETURN(findIter, AI_TYPE_ID_MAP.end(), systemItemParams);
-        menuOptionsParam.id = findIter->second;
-        menuOptionsParam.content = theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType);
-        param.menuOptionsParam = menuOptionsParam;
-        systemItemParams.emplace_back(param);
+        AddMenuItemParamIf(true, findIter->second.first,
+            theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType), systemItemParams);
     }
     return systemItemParams;
 }

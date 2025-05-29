@@ -43,6 +43,7 @@ ace_unittest("window_scene_test") {
 
     # test
     "$ace_root/test/unittest/core/pattern/window_scene/window_scene_test.cpp",
+    "$ace_root/adapter/preview/osal/device_config.cpp",
   ]
 
   external_deps = [

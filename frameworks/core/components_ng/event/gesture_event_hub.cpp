@@ -626,6 +626,11 @@ void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJud
     gestureJudgeNativeFunc_ = std::move(gestureJudgeFunc);
 }
 
+void GestureEventHub::SetOnGestureJudgeNativeBeginForMenu(GestureJudgeFunc&& gestureJudgeFunc)
+{
+    gestureJudgeNativeFuncForMenu_ = std::move(gestureJudgeFunc);
+}
+
 void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
     CheckClickActuator();
@@ -1138,9 +1143,24 @@ GestureJudgeFunc GestureEventHub::GetOnGestureJudgeBeginCallback() const
     return gestureJudgeFunc_;
 }
 
-GestureJudgeFunc GestureEventHub::GetOnGestureJudgeNativeBeginCallback() const
+GestureJudgeFunc GestureEventHub::GetOnGestureJudgeNativeBeginCallback()
 {
-    return gestureJudgeNativeFunc_;
+    auto callback = [weakNode = WeakClaim(this)](const RefPtr<GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        auto gestureHub = weakNode.Upgrade();
+        CHECK_NULL_RETURN(gestureHub, GestureJudgeResult::CONTINUE);
+        auto gestureJudgeNativeFunc = gestureHub->gestureJudgeNativeFunc_;
+        if (gestureJudgeNativeFunc && gestureJudgeNativeFunc(gestureInfo, info) == GestureJudgeResult::REJECT) {
+            return GestureJudgeResult::REJECT;
+        }
+        auto gestureJudgeNativeFuncForMenu = gestureHub->gestureJudgeNativeFuncForMenu_;
+        if (gestureJudgeNativeFuncForMenu &&
+            gestureJudgeNativeFuncForMenu(gestureInfo, info) == GestureJudgeResult::REJECT) {
+            return GestureJudgeResult::REJECT;
+        }
+        return GestureJudgeResult::CONTINUE;
+    };
+    return callback;
 }
 
 void GestureEventHub::RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -1238,6 +1258,12 @@ void GestureEventHub::SetPanEventType(GestureTypeName typeName)
 {
     CHECK_NULL_VOID(panEventActuator_);
     panEventActuator_->SetPanEventType(typeName);
+}
+
+void GestureEventHub::SetLongPressEventType(GestureTypeName typeName)
+{
+    CHECK_NULL_VOID(longPressEventActuator_);
+    longPressEventActuator_->SetLongPressEventType(typeName);
 }
 
 HitTestMode GestureEventHub::GetHitTestMode() const

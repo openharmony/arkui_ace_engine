@@ -262,6 +262,10 @@ let ImageRotateOrientation;
   ImageRotateOrientation[ImageRotateOrientation.RIGHT = 2] = 'RIGHT';
   ImageRotateOrientation[ImageRotateOrientation.DOWN = 3] = 'DOWN';
   ImageRotateOrientation[ImageRotateOrientation.LEFT = 4] = 'LEFT';
+  ImageRotateOrientation[ImageRotateOrientation.UP_MIRRORED = 5] = 'UP_MIRRORED';
+  ImageRotateOrientation[ImageRotateOrientation.RIGHT_MIRRORED = 6] = 'RIGHT_MIRRORED';
+  ImageRotateOrientation[ImageRotateOrientation.DOWN_MIRRORED = 7] = 'DOWN_MIRRORED';
+  ImageRotateOrientation[ImageRotateOrientation.LEFT_MIRRORED = 8] = 'LEFT_MIRRORED';
 })(ImageRotateOrientation || (ImageRotateOrientation = {}));
 
 let ImageInterpolation;
@@ -3312,12 +3316,19 @@ let SafeAreaEdge;
 let LayoutSafeAreaType;
 (function (LayoutSafeAreaType) {
   LayoutSafeAreaType[LayoutSafeAreaType.SYSTEM = 0] = 'SYSTEM';
+  LayoutSafeAreaType[LayoutSafeAreaType.KEYBOARD = 1] = 'KEYBOARD';
+  LayoutSafeAreaType[LayoutSafeAreaType.ALL = 2] = 'ALL';
 })(LayoutSafeAreaType || (LayoutSafeAreaType = {}));
 
 let LayoutSafeAreaEdge;
 (function (LayoutSafeAreaEdge) {
   LayoutSafeAreaEdge[LayoutSafeAreaEdge.TOP = 0] = 'TOP';
   LayoutSafeAreaEdge[LayoutSafeAreaEdge.BOTTOM = 1] = 'BOTTOM';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.START = 2] = 'START';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.END = 3] = 'END';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.VERTICAL = 4] = 'VERTICAL';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.HORIZONTAL = 5] = 'HORIZONTAL';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.ALL = 6] = 'ALL';
 })(LayoutSafeAreaEdge || (LayoutSafeAreaEdge = {}));
 
 let RenderFit;
@@ -3701,6 +3712,13 @@ let TextDeleteDirection;
     TextDeleteDirection[TextDeleteDirection.FORWARD = 1] = 'FORWARD';
 })(TextDeleteDirection || (TextDeleteDirection = {}));
 
+let SuperscriptStyle;
+(function (SuperscriptStyle) {
+  SuperscriptStyle[SuperscriptStyle.NORMAL = 0] = 'NORMAL';
+  SuperscriptStyle[SuperscriptStyle.SUPERSCRIPT = 1] = 'SUPERSCRIPT';
+  SuperscriptStyle[SuperscriptStyle.SUBSCRIPT = 2] = 'SUBSCRIPT';
+})(SuperscriptStyle || (SuperscriptStyle = {}));
+
 let GestureRecognizerState;
 (function (GestureRecognizerState) {
   GestureRecognizerState[GestureRecognizerState.READY = 0] = 'READY';
@@ -3880,6 +3898,7 @@ let HeightBreakpoint;
 let WebElementType;
 (function (WebElementType) {
   WebElementType[WebElementType.IMAGE = 1] = 'IMAGE';
+  WebElementType[WebElementType.LINK = 2] = 'LINK';
 })(WebElementType || (WebElementType = {}));
 
 let WebResponseType;
@@ -4023,3 +4042,17 @@ let AnimationPropertyType;
     AnimationPropertyType[AnimationPropertyType["SCALE"] = 2] = "SCALE";
     AnimationPropertyType[AnimationPropertyType["OPACITY"] = 3] = "OPACITY";
 })(AnimationPropertyType || (AnimationPropertyType = {}));
+
+let DragSpringLoadingState;
+(function (DragSpringLoadingState) {
+  DragSpringLoadingState.BEGIN = 0;
+  DragSpringLoadingState.UPDATE = 1;
+  DragSpringLoadingState.END = 2;
+  DragSpringLoadingState.CANCEL = 3;
+})(DragSpringLoadingState || (DragSpringLoadingState = {}));
+
+let ColorSpace;
+(function (ColorSpace) {
+  ColorSpace[ColorSpace.SRGB = 0] = 'SRGB';
+  ColorSpace[ColorSpace.DISPLAY_P3 = 1] = 'DISPLAY_P3';
+})(ColorSpace || (ColorSpace = {}));

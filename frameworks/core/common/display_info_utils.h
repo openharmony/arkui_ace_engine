@@ -32,6 +32,7 @@ public:
     FoldStatus GetCurrentFoldStatus();
     std::vector<Rect> GetCurrentFoldCreaseRegion();
     Rect GetDisplayAvailableRect(int32_t displayId) const;
+    Rect GetFoldExpandAvailableRect() const;
 
 private:
     RefPtr<DisplayInfo> displayInfo_ = AceType::MakeRefPtr<DisplayInfo>();

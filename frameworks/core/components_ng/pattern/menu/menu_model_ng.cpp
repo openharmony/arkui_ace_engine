@@ -36,6 +36,21 @@ void MenuModelNG::Create()
     }
 }
 
+RefPtr<FrameNode> MenuModelNG::CreateMenu()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        auto layoutProps = menuNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
+    }
+    return menuNode;
+}
+
 void MenuModelNG::SetFontSize(const Dimension& fontSize)
 {
     if (fontSize.IsValid()) {

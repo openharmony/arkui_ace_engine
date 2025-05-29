@@ -673,13 +673,13 @@ HWTEST_F(EventManagerTestNg, EventManagerTest050, TestSize.Level1)
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     std::list<RefPtr<MouseEventTarget>> mouseTestResult = {mouseEventTarget};
-    eventManager->currMouseTestResults_ = mouseTestResult;
+    eventManager->currMouseTestResultsMap_[0] = mouseTestResult;
 
     bool isMousePressAtSelectedNode = false;
-    eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID);
+    eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID, 0);
     EXPECT_TRUE(isMousePressAtSelectedNode);
     isMousePressAtSelectedNode = false;
-    eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID + 1);
+    eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID + 1, 0);
     EXPECT_FALSE(isMousePressAtSelectedNode);
 }
 
@@ -758,12 +758,12 @@ HWTEST_F(EventManagerTestNg, EventManagerTest053, TestSize.Level1)
     eventManager->LogPrintMouseTest();
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     std::list<RefPtr<MouseEventTarget>> MouseTestResult = {mouseEventTarget};
-    eventManager->currMouseTestResults_ = MouseTestResult;
+    eventManager->currMouseTestResultsMap_[0] = MouseTestResult;
     
     auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(MOUSE, NODEID);
     std::list<RefPtr<HoverEventTarget>> HoverTestResult = {hoverEventTarget};
-    eventManager->lastHoverTestResults_ = HoverTestResult;
-    eventManager->currHoverTestResults_ = HoverTestResult;
+    eventManager->lastHoverTestResultsMap_[0] = HoverTestResult;
+    eventManager->currHoverTestResultsMap_[0] = HoverTestResult;
     eventManager->LogPrintMouseTest();
 }
 
@@ -787,7 +787,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest054, TestSize.Level1)
     std::list<RefPtr<TouchEventTarget>> testResult = {AceType::MakeRefPtr<MockTouchEventTarget>(),
         mouseEventTarget, hoverEventTarget};
     eventManager->UpdateHoverNode(event, testResult);
-    EXPECT_FALSE((eventManager->currMouseTestResults_).empty());
+    EXPECT_FALSE((eventManager->currMouseTestResultsMap_[0]).empty());
 }
 
 /**
@@ -1130,16 +1130,16 @@ HWTEST_F(EventManagerTestNg, EventManagerTest065, TestSize.Level1)
     Offset offset;
 
     auto eventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE_EVENT, nodeId);
-    eventManager->currMouseTestResults_.emplace_back(eventTarget);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(eventTarget);
 
     /**
      * @tc.steps: step3. Create FrameNode and Call HandleGlobalEventNG.
-     * @tc.expected: currMouseTestResults_.size is equal to 1.
+     * @tc.expected: currMouseTestResultsMap_[0].size is equal to 1.
      */
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(frameNode);
     NG::OffsetF rootOffset;
     eventManager->HandleGlobalEventNG(touchPoint, selectOverlayManager, rootOffset);
-    EXPECT_EQ(eventManager->currMouseTestResults_.size(), 1);
+    EXPECT_EQ(eventManager->currMouseTestResultsMap_[0].size(), 1);
 }
 
 /**
@@ -1312,6 +1312,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest070, TestSize.Level1)
     
     event.action = MouseAction::WINDOW_ENTER;
     eventManager->MouseTest(event, pageNode, touchRestrict);
+    EXPECT_FALSE(touchRestrict.touchEvent.isMouseTouchTest);
+    event.button = MouseButton::LEFT_BUTTON;
+    eventManager->MouseTest(event, pageNode, touchRestrict);
     EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
@@ -1330,7 +1333,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest071, TestSize.Level1)
     auto hoverEffectTarget = AceType::MakeRefPtr<HoverEffectTarget>(CTRLSHIFT, NODEID);
     std::list<RefPtr<TouchEventTarget>> testResult = { hoverEffectTarget };
     eventManager->UpdateHoverNode(event, testResult);
-    EXPECT_TRUE(eventManager->currMouseTestResults_.empty());
+    EXPECT_TRUE(eventManager->currMouseTestResultsMap_[0].empty());
 }
 
 /**
@@ -1807,6 +1810,38 @@ HWTEST_F(EventManagerTestNg, EventManagerTest088, TestSize.Level1)
     EXPECT_EQ(touchPoint.isFalsified, false);
 }
 
+/**
+ * @tc.name: EventManagerTest089
+ * @tc.desc: Test MouseTest For API12.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest089, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t settingApiVersion = 11;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
+
+    MouseEvent event;
+    event.action = MouseAction::PRESS;
+    event.button = MouseButton::RIGHT_BUTTON;
+    TouchRestrict touchRestrict;
+    eventManager->MouseTest(event, pageNode, touchRestrict);
+    EXPECT_FALSE(touchRestrict.touchEvent.isMouseTouchTest);
+    event.button = MouseButton::LEFT_BUTTON;
+    eventManager->MouseTest(event, pageNode, touchRestrict);
+    EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 /**
  * @tc.name: EventManagerTest089
@@ -1930,5 +1965,28 @@ HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer, TestSize.Level1)
     EXPECT_EQ(touchTestResult[1].size(), 1);
     eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(targetRefs[1]), items[1]);
     EXPECT_EQ(touchTestResult.size(), 0);
+}
+
+/**
+ * @tc.name: DispatchTouchCancelToRecognizer_ItemsEmpty
+ * @tc.desc: Test DispatchTouchCancelToRecognizer when items is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer_ItemsEmpty, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    auto& touchTestResult = eventManager->touchTestResults_;
+    RefPtr<TouchEventActuator> target = AceType::MakeRefPtr<TouchEventActuator>();
+    using TouchRecognizerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
+ 
+    TouchTestResult resultList;
+    resultList.push_back(target);
+    touchTestResult[1] = resultList;
+    TouchRecognizerTarget items;
+ 
+    eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(target), items);
+    EXPECT_EQ(touchTestResult.size(), 1);
+    EXPECT_EQ(touchTestResult.count(1), 1);
+    EXPECT_EQ(touchTestResult[1].size(), 1);
 }
 } // namespace OHOS::Ace::NG

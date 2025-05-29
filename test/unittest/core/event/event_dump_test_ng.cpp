@@ -590,4 +590,32 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg016, TestSize.Level1)
     eventTreeRecord->Dump(dumpList, DEFAULT_DEPTH, startNumber);
     EXPECT_FALSE(dumpList.empty());
 }
+
+/**
+ * @tc.name: EventDumpTestNg017
+ * @tc.desc: EventTreeRecord DumpBriefInfo function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance and fill touch event vale to eventTree.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+    TouchEvent event;
+    event.type = Ace::TouchType::DOWN;
+    event.id = 1;
+    FillTouchDownEventToEventTree(eventTreeRecord, event, MAX_EVENT_TREE_RECORD_CNT + 1, 0, 0);
+
+    /**
+     * @tc.steps: step2. call DumpBriefInfo function.
+     * @tc.expected: dump list exist data, size is not empty.
+     */
+    std::list<std::pair<int32_t, std::string>> dumpList;
+    EXPECT_TRUE(dumpList.empty());
+    int32_t startNumber = 1;
+    eventTreeRecord->Dump(dumpList, DEFAULT_DEPTH, startNumber);
+    EXPECT_FALSE(dumpList.empty());
+}
 } // namespace OHOS::Ace::NG

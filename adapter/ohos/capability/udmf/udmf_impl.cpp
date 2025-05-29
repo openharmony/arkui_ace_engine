@@ -26,6 +26,7 @@
 #include "get_data_params_napi.h"
 #include "udmf_async_client.h"
 #include "unified_data_napi.h"
+#include "utd_client.h"
 #include "video.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -159,13 +160,24 @@ int32_t UdmfClientImpl::Cancel(const std::string& key)
     return static_cast<int32_t>(UDMF::UdmfAsyncClient::GetInstance().Cancel(key));
 }
 
-int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap)
+int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap,
+    std::map<std::string, int64_t>& detailedSummaryMap)
 {
     auto& client = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
+    UDMF::Summary detailedSummary;
     UDMF::QueryOption queryOption;
     queryOption.key = key;
-    int32_t ret = client.GetSummary(queryOption, summary);
+    int32_t ret = client.GetSummary(queryOption, detailedSummary);
+    if (ret != 0) {
+        return ret;
+    }
+    detailedSummaryMap = detailedSummary.summary;
+    ret = client.GetParentType(detailedSummary, summary);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF Convert summary failed, return value is %{public}d", ret);
+        return ret;
+    }
     summaryMap = summary.summary;
     return ret;
 }
@@ -587,5 +599,22 @@ std::vector<uint8_t> UdmfClientImpl::GetSpanStringEntry(const RefPtr<UnifiedData
         }
     }
     return GetSpanStringRecord(unifiedData);
+}
+
+bool UdmfClientImpl::IsBelongsTo(const std::string& summary, const std::string& allowDropType)
+{
+    std::shared_ptr<UDMF::TypeDescriptor> typeDescriptor;
+    auto ret = UDMF::UtdClient::GetInstance().GetTypeDescriptor(summary, typeDescriptor);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF get typeDescriptor failed, return value is %{public}d", ret);
+        return false;
+    }
+    CHECK_NULL_RETURN(typeDescriptor, false);
+    bool result = false;
+    ret = typeDescriptor->BelongsTo(allowDropType, result);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF determine the belonging failed, return value is %{public}d", ret);
+    }
+    return result;
 }
 } // namespace OHOS::Ace

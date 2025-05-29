@@ -208,6 +208,12 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    bool OnAttachAtapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child) override
+    {
+        node->AddChild(child);
+        return true;
+    }
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

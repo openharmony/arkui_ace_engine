@@ -356,8 +356,13 @@ ArkUINativeModuleValue NavigationBridge::SetToolBarConfiguration(ArkUIRuntimeCal
                 auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
                 JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
             }
-            NavigationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
-            NavigationModel::GetInstance()->SetToolbarConfiguration(std::move(toolbarItems));
+            if (SystemProperties::ConfigChangePerform()) {
+                NavigationModel::GetInstance()->SetToolbarConfiguration(
+                    std::move(toolbarItems), std::move(toolbarMoreButtonOptions));
+            } else {
+                NavigationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
+                NavigationModel::GetInstance()->SetToolbarConfiguration(std::move(toolbarItems));
+            }
         } else {
             std::list<RefPtr<AceType>> items;
             NavigationModel::GetInstance()->GetToolBarItems(items);
@@ -686,11 +691,14 @@ ArkUINativeModuleValue NavigationBridge::SetNavBarWidth(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension width;
-    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
+    RefPtr<ResourceObject> navBarWidthResObj;
+    if (jsValue->IsNull() || jsValue->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width, navBarWidthResObj)) {
         GetArkUINodeModifiers()->getNavigationModifier()->resetNavBarWidth(nativeNode);
     } else {
+        auto widthRawPtr = AceType::RawPtr(navBarWidthResObj);
         GetArkUINodeModifiers()->getNavigationModifier()->setNavBarWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+            nativeNode, width.Value(), static_cast<int>(width.Unit()), widthRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -720,21 +728,25 @@ ArkUINativeModuleValue NavigationBridge::SetNavBarWidthRange(ArkUIRuntimeCallInf
     auto rangeArray = panda::Local<panda::ArrayRef>(jsValue);
     auto minNavBarWidth = panda::ArrayRef::GetValueAt(vm, rangeArray, 0);
     CalcDimension minWidth;
+    RefPtr<ResourceObject> minNavBarWidthResObj;
     if (minNavBarWidth->IsNull() || minNavBarWidth->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionVp(vm, minNavBarWidth, minWidth)) {
+        !ArkTSUtils::ParseJsDimensionVp(vm, minNavBarWidth, minWidth, minNavBarWidthResObj)) {
         GetArkUINodeModifiers()->getNavigationModifier()->resetMinNavBarWidth(nativeNode);
     } else {
+        auto minNavBarWidthRawPtr = AceType::RawPtr(minNavBarWidthResObj);
         GetArkUINodeModifiers()->getNavigationModifier()->setMinNavBarWidth(
-            nativeNode, minWidth.Value(), static_cast<int>(minWidth.Unit()));
+            nativeNode, minWidth.Value(), static_cast<int>(minWidth.Unit()), minNavBarWidthRawPtr);
     }
     auto maxNavBarWidth = panda::ArrayRef::GetValueAt(vm, rangeArray, 1);
     CalcDimension maxWidth;
+    RefPtr<ResourceObject> maxNavBarWidthResObj;
     if (maxNavBarWidth->IsNull() || maxNavBarWidth->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionVp(vm, maxNavBarWidth, maxWidth)) {
+        !ArkTSUtils::ParseJsDimensionVp(vm, maxNavBarWidth, maxWidth, maxNavBarWidthResObj)) {
         GetArkUINodeModifiers()->getNavigationModifier()->resetMaxNavBarWidth(nativeNode);
     } else {
+        auto maxNavBarWidthRawPtr = AceType::RawPtr(maxNavBarWidthResObj);
         GetArkUINodeModifiers()->getNavigationModifier()->setMaxNavBarWidth(
-            nativeNode, maxWidth.Value(), static_cast<int>(maxWidth.Unit()));
+            nativeNode, maxWidth.Value(), static_cast<int>(maxWidth.Unit()), maxNavBarWidthRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -759,11 +771,14 @@ ArkUINativeModuleValue NavigationBridge::SetMinContentWidth(ArkUIRuntimeCallInfo
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension width;
-    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
+    RefPtr<ResourceObject> minContentWidthResObj;
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width,
+        minContentWidthResObj)) {
         GetArkUINodeModifiers()->getNavigationModifier()->resetMinContentWidth(nativeNode);
     } else {
+        auto widthRawPtr = AceType::RawPtr(minContentWidthResObj);
         GetArkUINodeModifiers()->getNavigationModifier()->setMinContentWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+            nativeNode, width.Value(), static_cast<int>(width.Unit()), widthRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -788,7 +803,8 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
 
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     std::string src;
-    auto noPixMap = Framework::JSViewAbstract::ParseJsMedia(info[1], src);
+    RefPtr<ResourceObject> backButtonIconResObj;
+    auto noPixMap = Framework::JSViewAbstract::ParseJsMedia(info[1], src, backButtonIconResObj);
     auto isValidImage = false;
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -810,7 +826,11 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
     }
     imageOption.noPixMap = noPixMap;
     imageOption.isValidImage = isValidImage;
-    NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
+    if (!SystemProperties::ConfigChangePerform()) {
+        NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
+    } else {
+        NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, imageOption, pixMap, backButtonIconResObj);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -883,7 +903,9 @@ ArkUINativeModuleValue NavigationBridge::SetTitle(ArkUIRuntimeCallInfo* runtimeC
     std::string subtitle;
     bool hasMain = false;
     bool hasSub = false;
-    if (ArkTSUtils::ParseJsString(vm, titleArg, title)) {
+    RefPtr<ResourceObject> titleResObj;
+    RefPtr<ResourceObject> subtitleResObj;
+    if (ArkTSUtils::ParseJsString(vm, titleArg, title, titleResObj)) {
         // Resource and string type.
         subtitle = "";
         hasMain = true;
@@ -893,8 +915,8 @@ ArkUINativeModuleValue NavigationBridge::SetTitle(ArkUIRuntimeCallInfo* runtimeC
         auto obj = titleArg->ToObject(vm);
         auto main = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "main"));
         auto sub = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "sub"));
-        hasMain = ArkTSUtils::ParseJsString(vm, main, title);
-        hasSub = ArkTSUtils::ParseJsString(vm, sub, subtitle);
+        hasMain = ArkTSUtils::ParseJsString(vm, main, title, titleResObj);
+        hasSub = ArkTSUtils::ParseJsString(vm, sub, subtitle, subtitleResObj);
         // NavigationCustomTitle or CustomBuilder is not supported
     } else {
         GetArkUINodeModifiers()->getNavigationModifier()->resetNavTitle(nativeNode);
@@ -906,7 +928,10 @@ ArkUINativeModuleValue NavigationBridge::SetTitle(ArkUIRuntimeCallInfo* runtimeC
         NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, options);
     }
     ArkUINavigationTitleInfo titleInfo = { hasSub, hasMain, subtitle.c_str(), title.c_str() };
-    GetArkUINodeModifiers()->getNavigationModifier()->setNavTitle(nativeNode, titleInfo, options);
+    auto titleRawPtr = AceType::RawPtr(titleResObj);
+    auto subtitleRawPtr = AceType::RawPtr(subtitleResObj);
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavTitle(nativeNode, titleInfo, options,
+        titleRawPtr, subtitleRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -63,7 +63,6 @@ constexpr int32_t PARAM_COUNT = 2;
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
-constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 1000;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
 const std::vector<BlurStyle> BAR_BLURSTYLE = {
@@ -81,11 +80,6 @@ const std::vector<BlurStyle> BAR_BLURSTYLE = {
     BlurStyle::COMPONENT_THICK,
     BlurStyle::COMPONENT_ULTRA_THICK,
 };
-
-JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
-{
-    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetIndex()));
-}
 
 RefPtr<Curve> CreateAnimationCurveByObject(const JSCallbackInfo& info)
 {
@@ -121,154 +115,6 @@ RefPtr<Curve> CreateAnimationCurveByObject(const JSCallbackInfo& info)
     return curve;
 }
 } // namespace
-
-void JSTabs::SetOnChange(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler), node = targetNode](
-                        const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
-        if (!tabsInfo) {
-            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onChange callback execute failed.");
-            return;
-        }
-        ACE_SCORING_EVENT("Tabs.onChange");
-        ACE_SCOPED_TRACE("Tabs.onChange index %d", tabsInfo->GetIndex());
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(*tabsInfo);
-    };
-    TabsModel::GetInstance()->SetOnChange(std::move(onChange));
-}
-
-void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler),
-                             node = targetNode](const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
-        if (!tabsInfo) {
-            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onTabBarClick callback execute failed.");
-            return;
-        }
-        ACE_SCORING_EVENT("Tabs.onTabBarClick");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(*tabsInfo);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onTabBarClick");
-    };
-    TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
-}
-
-void JSTabs::SetOnUnselected(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    auto unselectedHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onUnselected = [executionContext = info.GetExecutionContext(), func = std::move(unselectedHandler),
-                          node = targetNode](const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
-        if (!tabsInfo) {
-            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onUnselected callback execute failed.");
-            return;
-        }
-        ACE_SCORING_EVENT("Tabs.onUnselected");
-        ACE_SCOPED_TRACE("Tabs.onUnselected index %d", tabsInfo->GetIndex());
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(*tabsInfo);
-    };
-    TabsModel::GetInstance()->SetOnUnselected(std::move(onUnselected));
-}
-
-void JSTabs::SetOnAnimationStart(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    auto animationStartHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onAnimationStart = [executionContext = info.GetExecutionContext(),
-                                func = std::move(animationStartHandler)](
-                                int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        ACE_SCORING_EVENT("Tabs.onAnimationStart");
-        func->Execute(index, targetIndex, info);
-    };
-    TabsModel::GetInstance()->SetOnAnimationStart(std::move(onAnimationStart));
-}
-
-void JSTabs::SetOnAnimationEnd(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    auto animationEndHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onAnimationEnd = [executionContext = info.GetExecutionContext(), func = std::move(animationEndHandler)](
-                              int32_t index, const AnimationCallbackInfo& info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        ACE_SCORING_EVENT("Tabs.onAnimationEnd");
-        func->Execute(index, info);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onAnimationEnd");
-    };
-    TabsModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
-}
-
-void JSTabs::SetOnGestureSwipe(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    auto gestureSwipeHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onGestureSwipe = [executionContext = info.GetExecutionContext(), func = std::move(gestureSwipeHandler)](
-                              int32_t index, const AnimationCallbackInfo& info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        ACE_SCORING_EVENT("Tabs.onGestureSwipe");
-        func->Execute(index, info);
-    };
-    TabsModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
-}
-
-void JSTabs::SetOnSelected(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    auto selectedHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onSelected = [executionContext = info.GetExecutionContext(), func = std::move(selectedHandler),
-                          node = targetNode](const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
-        if (!tabsInfo) {
-            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onSelected callback execute failed.");
-            return;
-        }
-        ACE_SCORING_EVENT("Tabs.onSelected");
-        ACE_SCOPED_TRACE("Tabs.onSelected index %d", tabsInfo->GetIndex());
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(*tabsInfo);
-    };
-    TabsModel::GetInstance()->SetOnSelected(std::move(onSelected));
-}
 
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
@@ -408,10 +254,11 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
+    RefPtr<ResourceObject> widthResObj;
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_WIDTH, nullptr);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVpNG(info[0], width)) {
+        if (!ParseJsDimensionVpNG(info[0], width, widthResObj)) {
             width = Dimension(-1.0, DimensionUnit::VP);
             TabsModel::GetInstance()->SetTabBarWidth(width);
             return;
@@ -419,8 +266,8 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
     } else {
         ParseJsDimensionVp(info[0], width);
     }
-
     TabsModel::GetInstance()->SetTabBarWidth(width);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_WIDTH, widthResObj);
 }
 
 void JSTabs::SetBarHeight(const JSCallbackInfo& info)
@@ -429,6 +276,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
+    RefPtr<ResourceObject> heightResObj;
     bool adaptiveHeight = false;
     bool noMinHeightLimit = false;
     auto barHeightInfo = info[0];
@@ -443,7 +291,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         adaptiveHeight = true;
     } else {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            if (!ParseJsDimensionVpNG(barHeightInfo, height)) {
+            if (!ParseJsDimensionVpNG(barHeightInfo, height, heightResObj)) {
                 height = Dimension(-1.0, DimensionUnit::VP);
             }
         } else {
@@ -453,6 +301,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
     TabsModel::GetInstance()->SetNoMinHeightLimit(noMinHeightLimit);
     TabsModel::GetInstance()->SetTabBarHeight(height);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_HEIGHT, heightResObj);
 }
 
 void JSTabs::SetWidth(const JSCallbackInfo& info)
@@ -545,9 +394,13 @@ void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
 
 void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
 {
+    RefPtr<ResourceObject> resObj;
     Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
     if (info.Length() > 0) {
-        ConvertFromJSValue(info[0], backgroundColor);
+        ConvertFromJSValue(info[0], backgroundColor, resObj);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_BACKGROUND_COLOR, resObj);
     }
     TabsModel::GetInstance()->SetBarBackgroundColor(backgroundColor);
 }
@@ -565,11 +418,16 @@ void JSTabs::SetBarBackgroundBlurStyle(const JSCallbackInfo& info)
             styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
+    RefPtr<ResourceObject> inactiveColorStrObj;
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
         ParseBlurStyleOption(jsOption, styleOption);
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseJsColor(jsOption->GetProperty("inactiveColor"), styleOption.inactiveColor, inactiveColorStrObj);
+        }
     }
     TabsModel::GetInstance()->SetBarBackgroundBlurStyle(styleOption);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BlurStyle_INACTIVE_COLOR, inactiveColorStrObj);
 }
 
 void JSTabs::SetDivider(const JSCallbackInfo& info)
@@ -580,6 +438,10 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
     CalcDimension dividerEndMargin;
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
+    RefPtr<ResourceObject> widthResObj;
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> startMarginResObj;
+    RefPtr<ResourceObject> endMarginResObj;
 
     if (info.Length() > 0) {
         auto dividerInfo = info[0];
@@ -590,22 +452,26 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
         if (dividerInfo->IsNull()) {
             divider.isNull = true;
         } else {
-            if (!dividerInfo->IsObject() || !ParseJsDimensionVp(obj->GetProperty("strokeWidth"), dividerStrokeWidth) ||
+            if (!dividerInfo->IsObject() ||
+                !ParseJsDimensionVp(obj->GetProperty("strokeWidth"), dividerStrokeWidth, widthResObj) ||
                 dividerStrokeWidth.Value() < 0.0f || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
                 divider.strokeWidth.Reset();
             } else {
                 divider.strokeWidth = dividerStrokeWidth;
             }
-            if (!dividerInfo->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            if (!dividerInfo->IsObject() ||
+                !ConvertFromJSValue(obj->GetProperty("color"), divider.color, colorResObj)) {
                 divider.color = tabTheme->GetDividerColor();
             }
-            if (!dividerInfo->IsObject() || !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin) ||
+            if (!dividerInfo->IsObject() ||
+                !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin, startMarginResObj) ||
                 dividerStartMargin.Value() < 0.0f || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.startMargin.Reset();
             } else {
                 divider.startMargin = dividerStartMargin;
             }
-            if (!dividerInfo->IsObject() || !ParseJsDimensionVp(obj->GetProperty("endMargin"), dividerEndMargin) ||
+            if (!dividerInfo->IsObject() ||
+                !ParseJsDimensionVp(obj->GetProperty("endMargin"), dividerEndMargin, endMarginResObj) ||
                 dividerEndMargin.Value() < 0.0f || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.endMargin.Reset();
             } else {
@@ -614,6 +480,10 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
         }
     }
     TabsModel::GetInstance()->SetDivider(divider);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::DIVIDER_STROKE_WIDTH, widthResObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::DIVIDER_COLOR, colorResObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::DIVIDER_START_MARGIN, startMarginResObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::DIVIDER_END_MARGIN, endMarginResObj);
 }
 
 void JSTabs::SetClip(const JSCallbackInfo& info)
@@ -630,15 +500,15 @@ void JSTabs::SetClip(const JSCallbackInfo& info)
 void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
 {
     ScrollableBarModeOptions option;
+    RefPtr<ResourceObject> resObj;
     auto optionParam = JSRef<JSObject>::Cast(info);
     CalcDimension margin = Dimension(0.0, DimensionUnit::VP);
-    if (!ParseJsDimensionVp(optionParam->GetProperty("margin"), margin) || Negative(margin.Value()) ||
+    if (!ParseJsDimensionVp(optionParam->GetProperty("margin"), margin, resObj) || Negative(margin.Value()) ||
         margin.Unit() == DimensionUnit::PERCENT) {
         option.margin = 0.0_vp;
     } else {
         option.margin = margin;
     }
-
     auto nonScrollableLayoutStyle = optionParam->GetProperty("nonScrollableLayoutStyle");
     int32_t layoutStyle;
     if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle) ||
@@ -649,11 +519,14 @@ void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
         option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
     }
     TabsModel::GetInstance()->SetScrollableBarModeOptions(option);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::SCROLLABLE_BAR_MARGIN, resObj);
 }
 
 void JSTabs::SetBarGridAlign(const JSCallbackInfo& info)
 {
     BarGridColumnOptions columnOption;
+    RefPtr<ResourceObject> gutterResObj;
+    RefPtr<ResourceObject> marginResObj;
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto gridParam = JSRef<JSObject>::Cast(info[0]);
         auto sm = gridParam->GetProperty("sm");
@@ -672,90 +545,19 @@ void JSTabs::SetBarGridAlign(const JSCallbackInfo& info)
             columnOption.lg = lg->ToNumber<int32_t>();
         }
         CalcDimension columnGutter;
-        if (ParseJsDimensionVp(gridParam->GetProperty("gutter"), columnGutter) && NonNegative(columnGutter.Value()) &&
-            columnGutter.Unit() != DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(gridParam->GetProperty("gutter"), columnGutter, gutterResObj) &&
+            NonNegative(columnGutter.Value()) && columnGutter.Unit() != DimensionUnit::PERCENT) {
             columnOption.gutter = columnGutter;
         }
         CalcDimension columnMargin;
-        if (ParseJsDimensionVp(gridParam->GetProperty("margin"), columnMargin) && NonNegative(columnMargin.Value()) &&
-            columnMargin.Unit() != DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(gridParam->GetProperty("margin"), columnMargin, marginResObj) &&
+            NonNegative(columnMargin.Value()) && columnMargin.Unit() != DimensionUnit::PERCENT) {
             columnOption.margin = columnMargin;
         }
     }
     TabsModel::GetInstance()->SetBarGridAlign(columnOption);
-}
-
-void JSTabs::SetCustomContentTransition(const JSCallbackInfo& info)
-{
-    if (info.Length() != 1) {
-        return;
-    }
-
-    auto customContentTransitionInfo = info[0];
-    if (customContentTransitionInfo->IsUndefined() || !customContentTransitionInfo->IsFunction()) {
-        TabsModel::GetInstance()->SetIsCustomAnimation(false);
-        return;
-    }
-
-    RefPtr<JsTabsFunction> jsCustomAnimationFunc =
-        AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(customContentTransitionInfo));
-    auto onCustomAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsCustomAnimationFunc)](
-                                 int32_t from, int32_t to) -> TabContentAnimatedTransition {
-        TabContentAnimatedTransition transitionInfo;
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, transitionInfo);
-
-        auto ret = func->Execute(from, to);
-        if (!ret->IsObject()) {
-            return transitionInfo;
-        }
-
-        auto transitionObj = JSRef<JSObject>::Cast(ret);
-        JSRef<JSVal> timeoutProperty = transitionObj->GetProperty("timeout");
-        if (timeoutProperty->IsNumber()) {
-            auto timeout = timeoutProperty->ToNumber<int32_t>();
-            transitionInfo.timeout = timeout < 0 ? DEFAULT_CUSTOM_ANIMATION_TIMEOUT : timeout;
-        } else {
-            transitionInfo.timeout = DEFAULT_CUSTOM_ANIMATION_TIMEOUT;
-        }
-
-        JSRef<JSVal> transition = transitionObj->GetProperty("transition");
-        if (transition->IsFunction()) {
-            RefPtr<JsTabsFunction> jsOnTransition =
-                AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(transition));
-            auto onTransition = [execCtx, func = std::move(jsOnTransition)](
-                                    const RefPtr<TabContentTransitionProxy>& proxy) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("onTransition");
-                func->Execute(proxy);
-            };
-
-            transitionInfo.transition = std::move(onTransition);
-        }
-
-        return transitionInfo;
-    };
-    TabsModel::GetInstance()->SetIsCustomAnimation(true);
-    TabsModel::GetInstance()->SetOnCustomAnimation(std::move(onCustomAnimation));
-}
-
-void JSTabs::SetOnContentWillChange(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    auto handler = AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(handler)]
-        (int32_t currentIndex, int32_t comingIndex) -> bool {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
-        ACE_SCORING_EVENT("Tabs.onContentWillChange");
-        auto ret = func->Execute(currentIndex, comingIndex);
-        if (!ret->IsBoolean()) {
-            return true;
-        }
-        return ret->ToBoolean();
-    };
-    TabsModel::GetInstance()->SetOnContentWillChange(std::move(callback));
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_GRID_GUTTER, gutterResObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_GRID_MARGIN, marginResObj);
 }
 
 void JSTabs::SetAnimateMode(const JSCallbackInfo& info)
@@ -788,11 +590,19 @@ void JSTabs::SetBarBackgroundEffect(const JSCallbackInfo& info)
         return;
     }
     EffectOption option;
+    RefPtr<ResourceObject> colorStrObj;
+    RefPtr<ResourceObject> inactiveColorStrObj;
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
         ParseEffectOption(jsOption, option);
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseJsColor(jsOption->GetProperty("color"), option.color, colorStrObj);
+            ParseJsColor(jsOption->GetProperty("inactiveColor"), option.inactiveColor, inactiveColorStrObj);
+        }
     }
     TabsModel::GetInstance()->SetBarBackgroundEffect(option);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::COLOR, colorStrObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::INACTIVE_COLOR, inactiveColorStrObj);
 }
 
 void JSTabs::SetPageFlipMode(const JSCallbackInfo& info)

@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/models/relative_container_model_impl.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -158,12 +159,32 @@ void JSRelativeContainer::ParseGuideline(const JSRef<JSVal>& args, GuidelineInfo
         JSRef<JSObject> val = JSRef<JSObject>::Cast(positionVal);
         JSRef<JSVal> startVal = val->GetProperty("start");
         JSRef<JSVal> endVal = val->GetProperty("end");
+        RefPtr<ResourceObject> startResObj;
+        RefPtr<ResourceObject> endResObj;
 
-        if (JSViewAbstract::ParseJsDimensionVpNG(startVal, start)) {
+        if (JSViewAbstract::ParseJsDimensionVpNG(startVal, start, startResObj)) {
             guidelineInfoItem.start = start;
         }
-        if (JSViewAbstract::ParseJsDimensionVpNG(endVal, end)) {
+        if (SystemProperties::ConfigChangePerform() && startResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
+                CalcDimension result;
+                ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+                guidelineInfo.start = result;
+            };
+            guidelineInfoItem.AddResource("RelativeContainer.guideLine.position.start",
+                startResObj, std::move(updateFunc));
+        }
+        if (JSViewAbstract::ParseJsDimensionVpNG(endVal, end, endResObj)) {
             guidelineInfoItem.end = end;
+        }
+        if (SystemProperties::ConfigChangePerform() && endResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
+                CalcDimension result;
+                ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+                guidelineInfo.end = result;
+            };
+            guidelineInfoItem.AddResource("RelativeContainer.guideLine.position.end",
+                endResObj, std::move(updateFunc));
         }
     }
 }

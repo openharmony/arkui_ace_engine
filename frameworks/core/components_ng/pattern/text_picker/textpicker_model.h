@@ -25,6 +25,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
+#include "core/common/resource/resource_object.h"
 namespace OHOS::Ace {
 struct TextPickerDialog {
     CalcDimension height;
@@ -106,6 +107,12 @@ public:
     virtual void ParseSelectedTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
     virtual void ParseNormalTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
     virtual void ParseDefaultTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
+    virtual void ParseColumnWidthsResourceObj(const std::vector<RefPtr<ResourceObject>>& widthResObjs) {};
+    virtual void ParseSingleRangeResourceObj(const RefPtr<ResourceObject>& resultResObj,
+        const RefPtr<ResourceObject>& valueResObj) {};
+    virtual void ParseSingleIconTextResourceObj(const std::vector<NG::RangeContent>& value) {};
+    virtual void ParseCascadeResourceObj(const std::vector<NG::TextCascadePickerOptions>& options,
+        const std::vector<RefPtr<ResourceObject>>& valueArrResObj) {};
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
     static std::once_flag onceFlag_;

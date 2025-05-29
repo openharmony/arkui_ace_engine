@@ -47,6 +47,7 @@
 #include "iservice_registry.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
+#include "nweb_helper.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "system_ability_definition.h"
@@ -564,6 +565,14 @@ void ContextMenuParamOhos::GetImageRect(int32_t& x, int32_t& y, int32_t& width, 
     }
 }
 
+bool ContextMenuParamOhos::IsAILink() const
+{
+    if (param_) {
+        return param_->IsAILink();
+    }
+    return false;
+}
+
 void ContextMenuResultOhos::Cancel() const
 {
     if (callback_) {
@@ -783,8 +792,8 @@ void WebWindowFocusChangedListener::AfterFocused()
     TAG_LOGI(AceLogTag::ACE_WEB, "Dragdrop, AfterFocused, end attach ime, remove listener");
 }
 
-void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
-    const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+void WebAvoidAreaChangedListener::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea,
+    OHOS::Rosen::AvoidAreaType type, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -1649,6 +1658,18 @@ int WebDelegate::ConverToWebHitTestType(int hitType)
             break;
     }
     return static_cast<int>(webHitType);
+}
+
+int WebDelegate::GetLastHitTestResult()
+{
+    if (nweb_) {
+        std::shared_ptr<OHOS::NWeb::HitTestResult> nwebResult = nweb_->GetLastHitTestResult();
+        if (nwebResult) {
+            return ConverToWebHitTestType(nwebResult->GetType());
+        }
+        return ConverToWebHitTestType(OHOS::NWeb::HitTestResult::UNKNOWN_TYPE);
+    }
+    return static_cast<int>(WebHitTestType::UNKNOWN);
 }
 
 int WebDelegate::GetHitTestResult()
@@ -2775,7 +2796,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
     setting->PutEnableRawFileAccessFromFileURLs(webPattern->GetFileFromUrlAccessEnabledValue(true));
     setting->PutDatabaseAllowed(webPattern->GetDatabaseAccessEnabledValue(false));
     setting->PutZoomingForTextFactor(webPattern->GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
-    setting->PutWebDebuggingAccess(webPattern->GetWebDebuggingAccessEnabledValue(false));
     setting->PutMediaPlayGestureAccess(webPattern->GetMediaPlayGestureAccessValue(true));
     return;
 #else
@@ -2798,7 +2818,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
         setting->PutEnableRawFileAccessFromFileURLs(webPattern->GetFileFromUrlAccessEnabledValue(true));
         setting->PutDatabaseAllowed(webPattern->GetDatabaseAccessEnabledValue(false));
         setting->PutZoomingForTextFactor(webPattern->GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
-        setting->PutWebDebuggingAccess(webPattern->GetWebDebuggingAccessEnabledValue(false));
         setting->PutMediaPlayGestureAccess(webPattern->GetMediaPlayGestureAccessValue(true));
         return;
     }
@@ -2819,7 +2838,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
     setting->PutEnableRawFileAccessFromFileURLs(component->GetFileFromUrlAccessEnabled());
     setting->PutDatabaseAllowed(component->GetDatabaseAccessEnabled());
     setting->PutZoomingForTextFactor(component->GetTextZoomRatio());
-    setting->PutWebDebuggingAccess(component->GetWebDebuggingAccessEnabled());
     setting->PutMediaPlayGestureAccess(component->IsMediaPlayGestureAccess());
 #endif
 }
@@ -3790,14 +3808,26 @@ void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled)
     }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), isWebDebuggingAccessEnabled]() {
-            auto delegate = weak.Upgrade();
-            if (delegate && delegate->nweb_) {
-                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
-                CHECK_NULL_VOID(setting);
-                setting->PutWebDebuggingAccess(isWebDebuggingAccessEnabled);
-            }
+            NWebHelper::Instance().SetWebDebuggingAccess(isWebDebuggingAccessEnabled);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateDebuggingAccess");
+}
+
+void WebDelegate::UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enabled, port]() {
+            if (port > 0) {
+                NWebHelper::Instance().SetWebDebuggingAccessAndPort(enabled, port);
+            } else {
+                NWebHelper::Instance().SetWebDebuggingAccess(enabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateDebuggingAccessAndPort");
 }
 
 void WebDelegate::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
@@ -6378,6 +6408,13 @@ void WebDelegate::ChangeVisibilityOfQuickMenu()
     webPattern->ChangeVisibilityOfQuickMenu();
 }
 
+bool WebDelegate::ChangeVisibilityOfQuickMenuV2()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->ChangeVisibilityOfQuickMenuV2();
+}
+
 void WebDelegate::OnQuickMenuDismissed()
 {
 #ifdef NG_BUILD
@@ -8124,5 +8161,56 @@ bool WebDelegate::IsNWebEx()
         return false;
     }
     return nweb_->IsNWebEx();
+}
+
+void WebDelegate::OnPip(
+    int status, int delegate_id, int child_id, int frame_routing_id, int width, int height)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnPip");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), status, delegate_id, child_id, frame_routing_id, width, height]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnPip(status, delegate_id, child_id, frame_routing_id, width, height);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebOnPip");
+}
+
+void WebDelegate::SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window)
+{
+    if (!window) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "SetPipNativeWindow null");
+        return;
+    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), delegate_id, child_id, frame_routing_id, window]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            TAG_LOGI(AceLogTag::ACE_WEB, "setPipNativeWindow setting");
+            delegate->nweb_->SetPipNativeWindow(delegate_id, child_id, frame_routing_id, window);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetPipNativeWindow");
+}
+
+void WebDelegate::SendPipEvent(int delegate_id, int child_id, int frame_routing_id, int event)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), delegate_id, child_id, frame_routing_id, event]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            TAG_LOGI(AceLogTag::ACE_WEB, "sendPipEvent setting");
+            delegate->nweb_->SendPipEvent(delegate_id, child_id, frame_routing_id, event);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSendPipEvent");
 }
 } // namespace OHOS::Ace

@@ -21,6 +21,7 @@
 #include <memory>
 #include <refbase.h>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <list>
 
@@ -64,6 +65,7 @@ enum class AvoidAreaType : uint32_t;
 class AvoidArea;
 struct DecorButtonStyle;
 struct SingleHandTransform;
+class OccupiedAreaChangeInfo;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -177,7 +179,8 @@ public:
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {},
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info = nullptr) {};
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
     virtual void NotifyWindowMode(OHOS::Rosen::WindowMode mode) {};
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) = 0;
@@ -478,7 +481,7 @@ public:
 
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
+    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter = true) {};
 
     virtual void EnableContainerModalGesture(bool isEnable) {};
 
@@ -534,6 +537,12 @@ public:
     virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
 
     virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+    {
+        return false;
+    }
+
+    virtual bool SendUIExtProprtyByPersistentId(uint32_t code, const AAFwk::Want& data,
+        const std::unordered_set<int32_t>& persistentIds, uint8_t subSystemId)
     {
         return false;
     }

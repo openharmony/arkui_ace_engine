@@ -1140,7 +1140,7 @@ public:
         return displayWindowRectInfo_;
     }
     virtual void FlushModifier() {}
-    virtual void FlushMessages() = 0;
+    virtual void FlushMessages(std::function<void()> callback = nullptr) = 0;
     void SetGSVsyncCallback(std::function<void(void)>&& callback)
     {
         gsVsyncCallback_ = std::move(callback);
@@ -1327,6 +1327,8 @@ public:
     {
         vsyncTime_ = time;
     }
+
+    bool ReachResponseDeadline() const;
 
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 
@@ -1622,7 +1624,7 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
         const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
-    
+
     bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
@@ -1734,6 +1736,7 @@ protected:
 
     uint64_t compensationValue_ = 0;
     int64_t recvTime_ = 0;
+    int64_t currRecvTime_ = -1;
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+#include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
@@ -45,6 +46,7 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -473,25 +475,7 @@ FrameNode::~FrameNode()
         OnDetachFromMainTree(false, GetContextWithCheck());
     }
     HandleAreaChangeDestruct();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->RemoveOnAreaChangeNode(GetId());
-        pipeline->RemoveVisibleAreaChangeNode(GetId());
-        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
-        pipeline->FreeMouseStyleHoldNode(GetId());
-        pipeline->RemoveStoredNode(GetRestoreId());
-        auto dragManager = pipeline->GetDragDropManager();
-        if (dragManager) {
-            dragManager->RemoveDragFrameNode(GetId());
-            dragManager->UnRegisterDragStatusListener(GetId());
-        }
-        auto frameRateManager = pipeline->GetFrameRateManager();
-        if (frameRateManager) {
-            frameRateManager->RemoveNodeRate(GetId());
-        }
-        pipeline->RemoveChangedFrameNode(GetId());
-        pipeline->RemoveFrameNodeChangeListener(GetId());
-    }
+    CleanupPipelineResources();
     FireOnNodeDestroyCallback();
     FireOnExtraNodeDestroyCallback();
     FireFrameNodeDestructorCallback();
@@ -815,6 +799,10 @@ void FrameNode::DumpCommonInfo()
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
+    }
+    if (renderContext_->HasBorderRadius()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("BorderRadius: ").append(renderContext_->GetBorderRadius()->ToString().c_str()));
     }
     if (layoutProperty_->GetMarginProperty()) {
         DumpLog::GetInstance().AddDesc(
@@ -1659,6 +1647,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
+    } else {
+        renderContext_->UpdateCustomBackground();
     }
 
     // update focus state
@@ -1682,10 +1672,11 @@ void FrameNode::SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNod
     CHECK_NULL_VOID(customNode);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
-    layoutConstraint.percentReference.SetWidth(geometryNode_->GetFrameSize().Width());
-    layoutConstraint.percentReference.SetHeight(geometryNode_->GetFrameSize().Height());
-    layoutConstraint.maxSize.SetWidth(geometryNode_->GetFrameSize().Width());
-    layoutConstraint.maxSize.SetHeight(geometryNode_->GetFrameSize().Height());
+    auto backgroundRect = GetBackGroundAccumulatedSafeAreaExpand();
+    layoutConstraint.percentReference.SetWidth(backgroundRect.Width());
+    layoutConstraint.percentReference.SetHeight(backgroundRect.Height());
+    layoutConstraint.maxSize.SetWidth(backgroundRect.Width());
+    layoutConstraint.maxSize.SetHeight(backgroundRect.Height());
     customNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
 }
 
@@ -2207,11 +2198,9 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
             Measure(layoutConstraint);
             ResetIgnoreLayoutProcess();
         } else {
-            TAG_LOGI(ACE_LAYOUT,
-                "LayoutTask for postponed layouting on ignoreLayoutSafeArea-container [%s][self:%d], should skip "
-                "measuring.",
-                GetTag().c_str(), GetId());
+            // LayoutTask for postponed layouting on ignoreLayoutSafeArea-container node, which should skip measuring.
         }
+
         {
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d]"
                              "[pageId:%d][depth:%d]",
@@ -3504,6 +3493,15 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
         focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), focusPattern);
     }
     return focusHub_;
+}
+
+const RefPtr<DragDropRelatedConfigurations>& FrameNode::GetOrCreateDragDropRelatedConfigurations()
+{
+    if (dragDropRelatedConfigurations_) {
+        return dragDropRelatedConfigurations_;
+    }
+    dragDropRelatedConfigurations_ = MakeRefPtr<DragDropRelatedConfigurations>();
+    return dragDropRelatedConfigurations_;
 }
 
 const RefPtr<FocusHub>& FrameNode::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
@@ -4817,6 +4815,15 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             isLayoutDirtyMarked_ = true;
         }
         needSyncRsNode = false;
+    } else {
+        auto borderRadius = renderContext_->GetBorderRadius();
+        if (borderRadius.has_value()) {
+            renderContext_->SetBorderRadius(borderRadius.value());
+        }
+        auto outerBorderRadius = renderContext_->GetOuterBorderRadius();
+        if (outerBorderRadius.has_value()) {
+            renderContext_->SetOuterBorderRadius(outerBorderRadius.value());
+        }
     }
     if (GetTag() != V2::PAGE_ETS_TAG) {
         renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
@@ -4925,6 +4932,8 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
+    } else {
+        renderContext_->UpdateCustomBackground();
     }
 
     // update focus state
@@ -5032,6 +5041,12 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 {
     PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
     return CheckNeedMeasure(flag) || CheckNeedLayout(flag);
+}
+
+bool FrameNode::ReachResponseDeadline() const
+{
+    CHECK_NULL_RETURN(context_, false);
+    return context_->ReachResponseDeadline();
 }
 
 OffsetF FrameNode::GetOffsetInScreen()
@@ -6823,6 +6838,37 @@ void FrameNode::HandleAreaChangeDestruct()
             CleanVisibleAreaUserCallback();
             CleanVisibleAreaInnerCallback();
         }
+    }
+}
+
+void FrameNode::AddToOcclusionMap(bool enable)
+{
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    context->AddToOcclusionMap(GetId(), enable);
+}
+
+void FrameNode::CleanupPipelineResources()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->RemoveOnAreaChangeNode(GetId());
+        pipeline->RemoveVisibleAreaChangeNode(GetId());
+        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(GetId());
+        pipeline->RemoveStoredNode(GetRestoreId());
+        auto dragManager = pipeline->GetDragDropManager();
+        if (dragManager) {
+            dragManager->RemoveDragFrameNode(GetId());
+            dragManager->UnRegisterDragStatusListener(GetId());
+        }
+        auto frameRateManager = pipeline->GetFrameRateManager();
+        if (frameRateManager) {
+            frameRateManager->RemoveNodeRate(GetId());
+        }
+        pipeline->RemoveChangedFrameNode(GetId());
+        pipeline->RemoveFrameNodeChangeListener(GetId());
+        pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
     }
 }
 } // namespace OHOS::Ace::NG

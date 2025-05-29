@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/select/select_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -38,6 +40,19 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     }
 }
 
+void SetDefaultShowInSubWindow(const RefPtr<FrameNode>& select)
+{
+    CHECK_NULL_VOID(select);
+    auto pipeline = select->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    if (selectTheme->GetExpandDisplay()) {
+        auto selectPattern = select->GetPattern<SelectPattern>();
+        CHECK_NULL_VOID(selectPattern);
+        selectPattern->SetShowInSubWindow(true);
+    }
+}
 } // namespace
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
@@ -555,6 +570,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         pattern->AddOptionNode(option);
     }
 
+    SetDefaultShowInSubWindow(select);
     // delete menu when select node destroy
     auto destructor = [id = select->GetId(), frameNode]() {
         auto* pipeline = frameNode->GetContextWithCheck();
@@ -899,5 +915,53 @@ void SelectModelNG::SetSelectedOptionTextModifier(
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionTextModifier(optionSelectedApply);
+}
+
+void SelectModelNG::SetShowInSubWindow(bool isShowInSubWindow)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetShowInSubWindow(frameNode, isShowInSubWindow);
+}
+
+void SelectModelNG::ResetShowInSubWindow()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+    selectPattern->ResetShowInSubWindow();
+}
+
+void SelectModelNG::SetShowDefaultSelectedIcon(bool show)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetShowDefaultSelectedIcon(frameNode, show);
+}
+
+void SelectModelNG::ResetShowDefaultSelectedIcon()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+    selectPattern->ResetShowDefaultSelectedIcon();
+}
+
+void SelectModelNG::SetShowInSubWindow(FrameNode* frameNode, bool isShowInSubWindow)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+    selectPattern->SetShowInSubWindow(isShowInSubWindow);
+}
+
+void SelectModelNG::SetShowDefaultSelectedIcon(FrameNode* frameNode, bool show)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+    selectPattern->SetShowDefaultSelectedIcon(show);
 }
 } // namespace OHOS::Ace::NG

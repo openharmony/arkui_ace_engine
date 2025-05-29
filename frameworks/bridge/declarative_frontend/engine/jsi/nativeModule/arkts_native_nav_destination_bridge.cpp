@@ -129,8 +129,13 @@ ArkUINativeModuleValue NavDestinationBridge::SetToolBarConfiguration(ArkUIRuntim
             auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
             JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
         }
-        NavDestinationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
-        NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
+        if (SystemProperties::ConfigChangePerform()) {
+            NavDestinationModel::GetInstance()->SetToolbarConfiguration(
+                std::move(toolBarItems), std::move(toolbarMoreButtonOptions));
+        } else {
+            NavDestinationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
+            NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
+        }
     } else if (info[NUM_1]->IsObject()) {
         auto builderFuncParam = JSRef<JSObject>::Cast(info[NUM_1])->GetProperty("builder");
         if (builderFuncParam->IsFunction()) {
@@ -226,7 +231,8 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackButtonIcon(ArkUIRuntimeCallI
 
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     std::string src;
-    auto noPixMap = Framework::JSViewAbstract::ParseJsMedia(info[1], src);
+    RefPtr<ResourceObject> backButtonIconResObj;
+    auto noPixMap = Framework::JSViewAbstract::ParseJsMedia(info[1], src, backButtonIconResObj);
 
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -238,7 +244,11 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackButtonIcon(ArkUIRuntimeCallI
     std::string moduleName;
     
     Framework::JSViewAbstract::GetJsMediaBundleInfo(info[1], bundleName, moduleName);
-    NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
+    if (!SystemProperties::ConfigChangePerform()) {
+        NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
+    } else {
+        NavDestinationModelNG::SetBackButtonIcon(frameNode, noPixMap, pixMap, backButtonIconResObj);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -362,7 +372,9 @@ ArkUINativeModuleValue NavDestinationBridge::SetTitle(ArkUIRuntimeCallInfo* runt
     std::string subtitle;
     bool hasMain = false;
     bool hasSub = false;
-    if (ArkTSUtils::ParseJsString(vm, titleArg, title)) {
+    RefPtr<ResourceObject> titleResObj;
+    RefPtr<ResourceObject> subtitleResObj;
+    if (ArkTSUtils::ParseJsString(vm, titleArg, title, titleResObj)) {
         // Resource and string type.
         subtitle = "";
         hasMain = true;
@@ -372,8 +384,8 @@ ArkUINativeModuleValue NavDestinationBridge::SetTitle(ArkUIRuntimeCallInfo* runt
         auto obj = titleArg->ToObject(vm);
         auto main = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "main"));
         auto sub = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "sub"));
-        hasMain = ArkTSUtils::ParseJsString(vm, main, title);
-        hasSub = ArkTSUtils::ParseJsString(vm, sub, subtitle);
+        hasMain = ArkTSUtils::ParseJsString(vm, main, title, titleResObj);
+        hasSub = ArkTSUtils::ParseJsString(vm, sub, subtitle, subtitleResObj);
         // NavigationCustomTitle or CustomBuilder is not supported
     } else {
         GetArkUINodeModifiers()->getNavDestinationModifier()->resetTitle(nativeNode);
@@ -385,7 +397,10 @@ ArkUINativeModuleValue NavDestinationBridge::SetTitle(ArkUIRuntimeCallInfo* runt
         NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, options);
     }
     ArkUINavigationTitleInfo titleInfo = { hasSub, hasMain, subtitle.c_str(), title.c_str() };
-    GetArkUINodeModifiers()->getNavDestinationModifier()->setTitle(nativeNode, titleInfo, options);
+    auto titleRawPtr = AceType::RawPtr(titleResObj);
+    auto subtitleRawPtr = AceType::RawPtr(subtitleResObj);
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setTitle(nativeNode, titleInfo, options,
+        titleRawPtr, subtitleRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 

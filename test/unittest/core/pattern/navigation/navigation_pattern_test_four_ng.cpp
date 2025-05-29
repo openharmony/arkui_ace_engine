@@ -453,6 +453,56 @@ HWTEST_F(NavigationPatternTestFourNg, GenerateLastStandardPage003, TestSize.Leve
 }
 
 /**
+ * @tc.name: GenerateLastStandardPage004
+ * @tc.desc: Branch: if (lastPageIndex >= 0 && (navPathList[lastPageIndex].second == nullptr ||
+ *              !IsStandardPage(navPathList[lastPageIndex].second))) = true
+ *           Condition: IsStandardPage(navPathList[lastPageIndex].second) = false
+ *           Branch: if (!pageNode && !GenerateUINodeByIndex(lastPageIndex, pageNode)) = true
+ *           Condition: !pageNode = true, !GenerateUINodeByIndex(lastPageIndex, pageNode) = true
+ *           Branch: if (navigationStack_->CheckIsReplacedDestination()) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, GenerateLastStandardPage004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+
+    /**
+     * @tc.steps: step2. add dialog nodes into navPathList and try push
+     * @tc.expected: step2. size of navPathList size is one
+     */
+    auto dialogDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    dialogDestination->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    dialogDestination->SetIndex(0);
+    NavPathList navPathList;
+    // only push one dialog node to test setPathStack
+    navPathList.emplace_back(PAGE01, dialogDestination);
+    EXPECT_EQ(navPathList.size(), 1);
+    auto page01Info = AceType::MakeRefPtr<MockNavPathInfo>(PAGE01);
+    page01Info->isReplaced = false;
+    navigationStack->MockPushPath(page01Info, true, LaunchMode::STANDARD);
+    EXPECT_EQ(navigationStack->GetAllPathName().size(), 1);
+
+    /**
+     * @tc.steps: step3. call GenerateLastStandardPage
+     * @tc.expected: step3. size of navPathList size is zero
+     */
+    navigationPattern->GenerateLastStandardPage(navPathList);
+    EXPECT_EQ(navPathList.size(), 1);
+    EXPECT_EQ(navigationStack->Size(), 1);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
  * @tc.name: MarkAllNavDestinationDirtyIfNeeded001
  * @tc.desc: Branch: if (!skipCheck) = false
  *           Branch: if (!navDestination) = true

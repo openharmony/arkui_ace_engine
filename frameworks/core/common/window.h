@@ -70,7 +70,7 @@ public:
 
     virtual void RecordFrameTime(uint64_t timeStamp, const std::string& name) {}
 
-    virtual void FlushTasks() {}
+    virtual void FlushTasks(std::function<void()> callback = nullptr) {}
 
     virtual std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const
     {
@@ -227,10 +227,15 @@ public:
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
+    virtual void NotifySnapshotUpdate() {}
+
     virtual bool GetIsRequestFrame()
     {
         return false;
     }
+
+    void SetForceVsyncRequests(bool forceVsyncRequests);
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
@@ -249,6 +254,7 @@ protected:
     uint32_t windowId_ = 0;
     bool dvsyncOn_ = false;
     int64_t lastDVsyncInbihitPredictTs_ = 0;
+    bool forceVsync_ = false;
 
 private:
     std::function<Rect()> windowRectImpl_;

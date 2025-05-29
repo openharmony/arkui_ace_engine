@@ -119,6 +119,14 @@ struct MouseEvent final : public PointerEvent {
     bool isPrivacyMode = false;
     bool isMockWindowTransFlag = false;
 
+    int32_t GetEventIdentity() const
+    {
+        if (passThrough) {
+            return id;
+        }
+        return originalId;
+    }
+
     Offset GetOffset() const
     {
         return Offset(x, y);
@@ -187,6 +195,7 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.rawDeltaX = rawDeltaX;
         mouseEvent.rawDeltaY = rawDeltaY;
         mouseEvent.pressedButtonsArray = pressedButtonsArray;
+        mouseEvent.passThrough = passThrough;
         return mouseEvent;
     }
 
@@ -246,6 +255,7 @@ struct MouseEvent final : public PointerEvent {
         event.isPrivacyMode = isPrivacyMode;
         event.pointers.emplace_back(std::move(point));
         event.pressedKeyCodes_ = pressedKeyCodes_;
+        event.passThrough = passThrough;
         return event;
     }
 
@@ -659,5 +669,28 @@ private:
 using MouseTestResult = std::list<RefPtr<MouseEventTarget>>;
 using HoverTestResult = std::list<RefPtr<HoverEventTarget>>;
 
+struct PressMouseInfo {
+    int32_t id;
+    MouseButton mouseButton;
+
+    bool operator==(const PressMouseInfo& other) const noexcept
+    {
+        return id == other.id && mouseButton == other.mouseButton;
+    }
+
+    bool operator<(const PressMouseInfo& other) const noexcept
+    {
+        return id < other.id && mouseButton < other.mouseButton;
+    }
+};
+
+struct PressMouseInfoHashFunc {
+    size_t operator()(PressMouseInfo const& info) const noexcept
+    {
+        size_t h1 = std::hash<int32_t> {}(info.id);
+        size_t h2 = std::hash<int32_t> {}(static_cast<int32_t>(info.mouseButton));
+        return (h1 << 1) ^ h2;
+    }
+};
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H

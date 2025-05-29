@@ -67,8 +67,11 @@ public:
 
     static const int32_t LAST_ITEM = -1;
 
-    ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex)
-        :headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex) {}
+    ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex,
+        int32_t footerCount = 0)
+        : headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex),
+          footerCount_(footerCount)
+    {}
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -274,6 +277,11 @@ public:
     {
         return totalItemCount_;
     }
+    
+    int32_t GetFooterIndex() const
+    {
+        return footerIndex_;
+    }
 
     float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
 
@@ -358,6 +366,26 @@ public:
     void SetNeedMeasureFormLastItem(bool needMeasureFormLastItem)
     {
         isNeedMeasureFormLastItem_ = needMeasureFormLastItem;
+    }
+
+    void SetNeedSyncLoad(bool value)
+    {
+        isNeedSyncLoad_ = value;
+    }
+
+    void SetPrevMeasureBreak(bool value)
+    {
+        prevMeasureBreak_ = value;
+    }
+
+    bool MeasureInNextFrame() const
+    {
+        return measureInNextFrame_;
+    }
+
+    bool ReachResponseDeadline(LayoutWrapper* layoutWrapper) const
+    {
+        return !itemPosition_.empty() && isNeedSyncLoad_ && layoutWrapper->ReachResponseDeadline();
     }
 
     ListItemGroupLayoutInfo GetLayoutInfo() const;
@@ -480,6 +508,7 @@ private:
     int32_t headerIndex_;
     int32_t footerIndex_;
     int32_t itemStartIndex_;
+    int32_t footerCount_;
     RefPtr<ListLayoutProperty> listLayoutProperty_;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
@@ -525,6 +554,9 @@ private:
     bool needAdjustRefPos_ = false;
     bool isNeedCheckOffset_ = false;
     bool isNeedMeasureFormLastItem_ = false;
+    bool isNeedSyncLoad_ = false;
+    bool measureInNextFrame_ = false;
+    bool prevMeasureBreak_ = false;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;

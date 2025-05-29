@@ -34,6 +34,9 @@ constexpr int32_t SCALE_EFFECT = 2;
 constexpr int32_t NONE_EFFECT = 0;
 constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
 constexpr float DEFAULT_STROKE_WIDTH = 0.0f;
+constexpr float ANGLE_QUARTER = 90.0f;
+constexpr float ANGLE_HALF = 180.0f;
+constexpr float ANGLE_NUM = 270.0f;
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 struct LineSpaceAndHeightInfo {
     double lineHeightScale = 0.0;
@@ -119,6 +122,27 @@ Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
         default:
             TAG_LOGW(AceLogTag::ACE_FONT, "FontStyle setting error! Now using default FontStyle");
             convertValue = Rosen::FontStyle::NORMAL;
+            break;
+    }
+    return convertValue;
+}
+
+Rosen::TextBadgeType ConvertTxtBadgeType(SuperscriptStyle superscript)
+{
+    Rosen::TextBadgeType convertValue;
+    switch (superscript) {
+        case SuperscriptStyle::NORMAL:
+            convertValue = Rosen::TextBadgeType::BADGE_NONE;
+            break;
+        case SuperscriptStyle::SUPERSCRIPT:
+            convertValue = Rosen::TextBadgeType::SUPERSCRIPT;
+            break;
+        case SuperscriptStyle::SUBSCRIPT:
+            convertValue = Rosen::TextBadgeType::SUBSCRIPT;
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextBadgeType setting error! Now using default TextBadgeType");
+            convertValue = Rosen::TextBadgeType::BADGE_NONE;
             break;
     }
     return convertValue;
@@ -470,6 +494,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     txtStyle.fontStyle = ConvertTxtFontStyle(textStyle.GetFontStyle());
+    txtStyle.badgeType = ConvertTxtBadgeType(textStyle.GetSuperscript());
 
     if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
         txtStyle.wordSpacing = textStyle.GetWordSpacing().Value() * txtStyle.fontSize;
@@ -489,6 +514,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
 
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
+    UpdateShaderStyle(textStyle, txtStyle);
     ConvertSymbolTxtStyle(textStyle, txtStyle);
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
@@ -566,6 +592,193 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.backgroundRect.rightTopRadius = radiusConverter(radius->radiusTopRight);
     txtStyle.backgroundRect.leftBottomRadius = radiusConverter(radius->radiusBottomLeft);
     txtStyle.backgroundRect.rightBottomRadius = radiusConverter(radius->radiusBottomRight);
+}
+
+void UpdateShaderStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
+{
+    RSBrush brush;
+    if (!textStyle.GetGradient().has_value()) {
+        return;
+    }
+    auto gradient = textStyle.GetGradient().value();
+    GradientType type = gradient.GetType();
+    if (type != GradientType::RADIAL) {
+        return;
+    }
+    auto radialGradient = gradient.GetRadialGradient();
+    Offset offset;
+    offset.SetX(radialGradient.radialCenterX.value().Value());
+    offset.SetY(radialGradient.radialCenterY.value().Value());
+    RSPoint centerPoint = RSPoint(static_cast<RSScalar>(offset.GetX()), static_cast<RSScalar>(offset.GetY()));
+    auto radius = radialGradient.radialHorizontalSize.value().Value();
+    auto gradientColors = gradient.GetColors();
+    std::vector<RSColorQuad> colors(gradientColors.size(), 0);
+    std::vector<RSScalar> pos(gradientColors.size(), 0);
+    uint32_t colorsSize = gradientColors.size();
+    for (uint32_t i = 0; i < colorsSize; ++i) {
+        const auto& gradientColor = gradientColors[i];
+        colors.at(i) = gradientColor.GetColor().GetValue();
+        pos.at(i) = gradientColor.GetDimension().Value();
+    }
+    if (gradient.GetRepeat()) {
+        auto shaderEffect = RSShaderEffect::CreateRadialGradient(centerPoint, radius, colors, pos, RSTileMode::REPEAT);
+        brush.SetShaderEffect(shaderEffect);
+    } else {
+        auto shaderEffect = RSShaderEffect::CreateRadialGradient(centerPoint, radius, colors, pos, RSTileMode::CLAMP);
+        brush.SetShaderEffect(shaderEffect);
+    }
+    txtStyle.foregroundBrush = brush;
+}
+
+void UpdateOffset(Offset& firstPoint, Offset& secondPoint, LinearGradient& linearGradient, const Rect& rect)
+{
+    if (linearGradient.angle) {
+        EndPointsFromAngle(linearGradient.angle.value().Value(), rect, firstPoint, secondPoint);
+    } else {
+        if (linearGradient.linearX && linearGradient.linearY) {
+            float width = rect.Width();
+            float height = rect.Height();
+            if (linearGradient.linearX == OHOS::Ace::GradientDirection::LEFT) {
+                height *= -1;
+            }
+            if (linearGradient.linearY == OHOS::Ace::GradientDirection::BOTTOM) {
+                width *= -1;
+            }
+            float angle = ANGLE_QUARTER - Rad2deg(atan2(width, height));
+            EndPointsFromAngle(angle, rect, firstPoint, secondPoint);
+        } else if (linearGradient.linearX || linearGradient.linearY) {
+            secondPoint = DirectionToPoint(linearGradient.linearX, linearGradient.linearY, rect);
+            if (linearGradient.linearX) {
+                firstPoint.SetX(rect.Width() - secondPoint.GetX());
+            }
+            if (linearGradient.linearY) {
+                firstPoint.SetY(rect.Height() - secondPoint.GetY());
+            }
+        } else {
+            secondPoint = { 0.0f, rect.Height() };
+        }
+    }
+}
+
+void ConvertForegroundPaint(const TextStyle& textStyle, double width, double height, Rosen::TextStyle& txtStyle)
+{
+    if (!textStyle.GetGradient().has_value()) {
+        return;
+    }
+    txtStyle.textStyleUid  = static_cast<unsigned long>(textStyle.GetTextStyleUid());
+    txtStyle.relayoutChangeBitmap = textStyle.GetReLayoutTextStyleBitmap();
+    auto gradient = textStyle.GetGradient().value();
+    GradientType type = gradient.GetType();
+    if (type != GradientType::LINEAR) {
+        return;
+    }
+    RSBrush brush;
+    Rect rect;
+    rect.SetWidth(width);
+    rect.SetHeight(height);
+    auto linearGradient = gradient.GetLinearGradient();
+    Offset firstPoint;
+    Offset secondPoint;
+    UpdateOffset(firstPoint, secondPoint, linearGradient, rect);
+    RSPoint beginPoint = RSPoint(static_cast<RSScalar>(firstPoint.GetX()), static_cast<RSScalar>(firstPoint.GetY()));
+    RSPoint endPoint = RSPoint(static_cast<RSScalar>(secondPoint.GetX()), static_cast<RSScalar>(secondPoint.GetY()));
+    std::vector<RSPoint> pts = { beginPoint, endPoint };
+    auto gradientColors = gradient.GetColors();
+    std::vector<RSColorQuad> colors(gradientColors.size(), 0);
+    std::vector<RSScalar> pos(gradientColors.size(), 0);
+    uint32_t colorsSize = gradientColors.size();
+    for (uint32_t i = 0; i < colorsSize; ++i) {
+        const auto& gradientColor = gradientColors[i];
+        colors.at(i) = gradientColor.GetColor().GetValue();
+        pos.at(i) = gradientColor.GetDimension().Value();
+    }
+    if (gradient.GetRepeat()) {
+        auto shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, pos, RSTileMode::REPEAT);
+        brush.SetShaderEffect(shaderEffect);
+    } else {
+        auto shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, pos, RSTileMode::CLAMP);
+        brush.SetShaderEffect(shaderEffect);
+    }
+    txtStyle.foregroundBrush = brush;
+}
+
+void EndPointsFromAngle(float angle, const Rect& rect, Offset& firstPoint, Offset& secondPoint)
+{
+    angle = fmod(angle, 360.0f);
+    if (LessNotEqual(angle, 0.0)) {
+        angle += 360.0f;
+    }
+    if (NearEqual(angle, 0.0)) {
+        firstPoint = { 0.0f, rect.Height() };
+        secondPoint = { 0.0f, 0.0f };
+        return;
+    } else if (NearEqual(angle, ANGLE_QUARTER)) {
+        firstPoint = { 0.0f, 0.0f };
+        secondPoint = { rect.Width(), 0.0f };
+        return;
+    } else if (NearEqual(angle, ANGLE_HALF)) {
+        firstPoint = { 0.0f, 0.0f };
+        secondPoint = { 0, rect.Height() };
+        return;
+    } else if (NearEqual(angle, ANGLE_NUM)) {
+        firstPoint = { rect.Width(), 0.0f };
+        secondPoint = { 0.0f, 0.0f };
+        return;
+    }
+    float slope = tan(Deg2rad(ANGLE_QUARTER - angle));
+    float perpendicularSlope = 0.0f;
+    if (!NearZero(slope)) {
+        perpendicularSlope = -1 / slope;
+    }
+    float halfHeight = rect.Height() / 2;
+    float halfWidth = rect.Width() / 2;
+    Offset cornerPoint { 0.0f, 0.0f };
+    if (angle < ANGLE_QUARTER) {
+        cornerPoint = { halfWidth, halfHeight };
+    } else if (angle < 180) {
+        cornerPoint = { halfWidth, -halfHeight };
+    } else if (angle < 270) {
+        cornerPoint = { -halfWidth, -halfHeight };
+    } else {
+        cornerPoint = { -halfWidth, halfHeight };
+    }
+    // Compute b (of y = kx + b) using the corner point.
+    float b = cornerPoint.GetY() - perpendicularSlope * cornerPoint.GetX();
+    float endX = b / (slope - perpendicularSlope);
+    float endY = perpendicularSlope * endX + b;
+    secondPoint = { halfWidth + endX, halfHeight - endY };
+    firstPoint = { halfWidth - endX, halfHeight + endY };
+}
+
+Offset DirectionToPoint(const std::optional<OHOS::Ace::GradientDirection>& x,
+    const std::optional<OHOS::Ace::GradientDirection>& y, const Rect& rect)
+{
+    Offset offset { 0.0f, 0.0f };
+    if (x) {
+        if (x == OHOS::Ace::GradientDirection::LEFT) {
+            offset.SetX(0.0f);
+        } else {
+            offset.SetY(rect.Width());
+        }
+    }
+    if (y) {
+        if (y == OHOS::Ace::GradientDirection::TOP) {
+            offset.SetY(0.0f);
+        } else {
+            offset.SetY(rect.Height());
+        }
+    }
+    return offset;
+}
+
+float Deg2rad(float deg)
+{
+    return static_cast<float>(deg * M_PI / ANGLE_HALF);
+}
+
+float Rad2deg(float rad)
+{
+    return static_cast<float>(rad * ANGLE_HALF / M_PI);
 }
 
 void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)

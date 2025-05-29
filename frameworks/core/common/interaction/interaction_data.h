@@ -57,6 +57,8 @@ struct DragDataCore {
     bool hasCanceledAnimation = false;
     bool hasCoordinateCorrected = false;
     std::map<std::string, int64_t> summarys;
+    bool isDragDelay = false;
+    std::map<std::string, int64_t> detailedSummarys;
 };
 
 struct DragBundleInfo {

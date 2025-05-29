@@ -871,7 +871,7 @@ ArkUINativeModuleValue GridBridge::SetOnGridScrollBarUpdate(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<std::pair<float, float>(int32_t, Dimension&)> callback =
+    std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)> callback =
         [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const int32_t index, const Dimension& offset) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);

@@ -22,7 +22,7 @@ import { image } from '@kit.ImageKit';
 @Entry
 @Component
 struct ImageExample {
-  pixelMaps: Array<PixelMap>  = [];
+  pixelMaps: PixelMap[] = [];
   options: AnimationOptions = { iterations: 1 };
   @State animated: AnimatedDrawableDescriptor | undefined = undefined;
 
@@ -37,7 +37,7 @@ struct ImageExample {
         Image(this.animated)
           .width('500px').height('500px')
           .onFinish(() => {
-            console.info("finish");
+            console.info('finish');
           })
       }.height('50%')
       Row() {
@@ -60,7 +60,7 @@ struct ImageExample {
       id: resource.id
     });
     let imageSource = image.createImageSource(unit8Array?.buffer.slice(0, unit8Array.buffer.byteLength));
-    let createPixelMap: Array<image.PixelMap> = await imageSource.createPixelMapList({
+    let createPixelMap: image.PixelMap[] = await imageSource.createPixelMapList({
       desiredPixelFormat: image.PixelMapFormat.RGBA_8888
     });
     await imageSource.release();
@@ -82,7 +82,7 @@ struct ImageExample {
   }
 
   private async getPixelMaps() {
-    let myPixelMaps:Array<PixelMap> = await this.getPixmapListFromMedia($r('app.media.mountain')); //添加图片
+    let myPixelMaps:PixelMap[] = await this.getPixmapListFromMedia($r('app.media.mountain')); //添加图片
     myPixelMaps.push(await this.getPixmapFromMedia($r('app.media.sky')));
     myPixelMaps.push(await this.getPixmapFromMedia($r('app.media.clouds')));
     myPixelMaps.push(await this.getPixmapFromMedia($r('app.media.landscape')));

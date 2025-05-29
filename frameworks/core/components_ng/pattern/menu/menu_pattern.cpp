@@ -242,7 +242,7 @@ int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
         CHECK_NULL_VOID(menuWrapperNode);
         auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
-        if (menuWrapperPattern->GetHoverMode() && pattern->IsSubMenu()) {
+        if (menuWrapperPattern->GetHoverMode().value_or(false) && pattern->IsSubMenu()) {
             menuWrapperPattern->HideSubMenu();
         }
         pipelineContext->FlushUITasks();
@@ -302,7 +302,7 @@ void MenuPattern::OnModifyDone()
     CHECK_NULL_VOID(pipelineContext);
     auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selecTheme);
-    if (selecTheme->GetMenuNeedFocus()) {
+    if (selecTheme->GetMenuItemNeedFocus()) {
         UpdateMenuBorderAndBackgroundBlur();
     }
     SetAccessibilityAction();
@@ -516,7 +516,7 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(pipelineContext);
     auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selecTheme);
-    if (selecTheme->GetMenuNeedFocus()) {
+    if (selecTheme->GetMenuItemNeedFocus()) {
         InitDefaultBorder(host);
     }
 }
@@ -820,6 +820,12 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
     if (((IsContextMenu() || (expandDisplay && isShowInSubWindow))) && (targetTag_ != V2::SELECT_ETS_TAG)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d. reason %{public}d", targetId_, reason);
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
+        return;
+    }
+    if (targetTag_ == V2::SELECT_ETS_TAG && expandDisplay && layoutProperty->GetShowInSubWindowValue(false)) {
+        auto subWindowManager = SubwindowManager::GetInstance();
+        CHECK_NULL_VOID(subWindowManager);
+        subWindowManager->ClearMenuNG(Container::CurrentId(), targetId_);
         return;
     }
 
@@ -1175,8 +1181,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     expandDisplay_ = expandDisplay;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
-        || theme->GetMenuBlendBgColor()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
     }
@@ -1362,6 +1367,10 @@ void MenuPattern::ShowPreviewPositionAnimation(AnimationOption& option, int32_t 
     previewRenderContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
 
+    if (menuWrapperPattern->GetHoverScaleInterruption()) {
+        return;
+    }
+
     if (isHoverImageTarget) {
         option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
         option.SetDelay(delay);
@@ -1423,7 +1432,8 @@ void MenuPattern::ShowPreviewMenuAnimation()
 
     auto springMotionResponse = menuTheme->GetSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
-    auto delay = isShowHoverImage_ ? menuTheme->GetHoverImageDelayDuration() : 0;
+    auto isHoverScaleInterrupt = menuWrapperPattern->GetHoverScaleInterruption();
+    auto delay = isShowHoverImage_ ? menuTheme->GetHoverImageDelayDuration(isHoverScaleInterrupt) : 0;
 
     AnimationOption option = AnimationOption();
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
@@ -1470,11 +1480,12 @@ void MenuPattern::ShowMenuAppearAnimation()
         AnimationOption option = AnimationOption();
         if (theme->GetMenuAnimationDuration()) {
             option.SetDuration(theme->GetMenuAnimationDuration());
+            option.SetCurve(theme->GetMenuAnimationCurve());
             renderContext->UpdateTransformCenter(DimensionOffset(Offset()));
         } else {
+            option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
             renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
         }
-        option.SetCurve(theme->GetMenuAnimationCurve());
         AnimationUtils::Animate(option, [this, renderContext, menuPosition]() {
             CHECK_NULL_VOID(renderContext);
             if (IsSelectOverlayExtensionMenu()) {

@@ -2360,6 +2360,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest020, TestSize.Level1)
     item.string = "#ff182431;14;normal;Arial;normal";
     nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE, &item);
     nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_TEXT_STYLE, &item);
+    nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_CAN_LOOP, &item);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_SELECTED_TEXT_STYLE, &item),
         ARKUI_ERROR_CODE_NO_ERROR);
     item.string = "#ff182431;14;normal;Arial;test";
@@ -2372,6 +2373,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest020, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_DATE_PICKER_TEXT_STYLE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_DATE_PICKER_SELECTED_TEXT_STYLE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_DATE_PICKER_CAN_LOOP), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_LUNAR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_START), nullptr);
@@ -2380,6 +2382,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest020, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_TEXT_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_SELECTED_TEXT_STYLE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_CAN_LOOP), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -4852,6 +4855,10 @@ HWTEST_F(NativeNodeTest, NativeNodeTest064, TestSize.Level1)
         ARKUI_ERROR_CODE_PARAM_INVALID);
     ArkUI_NumberValue layoutModeV[] = {{.i32 = ArkUI_WaterFlowLayoutMode::ARKUI_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW}};
     ArkUI_AttributeItem layoutModeAttr = {layoutModeV, 1, nullptr, nullptr};
+        
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootNode->uiNodeHandle);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->AttachContext(AceType::RawPtr(context));
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_LAYOUT_MODE, &layoutModeAttr),
         ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_LAYOUT_MODE)->value->i32,
@@ -7174,5 +7181,36 @@ HWTEST_F(NativeNodeTest, NativeNodeTest142, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(
         styleButton, settingUIStatus, nullptr, false, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(OH_ArkUI_RemoveSupportedUIStates(styleButton, settingUIStatus), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeTest143
+ * @tc.desc: Test optimizeTrailingSpace function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest143, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT, nullptr, true});
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    value[0].i32 = false;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    item.size = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item),
+    ARKUI_ERROR_CODE_PARAM_INVALID);
+    item.size = 1;
+    value[0].i32 = 2;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item),
+    ARKUI_ERROR_CODE_PARAM_INVALID);
+    value[0].i32 = true;
+
+    nodeAPI->resetAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 } // namespace OHOS::Ace

@@ -2981,9 +2981,22 @@ void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
     FireOnScroll(finalOffset, onScroll);
 }
 
+void ScrollablePattern::FireObserverOnScrollerAreaChange(float finalOffset)
+{
+    CHECK_NULL_VOID(positionController_);
+    auto obsMgr = positionController_->GetObserverManager();
+    CHECK_NULL_VOID(obsMgr);
+    auto source = ConvertScrollSource(scrollSource_);
+    bool isAtTop = IsAtTop();
+    bool isAtBottom = IsAtBottom();
+    auto offsetPX = Dimension(finalOffset);
+    auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+    obsMgr->HandleOnScrollerAreaChangeEvent(offsetVP, source, isAtTop, isAtBottom);
+}
+
 void ScrollablePattern::SuggestOpIncGroup(bool flag)
 {
-    if (!SystemProperties::IsOpIncEnable()) {
+    if (!SystemProperties::IsOpIncEnable() || !isVertical()) {
         return;
     }
     auto host = GetHost();

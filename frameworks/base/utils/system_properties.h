@@ -706,6 +706,8 @@ public:
 
     static bool GetMultiInstanceEnabled();
 
+    static void SetMultiInstanceEnabled(bool enabled);
+
     static bool GetTaskPriorityAdjustmentEnable()
     {
         return taskPriorityAdjustmentEnable_;
@@ -720,6 +722,7 @@ public:
 
     static bool IsFormSkeletonBlurEnabled();
 
+    static int32_t getFormSharedImageCacheThreshold();
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -810,6 +813,7 @@ private:
     static int32_t touchAccelarate_;
     static bool pageTransitionFrzEnabled_;
     static bool formSkeletonBlurEnabled_;
+    static int32_t formSharedImageCacheThreshold_;
 };
 
 } // namespace OHOS::Ace

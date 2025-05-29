@@ -348,6 +348,28 @@ HWTEST_F(GridScrollLayoutTestNg, GetTotalHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTotalHeightWithOptions
+ * @tc.desc: Test total height of grid with different irregular heights.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GetTotalHeightWithOptions, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0, 2, 4 };
+    model.SetLayoutOptions(option);
+    CreateFixedHeightItems(1, 100);
+    CreateFixedHeightItems(1, 50);
+    CreateFixedHeightItems(1, 80);
+    CreateFixedHeightItems(1, 50);
+    CreateFixedHeightItems(1, 30);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetTotalHeight(), 310);
+}
+
+/**
  * @tc.name: GetAverageHeight001
  * @tc.desc: Test GetAverageHeight Function.
  * @tc.type: FUNC
@@ -1801,6 +1823,56 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpringAnimationTest009
+ * @tc.desc: Test Grid change height during spring animation. Grid becomes unscrollable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest009, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(2);
+
+    bool isScrollStopCalled = false;
+    auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetOnScrollStop(scrollStop);
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Simulate a scrolling gesture.
+     * @tc.expected: Grid trigger spring animation.
+     */
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. increase grid height to be larger than the content during animation
+     * @tc.expected: scrollable_ is false and currentOffset_ is 0
+     */
+    MockAnimationManager::GetInstance().Tick();
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT * 2))));
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->scrollable_);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_TRUE(isScrollStopCalled);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
  * @tc.name: TestIrregularGridWithScrollToIndex001
  * @tc.desc: Test Irregular Grid with columnStart Measure when scroll to index
  * @tc.type: FUNC
@@ -2377,5 +2449,29 @@ HWTEST_F(GridScrollLayoutTestNg, GetTotalOffsetTest001, TestSize.Level1)
     gridItemProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(ITEM_MAIN_SIZE + 50))));
     FlushUITasks();
     EXPECT_EQ(offset, pattern_->GetTotalOffset());
+}
+
+/**
+ * @tc.name: Test Skip large offset
+ * @tc.desc: Test OnScrollIndex with big cachedCount by skip large offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SkipLargeOffset001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(16, false);
+    CreateFixedItems(100);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 90);
+    EXPECT_EQ(pattern_->info_.endIndex_, 99);
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 15);
+    EXPECT_EQ(pattern_->info_.endIndex_, 26);
 }
 } // namespace OHOS::Ace::NG

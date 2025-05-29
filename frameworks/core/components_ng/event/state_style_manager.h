@@ -40,6 +40,8 @@ inline constexpr UIState UI_STATE_DISABLED = 1 << 2;
 inline constexpr UIState UI_STATE_SELECTED = 1 << 3;
 inline constexpr UIState UI_STATE_UNKNOWN = 1 << 9;
 
+inline constexpr uint64_t EXCLUDE_INNER_FLAG_NONE = 0;
+
 // StateStyleManager is mainly used to manage the setting and refresh of state styles.
 class StateStyleManager : public virtual AceType {
     DECLARE_ACE_TYPE(StateStyleManager, AceType)
@@ -72,22 +74,9 @@ public:
         supportedStates_ = state;
     }
 
-    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner)
-    {
-        if (state == UI_STATE_NORMAL) {
-            return;
-        }
-        if (!HasStateStyle(state)) {
-            supportedStates_ = supportedStates_ | state;
-        }
-        if (isInner) {
-            innerStateStyleSubscribers_.first |= state;
-            innerStateStyleSubscribers_.second = callback;
-        } else {
-            userStateStyleSubscribers_.first |= state;
-            userStateStyleSubscribers_.second = callback;
-        }
-    }
+    void AddSupportedUIStateWithCallback(
+        UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner = false);
+    void RemoveSupportedUIState(UIState state, bool isInner);
 
     bool GetUserSetStateStyle()
     {
@@ -100,22 +89,6 @@ public:
         return isSetState;
     }
 
-    void RemoveSupportedUIState(UIState state, bool isInner)
-    {
-        if (state == UI_STATE_NORMAL) {
-            return;
-        }
-        if (isInner) {
-            innerStateStyleSubscribers_.first &= ~state;
-        } else {
-            userStateStyleSubscribers_.first &= ~state;
-        }
-        UIState temp = frontendSubscribers_ | innerStateStyleSubscribers_.first | userStateStyleSubscribers_.first;
-        if ((temp & state) != state) {
-            supportedStates_ = supportedStates_ & ~state;
-        }
-    }
-
     bool IsCurrentStateOn(UIState state) const
     {
         if (state == UI_STATE_NORMAL) {
@@ -124,14 +97,7 @@ public:
         return (currentState_ & state) == state;
     }
 
-    void SetCurrentUIState(UIState state, bool flag)
-    {
-        if (flag) {
-            currentState_ |= state;
-        } else {
-            currentState_ &= ~state;
-        }
-    }
+    void SetCurrentUIState(UIState state, bool flag);
 
     void SetScrollingFeatureForbidden(bool scrollingFeatureForbidden)
     {
@@ -188,8 +154,9 @@ public:
     }
 
 private:
-    void HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset);
-    void FireStateFunc(UIState handlingState, UIState currentState, bool isReset);
+    void HandleStateChangeInternal(
+        UIState handlingState, UIState currentState, bool isReset, bool skipFrontendForcibly = false);
+    void FireStateFunc(UIState handlingState, UIState currentState, bool isReset, bool skipFrontendForcibly = false);
 
     void PostListItemPressStyleTask(UIState state);
     void PostPressStyleTask(uint32_t delayTime);
@@ -263,6 +230,7 @@ private:
     void GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<UINode> node);
     bool GetCustomNodeFromSelf(RefPtr<UINode>& node, RefPtr<CustomNodeBase>& customNode, int32_t nodeId);
     bool GetCustomNodeFromNavgation(RefPtr<UINode>& node, RefPtr<CustomNodeBase>& customNode, int32_t nodeId);
+    bool IsExcludeInner(UIState handlingState);
 
     WeakPtr<FrameNode> host_;
     RefPtr<TouchEventImpl> pressedFunc_;
@@ -273,6 +241,8 @@ private:
     std::pair<UIState, std::function<void(uint64_t)>> innerStateStyleSubscribers_ = { UI_STATE_UNKNOWN, nullptr };
     // manages user subscription UI state and callbacks.
     std::pair<UIState, std::function<void(uint64_t)>> userStateStyleSubscribers_ = { UI_STATE_UNKNOWN, nullptr };
+    // manages the flag that forbids the inner default state style handling for user subscriptions.
+    uint64_t userSubscribersExcludeConfigs_ = EXCLUDE_INNER_FLAG_NONE;
     // tracks frontend UI state.
     UIState frontendSubscribers_ = UI_STATE_UNKNOWN;
     

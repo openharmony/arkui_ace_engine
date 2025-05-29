@@ -213,6 +213,10 @@ public:
     static bool RegisterStringCacheTable(const EcmaVM* vm, int32_t size);
     static panda::Local<panda::StringRef> GetCachedString(const EcmaVM *vm, int32_t propertyIndex);
     static void SetCachedString(const EcmaVM* vm);
+    void CallAddAvailableInstanceIdFunc(
+        const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
+    void CallRemoveAvailableInstanceIdFunc(
+        const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
 
 private:
     void InitGlobalObjectTemplate();

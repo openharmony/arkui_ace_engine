@@ -1481,4 +1481,61 @@ HWTEST_F(PatternLockTestNg, PatternLockEnableForegroundTest001, TestSize.Level1)
     });
     EXPECT_TRUE(paintProperty_->GetEnableForegroundValue());
 }
+
+/**
+ * @tc.name: PatternLockPropertyUpdateTest001
+ * @tc.desc: Test PatternLock pattern property update methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockPropertyUpdateTest001, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {});
+    auto host = pattern_->GetHost();
+    auto context = host->GetContext();
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    auto layoutProperty = host->GetLayoutProperty<PatternLockLayoutProperty>();
+    /**
+     * @tc.case: case1: test UpdateSelectedColor under different conditions
+     */
+    context->SetIsSystemColorChange(true);
+    Color selectedColor = Color::RED;
+    pattern_->UpdateSelectedColor(selectedColor, false);
+    EXPECT_EQ(paintProperty->GetSelectedColor().value(), selectedColor);
+    
+    context->SetIsSystemColorChange(false);
+    Color selectedColor2 = Color::BLUE;
+    pattern_->UpdateSelectedColor(selectedColor2, true);
+    EXPECT_EQ(paintProperty->GetSelectedColor().value(), selectedColor2);
+    
+    Color originalSelectedColor = paintProperty->GetSelectedColor().value();
+    pattern_->UpdateSelectedColor(Color::GREEN, false);
+    EXPECT_EQ(paintProperty->GetSelectedColor().value(), originalSelectedColor);
+    /**
+     * @tc.case: case2: test UpdatePathColor with system color change
+     */
+    context->SetIsSystemColorChange(true);
+    Color pathColor = Color::RED;
+    pattern_->UpdatePathColor(pathColor, false);
+    EXPECT_EQ(paintProperty->GetPathColor().value(), pathColor);
+    /**
+     * @tc.case: case3: test UpdateActiveColor on first load
+     */
+    Color activeColor = Color::GREEN;
+    pattern_->UpdateActiveColor(activeColor, true);
+    EXPECT_EQ(paintProperty->GetActiveColor().value(), activeColor);
+    /**
+     * @tc.case: case4: test UpdateCircleRadius with valid dimension
+     */
+    const double circleRadius = 10.0;
+    CalcDimension radius(circleRadius, DimensionUnit::VP);
+    pattern_->UpdateCircleRadius(radius, true);
+    EXPECT_EQ(paintProperty->GetCircleRadius().value(), radius);
+    /**
+     * @tc.case: case5: test UpdateSideLength in layout property
+     */
+    const double sideLength = 300.0;
+    CalcDimension length(sideLength, DimensionUnit::VP);
+    pattern_->UpdateSideLength(length, true);
+    EXPECT_EQ(layoutProperty->GetSideLength().value(), length);
+}
 } // namespace OHOS::Ace::NG

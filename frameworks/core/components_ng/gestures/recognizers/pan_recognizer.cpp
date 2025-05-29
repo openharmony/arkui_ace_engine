@@ -153,25 +153,18 @@ void PanRecognizer::OnAccepted()
     }
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
-    {
-        ACE_SCOPED_TRACE("PanRecognizer onActionStart, mainDelta_: %f", mainDelta_);
-        SendCallbackMsg(onActionStart_, GestureCallbackType::START);
-    }
+    SendCallbackMsg(onActionStart_, GestureCallbackType::START);
     isNeedResetVoluntarily_ = false;
     // only report the pan gesture starting for touch event
     DispatchPanStartedToPerf(lastTouchEvent_);
     if (IsEnabled()) {
         isStartTriggered_ = true;
     }
-    {
-        ACE_SCOPED_TRACE("PanRecognizer onActionUpdate, mainDelta_: %f", mainDelta_);
-        SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
-    }
+    SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
     // if gesture is blocked by double click, recognizer will receive up before onAccepted
     // in this case, recognizer need to send onActionEnd when onAccepted
     if (isTouchEventFinished_) {
         isStartTriggered_ = false;
-        ACE_SCOPED_TRACE("PanRecognizer onActionEnd");
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
     }
 }
@@ -367,7 +360,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             }
             // last one to fire end.
             isStartTriggered_ = false;
-            ACE_SCOPED_TRACE("PanRecognizer onActionEnd");
             SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
             averageDistance_.Reset();
             AddOverTimeTrace();
@@ -421,7 +413,6 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (refereeState_ == RefereeState::SUCCEED) {
         // AxisEvent is single one.
         isStartTriggered_ = false;
-        ACE_SCOPED_TRACE("PanRecognizer onActionEnd");
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
         AddOverTimeTrace();
     }
@@ -463,17 +454,13 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         }
         if (isFlushTouchEventsEnd_) {
             if (!isStartTriggered_ && IsEnabled()) {
-                ACE_SCOPED_TRACE("PanRecognizer onActionStart, mainDelta_: %f", mainDelta_);
                 SendCallbackMsg(onActionStart_, GestureCallbackType::START);
                 isStartTriggered_ = true;
             }
             if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
                 return;
             }
-            {
-                ACE_SCOPED_TRACE("PanRecognizer onActionUpdate, mainDelta_: %f", mainDelta_);
-                SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
-            }
+            SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
         }
     }
 }
@@ -545,14 +532,10 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             averageDistance_.SetX(0.0);
         }
         if (!isStartTriggered_ && IsEnabled()) {
-            ACE_SCOPED_TRACE("PanRecognizer onActionStart, mainDelta_: %f", mainDelta_);
             SendCallbackMsg(onActionStart_, GestureCallbackType::START);
             isStartTriggered_ = true;
         }
-        {
-            ACE_SCOPED_TRACE("PanRecognizer onActionUpdate, mainDelta_: %f", mainDelta_);
-            SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
-        }
+        SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
     }
 }
 
@@ -595,7 +578,6 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
         // AxisEvent is single one.
-        ACE_SCOPED_TRACE("PanRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
@@ -614,7 +596,6 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        ACE_SCOPED_TRACE("PanRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
     }
 }
@@ -752,13 +733,11 @@ void PanRecognizer::OnResetStatus()
     mainDelta_ = 0.0;
     isFlushTouchEventsEnd_ = false;
     isForDrag_ = false;
-    isAllowMouse_ = true;
     isStartTriggered_ = false;
 }
 
 void PanRecognizer::OnSucceedCancel()
 {
-    ACE_SCOPED_TRACE("PanRecognizer onActionCancel");
     SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
 }
 
@@ -802,16 +781,17 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
         info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         info.SetPointerEventId(lastAxisEvent_.touchEventId);
+        info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPointerEventId(lastTouchEvent_.touchEventId);
+        info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetInputEventType(inputEventType_);
-    info.SetOriginInputEventType(originInputEventType_);
     info.SetForce(lastTouchEvent_.force);
     info.SetTiltX(lastTouchEvent_.tiltX.value_or(0.0));
     info.SetTiltY(lastTouchEvent_.tiltY.value_or(0.0));
@@ -824,6 +804,8 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type)
 {
+    std::string callbackName = GetCallbackName(callback);
+    ACE_SCOPED_TRACE("PanRecognizer %s, mainDelta: %f", callbackName.c_str(), mainDelta_);
     if ((type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) && !IsEnabled()) {
         if (panEndOnDisableState_ && *panEndOnDisableState_ && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
             GestureEvent info = GetGestureEventInfo();
@@ -932,7 +914,6 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 
     if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
-            ACE_SCOPED_TRACE("PanRecognizer onActionCancel");
             SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
         }
         ResetStatus();

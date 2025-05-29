@@ -42,6 +42,24 @@ void RelativeContainerModelNG::SetGuideline(const std::vector<GuidelineInfo>& gu
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<OHOS::Ace::NG::RelativeContainerPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [guidelineInfo, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            std::vector<GuidelineInfo> &guidelineInfoValue = const_cast<std::vector<GuidelineInfo> &>(guidelineInfo);
+            for (size_t i = 0; i < guidelineInfoValue.size(); i++) {
+                guidelineInfoValue[i].ReloadResources();
+            }
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfoValue, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        };
+        pattern->AddResObj("RelativeContainer.guideLine", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfo);
 }
 

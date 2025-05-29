@@ -36,6 +36,7 @@
 namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
+constexpr int32_t DEFAULT_RESPONSE_DELAY = 70000000; // default max response delay is 70ms.
 
 PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
@@ -742,6 +743,7 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     frameCount_ = frameCount;
 
     recvTime_ = GetSysTimestamp();
+    currRecvTime_ = recvTime_;
     compensationValue_ =
         nanoTimestamp > static_cast<uint64_t>(recvTime_) ? (nanoTimestamp - static_cast<uint64_t>(recvTime_)) : 0;
 
@@ -766,6 +768,15 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     if (onVsyncProfiler_) {
         onVsyncProfiler_(AceTracker::Stop());
     }
+    currRecvTime_ = -1;
+}
+
+bool PipelineBase::ReachResponseDeadline() const
+{
+    if (currRecvTime_ >= 0) {
+        return currRecvTime_ + DEFAULT_RESPONSE_DELAY < GetSysTimestamp();
+    }
+    return false;
 }
 
 void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context)

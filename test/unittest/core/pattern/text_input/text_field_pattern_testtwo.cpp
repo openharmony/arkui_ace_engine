@@ -1421,4 +1421,46 @@ HWTEST_F(TextFieldPatternTestTwo, CheckIfNeedToResetKeyboard001, TestSize.Level0
     pattern->CheckIfNeedToResetKeyboard();
     EXPECT_EQ(pattern->keyboard_, TextInputType::TEXT);
 }
+
+/**
+ * @tc.name: AddTextFireOnChange001
+ * @tc.desc: Test AddTextFireOnChange No PasswordMode with content added
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::USER_NAME);
+    pattern->contentController_->content_ = u"abcd";
+    pattern->textCache_ = "abc";
+    pattern->AddTextFireOnChange();
+    EXPECT_EQ(pattern->textCache_, "abcd");
+}
+
+/**
+ * @tc.name: AddTextFireOnChange002
+ * @tc.desc: Test AddTextFireOnChange IsInPasswordMode with content removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange002, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern->contentController_->content_ = u"abc";
+    pattern->textCache_ = "abcd";
+    pattern->AddTextFireOnChange();
+    EXPECT_EQ(pattern->textCache_, "abc");
+}
 } // namespace OHOS::Ace::NG

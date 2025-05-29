@@ -129,6 +129,7 @@ struct TextStyleResult {
     bool halfLeading = false;
     double letterSpacing = 0.0;
     double lineSpacing = 0.0;
+    bool optimizeTrailingSpace = false;
     std::optional<Dimension> paragraphSpacing;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;

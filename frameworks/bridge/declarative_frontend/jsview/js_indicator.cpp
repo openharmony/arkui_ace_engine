@@ -41,13 +41,6 @@ IndicatorModel* IndicatorModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
-namespace {
-JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
-{
-    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetIndex()));
-}
-
-} // namespace
 
 void JSIndicator::Create(const JSCallbackInfo& info)
 {
@@ -122,13 +115,21 @@ void JSIndicator::GetFontContent(const JSRef<JSVal>& font, bool isSelected, Swip
     CHECK_NULL_VOID(swiperIndicatorTheme);
     // set font size, unit FP
     CalcDimension fontSize;
-    if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFpNG(size, fontSize)) {
+    RefPtr<ResourceObject> resObj;
+    if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFpNG(size, fontSize, resObj)) {
         if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0) ||
             fontSize.Unit() == DimensionUnit::PERCENT) {
             fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
         }
     } else {
         fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (isSelected) {
+            digitalParameters.resourceSelectedFontSizeValueObject = resObj;
+        } else {
+            digitalParameters.resourceFontSizeValueObject = resObj;
+        }
     }
     if (isSelected) {
         digitalParameters.selectedFontSize = fontSize;
@@ -198,19 +199,29 @@ SwiperParameters JSIndicator::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimEnd = ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
 
     CalcDimension dimPosition;
-    bool parseItemWOk =
-        ParseJsDimensionVpNG(itemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
+    RefPtr<ResourceObject> resItemWidthObj;
+    RefPtr<ResourceObject> resItemHeightObj;
+    RefPtr<ResourceObject> resSelectedItemWidthObj;
+    RefPtr<ResourceObject> resSelectedItemHeightObj;
+    bool parseItemWOk = ParseJsDimensionVpNG(itemWidthValue, dimPosition, resItemWidthObj) &&
+        (dimPosition.Unit() != DimensionUnit::PERCENT);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     swiperParameters.itemWidth = parseItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    bool parseItemHOk =
-        ParseJsDimensionVpNG(itemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
+    bool parseItemHOk = ParseJsDimensionVpNG(itemHeightValue, dimPosition, resItemHeightObj) &&
+        (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.itemHeight = parseItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    bool parseSelectedItemWOk =
-        ParseJsDimensionVpNG(selectedItemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
+    bool parseSelectedItemWOk = ParseJsDimensionVpNG(selectedItemWidthValue, dimPosition, resSelectedItemWidthObj) &&
+        (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.selectedItemWidth = parseSelectedItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    bool parseSelectedItemHOk =
-        ParseJsDimensionVpNG(selectedItemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
+    bool parseSelectedItemHOk = ParseJsDimensionVpNG(selectedItemHeightValue, dimPosition, resSelectedItemHeightObj) &&
+        (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.selectedItemHeight = parseSelectedItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (SystemProperties::ConfigChangePerform()) {
+        swiperParameters.resourceItemWidthValueObject = resItemWidthObj;
+        swiperParameters.resourceItemHeightValueObject = resItemHeightObj;
+        swiperParameters.resourceSelectedItemWidthValueObject = resSelectedItemWidthObj;
+        swiperParameters.resourceSelectedItemHeightValueObject = resSelectedItemHeightObj;
+    }
     IndicatorModel::GetInstance()->SetIsIndicatorCustomSize(
         parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
     SetDotIndicatorInfo(obj, swiperParameters, swiperIndicatorTheme);
@@ -229,10 +240,16 @@ void JSIndicator::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParamete
         swiperParameters.maskValue = mask;
     }
     Color colorVal;
-    auto parseOk = ParseJsColor(colorValue, colorVal);
+    RefPtr<ResourceObject> resColorObj;
+    RefPtr<ResourceObject> resSelectedColorObj;
+    auto parseOk = ParseJsColor(colorValue, colorVal, resColorObj);
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
-    parseOk = ParseJsColor(selectedColorValue, colorVal);
+    parseOk = ParseJsColor(selectedColorValue, colorVal, resSelectedColorObj);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    if (SystemProperties::ConfigChangePerform()) {
+        swiperParameters.resourceColorValueObject = resColorObj;
+        swiperParameters.resourceSelectedColorValueObject = resSelectedColorObj;
+    }
     auto defalutSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     CalcDimension dimSpace;
     auto parseSpaceOk = ParseLengthMetricsToDimension(spaceValue, dimSpace) &&
@@ -266,12 +283,18 @@ SwiperDigitalParameters JSIndicator::GetDigitIndicatorInfo(const JSRef<JSObject>
     digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
     digitalParameters.dimBottom = ParseIndicatorDimension(dotBottomValue);
     Color fontColor;
-    auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);
+    RefPtr<ResourceObject> resFontColorObj;
+    RefPtr<ResourceObject> resSelectedFontColorObj;
+    auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor, resFontColorObj);
     digitalParameters.fontColor =
         parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
-    parseOk = JSViewAbstract::ParseJsColor(selectedFontColorValue, fontColor);
+    parseOk = JSViewAbstract::ParseJsColor(selectedFontColorValue, fontColor, resSelectedFontColorObj);
     digitalParameters.selectedFontColor =
         parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    if (SystemProperties::ConfigChangePerform()) {
+        digitalParameters.resourceFontColorValueObject = resFontColorObj;
+        digitalParameters.resourceSelectedFontColorValueObject = resSelectedFontColorObj;
+    }
     if (!digitFontValue->IsNull() && digitFontValue->IsObject()) {
         GetFontContent(digitFontValue, false, digitalParameters);
     }
@@ -308,28 +331,6 @@ void JSIndicator::SetStyle(const JSCallbackInfo& info)
         IndicatorModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
         IndicatorModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
     }
-}
-
-void JSIndicator::SetOnChange(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler), node = targetNode](
-                        const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-        if (!swiperInfo) {
-            return;
-        }
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(*swiperInfo);
-    };
-
-    IndicatorModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void JSIndicator::SetInitialIndex(const JSCallbackInfo& info)

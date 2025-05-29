@@ -96,4 +96,4 @@ globalThis.LinearIndicator.attributeModifier = function (modifier: ArkComponent)
 globalThis.LinearIndicator.onChange = function (value: OnLinearIndicatorChangeCallback): void {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().linearIndicator.setOnChange(nodePtr, value);
-}
+};

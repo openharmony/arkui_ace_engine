@@ -862,4 +862,33 @@ HWTEST_F(MenuItemTestNg, MenuItemPatternUpdatePasteDisabledOpacity001, TestSize.
     ASSERT_NE(renderContext, nullptr);
     EXPECT_EQ(renderContext->GetOpacityValue(1.0), 0.9f);
 }
+
+/**
+ * @tc.name: CreateNavigationMenuItemTest001
+ * @tc.desc: Test CreateMenuItem creates a FrameNode and sets properties correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateNavigationMenuItemTest001, TestSize.Level1)
+{
+    OptionParam optionParam;
+    optionParam.enabled = true;
+    optionParam.action = [] {};
+
+    MenuParam menuParam;
+    menuParam.title = "Menu Title";
+
+    auto menuItemNode = MenuItemModelNG::CreateMenuItem(std::move(optionParam), menuParam);
+    ASSERT_NE(menuItemNode, nullptr);
+
+    auto layoutProps = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
+
+    auto eventHub = menuItemNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_TRUE(eventHub->IsEnabled());
+
+    auto focusHub = menuItemNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_TRUE(focusHub->IsEnabled());
+}
 } // namespace OHOS::Ace::NG
