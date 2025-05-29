@@ -200,7 +200,7 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithStringOptions(const char* valu
     FfiOHOSAceFrameworkNavdestinationSetTitleWithString(value);
     NG::NavigationTitlebarOptions optionsNG;
     ParseTitlebarOptions(options, optionsNG);
-    NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG))
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithBuilderOptions(void (*builder)(), CJNavigationTitleOptions options)
@@ -208,7 +208,7 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithBuilderOptions(void (*builder)
     FfiOHOSAceFrameworkNavdestinationSetTitleWithBuilder(builder);
     NG::NavigationTitlebarOptions optionsNG;
     ParseTitlebarOptions(options, optionsNG);
-    NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG))
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitleOptions(
@@ -217,7 +217,7 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitleOptions(
     FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitle(main, sub);
     NG::NavigationTitlebarOptions optionsNG;
     ParseTitlebarOptions(options, optionsNG);
-    NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG))
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeightOptions(
@@ -226,7 +226,7 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeightOptions(
     FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeight(builder, titleHeightMode);
     NG::NavigationTitlebarOptions optionsNG;
     ParseTitlebarOptions(options, optionsNG);
-    NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG))
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithHeightOptions(
@@ -235,7 +235,7 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithHeightOptions(
     FfiOHOSAceFrameworkNavdestinationSetTitleWithHeight(builder, height, heightUnit);
     NG::NavigationTitlebarOptions optionsNG;
     ParseTitlebarOptions(options, optionsNG);
-    NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG))
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetHideTitleBar(bool value)
