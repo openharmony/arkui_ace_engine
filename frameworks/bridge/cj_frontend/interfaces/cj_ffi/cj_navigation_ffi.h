@@ -18,9 +18,9 @@
 
 #include <cstdint>
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 using VectorNavigationItemHandle = void*;
 using VectorInt32Ptr = void*;
