@@ -4299,8 +4299,6 @@ HWTEST_F(WebSelectOverlayTest, SetEditMenuOptions_001, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
     WebSelectOverlay overlay(webPattern);
     SelectOverlayInfo selectInfo;
     OnCreateMenuCallback onCreateMenuCallback = CreateMenuOptionsV2;
