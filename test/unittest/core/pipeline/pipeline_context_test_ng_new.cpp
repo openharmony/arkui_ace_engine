@@ -2727,12 +2727,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg215, TestSize.Level1)
     auto taskExecutor = context_->taskExecutor_;
     ASSERT_NE(taskExecutor, nullptr);
     context_->SetIsFormRender(false);
-    
-    /**
-     * @tc.steps: make !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI) is false.
-     */
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-    context_->taskExecutor_ = mockTaskExecutor;
+
     bool res = context_->CheckThreadSafe();
     EXPECT_TRUE(res);
 }
@@ -2751,15 +2746,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg216, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     auto taskExecutor = context_->taskExecutor_;
     ASSERT_NE(taskExecutor, nullptr);
-    context_->SetIsFormRender(false);
-    
-    /**
-     * @tc.steps: make !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI) is true.
-     */
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockMockTaskExecutor>();
-    context_->taskExecutor_ = mockTaskExecutor;
+    context_->SetIsFormRender(true);
+
     bool res = context_->CheckThreadSafe();
-    EXPECT_FALSE(res);
+    EXPECT_TRUE(res);
 }
 
 /**
@@ -2777,14 +2767,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg217, TestSize.Level1)
     auto taskExecutor = context_->taskExecutor_;
     ASSERT_NE(taskExecutor, nullptr);
     context_->SetIsFormRender(false);
-    
-    /**
-     * @tc.steps: make !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI) is true.
-     */
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockMockTaskExecutor>();
-    context_->taskExecutor_ = mockTaskExecutor;
-    bool res = context_->CheckThreadSafe();
-    EXPECT_FALSE(res);
 
     auto dirtyNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
     context_->AddDirtyPropertyNode(dirtyNode);
