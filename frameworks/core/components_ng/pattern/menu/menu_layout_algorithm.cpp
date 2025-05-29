@@ -280,6 +280,22 @@ RefPtr<NG::MenuTheme> GetMenuTheme(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     return pipelineContext->GetTheme<NG::MenuTheme>();
 }
+
+void PrepareExtensionMenuConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    if (pattern->IsSelectOverlayExtensionMenu() && props && props->HasMenuWidth() &&
+        props->GetMenuWidth()->ConvertToPx() < childConstraint.maxSize.Width()) {
+        auto minSizeWidth = childConstraint.minSize.Width();
+        minSizeWidth = fmax(static_cast<double>(minSizeWidth), props->GetMenuWidth()->ConvertToPx());
+        minSizeWidth = fmin(minSizeWidth, childConstraint.maxSize.Width());
+        childConstraint.minSize.SetWidth(minSizeWidth);
+    }
+}
 } // namespace
 
 MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag,
@@ -942,13 +958,14 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
             childConstraint.selfIdealSize.SetWidth(parentWidth);
         }
     }
+    PrepareExtensionMenuConstraint(layoutWrapper, childConstraint);
 
-    float idealHeight = 0.0f;
-    float idealWidth = 0.0f;
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(pattern);
+    float idealHeight = 0.0f;
+    float idealWidth = 0.0f;
     std::list<RefPtr<LayoutWrapper>> builderChildList;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (pattern->UseContentModifier()) {
@@ -2394,6 +2411,10 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
     }
     auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     optionConstraint.maxSize.MinusWidth(optionPadding_ * 2.0f);
+    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    if (menuPattern->IsSelectOverlayExtensionMenu() && props && props->HasMenuWidth()) {
+        minWidth = props->GetMenuWidth()->ConvertToPx();
+    }
     optionConstraint.minSize.SetWidth(minWidth - optionPadding_ * 2.0f);
     auto maxChildrenWidth = optionConstraint.minSize.Width();
     auto optionsLayoutWrapper = GetOptionsLayoutWrappper(layoutWrapper);

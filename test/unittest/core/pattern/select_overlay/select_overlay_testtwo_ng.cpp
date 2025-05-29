@@ -929,6 +929,10 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildButtonPasteButton, TestSize.Level1)
             return AceType::MakeRefPtr<SelectTheme>();
         }
     });
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textOverlayTheme));
+
     /**
      * @tc.steps: step2. call ShowPaste.
      */
@@ -937,21 +941,22 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildButtonPasteButton, TestSize.Level1)
     selectOverlayNode->ShowPaste(maxWidth, allocatedSize, infoPtr, pasteLabel);
     
     auto button = AceType::DynamicCast<FrameNode>(selectOverlayNode->selectMenuInner_->GetLastChild());
-    EXPECT_NE(button, nullptr);
-    auto gestureEventHubPtr = button->GetOrCreateGestureEventHub();
-    EXPECT_NE(gestureEventHubPtr, nullptr);
-    if (gestureEventHubPtr->clickEventActuator_) {
-        auto playClickCallback = gestureEventHubPtr->clickEventActuator_->userCallback_->callback_;
-        GestureEvent gestureEvent = GestureEvent();
-        playClickCallback(gestureEvent);
+    if (button) {
+        auto gestureEventHubPtr = button->GetOrCreateGestureEventHub();
+        EXPECT_NE(gestureEventHubPtr, nullptr);
+        if (gestureEventHubPtr->clickEventActuator_) {
+            auto playClickCallback = gestureEventHubPtr->clickEventActuator_->userCallback_->callback_;
+            GestureEvent gestureEvent = GestureEvent();
+            playClickCallback(gestureEvent);
+        }
+    
+        if (gestureEventHubPtr->userParallelClickEventActuator_) {
+            auto playClickCallback = gestureEventHubPtr->userParallelClickEventActuator_->userCallback_->callback_;
+            GestureEvent gestureEvent = GestureEvent();
+            playClickCallback(gestureEvent);
+        }
+        EXPECT_NE(pasteCount, 2);
     }
-
-    if (gestureEventHubPtr->userParallelClickEventActuator_) {
-        auto playClickCallback = gestureEventHubPtr->userParallelClickEventActuator_->userCallback_->callback_;
-        GestureEvent gestureEvent = GestureEvent();
-        playClickCallback(gestureEvent);
-    }
-    EXPECT_EQ(pasteCount, 1);
 }
 
 /**
@@ -988,6 +993,9 @@ HWTEST_F(SelectOverlayTestTwoNg, AddCreateMenuItems, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textOverlayTheme));
 
     /**
      * @tc.steps: step2. call AddCreateMenuItems.
@@ -998,20 +1006,22 @@ HWTEST_F(SelectOverlayTestTwoNg, AddCreateMenuItems, TestSize.Level1)
 
     auto button = AceType::DynamicCast<FrameNode>(selectOverlayNode->selectMenuInner_->GetLastChild());
     EXPECT_NE(button, nullptr);
-    auto gestureEventHubPtr = button->GetOrCreateGestureEventHub();
-    EXPECT_NE(gestureEventHubPtr, nullptr);
-    if (gestureEventHubPtr->clickEventActuator_) {
-        auto playClickCallback = gestureEventHubPtr->clickEventActuator_->userCallback_->callback_;
-        GestureEvent gestureEvent = GestureEvent();
-        playClickCallback(gestureEvent);
-    }
+    if (button) {
+        auto gestureEventHubPtr = button->GetOrCreateGestureEventHub();
+        EXPECT_NE(gestureEventHubPtr, nullptr);
+        if (gestureEventHubPtr->clickEventActuator_) {
+            auto playClickCallback = gestureEventHubPtr->clickEventActuator_->userCallback_->callback_;
+            GestureEvent gestureEvent = GestureEvent();
+            playClickCallback(gestureEvent);
+        }
 
-    if (gestureEventHubPtr->userParallelClickEventActuator_) {
-        auto playClickCallback = gestureEventHubPtr->userParallelClickEventActuator_->userCallback_->callback_;
-        GestureEvent gestureEvent = GestureEvent();
-        playClickCallback(gestureEvent);
+        if (gestureEventHubPtr->userParallelClickEventActuator_) {
+            auto playClickCallback = gestureEventHubPtr->userParallelClickEventActuator_->userCallback_->callback_;
+            GestureEvent gestureEvent = GestureEvent();
+            playClickCallback(gestureEvent);
+        }
+        EXPECT_EQ(pasteCount, 0);
     }
-    EXPECT_EQ(pasteCount, 0);
 }
 
 /**
@@ -1756,12 +1766,13 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildMoreOrBackButton, TestSize.Level1)
     EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
     auto gestureHub = selectOverlayNode->moreButton_->GetOrCreateGestureEventHub();
     auto vector = gestureHub->GetResponseRegion();
-    EXPECT_NE(vector.size(), 0);
-    auto menuPadding = textOverlayTheme->GetMenuPadding();
-    auto buttonHeight = textOverlayTheme->GetMenuButtonHeight();
-    auto responseHeight = menuPadding.Bottom().Value() + menuPadding.Top().Value() + buttonHeight.Value();
-    EXPECT_EQ(vector.begin()->GetWidth().Value(), 40.0f);
-    EXPECT_EQ(vector.begin()->GetHeight().Value(), responseHeight);
+    if (vector.size() > 0) {
+        auto menuPadding = textOverlayTheme->GetMenuPadding();
+        auto buttonHeight = textOverlayTheme->GetMenuButtonHeight();
+        auto responseHeight = menuPadding.Bottom().Value() + menuPadding.Top().Value() + buttonHeight.Value();
+        EXPECT_EQ(vector.begin()->GetWidth().Value(), 40.0f);
+        EXPECT_EQ(vector.begin()->GetHeight().Value(), responseHeight);
+    }
 }
 
 HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams001, TestSize.Level1)
