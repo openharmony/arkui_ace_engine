@@ -595,7 +595,7 @@ void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double densit
     if (iter == specifiedDensityListeners_.end()) {
         return;
     }
-    auto& holder = iter->second;
+    auto holder = iter->second;
     for (const auto& listener : holder) {
         listener->OnDensityChange(density);
     }
@@ -607,7 +607,7 @@ void UIObserver::HandDrawCommandSendChange()
     if (specifiedDrawListeners_.find(currentId) == specifiedDrawListeners_.end()) {
         return;
     }
-    auto& holder = specifiedDrawListeners_[currentId];
+    auto holder = specifiedDrawListeners_[currentId];
     for (const auto& listener : holder) {
         listener->OnDrawOrLayout();
     }
@@ -619,7 +619,7 @@ void UIObserver::HandLayoutDoneChange()
     if (specifiedLayoutListeners_.find(currentId) == specifiedLayoutListeners_.end()) {
         return;
     }
-    auto& holder = specifiedLayoutListeners_[currentId];
+    auto holder = specifiedLayoutListeners_[currentId];
     for (const auto& listener : holder) {
         listener->OnDrawOrLayout();
     }
