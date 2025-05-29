@@ -1605,8 +1605,10 @@ void SubwindowOhos::ClearToast()
 void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
-    SetIsToastWindow(
-        toastInfo.showMode == NG::ToastShowMode::TOP_MOST || toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+    SetIsToastWindow(toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
+                     toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST || parentContainer->IsSceneBoardWindow());
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     if (!aceContainer) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId : %{public}d", childContainerId_);
@@ -1633,8 +1635,6 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
         }
     }
     ContainerScope scope(childContainerId_);
-    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
     if (parentContainer->IsSceneBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ResizeWindow();
