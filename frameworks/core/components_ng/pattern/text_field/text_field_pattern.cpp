@@ -1104,7 +1104,8 @@ void TextFieldPattern::SetFocusStyle()
         }
     }
     auto defaultTextColor = textFieldTheme->GetTextColor();
-    if (layoutProperty->GetTextColorValue(defaultTextColor) == defaultTextColor) {
+    if (layoutProperty->GetTextColorValue(defaultTextColor) == defaultTextColor &&
+        !paintProperty->HasTextColorFlagByUser()) {
         layoutProperty->UpdateTextColor(textFieldTheme->GetFocusTextColor());
         isFocusTextColorSet_ = true;
     }

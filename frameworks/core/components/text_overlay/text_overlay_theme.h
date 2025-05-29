@@ -49,6 +49,17 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            ParseThemeConstants(themeConstants, theme);
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
+            ParseAIMenu(themeConstants->GetThemeStyle(), theme);
+            return theme;
+        }
+
+    protected:
+        void ParseThemeConstants(
+            const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextOverlayTheme>& theme) const
+        {
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
             theme->moreSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
@@ -63,13 +74,8 @@ public:
             theme->translateSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.translate_c2e");
             theme->aiMenuSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
             theme->shareSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.share");
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
-            ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
-            ParseAIMenu(themeConstants->GetThemeStyle(), theme);
-            return theme;
         }
 
-    private:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
         {
             if (!themeStyle || !theme) {
@@ -101,6 +107,7 @@ public:
                         pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_right", 0.0_vp).Value(),
                         pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_bottom", 0.0_vp).Value(),
                         pattern->GetAttr<Dimension>("text_overlay_menu_padding_left", 0.0_vp).Unit());
+                theme->menuButtonRadius_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_radius", 14.0_vp);
                 theme->iconColor_ = pattern->GetAttr<Color>("icon_color", Color());
                 theme->menuIconColor_ = pattern->GetAttr<Color>("memu_icon_color", Color());
                 theme->handleColor_ = pattern->GetAttr<Color>("handle_outer_color", Color());
@@ -109,8 +116,10 @@ public:
                 theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color());
                 theme->buttonClickedColor_ = pattern->GetAttr<Color>("button_bg_color_clicked", Color());
                 theme->moreOrBackIconColor_ = pattern->GetAttr<Color>("more_or_back_icon_color", Color());
-                theme->menuButtonTextStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
-                theme->menuButtonTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
+                theme->menuButtonTextStyle_.SetTextColor(
+                    pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+                theme->menuButtonTextStyle_.SetFontSize(
+                    pattern->GetAttr<Dimension>("text_overlay_text_font_size", 14.0_fp));
                 theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 14.0_vp);
                 theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 12.0_vp);
                 theme->alphaDisabled_ =
@@ -123,6 +132,7 @@ public:
                 LOGW("find pattern of textoverlay fail");
             }
         }
+
         void ParseMenuPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
         {
             CHECK_NULL_VOID(themeStyle && theme);
@@ -494,8 +504,16 @@ public:
         return aiMenuSymbolColor_;
     }
 
+    const Dimension& GetMenuButtonRadius() const
+    {
+        return menuButtonRadius_;
+    }
+
 protected:
     TextOverlayTheme() = default;
+    TextStyle menuButtonTextStyle_;
+    Color buttonClickedColor_;
+    Color buttonHoverColor_;
 
 private:
     Border menuBorder_;
@@ -504,8 +522,6 @@ private:
     Color menuBackgroundColor_;
     Color handleColor_;
     Color handleColorInner_;
-    Color buttonClickedColor_;
-    Color buttonHoverColor_;
     Color moreOrBackIconColor_;
     Edge menuPadding_;
     Edge menuButtonPadding_;
@@ -515,7 +531,6 @@ private:
     Dimension menuSafeSpacing_;
     Dimension menuButtonWidth_;
     Dimension menuButtonHeight_;
-    TextStyle menuButtonTextStyle_;
     double alphaDisabled_ = 0.0;
     std::string cameraInput_;
     std::string aiWrite_;
@@ -557,6 +572,7 @@ private:
     std::vector<Color> aiMenuFontGradientColors_;
     std::vector<float> aiMenuFontGradientScalars_;
     Color aiMenuSymbolColor_;
+    Dimension menuButtonRadius_;
 };
 
 } // namespace OHOS::Ace

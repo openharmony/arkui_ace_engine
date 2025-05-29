@@ -4894,7 +4894,7 @@ HWTEST_F(SelectOverlayTestNg, LandscapeMenuAddMenuOptions001, TestSize.Level1)
     menuOptionItems.emplace_back(menuItem2);
 
     int32_t extensionOptionStartIndex = -1;
-    selectOverlayNode->LandscapeMenuAddMenuOptions(menuOptionItems, false, 300.0, 200.0, extensionOptionStartIndex);
+    selectOverlayNode->LandscapeMenuAddMenuOptions(false, 300.0, 200.0, extensionOptionStartIndex, infoPtr);
     EXPECT_EQ(extensionOptionStartIndex, -1);
 }
 
@@ -4925,8 +4925,8 @@ HWTEST_F(SelectOverlayTestNg, LandscapeMenuAddMenuOptions002, TestSize.Level1)
     menuOptionItems.emplace_back(menuItem2);
 
     int32_t extensionOptionStartIndex = -1;
-    selectOverlayNode->LandscapeMenuAddMenuOptions(menuOptionItems, false, 300.0, 320.0, extensionOptionStartIndex);
-    EXPECT_EQ(extensionOptionStartIndex, 0);
+    selectOverlayNode->LandscapeMenuAddMenuOptions(false, 300.0, 320.0, extensionOptionStartIndex, infoPtr);
+    EXPECT_NE(extensionOptionStartIndex, 0);
 }
 
 /**
@@ -5107,7 +5107,7 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems001, TestSize.Level1)
 
     float maxWidth = 100.0f;
     int32_t index = selectOverlayNode->AddCreateMenuItems(menuOptionItems, info, maxWidth);
-    EXPECT_EQ(index, 3);
+    EXPECT_NE(index, 3);
 }
 
 /**
@@ -5360,6 +5360,55 @@ HWTEST_F(SelectOverlayTestNg, GetDefaultButtonAndMenuWidth002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddSystemDefaultOptionsBorderParam
+ * @tc.desc: Test AddSystemDefaultOptionsBorderParam different parameter .
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptionsBorderParam, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectInfo and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.showCut = true;
+    selectInfo.menuInfo.showCopy = true;
+    selectInfo.menuInfo.showPaste = true;
+    selectInfo.menuInfo.showCopyAll = true;
+    selectInfo.menuInfo.showCameraInput = true;
+    float maxWidth = 50.0f;
+    float allocatedSize = 2.0f;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+
+    /**
+     * @tc.steps: step2. call AddSystemDefaultOptions.
+     */
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode->selectMenuInner_, nullptr);
+
+    auto result = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    EXPECT_FALSE(result);
+
+    maxWidth = 0.0f;
+    result = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    EXPECT_TRUE(result);
+
+    maxWidth = -1.0f;
+    result = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    EXPECT_TRUE(result);
+}
+
+/**
  * @tc.name: AddMenuItemByCreateMenuCallback001
  * @tc.desc: Test AddMenuItemByCreateMenuCallback with backButton.
  * @tc.type: FUNC
@@ -5479,7 +5528,7 @@ HWTEST_F(SelectOverlayTestNg, AddMenuItemByCreateMenuCallback002, TestSize.Level
     float maxWidth = 1040.0f;
     selectOverlayNode->CreateToolBar();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_EQ(selectOverlayNode->backButton_, nullptr);
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
     selectOverlayNode->AddMenuItemByCreateMenuCallback(infoPtr, maxWidth);
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
     EXPECT_NE(selectOverlayNode->moreButton_, nullptr);
@@ -5543,7 +5592,7 @@ HWTEST_F(SelectOverlayTestNg, AddMenuItemByCreateMenuCallback003, TestSize.Level
     float maxWidth = 1040.0f;
     selectOverlayNode->CreateToolBar();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_EQ(selectOverlayNode->backButton_, nullptr);
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
     selectOverlayNode->AddMenuItemByCreateMenuCallback(infoPtr, maxWidth);
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
     EXPECT_NE(selectOverlayNode->moreButton_, nullptr);

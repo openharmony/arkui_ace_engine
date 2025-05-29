@@ -119,8 +119,8 @@ private:
     int32_t AddCreateMenuItems(const std::vector<NG::MenuOptionsParam>& menuItems,
         const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
-    void LandscapeMenuAddMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, bool isDefaultOverMaxWidth,
-        float maxWidth, float allocatedSize, int32_t& extensionOptionStartIndex);
+    void LandscapeMenuAddMenuOptions(bool isDefaultOverMaxWidth, float maxWidth, float allocatedSize,
+        int32_t& extensionOptionStartIndex, const std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCut(
         float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
     void ShowCopy(
