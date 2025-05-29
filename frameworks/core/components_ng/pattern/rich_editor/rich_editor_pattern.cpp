@@ -8494,39 +8494,40 @@ void RichEditorPattern::HandleOnPaste()
     };
     clipboard_->GetData(pasteCallback);
 #else
-    auto isSpanStringMode = isSpanStringMode_;
-    auto pasteCallback = [weak = WeakClaim(this), isSpanStringMode](std::vector<std::vector<uint8_t>>& arrs,
-                             const std::string& text, bool& isMulitiTypeRecord) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-            "pasteCallback callback, isMulitiTypeRecord : [%{public}d], isSpanStringMode : [%{public}d]",
-            isMulitiTypeRecord, isSpanStringMode);
-        auto richEditor = weak.Upgrade();
-        CHECK_NULL_VOID(richEditor);
-        richEditor->ProcessSpanStringData(arrs, text, isMulitiTypeRecord);
-    };
-    clipboard_->GetSpanStringData(pasteCallback);
+    clipboard_->GetSpanStringData(CreatePasteCallback());
 #endif
 }
 
-void RichEditorPattern::ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arrs, const std::string& text,
-    bool isMulitiTypeRecord)
+std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>
+    RichEditorPattern::CreatePasteCallback()
 {
-    std::list<RefPtr<SpanString>> spanStrings;
-    bool isFromStyledString = false;
-    for (auto&& arr : arrs) {
-        auto spanString = SpanString::DecodeTlv(arr);
-        IF_TRUE(spanString->isFromStyledStringMode, isFromStyledString = true);
-        spanStrings.push_back(spanString);
-    }
-    if (!spanStrings.empty() && isFromStyledString) {
-        CloseSelectOverlay();
-        for (auto&& spanString : spanStrings) {
-            AddSpanByPasteData(spanString);
-            RequestKeyboardToEdit();
+    auto isSpanStringMode = isSpanStringMode_;
+    auto pasteCallback = [weak = WeakClaim(this), isSpanStringMode](std::vector<std::vector<uint8_t>>& arrs,
+                             const std::string& text, bool& isMulitiTypeRecord) {
+        auto richEditor = weak.Upgrade();
+        CHECK_NULL_VOID(richEditor);
+        std::list<RefPtr<SpanString>> spanStrings;
+        bool isFromStyledString = false;
+        for (auto&& arr : arrs) {
+            auto spanString = SpanString::DecodeTlv(arr);
+            IF_TRUE(spanString->isFromStyledStringMode, isFromStyledString = true);
+            spanStrings.push_back(spanString);
         }
-        return;
-    }
-    PasteStr(text);
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+            "pasteCallback callback, isMulitiTypeRecord : [%{public}d], isSpanStringMode : [%{public}d], "
+            "isFromStyledString : [%{public}d]",
+            isMulitiTypeRecord, isSpanStringMode, isFromStyledString);
+        if (spanStrings.empty() || (!isSpanStringMode && !isFromStyledString)) {
+            richEditor->PasteStr(text);
+            return;
+        }
+        richEditor->CloseSelectOverlay();
+        for (auto&& spanString : spanStrings) {
+            richEditor->AddSpanByPasteData(spanString);
+            richEditor->RequestKeyboardToEdit();
+        }
+    };
+    return pasteCallback;
 }
 
 void RichEditorPattern::PasteStr(const std::string& text)

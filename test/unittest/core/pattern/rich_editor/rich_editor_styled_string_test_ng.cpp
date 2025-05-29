@@ -1236,29 +1236,6 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Le
 }
 
 /**
- * @tc.name: HandleOnPaste001
- * @tc.desc: test HandleOnPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyledStringTestNg, HandleOnPaste001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto styledString = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
-    richEditorPattern->SetStyledString(styledString);
-    richEditorPattern->textSelector_.Update(0, 1);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    std::vector<uint8_t> tlvData;
-    styledString->EncodeTlv(tlvData);
-    std::vector<std::vector<uint8_t>> tlvDatas = { tlvData };
-    richEditorPattern->ProcessSpanStringData(tlvDatas, styledString->GetString(), false);
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-}
-
-/**
  * @tc.name: InsertValueInStyledString002
  * @tc.desc: test InsertValueInStyledString
  * @tc.type: FUNC
@@ -1303,4 +1280,41 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString003, TestSize.Le
     ASSERT_EQ(richEditorPattern->HasFocus(), true);
 }
 
+/**
+ * @tc.name: CreatePasteCallback001
+ * @tc.desc: test CreatePasteCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, CreatePasteCallback001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    richEditorPattern->clipboard_ = clipboard;
+    /**
+     * @tc.steps: step1. CreatePasteCallback
+     */
+    auto pasteCallback = richEditorPattern->CreatePasteCallback();
+    /**
+     * @tc.steps: step2. value from clipBoard
+     */
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
+    auto mutableImageStr = CreateImageStyledString();
+    std::vector<uint8_t> data1;
+    std::vector<uint8_t> data2;
+    mutableTextStr->EncodeTlv(data1);
+    mutableImageStr->EncodeTlv(data2);
+    std::vector<std::vector<uint8_t>> arrs = { std::move(data1), std::move(data2) };
+    string text = UtfUtils::Str16ToStr8(INIT_U16STRING_1);
+    bool isMulitiTypeRecord = true;
+    /**
+     * @tc.steps: step3. test spanStringMode
+     */
+    richEditorPattern->spans_.clear();
+    richEditorPattern->isSpanStringMode_ = true;
+    pasteCallback(arrs, text, isMulitiTypeRecord);
+    EXPECT_EQ(2, richEditorPattern->spans_.size());
+}
 } // namespace OHOS::Ace::NG

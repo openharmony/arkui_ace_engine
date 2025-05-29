@@ -24,6 +24,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "test/unittest/core/pattern/rich_editor/rich_editor_styled_string_common_test_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
