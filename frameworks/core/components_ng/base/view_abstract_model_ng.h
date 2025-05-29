@@ -802,6 +802,11 @@ public:
         ViewAbstract::SetRotate(NG::Vector5F(x, y, z, angle, perspective));
     }
 
+    void SetRotateAngle(float x, float y, float z, float perspective) override
+    {
+        ViewAbstract::SetRotateAngle(NG::Vector4F(x, y, z, perspective));
+    }
+
     void SetTransformMatrix(const std::vector<float>& matrix) override
     {
         NG::ViewAbstract::SetTransformMatrix(

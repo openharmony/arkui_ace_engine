@@ -353,6 +353,7 @@ public:
     static void SetPivot(const DimensionOffset &value);
     static void SetTranslate(const NG::TranslateOptions &value);
     static void SetRotate(const NG::Vector5F &value);
+    static void SetRotateAngle(const NG::Vector4F &value);
 
     static void SetTransformMatrix(const Matrix4 &matrix);
     static void SetTransform3DMatrix(const Matrix4 &matrix);
@@ -697,6 +698,7 @@ public:
     static const std::string GetGeometryTransition(FrameNode* frameNode,
         bool* followWithoutTransition, bool* doRegisterSharedTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
+    static void SetRotateAngle(FrameNode* frameNode, const NG::Vector4F& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option);
@@ -917,6 +919,7 @@ public:
     static Alignment GetAlign(FrameNode* frameNode);
     static NG::VectorF GetScale(FrameNode* frameNode);
     static NG::Vector5F GetRotate(FrameNode* frameNode);
+    static NG::Vector4F GetRotateAngle(FrameNode* frameNode);
     static Dimension GetBrightness(FrameNode* frameNode);
     static Dimension GetSaturate(FrameNode* frameNode);
     static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);

@@ -226,6 +226,7 @@ public:
     virtual void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) = 0;
+    virtual void SetRotateAngle(float x, float y, float z, float perspective = 0.0f) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
     virtual void SetTransform3DMatrix(const std::vector<float>& matrix) = 0;
 
