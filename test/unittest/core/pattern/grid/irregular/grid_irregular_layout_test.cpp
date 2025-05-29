@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1028,6 +1028,50 @@ void CheckAlignEnd(const RefPtr<GridIrregularLayoutAlgorithm>& algorithm, GridLa
  * @tc.type: FUNC
  */
 HWTEST_F(GridIrregularLayoutTest, PrepareLineHeights001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedItems(15);
+    CreateDone();
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    algorithm->wrapper_ = AceType::RawPtr(frameNode_);
+    algorithm->crossLens_ = { 1.0f, 1.0f, 1.0f };
+    auto& info = algorithm->info_;
+    // because measuring children might not generate proper heights in test, we set them manually.
+    decltype(info.lineHeightMap_) cmpH = { { 0, 200.0f }, { 1, 200.0f }, { 2, 200.0f }, { 3, 200.0f }, { 4, 200.0f } };
+    info.lineHeightMap_ = cmpH;
+    decltype(info.gridMatrix_) cmp = {
+        { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 } } },
+        { 1, { { 0, 3 }, { 1, 4 }, { 2, 5 } } },
+        { 2, { { 0, 6 }, { 1, 7 }, { 2, 8 } } },
+        { 3, { { 0, 9 }, { 1, 10 }, { 2, 11 } } },
+        { 4, { { 0, 12 }, { 1, 13 }, { 2, 14 } } },
+    };
+    info.gridMatrix_ = cmp;
+
+    info.crossCount_ = 3;
+    info.childrenCount_ = 15;
+
+    info.scrollAlign_ = ScrollAlign::START;
+    algorithm->overscrollOffsetBeforeJump_ = 300.0f;
+    auto idx = 4;
+    algorithm->PrepareLineHeight(300.0f, idx);
+    // can align start with idx 4 when overscroll
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 4);
+
+    EXPECT_EQ(cmp, info.gridMatrix_);
+    EXPECT_EQ(cmpH, info.lineHeightMap_);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::PrepareLineHeights002
+ * @tc.desc: Test GridIrregularLayout::PrepareLineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, PrepareLineHeights002, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
