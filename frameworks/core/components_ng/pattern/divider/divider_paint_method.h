@@ -70,6 +70,7 @@ public:
             }
             RectF boundsRect(offset_.GetX(), offset_.GetY(), boundsRectWidth, boundsRectHeight);
             dividerModifier_->SetBoundsRect(boundsRect);
+            paintWrapper->FlushContentModifier();
         }
         dividerModifier_->SetStrokeWidth(constrainStrokeWidth_);
         dividerModifier_->SetDividerLength(dividerLength_);
