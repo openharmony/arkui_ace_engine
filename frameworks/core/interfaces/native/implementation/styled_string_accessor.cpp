@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
@@ -161,8 +162,10 @@ Ark_StyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* val
                 auto options = peerImageAttachment->span->GetImageSpanOptions();
                 peer->spanString = AceType::MakeRefPtr<SpanString>(options);
             },
-            [](const Ark_CustomSpan& arkCustomSpan) {
-                LOGE("StyledStringAccessor::CtorImpl unsupported Ark_CustomSpan");
+            [&peer](const Ark_CustomSpan& arkCustomSpan) {
+                CustomSpanPeer* peerCustomSpan = arkCustomSpan;
+                CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(peerCustomSpan->span);
             },
             []() {}
         );
