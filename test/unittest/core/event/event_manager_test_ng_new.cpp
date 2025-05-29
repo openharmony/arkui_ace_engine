@@ -1829,18 +1829,99 @@ HWTEST_F(EventManagerTestNg, EventManagerTest089, TestSize.Level1)
 
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::NONE, MouseButton::NONE_BUTTON, false },
+        { MouseAction::NONE, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::NONE, MouseButton::RIGHT_BUTTON, false },
+        { MouseAction::NONE, MouseButton::MIDDLE_BUTTON, false },
+        { MouseAction::NONE, MouseButton::BACK_BUTTON, false },
+        { MouseAction::NONE, MouseButton::FORWARD_BUTTON, false },
+        { MouseAction::NONE, MouseButton::SIDE_BUTTON, false },
+        { MouseAction::NONE, MouseButton::EXTRA_BUTTON, false },
+        { MouseAction::NONE, MouseButton::TASK_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::NONE_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::PRESS, MouseButton::RIGHT_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::MIDDLE_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::BACK_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::FORWARD_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::SIDE_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::EXTRA_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::TASK_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::NONE_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::RELEASE, MouseButton::RIGHT_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::MIDDLE_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::BACK_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::FORWARD_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::SIDE_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::EXTRA_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::TASK_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::NONE_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::RIGHT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::MIDDLE_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::BACK_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::FORWARD_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::SIDE_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::EXTRA_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::TASK_BUTTON, false },
+        { MouseAction::WINDOW_ENTER, MouseButton::NONE_BUTTON, false },
+        { MouseAction::WINDOW_ENTER, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::WINDOW_ENTER, MouseButton::RIGHT_BUTTON, false },
+        { MouseAction::WINDOW_ENTER, MouseButton::MIDDLE_BUTTON, false },
+        { MouseAction::WINDOW_ENTER, MouseButton::BACK_BUTTON, false },
+        { MouseAction::WINDOW_ENTER, MouseButton::FORWARD_BUTTON, false },
+        { MouseAction::WINDOW_ENTER, MouseButton::SIDE_BUTTON, false },
+        { MouseAction::WINDOW_ENTER, MouseButton::EXTRA_BUTTON, false },
+        { MouseAction::WINDOW_ENTER, MouseButton::TASK_BUTTON, false },
+        { MouseAction::WINDOW_LEAVE, MouseButton::NONE_BUTTON, false },
+        { MouseAction::WINDOW_LEAVE, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::WINDOW_LEAVE, MouseButton::RIGHT_BUTTON, false },
+        { MouseAction::WINDOW_LEAVE, MouseButton::MIDDLE_BUTTON, false },
+        { MouseAction::WINDOW_LEAVE, MouseButton::BACK_BUTTON, false },
+        { MouseAction::WINDOW_LEAVE, MouseButton::FORWARD_BUTTON, false },
+        { MouseAction::WINDOW_LEAVE, MouseButton::SIDE_BUTTON, false },
+        { MouseAction::WINDOW_LEAVE, MouseButton::EXTRA_BUTTON, false },
+        { MouseAction::WINDOW_LEAVE, MouseButton::TASK_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::NONE_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::CANCEL, MouseButton::RIGHT_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::MIDDLE_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::BACK_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::FORWARD_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::SIDE_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::EXTRA_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::TASK_BUTTON, false },
+    };
 
-    MouseEvent event;
-    event.action = MouseAction::PRESS;
-    event.button = MouseButton::RIGHT_BUTTON;
-    TouchRestrict touchRestrict;
-    eventManager->MouseTest(event, pageNode, touchRestrict);
-    EXPECT_FALSE(touchRestrict.touchEvent.isMouseTouchTest);
-    event.button = MouseButton::LEFT_BUTTON;
-    eventManager->MouseTest(event, pageNode, touchRestrict);
-    EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
+    /**
+     * @tc.steps: step3. Inject mouseEvent
+     * @tc.expected: pressMouseTestResults stop propagation no work for DispatchMouseEventNG result
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+        TouchRestrict touchRestrict;
+        eventManager->MouseTest(event, pageNode, touchRestrict);
+        EXPECT_EQ(touchRestrict.touchEvent.isMouseTouchTest, mockMouseEvent.expectedResult);
+    }
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    /**
+     * @tc.steps: step3. Inject mouseEvent
+     * @tc.expected: pressMouseTestResults stop propagation no work for DispatchMouseEventNG result
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+        TouchRestrict touchRestrict;
+        eventManager->MouseTest(event, pageNode, touchRestrict);
+        EXPECT_EQ(touchRestrict.touchEvent.isMouseTouchTest, mockMouseEvent.expectedResult);
+    }
 }
+
 
 #ifdef SUPPORT_DIGITAL_CROWN
 /**

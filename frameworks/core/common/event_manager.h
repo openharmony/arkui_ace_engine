@@ -405,6 +405,9 @@ private:
     void CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
+    void LogAndForceCleanReferee(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+        float viewScale = 1.0f, bool needAppend = false);
     bool DispatchMultiContainerEvent(const TouchEvent& point);
     void DispatchTouchEventAndCheck(const TouchEvent& event, bool sendOnTouch = true);
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);

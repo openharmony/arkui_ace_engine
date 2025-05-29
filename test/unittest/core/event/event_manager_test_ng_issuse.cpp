@@ -68,11 +68,6 @@ public:
         EventManagerTestNg::TearDownTestSuite();
     }
 };
-struct MockMouseEvent {
-    MouseAction action;
-    MouseButton button;
-    bool expectedResult;
-};
 
 class APIVersionGuard final {
 public:
