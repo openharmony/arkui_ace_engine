@@ -603,6 +603,293 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetBackgroundEffectTest001
+ * @tc.desc: Branch: if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) = true
+ *           effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, SetBackgroundEffectTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toolbarNode and init relative params
+     */
+    ToolBarTestNg::SetUpTestSuite();
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create Navigation background options with effectOption.
+     */
+    NavigationToolbarOptions opt;
+    NavigationBackgroundOptions bgOpt;
+    bgOpt.color = FRONT_COLOR;
+    EffectOption effectOption;
+    effectOption.color = Color::RED;
+    effectOption.adaptiveColor = AdaptiveColor::AVERAGE;
+    effectOption.saturation = 0.5f;
+    effectOption.brightness = 0.5f;
+    effectOption.blurType = BlurType::BEHIND_WINDOW;
+    // set policy as FOLLOWS_WINDOW_ACTIVE_STATE
+    effectOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    effectOption.inactiveColor = Color::BLUE;
+    effectOption.isValidColor = true;
+    effectOption.isWindowFocused = false;
+    bgOpt.effectOption = effectOption;
+    opt.bgOptions = bgOpt;
+    toolbarPattern->SetToolbarOptions(opt);
+
+    /**
+     * @tc.steps: step3. call onModifyDone and update relative param.
+     * @tc.expected: options_ effectOptions is set correct
+     */
+    toolbarPattern->OnModifyDone();
+    auto toolbarEffect = toolbarPattern->options_.bgOptions.effectOption;
+    ASSERT_EQ(toolbarEffect.has_value(), true);
+    auto effectValue = toolbarEffect.value();
+    EXPECT_EQ(effectValue.color, Color::RED);
+    EXPECT_EQ(effectValue.adaptiveColor, AdaptiveColor::AVERAGE);
+    EXPECT_EQ(effectValue.saturation, 0.5f);
+    EXPECT_EQ(effectValue.brightness, 0.5f);
+    EXPECT_EQ(effectValue.blurType, BlurType::BEHIND_WINDOW);
+    EXPECT_EQ(effectValue.policy, BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    EXPECT_EQ(effectValue.inactiveColor, Color::BLUE);
+    EXPECT_EQ(effectValue.isValidColor, true);
+    EXPECT_EQ(effectValue.isWindowFocused, false);
+}
+
+/**
+ * @tc.name: SetBackgroundEffectTest002
+ * @tc.desc: Branch: if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) = false
+ *           effectOption.policy != BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, SetBackgroundEffectTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toolbarNode and init relative params
+     */
+    ToolBarTestNg::SetUpTestSuite();
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create Navigation background options with effectOption.
+     */
+    NavigationToolbarOptions opt;
+    NavigationBackgroundOptions bgOpt;
+    bgOpt.color = FRONT_COLOR;
+    EffectOption effectOption;
+    effectOption.color = Color::RED;
+    effectOption.adaptiveColor = AdaptiveColor::AVERAGE;
+    effectOption.saturation = 0.5f;
+    effectOption.brightness = 0.5f;
+    effectOption.blurType = BlurType::BEHIND_WINDOW;
+    // set policy as ALWAYS_ACTIVE
+    effectOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
+    effectOption.inactiveColor = Color::BLUE;
+    effectOption.isValidColor = true;
+    effectOption.isWindowFocused = false;
+    bgOpt.effectOption = effectOption;
+    opt.bgOptions = bgOpt;
+    toolbarPattern->SetToolbarOptions(opt);
+
+    /**
+     * @tc.steps: step3. call onModifyDone and update relative param.
+     * @tc.expected: options_ effectOptions is set correct
+     */
+    toolbarPattern->OnModifyDone();
+    auto toolbarEffect = toolbarPattern->options_.bgOptions.effectOption;
+    ASSERT_EQ(toolbarEffect.has_value(), true);
+    auto effectValue = toolbarEffect.value();
+    EXPECT_EQ(effectValue.color, Color::RED);
+    EXPECT_EQ(effectValue.adaptiveColor, AdaptiveColor::AVERAGE);
+    EXPECT_EQ(effectValue.saturation, 0.5f);
+    EXPECT_EQ(effectValue.brightness, 0.5f);
+    EXPECT_EQ(effectValue.blurType, BlurType::BEHIND_WINDOW);
+    EXPECT_EQ(effectValue.policy, BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    EXPECT_EQ(effectValue.inactiveColor, Color::BLUE);
+    EXPECT_EQ(effectValue.isValidColor, true);
+    EXPECT_EQ(effectValue.isWindowFocused, false);
+}
+
+/**
+ * @tc.name: SetBackgroundEffectTest003
+ * @tc.desc: Branch: if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) = false
+ *           effectOption.policy != BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, SetBackgroundEffectTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toolbarNode and init relative params
+     */
+    ToolBarTestNg::SetUpTestSuite();
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create Navigation background options with effectOption.
+     */
+    NavigationToolbarOptions opt;
+    NavigationBackgroundOptions bgOpt;
+    bgOpt.color = FRONT_COLOR;
+    EffectOption effectOption;
+    effectOption.color = Color::RED;
+    effectOption.adaptiveColor = AdaptiveColor::AVERAGE;
+    effectOption.saturation = 0.5f;
+    effectOption.brightness = 0.5f;
+    effectOption.blurType = BlurType::BEHIND_WINDOW;
+    // set policy as ALWAYS_INACTIVE
+    effectOption.policy = BlurStyleActivePolicy::ALWAYS_INACTIVE;
+    effectOption.inactiveColor = Color::BLUE;
+    effectOption.isValidColor = true;
+    effectOption.isWindowFocused = false;
+    bgOpt.effectOption = effectOption;
+    opt.bgOptions = bgOpt;
+    toolbarPattern->SetToolbarOptions(opt);
+
+    /**
+     * @tc.steps: step3. call onModifyDone and update relative param.
+     * @tc.expected: options_ effectOptions is set correct
+     */
+    toolbarPattern->OnModifyDone();
+    auto toolbarEffect = toolbarPattern->options_.bgOptions.effectOption;
+    ASSERT_EQ(toolbarEffect.has_value(), true);
+    auto effectValue = toolbarEffect.value();
+    EXPECT_EQ(effectValue.color, Color::RED);
+    EXPECT_EQ(effectValue.adaptiveColor, AdaptiveColor::AVERAGE);
+    EXPECT_EQ(effectValue.saturation, 0.5f);
+    EXPECT_EQ(effectValue.brightness, 0.5f);
+    EXPECT_EQ(effectValue.blurType, BlurType::BEHIND_WINDOW);
+    EXPECT_EQ(effectValue.policy, BlurStyleActivePolicy::ALWAYS_INACTIVE);
+    EXPECT_EQ(effectValue.inactiveColor, Color::BLUE);
+    EXPECT_EQ(effectValue.isValidColor, true);
+    EXPECT_EQ(effectValue.isWindowFocused, false);
+}
+
+/**
+ * @tc.name: SetBackgroundEffectTest004
+ * @tc.desc: Branch: if (renderContext->GetBackBlurStyle().has_value()) = true
+ *           renderContext->GetBackBlurStyle().has_value() = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, SetBackgroundEffectTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toolbarNode and init relative params
+     */
+    ToolBarTestNg::SetUpTestSuite();
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create Navigation background options with effectOption.
+     */
+    NavigationToolbarOptions opt;
+    NavigationBackgroundOptions bgOpt;
+    bgOpt.color = FRONT_COLOR;
+    EffectOption effectOption;
+    effectOption.color = Color::RED;
+    bgOpt.effectOption = effectOption;
+    opt.bgOptions = bgOpt;
+    toolbarPattern->SetToolbarOptions(opt);
+
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    auto renderContext = toolbarNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackBlurStyle(blurStyleOption);
+
+    /**
+     * @tc.steps: step3. call onModifyDone and update relative param.
+     * @tc.expected: options_ effectOptions is set correct
+     */
+    toolbarPattern->OnModifyDone();
+    auto toolbarEffect = toolbarPattern->options_.bgOptions.effectOption;
+    ASSERT_EQ(toolbarEffect.has_value(), true);
+    auto effectValue = toolbarEffect.value();
+    EXPECT_EQ(effectValue.color, Color::RED);
+    auto contextBlurStyle = renderContext->GetBackBlurStyle();
+    EXPECT_EQ(contextBlurStyle.has_value(), true);
+}
+
+/**
+ * @tc.name: SetBackgroundEffectTest005
+ * @tc.desc: Branch: if (renderContext->GetBackBlurRadius().has_value()) = true
+ *           renderContext->GetBackBlurRadius().has_value() = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, SetBackgroundEffectTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toolbarNode and init relative params
+     */
+    ToolBarTestNg::SetUpTestSuite();
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create Navigation background options with effectOption.
+     */
+    NavigationToolbarOptions opt;
+    NavigationBackgroundOptions bgOpt;
+    bgOpt.color = FRONT_COLOR;
+    EffectOption effectOption;
+    effectOption.color = Color::RED;
+    bgOpt.effectOption = effectOption;
+    opt.bgOptions = bgOpt;
+    toolbarPattern->SetToolbarOptions(opt);
+
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    auto renderContext = toolbarNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackBlurRadius(Dimension(1.0, DimensionUnit::PERCENT));
+
+    /**
+     * @tc.steps: step3. call onModifyDone and update relative param.
+     * @tc.expected: options_ effectOptions is set correct
+     */
+    toolbarPattern->OnModifyDone();
+    auto toolbarEffect = toolbarPattern->options_.bgOptions.effectOption;
+    ASSERT_EQ(toolbarEffect.has_value(), true);
+    auto effectValue = toolbarEffect.value();
+    EXPECT_EQ(effectValue.color, Color::RED);
+    auto contextBlurRadius = renderContext->GetBackBlurRadius();
+    EXPECT_EQ(contextBlurRadius.has_value(), false);
+}
+
+/**
  * @tc.name: HandleTitleBarAndToolBarAnimation001
  * @tc.desc: Test HandleTitleBarAndToolBarAnimation function.
  * @tc.type: FUNC
