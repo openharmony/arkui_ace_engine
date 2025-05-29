@@ -1901,7 +1901,6 @@ void RichEditorPattern::CopyTextSpanLineStyle(
     COPY_SPAN_STYLE_IF_PRESENT(source, target, WordBreak);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LineBreakStrategy);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, ParagraphSpacing);
-    needLeadingMargin |= previewTextRecord_.previewTextHasStarted;
     if (source->HasLeadingMargin()) {
         auto leadingMargin = source->GetLeadingMarginValue({});
         if (!needLeadingMargin) {
