@@ -551,7 +551,7 @@ void FfiOHOSAceFrameworkNavigationSetIgnoreLayoutSafeArea(VectorInt32Ptr types, 
                 safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
                 break;
             }
-            if (value == SAFE_AREA_EDGE_TOP || SAFE_AREA_EDGE_BOTTOM) {
+            if (value == SAFE_AREA_EDGE_TOP || value == SAFE_AREA_EDGE_BOTTOM) {
                 safeAreaEdge |= (1 << (uint32_t)value);
             }
         }
