@@ -6402,6 +6402,9 @@ void FrameNode::BuildLayoutInfo(std::unique_ptr<JsonValue>& json)
     if (layoutProperty_->GetLayoutRect()) {
         json->Put("LayoutRect", layoutProperty_->GetLayoutRect().value().ToString().c_str());
     }
+    if (static_cast<int32_t>(GetSuggestOpIncMarked()) != 0) {
+        json->Put("SuggestOpIncMarked", static_cast<int32_t>(GetSuggestOpIncMarked()));
+    }
 }
 
 void FrameNode::DumpCommonInfo(std::unique_ptr<JsonValue>& json)
