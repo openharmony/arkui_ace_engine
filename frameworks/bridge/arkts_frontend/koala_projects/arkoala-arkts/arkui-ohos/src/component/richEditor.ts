@@ -40,7 +40,7 @@ import { TextBackgroundStyle } from "./span"
 import { PixelMap, PixelMapInternal } from "./arkui-pixelmap"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
-import { OnHoverCallback, MenuCallback } from "./sdk-stubs"
+import { OnHoverCallback } from "./sdk-stubs"
 import { ColorMetrics } from "../Graphics"
 
 import { CustomNodeBuilder } from "./customBuilder"
@@ -1158,6 +1158,7 @@ export interface RichEditorUrlStyle {
 }
 export type SubmitCallback = (enterKey: EnterKeyType, event: SubmitEvent) => void;
 export type MenuOnAppearCallback = (start: number, end: number) => void;
+export type MenuCallback = (start: number, end: number) => void;
 export type PasteEventCallback = (event?: PasteEvent) => void;
 /** @memo:stable */
 export class ArkRichEditorComponent extends ArkCommonMethodComponent implements UIRichEditorAttribute {
