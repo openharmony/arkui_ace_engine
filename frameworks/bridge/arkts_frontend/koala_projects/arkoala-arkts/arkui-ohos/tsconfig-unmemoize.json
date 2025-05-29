@@ -82,7 +82,7 @@
             "@ohos/arkui/graphics": [
                 "./ohos.arkui.graphics.ts"
             ],
-            "@ohos.promptAction": [
+            "@ohos/promptAction": [
                 "./ohos.promptAction.ts"
             ]
         },

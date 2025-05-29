@@ -214,6 +214,7 @@ generated_sources = [
   "implementation/polyline_modifier.cpp",
   "implementation/progress_mask_accessor.cpp",
   "implementation/progress_modifier.cpp",
+  "implementation/prompt_action_accessor.cpp",
   "implementation/pulse_symbol_effect_accessor.cpp",
   "implementation/qr_code_modifier.cpp",
   "implementation/radio_modifier.cpp",

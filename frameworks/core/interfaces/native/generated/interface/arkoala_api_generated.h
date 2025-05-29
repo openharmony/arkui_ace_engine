@@ -2973,6 +2973,8 @@ typedef struct AccessibilityHoverEventPeer* Ark_AccessibilityHoverEvent;
 typedef struct Opt_AccessibilityHoverEvent Opt_AccessibilityHoverEvent;
 typedef struct Ark_ActionSheetOptions Ark_ActionSheetOptions;
 typedef struct Opt_ActionSheetOptions Opt_ActionSheetOptions;
+typedef struct Ark_ShowToastOptions Ark_ShowToastOptions;
+typedef struct Opt_ShowToastOptions Opt_ShowToastOptions;
 typedef struct Ark_AlertDialogParamWithButtons Ark_AlertDialogParamWithButtons;
 typedef struct Opt_AlertDialogParamWithButtons Opt_AlertDialogParamWithButtons;
 typedef struct Ark_AlertDialogParamWithConfirm Ark_AlertDialogParamWithConfirm;
@@ -17783,6 +17785,33 @@ typedef struct Opt_ActionSheetOptions {
     Ark_Tag tag;
     Ark_ActionSheetOptions value;
 } Opt_ActionSheetOptions;
+typedef enum Ark_ToastShowMode {
+    ARK_TOAST_SHOW_MODE_DEFAULT = 0,
+    ARK_TOAST_SHOW_MODE_TOP_MOST = 1,
+    ARK_TOAST_SHOW_MODE_SYSTEM_TOP_MOST = 2,
+} Ark_ToastShowMode;
+typedef struct Opt_ToastShowMode {
+    Ark_Tag tag;
+    Ark_ToastShowMode value;
+} Opt_ToastShowMode;
+typedef struct Ark_ShowToastOptions {
+    Ark_Union_String_Resource message;
+    Opt_Number duration;
+    Opt_Union_String_Number bottom;
+    Opt_ToastShowMode showMode;
+    Opt_Alignment alignment;
+    Opt_Offset offset;
+    Opt_ResourceColor backgroundColor;
+    Opt_ResourceColor textColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_Boolean enableHoverMode;
+    Opt_HoverModeAreaType hoverModeArea;
+} Ark_ShowToastOptions;
+typedef struct Opt_ShowToastOptions {
+    Ark_Tag tag;
+    Ark_ShowToastOptions value;
+} Opt_ShowToastOptions;
 typedef struct Ark_AlertDialogParamWithButtons {
     Opt_ResourceStr title;
     Opt_ResourceStr subtitle;
@@ -26705,6 +26734,9 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
     Ark_Boolean (*focusControl_requestFocus)(const Ark_String* value);
 } GENERATED_ArkUIGlobalScopeAccessor;
 
+typedef struct GENERATED_ArkUIPromptActionAccessor {
+    void (*showToast)(const Ark_ShowToastOptions* value);
+} GENERATED_ArkUIPromptActionAccessor;
 
 /**
  * An API to control an implementation. When making changes modifying binary
@@ -27039,6 +27071,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUICustomSpanAccessor* (*getCustomSpanAccessor)();
     const GENERATED_ArkUILinearIndicatorControllerAccessor* (*getLinearIndicatorControllerAccessor)();
     const GENERATED_ArkUIGlobalScopeAccessor* (*getGlobalScopeAccessor)();
+    const GENERATED_ArkUIPromptActionAccessor* (*getPromptActionAccessor)();
 } GENERATED_ArkUIAccessors;
 
 typedef struct GENERATED_ArkUIGraphicsAPI {

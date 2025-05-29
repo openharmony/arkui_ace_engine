@@ -14331,6 +14331,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // AlertDialogAccessor
+    namespace PromptActionAccessor {
+    void ShowToastImpl(const Ark_ShowToastOptions* value)
+    {
+    }
+    } // PromptActionAccessor
     namespace SpringPropAccessor {
     void DestroyPeerImpl(Ark_SpringProp peer)
     {
@@ -21662,6 +21667,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &AlertDialogAccessorImpl;
     }
 
+    const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
+    {
+        static const GENERATED_ArkUIPromptActionAccessor PromptActionAccessorImpl {
+            PromptActionAccessor::ShowToastImpl,
+        };
+        return &PromptActionAccessorImpl;
+    }
+
     const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor()
     {
         static const GENERATED_ArkUISpringPropAccessor SpringPropAccessorImpl {
@@ -24682,6 +24695,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCustomSpanAccessor,
             GetLinearIndicatorControllerAccessor,
             GetGlobalScopeAccessor,
+            GetPromptActionAccessor,
         };
         return &accessorsImpl;
     }

@@ -171,6 +171,7 @@ import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 import { drawing } from "../../../ohos.graphics.drawing"
+import promptAction from '@ohos/promptAction'
 
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
@@ -21183,6 +21184,23 @@ export class Deserializer extends DeserializerBase {
         }
         const levelOrder_result : LevelOrder | undefined = levelOrder_buf
         let value : ActionSheetOptions = ({title: title_result, subtitle: subtitle_result, message: message_result, confirm: confirm_result, cancel: cancel_result, sheets: sheets_result, autoCancel: autoCancel_result, alignment: alignment_result, offset: offset_result, maskRect: maskRect_result, showInSubWindow: showInSubWindow_result, isModal: isModal_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, onWillDismiss: onWillDismiss_result, transition: transition_result, cornerRadius: cornerRadius_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, levelMode: levelMode_result, levelUniqueId: levelUniqueId_result, immersiveMode: immersiveMode_result, levelOrder: levelOrder_result} as ActionSheetOptions)
+        return value
+    }
+    readShowToastOptions(): promptAction.ShowToastOptions {
+        let valueDeserializer : Deserializer = this
+        const message_buf_selector : int32 = valueDeserializer.readInt8()
+        let message_buf : string | Resource | undefined
+        if (message_buf_selector == 0) {
+            message_buf = (valueDeserializer.readString() as string)
+        }
+        else if (message_buf_selector == 1) {
+            message_buf = valueDeserializer.readResource()
+        }
+        else {
+            throw new Error("One of the branches for message_buf has to be chosen through deserialisation.")
+        }
+        const message_result : ResourceStr = (message_buf as string | Resource)
+        let value : promptAction.ShowToastOptions = ({message: message_result } as promptAction.ShowToastOptions)
         return value
     }
     readAlertDialogParamWithButtons(): AlertDialogParamWithButtons {
