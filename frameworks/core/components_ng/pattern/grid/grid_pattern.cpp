@@ -74,7 +74,6 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(
             info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
         algo->SetEnableSkip(!disableSkip);
-        algo->SetScrollSource(GetScrollSource());
         return algo;
     }
     RefPtr<GridScrollLayoutAlgorithm> result;

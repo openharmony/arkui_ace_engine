@@ -185,8 +185,10 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         return;
     }
 
-    if ((wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) &&
-        scrollSource_ != SCROLL_FROM_ANIMATION_SPRING) {
+    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+        auto mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
+        overscrollOffsetBeforeJump_ =
+            -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
         postJumpOffset_ = info_.currentOffset_;
         info_.lineHeightMap_.clear();
         PrepareJumpOnReset(info_);
@@ -522,7 +524,8 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
 
             float len = filler.Fill(params, mainSize, jumpLineIdx).length;
             // condition [jumpLineIdx > 0] guarantees a finite call stack
-            if (LessNotEqual(len, mainSize) && jumpLineIdx > 0) {
+            // Over scroll at bottom dose not need ScrollAlign::END
+            if (LessNotEqual(len, mainSize) && jumpLineIdx > 0 && NonPositive(overscrollOffsetBeforeJump_)) {
                 jumpLineIdx = info_.lineHeightMap_.rbegin()->first;
                 info_.scrollAlign_ = ScrollAlign::END;
                 PrepareLineHeight(mainSize, jumpLineIdx);
