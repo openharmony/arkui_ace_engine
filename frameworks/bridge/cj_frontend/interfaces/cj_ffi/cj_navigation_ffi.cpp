@@ -30,7 +30,7 @@
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
-namespace {
+namespace OHOS::Ace {
 const std::vector<Dimension> TITLE_HEIGHT = { NG::SINGLE_LINE_TITLEBAR_HEIGHT, NG::DOUBLE_LINE_TITLEBAR_HEIGHT };
 
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
@@ -38,9 +38,7 @@ constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
 constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
 constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
 constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
-}
 
-namespace OHOS::Ace {
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
