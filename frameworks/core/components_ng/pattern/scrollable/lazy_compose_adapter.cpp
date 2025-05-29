@@ -39,12 +39,18 @@ void LazyComposeAdapter::SetActiveRange(int32_t start, int32_t end)
     if (updateRange_) {
         updateRange_(start, end);
     }
-
+    
     items_.RemoveIf([start, end](const uint32_t& k, const auto& _) {
         const auto idx = static_cast<int32_t>(k);
         return idx < start || idx > end;
     });
 }
+
+void LazyComposeAdapter::OnDataChange(int32_t changeIndex)
+{
+    items_.RemoveIf([idx = static_cast<int32_t>(changeIndex)](const uint32_t& k, const auto& _) { return k >= idx; });
+}
+
 void LazyComposeAdapter::SetCallbacks(CreateItemCb create, UpdateRangeCb update)
 {
     createItem_ = std::move(create);

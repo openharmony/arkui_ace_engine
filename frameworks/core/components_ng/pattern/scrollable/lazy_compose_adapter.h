@@ -45,6 +45,8 @@ public:
 
     void SetActiveRange(int32_t start, int32_t end);
 
+    void OnDataChange(int32_t changeIndex);
+
 private:
     UniqueValuedMap<uint32_t, WeakPtr<FrameNode>, WeakPtr<FrameNode>::Hash> items_;
     CreateItemCb createItem_;
