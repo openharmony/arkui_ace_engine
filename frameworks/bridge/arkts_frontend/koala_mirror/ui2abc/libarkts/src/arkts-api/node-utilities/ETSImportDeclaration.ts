@@ -15,34 +15,9 @@
 
 import { ETSImportDeclaration, StringLiteral } from "../../generated"
 import { isSameNativeObject } from "../peers/ArktsObject"
-import { passNode, passNodeArray, unpackNonNullableNode, updateNodeByNode } from "../utilities/private"
+import { updateNodeByNode } from "../utilities/private"
 import { AstNode } from "../peers/AstNode"
-import { Es2pandaImportFlags, Es2pandaImportKinds } from "../../generated/Es2pandaEnums"
-import { global } from "../static/global"
-import { Program } from "../peers/Program"
-
-export function createETSImportDeclaration(
-    source: StringLiteral | undefined,
-    specifiers: readonly AstNode[],
-    importKind: Es2pandaImportKinds,
-    program: Program,
-    flags: Es2pandaImportFlags
-): ETSImportDeclaration {
-    // TODO: check that plugin is on parsed stage
-    const res = unpackNonNullableNode(
-        global.es2panda._ETSParserBuildImportDeclaration(
-            global.context,
-            importKind,
-            passNodeArray(specifiers),
-            specifiers.length,
-            passNode(source),
-            program.peer,
-            flags
-        )
-    )
-    global.es2panda._InsertETSImportDeclarationAndParse(global.context, program.peer, res.peer)
-    return new ETSImportDeclaration(res.peer)
-}
+import { Es2pandaImportKinds } from "../../generated/Es2pandaEnums"
 
 export function updateETSImportDeclaration(
     original: ETSImportDeclaration,

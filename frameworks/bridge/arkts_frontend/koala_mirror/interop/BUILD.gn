@@ -26,7 +26,6 @@ action("interop.abc") {
         "$target_out_dir/interop.abc"
     ]
     args = [
-        "--root-path", rebase_path(".."),
         "--project-path", rebase_path("."),
         "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
         "--arklink-path", rebase_path("${static_linker_build_path}"),

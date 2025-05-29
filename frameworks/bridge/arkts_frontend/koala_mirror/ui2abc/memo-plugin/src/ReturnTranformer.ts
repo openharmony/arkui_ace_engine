@@ -17,6 +17,9 @@ import * as arkts from "@koalaui/libarkts"
 import { factory } from "./MemoFactory"
 import { isSyntheticReturnStatement } from "./utils"
 
+/**
+ * This transformer corrects function's body according to memo transformation
+ */
 export class ReturnTransformer extends arkts.AbstractVisitor {
     private skipNode?: arkts.ReturnStatement | arkts.BlockStatement
     private stableThis: boolean = false
@@ -42,10 +45,7 @@ export class ReturnTransformer extends arkts.AbstractVisitor {
         }
         const node = this.visitEachChild(beforeChildren)
         if (arkts.isReturnStatement(node)) {
-            if (this.stableThis && node.argument && arkts.isThisExpression(node.argument)) {
-                return factory.createReturnThis()
-            }
-            if (node.argument == undefined) {
+            if (node.argument == undefined || arkts.isThisExpression(node.argument)) {
                 return arkts.factory.createBlockStatement([
                     arkts.factory.createExpressionStatement(
                         factory.createRecacheCall()

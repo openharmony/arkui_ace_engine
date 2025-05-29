@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+export * from "./checkSdk"
 export * from "./utils"
 export * from "./reexport-for-generated"
 export * from "./generated/Es2pandaEnums"
@@ -23,9 +24,12 @@ export * from "./arkts-api/utilities/public"
 export * from "./arkts-api/factory/nodeFactory"
 export * from "./arkts-api/visitor"
 export * from "./arkts-api/AbstractVisitor"
+export * from "./arkts-api/ChainExpressionFilter"
 export * from "./arkts-api/CheckedBackFilter"
 export * from "./arkts-api/SetBaseOverloads"
 export * from "./arkts-api/plugins"
+export * from "./arkts-api/ImportStorage"
+export * from "./arkts-api/InferVoidReturnType"
 
 export * from "./arkts-api/peers/AstNode"
 export * from "./arkts-api/peers/Config"
@@ -33,3 +37,4 @@ export * from "./arkts-api/peers/Context"
 export * from "./arkts-api/peers/Program"
 export * from "./arkts-api/peers/ImportPathManager"
 export { global as arktsGlobal } from "./arkts-api/static/global"
+export * as arkts from "./arkts-api"

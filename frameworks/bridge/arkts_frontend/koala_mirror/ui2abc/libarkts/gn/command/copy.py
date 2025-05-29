@@ -46,7 +46,7 @@ def run_cmd(cmd, execution_path=None):
 def copy_output(options):
 
     copy_files(os.path.join(options.from_path, 'clang_x64/libes2panda_lib.node'),
-            os.path.join(options.to_path, 'out/native/es2panda.node'), True)
+            os.path.join(options.to_path, 'build/native/build/es2panda.node'), True)
 
 
 def parse_args():

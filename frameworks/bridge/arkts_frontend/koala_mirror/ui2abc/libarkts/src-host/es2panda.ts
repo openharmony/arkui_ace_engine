@@ -15,12 +15,12 @@
 
 import * as fs from "node:fs"
 import * as path from "node:path"
-import { arktsGlobal as global } from "@koalaui/libarkts"
-import { CheckedBackFilter } from "@koalaui/libarkts"
+import { checkSDK, arktsGlobal as global, ImportStorage } from "@koalaui/libarkts"
+import { CheckedBackFilter, ChainExpressionFilter, PluginContext, PluginContextImpl } from "@koalaui/libarkts"
 import { Command } from "commander"
 import { filterSource, isNumber, throwError, withWarning } from "@koalaui/libarkts"
 import { Es2pandaContextState } from "@koalaui/libarkts"
-import { AstNode, CompilationOptions, Config, Context, createETSModuleFromContext, listPrograms, proceedToState, ProgramTransformer, rebindSubtree, recheckSubtree, setBaseOverloads } from "@koalaui/libarkts"
+import { AstNode, Config, Context, createETSModuleFromContext, inferVoidReturnType, listPrograms, proceedToState, ProgramTransformer, rebindSubtree, recheckSubtree, setBaseOverloads } from "@koalaui/libarkts"
 
 function parseCommandLineArgs() {
     const commander = new Command()
@@ -62,7 +62,9 @@ function insertPlugin(
     transform: ProgramTransformer,
     state: Es2pandaContextState,
     dumpAst: boolean, restart: boolean,
-    updateWith?: (node: AstNode) => void): AstNode {
+    context: PluginContext,
+    updateWith?: (node: AstNode) => void
+): AstNode {
     proceedToState(state)
     const script = createETSModuleFromContext()
     // Or this: const script = createETSModuleFromSource(source)
@@ -84,13 +86,24 @@ function insertPlugin(
                 return
             }
             const ast = program.program.astNode
-            transform?.(program.program, { isMainProgram: false, name: program.name, stage: state })
+            const importStorage = new ImportStorage(program.program, state == Es2pandaContextState.ES2PANDA_STATE_PARSED)
+            stageSpecificPreFilters(ast, state)
+            
+            transform?.(program.program, { isMainProgram: false, name: program.name, stage: state }, context)
+
+            stageSpecificPostFilters(ast, state)
             setBaseOverloads(ast)
+            if (!restart) {
+                importStorage.update()
+            }
             setAllParents(ast)
         })
     }
 
-    transform?.(global.compilerContext.program, { isMainProgram: true, name: `${global.packageName}.${global.filePathFromPackageRoot}`, stage: state })
+    const importStorage = new ImportStorage(global.compilerContext.program, state == Es2pandaContextState.ES2PANDA_STATE_PARSED)
+    if (!restart) stageSpecificPreFilters(script, state)
+
+    transform?.(global.compilerContext.program, { isMainProgram: true, name: `${global.packageName}.${global.filePathFromPackageRoot}`, stage: state }, context)
 
     const afterTransform = Date.now()
     global.profiler.transformTime += afterTransform - beforeTransform
@@ -104,7 +117,11 @@ function insertPlugin(
         }
     }
 
+    if (!restart) stageSpecificPostFilters(script, state)
     setBaseOverloads(script)
+    if (!restart) {
+        importStorage.update()
+    }
     setAllParents(script)
 
     if (!restart) {
@@ -113,6 +130,18 @@ function insertPlugin(
         console.log("DONE!")
     }
     return script
+}
+
+function stageSpecificPreFilters(script: AstNode, state: Es2pandaContextState) {
+    if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
+        inferVoidReturnType(script)
+    }
+}
+
+function stageSpecificPostFilters(script: AstNode, state: Es2pandaContextState) {
+    if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
+        new ChainExpressionFilter().visitor(script)
+    }
 }
 
 function restartCompiler(source: string, configPath: string, filePath: string, stdlib: string, outputPath: string, verbose: boolean = true) {
@@ -186,7 +215,7 @@ function invokeWithPlugins(
     fs.mkdirSync(path.dirname(outputPath), {recursive: true})
     global.compilerContext = Context.createFromString(source)
 
-    console.log("PLUGINS: ", pluginsByState.size, pluginsByState)
+    // console.log("PLUGINS: ", pluginsByState.size, pluginsByState)
 
     pluginNames.push(`_proceed_to_binary`)
     let pluginsApplied = 0
@@ -211,18 +240,20 @@ function invokeWithPlugins(
         }
     }
 
+    const context = new PluginContextImpl()
+
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_PARSED)?.forEach(plugin => {
-        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, dumpAst, restart)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, dumpAst, restart, context)
         restartProcedure()
     })
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_BOUND)?.forEach(plugin => {
-        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, dumpAst, restart, rebindSubtree)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, dumpAst, restart, context, rebindSubtree)
         restartProcedure()
     })
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_CHECKED)?.forEach(plugin => {
-        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, dumpAst, restart, recheckSubtree)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, dumpAst, restart, context, recheckSubtree)
         restartProcedure()
     })
     proceedToState(Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED)
@@ -291,6 +322,7 @@ function readAndSortPlugins(configDir: string, plugins: any[]) {
 
 export function main() {
     const before = Date.now()
+    checkSDK()
     const { filePath, configPath, outputPath, dumpAst, restartStages, stage } = parseCommandLineArgs()
     const arktsconfig = JSON.parse(fs.readFileSync(configPath).toString())
     const configDir = path.dirname(configPath)
@@ -302,11 +334,6 @@ export function main() {
     const pluginNames = plugins.map((it: any) => `${it.name}-${it.stage}`)
 
     const pluginsByState = readAndSortPlugins(configDir, plugins)
-
-    exportsFromInitialFile.push(
-        ...[...fs.readFileSync(filePath).toString().matchAll(/export {([\s\S]*?)} from .*(\n|$)/g)].map(it => it[0]),
-        ...[...fs.readFileSync(filePath).toString().matchAll(/export \* from .*(\n|$)/g)].map(it => it[0])
-    )
 
     invokeWithPlugins(configPath, packageName, baseUrl, outDir, filePath, outputPath, pluginsByState, dumpAst, restartStages, stage, pluginNames)
 

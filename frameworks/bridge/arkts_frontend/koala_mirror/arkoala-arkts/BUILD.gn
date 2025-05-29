@@ -1,0 +1,181 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+koala_root = ".."
+koala_path = ""
+interop_root = "$koala_root/interop"
+framework_root = "$koala_root/arkoala-arkts/framework/native/src"
+# TODO: ugly
+napi_headers = "./node_modules/node-api-headers/include/"
+
+node_version = "v16.20.2"
+host_arch = "${host_os}-${host_cpu}"
+
+if (is_linux) {
+  os_define = "KOALA_LINUX"
+} else if (is_ohos) {
+  os_define = "KOALA_OHOS"
+} else {
+  assert(false, "Unsupported platform")
+}
+
+if (target_cpu == "arm") {
+  arch_define = "KOALA_OHOS_ARM32"
+} else if (target_cpu == "arm64") {
+  arch_define = "KOALA_OHOS_ARM64"
+} else {
+  assert(false, "Unsupported target_cpu")
+}
+
+def_cflags = [ "-fPIC", "-O3" ]
+def_cxxflags = [ "-fno-rtti", "-fno-exceptions", "-std=c++17", "-fPIC" ]
+
+ohos_shared_library("ArkoalaNative_ark") {
+  cflags = def_cflags
+  cflags_cc = def_cxxflags
+
+  defines = [ "$os_define", "KOALA_ANI", "__MUSL__", "KOALA_USE_PANDA_VM" ]
+
+  include_dirs = [
+    "$koala_root/interop/src/cpp",
+    "$koala_root/interop/src/cpp/ani",
+    "$koala_root/interop/src/cpp/types",
+    "$framework_root",
+    "$framework_root/generated",
+  ]
+
+  if (is_ohos) {
+    include_dirs += ["$koala_root/interop/src/cpp/ohos"]
+  }
+
+  sources = [
+    "$interop_root/src/cpp/ani/convertors-ani.cc",
+    "$interop_root/src/cpp/types/signatures.cc",
+    "$interop_root/src/cpp/callback-resource.cc",
+    "$interop_root/src/cpp/interop-logging.cc",
+    "$interop_root/src/cpp/common-interop.cc",
+    "$interop_root/src/cpp/ohos/oh_sk_log.cc",
+
+    "$framework_root/vsync.cc",
+    "$framework_root/generated/library.cc",
+    "$framework_root/generated/bridge_custom.cc",
+    "$framework_root/generated/bridge_generated.cc",
+    "$framework_root/generated/callback_deserialize_call.cc",
+    "$framework_root/generated/callback_managed_caller.cc",
+  ]
+
+  external_deps = [ "hilog:hilog_ndk" ]
+}
+
+ohos_shared_library("ArkoalaLoader") {
+  cflags = def_cflags
+  cflags_cc = def_cxxflags
+
+  defines = [ "$os_define", "KOALA_USE_HZ_VM", "KOALA_NAPI", "__MUSL__" ]
+
+  include_dirs = [
+    "$koala_root/interop/src/cpp",
+    "$koala_root/interop/src/cpp/napi",
+    "$koala_root/interop/src/cpp/types",
+    "$framework_root",
+    "$framework_root/generated",
+    "$napi_headers"
+  ]
+
+  sources = [
+    "$framework_root/generated/library.cc",
+    "$framework_root/vsync.cc",
+
+    "$interop_root/src/cpp/napi/convertors-napi.cc",
+    "$interop_root/src/cpp/interop-logging.cc",
+    "$interop_root/src/cpp/common-interop.cc",
+    "$interop_root/src/cpp/ohos/oh_sk_log.cc",
+  ]
+
+  if (is_ohos) {
+    include_dirs += ["$koala_root/interop/src/cpp/ohos"]
+  }
+
+  external_deps = [ "hilog:hilog_ndk", "napi:ace_napi" ]
+}
+
+ohos_shared_library("vmloader") {
+  cflags = def_cflags
+  cflags_cc = def_cxxflags
+  ldflags = [ "-ldl" ]
+
+  defines = [ "$os_define", "$arch_define", "KOALA_ANI", "__MUSL__" ]
+
+  include_dirs = [
+    "$interop_root/src/cpp",
+    "$interop_root/src/cpp/types",
+    "$interop_root/src/cpp/ani",
+  ]
+
+  sources = [
+    "$interop_root/src/cpp/vmloader.cc"
+  ]
+
+  if (is_ohos) {
+    include_dirs += ["$koala_root/interop/src/cpp/ohos"]
+  }
+
+  external_deps = [ "hilog:hilog_ndk" ]
+}
+
+action("arkoala.abc") {
+    script = "gn/command/npm.py"
+    outputs = [
+        "$target_out_dir/arkoala.abc"
+    ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--arklink-path", rebase_path("${static_linker_build_path}"),
+        "--es2panda-path", rebase_path("${ets2abc_build_path}"),
+        "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
+        "--target-out-path", rebase_path("$target_out_dir"),
+        "--built-file-path", rebase_path("build/arkoala.abc"),
+        "--npm-args", "run", "build:arkoala:m3:gn"
+    ]
+
+    deps = [
+      "${ohos_ets_api_deps}",
+      "${ohos_ets_arkts_deps}",
+      "$koala_root/incremental:incremental"
+    ]
+
+    external_deps = ets2abc_build_deps
+    external_deps += static_linker_build_deps
+}
+
+ohos_prebuilt_etc("arkoala_build") {
+  source = "$target_out_dir/arkoala.abc"
+  deps = [ ":arkoala.abc" ]
+  module_install_dir = "framework"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+group("arkoala") {
+    deps = [
+      "$koala_path:ArkoalaNative_ark",
+      "$koala_path:ArkoalaLoader",
+      "$koala_path:vmloader",
+      "$koala_path:arkoala_build"
+    ]
+}

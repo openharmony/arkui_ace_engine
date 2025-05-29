@@ -16,17 +16,17 @@
 import { Importer } from "./utils"
 import * as arkts from "@koalaui/libarkts"
 
-export class ImportsTransformer {
-    constructor(private program: arkts.Program, private imports: Importer) {}
-
-    private addImports() {
-        this.imports.emit(this.program)
+export class ImportsTransformer extends arkts.AbstractVisitor {
+    constructor(private imports: Importer) {
+        super()
     }
 
     visitor(node: arkts.AstNode): arkts.AstNode {
         if (arkts.isETSModule(node)) {
-            this.addImports()
-            return node
+            return arkts.updateETSModuleByStatements(
+                node,
+                this.imports.emit(node.statements)
+            )
         }
         throw new Error(`Must not be there`)
     }

@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/libarkts",
-    "version": "1.7.1+devel",
+    "version": "1.7.3+devel",
     "bin": "./lib/es2panda",
     "types": "./build/index.d.ts",
     "exports": {
@@ -16,14 +16,14 @@
         "gen_version": "2.1.7",
         "panda_sdk_path": "../../incremental/tools/panda/node_modules/@panda/sdk",
         "ohos_panda_sdk_path": "../build/sdk",
-        "panda_sdk_version": "1.5.0-dev.31052"
+        "panda_sdk_version": "next"
     },
     "dependencies": {
         "@koalaui/ets-tsc": "4.9.5-r5",
-        "@koalaui/build-common": "1.7.1+devel",
-        "@koalaui/compat": "1.7.1+devel",
-        "@koalaui/common": "1.7.1+devel",
-        "@koalaui/interop": "1.7.1+devel",
+        "@koalaui/build-common": "1.7.3+devel",
+        "@koalaui/compat": "1.7.3+devel",
+        "@koalaui/common": "1.7.3+devel",
+        "@koalaui/interop": "1.7.3+devel",
         "node-addon-api": "8.0.0",
         "node-api-headers": "0.0.5",
         "commander": "10.0.1"
@@ -59,7 +59,7 @@
         "compile:playground": "cd playground && meson setup build && meson compile -C build",
         "run:playground": "npm run compile:playground && ./playground/build/playground.out",
         "panda:sdk:clean": "cd ../../incremental/tools/panda && rimraf node_modules",
-        "panda:sdk:install": "cd ../../incremental/tools/panda && PANDA_SDK_VERSION=$npm_package_config_panda_sdk_version npm run panda:sdk:install && npm run panda:patch",
+        "panda:sdk:install": "cd ../../incremental/tools/panda && PANDA_SDK_VERSION=$npm_package_config_panda_sdk_version npm run panda:sdk:install",
         "panda:sdk:reinstall": "npm run panda:sdk:clean && npm run panda:sdk:install",
         "regenerate:current": "npm run compile -C ../../../arktscgen && node ../../../arktscgen --panda-sdk-path $npm_package_config_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize --debug",
         "regenerate": "npx --yes @idlizer/arktscgen@$npm_package_config_gen_version --panda-sdk-path $npm_package_config_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize",

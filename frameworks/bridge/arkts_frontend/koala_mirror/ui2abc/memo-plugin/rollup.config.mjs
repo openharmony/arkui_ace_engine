@@ -15,8 +15,9 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import commonjs from '@rollup/plugin-commonjs'
+import terser from "@rollup/plugin-terser"
 
-const ENABLE_SOURCE_MAPS = true;  // Enable for debugging
+const ENABLE_SOURCE_MAPS = false;  // Enable for debugging
 
 export default [
     buildPlugin({
@@ -26,40 +27,50 @@ export default [
     buildPlugin({
         src: "./src/MemoTransformer.ts",
         dst: "./lib/MemoTransformer.js",
-    })
+    }),
+    buildPlugin({
+        src: "./src/entry.ts",
+        dst: "./lib/entry.js",
+        minimize: true,
+    }),
 ]
 
 /** @return {import("rollup").RollupOptions} */
-function buildPlugin({ src, dst }) {
-  return {
-    input: src,
-    output: {
-        file: dst,
-        format: "commonjs",
+function buildPlugin({ src, dst, minimize = false }) {
+    return {
+        input: src,
+        output: {
+            file: dst,
+            format: "commonjs",
+            plugins: [
+                minimize && terser({
+                    sourceMap: ENABLE_SOURCE_MAPS,
+                    format: {
+                        max_line_len: 800
+                    }
+                }),
+                replaceLibarktsImport()
+
+            ],
+            sourcemap: ENABLE_SOURCE_MAPS,
+            banner: APACHE_LICENSE_HEADER(),
+        },
+        external: ["@koalaui/libarkts"],
         plugins: [
-            // terser()
+            commonjs(),
+            typescript({
+                outputToFilesystem: false,
+                module: "esnext",
+                sourceMap: ENABLE_SOURCE_MAPS,
+                declarationMap: false,
+                declaration: false,
+                composite: false,
+            }),
+            nodeResolve({
+                extensions: [".js", ".mjs", ".cjs", ".ts", ".cts", ".mts"]
+            })
         ],
-        banner: [
-            "#!/usr/bin/env node",
-            APACHE_LICENSE_HEADER()
-        ].join("\n"),
-    },
-    external: ["@koalaui/libarkts"],
-    plugins: [
-	    commonjs(),
-        typescript({
-            outputToFilesystem: false,
-            module: "esnext",
-            sourceMap: ENABLE_SOURCE_MAPS,
-            declarationMap: false,
-            declaration: false,
-            composite: false,
-        }),
-        nodeResolve({
-            extensions: [".js", ".mjs", ".cjs", ".ts", ".cts", ".mts"]
-        })
-    ]
-  }
+    }
 }
 
 function APACHE_LICENSE_HEADER() {
@@ -81,4 +92,19 @@ function APACHE_LICENSE_HEADER() {
 */
 
 `
+}
+
+/** @returns {import("rollup").OutputPlugin} */
+function replaceLibarktsImport() {
+    const REQUIRE_PATTERN = `require("@koalaui/libarkts")`
+    return {
+        name: "replace-librkts-import",
+        generateBundle(options, bundle) {
+            for (const [fileName, asset] of Object.entries(bundle)) {
+                if (!asset.code) continue
+                if (fileName !== "entry.js") continue
+                asset.code = asset.code.replace(REQUIRE_PATTERN, `require(process.env.KOALA_WRAPPER_PATH ?? "@koalaui/libarkts")`)
+            }
+        }
+    }
 }

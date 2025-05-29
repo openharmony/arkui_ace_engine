@@ -15,6 +15,7 @@
 
 import { global } from "../static/global"
 import { NumberLiteral } from "../../generated"
+import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
 
 export function createNumberLiteral(
@@ -32,6 +33,9 @@ export function updateNumberLiteral(
     original: NumberLiteral,
     value: number
 ): NumberLiteral {
+    if (isSameNativeObject(value.toString(), original.str)) {
+        return original
+    }
     return updateNodeByNode(
         createNumberLiteral(value),
         original

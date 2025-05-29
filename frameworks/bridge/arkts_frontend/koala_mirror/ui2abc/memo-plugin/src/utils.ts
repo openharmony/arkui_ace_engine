@@ -22,6 +22,7 @@ import { correctFunctionParamType, correctObjectExpression, MemoAnnotatable, Mem
 export enum RuntimeNames {
     __CONTEXT = "__context",
     __ID = "__id",
+    __KEY = "__key",
     ANNOTATION = "memo",
     ANNOTATION_ENTRY = "memo_entry",
     ANNOTATION_INTRINSIC = "memo_intrinsic",
@@ -249,6 +250,10 @@ export function isMemoParametersDeclaration(node: arkts.AstNode) {
  */
 export function isVoidType(node: arkts.TypeNode) {
     return node.dumpSrc() == "void"
+}
+
+export function isVoidReturn(returnTypeAnnotation: arkts.TypeNode | undefined) {
+    return !returnTypeAnnotation || isVoidType(returnTypeAnnotation)
 }
 
 export function getDeclResolveGensym(node: arkts.AstNode): arkts.AstNode | undefined {

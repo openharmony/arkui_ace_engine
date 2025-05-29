@@ -15,6 +15,7 @@
 
 import * as arkts from "@koalaui/libarkts"
 import { annotation } from "../common/arkts-utils";
+import { InternalAnnotations } from "../utils";
 
 export enum DecoratorNames {
     ENTRY = "Entry",
@@ -35,6 +36,11 @@ export enum DecoratorNames {
     CUSTOM_DIALOG = "CustomDialog",
     LOCAL_STORAGE_PROP = "LocalStorageProp",
     LOCAL_STORAGE_LINK = "LocalStorageLink",
+}
+
+export enum DecoratorParameters {
+    USE_SHARED_STORAGE = "useSharedStorage",
+    ALLOW_OVERRIDE = "allowOverride",
 }
 
 export function isDecoratorAnnotation(anno: arkts.AnnotationUsage, decoratorName: DecoratorNames): boolean {
@@ -114,7 +120,7 @@ export function createSetter(
         false
     );
     if (needMemo) {
-        param.setAnnotations([annotation("memo")])
+        param.setAnnotations([annotation(InternalAnnotations.MEMO)])
     }
     const key = arkts.factory.createIdentifier(name, undefined)
     const scriptFunction = arkts.factory.createScriptFunction(

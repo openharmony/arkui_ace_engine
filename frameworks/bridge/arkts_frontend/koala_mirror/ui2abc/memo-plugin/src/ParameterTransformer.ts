@@ -87,6 +87,9 @@ export class ParameterTransformer extends arkts.AbstractVisitor {
             }
         }
         if (arkts.isThisExpression(node) && this.rewriteThis) {
+            if (arkts.isReturnStatement(node.parent)) {
+                return node
+            }
             return factory.createMemoParameterAccess(RuntimeNames.THIS)
         }
         return node

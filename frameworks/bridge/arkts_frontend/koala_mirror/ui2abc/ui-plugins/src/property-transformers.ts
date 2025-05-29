@@ -16,16 +16,17 @@
 import * as arkts from "@koalaui/libarkts"
 import { Es2pandaTokenType } from "@koalaui/libarkts"
 
-import { DecoratorNames, getValueInDecorator, hasDecorator } from "./property-translators/utils"
+import { DecoratorNames, DecoratorParameters, hasDecorator } from "./property-translators/utils"
 import { CustomComponentNames, Importer, ImportingTransformer, InternalAnnotations } from "./utils"
 import { annotation, classMethods, isAnnotation } from "./common/arkts-utils"
 
 export interface PropertyTransformer extends ImportingTransformer {
     check(property: arkts.ClassProperty): boolean
     applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.Statement[], pageLocalStorage?: arkts.Expression): void
+    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void
     applyOptions(property: arkts.ClassProperty, result: arkts.Statement[]): void
-    applyInitialization(property: arkts.ClassProperty, result: arkts.Statement[]): void
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void
+    applyDisposeStruct(property: arkts.ClassProperty, result: arkts.Statement[]): void
 }
 
 function createOptionalClassProperty(
@@ -52,33 +53,32 @@ function createWrapperType(name: string, type: arkts.TypeNode): arkts.ETSTypeRef
     )
 }
 
-export function backingFieldName(name: string): string {
-    return "__backing_" + name
+function backingFieldNameOf(property: arkts.ClassProperty): string {
+    return "__backing_" + property.id!.name
 }
 
-function callBackingFieldMethod(method: string, property: arkts.ClassProperty, args: arkts.Expression[]): arkts.Statement {
-    return arkts.factory.createExpressionStatement(
-        arkts.factory.createCallExpression(
-            fieldOf(fieldOf(arkts.factory.createThisExpression(), backingFieldName(property.id!.name)), method),
-            args, undefined
-        ))
+function thisPropertyMethodCall(property: arkts.ClassProperty, method: string, args: readonly arkts.Expression[] = []): arkts.Statement {
+    return arkts.factory.createExpressionStatement(thisPropertyMethodCallExpr(property, method, args))
+}
+
+function thisPropertyMethodCallExpr(property: arkts.ClassProperty, method: string, args: readonly arkts.Expression[] = []): arkts.CallExpression {
+    return arkts.factory.createCallExpression(fieldOf(fieldOf(arkts.factory.createThisExpression(), backingFieldNameOf(property)), method), args, undefined)
 }
 
 function createWrappedProperty(
-    name: string,
     clazz: arkts.ClassDeclaration,
     property: arkts.ClassProperty,
     wrapperTypeName: string,
     ctorParams: arkts.Expression[] = []
 ): arkts.ClassElement[] {
     const wrapperType = createWrapperType(wrapperTypeName, property.typeAnnotation!)
-    const backingName = backingFieldName(name)
+    const name = property.id!.name
     let ctorArguments: arkts.Expression[] = [...ctorParams, arkts.factory.createStringLiteral(name)]
     if (property.value != undefined) {
         ctorArguments.push(property.value)
     }
     const backingField = arkts.factory.createClassProperty(
-        arkts.factory.createIdentifier(backingName),
+        arkts.factory.createIdentifier(backingFieldNameOf(property)),
         arkts.factory.createETSNewClassInstanceExpression(wrapperType, ctorArguments),
         wrapperType,
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PRIVATE,
@@ -92,7 +92,7 @@ function createWrappedProperty(
                     arkts.factory.createMemberExpression(
                         arkts.factory.createMemberExpression(
                             arkts.factory.createThisExpression(),
-                            arkts.factory.createIdentifier(backingName),
+                            arkts.factory.createIdentifier(backingFieldNameOf(property)),
                             arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_PROPERTY_ACCESS,
                             false,
                             false
@@ -122,7 +122,7 @@ function createWrappedProperty(
                 arkts.factory.createMemberExpression(
                     arkts.factory.createMemberExpression(
                         arkts.factory.createThisExpression(),
-                        arkts.factory.createIdentifier(backingName),
+                        arkts.factory.createIdentifier(backingFieldNameOf(property)),
                         arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_PROPERTY_ACCESS,
                         false,
                         false
@@ -184,6 +184,98 @@ function createWrappedProperty(
     return [backingField, getter]
 }
 
+function addTrackablePropertyTo(
+    result: arkts.ClassElement[],
+    clazz: arkts.ClassDeclaration,
+    property: arkts.ClassProperty,
+    propertyTypeName: string
+) {
+    const valueType = property.typeAnnotation
+    if (!valueType) throw new Error(`@${propertyTypeName}: type is not specified for ${property.id?.name}`)
+
+    const propertyName = property.id!.name
+    const propertyType = createWrapperType(propertyTypeName, valueType)
+    const propertyArgs: arkts.Expression[] = [arkts.factory.createStringLiteral(propertyName)]
+    const watches = property.annotations.filter(isWatchDecorator).map(getWatchParameter)
+    if (watches.length > 0) {
+        propertyArgs.push(
+            arkts.factory.createArrowFunctionExpression(
+                arkts.factory.createScriptFunction(
+                    arkts.factory.createBlockStatement(
+                        watches.map(watch => createWatchCall(clazz, watch, propertyName))
+                    ),
+                    undefined,
+                    [],
+                    undefined,
+                    false,
+                    arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_ARROW,
+                    arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
+                    undefined,
+                    undefined
+                )
+            )
+        )
+    }
+    const backingField = arkts.factory.createClassProperty(
+        arkts.factory.createIdentifier(backingFieldNameOf(property)),
+        arkts.factory.createETSNewClassInstanceExpression(propertyType, propertyArgs),
+        propertyType,
+        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PRIVATE,
+        false
+    )
+    const getterFunction = arkts.factory.createScriptFunction(
+        arkts.factory.createBlockStatement([
+            arkts.factory.createReturnStatement(thisPropertyMethodCallExpr(property, "get"))
+        ]),
+        undefined,
+        [],
+        valueType,
+        true,
+        arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_METHOD | arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_GETTER,
+        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
+        arkts.factory.createIdentifier(propertyName),
+        []
+    )
+    const setterFunction = arkts.factory.createScriptFunction(
+        arkts.factory.createBlockStatement([
+            thisPropertyMethodCall(property, "set", [arkts.factory.createIdentifier("value")])
+        ]),
+        undefined,
+        [
+            arkts.factory.createETSParameterExpression(
+                arkts.factory.createIdentifier("value"),
+                false,
+                undefined,
+                valueType
+            )
+        ],
+        undefined,
+        true,
+        arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_METHOD | arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_SETTER | arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_OVERLOAD,
+        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
+        arkts.factory.createIdentifier(propertyName),
+        []
+    )
+    const setter = arkts.factory.createMethodDefinition(
+        arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_SET,
+        arkts.factory.createIdentifier(propertyName),
+        arkts.factory.createFunctionExpression(arkts.factory.createIdentifier(propertyName), setterFunction),
+        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
+        false
+    )
+    const getter = arkts.factory.createMethodDefinition(
+        arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_GET,
+        arkts.factory.createIdentifier(propertyName),
+        arkts.factory.createFunctionExpression(arkts.factory.createIdentifier(propertyName), getterFunction),
+        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
+        false,
+        [setter]
+    )
+    setter.parent = getter
+    result.push(backingField)
+    result.push(getter)
+}
+
 function isWatchDecorator(usage: arkts.AnnotationUsage): boolean {
     return isAnnotation(usage, DecoratorNames.WATCH)
 }
@@ -218,325 +310,254 @@ function createWatchCall(clazz: arkts.ClassDeclaration, methodName: string, prop
 }
 
 export abstract class PropertyTransformerBase implements PropertyTransformer {
-    abstract check(property: arkts.ClassProperty): boolean
-
-    applyInitialization(property: arkts.ClassProperty, result: arkts.Statement[]): void { }
-    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void { }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void { }
-    applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void { }
-    collectImports(result: Importer): void { }
-}
-
-function applyInitializer(property: arkts.ClassProperty, setter: string = "init"): arkts.Statement {
-    let name = property.id?.name!
-    return arkts.factory.createBlockStatement([
-        arkts.factory.createExpressionStatement(
-            arkts.factory.createCallExpression(
-                fieldOf(
-                    fieldOf(
-                        arkts.factory.createThisExpression(), backingFieldName(name)
-                    ), setter
-                ),
-                [
-                    fieldOf(arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME), name, true)
-                ],
-                undefined
-            )
-        )
-    ])
+    constructor(public decoratorName: DecoratorNames, public className: string) {
+    }
+    check(property: arkts.ClassProperty): boolean {
+        return hasDecorator(property, this.decoratorName)
+    }
+    collectImports(importer: Importer): void {
+        importer.add(this.className, "@ohos.arkui")
+    }
+    applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
+    }
+    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
+        addTrackablePropertyTo(result, clazz, property, this.className)
+    }
+    abstract applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void
+    applyDisposeStruct(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "aboutToBeDeleted"))
+    }
+    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+    }
 }
 
 export class StateTransformer extends PropertyTransformerBase {
-    applyInitialization(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        result.push(applyInitializer(property))
-    }
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.STATE)
+    constructor() {
+        super(DecoratorNames.STATE, "StateDecoratorProperty")
     }
     applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
         result.push(createOptionalClassProperty(property.id!.name, property))
     }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "StateDecoratorProperty"))
-    }
-    collectImports(imports: Importer): void {
-        imports.add("StateDecoratorProperty", "@ohos.arkui")
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "init", [initializerOf(property), property.value!]))
     }
 }
 
-export class PlainPropertyTransformer extends PropertyTransformerBase {
+export class PlainPropertyTransformer implements PropertyTransformer {
     check(property: arkts.ClassProperty): boolean {
         return property.annotations.length == 0
-    }
-    applyInitialization(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        result.push(applyInitializer(property))
-    }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "PlainStructProperty"))
-    }
-    applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(createOptionalClassProperty(property.id!.name, property))
     }
     collectImports(imports: Importer): void {
         imports.add("PlainStructProperty", "@ohos.arkui")
     }
+    applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
+        result.push(createOptionalClassProperty(property.id!.name, property))
+    }
+    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
+        result.push(...createWrappedProperty(clazz, property, "PlainStructProperty"))
+    }
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "init", [initializerOf(property)]))
+    }
+    applyDisposeStruct(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+    }
+    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+    }
 }
 
 export class LinkTransformer extends PropertyTransformerBase {
-    applyInitialization(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        const init = fieldOf(
-            arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME), property.id?.name!, true)
-        result.push(arkts.factory.createIfStatement(
-            (arkts.factory.createBinaryExpression(init, arkts.factory.createUndefinedLiteral(),
-                Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_NOT_EQUAL)),
-            applyInitializer(property, "provide")
-        ))
-    }
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.LINK)
-    }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "LinkDecoratorProperty"))
+    constructor() {
+        super(DecoratorNames.LINK, "LinkDecoratorProperty")
     }
     applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
         result.push(arkts.factory.createClassProperty(
             arkts.factory.createIdentifier(property.id?.name!),
             undefined,
-            createWrapperType("AbstractProperty", property.typeAnnotation!),
+            createWrapperType("SubscribedAbstractProperty", property.typeAnnotation!),
             arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_OPTIONAL,
             false
         ))
     }
-    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "linkTo", [initializerOf(property)]))
     }
-    collectImports(imports: Importer): void {
-        imports.add("LinkDecoratorProperty", "@ohos.arkui")
-        imports.add("AbstractProperty", "@ohos.arkui")
+}
+
+function withStorageKey(expressions: arkts.Expression[], property: arkts.ClassProperty, decorator: DecoratorNames): arkts.Expression[] {
+    const props = property.annotations.find(usage => isAnnotation(usage, decorator))!.properties
+    if (props.length > 1) throw new Error(`@${decorator}: only one parameter is expected`)
+    if (props.length > 0) {
+        const prop = props[0]
+        if (!arkts.isClassProperty(prop)) throw new Error(`@${decorator}: expected class property`)
+        const param = prop.value
+        if (param) expressions.push(param)
     }
+    return expressions
 }
 
 export class StorageLinkTransformer extends PropertyTransformerBase {
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.STORAGE_LINK)
+    constructor() {
+        super(DecoratorNames.STORAGE_LINK, "StorageLinkDecoratorProperty")
     }
-
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "StorageLinkDecoratorProperty", [
-            arkts.factory.createStringLiteral(getValueInDecorator(property, DecoratorNames.STORAGE_LINK)!)
-        ]))
-    }
-
-    collectImports(imports: Importer): void {
-        imports.add("StorageLinkDecoratorProperty", "@ohos.arkui")
-        imports.add("AbstractProperty", "@ohos.arkui")
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "init", withStorageKey([property.value!], property, this.decoratorName)))
     }
 }
 
 
-export class LocalStorageLinkTransformer extends StorageLinkTransformer {
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.LOCAL_STORAGE_LINK)
+export class LocalStorageLinkTransformer extends PropertyTransformerBase {
+    constructor() {
+        super(DecoratorNames.LOCAL_STORAGE_LINK, "LocalStorageLinkDecoratorProperty")
     }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[], pageLocalStorage?: arkts.Expression): void {
-        if (!pageLocalStorage) {
-            throw new Error(`@LocalStorageLink decorator requires storage or useSharedStorage to be set in @Entry decorator of the current file`)
-        }
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "LocalStorageLinkDecoratorProperty",
-            [
-                pageLocalStorage,
-                arkts.factory.createStringLiteral(
-                    annotationArgumentName(DecoratorNames.LOCAL_STORAGE_LINK, property)!
-                )
-            ]
-        ))
-    }
-    collectImports(imports: Importer): void {
-        imports.add("LocalStorageLinkDecoratorProperty", "@ohos.arkui")
-        imports.add("AbstractProperty", "@ohos.arkui")
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        if (!localStorage) throw new Error("@LocalStorageLink decorator requires specified local storage")
+        result.push(thisPropertyMethodCall(property, "init", withStorageKey([property.value!, localStorage], property, this.decoratorName)))
     }
 }
 
 export class PropTransformer extends PropertyTransformerBase {
-    applyInitialization(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        result.push(applyInitializer(property))
-    }
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.PROP)
-    }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "PropDecoratorProperty"))
+    constructor() {
+        super(DecoratorNames.PROP, "PropDecoratorProperty")
     }
     applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
         result.push(createOptionalClassProperty(property.id!.name, property))
     }
-    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        // Call backing.update(__context().scope<void>(__id(), 3), initializers?.property)
-        result.push(callBackingFieldMethod("update", property, [
-            // __context().scope<void>(__id(), 1)
-            arkts.factory.createCallExpression(
-                fieldOf(memoContext(), "scope"),
-                [
-                    memoId(), arkts.factory.createNumberLiteral(3)
-                ], undefined, false),
-            fieldOf(arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME), property.id?.name!, true)
-        ]))
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "init", [initializerOf(property), property.value ?? arkts.factory.createUndefinedLiteral()]))
     }
-    collectImports(imports: Importer): void {
-        imports.add("PropDecoratorProperty", "@ohos.arkui")
-        imports.add("__id", "@koalaui/runtime")
+    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "update", [initializerOf(property)]))
     }
 }
 
 export class StoragePropTransformer extends PropertyTransformerBase {
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.STORAGE_PROP)
+    constructor() {
+        super(DecoratorNames.STORAGE_PROP, "StoragePropDecoratorProperty")
     }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "StoragePropDecoratorProperty",
-            [
-                arkts.factory.createStringLiteral(
-                    annotationArgumentName(DecoratorNames.STORAGE_PROP, property)!
-                )
-            ]
-        ))
-    }
-    collectImports(imports: Importer): void {
-        imports.add("StoragePropDecoratorProperty", "@ohos.arkui")
-        imports.add("AbstractProperty", "@ohos.arkui")
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "init", withStorageKey([property.value!], property, this.decoratorName)))
     }
 }
 
-export class LocalStoragePropTransformer extends StoragePropTransformer {
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.LOCAL_STORAGE_PROP)
+export class LocalStoragePropTransformer extends PropertyTransformerBase {
+    constructor() {
+        super(DecoratorNames.LOCAL_STORAGE_PROP, "LocalStoragePropDecoratorProperty")
     }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[], pageLocalStorage?: arkts.Expression): void {
-        if (!pageLocalStorage) {
-            throw new Error(`@LocalStorageProp decorator requires storage or useSharedStorage to be set in @Entry decorator of the current file`)
-        }
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "LocalStoragePropDecoratorProperty",
-            [
-                pageLocalStorage,
-                arkts.factory.createStringLiteral(
-                    annotationArgumentName(DecoratorNames.LOCAL_STORAGE_PROP, property)!
-                )
-            ]
-        ))
-    }
-    collectImports(imports: Importer): void {
-        imports.add("LocalStoragePropDecoratorProperty", "@ohos.arkui")
-        imports.add("AbstractProperty", "@ohos.arkui")
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        if (!localStorage) throw new Error("@LocalStorageProp decorator requires specified local storage")
+        result.push(thisPropertyMethodCall(property, "init", withStorageKey([property.value!, localStorage], property, this.decoratorName)))
     }
 }
 
 export class ObjectLinkTransformer extends PropertyTransformerBase {
-    applyInitialization(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        result.push(applyInitializer(property))
-    }
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.OBJECT_LINK)
-    }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        throw new Error(`Implement me`)
-    }
-    applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        throw new Error(`Implement me`)
-    }
-}
-
-export function fieldOf(base: arkts.Expression, name: string, optional: boolean = false): arkts.MemberExpression {
-    return arkts.factory.createMemberExpression(
-        base,
-        arkts.factory.createIdentifier(name),
-        arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_PROPERTY_ACCESS,
-        false,
-        optional)
-}
-
-function annotationArgumentName(name: string, propertyOriginal: arkts.ClassProperty): string | undefined {
-    const property = propertyOriginal.annotations.find(it => arkts.isIdentifier(it.expr) && it.expr.name == name)!.properties[0]
-    if (property === undefined) {
-        return undefined
-    }
-    if (!arkts.isClassProperty(property)) {
-        return undefined
-    }
-    if (property.value === undefined) {
-        return undefined
-    }
-    if (!arkts.isStringLiteral(property.value)) {
-        return undefined
-    }
-    return property.value.str
-}
-
-function memoContext(): arkts.Expression {
-    return arkts.factory.createCallExpression(arkts.factory.createIdentifier("__context"), [], undefined)
-}
-
-function memoId(): arkts.Expression {
-    return arkts.factory.createCallExpression(arkts.factory.createIdentifier("__id"), [], undefined)
-}
-
-export class ProvideTransformer extends PropertyTransformerBase {
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.PROVIDE)
-    }
-    applyInitialization(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        result.push(applyInitializer(property))
-    }
-    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        result.push(callBackingFieldMethod("provide", property, [memoContext()]))
-    }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "ProvideDecoratorProperty",
-            [
-                arkts.factory.createStringLiteral(
-                    annotationArgumentName(DecoratorNames.PROVIDE, property) ?? property.id?.name!
-                )
-            ]
-        ))
+    constructor() {
+        super(DecoratorNames.OBJECT_LINK, "ObjectLinkDecoratorProperty")
     }
     applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
         result.push(createOptionalClassProperty(property.id!.name, property))
     }
-    collectImports(imports: Importer): void {
-        imports.add("ProvideDecoratorProperty", "@ohos.arkui")
-        imports.add("__context", "@koalaui/runtime")
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "init", [initializerOf(property), property.value ?? arkts.factory.createUndefinedLiteral()]))
     }
+    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "update", [initializerOf(property)]))
+    }
+}
+
+export function fieldOf(base: arkts.Expression, name: string, optional: boolean = false): arkts.Expression {
+    const result = arkts.factory.createMemberExpression(
+        base,
+        arkts.factory.createIdentifier(name),
+        arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_PROPERTY_ACCESS,
+        false,
+        optional
+    )
+    //if (optional) return arkts.factory.createChainExpression(result)
+    return result
+}
+
+function initializerOf(property: arkts.ClassProperty): arkts.Expression {
+    return fieldOf(arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME), property.id!.name, true)
+}
+
+function parseAllowOverride(propertyOriginal: arkts.ClassProperty): boolean {
+    const allowOverrideProperty = propertyOriginal.annotations.find(it => {
+            return arkts.isIdentifier(it.expr) && it.expr.name === DecoratorNames.PROVIDE
+        })?.properties.find(it => {
+            return arkts.isClassProperty(it) && it.id?.name === DecoratorParameters.ALLOW_OVERRIDE
+        })
+    return allowOverrideProperty !== undefined
+}
+
+function callStatementsOnce(statements: arkts.Statement[]): arkts.Statement {
+    const lambdaBody = arkts.factory.createBlockStatement(statements)
+    const lambda = arkts.factory.createScriptFunction(
+        lambdaBody,
+        undefined,
+        [],
+        undefined,
+        false,
+        arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_ARROW,
+        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
+        undefined,
+        undefined
+    )
+    return arkts.factory.createExpressionStatement(
+        arkts.factory.createCallExpression(
+            arkts.factory.createIdentifier("once"),
+            [ arkts.factory.createArrowFunctionExpression(lambda) ],
+            undefined,
+        )
+    )
+}
+
+export class ProvideTransformer extends PropertyTransformerBase {
+    constructor() {
+        super(DecoratorNames.PROVIDE, "ProvideDecoratorProperty")
+    }
+    applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
+        result.push(createOptionalClassProperty(property.id!.name, property))
+    }
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "init", [initializerOf(property), property.value!]))
+    }
+    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        const allowOverride = parseAllowOverride(property)
+        const params = withStorageKey([], property, this.decoratorName)
+        if (!allowOverride) {
+            result.push(callStatementsOnce([
+                thisPropertyMethodCall(property, "checkOverrides", params)
+            ]))
+        }
+        result.push(thisPropertyMethodCall(property, "provide", params))
+    }
+    collectImports(imports: Importer): void {
+        super.collectImports(imports)
+        imports.add("once", "@koalaui/runtime")
+    }
+
 }
 
 export class ConsumeTransformer extends PropertyTransformerBase {
-    check(property: arkts.ClassProperty): boolean {
-        return hasDecorator(property, DecoratorNames.CONSUME)
+    constructor() {
+        super(DecoratorNames.CONSUME, "ConsumeDecoratorProperty")
     }
-    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        result.push(callBackingFieldMethod("consume", property, [memoContext()]))
-    }
-    applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(...createWrappedProperty(property.id!.name, clazz, property, "ConsumeDecoratorProperty",
-            [
-                arkts.factory.createStringLiteral(
-                    annotationArgumentName(DecoratorNames.CONSUME, property) ?? property.id?.name!
-                )
-            ]
-        ))
-    }
-    applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-    }
-    collectImports(imports: Importer): void {
-        imports.add("ConsumeDecoratorProperty", "@ohos.arkui")
-        imports.add("__context", "@koalaui/runtime")
-        imports.add("StateContext", "@koalaui/runtime")
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        if (property.value) throw new Error("@Consume decorator does not expect property initializer")
+        result.push(thisPropertyMethodCall(property, "init", withStorageKey([], property, this.decoratorName)))
     }
 }
 
-export class BuilderParamTransformer extends PropertyTransformerBase {
+export class BuilderParamTransformer implements PropertyTransformer {
     check(property: arkts.ClassProperty): boolean {
         return hasDecorator(property, DecoratorNames.BUILDER_PARAM)
     }
-    applyInitialization(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        result.push(applyInitStatement(property))
+    collectImports(result: Importer): void {
+    }
+    applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
+        let backing = createOptionalClassProperty(property.id!.name, property)
+        backing.setAnnotations([annotation(InternalAnnotations.MEMO)])
+        result.push(backing)
     }
     applyStruct(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
         let backing = arkts.factory.createClassProperty(
@@ -549,10 +570,12 @@ export class BuilderParamTransformer extends PropertyTransformerBase {
         backing.setAnnotations([annotation(InternalAnnotations.MEMO)])
         result.push(backing)
     }
-    applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        let backing = createOptionalClassProperty(property.id!.name, property)
-        backing.setAnnotations([annotation(InternalAnnotations.MEMO)])
-        result.push(backing)
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(applyInitStatement(property))
+    }
+    applyDisposeStruct(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+    }
+    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
     }
 }
 
@@ -565,7 +588,7 @@ function applyInitStatement(property: arkts.ClassProperty): arkts.Statement {
             arkts.factory.createVariableDeclarator(
                 arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_CONST,
                 identifier,
-                fieldOf(arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME), name, true)
+                initializerOf(property)
             )
         ]
     )
@@ -579,7 +602,7 @@ function applyInitStatement(property: arkts.ClassProperty): arkts.Statement {
             arkts.factory.createExpressionStatement(
                 arkts.factory.createAssignmentExpression(
                     fieldOf(arkts.factory.createThisExpression(), name),
-                    identifier,
+                    arkts.factory.createTSNonNullExpression(identifier),
                     arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_SUBSTITUTION
                 )
             )

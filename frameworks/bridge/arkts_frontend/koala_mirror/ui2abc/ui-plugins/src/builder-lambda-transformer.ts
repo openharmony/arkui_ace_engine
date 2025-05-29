@@ -91,7 +91,7 @@ export function builderLambdaFunctionName(node: arkts.CallExpression): string | 
  */
 function inferType(node: arkts.CallExpression): arkts.Identifier | undefined {
     if (arkts.isIdentifier(node.callee)) {
-        const component = node.callee.name.replace("Impl", "")
+        const component = node.callee.name
         return arkts.factory.createIdentifier(uiAttributeName(component))
     }
     const decl = arkts.getDecl(node.callee!)
@@ -135,13 +135,27 @@ function createInstanceLambda(
             instanceLambdaBody,
             undefined,
             [lambdaParameter],
-            undefined,
+            arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID),
             false,
             arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_ARROW,
             arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
             undefined,
             undefined
         )
+    )
+}
+
+function builderLambdaCallee(name: string) {
+    if (!name.includes('.')) {
+        return arkts.factory.createIdentifier(name)
+    }
+    // TODO: What are the restrictions on builderLambda name?
+    return arkts.factory.createMemberExpression(
+        arkts.factory.createIdentifier(name.split('.')[0]),
+        arkts.factory.createIdentifier(name.split('.')[1]),
+        arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_PROPERTY_ACCESS,
+        false,
+        false
     )
 }
 
@@ -152,7 +166,7 @@ function transformBuilderLambdaCall(node: arkts.CallExpression): arkts.CallExpre
     }
     return arkts.factory.updateCallExpression(
         node,
-        arkts.factory.createIdentifier(implFunction, undefined),
+        builderLambdaCallee(implFunction),
         [
             createBuilderLambdaInstanceLambda(node),
             ...node.arguments.slice(1)

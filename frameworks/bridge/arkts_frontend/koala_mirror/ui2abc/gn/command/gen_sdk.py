@@ -16,7 +16,6 @@ import os
 import shutil
 import json
 import argparse
-import subprocess
 
 def load_config(config_file):
     """Load the configuration file."""
@@ -63,10 +62,6 @@ def copy_files(config, src_base, dist_base, out_root):
             except Exception as e:
                 print(f"Failed to copy directory: {source} -> {destination}, error: {e}")
 
-def apply_patch(dist_base):
-    """Apply patch."""
-    subprocess.run(["patch", "-d", dist_base, "-p", "0", "-i", f"{os.path.dirname(__file__)}/../patch/es2panda_lib.idl.patch"])
-
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Copy files or directories.")
@@ -82,8 +77,13 @@ def main():
     # Copy files or directories
     copy_files(config, args.src, args.dist, args.out_root)
 
-    # Apply patch to the files copied
-    apply_patch(args.dist)
+    # Create package.json to pass SDK validation
+    content = """{
+  "name": "@panda/sdk",
+  "version": "1.0.0"
+}"""
+    with open(os.path.join(args.dist, "package.json"), "w") as file:
+        file.write(content)
 
 if __name__ == '__main__':
     main()

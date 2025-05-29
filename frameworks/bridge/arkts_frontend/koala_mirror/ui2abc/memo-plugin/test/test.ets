@@ -14,7 +14,7 @@
  */
 
 import { memo, memo_stable, memo_intrinsic, memo_entry } from "@koalaui/runtime/annotations"
-import { __context, __id } from "@koalaui/runtime"
+import { __context, __id, __key } from "@koalaui/runtime"
 
 type MemoType = @memo () => void
 @memo type AnotherMemoType = () => void
@@ -195,6 +195,11 @@ class Test {
 	) {
 		arg()
 	}
+
+	@memo_intrinsic
+    static intrinsicKeyAccessor(): void {
+        let key = __key()
+    }
 }
 
 declare class AbstractTest {
@@ -204,6 +209,30 @@ declare class AbstractTest {
 		@memo arg3: ((() => void) | undefined) | ((() => int) | undefined),
 		@memo x: (y: (z: @memo () => void) => void) => void,
 	): @memo () => void
+}
+
+@memo_stable
+class MemoStableClass {
+	// default memo method
+	@memo
+	test1(x: string): string {
+		return x;
+	}
+
+	// memo method returns this
+	@memo
+    test2(value: int): this {
+        console.log(value)
+        return this
+    }
+}
+
+class MemoUnstableClass {
+	@memo
+    test2(value: int): this {
+        console.log(value)
+        return this
+    }
 }
 
 class Use {
@@ -223,6 +252,10 @@ class Use {
 
 		test.obj_arg({ x: 1, y: 2 })
 		test.compute_test((): void => {}, (): void => {}, (): void => {})
+
+		const MemoStableClass_instance = new MemoStableClass()
+		MemoStableClass_instance.test1("a")
+		MemoStableClass_instance.test2(5)
 	}
 }
 
