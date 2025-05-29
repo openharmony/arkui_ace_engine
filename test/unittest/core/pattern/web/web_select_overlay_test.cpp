@@ -1939,7 +1939,7 @@ bool HandleMenuItemClickV2(const NG::MenuItemParam& item)
 }
 
 /**
- * @tc.name: +9 RunQuickMenu_001
+ * @tc.name: RunQuickMenu_001
  * @tc.desc: RunQuickMenu.
  * @tc.type: FUNC
  */
