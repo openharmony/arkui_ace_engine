@@ -1344,6 +1344,8 @@ public:
 
     ScrollWindowAdapter* GetScrollWindowAdapter() const;
     ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
+    void MarkModifyDoneUnsafely();
+    void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
 
     bool HasMultipleChild();
 
