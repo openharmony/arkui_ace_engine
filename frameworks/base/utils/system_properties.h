@@ -82,23 +82,15 @@ union DebugFlags {
 };
 
 struct WidthLayoutBreakPoint {
-    double WidthVPXS;
-    double WidthVPSM;
-    double WidthVPMD;
-    double WidthVPLG;
-
-    WidthLayoutBreakPoint(
-        double widthVPSXS, double widthVPSM, double widthVPMD, double widthVPLG)
-        : WidthVPXS(widthVPSXS), WidthVPSM(widthVPSM), WidthVPMD(widthVPMD), WidthVPLG(widthVPLG)
-    {}
+    double WidthVPXS = 320.0;
+    double WidthVPSM = 600.0;
+    double WidthVPMD = 840.0;
+    double WidthVPLG = 1440.0;
 };
 
 struct HeightLayoutBreakPoint {
-    double HeightVPRATIOSM;
-    double HeightVPRATIOMD;
-    HeightLayoutBreakPoint(double heightVPRATIOSM, double heightVPRATIOMD)
-        : HeightVPRATIOSM(heightVPRATIOSM), HeightVPRATIOMD(heightVPRATIOMD)
-    {}
+    double HeightVPRATIOSM = 0.8;
+    double HeightVPRATIOMD = 1.2;
 };
 
 class ACE_FORCE_EXPORT SystemProperties final {
@@ -747,6 +739,7 @@ public:
     static WidthLayoutBreakPoint GetWidthLayoutBreakpoints();
 
     static HeightLayoutBreakPoint GetHeightLayoutBreakpoints();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -838,6 +831,8 @@ private:
     static bool pageTransitionFrzEnabled_;
     static bool formSkeletonBlurEnabled_;
     static int32_t formSharedImageCacheThreshold_;
+    static WidthLayoutBreakPoint widthLayoutBreakpoints_;
+    static HeightLayoutBreakPoint heightLayoutBreakpoints_;
 };
 
 } // namespace OHOS::Ace

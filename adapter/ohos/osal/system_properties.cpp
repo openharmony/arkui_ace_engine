@@ -54,13 +54,7 @@ constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engi
 constexpr char IS_OPINC_ENABLE[] = "persist.ddgr.opinctype";
 constexpr char LAYOUT_BREAKPOINT[] = "const.arkui.layoutbreakpoint";
 constexpr char LAYOUT_BREAKPOINT_DEFAULT[] = "320,600,1000,1440;0.8,1.2;";
-constexpr size_t NUM_0 = 0;
-constexpr size_t NUM_1 = 1;
-constexpr size_t NUM_2 = 2;
-constexpr size_t NUM_3 = 3;
-constexpr size_t NUM_4 = 4;
-const std::vector<double> WIDTH_DEFAULTS {320, 600, 1000, 1440};
-const std::vector<double> HEIGHT_DEFAULTS {0.8, 1.2};
+enum class LayoutBreakPointPart : uint32_t { WIDTH_PART = 0, HEIGHT_PART };
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -471,64 +465,26 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
-std::vector<std::string> Split(const std::string &s, char delimiter)
-{
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(s);
-    while (getline(tokenStream, token, delimiter)) {
-        if (!token.empty()) {
-            tokens.push_back(token);
-        }
-    }
-    return tokens;
-}
-
-bool IsValidNumber(const std::string &s, double &num)
-{
-    if (s.empty()) {
-        return false;
-    }
-
-    std::istringstream iss(s);
-    double parsedNum;
-
-    iss >> parsedNum;
-
-    // Check if parsing failed or there are remaining characters
-    if (iss.fail() || !iss.eof()) {
-        return false;
-    }
-
-    // Check for non-positive value
-    if (parsedNum <= 0) {
-        return false;
-    }
-
-    num = parsedNum;
-    return true;
-}
-
-bool IsAscending(const std::vector<double> &nums)
+bool IsAscending(const std::vector<double>& nums)
 {
     for (size_t i = 1; i < nums.size(); ++i) {
-        if (nums[i] < nums[i-1]) {
+        if (nums[i] < nums[i - 1]) {
             return false;
         }
     }
     return true;
 }
 
-bool ParseBreakPoints(const std::string& input, std::vector<double>& breakpointsVec, size_t expectedCount)
+bool ParseBreakPoints(const std::string& input, const size_t expectedCount, std::vector<double>& breakpointsVec)
 {
-    std::vector<std::string> tokens = Split(input, ',');
-    if (tokens.size() != expectedCount) {
+    std::vector<double> numVec;
+    StringUtils::StringSplitter(input, ',', numVec);
+    if (numVec.size() != expectedCount) {
         return false;
     }
 
-    for (const std::string& s : tokens) {
-        double num;
-        if (!IsValidNumber(s, num)) {
+    for (const double num : numVec) {
+        if (LessOrEqual(num, 0)) {
             return false;
         }
         breakpointsVec.push_back(num);
@@ -539,49 +495,60 @@ bool ParseBreakPoints(const std::string& input, std::vector<double>& breakpoints
 
 bool ParseWidthBreakPoints(const std::string& input, std::vector<double>& breakpointsVec)
 {
-    return ParseBreakPoints(input, breakpointsVec, NUM_4);
+    // 4 means that there are exactly 4 layout break points in the horizontal direction
+    return ParseBreakPoints(input, 4, breakpointsVec);
 }
 
 bool ParseHeightBreakPoints(const std::string& input, std::vector<double>& breakpointsVec)
 {
-    return ParseBreakPoints(input, breakpointsVec, NUM_2);
+    // 2 means that there are exactly 2 layout break points in the vertical direction
+    return ParseBreakPoints(input, 2, breakpointsVec);
 }
 
-std::vector<double> GetLayoutBreakpoints(
-    size_t partIndex, const std::vector<double>& defaults, bool (*parser)(const std::string&, std::vector<double>&))
+bool GetLayoutBreakpoints(const LayoutBreakPointPart partIndex, std::vector<double>& breakPoint,
+    bool (*parser)(const std::string&, std::vector<double>&))
 {
     auto param = system::GetParameter(LAYOUT_BREAKPOINT, LAYOUT_BREAKPOINT_DEFAULT);
     if (param == LAYOUT_BREAKPOINT_DEFAULT) {
         LOGI("Using default layout breakpoints");
-        return defaults;
+        return false;
     }
 
-    auto parts = Split(param, ';');
-    if (parts.size() == NUM_2) {
+    std::vector<std::string> parts;
+    StringUtils::StringSplitter(param, ';', parts);
+    // 2 means that "const.arkui.layoutbreakpoint" must have exactly two parts
+    if (parts.size() != 2) {
         LOGI("Invalid parameter format");
-        return defaults;
+        return false;
     }
 
-    std::vector<double> result;
-    if (parser(parts[partIndex], result)) {
+    if (parser(parts[static_cast<uint32_t>(partIndex)], breakPoint)) {
         LOGI("Custom breakpoints applied");
-        return result;
+        return true;
     }
 
     LOGI("Failed to parse, using defaults");
-    return defaults;
+    return false;
 }
 
-WidthLayoutBreakPoint SystemProperties::GetWidthLayoutBreakpoints()
+WidthLayoutBreakPoint AcquireWidthLayoutBreakpoints()
 {
-    std::vector<double> vec = GetLayoutBreakpoints(NUM_0, WIDTH_DEFAULTS, ParseWidthBreakPoints);
-    return WidthLayoutBreakPoint(vec[NUM_0], vec[NUM_1], vec[NUM_2], vec[NUM_3]);
+    std::vector<double> vec;
+    bool ret = GetLayoutBreakpoints(LayoutBreakPointPart::WIDTH_PART, vec, ParseWidthBreakPoints);
+    if (ret) {
+        return WidthLayoutBreakPoint { vec[0], vec[1], vec[2], vec[3] };
+    }
+    return WidthLayoutBreakPoint();
 }
 
-HeightLayoutBreakPoint SystemProperties::GetHeightLayoutBreakpoints()
+HeightLayoutBreakPoint AcquireHeightLayoutBreakpoints()
 {
-    std::vector<double> vec = GetLayoutBreakpoints(NUM_1, HEIGHT_DEFAULTS, ParseHeightBreakPoints);
-    return HeightLayoutBreakPoint(vec[NUM_0], vec[NUM_1]);
+    std::vector<double> vec;
+    bool ret = GetLayoutBreakpoints(LayoutBreakPointPart::HEIGHT_PART, vec, ParseHeightBreakPoints);
+    if (ret) {
+        return HeightLayoutBreakPoint { vec[0], vec[1] };
+    }
+    return HeightLayoutBreakPoint();
 }
 
 std::string InitSysBrand()
@@ -733,6 +700,8 @@ int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
+WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = AcquireWidthLayoutBreakpoints();
+HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = AcquireHeightLayoutBreakpoints();
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -901,6 +870,8 @@ void SystemProperties::InitDeviceInfo(
         screenShape_ = ScreenShape::NOT_ROUND;
     }
     InitDeviceTypeBySystemProperty();
+    widthLayoutBreakpoints_ = AcquireWidthLayoutBreakpoints();
+    heightLayoutBreakpoints_ = AcquireHeightLayoutBreakpoints();
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
@@ -1345,5 +1316,14 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
 int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
+}
+
+WidthLayoutBreakPoint SystemProperties::GetWidthLayoutBreakpoints()
+{
+    return widthLayoutBreakpoints_;
+}
+HeightLayoutBreakPoint SystemProperties::GetHeightLayoutBreakpoints()
+{
+    return heightLayoutBreakpoints_;
 }
 } // namespace OHOS::Ace

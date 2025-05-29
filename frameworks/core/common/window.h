@@ -242,6 +242,7 @@ public:
 
     WidthBreakpoint GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBreakpoints) const;
     HeightBreakpoint GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const;
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
