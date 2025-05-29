@@ -666,4 +666,27 @@ HWTEST_F(RichEditorPatternTestSevenNg, PageScrollTest001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->scrollOffset_, 0);
     EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
 }
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility002
+ * @tc.desc: test UpdateSelectionAndHandleVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, UpdateSelectionAndHandleVisibility002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->sourceTool_ = SourceTool::MOUSE;
+    richEditorPattern->releaseInDrop_ = true;
+    AddSpan("test--test");
+
+    richEditorPattern->textSelector_.Update(5, 10);
+    richEditorPattern->lastCaretPosition_ = 5;
+    richEditorPattern->insertValueLength_ = 5;
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->UpdateSelectionAndHandleVisibility();
+    ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 5);
+    ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 10);
+}
 } // namespace OHOS::Ace::NG
