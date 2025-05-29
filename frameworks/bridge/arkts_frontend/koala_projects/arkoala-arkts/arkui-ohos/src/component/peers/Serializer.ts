@@ -16089,7 +16089,7 @@ export class Serializer extends SerializerBase {
             const value_controller_value  = value_controller!
             valueSerializer.writeTabsController(value_controller_value)
         }
-        const value_barModifier  = value.barModifier
+        const value_barModifier  = undefined
         let value_barModifier_type : int32 = RuntimeType.UNDEFINED
         value_barModifier_type = runtimeType(value_barModifier)
         valueSerializer.writeInt8(value_barModifier_type as int32)
