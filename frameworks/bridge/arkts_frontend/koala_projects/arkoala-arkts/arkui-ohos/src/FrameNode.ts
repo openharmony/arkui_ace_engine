@@ -30,6 +30,7 @@ import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
+import { Deserializer } from "./component/peers/Deserializer";
 
 export class ArkFrameNodePeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -335,10 +336,17 @@ export class FrameNode implements MaterializedBase {
         return retval;
     }
     private getPositionToWindowWithTransform_serialize(): Position {
-        // const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr)
-        // let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        // const returnResult : Position = retvalDeserializer.readGraphicsPosition()
-        return {x: 0, y: 0};
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr) as FixedArray<byte>;
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>;
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]));
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition();
+        return returnResult;
     }
     private static getFrameNodeByKey_serialize(name: string): FrameNode {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(name)
