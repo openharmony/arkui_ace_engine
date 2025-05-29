@@ -288,7 +288,9 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
         bool sizeDiminished =
             !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
-        CheckRestartSpring(sizeDiminished);
+        if (!GetCanStayOverScroll()) {
+            CheckRestartSpring(sizeDiminished);
+        }
         isInitialized_ = true;
     } else {
         ACE_SCOPED_TRACE("List MeasureInNextFrame");
