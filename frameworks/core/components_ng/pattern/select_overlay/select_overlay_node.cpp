@@ -728,6 +728,47 @@ std::function<void()> ConvertToVoidFunction(std::function<void(std::string)> fun
     };
 }
 
+void GetOptionsParamsHasSymbol(
+    const std::shared_ptr<SelectOverlayInfo>& info, RefPtr<TextOverlayTheme>& theme, std::vector<OptionParam>& params)
+{
+    CHECK_NULL_VOID(info);
+    CHECK_NULL_VOID(theme);
+    params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
+        theme->GetCutLabelInfo(), info->menuInfo.showCut, theme->GetCutSymbolId());
+    params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
+        theme->GetCopyLabelInfo(), info->menuInfo.showCopy, theme->GetCopySymbolId());
+    params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
+        theme->GetPasteLabelInfo(), info->menuInfo.showPaste, theme->GetPasteSymbolId());
+    params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
+        theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll, theme->GetCopyAllSymbolId());
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
+        TextSystemMenu::IsShowTranslate()) {
+        params.emplace_back(theme->GetTranslateLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onTranslate),
+            "", info->menuInfo.showTranslate);
+        params.back().symbolId = theme->GetTranslateSymbolId();
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (TextSystemMenu::IsShowShare()) {
+            params.emplace_back(theme->GetShareLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onShare), "",
+                info->menuInfo.showShare);
+            params.back().symbolId = theme->GetShareSymbolId();
+        }
+        if (TextSystemMenu::IsShowSearch()) {
+            params.emplace_back(theme->GetSearchLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSearch),
+                "", info->menuInfo.showSearch);
+            params.back().symbolId = theme->GetSearchSymbolId();
+        }
+    }
+    if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
+        auto inheritFunc = ConvertToVoidFunction(info->menuCallback.onAIMenuOption, "From_Right_Click");
+        params.emplace_back(theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType),
+            GetMenuCallbackWithContainerId(inheritFunc), "", true);
+        params.back().symbolId = theme->GetAIMenuSymbolId();
+        params.back().isAIMenuOption = true;
+    }
+}
+
 std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<OptionParam> params;
@@ -736,25 +777,17 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, params);
     if (theme->GetShowShortcut()) {
-        params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
-            theme->GetCutLabelInfo(), info->menuInfo.showCut, theme->GetCutSymbolId());
-        params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
-            theme->GetCopyLabelInfo(), info->menuInfo.showCopy, theme->GetCopySymbolId());
-        params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
-            theme->GetPasteLabelInfo(), info->menuInfo.showPaste, theme->GetPasteSymbolId());
-        params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
-            theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll, theme->GetCopyAllSymbolId());
-    } else {
-        params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
-            theme->GetCutLabelInfo(), info->menuInfo.showCut);
-        params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
-            theme->GetCopyLabelInfo(), info->menuInfo.showCopy);
-        params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
-            theme->GetPasteLabelInfo(), info->menuInfo.showPaste);
-        params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
-            theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll);
+        GetOptionsParamsHasSymbol(info, theme, params);
+        return params;
     }
-
+    params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
+        theme->GetCutLabelInfo(), info->menuInfo.showCut);
+    params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
+        theme->GetCopyLabelInfo(), info->menuInfo.showCopy);
+    params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
+        theme->GetPasteLabelInfo(), info->menuInfo.showPaste);
+    params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
+        theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
         TextSystemMenu::IsShowTranslate()) {
         params.emplace_back(theme->GetTranslateLabel(),
@@ -897,6 +930,17 @@ void CloseOverlayIfNecessary(const RefPtr<SelectOverlayManager>& overlayManager)
     contentOverlayManager->CloseCurrent(true, CloseReason::CLOSE_REASON_TOOL_BAR);
 }
 
+void SetMenuOptionsItem(std::vector<OptionParam>& params, MenuOptionsParam& item,
+    const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    if (item.symbolId.has_value()) {
+        params.back().symbolId = item.symbolId.value();
+    }
+    params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
+    params.back().disableSystemClick = true;
+    params.back().isAIMenuOption = IsAIMenuOption(item.id);
+}
+
 std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOptionsParam>& menuOptionItems,
     const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex)
 {
@@ -940,16 +984,9 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
                 CloseOverlayIfNecessary(overlayManager);
             }
         };
-        if (item.symbolId.has_value()) {
-            params.emplace_back(
-                GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback, item.symbolId.value_or(0));
-        } else {
-            params.emplace_back(
-                GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback);
-        }
-        params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
-        params.back().disableSystemClick = true;
-        params.back().isAIMenuOption = IsAIMenuOption(item.id);
+        params.emplace_back(
+            GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback);
+        SetMenuOptionsItem(params, item, info);
         itemNum++;
     }
     return params;
@@ -1064,9 +1101,13 @@ void SetMenuItemIcon(const RefPtr<FrameNode>& menuItem, const OptionParam& param
     layoutProperty->UpdateFontSize(theme->GetEndIconWidth());
     layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
     layoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
-    layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(param.symbolId));
     MarginProperty margin;
-    margin.right = CalcLength(theme->GetIconContentPadding());
+    if (param.symbolId != 0) {
+        layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(param.symbolId));
+        margin.right = CalcLength(theme->GetIconContentPadding());
+    } else {
+        margin.right = CalcLength(theme->GetIconContentPadding() + theme->GetIconSideLength());
+    }
     layoutProperty->UpdateMargin(margin);
     symbol->MountToParent(leftRow);
 }
@@ -1082,7 +1123,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
-    if (!isPaste && param.symbolId != 0) {
+    if (!isPaste) {
         SetMenuItemIcon(menuItem, param, leftRow);
     }
     auto leftTextNode = CreateMenuTextNode(content, leftRow, param.isAIMenuOption);

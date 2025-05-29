@@ -62,6 +62,7 @@ public:
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             theme->translateSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.translate_c2e");
             theme->aiMenuSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
+            theme->shareSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.share");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
             ParseAIMenu(themeConstants->GetThemeStyle(), theme);
@@ -482,6 +483,11 @@ public:
     {
         return aiMenuSymbolId_;
     }
+    
+    const uint32_t& GetShareSymbolId() const
+    {
+        return shareSymbolId_;
+    }
 
     const Color& GetAIMenuSymbolColor() const
     {
@@ -545,6 +551,7 @@ private:
     uint32_t searchSymbolId_ = 0;
     uint32_t translateSymbolId_ = 0;
     uint32_t aiMenuSymbolId_ = 0;
+    uint32_t shareSymbolId_ = 0;
 
     std::unordered_map<OHOS::Ace::TextDataDetectType, std::string> aiMenuTypeOptionNames_;
     std::vector<Color> aiMenuFontGradientColors_;
