@@ -81,6 +81,9 @@
             ],
             "@ohos/arkui/graphics": [
                 "./ohos.arkui.graphics.ts"
+            ],
+            "@ohos.promptAction": [
+                "./ohos.promptAction.ts"
             ]
         },
         "rootDir": "."
@@ -99,7 +102,8 @@
         "./ohos.arkui.observer.ts",
         "./ohos.graphics.common2D.ts",
         "./ohos.graphics.drawing.ts",
-        "./ohos.arkui.graphics.ts"
+        "./ohos.arkui.graphics.ts",
+        "./ohos.promptAction.ts"
     ],
     "exclude": [
         "./src/component/arkts",

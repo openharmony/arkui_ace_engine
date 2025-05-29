@@ -64,19 +64,20 @@ inline void AssignCast(std::optional<GridItemAlignment>& dst, const Ark_GridItem
 template<>
 inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_Tuple_Number_Number& src)
 {
-    dst->rows = Converter::Convert<int32_t>(src.value0);
-    dst->columns = Converter::Convert<int32_t>(src.value1);
+    auto rows = Converter::Convert<int32_t>(src.value0);
+    auto columns = Converter::Convert<int32_t>(src.value1);
+    dst = {.rows = rows, .columns = columns};
 }
 
 template<>
 inline void AssignCast(std::optional<GridItemRect>& dst, const Ark_Tuple_Number_Number_Number_Number& src)
 {
-    dst->rowStart = Converter::Convert<int32_t>(src.value0);
-    dst->rowSpan = Converter::Convert<int32_t>(src.value1);
-    dst->columnStart = Converter::Convert<int32_t>(src.value2);
-    dst->columnSpan = Converter::Convert<int32_t>(src.value3);
+    auto rowStart = Converter::Convert<int32_t>(src.value0);
+    auto columnStart = Converter::Convert<int32_t>(src.value1);
+    auto rowSpan = Converter::Convert<int32_t>(src.value2);
+    auto columnSpan = Converter::Convert<int32_t>(src.value3);
+    dst = {.rowStart = rowStart, .columnStart = columnStart, .rowSpan = rowSpan, .columnSpan = columnSpan};
 }
-
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -91,6 +92,18 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // GridModifier
 namespace GridInterfaceModifier {
+void SetScroll(FrameNode* frameNode, const Opt_Scroller* scroller)
+{
+    CHECK_NULL_VOID(scroller);
+    RefPtr<ScrollControllerBase> positionController = GridModelNG::GetOrCreateController(frameNode);
+    RefPtr<ScrollProxy> scrollBarProxy = GridModelNG::GetOrCreateScrollBarProxy(frameNode);
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
+    CHECK_NULL_VOID(abstPeerPtrOpt);
+    auto peerImplPtr = *abstPeerPtrOpt;
+    CHECK_NULL_VOID(peerImplPtr);
+    peerImplPtr->SetController(positionController);
+    peerImplPtr->SetScrollBarProxy(scrollBarProxy);
+}
 void SetGridOptionsImpl(Ark_NativePointer node,
                         const Opt_Scroller* scroller,
                         const Opt_GridLayoutOptions* layoutOptions)
@@ -134,17 +147,7 @@ void SetGridOptionsImpl(Ark_NativePointer node,
         }
         GridModelNG::SetLayoutOptions(frameNode, options);
     }
-    CHECK_NULL_VOID(scroller);
-    RefPtr<ScrollControllerBase> positionController = GridModelNG::GetOrCreateController(frameNode);
-    RefPtr<ScrollProxy> scrollBarProxy = GridModelNG::GetOrCreateScrollBarProxy(frameNode);
-
-     // obtain the external SwiperController peer
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
-    CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = *abstPeerPtrOpt;
-    CHECK_NULL_VOID(peerImplPtr);
-    peerImplPtr->SetController(positionController);
-    peerImplPtr->SetScrollBarProxy(scrollBarProxy);
+    SetScroll(frameNode, scroller);
 }
 } // GridInterfaceModifier
 namespace GridAttributeModifier {

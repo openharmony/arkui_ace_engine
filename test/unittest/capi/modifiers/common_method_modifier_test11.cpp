@@ -107,13 +107,11 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsInitialPopupInfoTest, 
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMessageTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -137,14 +135,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMessageTest, TestSize.
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementDefaultValueTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .placement = Converter::ArkValue<Opt_Placement>(Ark_Empty())
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -168,15 +164,13 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementDefaultValueT
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementValidValueTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .placement = Converter::ArkValue<Opt_Placement>(
             Converter::ArkValue<Ark_Placement>(Ark_Placement::ARK_PLACEMENT_TOP))
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -200,15 +194,13 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementValidValueTes
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementInvalidValueTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .placement = Converter::ArkValue<Opt_Placement>(
             Converter::ArkValue<Ark_Placement>(static_cast<Ark_Placement>(-1)))
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -222,88 +214,6 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementInvalidValueT
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
-    EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_BOTTOM);
-}
-
-// deprecated
-/*
- * @tc.name: bindPopupPopupOptionsPlacementOnTopDefaultValueTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementOnTopDefaultValueTest, TestSize.Level1)
-{
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .placement = Converter::ArkValue<Opt_Placement>(Ark_Empty()),
-        .placementOnTop = Converter::ArkValue<Opt_Boolean>(Ark_Empty())
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
-
-    UINode* blankNode = reinterpret_cast<UINode *>(node_);
-    RefPtr<UINode> blankRef = AceType::Claim(blankNode);
-    auto context = blankNode->GetContext();
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode, nullptr);
-
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
-    auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
-    EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_BOTTOM);
-}
-
-// deprecated
-/*
- * @tc.name: bindPopupPopupOptionsPlacementOnTopTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementOnTopTest, TestSize.Level1)
-{
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .placement = Converter::ArkValue<Opt_Placement>(Ark_Empty()),
-        .placementOnTop = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true))
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
-
-    UINode* blankNode = reinterpret_cast<UINode *>(node_);
-    RefPtr<UINode> blankRef = AceType::Claim(blankNode);
-    auto context = blankNode->GetContext();
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode, nullptr);
-
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
-    auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
-    EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_TOP);
-
-    arkOptions = {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .placement = Converter::ArkValue<Opt_Placement>(Ark_Empty()),
-        .placementOnTop = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false))
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
-
-    popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode, nullptr);
-
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
-    checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
     EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_BOTTOM);
 }
 
@@ -314,15 +224,13 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementOnTopTest, Te
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .arrowOffset = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .arrowPointPosition = Converter::ArkValue<Opt_ArrowPointPosition>(Ark_Empty())
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -339,13 +247,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetTest, TestS
     EXPECT_EQ(checkValue, "0.00px");
 
     // valid value
-    arkOptions = {
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .arrowOffset = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(1._px)),
         .arrowPointPosition = Converter::ArkValue<Opt_ArrowPointPosition>(Ark_Empty())
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -366,15 +273,13 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetTest, TestS
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetPointPositionTest, TestSize.Level1)
 {
     // default value
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .arrowOffset = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .arrowPointPosition = Converter::ArkValue<Opt_ArrowPointPosition>(Ark_Empty())
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -391,14 +296,13 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetPointPositi
     EXPECT_EQ(checkValue, "0.00px");
 
     // valid value
-    arkOptions = {
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .arrowOffset = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .arrowPointPosition = Converter::ArkValue<Opt_ArrowPointPosition>(
             Converter::ArkValue<Ark_ArrowPointPosition>(Ark_ArrowPointPosition::ARK_ARROW_POINT_POSITION_CENTER))
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -419,14 +323,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetPointPositi
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsTargetSpaceTest, TestSize.Level1)
 {
     // default value
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .targetSpace = Converter::ArkValue<Opt_Length>(Ark_Empty()),
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -443,12 +345,11 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsTargetSpaceTest, TestS
     EXPECT_EQ(checkValue, "8.00vp"); // default from PopupTheme
 
     // valid value
-    arkOptions = {
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .targetSpace = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(1._px)),
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -459,12 +360,11 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsTargetSpaceTest, TestS
     EXPECT_EQ(checkValue, "1.00px");
 
     // negative value
-    arkOptions = {
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .targetSpace = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(-1._px)),
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -483,14 +383,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsTargetSpaceTest, TestS
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableArrowTest, TestSize.Level1)
 {
     // default value
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .enableArrow = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -507,12 +405,11 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableArrowTest, TestS
     EXPECT_TRUE(checkValue); // default from PopupParam
 
     // valid value
-    arkOptions = {
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .enableArrow = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -530,14 +427,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableArrowTest, TestS
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableHoverModeDefaultValueTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .enableHoverMode = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -561,14 +456,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableHoverModeDefault
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableHoverModeTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .enableHoverMode = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true))
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -593,14 +486,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableHoverModeTest, T
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsFollowTransformOfTargetTest, TestSize.Level1)
 {
     // default value
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .followTransformOfTarget = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -617,12 +508,11 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsFollowTransformOfTarge
     EXPECT_FALSE(checkValue); // default from PopupParam
 
     // valid value
-    arkOptions = {
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .followTransformOfTarget = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true)),
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -640,14 +530,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsFollowTransformOfTarge
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsAutoCancelDefaultValueTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .autoCancel = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -671,14 +559,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsAutoCancelDefaultValue
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsAutoCancelTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .autoCancel = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true)),
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -702,14 +588,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsAutoCancelTest, TestSi
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskBlockEventTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(Ark_Empty())
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(Ark_Empty())
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -725,14 +609,13 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskBlockEventTest, Te
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_BLOCK_EVENT);
     EXPECT_TRUE(checkValue);
 
-    Ark_Union_Boolean_Literal_ResourceColor_color arkUnionMask;
-    TypeHelper::WriteToUnion<Ark_Boolean>(arkUnionMask) = Converter::ArkValue<Ark_Boolean>(false);
-    arkOptions = {
+
+    auto arkUnionMask = Converter::ArkUnion<Ark_Union_Boolean_PopupMaskType, Ark_Boolean>(false);
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -750,14 +633,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskBlockEventTest, Te
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorDefaultTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(Ark_Empty())
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(Ark_Empty())
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -782,18 +663,16 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorDefaultTest, 
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorColorNumberTest, TestSize.Level1)
 {
     // color as ark_color
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
-    Ark_Literal_ResourceColor_color literalColor = { .color = colorArkColor };
-    Ark_Union_Boolean_Literal_ResourceColor_color arkUnionMask;
-    TypeHelper::WriteToUnion<Ark_Literal_ResourceColor_color>(arkUnionMask) = literalColor;
-    Ark_PopupOptions arkOptions = {
+    Ark_PopupMaskType literalColor = { .color = colorArkColor };
+    auto arkUnionMask = Converter::ArkUnion<
+        Ark_Union_Boolean_PopupMaskType, Ark_PopupMaskType>(literalColor);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -812,13 +691,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorColorNumberTe
     // color as number
     auto colorArkNumber = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(TEST_COLOR_BLUE_NUM);
     literalColor = { .color = colorArkNumber };
-    TypeHelper::WriteToUnion<Ark_Literal_ResourceColor_color>(arkUnionMask) = literalColor;
-    arkOptions = {
+    TypeHelper::WriteToUnion<Ark_PopupMaskType>(arkUnionMask) = literalColor;
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -837,18 +715,16 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorColorNumberTe
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorStringResourceTest, TestSize.Level1)
 {
     // color as string
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto colorArkStr = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(TEST_COLOR_BLUE_STR);
-    Ark_Literal_ResourceColor_color literalColor = { .color = colorArkStr };
-    Ark_Union_Boolean_Literal_ResourceColor_color arkUnionMask;
-    TypeHelper::WriteToUnion<Ark_Literal_ResourceColor_color>(arkUnionMask) = literalColor;
-    Ark_PopupOptions arkOptions = {
+    Ark_PopupMaskType literalColor = { .color = colorArkStr };
+    auto arkUnionMask = Converter::ArkUnion<
+        Ark_Union_Boolean_PopupMaskType, Ark_PopupMaskType>(literalColor);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -867,13 +743,13 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorStringResourc
     // color as resource
     auto colorArkRes = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(TEST_COLOR_RESOURCE);
     literalColor = { .color = colorArkRes };
-    TypeHelper::WriteToUnion<Ark_Literal_ResourceColor_color>(arkUnionMask) = literalColor;
-    arkOptions = {
+    arkUnionMask = Converter::ArkUnion<
+        Ark_Union_Boolean_PopupMaskType, Ark_PopupMaskType>(literalColor);
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -891,14 +767,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorStringResourc
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsOffsetTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .offset = Converter::ArkValue<Opt_Position>(Ark_Empty())
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -920,12 +794,11 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsOffsetTest, TestSize.L
         .x = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(xLength)),
         .y = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(yLength))
     };
-    arkOptions = {
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .offset = Converter::ArkValue<Opt_Position>(arkPosition)
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -943,14 +816,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsOffsetTest, TestSize.L
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorDefaultTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(Ark_Empty())
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -975,18 +846,14 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorDefaultTest,
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorColorStringTest, TestSize.Level1)
 {
     // color as arkcolor
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    auto colorArkColor = Converter::ArkValue<Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
-    Ark_Union_Color_String_Resource_Number arkUnionPopupColor;
-    TypeHelper::WriteToUnion<Ark_Color>(arkUnionPopupColor) = colorArkColor;
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnionPopupColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_Number, Ark_Color>(ARK_COLOR_BLUE);
 
-    Ark_PopupOptions arkOptions = {
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(arkUnionPopupColor)
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -1003,14 +870,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorColorStringT
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
 
     // color as string
-    auto colorArkStr = Converter::ArkValue<Ark_String>(TEST_COLOR_BLUE_STR);
-    TypeHelper::WriteToUnion<Ark_String>(arkUnionPopupColor) = colorArkStr;
-    arkOptions = {
+    arkUnionPopupColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_Number, Ark_String>(TEST_COLOR_BLUE_STR);
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(arkUnionPopupColor)
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -1029,18 +894,14 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorColorStringT
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorNumberResourceTest, TestSize.Level1)
 {
     // color as number
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    auto colorArkNumber = Converter::ArkValue<Ark_Number>(TEST_COLOR_BLUE_NUM);
-    Ark_Union_Color_String_Resource_Number arkUnionPopupColor;
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionPopupColor) = colorArkNumber;
-
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnionPopupColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_Number, Ark_Number>(
+        TEST_COLOR_BLUE_NUM);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(arkUnionPopupColor)
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -1058,12 +919,11 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorNumberResour
 
     // color as resource
     TypeHelper::WriteToUnion<Ark_Resource>(arkUnionPopupColor) = TEST_COLOR_RESOURCE;
-    arkOptions = {
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(arkUnionPopupColor)
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
@@ -1081,14 +941,12 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorNumberResour
  */
 HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsShowInSubWindowTest, TestSize.Level1)
 {
-    Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    Ark_PopupOptions arkOptions = {
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
+    auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .showInSubWindow = Converter::ArkValue<Opt_Boolean>(Ark_Empty())
-    };
-    Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
     RefPtr<UINode> blankRef = AceType::Claim(blankNode);
@@ -1104,12 +962,11 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsShowInSubWindowTest, T
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_SHOW_IN_SUBWINDOW);
     EXPECT_FALSE(checkValue);
 
-    arkOptions = {
+    arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
         .showInSubWindow = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true))
-    };
-    TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
-    modifier_->setBindPopup(node_, arkShow, &arkUnion);
+    });
+    modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);

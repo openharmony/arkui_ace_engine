@@ -92,7 +92,9 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
             auto builderOpt = Converter::OptConvert<CustomNodeBuilder>(value0.builder);
             if (builderOpt.has_value()) {
                 auto builder = [callback = CallbackHelper(builderOpt.value()), node]() -> RefPtr<UINode> {
-                    return callback.BuildSync(node);
+                    auto subMenuNode = callback.BuildSync(node);
+                    ViewStackProcessor::GetInstance()->Push(subMenuNode);
+                    return subMenuNode;
                 };
                 menuItemProps.buildFunc = builder;
             }

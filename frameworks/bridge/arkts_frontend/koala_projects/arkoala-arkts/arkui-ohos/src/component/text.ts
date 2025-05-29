@@ -342,15 +342,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (TypeChecker.isFontWeight(value_value)) {
+            if (TypeChecker.isFontWeight(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as FontWeight
                 thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_value_1))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
             }
             else if (RuntimeType.STRING == value_value_type) {
                 thisSerializer.writeInt8(2 as int32)
@@ -370,15 +370,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const weight_value  = weight!
             let weight_value_type : int32 = RuntimeType.UNDEFINED
             weight_value_type = runtimeType(weight_value)
-            if (RuntimeType.NUMBER == weight_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const weight_value_0  = weight_value as number
-                thisSerializer.writeNumber(weight_value_0)
-            }
-            else if (TypeChecker.isFontWeight(weight_value)) {
+            if (TypeChecker.isFontWeight(weight_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const weight_value_1  = weight_value as FontWeight
                 thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(weight_value_1))
+            }
+            else if (RuntimeType.NUMBER == weight_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const weight_value_0  = weight_value as number
+                thisSerializer.writeNumber(weight_value_0)
             }
             else if (RuntimeType.STRING == weight_value_type) {
                 thisSerializer.writeInt8(2 as int32)
@@ -1331,13 +1331,8 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
             const fontValue_type = runtimeType(fontValue)
             const options_type = runtimeType(options)
             if ((RuntimeType.OBJECT == fontValue_type) || (RuntimeType.UNDEFINED == fontValue_type)) {
-                const value_casted = fontValue as (Font | undefined)
-                this.getPeer()?.font0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == fontValue_type) || (RuntimeType.UNDEFINED == fontValue_type)) {
                 const fontValue_casted = fontValue as (Font | undefined)
-                const options_casted = options as (FontSettingOptions)
+                const options_casted = options as (FontSettingOptions | undefined)
                 this.getPeer()?.font1Attribute(fontValue_casted, options_casted)
                 return this
             }
@@ -1414,13 +1409,8 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
             const weight_type = runtimeType(weight)
             const options_type = runtimeType(options)
             if ((RuntimeType.NUMBER == weight_type) || (RuntimeType.NUMBER == weight_type) || (RuntimeType.STRING == weight_type) || (RuntimeType.UNDEFINED == weight_type)) {
-                const value_casted = weight as (number | FontWeight | string | undefined)
-                this.getPeer()?.fontWeight0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == weight_type) || (RuntimeType.NUMBER == weight_type) || (RuntimeType.STRING == weight_type) || (RuntimeType.UNDEFINED == weight_type)) {
                 const weight_casted = weight as (number | FontWeight | string | undefined)
-                const options_casted = options as (FontSettingOptions)
+                const options_casted = options as (FontSettingOptions | undefined)
                 this.getPeer()?.fontWeight1Attribute(weight_casted, options_casted)
                 return this
             }

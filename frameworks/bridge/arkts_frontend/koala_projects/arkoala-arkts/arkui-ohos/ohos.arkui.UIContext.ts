@@ -39,8 +39,12 @@ import { KeyEvent } from "./src/component/common"
 import { Nullable } from "./src/component/enums"
 import { KeyProcessingMode } from "./src/component/focus"
 import { uiObserver } from "@ohos/arkui/observer"
+import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
+    AlertDialogParamWithOptions }from "./src/component/alertDialog"
 import inspector from "@ohos/arkui/inspector"
 import router from './ohos.router'
+import promptAction from './ohos.promptAction';
+import { ContextMenu } from './src/component/contextMenu';
 
 export class UIInspector {
     instanceId_: int32 = -1;
@@ -69,7 +73,7 @@ export class Font {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let arrayResult_ = GlobalScope_ohos_font.getSystemFontList();
         ArkUIAniModule._Common_Restore_InstanceId();
-        return new Array<string>();
+        return arrayResult_;
     }
     public getFontByName(fontName : string) : FontInfo {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
@@ -88,13 +92,13 @@ export class MeasureUtils {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let width = GlobalScope_ohos_measure_utils.measureText(options);
         ArkUIAniModule._Common_Restore_InstanceId();
-        return 0;
+        return width;
     }
     public measureTextSize(options: MeasureOptions) : SizeOptions {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
         ArkUIAniModule._Common_Restore_InstanceId();
-        return {};
+        return sizeOptions;
     }
 }
 
@@ -181,6 +185,31 @@ export class FocusController {
     }
 }
 
+class ContextMenuController {
+    instanceId_: int32
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+
+    public close(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ContextMenu.close();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
+export class PromptAction {
+    instanceId_: int32 = 100000;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+
+    showToast(options: promptAction.ShowToastOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
 export class UIContext {
     instanceId_: int32 = 100000;
     observer_ :UIObserver |null = null;
@@ -189,12 +218,14 @@ export class UIContext {
     componentUtils_: ComponentUtils;
     atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspector | null = null;
+    contextMenuController_: ContextMenuController;
 
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
         this.focusController_ = new FocusController(instanceId);
         this.componentUtils_ = new ComponentUtils(instanceId);
         this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
+        this.contextMenuController_ = new ContextMenuController(instanceId);
     }
     public getFont() : Font {
         let font : Font = new Font(this.instanceId_);
@@ -280,6 +311,10 @@ export class UIContext {
         return this.focusController_;
     }
 
+    public getContextMenuController(): ContextMenuController {
+        return this.contextMenuController_;
+    }
+
     public getComponentUtils(): ComponentUtils {
         return this.componentUtils_;
     }
@@ -356,6 +391,18 @@ export class UIContext {
             this.observer_ = new UIObserver(this.instanceId_);
         }
         return this.observer_ as UIObserver;
+    }
+
+    public getPromptAction(): PromptAction {
+        let promptAction : PromptAction = new PromptAction(this.instanceId_);
+        return promptAction;
+    }
+
+    public showAlertDialog(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons |
+        AlertDialogParamWithOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        AlertDialog.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     // @ts-ignore

@@ -222,13 +222,13 @@ export class StyledString implements MaterializedBase {
     }
 }
 export class TextStyle_styled_stringInternal {
-    public static fromPtr(ptr: KPointer): TextStyle_styled_string {
-        const obj : TextStyle_styled_string = new TextStyle_styled_string(undefined)
-        obj.peer = new Finalizable(ptr, TextStyle_styled_string.getFinalizer())
+    public static fromPtr(ptr: KPointer): TextStyle {
+        const obj : TextStyle = new TextStyle(undefined)
+        obj.peer = new Finalizable(ptr, TextStyle.getFinalizer())
         return obj
     }
 }
-export class TextStyle_styled_string implements MaterializedBase {
+export class TextStyle implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
@@ -262,8 +262,8 @@ export class TextStyle_styled_string implements MaterializedBase {
         return retval
     }
     constructor(value?: TextStyleInterface) {
-        const ctorPtr : KPointer = TextStyle_styled_string.ctor_textstyle_styled_string(value)
-        this.peer = new Finalizable(ctorPtr, TextStyle_styled_string.getFinalizer())
+        const ctorPtr : KPointer = TextStyle.ctor_textstyle_styled_string(value)
+        this.peer = new Finalizable(ctorPtr, TextStyle.getFinalizer())
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextStyle_styled_string_getFinalizer()
@@ -940,7 +940,7 @@ export interface ParagraphStyleInterface {
     leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
     paragraphSpacing?: LengthMetrics;
 }
-export type StyledStringValue = TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
+export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
 export enum StyledStringKey {
     FONT = 0,
     DECORATION = 1,

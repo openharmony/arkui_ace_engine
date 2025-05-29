@@ -24,7 +24,6 @@ namespace ContextMenuAccessor {
 void CloseImpl()
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
-    CHECK_NULL_VOID(scopedDelegate);
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
     if (Container::IsCurrentUseNewPipeline()) {
         SubwindowManager::GetInstance()->HideMenuNG();

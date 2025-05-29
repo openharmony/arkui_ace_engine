@@ -24,7 +24,7 @@ export const PeerNodeType = 11
 export const RootPeerType = 33
 export const LazyForEachType = 13
 export const RepeatType = 14
-const INITIAL_ID = 1000
+const INITIAL_ID = 10000000
 
 export class PeerNode extends IncrementalNode {
     static generateRootPeer() {

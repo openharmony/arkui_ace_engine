@@ -22,7 +22,7 @@ import { CallbackKind } from "./CallbackKind"
 import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, OnWillScrollCallback, ScrollResult } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, PointerStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
@@ -67,7 +67,7 @@ import { SaveButtonCallback, SaveButtonOnClickResult, SaveDescription, SaveIconS
 import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchType, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../search"
 import { SelectedCallback } from "./../griditemops"
 import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../slider"
-import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle_styled_string, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
+import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { TextAreaSubmitCallback, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, Callback_ResourceStr_Void, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../textArea"
 import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles, Edges } from "./../units"
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
@@ -20114,7 +20114,7 @@ export class Deserializer extends DeserializerBase {
         let value : TextPickerResult = ({value: value_result, index: index_result} as TextPickerResult)
         return value
     }
-    readTextStyle_styled_string(): TextStyle_styled_string {
+    readTextStyle_styled_string(): TextStyle {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return TextStyle_styled_stringInternal.fromPtr(ptr)
@@ -23400,30 +23400,6 @@ export class Deserializer extends DeserializerBase {
             placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
         }
         const placement_result : Placement | undefined = placement_buf
-        const maskColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let maskColor_buf : Color | string | Resource | number | undefined
-        if ((RuntimeType.UNDEFINED) != (maskColor_buf_runtimeType))
-        {
-            const maskColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let maskColor_buf_ : Color | string | Resource | number | undefined
-            if (maskColor_buf__selector == 0) {
-                maskColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (maskColor_buf__selector == 1) {
-                maskColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (maskColor_buf__selector == 2) {
-                maskColor_buf_ = valueDeserializer.readResource()
-            }
-            else if (maskColor_buf__selector == 3) {
-                maskColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else {
-                throw new Error("One of the branches for maskColor_buf_ has to be chosen through deserialisation.")
-            }
-            maskColor_buf = (maskColor_buf_ as Color | string | Resource | number)
-        }
-        const maskColor_result : Color | string | Resource | number | undefined = maskColor_buf
         const popupColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let popupColor_buf : Color | string | Resource | number | undefined
         if ((RuntimeType.UNDEFINED) != (popupColor_buf_runtimeType))
@@ -23463,12 +23439,12 @@ export class Deserializer extends DeserializerBase {
         }
         const autoCancel_result : boolean | undefined = autoCancel_buf
         const onStateChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onStateChange_buf : ((event: Literal_Boolean_isVisible) => void) | undefined
+        let onStateChange_buf : PopupStateChangeCallback | undefined
         if ((RuntimeType.UNDEFINED) != (onStateChange_buf_runtimeType))
         {
-            onStateChange_buf = valueDeserializer.readCallback_Literal_Boolean_isVisible_Void()
+            onStateChange_buf = valueDeserializer.readPopupStateChangeCallback()
         }
-        const onStateChange_result : ((event: Literal_Boolean_isVisible) => void) | undefined = onStateChange_buf
+        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
         const arrowOffset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let arrowOffset_buf : Length | undefined
         if ((RuntimeType.UNDEFINED) != (arrowOffset_buf_runtimeType))
@@ -23484,11 +23460,11 @@ export class Deserializer extends DeserializerBase {
         }
         const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
         const mask_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let mask_buf : boolean | Literal_ResourceColor_color | undefined
+        let mask_buf : boolean | PopupMaskType | undefined
         if ((RuntimeType.UNDEFINED) != (mask_buf_runtimeType))
         {
             const mask_buf__selector : int32 = valueDeserializer.readInt8()
-            let mask_buf_ : boolean | Literal_ResourceColor_color | undefined
+            let mask_buf_ : boolean | PopupMaskType | undefined
             if (mask_buf__selector == 0) {
                 mask_buf_ = valueDeserializer.readBoolean()
             }
@@ -23511,14 +23487,14 @@ export class Deserializer extends DeserializerBase {
                     throw new Error("One of the branches for mask_buf__u_color_buf has to be chosen through deserialisation.")
                 }
                 const mask_buf__u_color : ResourceColor = (mask_buf__u_color_buf as Color | number | string | Resource)
-                mask_buf_ = ({color: mask_buf__u_color} as Literal_ResourceColor_color)
+                mask_buf_ = ({color: mask_buf__u_color} as PopupMaskType)
             }
             else {
                 throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
             }
-            mask_buf = (mask_buf_ as boolean | Literal_ResourceColor_color)
+            mask_buf = (mask_buf_ as boolean | PopupMaskType)
         }
-        const mask_result : boolean | Literal_ResourceColor_color | undefined = mask_buf
+        const mask_result : boolean | PopupMaskType | undefined = mask_buf
         const targetSpace_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let targetSpace_buf : Length | undefined
         if ((RuntimeType.UNDEFINED) != (targetSpace_buf_runtimeType))
@@ -23646,7 +23622,7 @@ export class Deserializer extends DeserializerBase {
             keyboardAvoidMode_buf = TypeChecker.KeyboardAvoidMode_FromNumeric(valueDeserializer.readInt32())
         }
         const keyboardAvoidMode_result : KeyboardAvoidMode | undefined = keyboardAvoidMode_buf
-        let value : CustomPopupOptions = ({builder: builder_result, placement: placement_result, maskColor: maskColor_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as CustomPopupOptions)
+        let value : CustomPopupOptions = ({builder: builder_result, placement: placement_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as CustomPopupOptions)
         return value
     }
     readCustomTheme(): CustomTheme {
@@ -25551,9 +25527,9 @@ export class Deserializer extends DeserializerBase {
         const length_result : number | undefined = length_buf
         const styledKey_result : StyledStringKey = TypeChecker.StyledStringKey_FromNumeric(valueDeserializer.readInt32())
         const styledValue_buf_selector : int32 = valueDeserializer.readInt8()
-        let styledValue_buf : TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        let styledValue_buf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
         if (styledValue_buf_selector == 0) {
-            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle_styled_string)
+            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle)
         }
         else if (styledValue_buf_selector == 1) {
             styledValue_buf = (valueDeserializer.readDecorationStyle() as DecorationStyle)
@@ -25594,7 +25570,7 @@ export class Deserializer extends DeserializerBase {
         else {
             throw new Error("One of the branches for styledValue_buf has to be chosen through deserialisation.")
         }
-        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
         let value : StyleOptions = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as StyleOptions)
         return value
     }
@@ -26632,13 +26608,6 @@ export class Deserializer extends DeserializerBase {
     readPopupOptions(): PopupOptions {
         let valueDeserializer : Deserializer = this
         const message_result : string = (valueDeserializer.readString() as string)
-        const placementOnTop_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let placementOnTop_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (placementOnTop_buf_runtimeType))
-        {
-            placementOnTop_buf = valueDeserializer.readBoolean()
-        }
-        const placementOnTop_result : boolean | undefined = placementOnTop_buf
         const placement_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let placement_buf : Placement | undefined
         if ((RuntimeType.UNDEFINED) != (placement_buf_runtimeType))
@@ -26647,30 +26616,30 @@ export class Deserializer extends DeserializerBase {
         }
         const placement_result : Placement | undefined = placement_buf
         const primaryButton_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let primaryButton_buf : Literal_String_value_Callback_Void_action | undefined
+        let primaryButton_buf : PopupButton | undefined
         if ((RuntimeType.UNDEFINED) != (primaryButton_buf_runtimeType))
         {
             const primaryButton_buf__value : string = (valueDeserializer.readString() as string)
             const primaryButton_buf__action : (() => void) = valueDeserializer.readCallback_Void()
-            primaryButton_buf = ({value: primaryButton_buf__value, action: primaryButton_buf__action} as Literal_String_value_Callback_Void_action)
+            primaryButton_buf = ({value: primaryButton_buf__value, action: primaryButton_buf__action} as PopupButton)
         }
-        const primaryButton_result : Literal_String_value_Callback_Void_action | undefined = primaryButton_buf
+        const primaryButton_result : PopupButton | undefined = primaryButton_buf
         const secondaryButton_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let secondaryButton_buf : Literal_String_value_Callback_Void_action | undefined
+        let secondaryButton_buf : PopupButton | undefined
         if ((RuntimeType.UNDEFINED) != (secondaryButton_buf_runtimeType))
         {
             const secondaryButton_buf__value : string = (valueDeserializer.readString() as string)
             const secondaryButton_buf__action : (() => void) = valueDeserializer.readCallback_Void()
-            secondaryButton_buf = ({value: secondaryButton_buf__value, action: secondaryButton_buf__action} as Literal_String_value_Callback_Void_action)
+            secondaryButton_buf = ({value: secondaryButton_buf__value, action: secondaryButton_buf__action} as PopupButton)
         }
-        const secondaryButton_result : Literal_String_value_Callback_Void_action | undefined = secondaryButton_buf
+        const secondaryButton_result : PopupButton | undefined = secondaryButton_buf
         const onStateChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onStateChange_buf : ((event: Literal_Boolean_isVisible) => void) | undefined
+        let onStateChange_buf : PopupStateChangeCallback | undefined
         if ((RuntimeType.UNDEFINED) != (onStateChange_buf_runtimeType))
         {
-            onStateChange_buf = valueDeserializer.readCallback_Literal_Boolean_isVisible_Void()
+            onStateChange_buf = valueDeserializer.readPopupStateChangeCallback()
         }
-        const onStateChange_result : ((event: Literal_Boolean_isVisible) => void) | undefined = onStateChange_buf
+        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
         const arrowOffset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let arrowOffset_buf : Length | undefined
         if ((RuntimeType.UNDEFINED) != (arrowOffset_buf_runtimeType))
@@ -26686,11 +26655,11 @@ export class Deserializer extends DeserializerBase {
         }
         const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
         const mask_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let mask_buf : boolean | Literal_ResourceColor_color | undefined
+        let mask_buf : boolean | PopupMaskType | undefined
         if ((RuntimeType.UNDEFINED) != (mask_buf_runtimeType))
         {
             const mask_buf__selector : int32 = valueDeserializer.readInt8()
-            let mask_buf_ : boolean | Literal_ResourceColor_color | undefined
+            let mask_buf_ : boolean | PopupMaskType | undefined
             if (mask_buf__selector == 0) {
                 mask_buf_ = valueDeserializer.readBoolean()
             }
@@ -26713,14 +26682,14 @@ export class Deserializer extends DeserializerBase {
                     throw new Error("One of the branches for mask_buf__u_color_buf has to be chosen through deserialisation.")
                 }
                 const mask_buf__u_color : ResourceColor = (mask_buf__u_color_buf as Color | number | string | Resource)
-                mask_buf_ = ({color: mask_buf__u_color} as Literal_ResourceColor_color)
+                mask_buf_ = ({color: mask_buf__u_color} as PopupMaskType)
             }
             else {
                 throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
             }
-            mask_buf = (mask_buf_ as boolean | Literal_ResourceColor_color)
+            mask_buf = (mask_buf_ as boolean | PopupMaskType)
         }
-        const mask_result : boolean | Literal_ResourceColor_color | undefined = mask_buf
+        const mask_result : boolean | PopupMaskType | undefined = mask_buf
         const messageOptions_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let messageOptions_buf : PopupMessageOptions | undefined
         if ((RuntimeType.UNDEFINED) != (messageOptions_buf_runtimeType))
@@ -26886,7 +26855,7 @@ export class Deserializer extends DeserializerBase {
             keyboardAvoidMode_buf = TypeChecker.KeyboardAvoidMode_FromNumeric(valueDeserializer.readInt32())
         }
         const keyboardAvoidMode_result : KeyboardAvoidMode | undefined = keyboardAvoidMode_buf
-        let value : PopupOptions = ({message: message_result, placementOnTop: placementOnTop_result, placement: placement_result, primaryButton: primaryButton_result, secondaryButton: secondaryButton_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, messageOptions: messageOptions_result, targetSpace: targetSpace_result, enableArrow: enableArrow_result, offset: offset_result, popupColor: popupColor_result, autoCancel: autoCancel_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as PopupOptions)
+        let value : PopupOptions = ({message: message_result, placement: placement_result, primaryButton: primaryButton_result, secondaryButton: secondaryButton_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, messageOptions: messageOptions_result, targetSpace: targetSpace_result, enableArrow: enableArrow_result, offset: offset_result, popupColor: popupColor_result, autoCancel: autoCancel_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as PopupOptions)
         return value
     }
     readRichEditorImageSpanOptions(): RichEditorImageSpanOptions {
@@ -27049,9 +27018,9 @@ export class Deserializer extends DeserializerBase {
         const length_result : number = (valueDeserializer.readNumber() as number)
         const styledKey_result : StyledStringKey = TypeChecker.StyledStringKey_FromNumeric(valueDeserializer.readInt32())
         const styledValue_buf_selector : int32 = valueDeserializer.readInt8()
-        let styledValue_buf : TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        let styledValue_buf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
         if (styledValue_buf_selector == 0) {
-            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle_styled_string)
+            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle)
         }
         else if (styledValue_buf_selector == 1) {
             styledValue_buf = (valueDeserializer.readDecorationStyle() as DecorationStyle)
@@ -27092,7 +27061,7 @@ export class Deserializer extends DeserializerBase {
         else {
             throw new Error("One of the branches for styledValue_buf has to be chosen through deserialisation.")
         }
-        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
         let value : SpanStyle = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as SpanStyle)
         return value
     }

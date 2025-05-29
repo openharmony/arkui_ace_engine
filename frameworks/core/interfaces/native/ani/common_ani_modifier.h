@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG {
 const ArkUIAniCommonModifier* GetCommonAniModifier();
+const ArkUIAniDrawModifier* GetArkUIAniDrawModifier();
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_COMMON_ANI_MODIFIER

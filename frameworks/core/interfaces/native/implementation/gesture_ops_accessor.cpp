@@ -38,15 +38,38 @@ struct GestureOpsPeer {
 };
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+constexpr int32_t DEFAULT_TAP_FINGER = 1;
+constexpr int32_t DEFAULT_TAP_COUNT = 1;
+constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
+constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
+constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
+constexpr int32_t DEFAULT_PINCH_FINGER = 2;
+constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;
+constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
+constexpr int32_t DEFAULT_PAN_FINGER = 1;
+constexpr int32_t DEFAULT_MAX_FINGERS = 10;
+constexpr OHOS::Ace::Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
+constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
+constexpr double DEFAULT_SLIDE_SPEED = 100.0;
+constexpr int32_t DEFAULT_ROTATION_FINGER = 2;
+constexpr int32_t DEFAULT_MAX_ROTATION_FINGER = 5;
+constexpr double DEFAULT_ROTATION_ANGLE = 1.0;
+constexpr double DEFAULT_MAX_ROTATION_ANGLE = 360.0;
+} // namespace
 namespace GestureOpsAccessor {
 Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Number* count,
     const Ark_Number* distanceThreshold, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
+    if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
+        fingerValue = DEFAULT_TAP_FINGER;
+    }
     int32_t countValue = Converter::Convert<int32_t>(*count);
+    countValue = countValue < DEFAULT_TAP_COUNT ? DEFAULT_TAP_COUNT : countValue;
     float distanceThresholdValue = Converter::Convert<float>(*distanceThreshold);
-    distanceThresholdValue =
-        distanceThresholdValue < 0 ? std::numeric_limits<double>::infinity() : distanceThresholdValue;
+    distanceThresholdValue = distanceThresholdValue < 0 ? DEFAULT_TAP_DISTANCE : distanceThresholdValue;
+    distanceThresholdValue = Dimension(distanceThresholdValue, DimensionUnit::VP).ConvertToPx();
     bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto tapGestureObject =
         AceType::MakeRefPtr<TapGesture>(countValue, fingerValue, distanceThresholdValue, isFingerCountLimitedValue);
@@ -57,8 +80,12 @@ Ark_NativePointer CreateLongPressGestureImpl(
     const Ark_Number* fingers, Ark_Boolean repeat, const Ark_Number* duration, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
+    if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
+        fingerValue = DEFAULT_TAP_FINGER;
+    }
     bool repeatValue = Converter::Convert<bool>(repeat);
     int32_t durationValue = Converter::Convert<int32_t>(*duration);
+    durationValue = durationValue <= 0 ? DEFAULT_LONG_PRESS_DURATION : durationValue;
     bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto longPressGestureObject = AceType::MakeRefPtr<LongPressGesture>(
         fingerValue, repeatValue, durationValue, false, false, isFingerCountLimitedValue);
@@ -69,10 +96,16 @@ Ark_NativePointer CreatePanGestureImpl(
     const Ark_Number* fingers, Ark_PanDirection direction, const Ark_Number* distance, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
+    if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
+        fingerValue = DEFAULT_TAP_FINGER;
+    }
     PanDirection defaultPanDirection;
     defaultPanDirection.type = PanDirection::ALL;
     auto panDirection = Converter::Convert<std::optional<PanDirection>>(direction).value_or(defaultPanDirection);
     double distanceValue = Converter::Convert<double>(*distance);
+    distanceValue =
+        (LessNotEqual(distanceValue, 0.0) ? DEFAULT_PAN_DISTANCE : Dimension(distanceValue, DimensionUnit::VP))
+            .ConvertToPx();
     bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto panGestureObject =
         AceType::MakeRefPtr<PanGesture>(fingerValue, panDirection, distanceValue, isFingerCountLimitedValue);
@@ -83,13 +116,12 @@ Ark_NativePointer CreatePanGestureWithPanGestureOptionsImpl(Ark_NativePointer pa
 {
     Ark_PanGestureOptions peer = reinterpret_cast<Ark_PanGestureOptions>(panGestureOptions);
     CHECK_NULL_RETURN(peer, nullptr);
-    CHECK_NULL_RETURN(peer->handler,  nullptr);
+    CHECK_NULL_RETURN(peer->handler, nullptr);
     auto direction = peer->handler->GetDirection();
     auto distance = peer->handler->GetDistance();
     auto fingers = peer->handler->GetFingers();
     auto isFingerCountLimited = peer->handler->GetIsLimitFingerCount();
-    auto panGestureObject =
-        AceType::MakeRefPtr<PanGesture>(fingers, direction, distance, isFingerCountLimited);
+    auto panGestureObject = AceType::MakeRefPtr<PanGesture>(fingers, direction, distance, isFingerCountLimited);
     panGestureObject->IncRefCount();
     return AceType::RawPtr(panGestureObject);
 }
@@ -97,7 +129,11 @@ Ark_NativePointer CreatePinchGestureImpl(
     const Ark_Number* fingers, const Ark_Number* distance, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
+    if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
+        fingerValue = DEFAULT_TAP_FINGER;
+    }
     double distanceValue = Converter::Convert<double>(*distance);
+    distanceValue = LessNotEqual(distanceValue, 0.0) ? DEFAULT_PINCH_DISTANCE : distanceValue;
     bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto pinchGestureObject = AceType::MakeRefPtr<PinchGesture>(fingerValue, distanceValue, isFingerCountLimitedValue);
     pinchGestureObject->IncRefCount();
@@ -107,7 +143,13 @@ Ark_NativePointer CreateRotationGestureImpl(
     const Ark_Number* fingers, const Ark_Number* angle, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
+    if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
+        fingerValue = DEFAULT_TAP_FINGER;
+    }
     double angleValue = Converter::Convert<double>(*angle);
+    if (GreatNotEqual(angleValue, DEFAULT_MAX_ROTATION_ANGLE) || LessNotEqual(angleValue, 0.0)) {
+        angleValue = DEFAULT_ROTATION_ANGLE;
+    }
     bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto rotationGestureObject =
         AceType::MakeRefPtr<RotationGesture>(fingerValue, angleValue, isFingerCountLimitedValue);
@@ -118,10 +160,14 @@ Ark_NativePointer CreateSwipeGestureImpl(
     const Ark_Number* fingers, Ark_SwipeDirection direction, const Ark_Number* speed, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
+    if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
+        fingerValue = DEFAULT_TAP_FINGER;
+    }
     SwipeDirection defaultDirection;
     defaultDirection.type = SwipeDirection::ALL;
     auto swipeDirection = Converter::Convert<std::optional<SwipeDirection>>(direction).value_or(defaultDirection);
     double speedValue = Converter::Convert<double>(*speed);
+    speedValue = LessOrEqual(speedValue, 0.0) ? DEFAULT_SLIDE_SPEED : speedValue;
     bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto swipeGestureObject =
         AceType::MakeRefPtr<SwipeGesture>(fingerValue, swipeDirection, speedValue, isFingerCountLimitedValue);

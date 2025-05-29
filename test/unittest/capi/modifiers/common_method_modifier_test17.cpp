@@ -674,7 +674,7 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsMaskBlockEventTe
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(Ark_Empty())
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(Ark_Empty())
     };
     Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
     TypeHelper::WriteToUnion<Ark_CustomPopupOptions>(arkUnion) = arkOptions;
@@ -694,11 +694,11 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsMaskBlockEventTe
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_BLOCK_EVENT);
     EXPECT_TRUE(checkValue);
 
-    Ark_Union_Boolean_Literal_ResourceColor_color arkUnionMask;
+    Ark_Union_Boolean_PopupMaskType arkUnionMask;
     TypeHelper::WriteToUnion<Ark_Boolean>(arkUnionMask) = Converter::ArkValue<Ark_Boolean>(false);
     arkOptions = {
         .builder = *arkBuilder,
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     };
     TypeHelper::WriteToUnion<Ark_CustomPopupOptions>(arkUnion) = arkOptions;
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
@@ -727,7 +727,7 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsMaskColorDefault
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(Ark_Empty())
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(Ark_Empty())
     };
     Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
     TypeHelper::WriteToUnion<Ark_CustomPopupOptions>(arkUnion) = arkOptions;
@@ -758,9 +758,9 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsMaskColorColorNu
     // color as ark_color
     Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
     auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
-    Ark_Literal_ResourceColor_color literalColor = { .color = colorArkColor };
-    Ark_Union_Boolean_Literal_ResourceColor_color arkUnionMask;
-    TypeHelper::WriteToUnion<Ark_Literal_ResourceColor_color>(arkUnionMask) = literalColor;
+    Ark_PopupMaskType literalColor = { .color = colorArkColor };
+    Ark_Union_Boolean_PopupMaskType arkUnionMask;
+    TypeHelper::WriteToUnion<Ark_PopupMaskType>(arkUnionMask) = literalColor;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     const CustomNodeBuilderTestHelper<CommonMethodModifierTest17> builderHelper(this, frameNode);
@@ -768,7 +768,7 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsMaskColorColorNu
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     };
     Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
     TypeHelper::WriteToUnion<Ark_CustomPopupOptions>(arkUnion) = arkOptions;
@@ -791,10 +791,10 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsMaskColorColorNu
     // color as number
     auto colorArkNumber = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(TEST_COLOR_BLUE_NUM);
     literalColor = { .color = colorArkNumber };
-    TypeHelper::WriteToUnion<Ark_Literal_ResourceColor_color>(arkUnionMask) = literalColor;
+    TypeHelper::WriteToUnion<Ark_PopupMaskType>(arkUnionMask) = literalColor;
     arkOptions = {
         .builder = *arkBuilder,
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     };
     TypeHelper::WriteToUnion<Ark_CustomPopupOptions>(arkUnion) = arkOptions;
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
@@ -818,9 +818,9 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsMaskColorStringR
     // color as string
     Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
     auto colorArkStr = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(TEST_COLOR_BLUE_STR);
-    Ark_Literal_ResourceColor_color literalColor = { .color = colorArkStr };
-    Ark_Union_Boolean_Literal_ResourceColor_color arkUnionMask;
-    TypeHelper::WriteToUnion<Ark_Literal_ResourceColor_color>(arkUnionMask) = literalColor;
+    Ark_PopupMaskType literalColor = { .color = colorArkStr };
+    Ark_Union_Boolean_PopupMaskType arkUnionMask;
+    TypeHelper::WriteToUnion<Ark_PopupMaskType>(arkUnionMask) = literalColor;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     const CustomNodeBuilderTestHelper<CommonMethodModifierTest17> builderHelper(this, frameNode);
@@ -828,7 +828,7 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsMaskColorStringR
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     };
     Ark_Union_PopupOptions_CustomPopupOptions arkUnion;
     TypeHelper::WriteToUnion<Ark_CustomPopupOptions>(arkUnion) = arkOptions;
@@ -851,10 +851,10 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsMaskColorStringR
     // color as resource
     auto colorArkRes = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(TEST_COLOR_RESOURCE);
     literalColor = { .color = colorArkRes };
-    TypeHelper::WriteToUnion<Ark_Literal_ResourceColor_color>(arkUnionMask) = literalColor;
+    TypeHelper::WriteToUnion<Ark_PopupMaskType>(arkUnionMask) = literalColor;
     arkOptions = {
         .builder = *arkBuilder,
-        .mask = Converter::ArkValue<Opt_Union_Boolean_Literal_ResourceColor_color>(arkUnionMask)
+        .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     };
     TypeHelper::WriteToUnion<Ark_CustomPopupOptions>(arkUnion) = arkOptions;
     modifier_->setBindPopup(node_, arkShow, &arkUnion);

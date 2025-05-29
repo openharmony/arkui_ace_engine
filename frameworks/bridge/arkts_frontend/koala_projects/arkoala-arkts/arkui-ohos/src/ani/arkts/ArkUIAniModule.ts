@@ -18,6 +18,7 @@ import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import { DrawContext } from "arkui/Graphics"
+import { DrawModifier } from "arkui/component"
 
 export class ArkUIAniModule {
     static {
@@ -42,4 +43,8 @@ export class ArkUIAniModule {
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
 
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
+
+    native static _SetDrawModifier(ptr: KPointer, drawModifier: DrawModifier): void
+    
+    native static _Invalidate(ptr: KPointer): void
 }

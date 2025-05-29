@@ -17,6 +17,7 @@
 
 #include "ani.h"
 #include "load.h"
+#include "log.h"
 
 #include "common_module.h"
 #include "content_slot_module.h"
@@ -102,9 +103,23 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JLstd/core/Function1;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawCallback)
         },
+        ani_native_function {
+            "_SetDrawModifier",
+            "JLarkui/component/common/DrawModifier;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawModifier)
+        },
+        ani_native_function {
+            "_Invalidate",
+            "J:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Invalidate)
+        },
     };
 
-    env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    if (bindRst != ANI_OK) {
+        HILOGE("Bund native methonds failed, bindRst:%{public}d", bindRst);
+        return bindRst;
+    }
     *result = ANI_VERSION_1;
     return ANI_OK;
 }
