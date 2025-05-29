@@ -71,6 +71,7 @@ public:
             bool needLineHighest = true) const;
     OffsetF ComputeCursorInfoByClick(int32_t index, float& selectLineHeight, const OffsetF& lastTouchOffset) const;
     bool IsSelectLineHeadAndUseLeadingMargin(int32_t start) const;
+    void LayoutParagraphs(float maxWidth);
 
     void AddParagraph(ParagraphInfo&& info)
     {
