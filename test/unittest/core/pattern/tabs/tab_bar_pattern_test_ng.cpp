@@ -2669,18 +2669,123 @@ HWTEST_F(TabBarPatternTestNg,GetIndicatorStyle, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
-    tabBarPattern_->axis_ = Axis::VERTICAL;
+    tabBarPattern_->axis_ = Axis::HORIZONTAL;
     tabBarPattern_->isTouchingSwiper_ = true;
-    tabBarPattern_->indicator_ = 1;
-    tabBarPattern_->swiperStartIndex_ = 0;
+    tabBarPattern_->indicator_ = 0;
+    tabBarPattern_->swiperStartIndex_ = 1;
     IndicatorStyle indicatorStyle;
     indicatorStyle.color = Color::BLACK;
     tabBarPattern_->indicatorStyles_ = { indicatorStyle };
     auto firstRect = tabBarLayoutProperty_->GetIndicatorRect(0);
-    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE };
-    tabBarPattern_->selectedModes_ = { SelectedMode::INDICATOR };
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE };
+    tabBarPattern_->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR };
     IndicatorStyle indicator;
     OffsetF indicatorOffset;
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset, firstRect);
+
+    
+    IndicatorStyle indicatorStyle1;
+    indicatorStyle1.color = Color::BLACK;
+    IndicatorStyle indicatorStyle2;
+    indicatorStyle1.color = Color::BLACK;
+    tabBarPattern_->indicatorStyles_ = { indicatorStyle, indicatorStyle1, indicatorStyle2 };
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset, firstRect);
+}
+HWTEST_F(TabBarPatternTestNg,OnRestoreInfo, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    std::string restoreInfo_ = R"({"Index":2})";
+    auto info = JsonUtil::ParseJsonString(restoreInfo_);
+    tabBarPattern_->indicator_ = 2;
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE };
+    EXPECT_EQ(tabBarPattern_->tabBarStyles_.size(),2);
+    tabBarPattern_->OnRestoreInfo(restoreInfo_);
+
+    tabBarPattern_->animationDuration_ = std::nullopt;
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
+    pattern_->SetAnimateMode(TabAnimateMode::NO_ANIMATION);
+    tabBarPattern_->OnRestoreInfo(restoreInfo_);
+}
+HWTEST_F(TabBarPatternTestNg,FromJson, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    InspectorFilter filter;
+    IndicatorStyle style1;
+    style1.height = Dimension(12);
+    IndicatorStyle style2;
+    style2.height = Dimension(16);
+    tabBarPattern_->selectedModes_ = { SelectedMode::INDICATOR, SelectedMode::BOARD };
+    tabBarPattern_->indicatorStyles_ = { style1, style2 };
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE };
+
+    auto json = JsonUtil::Create(true);
+    tabBarPattern_->ToJsonValue(json, filter);
+    tabBarPattern_->FromJson(json);
+}
+HWTEST_F(TabBarPatternTestNg,ApplyTurnPageRateToIndicator, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    tabBarPattern_->ApplyTurnPageRateToIndicator(0.9f);
+
+    tabBarPattern_->turnPageRate_ = 0.5f;
+    tabBarPattern_->ApplyTurnPageRateToIndicator(0.9f);
+
+    tabBarPattern_->turnPageRate_ = 0.9f;
+    tabBarPattern_->ApplyTurnPageRateToIndicator(0.3f);
+
+    tabBarPattern_->isRTL_ = true;
+    tabBarPattern_->ApplyTurnPageRateToIndicator(0.3f);
+}
+HWTEST_F(TabBarPatternTestNg,HandleBottomTabBarAnimation, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE };
+    tabBarPattern_->indicator_ = 1;
+    tabBarPattern_->HandleBottomTabBarAnimation(1);
+
+    tabBarPattern_->indicator_ = 0;
+    tabBarPattern_->HandleBottomTabBarAnimation(1);
+
+    tabBarPattern_->indicator_ = -1;
+    tabBarPattern_->HandleBottomTabBarAnimation(1);
+
+    tabBarPattern_->indicator_ = 0;
+    tabBarPattern_->HandleBottomTabBarAnimation(-1);
+
+    tabBarPattern_->tabBarStyles_ = {TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::NOSTYLE };
+    tabBarPattern_->indicator_ = 1;
+    tabBarPattern_->HandleBottomTabBarAnimation(1);
+}
+HWTEST_F(TabBarPatternTestNg,DumpAdvanceInfo, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    tabBarPattern_->DumpAdvanceInfo();
 }
 } // namespace OHOS::Ace::NG
