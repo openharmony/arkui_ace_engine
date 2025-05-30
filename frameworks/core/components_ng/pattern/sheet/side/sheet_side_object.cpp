@@ -31,7 +31,11 @@ namespace OHOS::Ace::NG {
 NG::BorderWidthProperty SheetSideObject::PostProcessBorderWidth(const NG::BorderWidthProperty& borderWidth)
 {
     NG::BorderWidthProperty result = borderWidth;
-    result.rightDimen = 0.0_vp;
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        result.leftDimen = 0.0_vp;
+    } else {
+        result.rightDimen = 0.0_vp;
+    }
     return result;
 }
 
@@ -85,6 +89,8 @@ void SheetSideObject::UpdateSidePosition()
         bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (!isRTL) {
             context->UpdateTransformTranslate({ sheetMaxWidth_ - sheetWidth_, 0.0f, 0.0f });
+        } else {
+            context->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         }
     }
 }
@@ -328,6 +334,7 @@ void SheetSideObject::OnLanguageConfigurationUpdate()
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->CheckLocalized();
     CHECK_NULL_VOID(sheetPattern->GetShowState());
     CHECK_NULL_VOID(!sheetPattern->GetIsPlayTransition());
     TransformTranslateEnter();

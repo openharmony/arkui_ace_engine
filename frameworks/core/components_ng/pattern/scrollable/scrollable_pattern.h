@@ -108,9 +108,11 @@ public:
 
     virtual bool IsReverse() const
     {
-        if (GetAxis() != Axis::HORIZONTAL) {
-            return false;
-        }
+        return GetAxis() == Axis::HORIZONTAL && IsRTL();
+    };
+
+    bool IsRTL() const
+    {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();

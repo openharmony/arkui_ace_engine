@@ -226,39 +226,49 @@ void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
     }
 }
 
-#define UPDATE_DOT_VALUE(frameNode, name, resObj, resultType)                                              \
-    do {                                                                                                   \
-        CHECK_NULL_VOID(frameNode);                                                                        \
-        auto pattern = frameNode->GetPattern<IndicatorPattern>();                                          \
-        CHECK_NULL_VOID(pattern);                                                                          \
-        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
-            auto node = weak.Upgrade();                                                                    \
-            CHECK_NULL_VOID(node);                                                                         \
-            auto pattern = node->GetPattern<IndicatorPattern>();                                           \
-            resultType result;                                                                             \
-            ParseType(resObj, result);                                                                     \
-            auto params = pattern->GetIndicatorParameters();                                               \
-            params->name = result;                                                                         \
-        };                                                                                                 \
-        pattern->AddResObj("indicator." #name, resObj, std::move(updateFunc));                             \
-    } while (false)                                                                                        \
+#define UPDATE_DOT_VALUE(frameNode, name, resObj, resultType)                                                   \
+    do {                                                                                                        \
+        CHECK_NULL_VOID(frameNode);                                                                             \
+        auto pattern = frameNode->GetPattern<IndicatorPattern>();                                               \
+        CHECK_NULL_VOID(pattern);                                                                               \
+        if (resObj) {                                                                                           \
+            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {  \
+                auto node = weak.Upgrade();                                                                     \
+                CHECK_NULL_VOID(node);                                                                          \
+                auto pattern = node->GetPattern<IndicatorPattern>();                                            \
+                CHECK_NULL_VOID(pattern);                                                                       \
+                resultType result;                                                                              \
+                ParseType(resObj, result);                                                                      \
+                auto params = pattern->GetIndicatorParameters();                                                \
+                params->name = result;                                                                          \
+            };                                                                                                  \
+            pattern->AddResObj("indicator." #name, resObj, std::move(updateFunc));                              \
+        } else {                                                                                                \
+            pattern->RemoveResObj("indicator." #name);                                                          \
+        }                                                                                                       \
+    } while (false)
 
-#define UPDATE_DIGITAL_VALUE(frameNode, name, resObj, resultType)                                         \
-    do {                                                                                                   \
-        CHECK_NULL_VOID(frameNode);                                                                        \
-        auto pattern = frameNode->GetPattern<IndicatorPattern>();                                          \
-        CHECK_NULL_VOID(pattern);                                                                          \
-        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
-            auto node = weak.Upgrade();                                                                    \
-            CHECK_NULL_VOID(node);                                                                         \
-            auto pattern = node->GetPattern<IndicatorPattern>();                                           \
-            resultType result;                                                                             \
-            ParseType(resObj, result);                                                                     \
-            auto params = pattern->GetSwiperDigitalParameters();                                           \
-            params->name = result;                                                                         \
-        };                                                                                                 \
-        pattern->AddResObj("indicator." #name, resObj, std::move(updateFunc));                             \
-    } while (false)                                                                                        \
+#define UPDATE_DIGITAL_VALUE(frameNode, name, resObj, resultType)                                               \
+    do {                                                                                                        \
+        CHECK_NULL_VOID(frameNode);                                                                             \
+        auto pattern = frameNode->GetPattern<IndicatorPattern>();                                               \
+        CHECK_NULL_VOID(pattern);                                                                               \
+        if (resObj) {                                                                                           \
+            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {  \
+                auto node = weak.Upgrade();                                                                     \
+                CHECK_NULL_VOID(node);                                                                          \
+                auto pattern = node->GetPattern<IndicatorPattern>();                                            \
+                CHECK_NULL_VOID(pattern);                                                                       \
+                resultType result;                                                                              \
+                ParseType(resObj, result);                                                                      \
+                auto params = pattern->GetSwiperDigitalParameters();                                            \
+                params->name = result;                                                                          \
+            };                                                                                                  \
+            pattern->AddResObj("indicator." #name, resObj, std::move(updateFunc));                              \
+        } else {                                                                                                \
+            pattern->RemoveResObj("indicator." #name);                                                          \
+        }                                                                                                       \
+    } while (false)
 
 void IndicatorModelNG::CreateDotWithResourceObj(FrameNode* frameNode, const SwiperParameters& swiperParameters)
 {

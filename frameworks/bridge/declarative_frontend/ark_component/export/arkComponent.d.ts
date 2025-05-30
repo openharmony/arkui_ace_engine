@@ -807,7 +807,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     style(value: TextContentStyle): TextAreaAttribute;
     barState(value: BarState): TextAreaAttribute;
     selectionMenuHidden(value: boolean): TextAreaAttribute;
-    maxLines(value: number): TextAreaAttribute;
+    maxLines(value: number, options?: MaxLinesOptions): TextAreaAttribute;
     customKeyboard(value: CustomBuilder): TextAreaAttribute;
     ellipsisMode(value: EllipsisMode): TextAreaAttribute;
     strokeWidth(value: LengthMetrics): TextAreaAttribute;
@@ -1258,6 +1258,15 @@ declare class ArkFormComponentComponent extends ArkComponent implements FormComp
         id: number;
     }) => void): this;
     onLoad(callback: () => void): this;
+}
+declare class ArkEmbeddedComponent extends ArkComponent implements EmbeddedComponentAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onTerminated(callback: (info: TerminationInfo) => void): this;
+    onError(callback: (info: ErrorCallback) => void): this;
+}
+declare class ArkIsolatedComponent extends ArkComponent implements IsolatedComponentAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onError(callback: any): IsolatedComponentAttribute;
 }
 declare class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

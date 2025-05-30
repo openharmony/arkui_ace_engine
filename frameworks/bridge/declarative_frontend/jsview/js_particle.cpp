@@ -19,6 +19,7 @@
 
 #include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/property/particle_property_animation.h"
+#include "core/common/resource/resource_parse_utils.h"
 namespace OHOS::Ace {
 std::unique_ptr<ParticleModel> ParticleModel::instance_ = nullptr;
 std::mutex ParticleModel::mutex_;
@@ -65,7 +66,7 @@ constexpr float MAX_ANGLE = MAX_LIMIT;
 
 constexpr int DEFAULT_COLOR = 0xffffffff;
 
-void ParsSize(std::pair<Dimension, Dimension>& size, JSRef<JSVal>& sizeJsValue)
+void ParseSize(std::pair<Dimension, Dimension>& size, JSRef<JSVal>& sizeJsValue)
 {
     if (sizeJsValue->IsArray()) {
         auto sizeJsArray = JSRef<JSArray>::Cast(sizeJsValue);
@@ -80,6 +81,100 @@ void ParsSize(std::pair<Dimension, Dimension>& size, JSRef<JSVal>& sizeJsValue)
                 GreatOrEqual(yValue.Value(), 0.0)) {
                 size.second = yValue;
             }
+        }
+    }
+}
+
+void ParseSize(std::pair<Dimension, Dimension>& size,
+    JSRef<JSVal>& sizeJsValue, NG::ImageParticleParameter& imageParticle)
+{
+    if (!sizeJsValue->IsArray()) {
+        return;
+    }
+    auto sizeJsArray = JSRef<JSArray>::Cast(sizeJsValue);
+    if (static_cast<int32_t>(sizeJsArray->Length()) != ARRAY_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "ImageParticle: invalid size.");
+        return;
+    }
+    CalcDimension xValue;
+    CalcDimension yValue;
+    RefPtr<ResourceObject> xValueResObj;
+    if (JSParticle::ParseJsDimensionVp(sizeJsArray->GetValueAt(0), xValue, xValueResObj) &&
+        GreatOrEqual(xValue.Value(), 0.0)) {
+        size.first = xValue;
+        if (xValueResObj) {
+            auto&& sizeUpdateFunc =
+                [](const RefPtr<ResourceObject>& resobjX, NG::ImageParticleParameter& imageParticle) {
+                CalcDimension xValue(0.0);
+                ResourceParseUtils::ParseResDimensionVpNG(resobjX, xValue);
+                imageParticle.SetSizeX(xValue);
+            };
+            imageParticle.AddResource("imageParticle.sizeX", xValueResObj, std::move(sizeUpdateFunc));
+        } else {
+            imageParticle.RemoveResource("imageParticle.sizeX");
+        }
+    }
+    RefPtr<ResourceObject> yValueResObj;
+    if (JSParticle::ParseJsDimensionVp(sizeJsArray->GetValueAt(1), yValue, yValueResObj) &&
+        GreatOrEqual(yValue.Value(), 0.0)) {
+        size.second = yValue;
+        if (yValueResObj) {
+            auto&& sizeUpdateFunc =
+                [](const RefPtr<ResourceObject>& resobjY, NG::ImageParticleParameter& imageParticle) {
+                CalcDimension yValue(0.0);
+                ResourceParseUtils::ParseResDimensionVpNG(resobjY, yValue);
+                imageParticle.SetSizeY(yValue);
+            };
+            imageParticle.AddResource("imageParticle.sizeY", yValueResObj, std::move(sizeUpdateFunc));
+        } else {
+            imageParticle.RemoveResource("imageParticle.sizeY");
+        }
+    }
+}
+
+void ParseSize(std::pair<Dimension, Dimension>& size,
+    JSRef<JSVal>& sizeJsValue, OHOS::Ace::NG::EmitterOption& emitterOption)
+{
+    if (!sizeJsValue->IsArray()) {
+        return;
+    }
+    auto sizeJsArray = JSRef<JSArray>::Cast(sizeJsValue);
+    if (static_cast<int32_t>(sizeJsArray->Length()) != ARRAY_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "EmitterOption: invalid size.");
+        return;
+    }
+    CalcDimension xValue;
+    CalcDimension yValue;
+    RefPtr<ResourceObject> xValueResObj;
+    if (JSParticle::ParseJsDimensionVp(sizeJsArray->GetValueAt(0), xValue, xValueResObj) &&
+        GreatOrEqual(xValue.Value(), 0.0)) {
+        size.first = xValue;
+        if (xValueResObj) {
+            auto&& sizeUpdateFunc =
+                [](const RefPtr<ResourceObject>& resobjX, OHOS::Ace::NG::EmitterOption& emitterOption) {
+                CalcDimension xValue(0.0);
+                ResourceParseUtils::ParseResDimensionVpNG(resobjX, xValue);
+                emitterOption.SetSizeX(xValue);
+            };
+            emitterOption.AddResource("emitterOption.sizeX", xValueResObj, std::move(sizeUpdateFunc));
+        } else {
+            emitterOption.RemoveResource("emitterOption.sizeX");
+        }
+    }
+    RefPtr<ResourceObject> yValueResObj;
+    if (JSParticle::ParseJsDimensionVp(sizeJsArray->GetValueAt(1), yValue, yValueResObj) &&
+        GreatOrEqual(yValue.Value(), 0.0)) {
+        size.second = yValue;
+        if (yValueResObj) {
+            auto&& sizeUpdateFunc =
+                [](const RefPtr<ResourceObject>& resobjY, OHOS::Ace::NG::EmitterOption& emitterOption) {
+                CalcDimension yValue(0.0);
+                ResourceParseUtils::ParseResDimensionVpNG(resobjY, yValue);
+                emitterOption.SetSizeY(yValue);
+            };
+            emitterOption.AddResource("emitterOption.sizeY", yValueResObj, std::move(sizeUpdateFunc));
+        } else {
+            emitterOption.RemoveResource("emitterOption.sizeY");
         }
     }
 }
@@ -295,6 +390,72 @@ void ParseFloatInitRange(JSRef<JSVal>& floatRangeJsValue, OHOS::Ace::NG::Particl
     auto range = std::pair<float, float>(from, to);
     floatOption.SetRange(range);
 }
+bool SrcAddResIfNeed(JSRef<JSVal>& srcJsValue,
+    std::string& src, NG::ImageParticleParameter& imageParameter)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (srcJsValue->IsString()) {
+            src = srcJsValue->ToString();
+        } else if (!JSParticle::ParseJsMedia(srcJsValue, src, resObj)) {
+            return false;
+        }
+        if (resObj) {
+            auto&& srcUpdateFunc =
+                [](const RefPtr<ResourceObject>& resObj, NG::ImageParticleParameter& imageParameter) {
+                std::string src;
+                ResourceParseUtils::ParseResMedia(resObj, src);
+                imageParameter.SetImageSource(src);
+            };
+            imageParameter.AddResource("ImageParticleParameter.src", resObj, std::move(srcUpdateFunc));
+        } else {
+            imageParameter.RemoveResource("ImageParticleParameter.src");
+        }
+    } else {
+        if (srcJsValue->IsString()) {
+            src = srcJsValue->ToString();
+        } else if (!JSParticle::ParseJsMedia(srcJsValue, src)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ParseImageParticleObject(JSRef<JSObject>& configJsObject, OHOS::Ace::NG::Particle& particle)
+{
+    auto srcJsValue = configJsObject->GetProperty("src");
+    auto sizeJsValue = configJsObject->GetProperty("size");
+    auto objectFitJsValue = configJsObject->GetProperty("objectFit");
+    NG::ImageParticleParameter imageParameter;
+    std::string src;
+    bool result = SrcAddResIfNeed(srcJsValue, src, imageParameter);
+    if (!result) {
+        return false;
+    }
+    imageParameter.SetImageSource(src);
+    auto width = Dimension(0.0);
+    auto height = Dimension(0.0);
+    auto sizeValue = std::pair<Dimension, Dimension>(width, height);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseSize(sizeValue, sizeJsValue, imageParameter);
+    } else {
+        ParseSize(sizeValue, sizeJsValue);
+    }
+    imageParameter.SetSize(sizeValue);
+    auto fit = ImageFit::COVER;
+    if (objectFitJsValue->IsNumber()) {
+        auto fitIntValue = objectFitJsValue->ToNumber<int32_t>();
+        if (fitIntValue >= static_cast<int32_t>(ImageFit::FILL) &&
+            fitIntValue <= static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
+            fit = static_cast<ImageFit>(fitIntValue);
+        }
+    }
+    imageParameter.SetImageFit(fit);
+    NG::ParticleConfig particleConfig;
+    particleConfig.SetImageParticleParameter(imageParameter);
+    particle.SetConfig(particleConfig);
+    return true;
+}
 
 void ParseFloatOption(JSRef<JSObject>& floatJsObject, OHOS::Ace::NG::ParticleFloatPropertyOption& floatOption,
     float defaultValue, float minValue, float maxValue)
@@ -405,34 +566,10 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
     }
     auto configJsObject = JSRef<JSObject>::Cast(configJsValue);
     if (typeValue == NG::ParticleType::IMAGE) {
-        auto srcJsValue = configJsObject->GetProperty("src");
-        auto sizeJsValue = configJsObject->GetProperty("size");
-        auto objectFitJsValue = configJsObject->GetProperty("objectFit");
-        NG::ImageParticleParameter imageParameter;
-        std::string src;
-        if (srcJsValue->IsString()) {
-            src = srcJsValue->ToString();
-        } else if (!JSParticle::ParseJsMedia(srcJsValue, src)) {
+        bool result = ParseImageParticleObject(configJsObject, particle);
+        if (!result) {
             return false;
         }
-        imageParameter.SetImageSource(src);
-        auto width = Dimension(0.0);
-        auto height = Dimension(0.0);
-        auto sizeValue = std::pair<Dimension, Dimension>(width, height);
-        ParsSize(sizeValue, sizeJsValue);
-        imageParameter.SetSize(sizeValue);
-        auto fit = ImageFit::COVER;
-        if (objectFitJsValue->IsNumber()) {
-            auto fitIntValue = objectFitJsValue->ToNumber<int32_t>();
-            if (fitIntValue >= static_cast<int32_t>(ImageFit::FILL) &&
-                fitIntValue <= static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
-                fit = static_cast<ImageFit>(fitIntValue);
-            }
-        }
-        imageParameter.SetImageFit(fit);
-        NG::ParticleConfig particleConfig;
-        particleConfig.SetImageParticleParameter(imageParameter);
-        particle.SetConfig(particleConfig);
     } else {
         auto radiusJsValue = configJsObject->GetProperty("radius");
         CalcDimension radius;
@@ -475,6 +612,59 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
     return true;
 }
 
+void PositionAddResIfNeed(CalcDimension& xValue, CalcDimension& yValue,
+    JSRef<JSArray>& positionJsArray, OHOS::Ace::NG::EmitterOption& emitterOption)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> positionXResObj;
+        RefPtr<ResourceObject> positionYResObj;
+        JSParticle::ParseJsDimensionVp(positionJsArray->GetValueAt(0), xValue, positionXResObj);
+        JSParticle::ParseJsDimensionVp(positionJsArray->GetValueAt(1), yValue, positionYResObj);
+        if (positionXResObj) {
+            auto&& positionXUpdateFunc =
+                [](const RefPtr<ResourceObject>& resobjX, OHOS::Ace::NG::EmitterOption& emitterOption) {
+                CalcDimension positionXValue(0.0);
+                ResourceParseUtils::ParseResDimensionVpNG(resobjX, positionXValue);
+                emitterOption.SetPositionX(positionXValue);
+            };
+            emitterOption.AddResource("emitterOption.positionX",
+                positionXResObj, std::move(positionXUpdateFunc));
+        } else {
+            emitterOption.RemoveResource("emitterOption.positionX");
+        }
+        if (positionYResObj) {
+            auto&& positionYUpdateFunc =
+                [](const RefPtr<ResourceObject>& resobjY, OHOS::Ace::NG::EmitterOption& emitterOption) {
+                CalcDimension positionYValue(0.0);
+                ResourceParseUtils::ParseResDimensionVpNG(resobjY, positionYValue);
+                emitterOption.SetPositionY(positionYValue);
+            };
+            emitterOption.AddResource("emitterOption.positionY",
+                positionYResObj, std::move(positionYUpdateFunc));
+        } else {
+            emitterOption.RemoveResource("emitterOption.positionY");
+        }
+    } else {
+        JSParticle::ParseJsDimensionVp(positionJsArray->GetValueAt(0), xValue);
+        JSParticle::ParseJsDimensionVp(positionJsArray->GetValueAt(1), yValue);
+    }
+}
+
+void ParseEmitterOptionPosition(JSRef<JSObject>& emitterJsObject, OHOS::Ace::NG::EmitterOption& emitterOption)
+{
+    auto positionJsValue = emitterJsObject->GetProperty("position");
+    CalcDimension xValue(0.0);
+    CalcDimension yValue(0.0);
+    if (positionJsValue->IsArray()) {
+        auto positionJsArray = JSRef<JSArray>::Cast(positionJsValue);
+        if (positionJsArray->Length() == ARRAY_SIZE) {
+            PositionAddResIfNeed(xValue, yValue, positionJsArray, emitterOption);
+        }
+    }
+    auto positionValue = std::pair<Dimension, Dimension>(xValue, yValue);
+    emitterOption.SetPosition(positionValue);
+}
+
 bool ParseEmitterOption(JSRef<JSObject>& emitterJsObject, OHOS::Ace::NG::EmitterOption& emitterOption)
 {
     auto particleJsValue = emitterJsObject->GetProperty("particle");
@@ -504,27 +694,65 @@ bool ParseEmitterOption(JSRef<JSObject>& emitterJsObject, OHOS::Ace::NG::Emitter
         }
     }
     emitterOption.SetShape(emitShape);
-    auto positionJsValue = emitterJsObject->GetProperty("position");
-    CalcDimension xValue(0.0);
-    CalcDimension yValue(0.0);
-    if (positionJsValue->IsArray()) {
-        auto positionJsArray = JSRef<JSArray>::Cast(positionJsValue);
-        if (positionJsArray->Length() == ARRAY_SIZE) {
-            JSParticle::ParseJsDimensionVp(positionJsArray->GetValueAt(0), xValue);
-            JSParticle::ParseJsDimensionVp(positionJsArray->GetValueAt(1), yValue);
-        }
-    }
-    auto positionValue = std::pair<Dimension, Dimension>(xValue, yValue);
-    emitterOption.SetPosition(positionValue);
-
+    ParseEmitterOptionPosition(emitterJsObject, emitterOption);
     auto width = Dimension(1.0, DimensionUnit::PERCENT);
     auto height = Dimension(1.0, DimensionUnit::PERCENT);
     auto sizeValue = std::pair<Dimension, Dimension>(width, height);
     auto sizeJsValue = emitterJsObject->GetProperty("size");
-    ParsSize(sizeValue, sizeJsValue);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseSize(sizeValue, sizeJsValue, emitterOption);
+    } else {
+        ParseSize(sizeValue, sizeJsValue);
+    }
     emitterOption.SetSize(sizeValue);
     ParseEmitterOptionAnnulus(emitterJsObject, emitterOption);
     return true;
+}
+
+void FromAddResIfNeed(Color& from, JSRef<JSVal>& fromJsValue,
+    NG::ParticlePropertyAnimation<Color>& colorPropertyAnimation, int i)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> fromResObj;
+        JSParticle::ParseJsColor(fromJsValue, from, fromResObj);
+        std::string key = "ParticlePropertyAnimation.from." + std::to_string(i);
+        if (fromResObj) {
+            auto&& fromUpdateFunc = [](const RefPtr<ResourceObject>& fromResObj,
+                NG::ParticlePropertyAnimation<Color>& colorPropertyAnimation) {
+                Color colorFirstValue(DEFAULT_COLOR);
+                ResourceParseUtils::ParseResColor(fromResObj, colorFirstValue);
+                colorPropertyAnimation.SetFrom(colorFirstValue);
+            };
+            colorPropertyAnimation.AddResource(key, fromResObj, std::move(fromUpdateFunc));
+        } else {
+            colorPropertyAnimation.RemoveResource(key);
+        }
+    } else {
+        JSParticle::ParseJsColor(fromJsValue, from);
+    }
+}
+
+void ToAddResIfNeed(Color& to, JSRef<JSVal>& toJsValue,
+    NG::ParticlePropertyAnimation<Color>& colorPropertyAnimation, int i)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> toResObj;
+        JSParticle::ParseJsColor(toJsValue, to, toResObj);
+        std::string key = "ParticlePropertyAnimation.to." + std::to_string(i);
+        if (toResObj) {
+            auto&& toUpdateFunc = [](const RefPtr<ResourceObject>& toResObj,
+                OHOS::Ace::NG::ParticlePropertyAnimation<Color>& colorPropertyAnimation) {
+                Color colorSecondValue(DEFAULT_COLOR);
+                ResourceParseUtils::ParseResColor(toResObj, colorSecondValue);
+                colorPropertyAnimation.SetTo(colorSecondValue);
+            };
+            colorPropertyAnimation.AddResource(key, toResObj, std::move(toUpdateFunc));
+        } else {
+            colorPropertyAnimation.RemoveResource(key);
+        }
+    } else {
+        JSParticle::ParseJsColor(toJsValue, to);
+    }
 }
 
 void ParseAnimationColorArray(
@@ -540,11 +768,11 @@ void ParseAnimationColorArray(
         auto arrayItemJsObject = JSRef<JSObject>::Cast(arrayItemJsValue);
         auto fromJsValue = arrayItemJsObject->GetProperty("from");
         Color from(DEFAULT_COLOR);
-        JSParticle::ParseJsColor(fromJsValue, from);
+        FromAddResIfNeed(from, fromJsValue, colorPropertyAnimation, i);
         colorPropertyAnimation.SetFrom(from);
         auto toJsValue = arrayItemJsObject->GetProperty("to");
         Color to(DEFAULT_COLOR);
-        JSParticle::ParseJsColor(toJsValue, to);
+        ToAddResIfNeed(to, toJsValue, colorPropertyAnimation, i);
         colorPropertyAnimation.SetTo(to);
         auto startMillisJsValue = arrayItemJsObject->GetProperty("startMillis");
         auto startMillis = static_cast<int32_t>(0);
@@ -650,8 +878,37 @@ void ParseColorInitRange(JSRef<JSVal> colorRangeJsValue, OHOS::Ace::NG::Particle
         colorOption.SetRange(defaultRange);
         return;
     }
-    JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(0), fromColor);
-    JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(1), toColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> fromColorResObj;
+        RefPtr<ResourceObject> toColorResObj;
+        JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(0), fromColor, fromColorResObj);
+        JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(1), toColor, toColorResObj);
+        if (fromColorResObj) {
+            auto&& fromColorUpdateFunc = [](const RefPtr<ResourceObject>& fromColorResObj,
+                OHOS::Ace::NG::ParticleColorPropertyOption& colorOption) {
+                Color colorFirstValue(DEFAULT_COLOR);
+                ResourceParseUtils::ParseResColor(fromColorResObj, colorFirstValue);
+                colorOption.SetRangeFirst(colorFirstValue);
+            };
+            colorOption.AddResource("range.fromColor", fromColorResObj, std::move(fromColorUpdateFunc));
+        } else {
+            colorOption.RemoveResource("range.fromColor");
+        }
+        if (toColorResObj) {
+            auto&& toColorUpdateFunc = [](const RefPtr<ResourceObject>& toColorResObj,
+                OHOS::Ace::NG::ParticleColorPropertyOption& colorOption) {
+                Color colorSecondValue(DEFAULT_COLOR);
+                ResourceParseUtils::ParseResColor(toColorResObj, colorSecondValue);
+                colorOption.SetRangeSecond(colorSecondValue);
+            };
+            colorOption.AddResource("range.toColor", toColorResObj, std::move(toColorUpdateFunc));
+        } else {
+            colorOption.RemoveResource("range.toColor");
+        }
+    } else {
+        JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(0), fromColor);
+        JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(1), toColor);
+    }
     auto range = std::pair<Color, Color>(fromColor, toColor);
     colorOption.SetRange(range);
 }

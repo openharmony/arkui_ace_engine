@@ -1511,6 +1511,55 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest002, TestSize.L
 }
 
 /**
+ * @tc.name: ViewAbstractAddMouseEventForTipsTest001
+ * @tc.desc: Test the AddMouseEventForTips of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractAddMouseEventForTipsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and params.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", -2, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    popupInfo.isTips = true;
+    popupInfo.popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, -1, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    EXPECT_EQ(param->GetAnchorType(), TipsAnchorType::TARGET);
+    param->SetAnchorType(TipsAnchorType::CURSOR);
+    EXPECT_EQ(param->GetAnchorType(), TipsAnchorType::CURSOR);
+    ViewAbstract::AddMouseEventForTips(targetNode, popupInfo);
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    auto mouseEventActuator = inputHub->mouseEventActuator_;
+    ASSERT_NE(mouseEventActuator, nullptr);
+    auto events = mouseEventActuator->inputEvents_;
+    EXPECT_EQ(events.size(), 1);
+    EXPECT_NE(popupInfo.popupNode, nullptr);
+    MouseInfo info;
+    info.SetScreenLocation(Offset(100.0, 100.0));
+    for (const auto& callback : events) {
+        if (callback && callback->GetIstips() && callback->GetTipsFollowCursor()) {
+            (*callback)(info);
+        }
+    }
+    auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    EXPECT_EQ(pattern->mouseOffset_, Offset(100.0, 100.0));
+}
+
+/**
  * @tc.name: ViewAbstractHandleHoverTipsInfoTest001
  * @tc.desc: Test the handleHoverTipsInfo of View_Abstract.
  * @tc.type: FUNC

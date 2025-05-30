@@ -94,6 +94,7 @@ struct SwiperDigitalParameters {
     RefPtr<ResourceObject> resourceSelectedFontColorValueObject;
     RefPtr<ResourceObject> resourceFontSizeValueObject;
     RefPtr<ResourceObject> resourceSelectedFontSizeValueObject;
+    std::unordered_set<std::string> parametersByUser;
 };
 
 struct SwiperArcDotParameters {
@@ -116,6 +117,7 @@ struct SwiperArrowParameters {
     RefPtr<ResourceObject> resourceBackgroundColorValueObject;
     RefPtr<ResourceObject> resourceArrowSizeValueObject;
     RefPtr<ResourceObject> resourceArrowColorValueObject;
+    std::unordered_set<std::string> parametersByUser;
 };
 
 struct AnimationCallbackInfo {

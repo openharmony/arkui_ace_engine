@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -32,6 +33,32 @@ constexpr int SLIDER_MIN = 0;
 constexpr int SLIDER_MAX = 100;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 const char* SLIDER_NODEPTR_OF_UINODE = "nodePtr_";
+namespace {
+bool ConvertSliderGradientColor(const EcmaVM* vm, const Local<JSValueRef>& value, OHOS::Ace::NG::Gradient& gradient)
+{
+    if (!value->IsObject(vm)) {
+        return false;
+    }
+    Framework::JSLinearGradient* jsLinearGradient =
+        static_cast<Framework::JSLinearGradient*>(value->ToObject(vm)->GetNativePointerField(vm, 0));
+    if (!jsLinearGradient) {
+        return false;
+    }
+
+    size_t colorLength = jsLinearGradient->GetGradient().size();
+    if (colorLength == 0) {
+        return false;
+    }
+    for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        gradient.AddColor(gradientColor);
+    }
+    return true;
+}
+} // namespace
+
 panda::Local<panda::JSValueRef> JsSliderChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     auto vm = runtimeCallInfo->GetVM();
@@ -312,11 +339,33 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Gradient gradient;
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
-    } else {
+    if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
+        ArkUIGradientType gradientObj;
+        auto colorLength = gradient.GetColors().size();
+        std::vector<uint32_t> colorValues;
+        std::vector<ArkUILengthType> offsetValues;
+        if (colorLength <= 0) {
+            GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+
+        for (int32_t i = 0; i < static_cast<int32_t>(colorLength); i++) {
+            colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
+            offsetValues.push_back(ArkUILengthType {
+                .number = static_cast<ArkUI_Float32>(gradient.GetColors()[i].GetDimension().Value()),
+                .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
+        }
+
+        gradientObj.color = &(*colorValues.begin());
+        gradientObj.offset = &(*offsetValues.begin());
+        GetArkUINodeModifiers()->getSliderModifier()->setLinearTrackBackgroundColor(
+            nativeNode, &gradientObj, colorLength);
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getSliderModifier()->setTrackBackgroundColor(nativeNode, color.GetValue());
+    } else {
+        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -338,11 +387,32 @@ ArkUINativeModuleValue SliderBridge::SetSelectColor(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-        Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUINodeModifiers()->getSliderModifier()->resetSelectColor(nativeNode);
-    } else {
+    Gradient gradient;
+    Color color;
+    if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
+        ArkUIGradientType gradientObj;
+        auto colorLength = gradient.GetColors().size();
+        std::vector<uint32_t> colorValues;
+        std::vector<ArkUILengthType> offsetValues;
+        if (colorLength <= 0) {
+            GetArkUINodeModifiers()->getSliderModifier()->resetSelectColor(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+
+        for (int32_t i = 0; i < static_cast<int32_t>(colorLength); i++) {
+            colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
+            offsetValues.push_back(ArkUILengthType {
+                .number = static_cast<ArkUI_Float32>(gradient.GetColors()[i].GetDimension().Value()),
+                .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
+        }
+
+        gradientObj.color = &(*colorValues.begin());
+        gradientObj.offset = &(*offsetValues.begin());
+        GetArkUINodeModifiers()->getSliderModifier()->setLinearSelectColor(nativeNode, &gradientObj, colorLength);
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getSliderModifier()->setSelectColor(nativeNode, color.GetValue());
+    } else {
+        GetArkUINodeModifiers()->getSliderModifier()->resetSelectColor(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }

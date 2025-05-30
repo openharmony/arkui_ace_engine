@@ -1036,4 +1036,24 @@ HWTEST_F(SubMenuTestNg, InitializePadding001, TestSize.Level1)
     subMenuLayoutAlgorithm.InitializePadding(layoutWrapper);
     EXPECT_EQ(subMenuLayoutAlgorithm.paddingTop_, ZERO);
 }
+
+/**
+ * @tc.name: GetSubMenuPosition002
+ * @tc.desc: Verify GetSubMenuPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, GetSubMenuPosition002, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto pipelineContext = menuItemNode->GetContextWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->windowModal_ = WindowModal::NORMAL;
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    menuItemNode->geometryNode_->SetFrameSize(SizeF(TWENTY, TWENTY));
+
+    EXPECT_FLOAT_EQ(subMenuLayoutAlgorithm.GetSubMenuPosition(menuItemNode, SubMenuExpandingMode::EMBEDDED).x_, TWENTY);
+}
 } // namespace OHOS::Ace::NG

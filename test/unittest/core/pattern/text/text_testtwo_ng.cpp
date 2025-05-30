@@ -1019,6 +1019,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
     textLayoutProperty->ToJsonValue(json, filter);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -1052,6 +1055,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue002, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
     textLayoutProperty->ToJsonValue(json, filter);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));

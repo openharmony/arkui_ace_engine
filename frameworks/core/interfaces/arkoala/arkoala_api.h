@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -679,6 +679,7 @@ struct ArkUIBindTipsOptionsArrow {
     ArkUI_Int32 arrowWidthUnit;
     ArkUI_Float64 arrowHeightValue;
     ArkUI_Int32 arrowHeightUnit;
+    ArkUI_Int32 showAtAnchor;
 };
 
 struct ArkUIFlexOptions {
@@ -2554,6 +2555,12 @@ struct ArkUICommonModifier {
     void (*resetPrivacySensitive)(ArkUINodeHandle node);
     void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
     void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
+    void (*setAccessibilityTextHint)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityTextHint)(ArkUINodeHandle node);
+    void (*setAccessibilityChecked)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAccessibilityChecked)(ArkUINodeHandle node);
+    void (*setAccessibilitySelected)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAccessibilitySelected)(ArkUINodeHandle node);
     void (*setVisualEffect)(ArkUINodeHandle node, void* visualEffect);
     void (*resetVisualEffect)(ArkUINodeHandle node);
     void (*setBackgroundFilter)(ArkUINodeHandle node, void* backgroundFilter);
@@ -3340,6 +3347,10 @@ struct ArkUILazyGridLayoutModifier {
 struct ArkUIEmbeddedComponentModifier {
     void (*setEmbeddedComponentWant)(ArkUINodeHandle node, AbilityBase_Want* want);
     void (*setEmbeddedComponentOption)(ArkUINodeHandle node, ArkUIEmbeddedComponentOptionHandle option);
+    void (*setOnTerminated)(ArkUINodeHandle node, void* callback);
+    void (*resetOnTerminated)(ArkUINodeHandle node);
+    void (*setOnError)(ArkUINodeHandle node, void* callback);
+    void (*resetOnError)(ArkUINodeHandle node);
 };
 
 struct ArkUITimepickerModifier {
@@ -3982,6 +3993,10 @@ struct ArkUISliderModifier {
     void (*resetMinResponsiveDistance)(ArkUINodeHandle node);
     void (*setOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnChange)(ArkUINodeHandle node);
+    void (*setLinearTrackBackgroundColor)(
+        ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength);
+    void (*setLinearSelectColor)(
+        ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength);
 
     ArkUI_Uint32 (*getBlockColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTrackBackgroundColor)(ArkUINodeHandle node);
@@ -4109,7 +4124,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaStyle)(ArkUINodeHandle node);
     void (*setTextAreaSelectionMenuHidden)(ArkUINodeHandle node, ArkUI_Uint32 contextMenuHidden);
     void (*resetTextAreaSelectionMenuHidden)(ArkUINodeHandle node);
-    void (*setTextAreaMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
+    void (*setTextAreaMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine, ArkUI_Uint32 overflowMode);
     void (*resetTextAreaMaxLines)(ArkUINodeHandle node);
     void (*setTextAreaMinLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
     void (*resetTextAreaMinLines)(ArkUINodeHandle node);
@@ -4153,6 +4168,7 @@ struct ArkUITextAreaModifier {
     ArkUI_CharPtr (*getTextAreaText)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaCaretColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaMaxLength)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextAreaMinLines)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaPlaceholderColor)(ArkUINodeHandle node);
     void (*getTextAreaPlaceholderFont)(ArkUINodeHandle node, ArkUITextFont* font);
     ArkUI_Bool (*getTextAreaEditing)(ArkUINodeHandle node);
@@ -4819,6 +4835,8 @@ struct ArkUIImageSpanModifier {
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetImageSpanBorderRadius)(ArkUINodeHandle node);
     ArkUI_Float32 (*getImageSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    void (*setImageSpanSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
+        ArkUI_Bool isUriPureNumber);
 };
 
 struct ArkUIMenuModifier {

@@ -60,7 +60,7 @@ class ACE_EXPORT BubbleLayoutAlgorithm : public LayoutAlgorithm {
 public:
     BubbleLayoutAlgorithm() = default;
     BubbleLayoutAlgorithm(int32_t id, const std::string& tag, const std::optional<OffsetF>& targetOffset = std::nullopt,
-        const std::optional<SizeF>& targetSize = std::nullopt);
+        const std::optional<SizeF>& targetSize = std::nullopt, const std::optional<Offset>& mouseOffset = std::nullopt);
     ~BubbleLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -240,6 +240,10 @@ private:
     void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     void FitAvailableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
+    void UpdateTextNodeMaxLines(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& layoutConstraint);
+    void MeasureTipsRegion(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& childContraint);
+    Placement CalculateTipsDirections(SizeF& newSize);
+
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
     void InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition, OffsetF& topPosition,
@@ -258,6 +262,8 @@ private:
     bool bCaretMode_ = false;
     bool useCustom_ = false;
     bool isTips_ = false;
+    bool followCursor_ = false;
+    Placement tipsPlacement_ = Placement::BOTTOM_LEFT;
 
     BubbleDumpInfo dumpInfo_;
     SizeF targetSize_;

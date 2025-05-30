@@ -432,7 +432,6 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR+2));
     options[columnNode_] = pickerDates;
     columnPattern_->options_ = options;
-    columnPattern_->SetCurrentIndex(2);
     columnPattern_->OnModifyDone();
 
     /**
@@ -444,6 +443,7 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     columnPattern_->InitPanEvent(gestureHub);
+    columnPattern_->SetCurrentIndex(2);
     EXPECT_EQ(columnPattern_->GetCurrentIndex(), 2);
 
     auto actionEndTask = columnPattern_->panEvent_->actionEnd_;
@@ -451,9 +451,10 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     info.SetSourceTool(SourceTool::FINGER);
     info.SetInputEventType(InputEventType::AXIS);
     actionEndTask(info);
-    Point globalPoint(1.0f, 1.0f);
-    info.SetGlobalPoint(globalPoint);
     info.SetOffsetX(1.0f);
+    
+    Point globalPoint1 = Point(1.0f, 1.0f);
+    info.SetGlobalPoint(globalPoint1);
     info.SetOffsetY(200.0f);
     columnPattern_->yLast_ = 0.0f;
     columnPattern_->pressed_ = true;
@@ -461,15 +462,15 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     EXPECT_FLOAT_EQ(columnPattern_->yLast_, 201.0f);
     EXPECT_EQ(columnPattern_->GetCurrentIndex(), 1);
     
-    info.SetOffsetY(400.0f);
-    columnPattern_->yLast_ = 0.0f;
+    Point globalPoint2 = Point(1.0f, 201.0f);
+    info.SetGlobalPoint(globalPoint2);
     columnPattern_->pressed_ = true;
     columnPattern_->HandleDragMove(info);
     EXPECT_FLOAT_EQ(columnPattern_->yLast_, 401.0f);
     EXPECT_EQ(columnPattern_->GetCurrentIndex(), 0);
 
-    info.SetOffsetY(600.0f);
-    columnPattern_->yLast_ = 0.0f;
+    Point globalPoint3 = Point(1.0f, 401.0f);
+    info.SetGlobalPoint(globalPoint3);
     columnPattern_->pressed_ = true;
     columnPattern_->HandleDragMove(info);
     EXPECT_FLOAT_EQ(columnPattern_->yLast_, 601.0f);
@@ -531,4 +532,22 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest006, TestSize.Level1)
     auto rowLayoutProperty2 = AceType::DynamicCast<DataPickerRowLayoutProperty>(rowLayoutProperty->Clone());
     ASSERT_FALSE(rowLayoutProperty2->GetCanLoopValue(true));
 }
+
+/**
+ * @tc.name: DatePickerCanLoopTest007
+ * @tc.desc: Test SetCanLoop with framenode.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest007, TestSize.Level1)
+ {
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    DatePickerModelNG::SetCanLoop(frameNode, false);
+    EXPECT_FALSE(pickerProperty->GetCanLoopValue());
+ }
 } // namespace OHOS::Ace::NG

@@ -590,7 +590,6 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
     // When CanLoop is true and NotLoopOptions is false(which means LoopOptions are satisfied), CanMove returns true;
     // otherwise, validate the index legality.
     if (dataPickerRowLayoutProperty->GetCanLoopValue(true) && !NotLoopOptions()) {
-
         return true;
     }
     int totalOptionCount = GetOptionCount();

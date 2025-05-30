@@ -100,6 +100,8 @@ public:
     void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength, LayoutWrapper* layoutWrapper);
     bool DidExceedMaxLines(const SizeF& maxSize) override;
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
+    void UpdateTextAreaMaxLines(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
+    bool ShouldUseInfiniteMaxLines(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
 
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);

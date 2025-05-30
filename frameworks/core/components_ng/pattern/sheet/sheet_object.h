@@ -16,18 +16,22 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHEET_SHEET_OBJECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHEET_SHEET_OBJECT_H
 
-#include "base/memory/referenced.h"
+#include "base/memory/ace_type.h"
+
 #include "core/common/window_animation_config.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 
 namespace OHOS::Ace::NG {
 
 class SheetPresentationPattern;
 enum class BindSheetDismissReason;
 
-class SheetObject : public Referenced {
+class SheetObject : public virtual AceType {
+    DECLARE_ACE_TYPE(SheetObject, AceType);
+
 public:
     SheetObject(SheetType sheetType) : sheetType_(sheetType) {}
     virtual BorderWidthProperty PostProcessBorderWidth(const BorderWidthProperty& borderWidth);
@@ -48,6 +52,13 @@ public:
     virtual void HandleDragEnd(float dragVelocity);
     virtual void ModifyFireSheetTransition(float dragVelocity);
     virtual void CreatePropertyCallback();
+
+    virtual ScrollResult HandleScroll(float scrollOffset, int32_t source,
+        NestedState state, float velocity = 0.f);
+    virtual void OnScrollStartRecursive(float position, float dragVelocity = 0.0f);
+    virtual void OnScrollEndRecursive (const std::optional<float>& velocity);
+    virtual bool HandleScrollVelocity(float velocity);
+    ScrollResult HandleScrollWithSheet(float scrollOffset);
 
     void BindPattern(const WeakPtr<SheetPresentationPattern>& pattern)
     {
@@ -101,6 +112,9 @@ protected:
     float currentOffset_ = 0.0f;
     SheetType sheetType_;
     WeakPtr<SheetPresentationPattern> pattern_;
+    // not need copy, and 非Side 独有
+    bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
+    bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
 };
 } // namespace OHOS::Ace::NG
 

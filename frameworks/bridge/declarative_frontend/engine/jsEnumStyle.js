@@ -84,6 +84,12 @@ let FontWeight;
   FontWeight.Bolder = 'bolder';
 })(FontWeight || (FontWeight = {}));
 
+let MaxLinesMode;
+(function (MaxLinesMode) {
+    MaxLinesMode[MaxLinesMode.CLIP = 0] = 'clip';
+    MaxLinesMode[MaxLinesMode.SCROLL = 1] = 'scroll';
+})(MaxLinesMode || (MaxLinesMode = {}));
+
 let WordBreak;
 (function (WordBreak) {
   WordBreak[WordBreak.NORMAL = 0] = 'normal';
@@ -3985,6 +3991,12 @@ let AccessibilityActionInterceptResult;
   AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_CONTINUE = 1] = 'ACTION_CONTINUE';
   AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_RISE = 2] = 'ACTION_RISE';
 })(AccessibilityActionInterceptResult || (AccessibilityActionInterceptResult = {}));
+
+let TipsAnchorType;
+(function (TipsAnchorType) {
+  TipsAnchorType[TipsAnchorType.TARGET = 0] = 'TARGET';
+  TipsAnchorType[TipsAnchorType.CURSOR = 1] = 'CURSOR';
+})(TipsAnchorType || (TipsAnchorType = {}));
 
 let TextMenuShowMode;
 (function (TextMenuShowMode) {

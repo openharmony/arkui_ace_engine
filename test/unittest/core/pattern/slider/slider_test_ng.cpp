@@ -841,6 +841,33 @@ HWTEST_F(SliderTestNg, SliderTestNg012, TestSize.Level1)
     EXPECT_FALSE(sliderPattern->axisFlag_);
 }
 
+
+/**
+ * @tc.name: SliderTestNg013
+ * @tc.desc: Test Slider Trace Color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNg013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider and set the properties, and then get frameNode.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetTrackBackgroundColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    EXPECT_NE(sliderPaintProperty, nullptr);
+    EXPECT_EQ(true, sliderPaintProperty->GetTrackBackgroundColor().has_value());
+    EXPECT_EQ(sliderPaintProperty->GetTrackBackgroundColor().value(), SliderModelNG::CreateSolidGradient(TEST_COLOR));
+}
+
 /**
  * @tc.name: SliderLayoutAlgorithm001
  * @tc.desc: Test SliderLayoutAlgorithm MeasureContent.

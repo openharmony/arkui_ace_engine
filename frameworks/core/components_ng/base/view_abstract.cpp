@@ -3611,6 +3611,30 @@ void ViewAbstract::AddHoverEventForTips(
     auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
     hoverEvent->SetIstips(true);
     inputHub->AddOnHoverEvent(hoverEvent);
+    if (param->GetAnchorType() == TipsAnchorType::CURSOR) {
+        AddMouseEventForTips(targetNode, tipsInfo);
+    }
+}
+
+void ViewAbstract::AddMouseEventForTips(const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo)
+{
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto context = targetNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto mouseTask = [popupNode = AceType::WeakClaim(AceType::RawPtr(tipsInfo.popupNode))](MouseInfo& info) {
+        auto popup = popupNode.Upgrade();
+        CHECK_NULL_VOID(popup);
+        auto pattern = popup->GetPattern<BubblePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetMouseOffset(info.GetScreenLocation());
+    };
+    auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
+    mouseEvent->SetIstips(true);
+    mouseEvent->SetTipsFollowCursor(true);
+    inputHub->AddOnMouseEvent(mouseEvent);
 }
 
 RefPtr<OverlayManager> ViewAbstract::GetCurOverlayManager(const RefPtr<UINode>& node)

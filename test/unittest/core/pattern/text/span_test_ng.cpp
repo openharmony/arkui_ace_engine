@@ -2063,4 +2063,33 @@ HWTEST_F(SpanTestNg, SpanMouseHoverEvent002, TestSize.Level1)
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
     EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
 }
+
+/**
+ * @tc.name: ImageSpanViewSetSrc
+ * @tc.desc: Test ImageSPan UpdateSrc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanViewSetSrc, TestSize.Level1)
+{
+    ImageModelNG imageSpan;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = "";
+    imageInfoConfig.moduleName = "";
+    imageInfoConfig.isImageSpan = true;
+    imageSpan.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    std::string src = "imageSpanSrc";
+    std::string bundleName = "";
+    std::string moduleName = "";
+    ImageSpanView::SetSrc(frameNode, src, bundleName, moduleName, false);
+    auto srcInfo = imageLayoutProperty->GetImageSourceInfo();
+    EXPECT_EQ(srcInfo->src_, src);
+}
 } // namespace OHOS::Ace::NG

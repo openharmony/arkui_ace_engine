@@ -379,6 +379,13 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
                       : std::max(preferredHeight_, paragraph_->GetHeight());
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, SizeF());
+    auto lineCount = paragraph_->GetLineCount() != 0 ? paragraph_->GetLineCount() : 1;
+    if (textFieldLayoutProperty->HasNormalMaxViewLines() && ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        auto maxline = (height / lineCount) * textFieldLayoutProperty->GetNormalMaxViewLines().value();
+        contentHeight = std::min(contentHeight, maxline);
+    }
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
     return SizeF(contentWidth, contentHeight);
@@ -1285,5 +1292,26 @@ void TextFieldLayoutAlgorithm::UpdateAutoWidth(
         autoWidth_ = (layoutCalPolicy == LayoutCalPolicy::WRAP_CONTENT) ||
                      (layoutCalPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
     }
+}
+
+void TextFieldLayoutAlgorithm::UpdateTextAreaMaxLines(
+    TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        textStyle.SetMaxLines(INT32_MAX);
+    } else {
+        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+    }
+}
+
+bool TextFieldLayoutAlgorithm::ShouldUseInfiniteMaxLines(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    return textFieldLayoutProperty->HasOverflowMode() &&
+           textFieldLayoutProperty->GetOverflowMode() == OverflowMode::SCROLL &&
+           (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::NONE ||
+               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::CLIP ||
+               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::DEFAULT);
 }
 } // namespace OHOS::Ace::NG

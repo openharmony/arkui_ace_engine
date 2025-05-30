@@ -117,7 +117,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<BubbleLayoutAlgorithm>(targetNodeId_, targetTag_, targetOffset_, targetSize_);
+        return MakeRefPtr<BubbleLayoutAlgorithm>(targetNodeId_, targetTag_, targetOffset_, targetSize_, mouseOffset_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -346,6 +346,11 @@ public:
         return innerBorderWidth_;
     }
 
+    void SetMouseOffset(const std::optional<Offset>& offset)
+    {
+        mouseOffset_ = offset;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -424,6 +429,7 @@ private:
 
     std::optional<OffsetF> targetOffset_;
     std::optional<SizeF> targetSize_;
+    std::optional<Offset> mouseOffset_;
 
     bool isCustomPopup_ = false;
     bool isTips_ = false;

@@ -87,6 +87,7 @@ public:
     void SetMaxViewLines(uint32_t value) override;
     void SetNormalMaxViewLines(uint32_t value) override;
     void SetMinLines(uint32_t value) override;
+    void SetOverflowMode(OverflowMode value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetNormalUnderlineColor(const Color& normalColor) override;
@@ -175,6 +176,7 @@ public:
     static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetMinLines(FrameNode* frameNode, uint32_t value);
+    static void SetOverflowMode(FrameNode* frameNode, OverflowMode value);
     static void SetType(FrameNode* frameNode, TextInputType value);
     static void SetContentType(const FrameNode* frameNode, const TextContentType& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
@@ -254,6 +256,7 @@ public:
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
     static bool GetShowCounter(FrameNode* frameNode);
     static int GetCounterType(FrameNode* frameNode);
+    static uint32_t GetMinLines(FrameNode* frameNode);
     static bool GetShowCounterBorder(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end);
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);

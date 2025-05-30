@@ -509,6 +509,38 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetPipelineByWindowId002
+ * @tc.desc: GetPipelineByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetPipelineByWindowId002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->SetWindowId(1);
+
+    RefPtr<NG::PipelineContext> context1 = nullptr;
+    jsAccessibilityManager->AddSubPipelineContext(context1);
+
+    auto context2 = AceType::MakeRefPtr<NG::PipelineContext>();
+    context2->SetWindowId(2);
+    jsAccessibilityManager->AddSubPipelineContext(context2);
+    /**
+     * @tc.steps: step2. test GetSubPipelineContext in GetPipelineByWindowId
+     */
+    auto pattern = jsAccessibilityManager->GetPipelineByWindowId(1);
+    EXPECT_NE(pattern, nullptr);
+
+    pattern = jsAccessibilityManager->GetPipelineByWindowId(2);
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
  * @tc.name: JsAccessibilityManager011
  * @tc.desc: CheckDumpInfoParams,OnDumpInfoNG,CheckDumpHandleEventParams,DumpProperty
  * @tc.type: FUNC

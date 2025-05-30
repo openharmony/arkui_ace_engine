@@ -6997,16 +6997,17 @@ void OverlayManager::RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    if (overlayManager->IsFilterOnDisappear(filterNode->GetId())) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter is onDisappear, filterId: %{public}d", filterNode->GetId());
+
+    if (!hasAnimation) {
+        overlayManager->RemoveFilterWithNode(filterNode);
         return;
     }
 
-    if (hasAnimation) {
-        overlayManager->ShowFilterDisappearAnimation(filterNode);
-    } else {
-        overlayManager->RemoveFilterWithNode(filterNode);
+    if (overlayManager->IsFilterOnDisappear(filterNode->GetId())) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter is already disappearing, filterId: %{public}d", filterNode->GetId());
+        return;
     }
+    overlayManager->ShowFilterDisappearAnimation(filterNode);
 }
 
 void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode)

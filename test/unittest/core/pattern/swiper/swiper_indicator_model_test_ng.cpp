@@ -835,4 +835,27 @@ HWTEST_F(IndicatorModelTestNg, CreateDigitWithResourceObj, TestSize.Level1)
     EXPECT_EQ(indicatorPattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
     EXPECT_EQ(indicatorPattern_->swiperDigitalParameters_->fontColor, Color::RED);
 }
+
+/**
+ * @tc.name: CreateDotWithResourceObj001
+ * @tc.desc: Text CreateDotWithResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, CreateDotWithResourceObj, TestSize.Level1)
+{
+    SwiperParameters swiperParameters;
+    swiperParameters.colorVal = Color::RED;
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+    model.CreateDotWithResourceObj(frameNode, swiperParameters);
+    model.SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+
+    EXPECT_EQ(indicatorPattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->colorVal, Color::RED);
+}
 } // namespace OHOS::Ace::NG

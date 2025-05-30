@@ -96,6 +96,8 @@ public:
         return MakeRefPtr<SheetPresentationProperty>();
     }
 
+    RefPtr<RenderContext> GetRenderContext();
+
     int32_t GetTargetId() const override
     {
         return targetId_;
@@ -1045,7 +1047,7 @@ private:
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
-    RefPtr<RenderContext> GetRenderContext();
+
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
     float GetWrapperHeight();
@@ -1171,8 +1173,6 @@ private:
     bool isDrag_ = false;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     bool isNeedProcessHeight_ = false;
-    bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
-    bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
     bool isSpringBack_ = false; // sheet rebound
 
     double start_ = 0.0; // start position of detents changed

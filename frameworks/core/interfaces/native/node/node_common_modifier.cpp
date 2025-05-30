@@ -2631,6 +2631,7 @@ void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptio
     tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
     tipsParam->SetEnableArrow(arrowOptions.enableArrow);
     tipsParam->SetKeyBoardAvoidMode(PopupKeyboardAvoidMode::DEFAULT);
+    tipsParam->SetAnchorType(static_cast<TipsAnchorType>(arrowOptions.showAtAnchor));
     if (arrowOptions.arrowPointPosition && arrowOptions.enableArrow) {
         char* pEnd = nullptr;
         std::strtod(arrowOptions.arrowPointPosition, &pEnd);
@@ -3266,6 +3267,49 @@ void ResetAccessibilityText(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityText(frameNode, "");
+}
+
+void SetAccessibilityTextHint(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, valueStr);
+}
+
+void ResetAccessibilityTextHint(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, "");
+}
+
+void SetAccessibilityChecked(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityChecked(frameNode, value, false);
+}
+
+void ResetAccessibilityChecked(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityChecked(frameNode, false, true);
+}
+
+void SetAccessibilitySelected(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilitySelected(frameNode, value, false);
+}
+
+void ResetAccessibilitySelected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilitySelected(frameNode, false, true);
 }
 
 void SetAllowDrop(ArkUINodeHandle node, ArkUI_CharPtr* allowDropCharArray, ArkUI_Int32 length)
@@ -7847,6 +7891,12 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetPrivacySensitive = ResetPrivacySensitve,
         .freezeUINodeById = FreezeUINodeById,
         .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
+        .setAccessibilityTextHint = SetAccessibilityTextHint,
+        .resetAccessibilityTextHint = ResetAccessibilityTextHint,
+        .setAccessibilityChecked = SetAccessibilityChecked,
+        .resetAccessibilityChecked = ResetAccessibilityChecked,
+        .setAccessibilitySelected = SetAccessibilitySelected,
+        .resetAccessibilitySelected = ResetAccessibilitySelected,
         .setVisualEffect = SetVisualEffect,
         .resetVisualEffect = ResetVisualEffect,
         .setBackgroundFilter = SetBackgroundFilter,
@@ -9139,6 +9189,28 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnMouse(frameNode, onEvent);
 }
 
+void SetOnAxisInfo(ArkUINodeEvent& event, AxisInfo& info, bool usePx)
+{
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    if (usePx) {
+        event.axisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+        event.axisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+        event.axisEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+        event.axisEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+        event.axisEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
+        event.axisEvent.height = info.GetTarget().area.GetHeight().ConvertToPx();
+    } else {
+        event.axisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToVp();
+        event.axisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToVp();
+        event.axisEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+        event.axisEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+        event.axisEvent.width = info.GetTarget().area.GetWidth().ConvertToVp();
+        event.axisEvent.height = info.GetTarget().area.GetHeight().ConvertToVp();
+    }
+    event.axisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+}
+
 void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -9170,6 +9242,7 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         event.axisEvent.deviceId = info.GetDeviceId();
 
+        SetOnAxisInfo(event, info, usePx);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(!event.axisEvent.propagation);
     };

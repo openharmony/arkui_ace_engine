@@ -226,6 +226,9 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(popupTheme, false);
     padding_ = isTips_ ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
     if (isTips_) {
+        if (paintProperty->GetShowAtAnchorValue(TipsAnchorType::TARGET) == TipsAnchorType::CURSOR) {
+            return popupTheme->GetTipsDoubleBorderEnable();
+        }
         return enableArrow_ && showArrow_ && popupTheme->GetTipsDoubleBorderEnable();
     }
     return popupTheme->GetPopupDoubleBorderEnable() && childSize_.IsPositive();

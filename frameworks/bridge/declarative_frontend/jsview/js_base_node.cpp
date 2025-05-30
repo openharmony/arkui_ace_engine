@@ -636,6 +636,20 @@ bool JSBaseNode::InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
     if (screenYJsVal->IsNumber()) {
         axisEvent.screenY = screenYJsVal->ToNumber<float>();
     }
+
+    AxisInfo* axisInfo = JSRef<JSObject>::Cast(obj)->Unwrap<AxisInfo>();
+    auto pinchAxisScale = obj->GetProperty("pinchAxisScale");
+    if (pinchAxisScale->IsNumber()) {
+        axisEvent.pinchAxisScale = pinchAxisScale->ToNumber<float>();
+    } else if (axisInfo) {
+        axisEvent.pinchAxisScale = axisInfo->GetPinchAxisScale();
+    }
+    auto rotateAxisAngle = obj->GetProperty("rotateAxisAngle");
+    if (rotateAxisAngle->IsNumber()) {
+        axisEvent.rotateAxisAngle = rotateAxisAngle->ToNumber<float>();
+    } else if (axisInfo) {
+        axisEvent.rotateAxisAngle = axisInfo->GetRotateAxisAngle();
+    }
     if (!ParamAxisEvent(info, axisEvent)) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "AxisEvent params invalid");
         return false;

@@ -855,4 +855,35 @@ HWTEST_F(OverlayManagerMenuTestNg, HideAllMenusWithoutAnimation001, TestSize.Lev
     overlayManager->HideAllMenusWithoutAnimation();
     EXPECT_TRUE(overlayManager->menuMap_.empty());
 }
+
+/**
+ * @tc.name: RemoveMenuFilter001
+ * @tc.desc: Test OverlayManager::RemoveMenuFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, RemoveMenuFilter001, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    auto column = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(column, nullptr);
+    column->MountToParent(rootNode);
+    menuWrapperPattern->SetFilterColumnNode(column);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    
+    EXPECT_FALSE(rootNode->GetChildren().empty());
+    overlayManager->RemoveMenuFilter(menuWrapper, false);
+    EXPECT_TRUE(rootNode->GetChildren().empty());
+}
 } // namespace OHOS::Ace::NG

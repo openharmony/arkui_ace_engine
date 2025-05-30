@@ -1210,6 +1210,13 @@ HWTEST_F(MenuViewTestNg, UpdateMenuMaskType001, TestSize.Level1)
 
     EXPECT_EQ(filterRenderContext->GetBackgroundColorValue(), Color::RED);
     EXPECT_EQ(filterRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
+
+    menuParam.maskEnable = false;
+    menuParam.maskType->maskColor = Color::BLUE;
+    menuParam.maskType->maskBackGroundBlurStyle = BlurStyle::BACKGROUND_THIN;
+    MenuView::UpdateMenuParam(menuWrapperNode, menuNode, menuParam);
+    EXPECT_EQ(filterRenderContext->GetBackgroundColorValue(), Color::RED);
+    EXPECT_EQ(filterRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
 }
 
 /**
@@ -1343,5 +1350,66 @@ HWTEST_F(MenuViewTestNg, CheckHoverImageFinishForInterruption001, TestSize.Level
     ASSERT_NE(stackContext, nullptr);
     auto opacity = stackContext->GetOpacity().value_or(0.0f);
     EXPECT_TRUE(NearEqual(opacity, 1.0));
+}
+
+/**
+ * @tc.name: TouchEventGenerator001
+ * @tc.desc: Verify touch event parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, TouchEventGenerator001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    TouchEvent event;
+    MenuView::TouchEventGenerator(menuItemNode, event);
+    auto childOffset = menuItemNode->GetPaintRectOffset(false, true);
+    auto rectWithRender = menuItemNode->GetRectWithRender();
+    auto x = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / TWO;
+    auto y = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / TWO;
+    EXPECT_EQ(event.id, menuItemNode->GetId());
+    EXPECT_EQ(event.originalId, menuItemNode->GetId());
+    EXPECT_EQ(event.postEventNodeId, menuItemNode->GetId());
+    EXPECT_DOUBLE_EQ(event.x, x);
+    EXPECT_DOUBLE_EQ(event.y, y);
+}
+
+/**
+ * @tc.name: TouchPointGenerator001
+ * @tc.desc: Verify touch point parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, TouchPointGenerator001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    TouchPoint point;
+    MenuView::TouchPointGenerator(menuItemNode, point);
+    auto childOffset = menuItemNode->GetPaintRectOffset(false, true);
+    auto rectWithRender = menuItemNode->GetRectWithRender();
+    auto x = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / TWO;
+    auto y = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / TWO;
+    EXPECT_EQ(point.id, menuItemNode->GetId());
+    EXPECT_EQ(point.originalId, menuItemNode->GetId());
+    EXPECT_DOUBLE_EQ(point.x, x);
+    EXPECT_DOUBLE_EQ(point.y, y);
+    EXPECT_DOUBLE_EQ(point.screenX, x);
+    EXPECT_DOUBLE_EQ(point.screenY, y);
+}
+
+/**
+ * @tc.name: RegisterAccessibilityChildActionNotify001
+ * @tc.desc: Check callback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, RegisterAccessibilityChildActionNotify001, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    ASSERT_NE(menuWrapperNode_, nullptr);
+    MenuView::RegisterAccessibilityChildActionNotify(menuWrapperNode_);
+    auto menuwrapperAccessibilityProperty = menuWrapperNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(menuwrapperAccessibilityProperty, nullptr);
+    auto callback = menuwrapperAccessibilityProperty->GetNotifyChildActionFunc();
+    ASSERT_NE(callback, nullptr);
 }
 } // namespace OHOS::Ace::NG

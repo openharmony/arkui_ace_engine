@@ -171,4 +171,18 @@ void ImageSpanView::ResetBorderRadius(FrameNode* frameNode)
     ViewAbstract::SetBorderRadius(frameNode, borderRadius);
     ImageModelNG::ResetBackBorder(frameNode);
 }
+
+void ImageSpanView::SetPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
+{
+    auto srcInfo = ImageSourceInfo(pixMap);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
+void ImageSpanView::SetSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
+    const std::string& moduleName, bool isUriPureNumber)
+{
+    auto srcInfo = ImageSourceInfo { src, bundleName, moduleName };
+    srcInfo.SetIsUriPureNumber(isUriPureNumber);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
 } // namespace OHOS::Ace::NG

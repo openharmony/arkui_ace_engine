@@ -767,10 +767,12 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     RefPtr<ResourceObject> resSelectedFontColorObj;
     auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor, resFontColorObj);
     digitalParameters.fontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("fontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     parseOk = JSViewAbstract::ParseJsColor(selectedFontColorValue, fontColor, resSelectedFontColorObj);
     digitalParameters.selectedFontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("selectedFontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     if (SystemProperties::ConfigChangePerform()) {
         digitalParameters.resourceDimLeftValueObject = resLeftObj;
         digitalParameters.resourceDimTopValueObject = resTopObj;
@@ -820,7 +822,9 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
                 ? dimension
                 : swiperIndicatorTheme->GetBigArrowBackgroundSize();
         parseOk = ParseJsColor(backgroundColorValue, color, resBackgroundColorObj);
-        swiperArrowParameters.backgroundColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowBackgroundColor();
+        swiperArrowParameters.backgroundColor = parseOk
+            ? (swiperArrowParameters.parametersByUser.insert("backgroundColor"), color)
+            : swiperIndicatorTheme->GetBigArrowBackgroundColor();
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
@@ -832,7 +836,9 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
             swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
         }
         parseOk = ParseJsColor(arrowColorValue, color, resArrowColorObj);
-        swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowColor();
+        swiperArrowParameters.arrowColor = parseOk
+            ? (swiperArrowParameters.parametersByUser.insert("arrowColor"), color)
+            : swiperIndicatorTheme->GetBigArrowColor();
     } else {
         parseOk = ParseJsDimensionVp(backgroundSizeValue, dimension, resBackgroundSizeObj);
         swiperArrowParameters.backgroundSize =
@@ -840,7 +846,9 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
                 ? dimension
                 : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
         parseOk = ParseJsColor(backgroundColorValue, color, resBackgroundColorObj);
-        swiperArrowParameters.backgroundColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowBackgroundColor();
+        swiperArrowParameters.backgroundColor = parseOk
+            ? (swiperArrowParameters.parametersByUser.insert("backgroundColor"), color)
+            : swiperIndicatorTheme->GetSmallArrowBackgroundColor();
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
@@ -852,7 +860,9 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
             swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
         }
         parseOk = ParseJsColor(arrowColorValue, color, resArrowColorObj);
-        swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowColor();
+        swiperArrowParameters.arrowColor = parseOk
+           ? (swiperArrowParameters.parametersByUser.insert("arrowColor"), color)
+           : swiperIndicatorTheme->GetSmallArrowColor();
     }
     if (SystemProperties::ConfigChangePerform()) {
         swiperArrowParameters.resourceBackgroundSizeValueObject = resBackgroundSizeObj;

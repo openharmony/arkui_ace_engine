@@ -287,10 +287,12 @@ SwiperDigitalParameters JSIndicator::GetDigitIndicatorInfo(const JSRef<JSObject>
     RefPtr<ResourceObject> resSelectedFontColorObj;
     auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor, resFontColorObj);
     digitalParameters.fontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("fontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     parseOk = JSViewAbstract::ParseJsColor(selectedFontColorValue, fontColor, resSelectedFontColorObj);
     digitalParameters.selectedFontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("selectedFontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     if (SystemProperties::ConfigChangePerform()) {
         digitalParameters.resourceFontColorValueObject = resFontColorObj;
         digitalParameters.resourceSelectedFontColorValueObject = resSelectedFontColorObj;
