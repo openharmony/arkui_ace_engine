@@ -23,7 +23,7 @@ import { IDataSource } from "../component/lazyForEach";
 import { LazyForEachOps } from "../component";
 import { LazyItemNode } from "./LazyItemNode";
 
-let globalLazyItems = new Set<ComputableState<LazyItemNode>>()
+let globalLazyItems: Set<ComputableState<LazyItemNode>> = new Set<ComputableState<LazyItemNode>>()
 export function updateLazyItems() {
     for (let node of globalLazyItems) {
         node.value
