@@ -1255,6 +1255,8 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
     return false;
 }
 
+void WebDelegate::RemoveSnapshotFrameNode() {}
+
 void WebDelegate::OnPip(int status, int delegate_id,
     int child_id, int frame_routing_id,  int width, int height) {}
 void WebDelegate::SetPipNativeWindow(int delegate_id,

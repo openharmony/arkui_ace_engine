@@ -1542,4 +1542,56 @@ HWTEST_F(WebPatternSelectTestNg, UninitRotationEventCallback_001, TestSize.Level
     webPattern->UninitRotationEventCallback();
 #endif
 }
+
+/**
+ * @tc.name: CreateSnapshotImageFrameNode_001
+ * @tc.desc: CreateSnapshotImageFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+   auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    std::string snapshotPath = "";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: RemoveSnapshotFrameNode_001
+ * @tc.desc: RemoveSnapshotFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, RemoveSnapshotFrameNode_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    std::string snapshotPath = "";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    webPattern->RemoveSnapshotFrameNode();
+    webPattern->RemoveSnapshotFrameNode();
+    MockPipelineContext::TearDown();
+#endif
+}
 } // namespace OHOS::Ace::NG

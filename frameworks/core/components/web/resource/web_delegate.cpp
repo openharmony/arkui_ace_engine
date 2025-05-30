@@ -48,6 +48,7 @@
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
 #include "nweb_helper.h"
+#include "nweb_snapshot_data_base.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "system_ability_definition.h"
@@ -3255,6 +3256,9 @@ void WebDelegate::InitWebViewWithSurface()
             auto window_id = upgradeContext->GetWindowId();
             auto foucus_window_id = upgradeContext->GetFocusWindowId();
             delegate->nweb_->SetWindowId(window_id);
+            if (sptr<Rosen::Window> window = OHOS::Rosen::Window::GetWindowWithId(window_id)) {
+                delegate->nweb_->SetPrivacyStatus(window->IsPrivacyMode());
+            }
             delegate->nweb_->SetFocusWindowId(foucus_window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
@@ -5864,6 +5868,23 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
     return result;
 }
 
+void WebDelegate::RemoveSnapshotFrameNode()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::RemoveSnapshotFrameNode");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(context->GetTaskExecutor());
+    context->GetTaskExecutor()->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->RemoveSnapshotFrameNode();
+        },
+        TaskExecutor::TaskType::UI, 650, "ArkUIWebSnapshotRemove"); // 650为根据LCP和FCP时差估算的经验值
+}
+
 bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     CHECK_NULL_RETURN(taskExecutor_, false);
@@ -5888,6 +5909,27 @@ bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRe
         CHECK_NULL_VOID(webCom);
         result = webCom->OnLoadIntercept(param.get());
     }, "ArkUIWebHandleInterceptLoading");
+
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), request]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            std::string key = OHOS::NWeb::NWebHelper::Instance().CheckBlankOptEnable(
+                request->Url(), delegate->nweb_->GetWebId());
+            if (!key.empty() && request->IsAboutMainFrame()) {
+                auto snapshotDataItem = NWebSnapshotDataBase::Instance().GetSnapshotDataItem(key);
+                TAG_LOGD(AceLogTag::ACE_WEB, "blankless OnHandleInterceptLoading, snapshot Path:%{public}s",
+                         snapshotDataItem.staticPath.c_str());
+                if (!snapshotDataItem.staticPath.empty()) {
+                    auto webPattern = delegate->webPattern_.Upgrade();
+                    CHECK_NULL_VOID(webPattern);
+                    webPattern->CreateSnapshotImageFrameNode(snapshotDataItem.staticPath);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebloadSnapshot");
     return result;
 }
 
