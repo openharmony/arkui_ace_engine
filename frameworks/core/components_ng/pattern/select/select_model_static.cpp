@@ -212,4 +212,20 @@ void SelectModelStatic::SetValueChangeEvent(FrameNode* frameNode, NG::ValueChang
     CHECK_NULL_VOID(hub);
     hub->SetValueChangeEvent(std::move(valueChangeEvent));
 }
+
+NG::SelectDivider SelectModelStatic::GetDefaultDivider(FrameNode* frameNode)
+{
+    NG::SelectDivider defaultDivider;
+    CHECK_NULL_RETURN(frameNode, defaultDivider);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, defaultDivider);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, defaultDivider);
+    defaultDivider.strokeWidth = selectTheme->GetDefaultDividerWidth();
+    defaultDivider.color = selectTheme->GetLineColor();
+    Dimension defaultMargin = -1.0_vp;
+    defaultDivider.startMargin = defaultMargin;
+    defaultDivider.endMargin = defaultMargin;
+    return defaultDivider;
+}
 } // namespace OHOS::Ace::NG

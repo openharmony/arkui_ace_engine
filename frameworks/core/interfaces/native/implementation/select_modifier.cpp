@@ -460,8 +460,30 @@ void DividerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<SelectDivider>(*value);
-    SelectModelStatic::SetDivider(frameNode, divider);
+    auto divider = SelectModelStatic::GetDefaultDivider(frameNode);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        SelectModelStatic::SetDivider(frameNode, divider);
+        return;
+    }
+    auto dividerOptions = value->value;
+    auto strokeWidthOpt = Converter::OptConvert<Dimension>(dividerOptions.strokeWidth);
+    if (strokeWidthOpt.has_value()) {
+        divider.strokeWidth = strokeWidthOpt.value();
+    }
+    auto colorOpt = Converter::OptConvert<Color>(dividerOptions.color);
+    if (colorOpt.has_value()) {
+        divider.color = colorOpt.value();
+    }
+    auto startMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.startMargin);
+    if (startMarginOpt.has_value()) {
+        divider.startMargin = startMarginOpt.value();
+    }
+    auto endMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.endMargin);
+    if (endMarginOpt.has_value()) {
+        divider.endMargin = endMarginOpt.value();
+    }
+    std::optional<SelectDivider> dividerOpt = divider;
+    SelectModelStatic::SetDivider(frameNode, dividerOpt);
 }
 void TextModifierImpl(Ark_NativePointer node,
                       const Opt_TextModifier* value)

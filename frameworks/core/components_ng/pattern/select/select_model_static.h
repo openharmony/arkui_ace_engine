@@ -48,6 +48,7 @@ public:
     static void SetMenuBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetSelectChangeEvent(FrameNode* frameNode, NG::SelectChangeEvent&& selectChangeEvent);
     static void SetValueChangeEvent(FrameNode* frameNode, NG::ValueChangeEvent&& valueChangeEvent);
+    static NG::SelectDivider GetDefaultDivider(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_STATIC_H
