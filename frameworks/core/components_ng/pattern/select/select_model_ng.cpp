@@ -40,19 +40,6 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     }
 }
 
-void SetDefaultShowInSubWindow(const RefPtr<FrameNode>& select)
-{
-    CHECK_NULL_VOID(select);
-    auto pipeline = select->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    if (selectTheme->GetExpandDisplay()) {
-        auto selectPattern = select->GetPattern<SelectPattern>();
-        CHECK_NULL_VOID(selectPattern);
-        selectPattern->SetShowInSubWindow(true);
-    }
-}
 } // namespace
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
@@ -570,7 +557,6 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         pattern->AddOptionNode(option);
     }
 
-    SetDefaultShowInSubWindow(select);
     // delete menu when select node destroy
     auto destructor = [id = select->GetId(), frameNode]() {
         auto* pipeline = frameNode->GetContextWithCheck();
