@@ -285,40 +285,103 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
     }
 }
 
+std::optional<std::string> ResourceConverter::GetStringResource()
+{
+    std::optional<std::string> result;
+    if (id_ != -1) {
+        result = themeConstants_->GetString(id_);
+        ReplaceHolder(result.value(), params_, 0);
+    } else if (!params_.empty()) {
+        result = themeConstants_->GetStringByName(params_.front());
+        ReplaceHolder(result.value(), params_, 1);
+    } else {
+        LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
+    }
+    return result;
+}
+
+std::optional<std::string> ResourceConverter::GetRawfilePath()
+{
+    std::optional<std::string> result;
+    if (!params_.empty()) {
+        result = themeConstants_->GetRawfile(params_.front());
+    }
+    return result;
+}
+
+std::optional<std::string> ResourceConverter::GetMediaPath()
+{
+    std::optional<std::string> result;
+    if (id_ != -1) {
+        result = themeConstants_->GetMediaPath(id_);
+    } else if (!params_.empty()) {
+        result = themeConstants_->GetMediaPathByName(params_.front());
+    }
+    return result;
+}
+
+std::optional<std::string> ResourceConverter::GetPluralResource()
+{
+    std::optional<std::string> result;
+    if (id_ != -1 && params_.size() == 2) {  // 2 means quantity and count in params_
+        result = themeConstants_->GetPluralString(id_, StringUtils::StringToInt(params_[0]));
+        ReplaceHolder(result.value(), params_, 1);
+    } else if (params_.size() == 3) {  // 3 means resName, quantity and count in params_
+        result = themeConstants_->GetPluralStringByName(params_[0], StringUtils::StringToInt(params_[1]));
+        ReplaceHolder(result.value(), params_, 2);  // 2 means data get from params_[2]
+    } else {
+        LOGE("Invalid PLURAL resource OHOS::Ace::NG::Converter::ResourceConverter");
+    }
+    return result;
+}
+
+std::optional<int32_t> ResourceConverter::GetIntegerResource()
+{
+    std::optional<int32_t> result;
+    if (id_ != -1) {
+        result = themeConstants_->GetInt(id_);
+    } else if (!params_.empty()) {
+        result = themeConstants_->GetIntByName(params_.front());
+    } else {
+        LOGE("Unknown INTEGER value OHOS::Ace::NG::Converter::ResourceConverter");
+    }
+    return result;
+}
+
+std::optional<double> ResourceConverter::GetFloatResource()
+{
+    std::optional<double> result;
+    if (id_ != -1) {
+        result = themeConstants_->GetDouble(id_);
+    } else if (!params_.empty()) {
+        result = themeConstants_->GetDoubleByName(params_.front());
+    } else {
+        LOGE("Unknown FLOAT value OHOS::Ace::NG::Converter::ResourceConverter");
+    }
+    return result;
+}
+
 std::optional<std::string> ResourceConverter::ToString()
 {
     std::optional<std::string> result;
     CHECK_NULL_RETURN(themeConstants_, result);
 
-    switch (type_) {
-        case ResourceType::STRING:
-            if (id_ != -1) {
-                result = themeConstants_->GetString(id_);
-                ReplaceHolder(result.value(), params_, 0);
-            } else if (!params_.empty()) {
-                result = themeConstants_->GetStringByName(params_.front());
-                ReplaceHolder(result.value(), params_, 1);
-            } else {
-                LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
-            }
-            break;
-
-        case ResourceType::RAWFILE:
-            if (!params_.empty()) {
-                result = themeConstants_->GetRawfile(params_.front());
-            }
-            break;
-
-        case ResourceType::MEDIA:
-            if (id_ != -1) {
-                result = themeConstants_->GetMediaPath(id_);
-            } else if (!params_.empty()) {
-                result = themeConstants_->GetMediaPathByName(params_.front());
-            }
-            break;
-
-        default:
-            break;
+    if (type_ == ResourceType::STRING) {
+        result = GetStringResource();
+    } else if (type_ == ResourceType::RAWFILE) {
+        result = GetRawfilePath();
+    } else if (type_ == ResourceType::MEDIA) {
+        result = GetMediaPath();
+    } else if (type_ == ResourceType::PLURAL) {
+        result = GetPluralResource();
+    } else if (type_ == ResourceType::INTEGER) {
+        auto intValue = GetIntegerResource();
+        result = intValue.has_value() ? std::make_optional(std::to_string(intValue.value())) : std::nullopt;
+    } else if (type_ == ResourceType::FLOAT) {
+        auto floatValue = GetFloatResource();
+        result = floatValue.has_value() ? std::make_optional(std::to_string(floatValue.value())) : std::nullopt;
+    } else {
+        LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
     }
     return result;
 }

@@ -55,16 +55,7 @@ class ArkResource implements Resource {
             }
             thisSerializer.writeInt32(param.length as int32);
             for (let i = 0; i < param.length; i++) {
-                const params_type = runtimeType(param[i]);
-                if (params_type == RuntimeType.STRING) {
-                    const params_element: string = param[i] as string;
-                    thisSerializer.writeString(params_element);
-                } else if (params_type == RuntimeType.NUMBER) {
-                    const params_element: number = param[i] as number;
-                    thisSerializer.writeString(String(params_element));
-                } else {
-                    throw new Error("Unsupported params type, expect string or number.")
-                }
+                thisSerializer.writeString(String(param[i]));
             }
             const retval = ArkUIGeneratedNativeModule._SystemOps_getResourceId(bundleNamea, moduleNamea, thisSerializer.asBuffer(), thisSerializer.length());
             thisSerializer.release();

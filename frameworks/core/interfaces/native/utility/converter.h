@@ -179,6 +179,13 @@ namespace Converter {
             const std::string& ModuleName() { return moduleName_; }
 
         private:
+            std::optional<std::string> GetStringResource();
+            std::optional<std::string> GetRawfilePath();
+            std::optional<std::string> GetMediaPath();
+            std::optional<std::string> GetPluralResource();
+            std::optional<int32_t> GetIntegerResource();
+            std::optional<double> GetFloatResource();
+
             RefPtr<ThemeConstants> themeConstants_;
             ResourceType type_;
             std::string bundleName_;
