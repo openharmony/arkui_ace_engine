@@ -143,7 +143,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
             throw new Error('template generator function missing. Application error!');
         }
         this.itemGenFuncs_.set(type, itemBuilder);
-        this.templateOptions_.set(type, this.normTemplateOptions(templateOptions!));
+        this.templateOptions_.set(type, this.normTemplateOptions(templateOptions));
         return this;
     }
 
@@ -157,21 +157,21 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
     }
 
     /** @memo */
-    render(): void {
+    render(arr: RepeatArray<T>): void {
         if (!this.itemGenFuncs_.get(RepeatEachFuncType)) {
             throw new Error('Repeat item builder function unspecified. Usage error!');
         }
         this.isVirtualScroll_
-            ? virtualRender<T>(this.arr_, this.itemGenFuncs_, this.keyGenFunc_, this.ttypeGenFunc_, this.reusable_)
-            : nonVirtualRender<T>(this.arr_, this.itemGenFuncs_.get(RepeatEachFuncType)!, this.keyGenFunc_);
+            ? virtualRender<T>(arr, this.itemGenFuncs_, this.keyGenFunc_, this.ttypeGenFunc_, this.reusable_)
+            : nonVirtualRender<T>(arr, this.itemGenFuncs_.get(RepeatEachFuncType)!, this.keyGenFunc_);
     }
 
     // normalize the template options
-    private normTemplateOptions(options: TemplateOptions): number {
-        if (!options || !options.cachedCount || !Number.isInteger(options.cachedCount!)) {
-            return NaN;
+    private normTemplateOptions(options?: TemplateOptions): number {
+        if (options && options.cachedCount && Number.isInteger(options.cachedCount!)) {
+            return options.cachedCount!;
         }
-        return options.cachedCount!;
+        return NaN;
     }
 }
 
@@ -212,7 +212,7 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     /** @memo */
     itemGenerator: RepeatItemBuilder<T>,
     keyGenerator?: (element: T, index: number) => string): void {
-    if (typeof keyGenerator !== 'function') {
+    if (keyGenerator && typeof keyGenerator !== 'function') {
         throw new Error('key generator is not a function. Application error!');
     }
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
@@ -238,5 +238,5 @@ export function RepeatImpl<T>(
     }, (_: RepeatDataNode<T>) => {
         style?.(receiver);
     });
-    receiver.render();
+    receiver.render(arr);
 }
