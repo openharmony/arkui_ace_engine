@@ -4284,6 +4284,38 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBounds006, TestSize.Level1
 }
 
 /**
+ * @tc.name: SetEditMenuOptions_001
+ * @tc.desc: SetEditMenuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, SetEditMenuOptions_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    WebSelectOverlay overlay(webPattern);
+    SelectOverlayInfo selectInfo;
+    OnCreateMenuCallback onCreateMenuCallback = CreateMenuOptionsV2;
+    OnMenuItemClickCallback onMenuItemClick = HandleMenuItemClickV2;
+    overlay.SetEditMenuOptions(selectInfo);
+    webPattern->onCreateMenuCallback_ =
+        [](const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
+        std::vector<MenuOptionsParam> menuOptions;
+        return menuOptions;
+    };
+    overlay.SetEditMenuOptions(selectInfo);
+    webPattern->onMenuItemClick_ = [](const NG::MenuItemParam& menuItem) -> bool { return false; };
+    overlay.SetEditMenuOptions(selectInfo);
+#endif
+}
+
+/**
  * @tc.name: QuickMenuIsNeedNewAvoid_001
  * @tc.desc: QuickMenuIsNeedNewAvoid.
  * @tc.type: FUNC

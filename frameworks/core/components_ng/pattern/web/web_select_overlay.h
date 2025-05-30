@@ -77,6 +77,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     void RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo);
+    void SetEditMenuOptions(SelectOverlayInfo& selectInfo);
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
     // Check whether the handle status is valid.
