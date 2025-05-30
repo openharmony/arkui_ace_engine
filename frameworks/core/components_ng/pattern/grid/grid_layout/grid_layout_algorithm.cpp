@@ -330,8 +330,15 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         ++itemIndex;
     }
     gridLayoutInfo_.endIndex_ = itemIndex - 1;
-    gridLayoutInfo_.startMainLineIndex_ = 0;
-    gridLayoutInfo_.endMainLineIndex_ = static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.size()) - 1 ;
+    UpdateGridLayoutInfo();
+}
+
+void GridLayoutAlgorithm::UpdateGridLayoutInfo()
+{
+    auto startIter = gridLayoutInfo_.gridMatrix_.begin();
+    gridLayoutInfo_.startMainLineIndex_ = (startIter == gridLayoutInfo_.gridMatrix_.end() ? 0 : startIter->first);
+    auto endIter = gridLayoutInfo_.gridMatrix_.rbegin();
+    gridLayoutInfo_.endMainLineIndex_ = (endIter == gridLayoutInfo_.gridMatrix_.rend() ? -1 : endIter->first);
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
