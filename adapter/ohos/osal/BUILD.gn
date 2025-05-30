@@ -98,6 +98,7 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "ability_runtime:app_manager",
       "hicollie:libhicollie",
+      "hiview:libperfmonitor",
       "i18n:intl_util",
       "init:libbegetutil",
     ]

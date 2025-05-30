@@ -227,11 +227,6 @@ public:
         const std::string& processName, const std::string& msg = "");
     static void JankFrameReport(int64_t startTime, int64_t duration, const std::vector<uint16_t>& jank,
         const std::string& pageUrl, uint32_t jankStatusVersion = 1);
-    static void ReportEventComplete(DataBase& data);
-    static void ReportEventJankFrame(DataBase& data);
-    static void ReportJankFrameApp(JankInfo& info);
-    static void ReportJankFrameFiltered(JankInfo& info);
-    static void ReportJankFrameUnFiltered(JankInfo& info);
     static void ReportDoubleClickTitle(int32_t stateChange);
     static void ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange);
     static void ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold);
@@ -239,8 +234,6 @@ public:
     static void ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold);
     static void ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool isHoverMode,
         int32_t appRotation, int32_t windowMode);
-    static void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
-                                  const std::string& pageName);
     static void ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName, int32_t dimension);
     static void ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
@@ -262,10 +255,6 @@ private:
     static FRCSceneFpsInfo curFRCSceneFpsInfo_;
     static int64_t calTime_;
     static int32_t calFrameRate_;
-#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    static void ReportAppFrameDropToRss(const bool isInteractionJank, const std::string &bundleName,
-        const int64_t maxFrameTime = 0);
-#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 };
 
 } // namespace OHOS::Ace
