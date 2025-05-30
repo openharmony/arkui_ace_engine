@@ -47,6 +47,38 @@
     {
       "name": "Select_Option_9",
       "value": "选项九"
+    },
+    {
+      "name": "rTrackThickness",
+      "value": "40"
+    },
+    {
+      "name": "rBorderWidth",
+      "value": "4"
+    },
+    {
+      "name": "rBorderRadius",
+      "value": "10"
+    },
+    {
+      "name": "rWidth",
+      "value": "20"
+    },
+    {
+      "name": "rHeight",
+      "value": "20"
+    },
+    {
+      "name": "rStepSize",
+      "value": "2"
+    },
+    {
+      "name": "Empty_string",
+      "value": " "
+    },
+    {
+      "name": "Long_string",
+      "value": "labelbjahfnipb[jtg跑【阿金葡萄球菌混凝土群殴【jhtoqephjnpkfqajnbprqeoonjy"
     }
   ]
 }
