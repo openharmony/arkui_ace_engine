@@ -1392,6 +1392,15 @@ void JSRichEditor::SetMaxLines(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetMaxLines(normalMaxLines);
 }
 
+void JSRichEditor::SetEnableAutoSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetEnableAutoSpacing(enabled);
+}
+
 void JSRichEditor::SetStopBackPress(const JSCallbackInfo& info)
 {
     bool isStopBackPress = true;
@@ -1472,6 +1481,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("barState", &JSRichEditor::SetBarState);
     JSClass<JSRichEditor>::StaticMethod("maxLength", &JSRichEditor::SetMaxLength);
     JSClass<JSRichEditor>::StaticMethod("maxLines", &JSRichEditor::SetMaxLines);
+    JSClass<JSRichEditor>::StaticMethod("enableAutoSpacing", &JSRichEditor::SetEnableAutoSpacing);
     JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
     JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
     JSClass<JSRichEditor>::StaticMethod("undoStyle", &JSRichEditor::SetUndoStyle);
