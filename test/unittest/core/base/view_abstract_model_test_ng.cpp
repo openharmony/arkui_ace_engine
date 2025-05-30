@@ -46,6 +46,7 @@ namespace {
     ViewAbstractModelNG viewAbstractModelNG;
     RefPtr<MockTaskExecutor> MOCK_TASK_EXECUTOR;
     int32_t flag = 0;
+    const std::string TEST_TEXT_HINT = "testTextHint";
 }; // namespace
 
 class ViewAbstractModelTestNg : public testing::Test {
@@ -1662,5 +1663,26 @@ HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityRole002, TestSize.Level1)
     resetValue = false;
     viewAbstractModelNG.SetAccessibilityRole(&frameNode, role, resetValue);
     EXPECT_EQ(frameNode.accessibilityProperty_->accessibilityCustomRole_, role);
+}
+
+/**
+ * @tc.name: SetAccessibilityTextHint001
+ * @tc.desc: Test the SetAccessibilityTextHint
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityTextHint001, TestSize.Level1)
+{
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityTextHint(TEST_TEXT_HINT);
+
+    viewAbstractModelNG.SetAccessibilityTextHint(&frameNode, "");
+    EXPECT_EQ(accessibilityProperty->textTypeHint_, "");
+
+    viewAbstractModelNG.SetAccessibilityTextHint(&frameNode, TEST_TEXT_HINT);
+    EXPECT_EQ(accessibilityProperty->textTypeHint_, TEST_TEXT_HINT);
 }
 } // namespace OHOS::Ace::NG

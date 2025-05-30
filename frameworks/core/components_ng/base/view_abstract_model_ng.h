@@ -1762,6 +1762,7 @@ public:
     }
 
     static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);
+    static void SetAccessibilityTextHint(FrameNode* frameNode, const std::string& text);
 
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override

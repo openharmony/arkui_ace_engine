@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2554,6 +2554,12 @@ struct ArkUICommonModifier {
     void (*resetPrivacySensitive)(ArkUINodeHandle node);
     void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
     void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
+    void (*setAccessibilityTextHint)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityTextHint)(ArkUINodeHandle node);
+    void (*setAccessibilityChecked)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAccessibilityChecked)(ArkUINodeHandle node);
+    void (*setAccessibilitySelected)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAccessibilitySelected)(ArkUINodeHandle node);
     void (*setVisualEffect)(ArkUINodeHandle node, void* visualEffect);
     void (*resetVisualEffect)(ArkUINodeHandle node);
     void (*setBackgroundFilter)(ArkUINodeHandle node, void* backgroundFilter);
@@ -3340,6 +3346,10 @@ struct ArkUILazyGridLayoutModifier {
 struct ArkUIEmbeddedComponentModifier {
     void (*setEmbeddedComponentWant)(ArkUINodeHandle node, AbilityBase_Want* want);
     void (*setEmbeddedComponentOption)(ArkUINodeHandle node, ArkUIEmbeddedComponentOptionHandle option);
+    void (*setOnTerminated)(ArkUINodeHandle node, void* callback);
+    void (*resetOnTerminated)(ArkUINodeHandle node);
+    void (*setOnError)(ArkUINodeHandle node, void* callback);
+    void (*resetOnError)(ArkUINodeHandle node);
 };
 
 struct ArkUITimepickerModifier {

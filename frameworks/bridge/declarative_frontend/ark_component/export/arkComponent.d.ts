@@ -1259,6 +1259,15 @@ declare class ArkFormComponentComponent extends ArkComponent implements FormComp
     }) => void): this;
     onLoad(callback: () => void): this;
 }
+declare class ArkEmbeddedComponent extends ArkComponent implements EmbeddedComponentAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onTerminated(callback: (info: TerminationInfo) => void): this;
+    onError(callback: (info: ErrorCallback) => void): this;
+}
+declare class ArkIsolatedComponent extends ArkComponent implements IsolatedComponentAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onError(callback: any): IsolatedComponentAttribute;
+}
 declare class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     value(value: number): this;

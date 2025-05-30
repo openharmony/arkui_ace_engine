@@ -1007,6 +1007,15 @@ void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::
     accessibilityProperty->SetAccessibilityTextWithEvent(text);
 }
 
+
+void ViewAbstractModelNG::SetAccessibilityTextHint(FrameNode* frameNode, const std::string& text)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityTextHint(text);
+}
+
 void ViewAbstractModelNG::SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance)
 {
     CHECK_NULL_VOID(frameNode);

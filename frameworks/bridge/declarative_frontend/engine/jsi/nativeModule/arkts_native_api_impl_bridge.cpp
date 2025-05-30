@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_animator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_embedded_component_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
@@ -1250,6 +1251,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAdvancedBlendMode));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerFrameNodeDestructorCallback"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::RegisterFrameNodeDestructorCallback));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityTextHint"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityTextHint));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityTextHint"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityTextHint));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityChecked"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityChecked));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityChecked"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityChecked));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilitySelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilitySelected));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilitySelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilitySelected));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVisualEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetVisualEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVisualEffect"),
@@ -3204,6 +3217,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #endif
     RegisterLazyVGridLayoutAttributes(object, vm);
     RegisterCanvasAttributes(object, vm);
+#ifdef WINDOW_SCENE_SUPPORTED
+    RegisterEmbeddedComponentAttributes(object, vm);
+#endif
     RegisterStepperAttributes(object, vm);
     return object;
 }
@@ -5096,6 +5112,22 @@ void ArkUINativeModule::RegisterFormAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::ResetSize));
 #endif
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "formComponent"), formComponent);
+}
+#endif
+
+#ifdef WINDOW_SCENE_SUPPORTED
+void ArkUINativeModule::RegisterEmbeddedComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto embeddedComponent = panda::ObjectRef::New(vm);
+    embeddedComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTerminated"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), EmbeddedComponentBridge::SetOnTerminated));
+    embeddedComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnTerminated"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), EmbeddedComponentBridge::ResetOnTerminated));
+    embeddedComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), EmbeddedComponentBridge::SetOnError));
+    embeddedComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), EmbeddedComponentBridge::ResetOnError));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "embeddedComponent"), embeddedComponent);
 }
 #endif
 
