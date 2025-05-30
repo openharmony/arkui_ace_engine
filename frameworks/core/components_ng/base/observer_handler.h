@@ -53,7 +53,7 @@ struct NavDestinationInfo {
     std::string navDestinationId;
     NavDestinationMode mode;
     int32_t uniqueId;
-    int32_t navigationUniqueId; //Internal use only
+    int32_t navigationUniqueId = -1; //Internal use only
 
     NavDestinationInfo() = default;
 

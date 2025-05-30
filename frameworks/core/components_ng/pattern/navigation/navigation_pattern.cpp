@@ -1023,7 +1023,7 @@ void NavigationPattern::UpdateColorModeForNodes(
         auto pipelineContext = hostNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto colorMode = pipelineContext->GetColorMode() == ColorMode::DARK ? true : false;
-        for (size_t index = lastIndex; index < allStackNode.size(); index++) {
+        for (auto index = lastIndex; index < static_cast<int32_t>(allStackNode.size()); index++) {
             auto node = allStackNode[index].second;
             if (node && node->CheckIsDarkMode() == colorMode) {
                 continue;
