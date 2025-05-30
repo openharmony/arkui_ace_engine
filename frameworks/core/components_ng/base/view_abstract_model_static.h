@@ -201,6 +201,7 @@ public:
     static void SetFocusScopePriority(
         FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority);
     static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
+    static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

@@ -1217,4 +1217,11 @@ void ViewAbstractModelStatic::SetBlendApplyType(
         ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendApplyType, frameNode);
     }
 }
+
+void ViewAbstractModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(flag.value_or(false));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG
