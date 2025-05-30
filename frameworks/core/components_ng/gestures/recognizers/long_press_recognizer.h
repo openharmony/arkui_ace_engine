@@ -158,7 +158,7 @@ private:
     TouchEvent lastTouchEvent_;
     WeakPtr<GestureEventHub> gestureHub_;
     int32_t thumbnailDeadline = 150;
-    long long inputTime_;
+    long long inputTime_ = 0;
     TimeStamp time_;
     bool useCatchMode_ = true;
     Point globalPoint_;

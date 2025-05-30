@@ -29,6 +29,7 @@ Reporter& Reporter::GetInstance()
 void ReporterImpl::HandleUISessionReporting(const JsonReport& report) const
 {
     auto value = report.GetJsonData();
+    CHECK_NULL_VOID(value);
     if (value->IsNull()) {
         return;
     }
