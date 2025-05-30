@@ -146,6 +146,14 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return promise;
     }
+
+    getWithRange(start, end, isStartRect, options)
+    {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getWithRange(start, end, isStartRect, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
 }
 
 class DragController {

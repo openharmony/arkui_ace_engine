@@ -37,6 +37,9 @@ struct SnapshotAsyncCtx {
     int32_t errCode = -1;
     int32_t instanceId = -1;
 };
+constexpr int32_t GETWITHRANGE_ISSTARTRECT_NUMBER = 2;
+constexpr int32_t GETWITHRANGE_ARGV_VALUE = 4;
+constexpr int32_t GETWITHRANGE_OPTIONS_NUMBER = 3;
 
 void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback)
 {
@@ -206,6 +209,9 @@ void JsComponentSnapshot::ParseParamForGet(NG::SnapshotOptions& options)
     // parse options param for Callback
     if (argc_ == 3) {
         ParseOptions(2, options);
+    }
+    if (argc_ == GETWITHRANGE_ARGV_VALUE) {
+        ParseOptions(GETWITHRANGE_OPTIONS_NUMBER, options);
     }
 }
 
@@ -658,6 +664,96 @@ static napi_value JSSnapshotFromComponent(napi_env env, napi_callback_info info)
     return result;
 }
 
+bool JudgeRangeType(napi_env env, napi_callback_info info, int32_t argNum)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    JsComponentSnapshot helper(env, info);
+
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, helper.GetArgv(argNum), &type);
+    if (type != napi_valuetype::napi_number && type != napi_valuetype::napi_string) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing argument failed, not of number or string type.");
+        NapiThrow(env, "parameter uniqueId is not of type number or string", ERROR_CODE_PARAM_INVALID);
+        napi_close_escapable_handle_scope(env, scope);
+        return false;
+    }
+    return true;
+}
+
+bool JudgeRectValue(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    JsComponentSnapshot helper(env, info);
+
+    if (GETWITHRANGE_ISSTARTRECT_NUMBER >= JsComponentSnapshot::ARGC_MAX) {
+        return true;
+    }
+
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, helper.GetArgv(GETWITHRANGE_ISSTARTRECT_NUMBER), &type);
+    bool isRect = true;
+    if (type == napi_valuetype::napi_boolean) {
+        napi_get_value_bool(env, helper.GetArgv(GETWITHRANGE_ISSTARTRECT_NUMBER), &isRect);
+    }
+    return isRect;
+}
+
+NG::NodeIdentity GetNodeIdentity(napi_env env, napi_callback_info info, int32_t index)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    JsComponentSnapshot helper(env, info);
+
+    NG::NodeIdentity nodeIdentity;
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, helper.GetArgv(index), &type);
+    if (type == napi_valuetype::napi_number) {
+        napi_get_value_int32(env, helper.GetArgv(index), &nodeIdentity.second);
+    } else {
+        napi_valuetype valueType = napi_null;
+        GetNapiString(env, helper.GetArgv(index), nodeIdentity.first, valueType);
+    }
+    return nodeIdentity;
+}
+
+static napi_value JSSnapshotGetWithRange(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    JsComponentSnapshot helper(env, info);
+    napi_value result = nullptr;
+
+    if (!JudgeRangeType(env, info, 0) || !JudgeRangeType(env, info, 1)) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing argument failed, not of number or string type.");
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
+
+    auto startID = GetNodeIdentity(env, info, 0);
+    auto endID = GetNodeIdentity(env, info, 1);
+    bool isStartRect = JudgeRectValue(env, info);
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get delegate of ace_engine. ");
+        NapiThrow(env, "Delegate is null", ERROR_CODE_INTERNAL_ERROR);
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
+    NG::SnapshotOptions options;
+    helper.ParseParamForGet(options);
+    delegate->GetSnapshotWithRange(startID, endID, isStartRect, helper.CreateCallback(&result), options);
+
+    napi_escape_handle(env, scope, result, &result);
+    napi_close_escapable_handle_scope(env, scope);
+    return result;
+}
+
 static napi_value ComponentSnapshotExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor snapshotDesc[] = {
@@ -667,6 +763,7 @@ static napi_value ComponentSnapshotExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getWithUniqueId", JSSnapshotGetWithUniqueId),
         DECLARE_NAPI_FUNCTION("getSyncWithUniqueId", JSSnapshotGetSyncWithUniqueId),
         DECLARE_NAPI_FUNCTION("createFromComponent", JSSnapshotFromComponent),
+        DECLARE_NAPI_FUNCTION("getWithRange", JSSnapshotGetWithRange),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(snapshotDesc) / sizeof(snapshotDesc[0]), snapshotDesc));
 
