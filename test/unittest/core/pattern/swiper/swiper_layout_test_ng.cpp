@@ -413,6 +413,85 @@ HWTEST_F(SwiperLayoutTestNg, CalcCurrentPageStatusOnRTL001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcCurrentPageStatusOnRTL002
+ * @tc.desc: Test CalcCurrentPageStatusOnRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, CalcCurrentPageStatusOnRTL002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. The precision is thousandths.
+     */
+    pattern_->itemPosition_.clear();
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = 479.999f;
+    swiperItemInfo1.endPos = 959.999f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    auto additionalOffset = 0.0f;
+    auto isTouchBottom = false;
+    pattern_->currentFirstIndex_ = -1;
+    auto firstIndex = pattern_->CalcCurrentPageStatusOnRTL(additionalOffset, isTouchBottom).second;
+    EXPECT_EQ(firstIndex, -1);
+
+    /**
+     * @tc.steps: step3. The precision is percentile.
+     */
+    pattern_->itemPosition_.clear();
+    swiperItemInfo1.startPos = 479.98f;
+    swiperItemInfo1.endPos = 959.98f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    pattern_->currentFirstIndex_ = -1;
+    firstIndex = pattern_->CalcCurrentPageStatusOnRTL(additionalOffset, isTouchBottom).second;
+    EXPECT_EQ(firstIndex, 0);
+}
+
+/**
+ * @tc.name: CalcCurrentPageStatus001
+ * @tc.desc: Test CalcCurrentPageStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, CalcCurrentPageStatus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. The precision is thousandths.
+     */
+    pattern_->itemPosition_.clear();
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -479.999f;
+    swiperItemInfo1.endPos = 0.001f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    auto additionalOffset = 0.0f;
+    pattern_->currentFirstIndex_ = -1;
+    auto firstIndex = pattern_->CalcCurrentPageStatus(additionalOffset).second;
+    EXPECT_EQ(firstIndex, -1);
+
+    /**
+     * @tc.steps: step3. The precision is percentile.
+     */
+    pattern_->itemPosition_.clear();
+    swiperItemInfo1.startPos = -479.98f;
+    swiperItemInfo1.endPos = 0.02f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    pattern_->currentFirstIndex_ = -1;
+    firstIndex = pattern_->CalcCurrentPageStatus(additionalOffset).second;
+    EXPECT_EQ(firstIndex, 0);
+}
+
+/**
  * @tc.name: AdjustOffsetOnBackward001
  * @tc.desc: Test AdjustOffsetOnBackward
  * @tc.type: FUNC
