@@ -9242,7 +9242,7 @@ class ImageSpanColorFilterModifier extends ModifierWithKey {
     return true;
   }
 }
-
+ImageSpanColorFilterModifier.identity = Symbol('ImageSpanColorFilter');
 class ImageSpanBorderRadiusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9280,11 +9280,27 @@ class ImageSpanBorderRadiusModifier extends ModifierWithKey {
   }
 }
 ImageSpanBorderRadiusModifier.identity = Symbol('imageSpanBorderRadius');
+class ImageSpanSrcModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.setImageSpanSrc(node, '');
+    } else {
+      getUINativeModule().imageSpan.setImageSpanSrc(node, this.value);
+    }
+  }
+}
+ImageSpanSrcModifier.identity = Symbol('imageSpanShowSrc');
 
-ImageSpanColorFilterModifier.identity = Symbol('ImageSpanColorFilter');
 class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanSrcModifier.identity, ImageSpanSrcModifier, value[0]);
+    return this;
   }
   objectFit(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanObjectFitModifier.identity, ImageSpanObjectFitModifier, value);
