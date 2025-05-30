@@ -349,13 +349,12 @@ void MovingPhotoPattern::UpdateImageNode()
 
 void MovingPhotoPattern::UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode)
 {
+    DynamicRangeModeConvert(dynamicRangeMode_);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, imageNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, imageNode);
     if (dynamicRangeMode_ == DynamicRangeMode::STANDARD) {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, imageNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, DynamicRangeMode, imageNode);
-    } else {
-        DynamicRangeModeConvert(dynamicRangeMode_);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, imageNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, imageNode);
     }
 }
 
@@ -768,6 +767,9 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo());
     CHECK_NULL_RETURN(video, false);
     video->GetRenderContext()->SetClipToBounds(true);
+    if (currentPlayStatus_ == PlaybackStatus::STARTED) {
+        video->GetRenderContext()->UpdateOpacity(0.0);
+    }
     return false;
 }
 
