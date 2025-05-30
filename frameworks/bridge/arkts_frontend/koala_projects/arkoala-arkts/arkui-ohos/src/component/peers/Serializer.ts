@@ -14729,7 +14729,7 @@ export class Serializer extends SerializerBase {
             const value_builder_value  = value_builder!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder_value))
         }
-        const value_refreshingContent  = value.refreshingContent
+        const value_refreshingContent  = undefined
         let value_refreshingContent_type : int32 = RuntimeType.UNDEFINED
         value_refreshingContent_type = runtimeType(value_refreshingContent)
         valueSerializer.writeInt8(value_refreshingContent_type as int32)
