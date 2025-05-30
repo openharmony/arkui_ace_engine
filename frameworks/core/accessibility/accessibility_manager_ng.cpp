@@ -115,7 +115,6 @@ bool CheckAndSendHoverEnterByAncestor(const RefPtr<NG::FrameNode>& ancestor)
     }
     return false;
 }
-}
 
 bool IsTouchExplorationEnabled(const RefPtr<FrameNode>& root)
 {
@@ -126,6 +125,17 @@ bool IsTouchExplorationEnabled(const RefPtr<FrameNode>& root)
     CHECK_NULL_RETURN(jsAccessibilityManager, true);
     auto accessibilityWorkMode = jsAccessibilityManager->GenerateAccessibilityWorkMode();
     return accessibilityWorkMode.isTouchExplorationEnabled;
+}
+
+WeakPtr<NG::FrameNode> GetEmbedNodeBySurfaceId(const std::string& surfaceId)
+{
+    std::stringstream ss(surfaceId);
+    uint64_t id;
+    if (ss >> id) {
+        return ElementRegister::GetInstance()->GetEmbedNodeBySurfaceId(id);
+    }
+    return nullptr;
+}
 }
 
 void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const MouseEvent& event)
@@ -149,9 +159,9 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
             return;
     }
     PointF point(event.x, event.y);
-    HandleHoverEventInnerParam param {SourceType::MOUSE, type, event.time};
+    HandleHoverEventParam param {point, SourceType::MOUSE, type, event.time};
     TouchEvent touchEvent;
-    HandleAccessibilityHoverEventInner(root, point, param, touchEvent);
+    HandleAccessibilityHoverEventInner(root, param, touchEvent);
 }
 
 void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const TouchEvent& event)
@@ -186,8 +196,8 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
             return;
         }
     }
-    HandleHoverEventInnerParam param {event.sourceType, type, event.time};
-    HandleAccessibilityHoverEventInner(root, point, param, event);
+    HandleHoverEventParam param {point, event.sourceType, type, event.time};
+    HandleAccessibilityHoverEventInner(root, param, event);
 }
 
 void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, float pointX, float pointY,
@@ -210,10 +220,10 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
         event.time = time;
         HandlePipelineAccessibilityHoverEnter(root, event, eventType);
     }
-    HandleHoverEventInnerParam param {static_cast<SourceType>(sourceType),
+    HandleHoverEventParam param {point, static_cast<SourceType>(sourceType),
         static_cast<AccessibilityHoverEventType>(eventType), time};
     TouchEvent touchEvent;
-    HandleAccessibilityHoverEventInner(root, point, param, touchEvent);
+    HandleAccessibilityHoverEventInner(root, param, touchEvent);
 }
 
 bool HasTransparentCallback(const RefPtr<NG::FrameNode>& node)
@@ -279,10 +289,9 @@ bool AccessibilityManagerNG::HandleAccessibilityHoverTransparentCallback(bool tr
     return false;
 }
 
-void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
+HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     const RefPtr<FrameNode>& root,
-    const PointF& point,
-    HandleHoverEventInnerParam param,
+    const HandleHoverEventParam& param,
     const TouchEvent& event)
 {
     auto sourceType = param.sourceType;
@@ -293,14 +302,14 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
         static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count());
     if (!hoverState_.idle) {
         if ((!IsEventTypeChangeDirectHandleHover(eventType)) && (duration < THROTTLE_INTERVAL_HOVER_EVENT)) {
-            return;
+            return HandleHoverRet::IN_TIME_LIMIT;
         }
     }
 
     static constexpr size_t MIN_SOURCE_CHANGE_GAP_MS = 1000;
     if (sourceType != hoverState_.source && !hoverState_.idle) {
         if (duration < MIN_SOURCE_CHANGE_GAP_MS) {
-            return;
+            return HandleHoverRet::IN_TIME_LIMIT;
         }
         ResetHoverState();
     }
@@ -321,7 +330,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     }
     if (eventType != AccessibilityHoverEventType::EXIT) {
         std::unique_ptr<AccessibilityProperty::HoverTestDebugTraceInfo> debugInfo = nullptr;
-        AccessibilityHoverTestPath path = AccessibilityProperty::HoverTest(point, root, debugInfo);
+        AccessibilityHoverTestPath path = AccessibilityProperty::HoverTest(param.point, root, debugInfo);
         for (const auto& node: path) {
             auto id = node->GetId();
             if (std::find(lastNodesHoveringId.begin(), lastNodesHoveringId.end(), id) != lastNodesHoveringId.end() ||
@@ -347,15 +356,15 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     bool transformHover = false;
     if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
         lastHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_EXIT_EVENT);
-        transformHover = NotifyHoverEventToNodeSession(lastHovering, root, point,
+        transformHover = NotifyHoverEventToNodeSession(lastHovering, root, param.point,
             sourceType, AccessibilityHoverEventType::EXIT, time);
     }
-    if (currentHoveringId != INVALID_NODE_ID) {
+    if (currentHovering && (currentHoveringId != INVALID_NODE_ID)) {
         if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering))) {
             currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
             sendHoverEnter = true;
         }
-        transformHover = NotifyHoverEventToNodeSession(currentHovering, root, point,
+        transformHover = NotifyHoverEventToNodeSession(currentHovering, root, param.point,
             sourceType, eventType, time);
     }
 
@@ -364,9 +373,9 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
         transformHover |= CheckAndSendHoverEnterByAncestor(root);
     }
 
-    if (sourceType != SourceType::MOUSE) {
-        HandleTransparentCallbackParam param = {currentHoveringId, lastHoveringId};
-        HandleAccessibilityHoverTransparentCallback(transformHover, root, param, point, event);
+    if ((sourceType != SourceType::MOUSE) && (!param.ignoreTransparent)) {
+        HandleTransparentCallbackParam callbackParam = {currentHoveringId, lastHoveringId};
+        HandleAccessibilityHoverTransparentCallback(transformHover, root, callbackParam, param.point, event);
     }
 
     hoverState_.nodesHovering = std::move(currentNodesHovering);
@@ -374,6 +383,21 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     hoverState_.source = sourceType;
     hoverState_.idle = eventType == AccessibilityHoverEventType::EXIT;
     hoverState_.eventType = eventType;
+    if (sendHoverEnter && !transformHover) {
+        return HandleHoverRet::HOVER_HIT;
+    }
+    return HandleHoverRet::HOVER_FAIL;
+}
+
+HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventBySurfaceId(
+    const std::string& surfaceId,
+    HandleHoverEventParam& param)
+{
+    auto root = GetEmbedNodeBySurfaceId(surfaceId).Upgrade();
+    CHECK_NULL_RETURN(root, HandleHoverRet::HOVER_FAIL);
+    TouchEvent event;
+    param.ignoreTransparent = true;
+    return HandleAccessibilityHoverEventInner(root, param, event);
 }
 
 bool AccessibilityManagerNG::IgnoreCurrentHoveringNode(const RefPtr<FrameNode> &node)

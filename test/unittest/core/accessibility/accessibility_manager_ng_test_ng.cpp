@@ -21,6 +21,7 @@
 #define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/accessibility/accessibility_constants.h"
 #include "frameworks/core/accessibility/accessibility_manager_ng.h"
@@ -793,5 +794,46 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandlePipelineAccessibilityHoverEnter001,
     // Case 4: Test with an invalid event type (default case)
     eventType = -1; // Invalid type
     manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
+}
+
+/**
+* @tc.name: HandleAccessibilityHoverEventBySurfaceId
+* @tc.desc: HandleAccessibilityHoverEventBySurfaceId001
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverEventBySurfaceId001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto pipe = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipe, nullptr);
+
+    auto exportNode = FrameNode::CreateFrameNode(
+        "exportNode",
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(exportNode, nullptr);
+    exportNode->context_ = AceType::RawPtr(pipe);
+
+    ElementRegister::GetInstance()->RegisterEmbedNode(1U, exportNode);
+
+    auto rootElement = pipe->GetRootElement();
+    ASSERT_NE(rootElement, nullptr);
+    rootElement->AddChild(exportNode);
+
+    AccessibilityManagerNG manager;
+    std::stringstream ss;
+    ss << 1U;
+    PointF point(POINT_X, POINT_Y);
+    TimeStamp time((std::chrono::milliseconds(TIMEMS_DIFFERENT_HOVER_SOURCE)));
+    HandleHoverEventParam param {
+        .point = point,
+        .time = time,
+        .sourceType = SourceType::MOUSE,
+        .eventType = AccessibilityHoverEventType::ENTER
+    };
+    auto ret = manager.HandleAccessibilityHoverEventBySurfaceId(ss.str(), param);
+    EXPECT_EQ(ret, HandleHoverRet::HOVER_FAIL);
+
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

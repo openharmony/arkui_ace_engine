@@ -42,6 +42,23 @@ struct AccessibilityHoverState {
     AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
 };
 
+struct HandleHoverEventParam {
+    NG::PointF point;
+    SourceType sourceType = SourceType::NONE;
+    AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
+    TimeStamp time;
+    bool ignoreTransparent = false;
+};
+
+enum class HandleHoverRet : int32_t {
+    HOVER_HIT = 0,
+    HOVER_FAIL,
+    NO_MATCH_NODE,
+    ILLEGAL_PARAM,
+    TIMEOUT,
+    IN_TIME_LIMIT,
+};
+
 class AccessibilityManagerNG final: public AceType {
     DECLARE_ACE_TYPE(AccessibilityManagerNG, AceType);
 
@@ -52,6 +69,10 @@ public:
         int32_t sourceType, int32_t eventType, int64_t timeMs);
     void HoverTestDebug(const RefPtr<FrameNode>& root, const PointF& point,
         std::string& summary, std::string& detail) const;
+
+    HandleHoverRet HandleAccessibilityHoverEventBySurfaceId(
+        const std::string& surfaceId,
+        HandleHoverEventParam& param);
 
     /*
     * Convert coordinates of point relative to ancestor (x_ances, y_ances) to
@@ -64,12 +85,6 @@ public:
         const PointF& pointAncestor, PointF& pointNode);
 
 private:
-    struct HandleHoverEventInnerParam {
-        SourceType sourceType = SourceType::NONE;
-        AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
-        TimeStamp time;
-    };
-
     struct HandleTransparentCallbackParam {
         int32_t currentHoveringId = 0;
         int32_t lastHoveringId = 0;
@@ -80,10 +95,9 @@ private:
     * And send hover enter/exit events to accessibility framework;
     * param: {root} should be not-null.
     */
-    void HandleAccessibilityHoverEventInner(
+    HandleHoverRet HandleAccessibilityHoverEventInner(
         const RefPtr<FrameNode>& root,
-        const PointF& point,
-        HandleHoverEventInnerParam param,
+        const HandleHoverEventParam& param,
         const TouchEvent& event);
 
     void ResetHoverState();

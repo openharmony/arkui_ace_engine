@@ -57,6 +57,7 @@ constexpr int32_t CARD_BASE = 100000;
 constexpr int32_t DELAY_SEND_EVENT_MILLISECOND = 20;
 constexpr uint32_t SUB_TREE_OFFSET_IN_PAGE_ID = 16;
 constexpr int32_t MAX_PAGE_ID_WITH_SUB_TREE = (1 << SUB_TREE_OFFSET_IN_PAGE_ID);
+constexpr int64_t INVALID_NODE_ID = -1;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
@@ -924,6 +925,38 @@ void GetFrameNodeParent(const RefPtr<NG::UINode>& uiNode, RefPtr<NG::FrameNode>&
     GetFrameNodeParent(parentNode, parent);
 }
 
+bool NeedChangeTreeId(int64_t elementId, int32_t targetTreeId)
+{
+    if (elementId == INVALID_PARENT_ID) {
+        return true;
+    }
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
+    if (splitTreeId != 0 &&
+        splitTreeId != AccessibilityElementInfo::UNDEFINED_TREE_ID &&
+        splitTreeId != targetTreeId) {
+        return false;
+    }
+    return true;
+}
+
+std::string GetSurfaceIdByEmbedNode(const RefPtr<NG::FrameNode>& node)
+{
+    auto surfaceId = ElementRegister::GetInstance()->GetSurfaceIdByEmbedNode(AceType::RawPtr(node));
+    return std::to_string(surfaceId);
+}
+
+WeakPtr<NG::FrameNode> GetEmbedNodeBySurfaceId(const std::string& surfaceId)
+{
+    std::stringstream ss(surfaceId);
+    uint64_t id;
+    if (ss >> id) {
+        return ElementRegister::GetInstance()->GetEmbedNodeBySurfaceId(id);
+    }
+    return nullptr;
+}
+
 bool CheckFrameNodeByAccessibilityLevel(const RefPtr<NG::FrameNode>& frameNode, bool isParent)
 {
     return true;
@@ -960,12 +993,24 @@ bool CheckAndSetAccessibilityVisible(const RefPtr<NG::FrameNode>& node, bool isR
     return node->GetAccessibilityVisible();
 }
 
+bool IsValidEmbedTarget(const RefPtr<NG::FrameNode>& frameNode, const CommonProperty& commonProperty)
+{
+    return commonProperty.checkEmbedNode &&
+           frameNode && commonProperty.checkGetFunc &&
+           (commonProperty.checkGetFunc(frameNode) != INVALID_NODE_ID);
+}
+
 void GetFrameNodeChildren(
     const RefPtr<NG::UINode>& uiNode,
     std::vector<std::pair<int64_t, int32_t>>& childrenIdInfo,
     const CommonProperty& commonProperty)
 {
+    CHECK_NULL_VOID(uiNode);
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (IsValidEmbedTarget(frameNode, commonProperty)) {
+        return;
+    }
+
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
         if (!frameNode->IsFirstVirtualNode()) {
             CHECK_NULL_VOID(frameNode->IsActive());
@@ -1017,7 +1062,12 @@ void GetFrameNodeChildren(
     std::list<RefPtr<NG::FrameNode>>& children,
     const CommonProperty& commonProperty)
 {
+    CHECK_NULL_VOID(uiNode);
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (IsValidEmbedTarget(frameNode, commonProperty)) {
+        return;
+    }
+
     if (frameNode) {
         CHECK_NULL_VOID(frameNode->IsActive());
         if (uiNode->GetTag() == "page") {
@@ -1025,7 +1075,7 @@ void GetFrameNodeChildren(
                 return;
             }
         } else if (!frameNode->IsInternal() && uiNode->GetTag() != "stage") {
-            if (CheckFrameNodeByAccessibilityLevel(frameNode, false)&&
+            if (CheckFrameNodeByAccessibilityLevel(frameNode, false) &&
                 CheckAndSetAccessibilityVisible(frameNode, commonProperty.isReduceMode)) {
                 children.emplace_back(frameNode);
                 return;
@@ -1568,6 +1618,18 @@ void AddHasRegisteredHover(const RefPtr<NG::FrameNode>& node, ExtraElementInfo& 
     if (inputEventHub->HasAccessibilityHoverEvent()) {
         extraElementInfo.SetExtraElementInfo("hasRegisteredHover", true);
     }
+}
+
+void UpdateWebEmbedParent(std::list<AccessibilityElementInfo>& infos,
+    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty)
+{
+    if (infos.empty() || !commonProperty.checkGetFunc) {
+        return;
+    }
+    auto webEmbedNodeId = commonProperty.checkGetFunc(node);
+    CHECK_EQUAL_VOID(webEmbedNodeId, INVALID_NODE_ID);
+    auto& frontElementInfo = infos.front();
+    frontElementInfo.SetParent(webEmbedNodeId);
 }
 } // namespace
 
@@ -2203,6 +2265,19 @@ void GetChildrenFromFrameNode(
         children.emplace_back(frameNodeChildren.front());
         frameNodeChildren.pop_front();
     }
+}
+
+RefPtr<NG::FrameNode> GetLastChildFrameNode(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty)
+{
+    std::list<RefPtr<NG::FrameNode>> children { node };
+    RefPtr<NG::FrameNode> checkNode;
+
+    while (!children.empty()) {
+        checkNode = children.back();
+        children.clear();
+        GetChildrenFromFrameNode(checkNode, children, commonProperty);
+    }
+    return checkNode;
 }
 }
 
@@ -3606,6 +3681,19 @@ bool JsAccessibilityManager::IsInHoverTransparentCallbackList(const RefPtr<NG::F
     return hoverTransparentCallbackController_.IsInHoverTransparentCallbackList(node);
 }
 
+int64_t JsAccessibilityManager::CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node)
+{
+    auto surfaceId = GetSurfaceIdByEmbedNode(node);
+    if (surfaceId.empty()) {
+        return INVALID_NODE_ID;
+    }
+#ifdef WEB_SUPPORTED
+    return GetWebAccessibilityIdBySurfaceId(surfaceId);
+#else
+    return INVALID_NODE_ID;
+#endif
+}
+
 void JsAccessibilityManager::RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager)
 {
     CHECK_NULL_VOID(uiExtManager);
@@ -4129,6 +4217,24 @@ bool CheckAndGetEventTestArgument(std::vector<std::string>::const_iterator start
     return true;
 }
 
+bool CheckAndGetHoverTestArgument(std::vector<std::string>::const_iterator start,
+    const std::vector<std::string>& params, DumpInfoArgument& argument)
+{
+    auto arg = start;
+    argument.mode = DumpMode::HOVER_TEST;
+    static constexpr int32_t NUM_POINT_DIMENSION = 2;
+    if (std::distance(arg, params.end()) <= NUM_POINT_DIMENSION) {
+        DumpLog::GetInstance().Print(std::string("Error: --hover-test is used to get nodes at a point ") +
+            "relative to the root node, e.g. '--hover-test ${x} ${y}'!");
+        return false;
+    }
+    ++arg;
+    argument.pointX = StringUtils::StringToInt(*arg);
+    ++arg;
+    argument.pointY = StringUtils::StringToInt(*arg);
+    return true;
+}
+
 bool DumpProcessInjectActionParameters(
     const std::vector<std::string>& params,
     int64_t& nodeId,
@@ -4156,6 +4262,63 @@ bool DumpProcessInjectActionParameters(
             ++arg;
             result = StringUtils::StringToInt(*arg);
             actionType = InjectActionType::NOTIFY_CHILD_ACTION;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool DumpProcessEmbedSearchParameters(
+    const std::vector<std::string>& params,
+    int64_t& nodeId,
+    SearchSurfaceIdType& searchType)
+{
+    constexpr int32_t NUM_PARAMETERS_DIMENSION = 2;
+    if (params.size() < 1) {
+        return false;
+    }
+
+    for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
+        // Process the embed node parameters and dump its subtree info.
+        if (*arg == "--embed-search") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
+                return false;
+            }
+            ++arg;
+            nodeId = StringUtils::StringToLongInt(*arg);
+            ++arg;
+            searchType = static_cast<SearchSurfaceIdType>(StringUtils::StringToInt(*arg));
+            return true;
+        }
+    }
+    return false;
+}
+
+bool DumpProcessEmbedHoverParameters(
+    const std::vector<std::string>& params,
+    int64_t& nodeId,
+    int32_t& x,
+    int32_t& y)
+{
+    constexpr int32_t NUM_PARAMETERS_DIMENSION = 3;
+    if (params.size() < 1) {
+        return false;
+    }
+
+    for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
+        // Process the embed node parameters and hover test.
+        if (*arg == "--embed-hover") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
+                return false;
+            }
+            ++arg;
+            nodeId = StringUtils::StringToLongInt(*arg);
+            ++arg;
+            x = StringUtils::StringToInt(*arg);
+            ++arg;
+            y = StringUtils::StringToInt(*arg);
             return true;
         }
     }
@@ -4194,6 +4357,96 @@ void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>
         });
     }
     DumpLog::GetInstance().Print(std::string("Result: inject action done"));
+}
+
+void JsAccessibilityManager::DumpEmbedSearchTest(const std::vector<std::string>& params)
+{
+    int64_t nodeId = 0;
+    SearchSurfaceIdType searchType = SearchSurfaceIdType::SEARCH_ALL;
+
+    if (!DumpProcessEmbedSearchParameters(params, nodeId, searchType)) {
+        return;
+    }
+
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<NG::PipelineContext> ngPipeline;
+
+    RefPtr<NG::FrameNode> frameNode;
+    ngPipeline = FindPipelineByElementId(nodeId, frameNode);
+    CHECK_NULL_VOID(ngPipeline);
+    CHECK_NULL_VOID(frameNode);
+    auto surfaceId = GetSurfaceIdByEmbedNode(frameNode);
+    if (surfaceId.empty()) {
+        DumpLog::GetInstance().Print(std::string("Result: embed search not have surfaceId"));
+        return;
+    }
+    std::list<AccessibilityElementInfo> infos;
+
+    SearchElementInfoBySurfaceId(surfaceId, ngPipeline->GetWindowId(), searchType, infos);
+    if (infos.empty()) {
+        DumpLog::GetInstance().Print(std::string("Result: embed search empty"));
+        return;
+    }
+    auto accessibilityId = infos.front().GetAccessibilityId();
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+        accessibilityId, splitElementId, splitTreeId);
+
+    for (auto& info : infos) {
+        DumpCommonPropertyNG(info, splitTreeId);
+    }
+    DumpLog::GetInstance().Print(0, surfaceId, infos.size());
+    DumpLog::GetInstance().Print(std::string("Result: embed search done"));
+}
+
+void JsAccessibilityManager::DumpEmbedHoverTestNG(const std::vector<std::string>& params, uint32_t windowId)
+{
+    int64_t rootId = INVALID_NODE_ID;
+    int32_t x = 0;
+    int32_t y = 0;
+    if (!DumpProcessEmbedHoverParameters(params, rootId, x, y)) {
+        return;
+    }
+
+    auto pipeline = GetPipelineByWindowId(windowId);
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManagerNG = pipeline->GetAccessibilityManagerNG();
+    CHECK_NULL_VOID(accessibilityManagerNG);
+    auto pipelineRoot = pipeline->GetRootElement();
+    RefPtr<NG::FrameNode> root = nullptr;
+    if (rootId == -1) {
+        root = pipelineRoot;
+    } else {
+        root = GetFramenodeByAccessibilityId(pipelineRoot, rootId);
+    }
+    CHECK_NULL_VOID(root);
+
+    auto mainContext = context_.Upgrade();
+    CHECK_NULL_VOID(mainContext);
+    CommonProperty commonProperty;
+    GenerateCommonProperty(pipeline, commonProperty, mainContext, root);
+    AccessibilityElementInfo elementInfo;
+    UpdateAccessibilityElementInfo(root, commonProperty, elementInfo, pipeline);
+    x -= elementInfo.GetRectInScreen().GetLeftTopXScreenPostion();
+    y -= elementInfo.GetRectInScreen().GetLeftTopYScreenPostion();
+
+    DumpLog::GetInstance().Print("Window ID: " + std::to_string(windowId));
+    DumpLog::GetInstance().Print("Root ID: " + std::to_string(root->GetAccessibilityId()));
+    NG::PointF hoverPoint(x, y);
+    DumpLog::GetInstance().Print("Hover Point: " + hoverPoint.ToString());
+    auto surfaceId = GetSurfaceIdByEmbedNode(root);
+    if (surfaceId.empty()) {
+        DumpLog::GetInstance().Print(std::string("Result: embed hover test not have surfaceId"));
+        return;
+    }
+    DumpLog::GetInstance().Print("surfaceId: " + surfaceId);
+
+    TimeStamp time;
+    NG::HandleHoverEventParam param = {
+        hoverPoint, SourceType::TOUCH, NG::AccessibilityHoverEventType::ENTER, time, true };
+    accessibilityManagerNG->HandleAccessibilityHoverEventBySurfaceId(surfaceId, param);
 }
 
 void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify)
@@ -4340,21 +4593,19 @@ bool JsAccessibilityManager::GetDumpInfoArgument(const std::vector<std::string>&
             }
             argument.rootId = StringUtils::StringToLongInt(*arg);
         } else if (*arg == "--hover-test") {
-            argument.mode = DumpMode::HOVER_TEST;
-            static constexpr int32_t NUM_POINT_DIMENSION = 2;
-            if (std::distance(arg, params.end()) <= NUM_POINT_DIMENSION) {
-                DumpLog::GetInstance().Print(std::string("Error: --hover-test is used to get nodes at a point ") +
-                    "relative to the root node, e.g. '--hover-test ${x} ${y}'!");
+            if (!CheckAndGetHoverTestArgument(arg, params, argument)) {
                 return false;
             }
-            ++arg;
-            argument.pointX = StringUtils::StringToInt(*arg);
-            ++arg;
-            argument.pointY = StringUtils::StringToInt(*arg);
         } else if (*arg == "--event-test") {
             return CheckAndGetEventTestArgument(arg, params, argument);
         } else if (*arg == "--inject-action") {
             argument.mode = DumpMode::INJECT_ACTION_TEST;
+            break;
+        } else if (*arg == "--embed-search") {
+            argument.mode = DumpMode::EMBED_SEARCH_TEST;
+            break;
+        } else if (*arg == "--embed-hover") {
+            argument.mode = DumpMode::EMBED_HOVER_TEST;
             break;
         } else if (*arg == "-v") {
             argument.verbose = true;
@@ -4408,6 +4659,12 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
             break;
         case DumpMode::INJECT_ACTION_TEST:
             DumpInjectActionTest(params);
+            break;
+        case DumpMode::EMBED_SEARCH_TEST:
+            DumpEmbedSearchTest(params);
+            break;
+        case DumpMode::EMBED_HOVER_TEST:
+            DumpEmbedHoverTestNG(params, windowId);
             break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
@@ -4562,6 +4819,22 @@ void JsAccessibilityManager::DumpProperty(const RefPtr<AccessibilityNode>& node)
     DumpLog::GetInstance().Print(0, node->GetTag(), node->GetChildList().size());
 }
 
+void JsAccessibilityManager::DumpPropertyInfo(
+    const RefPtr<NG::FrameNode>& frameNode, AccessibilityElementInfo& nodeInfo)
+{
+    DumpCommonPropertyNG(nodeInfo, treeId_);
+    DumpAccessibilityPropertyNG(nodeInfo);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (accessibilityProperty) {
+        DumpLog::GetInstance().AddDesc("offset: ", accessibilityProperty->GetScrollOffSet());
+        DumpLog::GetInstance().AddDesc("childTreeId: ", accessibilityProperty->GetChildTreeId());
+        DumpLog::GetInstance().AddDesc("childWindowId: ", accessibilityProperty->GetChildWindowId());
+    }
+
+    DumpLog::GetInstance().AddDesc("surfaceId: ", GetSurfaceIdByEmbedNode(frameNode));
+    DumpLog::GetInstance().Print(0, nodeInfo.GetComponentType(), nodeInfo.GetChildCount());
+}
+
 void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
 {
     auto pipeline = context_.Upgrade();
@@ -4595,6 +4868,7 @@ void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
 
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, pipeline, frameNode);
+    commonProperty.checkEmbedNode = false;
     AccessibilityElementInfo nodeInfo;
     UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
     SetRootAccessibilityVisible(frameNode, nodeInfo);
@@ -4606,15 +4880,7 @@ void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
         std::list<AccessibilityElementInfo> extensionElementInfos;
         SearchExtensionElementInfoNG(param, frameNode, extensionElementInfos, nodeInfo);
     }
-    DumpCommonPropertyNG(nodeInfo, treeId_);
-    DumpAccessibilityPropertyNG(nodeInfo);
-    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    if (accessibilityProperty) {
-        DumpLog::GetInstance().AddDesc("offset: ", accessibilityProperty->GetScrollOffSet());
-        DumpLog::GetInstance().AddDesc("childTreeId: ", accessibilityProperty->GetChildTreeId());
-        DumpLog::GetInstance().AddDesc("childWindowId: ", accessibilityProperty->GetChildWindowId());
-    }
-    DumpLog::GetInstance().Print(0, nodeInfo.GetComponentType(), nodeInfo.GetChildCount());
+    DumpPropertyInfo(frameNode, nodeInfo);
 }
 
 void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params)
@@ -5366,6 +5632,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
         (infos.front().GetParentNodeId() == rootNode->GetAccessibilityId())) {
             infos.front().SetParent(NG::UI_EXTENSION_ROOT_ID);
     }
+    UpdateWebEmbedParent(infos, node, commonProperty);
 }
 
 void JsAccessibilityManager::SearchExtensionElementInfoByAccessibilityIdNG(const SearchParameter& searchParam,
@@ -5490,6 +5757,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     CHECK_NULL_VOID(node);
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext, node);
+    commonProperty.checkEmbedNode = false;
     nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
     if (textJson.is_null() || textJson.is_discarded() || !textJson.contains("type")) {
         return;
@@ -6514,6 +6782,11 @@ void JsAccessibilityManager::UpdateWebCacheInfo(std::list<AccessibilityElementIn
         }
     }
 }
+
+int64_t JsAccessibilityManager::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
+{
+    return INVALID_NODE_ID;
+}
 #endif //WEB_SUPPORTED
 
 bool JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
@@ -6951,7 +7224,7 @@ void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::Accessibilit
     info.SetAccessibilityId(elementId);
 
     int64_t parentId = info.GetParentNodeId();
-    if (parentId != INVALID_PARENT_ID) {
+    if ((parentId != INVALID_PARENT_ID) && NeedChangeTreeId(parentId, treeId)) {
         AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, parentId);
         info.SetParent(parentId);
     }
@@ -6960,9 +7233,11 @@ void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::Accessibilit
 
     std::vector<int64_t> childIds = info.GetChildIds();
     for (int64_t child : childIds) {
-        info.RemoveChild(child);
-        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, child);
-        info.AddChild(child);
+        if (NeedChangeTreeId(child, treeId)) {
+            info.RemoveChild(child);
+            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, child);
+            info.AddChild(child);
+        }
     }
 }
 
@@ -6980,17 +7255,21 @@ void JsAccessibilityManager::UpdateElementInfosTreeId(std::list<Accessibility::A
 
         int64_t parentId = item.GetParentNodeId();
         if (parentId != INVALID_PARENT_ID) {
-            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, parentId);
-            item.SetParent(parentId);
+            if (NeedChangeTreeId(parentId, treeId)) {
+                AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, parentId);
+                item.SetParent(parentId);
+            }
         }
 
         UpdateElementInfoPageIdWithTreeId(item, treeId);
 
         std::vector<int64_t> childIds = item.GetChildIds();
         for (int64_t child : childIds) {
-            item.RemoveChild(child);
-            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, child);
-            item.AddChild(child);
+            if (NeedChangeTreeId(child, treeId)) {
+                item.RemoveChild(child);
+                AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, child);
+                item.AddChild(child);
+            }
         }
     }
 }
@@ -7763,6 +8042,12 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
         output.pageNodes.clear();
         output.pagePaths.clear();
     }
+
+    output.checkGetFunc = [weak = WeakClaim(this)](const RefPtr<NG::FrameNode>& node) -> int64_t {
+        auto jsAccessibilityManager = weak.Upgrade();
+        CHECK_NULL_RETURN(jsAccessibilityManager, INVALID_NODE_ID);
+        return jsAccessibilityManager->CheckAndGetEmbedFrameNode(node);
+    };
 }
 
 void JsAccessibilityManager::GenerateCommonPropertyForWeb(const RefPtr<PipelineBase>& context, CommonProperty& output,
@@ -8080,5 +8365,45 @@ bool JsAccessibilityManager::IsScreenReaderEnabled()
         }
     }
     return isScreenReaderEnabled_;
+}
+
+SearchSurfaceIdRet JsAccessibilityManager::SearchElementInfoBySurfaceId(
+    const std::string& surfaceId, const int32_t windowId,
+    const SearchSurfaceIdType searchType, std::list<AccessibilityElementInfo>& infos)
+{
+    auto pipeline = GetPipelineByWindowId(windowId);
+    CHECK_NULL_RETURN(pipeline, SearchSurfaceIdRet::NO_MATCH_NODE);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(ngPipeline, SearchSurfaceIdRet::NO_MATCH_NODE);
+
+    auto node = GetEmbedNodeBySurfaceId(surfaceId).Upgrade();
+    CHECK_NULL_RETURN(node, SearchSurfaceIdRet::NO_MATCH_NODE);
+
+    if (searchType != SearchSurfaceIdType::SEARCH_TAIL) {
+        auto mode = searchType == SearchSurfaceIdType::SEARCH_ALL ?
+            static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN) : 0;
+        SearchElementInfoByAccessibilityIdNG(
+            node->GetAccessibilityId(), mode, infos, pipeline, NG::UI_EXTENSION_OFFSET_MAX);
+        UpdateElementInfosTreeId(infos);
+        return SearchSurfaceIdRet::SEARCH_SUCCESS;
+    }
+
+    auto mainContext = context_.Upgrade();
+    CHECK_NULL_RETURN(mainContext, SearchSurfaceIdRet::NO_MATCH_NODE);
+    CommonProperty commonProperty;
+    GenerateCommonProperty(pipeline, commonProperty, mainContext, node);
+    UpdateAccessibilityVisibleToRoot(node);
+    commonProperty.checkEmbedNode = false;
+    auto lastNode = GetLastChildFrameNode(node, commonProperty);
+    CHECK_NULL_RETURN(lastNode, SearchSurfaceIdRet::NO_MATCH_NODE);
+
+    AccessibilityElementInfo elementInfo;
+    UpdateAccessibilityElementInfo(lastNode, commonProperty, elementInfo, ngPipeline);
+    SetRootAccessibilityVisible(lastNode, elementInfo);
+    SetRootAccessibilityNextFocusId(lastNode, node, elementInfo);
+    SetRootAccessibilityPreFocusId(lastNode, node, elementInfo, nextFocusMapWithSubWindow_[pipeline->GetInstanceId()]);
+    infos.push_back(elementInfo);
+    UpdateElementInfosTreeId(infos);
+    return SearchSurfaceIdRet::SEARCH_SUCCESS;
 }
 } // namespace OHOS::Ace::Framework
