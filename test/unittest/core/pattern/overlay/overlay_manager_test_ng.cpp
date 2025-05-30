@@ -1585,13 +1585,16 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
     ASSERT_NE(topSheetNode, nullptr);
     auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(topSheetPattern, nullptr);
+    topSheetPattern->UpdateSheetObject(SheetType::SHEET_BOTTOM);
+    auto sheetObject = topSheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
     topSheetPattern->OnDirtyLayoutWrapperSwap(topSheetNode->CreateLayoutWrapper(), DirtySwapConfig());
 
     /**
      * @tc.steps: step3. Set currentOffset_ = 0, NestedState = CHILD_SCROLL.
      */
     topSheetPattern->currentOffset_ = 0;
-    auto result = topSheetPattern->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    auto result = sheetObject->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0);
 
@@ -1599,7 +1602,7 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
      * @tc.steps: step4. Set currentOffset_ = 0, NestedState = CHILD_OVER_SCROLL.
      */
     topSheetPattern->currentOffset_ = 0;
-    result = topSheetPattern->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    result = sheetObject->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 20.f);
 
@@ -1607,7 +1610,7 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
      * @tc.steps: step5. Set currentOffset_ < 0, NestedState = CHILD_SCROLL.
      */
     topSheetPattern->currentOffset_ = -5;
-    result = topSheetPattern->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    result = sheetObject->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 20.f);
 }

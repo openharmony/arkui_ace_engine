@@ -177,7 +177,7 @@ void SheetPresentationSideLayoutAlgorithm::LayoutCloseIcon(LayoutWrapper* layout
     CHECK_NULL_VOID(closeIconWrapper);
     auto geometryNode = closeIconWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-
+ 
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();

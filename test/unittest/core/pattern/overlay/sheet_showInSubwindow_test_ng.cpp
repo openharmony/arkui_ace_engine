@@ -17,10 +17,10 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "ui/base/geometry/dimension.h"
 
 #define private public
 #define protected public
+
 #include "test/mock/base/mock_foldable_window.h"
 #include "test/mock/base/mock_subwindow.h"
 #include "test/mock/base/mock_task_executor.h"
@@ -28,6 +28,8 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "ui/base/ace_type.h"
+#include "ui/base/geometry/dimension.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -1041,5 +1043,342 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheeteLayoutAlgorithm3, TestSize.Level1
     layoutProperty->UpdateSheetStyle(style);
     algorithm->Measure(AceType::RawPtr(sheetNode));
     EXPECT_FLOAT_EQ(algorithm->sheetHeight_, algorithm->sheetMaxHeight_);
+}
+
+/**
+ * @tc.name: SideSheetLayoutAlgorithm4
+ * @tc.desc: SheetPresentationSideLayoutAlgorithm Measure Scroll Height
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm4, TestSize.Level1)
+{
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 1000, 1600 });
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetStyle style;
+    style.sheetType = SheetType::SHEET_SIDE;
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto* layoutWrapper = new LayoutWrapperNode(
+        AceType::WeakClaim(AceType::RawPtr(sheetNode)), geometryNode->Clone(), layoutProperty->Clone());
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = { 1000, 1000 };
+    geometryNode->SetParentLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    /**
+     * @tc.steps: step2. scroll height = maxHeight, scroll width = maxWidth.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sideLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationSideLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sideLayoutAlgorithm, nullptr);
+    sideLayoutAlgorithm->sheetHeight_ = 1000;
+    sideLayoutAlgorithm->sheetWidth_ = 1000;
+    sideLayoutAlgorithm->MeasureScrollNode(layoutWrapper, layoutConstraint);
+    auto scrollGeometryNode = scrollNode->GetGeometryNode();
+    ASSERT_NE(scrollGeometryNode, nullptr);
+    EXPECT_FLOAT_EQ(scrollGeometryNode->GetFrameSize().Width(), 1000);
+    EXPECT_FLOAT_EQ(scrollGeometryNode->GetFrameSize().Height(), 1000);
+}
+
+/**
+ * @tc.name: SideSheetLayoutAlgorithm5
+ * @tc.desc: SheetPresentationSideLayoutAlgorithm Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm5, TestSize.Level1)
+{
+    Dimension closeIconButtonWidth = 1.0_vp;
+    Dimension titleTextMargin = 2.0_vp;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 1000, 1600 });
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->closeIconButtonWidth_ = closeIconButtonWidth;
+    sheetTheme->titleTextMargin_ = titleTextMargin;
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetStyle style;
+    style.sheetType = SheetType::SHEET_SIDE;
+    style.sheetTitle = "mainTitle";
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = { 1000, 1000 };
+    geometryNode->SetParentLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    /**
+     * @tc.steps: step2. test sheetNode Layout.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sideLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationSideLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sideLayoutAlgorithm, nullptr);
+    sideLayoutAlgorithm->sheetHeight_ = 1000;
+    sideLayoutAlgorithm->sheetWidth_ = 1000;
+    sideLayoutAlgorithm->Layout(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(geometryNode->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_FLOAT_EQ(geometryNode->GetMarginFrameOffset().GetY(), 0);
+
+    auto sheetCloseNode = sheetPattern->GetSheetCloseIcon();
+    ASSERT_NE(sheetCloseNode, nullptr);
+    auto closeGeometryNode = sheetCloseNode->GetGeometryNode();
+    ASSERT_NE(closeGeometryNode, nullptr);
+    EXPECT_FLOAT_EQ(closeGeometryNode->GetMarginFrameOffset().GetX(),
+        geometryNode->GetFrameSize().Width() - closeIconButtonWidth.ConvertToPx() - titleTextMargin.ConvertToPx());
+    EXPECT_FLOAT_EQ(closeGeometryNode->GetMarginFrameOffset().GetY(), titleTextMargin.ConvertToPx());
+
+    auto padding = sheetPattern->GetSheetObject()->GetSheetSafeAreaPadding();
+    auto builderNode = sheetPattern->GetTitleBuilderNode();
+    ASSERT_NE(builderNode, nullptr);
+    auto buildGeometryNode = builderNode->GetGeometryNode();
+    ASSERT_NE(buildGeometryNode, nullptr);
+    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetY(), padding.top.value_or(0.0f));
+}
+
+/**
+ * @tc.name: SideSheetLayoutAlgorithm6
+ * @tc.desc: SheetPresentationSideLayoutAlgorithm Layout when in mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm6, TestSize.Level1)
+{
+    Dimension closeIconButtonWidth = 1.0_vp;
+    Dimension titleTextMargin = 2.0_vp;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 1000, 1600 });
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->closeIconButtonWidth_ = closeIconButtonWidth;
+    sheetTheme->titleTextMargin_ = titleTextMargin;
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetStyle style;
+    style.sheetType = SheetType::SHEET_SIDE;
+    style.sheetTitle = "mainTitle";
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = { 1000, 1000 };
+    geometryNode->SetParentLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    /**
+     * @tc.steps: step2. set RTL = true.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    /**
+     * @tc.steps: step3. test sheetNode Layout.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sideLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationSideLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sideLayoutAlgorithm, nullptr);
+    sideLayoutAlgorithm->sheetHeight_ = 1000;
+    sideLayoutAlgorithm->sheetWidth_ = 1000;
+    sideLayoutAlgorithm->Layout(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(geometryNode->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_FLOAT_EQ(geometryNode->GetMarginFrameOffset().GetY(), 0);
+
+    auto sheetCloseNode = sheetPattern->GetSheetCloseIcon();
+    ASSERT_NE(sheetCloseNode, nullptr);
+    auto closeGeometryNode = sheetCloseNode->GetGeometryNode();
+    ASSERT_NE(closeGeometryNode, nullptr);
+    auto padding = sheetPattern->GetSheetObject()->GetSheetSafeAreaPadding();
+    EXPECT_FLOAT_EQ(closeGeometryNode->GetMarginFrameOffset().GetX(),
+        titleTextMargin.ConvertToPx() + padding.left.value_or(0.0f));
+    EXPECT_FLOAT_EQ(closeGeometryNode->GetMarginFrameOffset().GetY(), titleTextMargin.ConvertToPx());
+
+    auto builderNode = sheetPattern->GetTitleBuilderNode();
+    ASSERT_NE(builderNode, nullptr);
+    auto buildGeometryNode = builderNode->GetGeometryNode();
+    ASSERT_NE(buildGeometryNode, nullptr);
+    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetX(), padding.left.value_or(0.0f));
+    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetY(), padding.top.value_or(0.0f));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+}
+
+/**
+ * @tc.name: SheetShowInSubwindowTestNg
+ * @tc.desc: Test SheetSideObject::UpdateSidePosition().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, UpdateSidePosition, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_SIDE);
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    /**
+     * @tc.steps: step2. Sheet will not update side position, when it is onAppearing or onDisappearing.
+     */
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->isOnAppearing_ = true;
+    object->UpdateSidePosition();
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+    sheetPattern->isOnDisappearing_ = false;
+    object->UpdateSidePosition();
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+    /**
+     * @tc.steps: step3. Sheet will update side position, when it is not onAppearing and onDisappearing.
+     */
+    sheetPattern->isOnAppearing_ = false;
+    object->UpdateSidePosition();
+    EXPECT_FLOAT_EQ(
+        renderContext->GetTransformTranslate()->x.ConvertToPx(), object->sheetMaxWidth_ - object->sheetWidth_);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    object->UpdateSidePosition();
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+}
+
+/**
+ * @tc.name: SheetShowInSubwindowTestNg
+ * @tc.desc: Test SheetSideObject::ClipSheetNode().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, SideClipSheetNode, TestSize.Level1)
+{
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    /**
+     * @tc.steps: step1. create sheet pattern and object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    BorderRadiusProperty borderRadius(5.0_vp);
+    SheetStyle sheetStyle;
+    sheetStyle.radius = borderRadius;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_SIDE);
+    auto object = sheetPattern->GetSheetObject();
+    ASSERT_NE(object, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_TRUE(renderContext->GetBorderRadius() == std::nullopt);
+    /**
+     * @tc.steps: step2. test BorderRadius.
+     */
+    Dimension radius = 1.0_px;
+    object->ClipSheetNode();
+    ASSERT_NE(renderContext->GetBorderRadius(), std::nullopt);
+    EXPECT_FLOAT_EQ(renderContext->GetBorderRadius()->radiusTopRight->ConvertToPx(), radius.ConvertToPx());
+    EXPECT_FLOAT_EQ(renderContext->GetBorderRadius()->radiusBottomRight->ConvertToPx(), radius.ConvertToPx());
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    object->ClipSheetNode();
+    EXPECT_FLOAT_EQ(renderContext->GetBorderRadius()->radiusTopLeft->ConvertToPx(), radius.ConvertToPx());
+    EXPECT_FLOAT_EQ(renderContext->GetBorderRadius()->radiusBottomLeft->ConvertToPx(), radius.ConvertToPx());
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+}
+
+/**
+ * @tc.name: SheetShowInSubwindowTestNg
+ * @tc.desc: Test SheetSideObject::TransformTranslate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, TransformTranslate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_SIDE);
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+    /**
+     * @tc.steps: step2. test TransformTranslateEnter.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    object->TransformTranslateEnter();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    object->TransformTranslateEnter();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_FLOAT_EQ(
+        renderContext->GetTransformTranslate()->x.ConvertToPx(), object->sheetMaxWidth_ - object->sheetWidth_);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
+    /**
+     * @tc.steps: step3. test TransformTranslateExit.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    object->TransformTranslateEnter();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), -object->sheetWidth_);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    object->TransformTranslateEnter();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), object->sheetMaxWidth_);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

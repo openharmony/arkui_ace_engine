@@ -2711,122 +2711,23 @@ bool SheetPresentationPattern::IsScrollOutOfBoundary()
 void SheetPresentationPattern::OnScrollStartRecursive(
     WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
-    InitScrollProps();
-    if (animation_ && isAnimationProcess_) {
-        AnimationUtils::StopAnimation(animation_);
-        isAnimationBreak_ = true;
-    }
-    currentOffset_ = 0.0f;
-    isSheetNeedScroll_ = false;
-    isDirectionUp_ = true;
-    GetCurrentBroadcastDetentsIndex();
+    return sheetObject_->OnScrollStartRecursive(position, velocity);
 }
 
 ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t source, NestedState state,
     float velocity)
 {
-    if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
-        return {scrollOffset, true};
-    }
-    ScrollResult result = {0, true};
-    if (GreatOrEqual(currentOffset_, 0.0) && (source == SCROLL_FROM_UPDATE) && !isSheetNeedScroll_) {
-        isSheetNeedScroll_ = true;
-    }
-    if (!isSheetNeedScroll_ || IsScrollOutOfBoundary()) {
-        return {scrollOffset, true};
-    }
-    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
-    if (state == NestedState::CHILD_SCROLL) {
-        if (scrollState == ScrollState::SCROLL) {
-            return HandleScrollWithSheet(scrollOffset);
-        }
-        if (isSheetPosChanged_) {
-            HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
-            isSheetPosChanged_ = false;
-        }
-    } else if (state == NestedState::CHILD_OVER_SCROLL) {
-        isSheetNeedScroll_ = false;
-        return {scrollOffset, true};
-    }
-    return result;
-}
-
-ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
-{
-    ScrollResult result = {0, true};
-    auto sheetType = GetSheetType();
-    auto sheetDetentsSize = sheetDetentHeight_.size();
-    if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0) || IsShowInSubWindowTwoInOne()) {
-        isSheetNeedScroll_ = false;
-        return {scrollOffset, true};
-    }
-
-    auto currentHeightPos = GetSheetHeightBeforeDragUpdate();
-    bool isDraggingUp = LessNotEqual(scrollOffset, 0.0f);
-    bool isReachMaxSheetHeight = GreatOrEqual(currentHeightPos, GetMaxSheetHeightBeforeDragUpdate());
-
-    // When dragging up the sheet, and sheet height is larger than sheet content height,
-    // the sheet height should be updated.
-    // When dragging up the sheet, and sheet height is less than or equal to sheet content height,
-    // the sheet content should scrolling.
-    if ((NearZero(currentOffset_)) && isDraggingUp && isReachMaxSheetHeight) {
-        isSheetNeedScroll_ = false;
-        return {scrollOffset, true};
-    }
-
-    // When dragging up the sheet, and sheet height is larger than max height,
-    // should set the coefficient of friction.
-    bool isExceedMaxSheetHeight =
-        GreatNotEqual((currentHeightPos - currentOffset_), GetMaxSheetHeightBeforeDragUpdate());
-    bool isNeedCalculateFriction = isExceedMaxSheetHeight && isDraggingUp;
-    if (isNeedCalculateFriction && GreatNotEqual(sheetMaxHeight_, 0.0f)) {
-        auto friction = CalculateFriction((currentHeightPos - currentOffset_) / sheetMaxHeight_, GetRadio());
-        scrollOffset = scrollOffset * friction;
-    }
-
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, result);
-    currentOffset_ = currentOffset_ + scrollOffset;
-    auto pageHeight = GetPageHeightWithoutOffset();
-    auto sheetOffsetInPage = pageHeight - currentHeightPos + currentOffset_;
-    if (LessOrEqual(sheetOffsetInPage, pageHeight - sheetMaxHeight_)) {
-        sheetOffsetInPage = pageHeight - sheetMaxHeight_;
-        currentOffset_ = currentHeightPos - sheetMaxHeight_;
-    }
-    bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDraggingUp;
-    if (isNeedChangeScrollHeight) {
-        ChangeScrollHeight(currentHeightPos - currentOffset_);
-    }
-    HandleFollowAccessibilityEvent(currentHeightPos - currentOffset_);
-    auto renderContext = host->GetRenderContext();
-    renderContext->UpdateTransformTranslate({ 0.0f, sheetOffsetInPage, 0.0f });
-    isSheetPosChanged_ = NearZero(scrollOffset) ? false : true;
-    if (IsSheetBottomStyle()) {
-        OnHeightDidChange(height_ - currentOffset_ + sheetHeightUp_);
-    }
-    isSheetPosChanged_ = true;
-    return result;
+    return sheetObject_->HandleScroll(scrollOffset, source, state, velocity);
 }
 
 void SheetPresentationPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
-    if (isSheetPosChanged_) {
-        HandleDragEnd(velocity.value_or(0.f));
-        isSheetPosChanged_ = false;
-    }
+    sheetObject_->OnScrollEndRecursive(velocity);
 }
 
 bool SheetPresentationPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
-    if (isSheetPosChanged_) {
-        HandleDragEnd(velocity);
-        isSheetPosChanged_ = false;
-    }
-    // Use child edge effect
-    if (!isSheetNeedScroll_) {
-        return false;
-    }
-    return true;
+    return sheetObject_->HandleScrollVelocity(velocity);
 }
 
 bool SheetPresentationPattern::IsTypeNeedAvoidAiBar()

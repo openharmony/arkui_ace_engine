@@ -24,17 +24,17 @@
 #include "test/mock/base/mock_foldable_window.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_window.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_window.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -124,18 +124,21 @@ HWTEST_F(SheetPresentationTestNg, OnScrollStartRecursive001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->animation_ = nullptr;
     EXPECT_EQ(sheetPattern->animation_, nullptr);
-    sheetPattern->OnScrollStartRecursive(sheetPattern, 0.0f, 0.0f);
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_BOTTOM);
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->OnScrollStartRecursive(0.0f, 0.0f);
 
     AnimationOption option;
     sheetPattern->animation_ = AnimationUtils::StartAnimation(option, []() {}, []() {});
     sheetPattern->isAnimationProcess_ = false;
     EXPECT_NE(sheetPattern->animation_, nullptr);
     EXPECT_FALSE(sheetPattern->isAnimationProcess_);
-    sheetPattern->OnScrollStartRecursive(sheetPattern, 0.0f, 0.0f);
+    sheetObject->OnScrollStartRecursive(0.0f, 0.0f);
 
     sheetPattern->isAnimationProcess_ = true;
     EXPECT_TRUE(sheetPattern->isAnimationProcess_);
-    sheetPattern->OnScrollStartRecursive(sheetPattern, 0.0f, 0.0f);
+    sheetObject->OnScrollStartRecursive(0.0f, 0.0f);
 }
 
 /**
@@ -150,6 +153,9 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet001, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_BOTTOM);
+    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
     float scrollOffset = 0.0f;
     PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
     sheetPattern->sheetDetentHeight_.emplace_back(1);
@@ -159,25 +165,25 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet001, TestSize.Level1)
     sheetPattern->sheetMaxHeight_ = 0.0f;
     sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
     EXPECT_FALSE(NearZero(sheetPattern->currentOffset_));
-    sheetPattern->HandleScrollWithSheet(scrollOffset);
+    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
 
     scrollOffset = 0.0f;
     sheetPattern->currentOffset_ = 0.0f;
     EXPECT_TRUE(NearZero(sheetPattern->currentOffset_));
     EXPECT_FALSE(LessNotEqual(scrollOffset, 0.0f));
-    sheetPattern->HandleScrollWithSheet(scrollOffset);
+    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
 
     scrollOffset = -1.0f;
     sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
     EXPECT_TRUE(LessNotEqual(scrollOffset, 0.0f));
-    sheetPattern->HandleScrollWithSheet(scrollOffset);
+    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
 
     sheetPattern->sheetDetentHeight_.emplace_back(0);
-    sheetPattern->HandleScrollWithSheet(scrollOffset);
+    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
 
     sheetPattern->sheetDetentHeight_.clear();
     EXPECT_EQ(sheetPattern->sheetDetentHeight_.size(), 0);
-    sheetPattern->HandleScrollWithSheet(scrollOffset);
+    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -751,14 +757,15 @@ HWTEST_F(SheetPresentationTestNg, OnScrollEndRecursive001, TestSize.Level1)
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
     sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
-    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
-    sheetPattern->isSheetPosChanged_ = false;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->isSheetPosChanged_ = false;
     sheetPattern->OnScrollEndRecursive(std::nullopt);
-    EXPECT_FALSE(sheetPattern->isSheetPosChanged_);
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
 
-    sheetPattern->isSheetPosChanged_ = true;
+    sheetObject->isSheetPosChanged_ = true;
     sheetPattern->OnScrollEndRecursive(std::nullopt);
-    EXPECT_FALSE(sheetPattern->isSheetPosChanged_);
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -777,17 +784,18 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollVelocity001, TestSize.Level1)
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
     sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
-    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
-    sheetPattern->isSheetPosChanged_ = false;
-    sheetPattern->isSheetNeedScroll_ = true;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->isSheetPosChanged_ = false;
+    sheetObject->isSheetNeedScroll_ = true;
     bool ret = sheetPattern->HandleScrollVelocity(1.0f, sheetPattern);
-    EXPECT_FALSE(sheetPattern->isSheetPosChanged_);
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
     EXPECT_TRUE(ret);
 
-    sheetPattern->isSheetPosChanged_ = true;
-    sheetPattern->isSheetNeedScroll_ = false;
+    sheetObject->isSheetPosChanged_ = true;
+    sheetObject->isSheetNeedScroll_ = false;
     ret = sheetPattern->HandleScrollVelocity(1.0f, sheetPattern);
-    EXPECT_FALSE(sheetPattern->isSheetPosChanged_);
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
     EXPECT_FALSE(ret);
     SheetPresentationTestNg::TearDownTestCase();
 }
