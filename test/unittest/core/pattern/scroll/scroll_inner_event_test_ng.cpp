@@ -311,7 +311,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleLongPress001, TestSize.Level1)
  */
 HWTEST_F(ScrollInnerEventTestNg, HandleLongPress002, TestSize.Level1)
 {
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockScrollTaskExecutor>();
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     ScrollModelNG model = CreateScroll();
     model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
@@ -355,7 +355,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleLongPress002, TestSize.Level1)
  */
 HWTEST_F(ScrollInnerEventTestNg, TouchEvent001, TestSize.Level1)
 {
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockScrollTaskExecutor>();
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     CreateScroll();
     CreateContent();
@@ -414,7 +414,7 @@ HWTEST_F(ScrollInnerEventTestNg, TouchEvent001, TestSize.Level1)
  */
 HWTEST_F(ScrollInnerEventTestNg, TouchEvent002, TestSize.Level1)
 {
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockScrollTaskExecutor>();
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     CreateScroll();
     CreateContent();
@@ -449,7 +449,7 @@ HWTEST_F(ScrollInnerEventTestNg, TouchEvent002, TestSize.Level1)
  */
 HWTEST_F(ScrollInnerEventTestNg, TouchEvent003, TestSize.Level1)
 {
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockScrollTaskExecutor>();
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     CreateScroll();
     CreateContent();

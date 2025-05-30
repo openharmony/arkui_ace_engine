@@ -422,7 +422,7 @@ HWTEST_F(ScrollEffectTestNg, FadeController001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create ScrollFadeController and set callback function.
      */
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockScrollTaskExecutor>();
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     auto fadeController = AceType::MakeRefPtr<ScrollFadeController>();
     double param1 = 10.f;
@@ -512,7 +512,7 @@ HWTEST_F(ScrollEffectTestNg, FadeController002, TestSize.Level1)
     /**
      * @tc.steps: step1. Create ScrollFadeController and set callback function.
      */
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockScrollTaskExecutor>();
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     auto fadeController = AceType::MakeRefPtr<ScrollFadeController>();
     double param1 = 10.f;
