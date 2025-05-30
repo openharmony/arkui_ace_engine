@@ -2230,4 +2230,27 @@ void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         filter);
     json->PutExtAttr("enableShortcutKey", isEnableShortcutKey_ ? "true" : "false", filter);
 }
+
+void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoController)
+{
+    if (videoControllerV2_) {
+        // Video Controller is already attached
+        return;
+    }
+    videoControllerV2_ = videoController;
+
+    // if pattern is attached to frame node
+    auto frameNode = frameNode_.Upgrade();
+    if (frameNode) {
+        // full screen node is not supposed to register js controller event
+        if (!InstanceOf<VideoFullScreenPattern>(this)) {
+            SetMethodCall();
+        }
+    }
+}
+
+RefPtr<VideoControllerV2> VideoPattern::GetVideoController()
+{
+    return videoControllerV2_;
+}
 } // namespace OHOS::Ace::NG
