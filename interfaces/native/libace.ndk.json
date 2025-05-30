@@ -3422,5 +3422,17 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PostAsyncUITask"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PostUITask"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PostUITaskAndWait"
     }
 ]

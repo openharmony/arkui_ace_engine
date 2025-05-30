@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
+std::atomic<ElementIdType> ElementRegister::nextUniqueElementId_ = 0;
 std::mutex ElementRegister::mutex_;
 
 ElementRegister* ElementRegister::GetInstance()
@@ -30,6 +31,11 @@ ElementRegister* ElementRegister::GetInstance()
         }
     }
     return (ElementRegister::instance_);
+}
+
+ElementIdType ElementRegister::MakeUniqueId()
+{
+    return ElementRegister::nextUniqueElementId_++;
 }
 
 RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
