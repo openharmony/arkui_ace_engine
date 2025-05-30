@@ -39,12 +39,12 @@ namespace {
     // attrs
     const auto BUTTON_SIZE_ACE = Dimension(5);
     const auto BUTTON_BG_COLOR_ACE = Color::RED;
-    const PaddingProperty BUTTON_MARGIN_ACE = { 
+    const PaddingProperty BUTTON_MARGIN_ACE = {
         CalcLength(5.0f), CalcLength(5.0f), CalcLength(5.0f), CalcLength(5.0f) };
     const BorderWidthProperty BUTTON_BORDER_WIDTH_ACE = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
     const BorderColorProperty BUTTON_BORDER_COLOR_ACE = { Color::BLUE, Color::BLUE, Color::BLUE, Color::BLUE };
-    const std::optional<DimensionOffset> BUTTON_PIVOT_ACE = DimensionOffset(Dimension(0), Dimension(0));
-    const std::vector<std::optional<float>> BUTTON_ROTATE_ACE = {0, 0, 1, 300, 0};
+    const DimensionOffset BUTTON_PIVOT_ACE = DimensionOffset(Dimension(0), Dimension(0));
+    const NG::Vector5F BUTTON_ROTATE_ACE = {0, 0, 1, 300, 0};
     const auto BUTTON_LABEL_ACE = "click";
     const auto BUTTON_TYPE_ACE = static_cast<int>(ButtonType::CIRCLE);
     
@@ -53,23 +53,23 @@ namespace {
         Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED));
     const auto BUTTON_MARGIN_CAPI =
         Converter::ArkUnion<Opt_Union_Margin_Length_LocalizedMargin, Ark_Length>(
-        Converter::ArkValue<Ark_Length>(5.0_px));
-    const auto BUTTON_BORDER_WIDTH_CAPI = 
+            Converter::ArkValue<Ark_Length>(5.0_px));
+    const auto BUTTON_BORDER_WIDTH_CAPI =
         Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_Length>(
-        Converter::ArkValue<Ark_Length>(1.0_vp));
+            Converter::ArkValue<Ark_Length>(1.0_vp));
     const auto BUTTON_BORDER_COLOR_CAPI =
         Converter::ArkUnion<Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors, Ark_ResourceColor>(
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE));
 
     const Ark_RotateOptions BUTTON_PIVOT_ROTATE_CAPI_TMP = {
         Converter::ArkValue<Opt_Number>(0), //ROTATE - 1: x
         Converter::ArkValue<Opt_Number>(0), //ROTATE - 2: y
         Converter::ArkValue<Opt_Number>(1), //ROTATE - 3: z
-        Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(0), //PIVOT: x 
+        Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(0), //PIVOT: x
         Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(0), //PIVOT: y
         Converter::ArkValue<Opt_Number>(Ark_Empty()), //PIVOT: z
         Converter::ArkValue<Opt_Number>(0), //ROTATE 5: perspective
-        Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(300)//ROTATE 4: angle
+        Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(300) //ROTATE 4: angle
     };
 
     const auto BUTTON_ALIGN_CAPI = Converter::ArkValue<Opt_Alignment>(Ark_Alignment::ARK_ALIGNMENT_START);
@@ -189,7 +189,6 @@ BENCHMARK_F(BenchmarkButtonTest, test_button_WARM_UP_CPU)(benchmark::State& stat
     while (state.KeepRunning()) {
         auto frameNode = ButtonModelStatic::CreateFrameNode(GetId());
         AssertUnequal(frameNode, nullptr, "ButtonNode is nullptr.", state);
-        frameNode->IncRefCount();
         ViewAbstractModelStatic::SetWidth(Referenced::RawPtr(frameNode), BUTTON_SIZE_ACE);
         ViewAbstractModelStatic::SetHeight(Referenced::RawPtr(frameNode), BUTTON_SIZE_ACE);
         ButtonModelStatic::BackgroundColor(Referenced::RawPtr(frameNode), BUTTON_BG_COLOR_ACE, true);
@@ -201,9 +200,6 @@ BENCHMARK_F(BenchmarkButtonTest, test_button_WARM_UP_CPU)(benchmark::State& stat
         ViewAbstractModelStatic::SetAlign(Referenced::RawPtr(frameNode), Alignment::CENTER_LEFT);
         ButtonModelStatic::SetLabel(Referenced::RawPtr(frameNode), BUTTON_LABEL_ACE);
         ButtonModelStatic::SetType(Referenced::RawPtr(frameNode), BUTTON_TYPE_ACE);
-
-        frameNode->SetExtensionHandler(nullptr);
-        frameNode->DecRefCount();
         frameNode = nullptr;
     }
 }
@@ -218,7 +214,6 @@ BENCHMARK_F(BenchmarkButtonTest, test_button_ACE)(benchmark::State& state)
     while (state.KeepRunning()) {
         auto frameNode = ButtonModelStatic::CreateFrameNode(GetId());
         AssertUnequal(frameNode, nullptr, "ButtonNode is nullptr.", state);
-        frameNode->IncRefCount();
         ViewAbstractModelStatic::SetWidth(Referenced::RawPtr(frameNode), BUTTON_SIZE_ACE);
         ViewAbstractModelStatic::SetHeight(Referenced::RawPtr(frameNode), BUTTON_SIZE_ACE);
         ButtonModelStatic::BackgroundColor(Referenced::RawPtr(frameNode), BUTTON_BG_COLOR_ACE, true);
@@ -230,9 +225,6 @@ BENCHMARK_F(BenchmarkButtonTest, test_button_ACE)(benchmark::State& state)
         ViewAbstractModelStatic::SetAlign(Referenced::RawPtr(frameNode), Alignment::CENTER_LEFT);
         ButtonModelStatic::SetLabel(Referenced::RawPtr(frameNode), BUTTON_LABEL_ACE);
         ButtonModelStatic::SetType(Referenced::RawPtr(frameNode), BUTTON_TYPE_ACE);
-
-        frameNode->SetExtensionHandler(nullptr);
-        frameNode->DecRefCount();
         frameNode = nullptr;
     }
 }

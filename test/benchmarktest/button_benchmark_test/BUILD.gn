@@ -23,10 +23,7 @@ config("capi_bm_config") {
     "$ace_root/",
   ]
   cflags = [
-    "-g",
-    "-O0",
     "-Wno-unused-variable",
-    "-fno-omit-frame-pointer",
   ]
 }
 
@@ -50,8 +47,8 @@ ace_unittest("ButtonBM_CAPI") {
   extra_deps = []
   extra_deps += [
     ":capi_bm_deps",
-    "//foundation/arkui/ace_engine/test/unittest/capi:ace_core_interfaces_native_node_linux_unittest",
-    "//foundation/arkui/ace_engine/test/unittest/capi/stubs:capi-ut-stubs", 
+    "$ace_root/test/unittest/capi:ace_core_interfaces_native_node_linux_unittest",
+    "$ace_root/test/unittest/capi/stubs:capi-ut-stubs", 
     "$ace_root/build:libace",
     "$ace_root/build:libace_compatible",
     "$ace_root/build:libace_engine_pa_ark",

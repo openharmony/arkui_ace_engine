@@ -261,9 +261,9 @@
                 }
             ],
             "test": [
+                "//foundation/arkui/ace_engine/test/benchmarktest:benchmarktest",
                 "//foundation/arkui/ace_engine/test/unittest:run_linux_unittest_capi",
-                "//foundation/arkui/ace_engine/test/unittest:unittest",
-                "//foundation/arkui/ace_engine/test/benchmarktest:benchmarktest"
+                "//foundation/arkui/ace_engine/test/unittest:unittest"
             ]
         }
     }
