@@ -310,9 +310,7 @@ void DatePickerModelNG::SetCanLoop(bool isLoop)
 void DatePickerModelNG::SetCanLoop(FrameNode* frameNode, bool isLoop)
 {
     CHECK_NULL_VOID(frameNode);
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    CHECK_NULL_VOID(datePickerPattern);
-    datePickerPattern->SetCanLoop(isLoop);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, CanLoop, isLoop, frameNode);
 }
 
 bool DatePickerModelNG::GetCanLoop(FrameNode* frameNode)
