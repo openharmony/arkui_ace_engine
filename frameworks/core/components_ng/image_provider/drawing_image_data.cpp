@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 
 #include "include/codec/SkCodec.h"
 
