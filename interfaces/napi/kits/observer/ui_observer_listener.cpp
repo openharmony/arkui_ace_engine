@@ -16,394 +16,16 @@
 #include "ui_observer_listener.h"
 #include "js_native_api.h"
 #include "core/event/ace_events.h"
+#include "interfaces/napi/kits/observer/gesture/gesture_observer_listener.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr char NAV_BAR[] = "navBar";
-constexpr char GET_TAG[] = "getTag";
-constexpr char GET_TYPE[] = "getType";
-constexpr char IS_BUILT_IN[] = "isBuiltIn";
-constexpr char SET_ENABLED[] = "setEnabled";
-constexpr char IS_ENABLED[] = "isEnabled";
-constexpr char GET_STATE[] = "getState";
-constexpr char GET_EVENT_TARGET_INFO[] = "getEventTargetInfo";
-constexpr char IS_VALID[] = "isValid";
-constexpr char GET_ID[] = "getId";
 constexpr char GET_MODIFIER_KEY_STATE[] = "getModifierKeyState";
-constexpr char GET_FINGER_COUNT[] = "getFingerCount";
-constexpr char IS_FINGER_COUNT_LIMIT[] = "isFingerCountLimit";
-constexpr char GET_DIRECTION[] = "getDirection";
-constexpr char GET_DISTANCE[] = "getDistance";
-constexpr char GET_PANGESTURE_OPTIONS[] = "getPanGestureOptions";
-constexpr char SET_DIRECTION[] = "setDirection";
-constexpr char SET_DISTANCE[] = "setDistance";
-constexpr char SET_FINGERS[] = "setFingers";
-constexpr int32_t PARAM_SIZE_ZERO = 0;
 constexpr int32_t PARAM_SIZE_ONE = 1;
 constexpr int32_t PARAM_SIZE_TWO = 2;
 constexpr int32_t PARAM_SIZE_THREE = 3;
 constexpr int32_t PARAM_SIZE_SIX = 6;
-
-static NG::PanRecognizer* GetCurrentGestureRecognizer(
-    napi_env env, napi_callback_info info, size_t* argc = nullptr, napi_value* argv = nullptr)
-{
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, argc, argv, &thisVar, nullptr));
-
-    NG::PanRecognizer* current = nullptr;
-    napi_unwrap(env, thisVar, (void**)&current);
-    CHECK_NULL_RETURN(current, nullptr);
-    return current;
-}
-
-static napi_value GetTag(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    auto gestureInfo = current->GetGestureInfo();
-    if (!gestureInfo) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    if (gestureInfo->GetTag().has_value()) {
-        std::string tag = gestureInfo->GetTag().value();
-        napi_create_string_utf8(env, tag.c_str(), NAPI_AUTO_LENGTH, &result);
-    } else {
-        napi_get_undefined(env, &result);
-    }
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
-
-static napi_value GetType(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    auto gestureInfo = current->GetGestureInfo();
-    if (!gestureInfo) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_create_int32(env, static_cast<int32_t>(gestureInfo->GetRecognizerType()), &result);
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
-
-static napi_value IsBuiltIn(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    auto gestureInfo = current->GetGestureInfo();
-    if (!gestureInfo) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_get_boolean(env, gestureInfo->IsSystemGesture(), &result);
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
-
-static napi_value SetEnabled(napi_env env, napi_callback_info info)
-{
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    size_t argc = PARAM_SIZE_ONE;
-    napi_value argv[PARAM_SIZE_ONE] = { nullptr };
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info, &argc, argv);
-    if (!current) {
-        napi_close_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_valuetype valueType = napi_undefined;
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM_SIZE_ZERO], &valueType));
-    NAPI_ASSERT(env, (valueType == napi_boolean), "Invalid arguments");
-    bool isEnabled = false;
-    napi_get_value_bool(env, argv[PARAM_SIZE_ZERO], &isEnabled);
-    current->SetEnabled(isEnabled);
-    napi_close_handle_scope(env, scope);
-    return nullptr;
-}
-
-static napi_value IsEnabled(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_get_boolean(env, current->IsEnabled(), &result);
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
-
-static napi_value GetState(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_create_int32(env, static_cast<int32_t>(current->GetRefereeState()), &result);
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
-
-static napi_value GetId(napi_env env, napi_callback_info info)
-{
-    napi_value result = nullptr;
-    void* data = nullptr;
-    napi_get_cb_info(env, info, nullptr, nullptr, nullptr, &data);
-    auto inspectorId = static_cast<std::string*>(data);
-    CHECK_NULL_RETURN(inspectorId, nullptr);
-    napi_create_string_utf8(env, (*inspectorId).c_str(), NAPI_AUTO_LENGTH, &result);
-    return result;
-}
-
-static napi_value GetEventTargetInfo(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_create_object(env, &result);
-    napi_value funcValue = nullptr;
-    auto attactNode = current->GetAttachedNode().Upgrade();
-    if (!attactNode) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    auto inspectorId = std::make_unique<std::string>(attactNode->GetInspectorIdValue(""));
-    auto* rawPtr = inspectorId.release();
-    status = napi_wrap(
-        env, result, rawPtr,
-        [](napi_env env, void* data, void* hint) {
-            auto origin = static_cast<std::string*>(data);
-            if (origin) {
-                delete origin;
-            }
-        },
-        nullptr, nullptr);
-    if (status != napi_ok) {
-        LOGE("napi_wrap failed");
-        delete rawPtr;
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-
-    napi_create_function(env, GET_ID, 0, GetId, rawPtr, &funcValue);
-    napi_set_named_property(env, result, GET_ID, funcValue);
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
-
-static napi_value IsValid(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_get_boolean(env, current->IsInResponseLinkRecognizers(), &result);
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
-
-static napi_value GetFingerCount(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_create_int32(env, static_cast<int32_t>(current->GetFingers()), &result);
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
-
-static napi_value IsFingerCountLimit(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_get_boolean(env, current->GetLimitFingerCount(), &result);
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
-
-struct PanRecognizerWrapper {
-    NG::PanRecognizer* recognizer;
-};
-
-static napi_value GetDistance(napi_env env, napi_callback_info info)
-{
-    double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
-    if (NearZero(scale)) {
-        scale = 1.0;
-    }
-    napi_value thisArg;
-    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, nullptr);
-    PanRecognizerWrapper* wrapper = nullptr;
-    napi_unwrap(env, thisArg, reinterpret_cast<void**>(&wrapper));
-    CHECK_NULL_RETURN(wrapper, nullptr);
-    auto current = wrapper->recognizer;
-    CHECK_NULL_RETURN(current, nullptr);
-    napi_value napiDistance = nullptr;
-    napi_create_double(env, current->GetDistance() / scale, &napiDistance);
-    return napiDistance;
-}
-
-static napi_value GetDirection(napi_env env, napi_callback_info info)
-{
-    napi_value thisArg;
-    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, nullptr);
-    PanRecognizerWrapper* wrapper = nullptr;
-    napi_unwrap(env, thisArg, reinterpret_cast<void**>(&wrapper));
-    CHECK_NULL_RETURN(wrapper, nullptr);
-    auto current = wrapper->recognizer;
-    CHECK_NULL_RETURN(current, nullptr);
-    napi_value napiDirection = nullptr;
-    napi_create_uint32(env, static_cast<uint32_t>(current->GetDirection().type), &napiDirection);
-    return napiDirection;
-}
-
-static napi_value GetPanGestureOptions(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    auto status = napi_open_escapable_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    NG::PanRecognizer* current = GetCurrentGestureRecognizer(env, info);
-    if (!current) {
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_value funcValue = nullptr;
-    napi_create_object(env, &result);
-
-    PanRecognizerWrapper* wrapper = new PanRecognizerWrapper { current };
-    status = napi_wrap(
-        env, result, wrapper,
-        [](napi_env env, void* data, void* hint) {
-            auto castData = reinterpret_cast<PanRecognizerWrapper*>(data);
-            if (castData) {
-                delete castData;
-            }
-        },
-        nullptr, nullptr);
-    if (status != napi_ok) {
-        LOGE("Failed to wrap native object");
-        delete wrapper;
-        napi_close_escapable_handle_scope(env, scope);
-        return nullptr;
-    }
-
-    auto setDirection = [](napi_env env, napi_callback_info info) -> napi_value { return nullptr; };
-    auto setDistance = [](napi_env env, napi_callback_info info) -> napi_value { return nullptr; };
-    auto setFingers = [](napi_env env, napi_callback_info info) -> napi_value { return nullptr; };
-    napi_create_function(env, GET_DIRECTION, NAPI_AUTO_LENGTH, GetDirection, nullptr, &funcValue);
-    napi_set_named_property(env, result, GET_DIRECTION, funcValue);
-    napi_create_function(env, GET_DISTANCE, NAPI_AUTO_LENGTH, GetDistance, nullptr, &funcValue);
-    napi_set_named_property(env, result, GET_DISTANCE, funcValue);
-    napi_create_function(env, SET_DIRECTION, NAPI_AUTO_LENGTH, setDirection, nullptr, &funcValue);
-    napi_set_named_property(env, result, SET_DIRECTION, funcValue);
-    napi_create_function(env, SET_DISTANCE, NAPI_AUTO_LENGTH, setDistance, nullptr, &funcValue);
-    napi_set_named_property(env, result, SET_DISTANCE, funcValue);
-    napi_create_function(env, SET_FINGERS, NAPI_AUTO_LENGTH, setFingers, nullptr, &funcValue);
-    napi_set_named_property(env, result, SET_FINGERS, funcValue);
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return newResult;
-}
 
 bool CheckKeysPressed(const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes)
 {
@@ -787,19 +409,7 @@ void UIObserverListener::OnWillClick(
 
     napi_value objValueFrameNode = nullptr;
     napi_create_object(env_, &objValueFrameNode);
-
-    auto container = Container::Current();
-    if (container == nullptr) {
-        napi_close_handle_scope(env_, scope);
-        return;
-    }
-    auto frontEnd = container->GetFrontend();
-    if (frontEnd == nullptr) {
-        napi_close_handle_scope(env_, scope);
-        return;
-    }
-    auto nodeId = frameNode->GetId();
-    objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(nodeId);
+    objValueFrameNode = GetFrameNodeObject(frameNode);
 
     napi_value argv[] = { objValueClickEvent, objValueFrameNode };
     napi_call_function(env_, nullptr, callback, PARAM_SIZE_TWO, argv, nullptr);
@@ -835,19 +445,7 @@ void UIObserverListener::OnDidClick(
 
     napi_value objValueFrameNode = nullptr;
     napi_create_object(env_, &objValueFrameNode);
-
-    auto container = Container::Current();
-    if (container == nullptr) {
-        napi_close_handle_scope(env_, scope);
-        return;
-    }
-    auto frontEnd = container->GetFrontend();
-    if (frontEnd == nullptr) {
-        napi_close_handle_scope(env_, scope);
-        return;
-    }
-    auto nodeId = frameNode->GetId();
-    objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(nodeId);
+    objValueFrameNode = GetFrameNodeObject(frameNode);
 
     napi_value argv[] = { objValueClickEvent, objValueFrameNode };
     napi_call_function(env_, nullptr, callback, PARAM_SIZE_TWO, argv, nullptr);
@@ -881,26 +479,59 @@ void UIObserverListener::OnPanGestureStateChange(const GestureEvent& gestureEven
     AddGestureEventInfoThree(objValueGestureEvent, gestureEventInfo);
     AddGestureEventInfoFour(objValueGestureEvent, gestureEventInfo);
     AddTargetObject(objValueGestureEvent, gestureEventInfo);
-    AddGestureRecognizerInfo(objValueGestureRecognizer, current);
+    GestureObserverListener::AddGestureRecognizerInfo(env_, objValueGestureRecognizer, current);
     
     napi_value objValueFrameNode = nullptr;
     napi_create_object(env_, &objValueFrameNode);
-
-    auto container = Container::Current();
-    if (!container) {
-        napi_close_handle_scope(env_, scope);
-        return;
-    }
-    auto frontEnd = container->GetFrontend();
-    if (!frontEnd) {
-        napi_close_handle_scope(env_, scope);
-        return;
-    }
-    auto nodeId = frameNode->GetId();
-    objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(nodeId);
+    objValueFrameNode = GetFrameNodeObject(frameNode);
 
     napi_value argv[] = { objValueGestureEvent, objValueGestureRecognizer, objValueFrameNode };
     napi_call_function(env_, nullptr, callback, PARAM_SIZE_THREE, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::OnGestureStateChange(const GestureEvent& gestureEventInfo,
+    const RefPtr<NG::NGGestureRecognizer>& current, const RefPtr<NG::FrameNode> frameNode, NG::GestureActionPhase phase)
+{
+    if (!env_ || !callback_ || !current) {
+        TAG_LOGW(
+            AceLogTag::ACE_OBSERVER, "Handle gesture change failed, runtime, recognizer or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+
+    napi_value objValueGestureTriggerInfo = nullptr;
+    napi_create_object(env_, &objValueGestureTriggerInfo);
+    napi_value objValueGestureEvent = nullptr;
+    napi_create_object(env_, &objValueGestureEvent);
+    napi_value objValueGestureRecognizer = nullptr;
+    napi_create_object(env_, &objValueGestureRecognizer);
+
+    AddBaseEventInfo(objValueGestureEvent, gestureEventInfo);
+    AddGestureEventInfoOne(objValueGestureEvent, gestureEventInfo);
+    AddGestureEventInfoTwo(objValueGestureEvent, gestureEventInfo);
+    AddGestureEventInfoThree(objValueGestureEvent, gestureEventInfo);
+    AddGestureEventInfoFour(objValueGestureEvent, gestureEventInfo);
+    AddTargetObject(objValueGestureEvent, gestureEventInfo);
+    GestureObserverListener::AddGestureRecognizerInfo(env_, objValueGestureRecognizer, current);
+    napi_value currentPhase = nullptr;
+    napi_create_double(env_, static_cast<int32_t>(phase), &currentPhase);
+    napi_set_named_property(env_, objValueGestureTriggerInfo, "currentPhase", currentPhase);
+    napi_set_named_property(env_, objValueGestureTriggerInfo, "event", objValueGestureEvent);
+    napi_set_named_property(env_, objValueGestureTriggerInfo, "current", objValueGestureRecognizer);
+    napi_value objValueFrameNode = GetFrameNodeObject(frameNode);
+    if (objValueFrameNode) {
+        napi_set_named_property(env_, objValueGestureTriggerInfo, "node", objValueFrameNode);
+    }
+    napi_value argv[] = { objValueGestureTriggerInfo };
+    napi_call_function(env_, nullptr, callback, PARAM_SIZE_ONE, argv, nullptr);
     napi_close_handle_scope(env_, scope);
 }
 
@@ -990,6 +621,7 @@ void UIObserverListener::AddBaseEventInfo(napi_value objValueEvent, const BaseEv
     napi_value napiPressure = nullptr;
     napi_value napiTiltX = nullptr;
     napi_value napiTiltY = nullptr;
+    napi_value napiRollAngle = nullptr;
     napi_value napiSourceTool = nullptr;
 
     napi_create_double(env_,
@@ -1002,6 +634,7 @@ void UIObserverListener::AddBaseEventInfo(napi_value objValueEvent, const BaseEv
     if (baseEventInfo.GetTiltY().has_value()) {
         napi_create_double(env_, baseEventInfo.GetTiltY().value(), &napiTiltY);
     }
+    napi_create_double(env_, baseEventInfo.GetRollAngle().value_or(0.0f), &napiRollAngle);
     napi_create_double(env_, static_cast<int32_t>(baseEventInfo.GetSourceTool()), &napiSourceTool);
 
     napi_set_named_property(env_, objValueEvent, "timestamp", napiTimeStamp);
@@ -1009,6 +642,7 @@ void UIObserverListener::AddBaseEventInfo(napi_value objValueEvent, const BaseEv
     napi_set_named_property(env_, objValueEvent, "pressure", napiPressure);
     napi_set_named_property(env_, objValueEvent, "tiltX", napiTiltX);
     napi_set_named_property(env_, objValueEvent, "tiltY", napiTiltY);
+    napi_set_named_property(env_, objValueEvent, "rollAngle", napiRollAngle);
     napi_set_named_property(env_, objValueEvent, "sourceTool", napiSourceTool);
 
     napi_close_handle_scope(env_, scope);
@@ -1391,57 +1025,6 @@ void UIObserverListener::AddGestureEventInfoFour(napi_value objValueEvent, const
     napi_close_handle_scope(env_, scope);
 }
 
-void UIObserverListener::AddGestureRecognizerInfo(
-    napi_value objValueGestureRecognizer, const RefPtr<NG::PanRecognizer>& current)
-{
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env_, &scope);
-    if (status != napi_ok) {
-        return;
-    }
-    current->IncRefCount();
-    status = napi_wrap(
-        env_, objValueGestureRecognizer, AceType::RawPtr(current),
-        [](napi_env env, void* data, void* hint) {
-            NG::PanRecognizer* current = reinterpret_cast<NG::PanRecognizer*>(data);
-            if (current != nullptr) {
-                current->DecRefCount();
-            }
-        },
-        nullptr, nullptr);
-    if (status != napi_ok) {
-        LOGE("napi_wrap failed");
-        current->DecRefCount();
-        napi_close_handle_scope(env_, scope);
-        return;
-    }
-
-    napi_value funcValue = nullptr;
-    napi_create_function(env_, GET_TAG, 0, GetTag, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, GET_TAG, funcValue);
-    napi_create_function(env_, GET_TYPE, 0, GetType, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, GET_TYPE, funcValue);
-    napi_create_function(env_, IS_BUILT_IN, 0, IsBuiltIn, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, IS_BUILT_IN, funcValue);
-    napi_create_function(env_, SET_ENABLED, 0, SetEnabled, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, SET_ENABLED, funcValue);
-    napi_create_function(env_, IS_ENABLED, 0, IsEnabled, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, IS_ENABLED, funcValue);
-    napi_create_function(env_, GET_STATE, 0, GetState, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, GET_STATE, funcValue);
-    napi_create_function(env_, GET_EVENT_TARGET_INFO, 0, GetEventTargetInfo, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, GET_EVENT_TARGET_INFO, funcValue);
-    napi_create_function(env_, IS_VALID, 0, IsValid, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, IS_VALID, funcValue);
-    napi_create_function(env_, GET_FINGER_COUNT, 0, GetFingerCount, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, GET_FINGER_COUNT, funcValue);
-    napi_create_function(env_, IS_FINGER_COUNT_LIMIT, 0, IsFingerCountLimit, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, IS_FINGER_COUNT_LIMIT, funcValue);
-    napi_create_function(env_, GET_PANGESTURE_OPTIONS, 0, GetPanGestureOptions, nullptr, &funcValue);
-    napi_set_named_property(env_, objValueGestureRecognizer, GET_PANGESTURE_OPTIONS, funcValue);
-    napi_close_handle_scope(env_, scope);
-}
-
 void UIObserverListener::AddTargetObject(napi_value objValueEvent, const BaseEventInfo& baseEventInfo)
 {
     napi_handle_scope scope = nullptr;
@@ -1530,6 +1113,18 @@ napi_value UIObserverListener::GetNapiCallback()
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     return callback;
+}
+
+napi_value UIObserverListener::GetFrameNodeObject(const RefPtr<NG::FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+
+    auto frontEnd = container->GetFrontend();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+
+    return frontEnd->GetFrameNodeValueByNodeId(frameNode->GetId());
 }
 
 bool UIObserverListener::NapiEqual(napi_value cb)

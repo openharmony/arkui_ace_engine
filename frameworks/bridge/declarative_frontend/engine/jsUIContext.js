@@ -226,6 +226,16 @@ class UIObserver {
         this.ohos_observer.off(...args);
         __JSScopeUtil__.restoreInstanceId();
     }
+    addGlobalGestureListener(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer?.addGlobalGestureListener(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    removeGlobalGestureListener(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer?.removeGlobalGestureListener(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class MeasureUtils {

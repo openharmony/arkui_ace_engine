@@ -397,6 +397,12 @@ void LongPressRecognizer::SendCallbackMsg(
     if (type == GestureCallbackType::START) {
         isOnActionTriggered_ = true;
     }
+    TriggerCallbackMsg(callback, isRepeat, type);
+}
+
+void LongPressRecognizer::TriggerCallbackMsg(
+    const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type)
+{
     if (callback && *callback) {
         GestureEvent info;
         info.SetGestureTypeName(GestureTypeName::LONG_PRESS_GESTURE);
@@ -429,6 +435,7 @@ void LongPressRecognizer::SendCallbackMsg(
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
+        HandleGestureAccept(info, type);
         callbackFunction(info);
         HandleReports(info, type);
         if (type == GestureCallbackType::START && longPressRecorder_ && *longPressRecorder_) {
