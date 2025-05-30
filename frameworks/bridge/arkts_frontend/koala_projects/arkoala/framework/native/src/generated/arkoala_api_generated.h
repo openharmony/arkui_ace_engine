@@ -10744,8 +10744,8 @@ typedef struct Opt_Map_String_String {
 } Opt_Map_String_String;
 typedef struct MenuCallback {
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end);
 } MenuCallback;
 typedef struct Opt_MenuCallback {
     Ark_Tag tag;

@@ -2215,4 +2215,18 @@ void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src)
         }
     }
 }
+
+template<>
+void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src)
+{
+    switch (src) {
+        case ARK_HAPTIC_FEEDBACK_MODE_DISABLED: dst = HapticFeedbackMode::DISABLED; break;
+        case ARK_HAPTIC_FEEDBACK_MODE_ENABLED: dst = HapticFeedbackMode::ENABLED; break;
+        case ARK_HAPTIC_FEEDBACK_MODE_AUTO: dst = HapticFeedbackMode::AUTO; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_HapticFeedbackMode: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

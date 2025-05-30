@@ -4914,7 +4914,7 @@ void callManagedLocationButtonCallbackSync(Ark_VMContext vmContext, Ark_Int32 re
     }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
-void callManagedMenuCallback(Ark_Int32 resourceId)
+void callManagedMenuCallback(Ark_Int32 resourceId, Ark_Number start, Ark_Number end)
 {
     CallbackBuffer _buffer = {{}, {}};
     const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -4922,14 +4922,18 @@ void callManagedMenuCallback(Ark_Int32 resourceId)
     Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
     argsSerializer.writeInt32(Kind_MenuCallback);
     argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeNumber(start);
+    argsSerializer.writeNumber(end);
     enqueueCallback(&_buffer);
 }
-void callManagedMenuCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId)
+void callManagedMenuCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number start, Ark_Number end)
 {
     uint8_t _buffer[4096];
     Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
     argsSerializer.writeInt32(Kind_MenuCallback);
     argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeNumber(start);
+    argsSerializer.writeNumber(end);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
 void callManagedMenuOnAppearCallback(Ark_Int32 resourceId, Ark_Number start, Ark_Number end)

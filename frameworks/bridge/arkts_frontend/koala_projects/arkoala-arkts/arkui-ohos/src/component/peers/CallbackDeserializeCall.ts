@@ -34,7 +34,7 @@ import { Callback_Boolean, Callback_NavDestinationActiveReason_Void, NavDestinat
 import { Callback_Boolean_Void, Callback_NavigationMode_Void, NavigationMode, Callback_NavigationTitleMode_Void, NavigationTitleMode, Callback_NavigationTransitionProxy_Void, NavigationTransitionProxy, NavigationAnimatedTransition, Callback_PopInfo_Void, PopInfo, Callback_String_Opt_Object_Void, InterceptionModeCallback, InterceptionShowCallback, NavBar, NavigationOperation, Type_NavigationAttribute_customNavContentTransition_delegate, NavContentInfo } from "./../navigation"
 import { Callback_CalendarRequestedData_Void, CalendarRequestedData, Callback_CalendarSelectedDate_Void, CalendarSelectedDate } from "./../calendar"
 import { ComputedBarAttribute, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Void, Literal_Number_offsetRemain, Callback_Number_Number_ComputedBarAttribute, Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number } from "./../grid"
-import { Callback_CopyEvent_Void, CopyEvent, Callback_CutEvent_Void, CutEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, PasteEvent, Callback_TextRange_Void, MenuOnAppearCallback, PasteEventCallback, SubmitCallback } from "./../richEditor"
+import { Callback_CopyEvent_Void, CopyEvent, Callback_CutEvent_Void, CutEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, PasteEvent, Callback_TextRange_Void, MenuCallback, MenuOnAppearCallback, PasteEventCallback, SubmitCallback } from "./../richEditor"
 import { Callback_Date_Void } from "./../calendarPicker"
 import { Callback_DatePickerResult_Void, DatePickerResult } from "./../datePicker"
 import { Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, Callback_InsertValue_Boolean, Callback_InsertValue_Void, SearchSubmitCallback } from "./../search"
@@ -79,10 +79,10 @@ import { GetItemMainSizeByIndex } from "./../waterFlow"
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, TextTimerAttribute_onTimer_event_type } from "./../type-replacements"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
 import { LocationButtonCallback, LocationButtonOnClickResult } from "./../locationButton"
-import { MenuCallback, OnHoverCallback } from "./../sdk-stubs"
 import { NavExtender_OnUpdateStack } from "./../navigationExtender"
 import { OnCheckboxGroupChangeCallback, CheckboxGroupResult } from "./../checkboxgroup"
 import { OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam } from "./../folderStack"
+import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback } from "./../linearindicator"
 import { SurfaceRect, Callback_String_SurfaceRect_Void, OnNativeLoadCallback } from "./../xcomponent"
 import { OnRadioChangeCallback } from "./../radio"
@@ -1705,7 +1705,9 @@ export function deserializeAndCallLocationButtonCallback(thisDeserializer: Deser
 export function deserializeAndCallMenuCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as MenuCallback)
-    _call()
+    let start : number = (thisDeserializer.readNumber() as number)
+    let end : number = (thisDeserializer.readNumber() as number)
+    _call(start, end)
 }
 export function deserializeAndCallMenuOnAppearCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()

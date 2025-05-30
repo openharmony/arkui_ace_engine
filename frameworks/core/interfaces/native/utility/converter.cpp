@@ -2664,22 +2664,55 @@ ImageResizableSlice Convert(const Ark_EdgeWidths& src)
 }
 
 template<>
+NG::PreviewMenuOptions Convert(const Ark_PreviewMenuOptions& src)
+{
+    NG::PreviewMenuOptions previewMenuOptions;
+    auto feedbackMode = Converter::OptConvert<HapticFeedbackMode>(src.hapticFeedbackMode);
+    if (feedbackMode.has_value()) {
+        previewMenuOptions.hapticFeedbackMode = feedbackMode.value();
+    }
+    return previewMenuOptions;
+}
+
+template<>
 SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
 {
-    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};
+    SelectMenuParam selectMenuParam = {
+        .onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {},
+        .onMenuShow = [](int32_t start, int32_t end) {}, .onMenuHide = [](int32_t start, int32_t end) {},
+        .previewMenuOptions = NG::PreviewMenuOptions()
+    };
     auto optOnAppear = Converter::OptConvert<MenuOnAppearCallback>(src.onAppear);
     if (optOnAppear.has_value()) {
         selectMenuParam.onAppear =
             [arkCallback = CallbackHelper(optOnAppear.value())](int32_t start, int32_t end) {
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
         };
     }
     auto optOnDisappear = Converter::OptConvert<Callback_Void>(src.onDisappear);
     if (optOnDisappear.has_value()) {
         selectMenuParam.onDisappear =
             [arkCallback = CallbackHelper(optOnDisappear.value())]() {
-                arkCallback.Invoke();
+                arkCallback.InvokeSync();
         };
+    }
+    auto optOnMenuShow = Converter::OptConvert<MenuCallback>(src.onMenuShow);
+    if (optOnMenuShow.has_value()) {
+        selectMenuParam.onMenuShow =
+            [arkCallback = CallbackHelper(optOnMenuShow.value())](int32_t start, int32_t end) {
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+        };
+    }
+    auto optOnMenuHide = Converter::OptConvert<MenuCallback>(src.onMenuHide);
+    if (optOnMenuHide.has_value()) {
+        selectMenuParam.onMenuHide =
+            [arkCallback = CallbackHelper(optOnMenuHide.value())](int32_t start, int32_t end) {
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+        };
+    }
+    auto previewMenuOptions = Converter::OptConvert<NG::PreviewMenuOptions>(src.previewMenuOptions);
+    if (previewMenuOptions.has_value()) {
+        selectMenuParam.previewMenuOptions = previewMenuOptions.value();
     }
     return selectMenuParam;
 }
