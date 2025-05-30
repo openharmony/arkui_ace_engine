@@ -86,7 +86,6 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     if (PerfInterfaces::IsScrollJank(sceneId)) {
         PerfInterfaces::SetScrollState(false);
     }
-    NotifySbdJankStatsBegin(sceneId);
     if (apsMonitor_ != nullptr) {
         apsMonitor_->SetApsScene(sceneId, false);
     }
