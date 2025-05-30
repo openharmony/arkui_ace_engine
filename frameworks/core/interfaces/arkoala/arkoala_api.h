@@ -3992,6 +3992,10 @@ struct ArkUISliderModifier {
     void (*resetMinResponsiveDistance)(ArkUINodeHandle node);
     void (*setOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnChange)(ArkUINodeHandle node);
+    void (*setLinearTrackBackgroundColor)(
+        ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength);
+    void (*setLinearSelectColor)(
+        ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength);
 
     ArkUI_Uint32 (*getBlockColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTrackBackgroundColor)(ArkUINodeHandle node);
