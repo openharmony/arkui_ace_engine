@@ -70,7 +70,7 @@ std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
 void ParseExpectedFrameRateRange(ani_env *env, ani_object objOption,
     FrameRateRange& frameRateRange)
 {
-    static const char *className = "L@ohos/graphic/displaySync/ExpectedFrameRateRange;";
+    static const char *className = "Larkui/component/common/ExpectedFrameRateRange;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return;
@@ -122,19 +122,18 @@ static RefPtr<UIDisplaySync> GetUIDisplaySync(ani_env *env, ani_object obj)
 
 ani_object createIntervalInfo(ani_env *env, int64_t timestamp, int64_t targetTimestamp)
 {
-    static const char *className = "L@ohos/graphic/displaySync/IntervalInfo;";
+    static const char *className = "L@ohos/graphics/displaySync/displaySync/IntervalInfo;";
     ani_class intervalInfo_cls;
 
     if (ANI_OK != env->FindClass(className, &intervalInfo_cls))
     {
-        std::cerr << "Not found '" << className << "'" << std::endl;
         return nullptr;
     }
     ani_method intervalInfoCtor;
-    env->Class_FindMethod(intervalInfo_cls, "<ctor>", "JJ:V", &intervalInfoCtor);
+    env->Class_FindMethod(intervalInfo_cls, "<ctor>", "DD:V", &intervalInfoCtor);
     ani_object intervalInfoObj;
     env->Object_New(
-        intervalInfo_cls, intervalInfoCtor, &intervalInfoObj, ani_long(timestamp), ani_long(targetTimestamp));
+        intervalInfo_cls, intervalInfoCtor, &intervalInfoObj, ani_double(timestamp), ani_double(targetTimestamp));
     return intervalInfoObj;
 }
 
@@ -209,23 +208,23 @@ static void JSSetExpectedFrameRateRange(ani_env *env, ani_object obj, ani_object
 ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
     ani_object displaySync_obj = {};
-    static const char *className = "L@ohos/graphic/displaySync/DisplaySyncResultInner;";
+    static const char *className = "L@ohos/graphics/displaySync/displaySync/DisplaySync;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
-        TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find class fail");
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find class fail");
         return displaySync_obj;
     }
 
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find method fail");
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find method fail");
         return displaySync_obj;
     }
 
     auto uiDisplaySync = AceType::MakeRefPtr<UIDisplaySync>();
     DisplaySync* displaySync = new DisplaySync(uiDisplaySync);
     if (ANI_OK != env->Object_New(cls, ctor, &displaySync_obj, reinterpret_cast<ani_long>(displaySync))) {
-        TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] create displaySync fail");
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] create displaySync fail");
         return displaySync_obj;
     }
     return displaySync_obj;
@@ -239,34 +238,13 @@ static void clean([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj
     delete reinterpret_cast<DisplaySync *>(ptr);
 }
 
+
 ani_status BindDisplaySync(ani_env *env)
 {
-    static const char *className = "L@ohos/graphic/displaySync/DisplaySync;";
+    static const char *className = "L@ohos/graphics/displaySync/displaySync/DisplaySync;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
-        TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Bind DisplaySync fail");
-        return ANI_ERROR;
-    }
-
-    std::array methods = {
-        ani_native_function{"create",
-            ":L@ohos/graphic/displaySync/DisplaySyncResult;",
-            reinterpret_cast<void *>(ANICreate)},
-    };
-
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Bind DisplaySync method fail");
-        return ANI_ERROR;
-    };
-    return ANI_OK;
-}
-
-ani_status BindDisplaySyncResult(ani_env *env)
-{
-    static const char *className = "L@ohos/graphic/displaySync/DisplaySyncResultInner;";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] bind DisplaySyncResultInner result fail");
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] bind DisplaySync result fail");
         return ANI_ERROR;
     }
 
@@ -279,11 +257,11 @@ ani_status BindDisplaySyncResult(ani_env *env)
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
     };
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] bind native method fail");
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] bind native method fail");
         return ANI_ERROR;
     };
 
-    static const char *cleanerName = "L@ohos/graphic/displaySync/Cleaner;";
+    static const char *cleanerName = "L@ohos/graphics/displaySync/displaySync/Cleaner;";
     ani_class cleanerCls;
     if (ANI_OK != env->FindClass(cleanerName, &cleanerCls)) {
         return (ani_status)ANI_ERROR;
@@ -306,18 +284,24 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
     }
-
-    ani_status retBindDisplaySync = OHOS::Ace::Ani::BindDisplaySync(env);
-    if (retBindDisplaySync != ANI_OK) {
-        TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DISPLAY_SYNC, "[ANI] BindDisplaySync fail");
-        return retBindDisplaySync;
+    ani_namespace displaySyncNamespace;
+    if (ANI_OK != env->FindNamespace("L@ohos/graphics/displaySync/displaySync;", &displaySyncNamespace)) {
+        return ANI_ERROR;
     }
-    ani_status retBindResult = OHOS::Ace::Ani::BindDisplaySyncResult(env);
+    std::array staticMethods = {
+        ani_native_function {"create", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::Ani::ANICreate)},
+    };
+    if (ANI_OK != env->Namespace_BindNativeFunctions(
+        displaySyncNamespace, staticMethods.data(), staticMethods.size())) {
+        return ANI_ERROR;
+    };
+
+    ani_status retBindResult = OHOS::Ace::Ani::BindDisplaySync(env);
     if (retBindResult != ANI_OK) {
-        TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DISPLAY_SYNC, "[ANI] BindDisplaySyncResult fail");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DISPLAY_SYNC, "[ANI] BindDisplaySyncResult fail");
         return retBindResult;
     }
-
     *result = ANI_VERSION_1;
     return ANI_OK;
 }
