@@ -917,6 +917,7 @@ void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t 
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
+    delegate->RemoveSnapshotFrameNode();
 }
 
 void WebClientImpl::OnFirstMeaningfulPaint(

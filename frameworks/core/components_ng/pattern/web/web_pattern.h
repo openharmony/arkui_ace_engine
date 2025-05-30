@@ -799,6 +799,8 @@ public:
     void InitDataDetector();
     void CloseDataDetectorMenu();
 
+    void CreateSnapshotImageFrameNode(const std::string& snapshotPath);
+    void RemoveSnapshotFrameNode();
 
     void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
@@ -1153,6 +1155,7 @@ private:
     std::map<std::pair<WebElementType, ResponseType>,
         std::shared_ptr<WebPreviewSelectionMenuParam>> previewSelectionMenuMap_;
     std::optional<int32_t> previewImageNodeId_ = std::nullopt;
+    std::optional<int32_t> snapshotImageNodeId_ = std::nullopt;
     bool needUpdateImagePreviewParam_ = false;
     WebElementType curElementType_ = WebElementType::NONE;
     ResponseType curResponseType_ = ResponseType::LONG_PRESS;

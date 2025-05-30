@@ -756,6 +756,51 @@ RefPtr<FrameNode> WebPattern::CreatePreviewImageFrameNode(bool isImage)
     return previewNode;
 }
 
+void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CreateSnapshotImageFrameNode");
+    RemoveSnapshotFrameNode();
+    snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    auto snapshotNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_VOID(snapshotNode);
+    auto pattern = snapshotNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSyncLoad(true);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto index = host->GetChildren().size();
+    snapshotNode->MountToParent(host, index);
+
+    snapshotNode->SetDraggable(false);
+    auto gesture = snapshotNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
+
+    auto imageLayoutProperty = snapshotNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    ImageSourceInfo sourceInfo = ImageSourceInfo("file://" + snapshotPath);
+    imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+    snapshotNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    snapshotNode->MarkModifyDone();
+}
+
+void WebPattern::RemoveSnapshotFrameNode()
+{
+    if (!snapshotImageNodeId_.has_value()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "RemoveSnapshotFrameNode");
+    auto snapshotNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value());
+    CHECK_NULL_VOID(snapshotNode);
+    auto parent = snapshotNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->RemoveChild(snapshotNode);
+    snapshotImageNodeId_.reset();
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void WebPattern::SetActiveStatusInner(bool isActive, bool isForce)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,

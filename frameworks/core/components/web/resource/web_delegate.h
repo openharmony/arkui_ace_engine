@@ -1221,6 +1221,8 @@ public:
     int GetLastHitTestResult();
     int GetHitTestResult();
 
+    void RemoveSnapshotFrameNode();
+
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
     void SendPipEvent(int delegate_id, int child_id, int frame_routing_id, int event);
