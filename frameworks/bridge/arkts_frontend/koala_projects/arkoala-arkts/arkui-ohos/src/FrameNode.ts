@@ -19,8 +19,10 @@
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Position, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer,
-    MaterializedBase, NativeBuffer, nullptr, pointer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import {
+    Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer,
+    MaterializedBase, NativeBuffer, nullptr, pointer, KSerializerBuffer, KUint8ArrayPtr
+} from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
@@ -31,6 +33,12 @@ import { ArkListNode } from './handwritten/modifiers/ArkListNode'
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
 import { Deserializer } from "./component/peers/Deserializer";
+
+import { DrawContext } from './Graphics';
+
+export interface CrossLanguageOptions {
+    attributeSetting?: boolean;
+}
 
 export class ArkFrameNodePeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -44,7 +52,7 @@ export enum ExpandMode {
     LAZY_EXPAND = 2,
 }
 export class FrameNodeFinalizationRegisterProxy {
-    constructor() {}
+    constructor() { }
     public static instance_: FrameNodeFinalizationRegisterProxy = new FrameNodeFinalizationRegisterProxy();
     public static ElementIdToOwningFrameNode_ = new Map<number, FrameNode>();
 
@@ -52,7 +60,7 @@ export class FrameNodeFinalizationRegisterProxy {
 
 export class FrameNodeInternal {
     public static fromPtr(ptr: KPointer): FrameNode {
-        const obj : FrameNode = new FrameNode(undefined)
+        const obj: FrameNode = new FrameNode(undefined)
         obj.peer = new Finalizable(ptr, FrameNode.getFinalizer())
         return obj
     }
@@ -83,7 +91,7 @@ export class FrameNode implements MaterializedBase {
         return 'CustomFrameNode';
     }
 
-    checkValid(node:FrameNode): boolean {
+    checkValid(node: FrameNode): boolean {
         return true;
     }
     public getPeer(): Finalizable | undefined {
@@ -102,14 +110,13 @@ export class FrameNode implements MaterializedBase {
         return this._gestureEvent as UIGestureEvent;
     }
     static ctor_framenode(): KPointer {
-        const thisSerializer : Serializer = Serializer.hold()
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asBuffer(), thisSerializer.length())
+        const thisSerializer: Serializer = Serializer.hold()
+        const retval = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
     constructor(uiContext?: UIContext, type?: string, ptr?: KPointer) {
-        if ((uiContext) !== (undefined))
-        {
+        if ((uiContext) !== (undefined)) {
             this.uiContext = uiContext;
             this.instanceId_ = uiContext.instanceId_;
             if (type === 'ProxyFrameNode') {
@@ -130,7 +137,7 @@ export class FrameNode implements MaterializedBase {
                 const ctorPtr: KPointer = FrameNode.ctor_framenode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
             } else {
-                const retval  = ArkUIGeneratedNativeModule._FrameNode_createTypedFrameNode(type as string);
+                const retval = ArkUIGeneratedNativeModule._FrameNode_createTypedFrameNode(type as string);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
             }
             this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
@@ -138,6 +145,7 @@ export class FrameNode implements MaterializedBase {
             this._nodeId = this.getIdByFrameNode_serialize(this);
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
+            this.onDraw_serialize(this.onDraw);
         }
     }
     static getFinalizer(): KPointer {
@@ -145,6 +153,13 @@ export class FrameNode implements MaterializedBase {
     }
     public isModifiable(): boolean {
         return this.isModifiable_serialize();
+    }
+    private onDraw_serialize(drawCallBack: (context: DrawContext) => void): void {
+        const thisSerializer: Serializer = Serializer.hold();
+        const event_value = drawCallBack;
+        thisSerializer.holdAndWriteCallback(event_value);
+        ArkUIGeneratedNativeModule._FrameNode_onDraw(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
     }
     public appendChild(node: FrameNode): void {
         if (node.getType() === 'ProxyFrameNode' || !this.checkValid(node)) {
@@ -159,8 +174,8 @@ export class FrameNode implements MaterializedBase {
         if (sibling === null || sibling === undefined) {
             this.insertChildAfter_serialize(child_casted, null);
         } else {
-        const sibling_casted = sibling as (FrameNode);
-        this.insertChildAfter_serialize(child_casted, sibling_casted);
+            const sibling_casted = sibling as (FrameNode);
+            this.insertChildAfter_serialize(child_casted, sibling_casted);
         }
         return
     }
@@ -190,7 +205,7 @@ export class FrameNode implements MaterializedBase {
     }
     public getChild(index: number, expandMode?: ExpandMode | undefined): FrameNode | null {
         const index_casted = index as (number);
-        let expand_casted : number = 1;
+        let expand_casted: number = 1;
         if (expandMode !== undefined && expandMode !== null) {
             expand_casted = expandMode;
         }
@@ -318,6 +333,43 @@ export class FrameNode implements MaterializedBase {
     public getUserConfigSize(): SizeT<LengthMetrics> {
         return this.getUserConfigSize_serialize()
     }
+     public getId(): string {
+        return ArkUIGeneratedNativeModule._FrameNode_getId(this.peer!.ptr);
+    }
+    public getUniqueId(): number {
+        return ArkUIGeneratedNativeModule._FrameNode_getUniqueId(this.peer!.ptr);
+    }
+    public isVisible(): boolean {
+        return ArkUIGeneratedNativeModule._FrameNode_isVisible(this.peer!.ptr);
+    }
+    public isClipToFrame(): boolean {
+        return ArkUIGeneratedNativeModule._FrameNode_isClipToFrame(this.peer!.ptr);
+    }
+    public isAttached(): boolean {
+        return ArkUIGeneratedNativeModule._FrameNode_isAttached(this.peer!.ptr);
+    }
+    public getInspectorInfo(): Object {
+        return ArkUIGeneratedNativeModule._FrameNode_getInspectorInfo(this.peer!.ptr);
+    }
+    public onDraw(context: DrawContext): void {
+    }
+    public invalidate(): void {
+        ArkUIGeneratedNativeModule._FrameNode_invalidate(this.peer!.ptr);
+    };
+    public disposeTree(): void {
+        ArkUIGeneratedNativeModule._FrameNode_disposeTree(this.peer!.ptr);
+    };
+    public setCrossLanguageOptions(options: CrossLanguageOptions): void {
+        let setting: boolean = options.attributeSetting ? options.attributeSetting! : false;
+        ArkUIGeneratedNativeModule._FrameNode_setCrossLanguageOptions(this.peer!.ptr, setting);
+    }
+    public getCrossLanguageOptions(): CrossLanguageOptions {
+        let option: boolean = ArkUIGeneratedNativeModule._FrameNode_getCrossLanguageOptions(this.peer!.ptr);
+        const crossLanguageOptions: CrossLanguageOptions = {
+            attributeSetting: option,
+        };
+        return crossLanguageOptions;
+    }
     private getCommonEvent(): UICommonEvent {
         return this.getCommonEvent_serialize()
     }
@@ -327,7 +379,7 @@ export class FrameNode implements MaterializedBase {
         return obj
     }
     private isModifiable_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_isModifiable(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_isModifiable(this.peer!.ptr)
         return retval
     }
     private appendChild_serialize(node: FrameNode): void {
@@ -338,7 +390,7 @@ export class FrameNode implements MaterializedBase {
             ArkUIGeneratedNativeModule._FrameNode_insertChildAfter(this.peer!.ptr, toPeerPtr(child), nullptr);
         } else {
             ArkUIGeneratedNativeModule._FrameNode_insertChildAfter(this.peer!.ptr, toPeerPtr(child),
-                                                                   toPeerPtr(sibling!));
+                toPeerPtr(sibling!));
         }
     }
     private removeChild_serialize(node: FrameNode): void {
@@ -348,77 +400,77 @@ export class FrameNode implements MaterializedBase {
         ArkUIGeneratedNativeModule._FrameNode_clearChildren(this.peer!.ptr);
     }
     private getChild_serialize(index: number, expandMode: number): FrameNode | null {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getChild(this.peer!.ptr, index, expandMode);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getChild(this.peer!.ptr, index, expandMode);
         if (retval) {
-            const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
+            const obj: FrameNode = FrameNodeInternal.fromPtr(retval);
             return obj;
         } else {
             return null;
         }
     }
     private getFirstChild_serialize(): FrameNode | null {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getFirstChild(this.peer!.ptr);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getFirstChild(this.peer!.ptr);
         if (retval) {
-            const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
+            const obj: FrameNode = FrameNodeInternal.fromPtr(retval);
             return obj;
         } else {
             return null;
         }
     }
     private getNextSibling_serialize(): FrameNode | null {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getNextSibling(this.peer!.ptr);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getNextSibling(this.peer!.ptr);
         if (retval) {
-            const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
+            const obj: FrameNode = FrameNodeInternal.fromPtr(retval);
             return obj;
         } else {
             return null;
         }
     }
     private getPreviousSibling_serialize(): FrameNode | null {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPreviousSibling(this.peer!.ptr);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getPreviousSibling(this.peer!.ptr);
         if (retval) {
-            const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
+            const obj: FrameNode = FrameNodeInternal.fromPtr(retval);
             return obj;
         } else {
             return null;
         }
     }
     private getParent_serialize(): FrameNode | null {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getParent(this.peer!.ptr);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getParent(this.peer!.ptr);
         if (retval) {
-            const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
+            const obj: FrameNode = FrameNodeInternal.fromPtr(retval);
             return obj;
         } else {
             return null;
         }
     }
     private getChildrenCount_serialize(): int32 {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getChildrenCount(this.peer!.ptr);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getChildrenCount(this.peer!.ptr);
         return retval;
     }
     private dispose_serialize(): void {
         ArkUIGeneratedNativeModule._FrameNode_dispose(this.peer!.ptr);
     }
     private getOpacity_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getOpacity(this.peer!.ptr);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getOpacity(this.peer!.ptr);
         return retval;
     }
     private getPositionToWindowWithTransform_serialize(): Position {
         // @ts-ignore
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr) as FixedArray<byte>;
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr) as FixedArray<byte>;
         // @ts-ignore
         let exactRetValue: byte[] = new Array<byte>;
         for (let i = 0; i < retval.length; i++) {
             // @ts-ignore
             exactRetValue.push(new Byte(retval[i]));
         }
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition();
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Position = retvalDeserializer.readGraphicsPosition();
         return returnResult;
     }
     private static getFrameNodeByKey_serialize(name: string): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(name)
-        const obj : FrameNode = FrameNodeInternal.fromPtr(retval)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(name)
+        const obj: FrameNode = FrameNodeInternal.fromPtr(retval)
         return obj
     }
     public getIdByFrameNode(node: FrameNode): number {
@@ -426,7 +478,7 @@ export class FrameNode implements MaterializedBase {
         return this.getIdByFrameNode_serialize(node_casted);
     }
     private getIdByFrameNode_serialize(node: FrameNode): number {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getIdByFrameNode(this.peer!.ptr, toPeerPtr(node));
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getIdByFrameNode(this.peer!.ptr, toPeerPtr(node));
         return retval;
     }
     public moveTo(targetParent: FrameNode, index?: number): void {
@@ -448,7 +500,7 @@ export class FrameNode implements MaterializedBase {
     private moveTo_serialize(targetParent: FrameNode, index: number): void {
         ArkUIGeneratedNativeModule._FrameNode_moveTo(this.peer!.ptr, toPeerPtr(targetParent), index);
     }
-    
+
     public getFirstChildIndexWithoutExpand(): number {
         return this.getFirstChildIndexWithoutExpand_serialize();
     }
@@ -457,11 +509,11 @@ export class FrameNode implements MaterializedBase {
     }
 
     private getFirstChildIndexWithoutExpand_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getFirstChildIndexWithoutExpand(this.peer!.ptr);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getFirstChildIndexWithoutExpand(this.peer!.ptr);
         return retval;
     }
     private getLastChildIndexWithoutExpand_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getLastChildIndexWithoutExpand(this.peer!.ptr);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getLastChildIndexWithoutExpand(this.peer!.ptr);
         return retval;
     }
     public static getAttachedFrameNodeById(id: string): FrameNode {
@@ -476,19 +528,19 @@ export class FrameNode implements MaterializedBase {
         const id_casted = id as (number);
         return FrameNode.getFrameNodeByUniqueId_serialize(id_casted);
     }
-	private static getAttachedFrameNodeById_serialize(id: string): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getAttachedFrameNodeById(id);
-        const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
+    private static getAttachedFrameNodeById_serialize(id: string): FrameNode {
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getAttachedFrameNodeById(id);
+        const obj: FrameNode = FrameNodeInternal.fromPtr(retval);
         return obj;
     }
     private static getFrameNodeById_serialize(id: number): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeById(id);
-        const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeById(id);
+        const obj: FrameNode = FrameNodeInternal.fromPtr(retval);
         return obj;
     }
     private static getFrameNodeByUniqueId_serialize(id: number): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByUniqueId(id);
-        const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByUniqueId(id);
+        const obj: FrameNode = FrameNodeInternal.fromPtr(retval);
         return obj;
     }
     private getPositionToParent_serialize(): Position {
@@ -598,13 +650,13 @@ export class FrameNode implements MaterializedBase {
         return FrameNode.getFrameNodePtr_serialize(node_casted)
     }
     private static getFrameNodePtr_serialize(node: FrameNode): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node))
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node))
         return retval
     }
     get commonAttribute(): CommonMethod {
         if (this._commonAttribute === undefined) {
             let baseNode = new ArkBaseNode();
-            const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(this))
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(this))
             let peer = new ArkFrameNodePeer(retval, this._nodeId as int32, "FrameNode", 0);
             baseNode.setPeer(peer);
             this._commonAttribute = baseNode as CommonAttribute;
@@ -631,12 +683,12 @@ export class FrameNode implements MaterializedBase {
 class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {
         super(uiContext, type, ptr);
-      }
+    }
     isModifiable(): boolean {
-      return false;
+        return false;
     }
     invalidate(): void {
-      return;
+        return;
     }
     appendChild(node: FrameNode): void {
         throw Error("The FrameNode is not modifiable.");
@@ -650,26 +702,26 @@ class ImmutableFrameNode extends FrameNode {
     clearChildren(): void {
         throw Error("The FrameNode is not modifiable.");
     }
-  }
+}
 
- export class ProxyFrameNode extends ImmutableFrameNode {
+export class ProxyFrameNode extends ImmutableFrameNode {
     constructor(uiContext: UIContext, type: string = 'ProxyFrameNode', ptr?: KPointer) {
-      super(uiContext, type, ptr);
+        super(uiContext, type, ptr);
     }
     getType(): string {
-      return 'ProxyFrameNode';
+        return 'ProxyFrameNode';
     }
     moveTo(targetParent: FrameNode, index?: number): void {
         throw Error("The FrameNode is not modifiable.");
     }
-  }
+}
 export interface ResultFrameNode {
     nodeId: int32;
     frameNode: FrameNode;
 }
 export class FrameNodeUtils {
     static searchNodeInRegisterProxy(ptr: KPointer): FrameNode | null {
-        const nodeId  = ArkUIGeneratedNativeModule._FrameNode_getIdByFrameNode(ptr, ptr);
+        const nodeId = ArkUIGeneratedNativeModule._FrameNode_getIdByFrameNode(ptr, ptr);
         if (nodeId === -1) {
             return null;
         }
@@ -680,7 +732,7 @@ export class FrameNodeUtils {
         return null;
     }
     static createFrameNode(uiContext: UIContext, ptr: KPointer): FrameNode | null {
-        const nodeId  = ArkUIGeneratedNativeModule._FrameNode_getIdByFrameNode(ptr, ptr);
+        const nodeId = ArkUIGeneratedNativeModule._FrameNode_getIdByFrameNode(ptr, ptr);
         if (nodeId !== -1 && !ArkUIGeneratedNativeModule._FrameNode_isModifiable(ptr)) {
             let frameNode = new ProxyFrameNode(uiContext, "ProxyFrameNode", ptr);
             frameNode._nodeId = nodeId;

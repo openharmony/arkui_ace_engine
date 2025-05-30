@@ -23999,6 +23999,17 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_EdgesLengthMetrics (*getUserConfigPadding)(Ark_FrameNode peer);
     Ark_EdgesLengthMetrics (*getUserConfigMargin)(Ark_FrameNode peer);
     Ark_SizeLengthMetrics (*getUserConfigSize)(Ark_FrameNode peer);
+    Ark_String (*getId)(Ark_FrameNode node);
+    Ark_Int32 (*getUniqueId)(Ark_FrameNode peer);
+    Ark_Boolean (*isVisible)(Ark_FrameNode peer);
+    Ark_Boolean (*isClipToFrame)(Ark_FrameNode peer);
+    Ark_Boolean (*isAttached)(Ark_FrameNode peer);
+    Ark_String (*getInspectorInfo)(Ark_FrameNode node);
+    void (*onDraw)(Ark_FrameNode peer, const Opt_DrawCallbackFunc* callback);
+    void (*invalidate)(Ark_FrameNode peer);
+    void (*disposeTree)(Ark_FrameNode peer);
+    void (*setCrossLanguageOptions)(Ark_FrameNode peer, Ark_Boolean attributeSettings);
+    Ark_Boolean (*getCrossLanguageOptions)(Ark_FrameNode peer);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {

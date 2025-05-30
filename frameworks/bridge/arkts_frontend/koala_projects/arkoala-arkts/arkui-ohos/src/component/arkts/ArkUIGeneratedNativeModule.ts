@@ -3919,6 +3919,28 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_getAttachedFrameNodeById(ptr: KPointer, id: KStringPtr): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _UIContext_getFrameNodeByUniqueId(ptr: KPointer, id: number): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getId(name: KPointer): string
+    @ani.unsafe.Direct
+    native static _FrameNode_getUniqueId(point: KPointer): int32
+    @ani.unsafe.Direct
+    native static _FrameNode_isVisible(point: KPointer): boolean 
+    @ani.unsafe.Direct
+    native static _FrameNode_isClipToFrame(point: KPointer): boolean 
+    @ani.unsafe.Direct
+    native static _FrameNode_isAttached(point: KPointer): boolean 
+    @ani.unsafe.Quick
+    native static _FrameNode_getInspectorInfo(point: KPointer): string 
+    @ani.unsafe.Direct
+    native static _FrameNode_onDraw(point: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    @ani.unsafe.Direct
+    native static _FrameNode_invalidate(point: KPointer): void 
+    @ani.unsafe.Direct
+    native static _FrameNode_disposeTree(point: KPointer): void 
+    @ani.unsafe.Direct
+    native  static _FrameNode_setCrossLanguageOptions(point: KPointer, attributeSettings:boolean): KPointer
+    @ani.unsafe.Direct
+    native static _FrameNode_getCrossLanguageOptions(point: KPointer): boolean 
     @ani.unsafe.Direct
     native static _UIContext_vp2px(ptr: KPointer, value: number): number
     @ani.unsafe.Direct
