@@ -829,6 +829,7 @@ void MenuWrapperPattern::StartShowAnimation()
         context->UpdateTransformScale(VectorF(theme->GetMenuAnimationScale(), theme->GetMenuAnimationScale()));
         context->UpdateOpacity(MENU_ANIMATION_MIN_OPACITY);
     }
+    CallMenuOnWillAppearCallback();
     AnimationUtils::Animate(
         animationOption_,
         [context, weak = WeakClaim(this), theme]() {
@@ -915,6 +916,10 @@ void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapp
     pattern->RegisterMenuAboutToAppearCallback(menuParam.aboutToAppear);
     pattern->RegisterMenuAboutToDisappearCallback(menuParam.aboutToDisappear);
     pattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
+    pattern->RegisterMenuOnWillAppearCallback(menuParam.onWillAppear);
+    pattern->RegisterMenuOnDidAppearCallback(menuParam.onDidAppear);
+    pattern->RegisterMenuOnWillDisappearCallback(menuParam.onWillDisappear);
+    pattern->RegisterMenuOnDidDisappearCallback(menuParam.onDidDisappear);
 }
 
 void MenuWrapperPattern::SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)

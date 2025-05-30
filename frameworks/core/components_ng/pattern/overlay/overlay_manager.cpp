@@ -1249,6 +1249,7 @@ void OverlayManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK
     }
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     menuWrapperPattern->CallMenuAppearCallback();
+    menuWrapperPattern->CallMenuOnDidAppearCallback();
     if (!menuWrapperPattern->IsHide()) {
         menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
     }
@@ -1277,6 +1278,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     if (!wrapperPattern->GetHoverScaleInterruption()) {
         wrapperPattern->CallMenuAboutToAppearCallback();
     }
+
     wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
     SetIsMenuShow(true, menu);
     ResetContextMenuDragHideFinished();
@@ -1389,7 +1391,6 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     eventHub->SetEnabledInternal(true);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto root = rootWeak.Upgrade();
     auto overlayManager = weak.Upgrade();
     CHECK_NULL_VOID(overlayManager);
 
@@ -1399,6 +1400,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     CHECK_NULL_VOID(menuWrapperPattern);
     if (MenuView::GetMenuHoverScaleStatus(menuWrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT) {
         menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->CallMenuOnDidDisappearCallback();
     }
     menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
     menuWrapperPattern->SetOnMenuDisappear(false);
@@ -1454,6 +1456,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 
     if (MenuView::GetMenuHoverScaleStatus(wrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT) {
         wrapperPattern->CallMenuAboutToDisappearCallback();
+        wrapperPattern->CallMenuOnWillDisappearCallback();
     }
 
     wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
