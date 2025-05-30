@@ -130,6 +130,8 @@ struct GridLayoutInfo {
         return totalHeight - currentOffset_;
     }
 
+    bool IsAllItemsMeasured() const;
+
     float GetTotalLineHeight(float mainGap, bool removeLastGap = true) const
     {
         float totalHeight = 0.0f;
