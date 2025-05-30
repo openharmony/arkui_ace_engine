@@ -853,6 +853,10 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
         spanItem->textLineStyle->UpdateTextAlign(paragraphStyle_.align.value());
     }
 
+    if (paragraphStyle_.textVerticalAlign.has_value()) {
+        spanItem->textLineStyle->UpdateTextVerticalAlign(paragraphStyle_.textVerticalAlign.value());
+    }
+
     if (paragraphStyle_.maxLines.has_value()) {
         spanItem->textLineStyle->UpdateMaxLines(static_cast<uint32_t>(paragraphStyle_.maxLines.value()));
     }
@@ -881,6 +885,7 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
 void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     spanItem->textLineStyle->ResetTextAlign();
+    spanItem->textLineStyle->ResetTextVerticalAlign();
     spanItem->textLineStyle->ResetMaxLines();
     spanItem->textLineStyle->ResetTextOverflow();
     spanItem->textLineStyle->ResetLeadingMargin();

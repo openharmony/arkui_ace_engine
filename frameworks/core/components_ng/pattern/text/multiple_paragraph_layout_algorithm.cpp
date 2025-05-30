@@ -112,6 +112,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     UpdateShaderStyle(textLayoutProperty, textStyle);
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
     textStyle.SetEnableAutoSpacing(textLayoutProperty->GetEnableAutoSpacingValue(false));
+    textStyle.SetParagraphVerticalAlign(
+        textLayoutProperty->GetTextVerticalAlignValue(TextVerticalAlign::BASELINE));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
     FontRegisterCallback(frameNode, textStyle); // Register callback for fonts.
     textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
@@ -303,6 +305,9 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     CHECK_NULL_VOID(lineStyle);
     if (lineStyle->HasTextAlign()) {
         pStyle.align = lineStyle->GetTextAlignValue();
+    }
+    if (lineStyle->HasTextVerticalAlign()) {
+        pStyle.verticalAlign = lineStyle->GetTextVerticalAlignValue();
     }
     if (lineStyle->HasMaxLines()) {
         pStyle.maxLines = std::min(lineStyle->GetMaxLinesValue(), pStyle.maxLines);
@@ -532,6 +537,7 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(const TextSty
 {
     return { .direction = textStyle.GetTextDirection(),
         .align = textStyle.GetTextAlign(),
+        .verticalAlign = textStyle.GetParagraphVerticalAlign(),
         .maxLines = static_cast<int32_t>(textStyle.GetMaxLines()) < 0 ? UINT32_MAX : textStyle.GetMaxLines(),
         .fontLocale = textStyle.GetLocale(),
         .wordBreak = textStyle.GetWordBreak(),

@@ -859,6 +859,8 @@ Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlign
         case PlaceholderAlignment::MIDDLE:
             convertValue = Rosen::PlaceholderVerticalAlignment::CENTER_OF_ROW_BOX;
             break;
+        case PlaceholderAlignment::FOLLOW_PARAGRAPH:
+            break;
         default:
             TAG_LOGW(AceLogTag::ACE_FONT, "PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
             break;

@@ -58,6 +58,14 @@ let TextAlign;
   TextAlign[TextAlign.JUSTIFY = 3] = 'JUSTIFY';
 })(TextAlign || (TextAlign = {}));
 
+let TextVerticalAlign;
+(function (TextVerticalAlign) {
+  TextVerticalAlign[TextVerticalAlign.BASELINE = 0] = 'BASELINE';
+  TextVerticalAlign[TextVerticalAlign.BOTTOM = 1] = 'BOTTOM';
+  TextVerticalAlign[TextVerticalAlign.CENTER = 2] = 'CENTER';
+  TextVerticalAlign[TextVerticalAlign.TOP = 3] = 'TOP';
+})(TextVerticalAlign || (TextVerticalAlign = {}));
+
 let TextDataDetectorType;
 (function (TextDataDetectorType) {
   TextDataDetectorType[TextDataDetectorType.PHONE_NUMBER = 0] = 'PHONE_NUMBER';
@@ -3119,6 +3127,7 @@ let ImageSpanAlignment;
   ImageSpanAlignment[ImageSpanAlignment.CENTER = 2] = 'CENTER';
   ImageSpanAlignment[ImageSpanAlignment.BOTTOM = 3] = 'BOTTOM';
   ImageSpanAlignment[ImageSpanAlignment.BASELINE = 4] = 'BASELINE';
+  ImageSpanAlignment[ImageSpanAlignment.FOLLOW_PARAGRAPH = 5] = 'FOLLOW_PARAGRAPH';
 })(ImageSpanAlignment || (ImageSpanAlignment = {}));
 
 let MenuAlignType;

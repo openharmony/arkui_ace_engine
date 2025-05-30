@@ -13902,6 +13902,24 @@ class TextShaderStyleModifier extends ModifierWithKey {
 }
 TextShaderStyleModifier.identity = Symbol('textShaderStyle');
 
+class TextVerticalAlignModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetTextVerticalAlign(node);
+    }
+    else {
+      getUINativeModule().text.setTextVerticalAlign(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextVerticalAlignModifier.identity = Symbol('textVerticalAlignIdentity');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -14144,6 +14162,10 @@ class ArkTextComponent extends ArkComponent {
   }
   shaderStyle(value) {
     modifierWithKey(this._modifiersWithKeys, TextShaderStyleModifier.identity, TextShaderStyleModifier, value);
+    return this;
+  }
+  textVerticalAlign(value) {
+    modifierWithKey(this._modifiersWithKeys, TextVerticalAlignModifier.identity, TextVerticalAlignModifier, value);
     return this;
   }
 }
