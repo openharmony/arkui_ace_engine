@@ -153,14 +153,15 @@ void WindowScene::OnAttachToMainTree()
     if (IsMainWindow()) {
         return;
     }
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "OnAttachToMainTree id:%{public}d, nodeId:%{public}d, type:%{public}d, name:%{public}s",
+        session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), windowName.c_str());
     if (IsMainSessionRecent()) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "OnAttachToMainTree id:%{public}d, nodeId:%{public}d, type:%{public}d, name:%{public}s",
-            session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), windowName.c_str());
-        auto surfaceNode = session_->GetSurfaceNode();
-        if (surfaceNode) {
-            surfaceNode->SetVisible(false);
-        }
+        surfaceNode->SetVisible(false);
+    } else {
+        surfaceNode->SetVisible(true);
     }
 }
 
@@ -572,6 +573,7 @@ void WindowScene::OnActivation()
         } else if (self->snapshotWindow_) {
             self->session_->SetEnableAddSnapshot(true);
             self->DisposeSnapshotAndBlankWindow();
+            self->SetSubSessionVisible();
         }
     };
 
