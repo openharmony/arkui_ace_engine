@@ -46,7 +46,11 @@ void CheckBoxGroupPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
-    groupManager->RemoveCheckBoxGroup(GetGroupNameWithNavId(), frameNode->GetId());
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto group = currentNavId_.has_value() ? eventHub->GetGroupName() + currentNavId_.value()
+                                           : eventHub->GetGroupName() + groupManager->GetLastNavId();
+    groupManager->RemoveCheckBoxGroup(group, frameNode->GetId());
 }
 
 void CheckBoxGroupPattern::OnModifyDone()
