@@ -1380,12 +1380,14 @@ void AceContainer::InitializeCallback()
 
 void AceContainer::InitDragEventCallback()
 {
-    if (!isFormRender_) {
+    // Ensure drag callbacks are registered for dynamic components
+    if (!isFormRender_ || isDynamicRender_) {
         auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const DragPointerEvent& pointerEvent,
                                        const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(context);
-            auto callback = [context, pointerEvent, action, node]() {
+            auto callback = [context, pointerEvent, action, node, id]() {
+                ContainerScope scope(id);
                 context->OnDragEvent(pointerEvent, action, node);
             };
             auto taskExecutor = context->GetTaskExecutor();
