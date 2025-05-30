@@ -65,6 +65,7 @@
 #include "core/interfaces/native/implementation/navigation_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/nav_destination_context_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
+#include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -210,6 +211,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
+    void AssignArkValue(Ark_GestureRecognizerState &dst, const NG::RefereeState& src);
     void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx);
     void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
@@ -328,6 +330,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
+    void AssignArkValue(Ark_SwipeDirection &dst, const OHOS::Ace::SwipeDirection &src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
     void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src);
     void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx);
