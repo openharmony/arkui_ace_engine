@@ -140,6 +140,16 @@ public:
 
     void RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId);
 
+    void RegisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node);
+
+    void UnregisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node);
+
+    WeakPtr<NG::FrameNode> GetEmbedNodeBySurfaceId(const uint64_t surfaceId);
+
+    bool IsEmbedNode(NG::FrameNode* node);
+
+    uint64_t GetSurfaceIdByEmbedNode(NG::FrameNode* node);
+
 private:
     // private constructor
     ElementRegister() = default;
@@ -171,6 +181,10 @@ private:
     std::function<void(int64_t)> jsCleanUpIdleTaskCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
+
+    std::unordered_map<uint64_t, WeakPtr<NG::FrameNode>> surfaceIdEmbedNodeMap_;
+
+    std::unordered_map<NG::FrameNode*, uint64_t> embedNodeSurfaceIdMap_;
 };
 } // namespace OHOS::Ace
 #endif

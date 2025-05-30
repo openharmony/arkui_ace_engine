@@ -1082,4 +1082,43 @@ HWTEST_F(NodeContainerTestNg, GetNodeContainerEventHub001, TestSize.Level1)
     auto eventHub = pattern->GetNodeContainerEventHub();
     EXPECT_NE(eventHub, nullptr);
 }
+
+/**
+ * @tc.name: HandleTextureExport002
+ * @tc.desc: Test the EmbedNode Query with ElementRegister.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, HandleTextureExport002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create node and get pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    pattern->surfaceId_ = 1U;
+    
+    auto exportNode = AceType::MakeRefPtr<FrameNode>("exportNode", -1, AceType::MakeRefPtr<Pattern>());
+    pattern->exportTextureNode_ = AceType::WeakClaim(AceType::RawPtr(exportNode));
+ 
+    /**
+     * @tc.steps: step2: Directly call HandleTextureExport.
+     * @tc.expected: ret is false.
+     */
+    bool ret = pattern->HandleTextureExport(false, frameNode);
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step3: Get embedNode and surfaceId with ElementRegister.
+     * @tc.expected: get expected embedNode and surfaceId.
+     */
+    auto elementRegister = ElementRegister::GetInstance();
+    EXPECT_TRUE(elementRegister);
+    auto node = elementRegister->GetEmbedNodeBySurfaceId(1U);
+    auto nodeRef = node.Upgrade();
+    EXPECT_TRUE(nodeRef);
+    EXPECT_EQ(AceType::RawPtr(nodeRef), AceType::RawPtr(exportNode));
+    auto surfaceIdGet = elementRegister->GetSurfaceIdByEmbedNode(AceType::RawPtr(exportNode));
+    EXPECT_EQ(surfaceIdGet, 1U);
+    EXPECT_TRUE(elementRegister->IsEmbedNode(AceType::RawPtr(exportNode)));
+}
 } // namespace OHOS::Ace::NG
