@@ -96,6 +96,7 @@ private:
         auto backgroundRegionWidth = backgroundRegion.GetWidth();
         auto backgroundRegionHeight = backgroundRegion.GetHeight();
         std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
+        CHECK_NULL_VOID(mediaPixelMap);
         CHECK_NULL_VOID(context.canvas);
         auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(*context.canvas);
         RSSamplingOptions samplingOptions;

@@ -1479,8 +1479,136 @@ HWTEST_F(RosenRenderContextTest, OnCustomBackgroundColorUpdate001, TestSize.Leve
     RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
     ASSERT_NE(rosenRenderContext, nullptr);
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
-    const Color value = Color::RED;
-    rosenRenderContext->OnCustomBackgroundColorUpdate(value);
+    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
+    ASSERT_NE(transitionModifier, nullptr);
+
+    /**
+     * @tc.steps: step1. Set custom background color.
+     * @tc.expected: step1. Custom background color can be set correctly.
+     */
+    Color color = Color::BLUE;
+    rosenRenderContext->OnCustomBackgroundColorUpdate(color);
+    EXPECT_EQ(transitionModifier->backgroundColor_.GetValue(), color.GetValue());
+
+    /**
+     * @tc.steps: step2. Set custom background color while rsNode_ is null.
+     * @tc.expected: step2. Custom background color set failed.
+     */
+    rosenRenderContext->rsNode_ = nullptr;
+    rosenRenderContext->OnCustomBackgroundColorUpdate(Color::GREEN);
+    EXPECT_EQ(transitionModifier->backgroundColor_.GetValue(), color.GetValue());
+}
+
+/**
+ * @tc.name: OnBuilderBackgroundFlagUpdate001
+ * @tc.desc: Test OnBuilderBackgroundFlagUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnBuilderBackgroundFlagUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
+    ASSERT_NE(transitionModifier, nullptr);
+
+    /**
+     * @tc.steps: step1. Set BuilderBackgroundFlag.
+     * @tc.expected: step1. BuilderBackgroundFlag can be set correctly.
+     */
+    rosenRenderContext->OnBuilderBackgroundFlagUpdate(true);
+    EXPECT_TRUE(transitionModifier->isBuilderBackground_);
+
+    /**
+     * @tc.steps: step2. Set BuilderBackgroundFlag while rsNode_ is null.
+     * @tc.expected: step2. BuilderBackgroundFlag set failed.
+     */
+    rosenRenderContext->rsNode_ = nullptr;
+    rosenRenderContext->OnBuilderBackgroundFlagUpdate(false);
+    EXPECT_TRUE(transitionModifier->isBuilderBackground_);
+}
+
+/**
+ * @tc.name: OnBackgroundAlignUpdate001
+ * @tc.desc: Test OnBackgroundAlignUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnBackgroundAlignUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
+    ASSERT_NE(transitionModifier, nullptr);
+    auto backgroundModifier = rosenRenderContext->GetOrCreateBackgroundModifier();
+    ASSERT_NE(backgroundModifier, nullptr);
+
+    /**
+     * @tc.steps: step1. Set alignment.
+     * @tc.expected: step1. alignment can be set correctly.
+     */
+    Alignment align = Alignment::TOP_CENTER;
+    rosenRenderContext->OnBackgroundAlignUpdate(align);
+    EXPECT_EQ(transitionModifier->align_.ToString(), align.ToString());
+    EXPECT_EQ(backgroundModifier->align_.ToString(), align.ToString());
+
+    /**
+     * @tc.steps: step2. Set alignment while rsNode_ is null.
+     * @tc.expected: step2. alignment set failed.
+     */
+    rosenRenderContext->rsNode_ = nullptr;
+    rosenRenderContext->OnBackgroundAlignUpdate(Alignment::BOTTOM_RIGHT);
+    EXPECT_EQ(transitionModifier->align_.ToString(), align.ToString());
+    EXPECT_EQ(backgroundModifier->align_.ToString(), align.ToString());
+}
+
+/**
+ * @tc.name: OnBackgroundPixelMapUpdate001
+ * @tc.desc: Test OnBackgroundPixelMapUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnBackgroundPixelMapUpdate001, TestSize.Level1)
+{
+    const float EXPECT_WIDTH = 100.0f;
+    const float EXPECT_HEIGHT = 150.0f;
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
+    ASSERT_NE(transitionModifier, nullptr);
+    auto backgroundModifier = rosenRenderContext->GetOrCreateBackgroundModifier();
+    ASSERT_NE(backgroundModifier, nullptr);
+
+    /**
+     * @tc.steps: step1. Set alignment.
+     * @tc.expected: step1. alignment can be set correctly.
+     */
+    RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(EXPECT_WIDTH, EXPECT_HEIGHT));
+    rosenRenderContext->OnBackgroundPixelMapUpdate(pixelMap);
+    RectF backgroundRegion = frameNode->GetBackGroundAccumulatedSafeAreaExpand();
+    EXPECT_EQ(transitionModifier->initialBackgroundRegion_.ToString(), backgroundRegion.ToString());
+    EXPECT_EQ(backgroundModifier->initialNodeWidth_, EXPECT_WIDTH);
+    EXPECT_EQ(backgroundModifier->initialNodeHeight_, EXPECT_HEIGHT);
+
+    /**
+     * @tc.steps: step2. Set PixelMap while rsNode_ is null.
+     * @tc.expected: step2. PixelMap set failed.
+     */
+    rosenRenderContext->rsNode_ = nullptr;
+    transitionModifier->pixelMap_ = nullptr;
+    backgroundModifier->pixelMap_ = nullptr;
+    rosenRenderContext->OnBackgroundPixelMapUpdate(pixelMap);
+    EXPECT_EQ(transitionModifier->pixelMap_, nullptr);
+    EXPECT_EQ(backgroundModifier->pixelMap_, nullptr);
 }
 
 /**
