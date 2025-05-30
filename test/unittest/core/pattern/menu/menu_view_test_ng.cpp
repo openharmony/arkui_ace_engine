@@ -1210,6 +1210,13 @@ HWTEST_F(MenuViewTestNg, UpdateMenuMaskType001, TestSize.Level1)
 
     EXPECT_EQ(filterRenderContext->GetBackgroundColorValue(), Color::RED);
     EXPECT_EQ(filterRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
+
+    menuParam.maskEnable = false;
+    menuParam.maskType->maskColor = Color::BLUE;
+    menuParam.maskType->maskBackGroundBlurStyle = BlurStyle::BACKGROUND_THIN;
+    MenuView::UpdateMenuParam(menuWrapperNode, menuNode, menuParam);
+    EXPECT_EQ(filterRenderContext->GetBackgroundColorValue(), Color::RED);
+    EXPECT_EQ(filterRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
 }
 
 /**

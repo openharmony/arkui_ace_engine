@@ -1974,6 +1974,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg044, TestSize.Level1)
     MneuModelInstance.SetItemDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.SetExpandingMode(SubMenuExpandingMode::STACK);
+    MneuModelInstance.SetExpandSymbol([](WeakPtr<NG::FrameNode> weakPtr) {});
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
@@ -1996,6 +1997,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg044, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
     ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
     EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+    EXPECT_NE(layoutProperty->GetExpandSymbol(), nullptr);
 }
 
 /**
@@ -2024,6 +2026,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg045, TestSize.Level1)
     MneuModelInstance.SetItemDivider(frameNode, ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.SetItemGroupDivider(frameNode, ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.ResetBorderRadius(frameNode);
+    MneuModelInstance.SetExpandSymbol(frameNode, [](WeakPtr<NG::FrameNode> weakPtr) {});
 
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
@@ -2041,6 +2044,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg045, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
     ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
     EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+    EXPECT_NE(layoutProperty->GetExpandSymbol(), nullptr);
 
     MneuModelInstance.SetFontColor(frameNode, std::nullopt);
     ASSERT_FALSE(layoutProperty->GetFontColor().has_value());
