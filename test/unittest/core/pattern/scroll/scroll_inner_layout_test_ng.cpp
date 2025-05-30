@@ -126,7 +126,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, AdaptAnimation001, TestSize.Level1)
  */
 HWTEST_F(ScrollInnerLayoutTestNg, Opacity001, TestSize.Level1)
 {
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockScrollTaskExecutor>();
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     CreateScroll();
     CreateContent();

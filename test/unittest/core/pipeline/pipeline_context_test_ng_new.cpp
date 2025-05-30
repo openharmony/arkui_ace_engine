@@ -52,7 +52,7 @@ const std::vector<TouchTimeTestCase> FLUSH_TOUCH_EVENTS_TESTCASES = {
     { DEFAULT_VSYNC_TIME, 0, { DEFAULT_VSYNC_TIME, AFTER_VSYNC_TIME }, 1, 2 },
 };
 
-class MockMockTaskExecutor : public MockTaskExecutor {
+class MockMockTaskExecutor : public MockScrollTaskExecutor {
 public:
     MockMockTaskExecutor() = default;
     explicit MockMockTaskExecutor(bool delayRun) {};
