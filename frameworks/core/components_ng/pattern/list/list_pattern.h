@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
 #include <tuple>
-#include "base/log/log_wrapper.h"
 #include "core/animation/chain_animation.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
@@ -160,7 +159,7 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
 
     bool LayoutItemInGroupForFocus(int32_t indexInList, int32_t nextIndexInGroup, int32_t curIndexInGroup,
-        ListItemGroupPara listItemGroupPara, int32_t maxListItemIndex);
+        const ListItemGroupPara& listItemGroupPara, int32_t maxListItemIndex);
 
     ScrollOffsetAbility GetScrollOffsetAbility() override;
 
