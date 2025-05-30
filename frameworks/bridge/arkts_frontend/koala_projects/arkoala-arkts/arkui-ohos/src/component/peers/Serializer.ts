@@ -5444,16 +5444,7 @@ export class Serializer extends SerializerBase {
             const value_params_value  = value_params!
             valueSerializer.writeInt32(value_params_value.length as int32)
             for (let i = 0; i < value_params_value.length; i++) {
-                const value_params_value_type = runtimeType(value_params_value[i])
-                if (value_params_value_type == RuntimeType.STRING) {
-                    const value_params_value_element: string = value_params_value[i] as string
-                    valueSerializer.writeString(value_params_value_element)
-                } else if (value_params_value_type == RuntimeType.NUMBER) {
-                    const value_params_value_element : number = value_params_value[i] as number
-                    valueSerializer.writeString(String(value_params_value_element))
-                } else {
-                    throw new Error("Unsupported params type, expect string or number.")
-                }
+                valueSerializer.writeString(String(value_params_value[i]))
             }
         }
         const value_type  = value.type
