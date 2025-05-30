@@ -4941,7 +4941,7 @@ void FrameNode::RemoveItemsOnChange(int32_t changeIndex)
     for (auto&& node : toRemove) {
         RemoveChild(node);
     }
-    adapter->OnDataChange(changeIndex)
+    adapter->OnDataChange(changeIndex);
 }
 
 void FrameNode::SetActiveChildRange(
