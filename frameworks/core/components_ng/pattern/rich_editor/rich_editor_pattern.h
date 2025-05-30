@@ -483,6 +483,14 @@ public:
         }
     }
 
+    void SetEnableAutoSpacing(bool enabled)
+    {
+        CHECK_NULL_VOID(isEnableAutoSpacing_ != enabled);
+        isEnableAutoSpacing_ = enabled;
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
+    }
+
     void OnAttachToMainTree() override
     {
         TextPattern::OnAttachToMainTree();
@@ -1800,6 +1808,7 @@ private:
     bool isModifyingContent_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
+    bool isEnableAutoSpacing_ = false;
     float maxLinesHeight_ = FLT_MAX;
     int32_t maxLines_ = INT32_MAX;
     std::unordered_map<std::u16string, RefPtr<SpanItem>> placeholderSpansMap_;
