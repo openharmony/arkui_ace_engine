@@ -2192,4 +2192,44 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest018, TestSize.Level1)
     EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
 #endif
 }
+
+/**
+ * @tc.name: TextPickerPatternTest019
+ * @tc.desc: Test GetColumnWidthSumForFirstIndexColumns
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest019, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+
+    auto columnNodeGeometryNode = columnNode_->GetGeometryNode();
+    ASSERT_NE(columnNodeGeometryNode, nullptr);
+    columnNodeGeometryNode->SetFrameSize(SizeF(20.0f, 1.0f));
+    auto columnNodeNextGeometryNode = columnNodeNext_->GetGeometryNode();
+    ASSERT_NE(columnNodeNextGeometryNode, nullptr);
+    columnNodeNextGeometryNode->SetFrameSize(SizeF(30.0f, 1.0f));
+
+    int32_t childCount = static_cast<int32_t>(frameNode_->GetChildren().size());
+    EXPECT_EQ(childCount, 2);
+
+    textPickerPattern_->focusKeyID_ = 0;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    float sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(0);
+    EXPECT_FLOAT_EQ(sum, 0);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(0);
+    EXPECT_FLOAT_EQ(sum, 30);
+
+    textPickerPattern_->focusKeyID_ = 1;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(1);
+    EXPECT_FLOAT_EQ(sum, 20);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(1);
+    EXPECT_FLOAT_EQ(sum, 0);
+}
 } // namespace OHOS::Ace::NG
