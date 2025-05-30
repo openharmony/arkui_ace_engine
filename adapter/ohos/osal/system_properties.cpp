@@ -510,7 +510,7 @@ bool GetLayoutBreakpoints(const LayoutBreakPointPart partIndex, std::vector<doub
 {
     auto param = system::GetParameter(LAYOUT_BREAKPOINT, LAYOUT_BREAKPOINT_DEFAULT);
     if (param == LAYOUT_BREAKPOINT_DEFAULT) {
-        LOGI("Using default layout breakpoints");
+        LOGD("Using default layout breakpoints");
         return false;
     }
 
@@ -518,16 +518,16 @@ bool GetLayoutBreakpoints(const LayoutBreakPointPart partIndex, std::vector<doub
     StringUtils::StringSplitter(param, ';', parts);
     // 2 means that "const.arkui.layoutbreakpoint" must have exactly two parts
     if (parts.size() != 2) {
-        LOGI("Invalid parameter format");
+        LOGE("Invalid parameter format");
         return false;
     }
 
     if (parser(parts[static_cast<uint32_t>(partIndex)], breakPoint)) {
-        LOGI("Custom breakpoints applied");
+        LOGD("Custom breakpoints applied");
         return true;
     }
 
-    LOGI("Failed to parse, using defaults");
+    LOGE("Failed to parse, using defaults");
     return false;
 }
 

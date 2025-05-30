@@ -111,7 +111,6 @@ WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBr
     } else {
         width = GetCurrentWindowRect().Width() / density;
     }
-    LOGI("GetWidthBreakpoint width: %{public}lf", width);
 
     WidthBreakpoint breakpoint;
     if (width < layoutBreakpoints.WidthVPXS) {
@@ -138,7 +137,6 @@ HeightBreakpoint Window::GetHeightBreakpoint(const HeightLayoutBreakPoint& layou
     } else {
         aspectRatio = height / width;
     }
-    LOGI("GetHeightBreakpoint aspectRatio: %{public}lf", aspectRatio);
 
     HeightBreakpoint breakpoint;
     if (aspectRatio < layoutBreakpoints.HeightVPRATIOSM) {
