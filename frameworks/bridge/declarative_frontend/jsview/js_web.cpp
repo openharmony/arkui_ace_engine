@@ -4706,6 +4706,22 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
         bool audioExclusive = audioExclusiveObj->ToBoolean();
         WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
+    auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
+    auto audioSessionType = WebAudioSessionType::AUTO;
+    if (audioSessionTypeObj->IsNumber()) {
+        int32_t audioSessionTypeIntValue = audioSessionTypeObj->ToNumber<int32_t>();
+        switch (audioSessionTypeIntValue) {
+            case 0:
+                audioSessionType = WebAudioSessionType::AUTO;
+                break;
+            case 3:
+                audioSessionType = WebAudioSessionType::AMBIENT;
+                break;
+            default:
+                audioSessionType = WebAudioSessionType::AUTO;
+        }
+    }
+    WebModel::GetInstance()->SetAudioSessionType(audioSessionType);
 }
 
 JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)

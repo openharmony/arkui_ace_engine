@@ -642,6 +642,7 @@ void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_p
 {}
 void WebDelegate::UpdateForceDarkAccess(const bool& access) {}
 void WebDelegate::UpdateAudioResumeInterval(const int32_t& resumeInterval) {}
+void WebDelegate::UpdateAudioSessionType(const WebAudioSessionType& audioSessionType) {}
 void WebDelegate::UpdateAudioExclusive(const bool& audioExclusive) {}
 void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled) {}
 void WebDelegate::UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled) {}

@@ -183,7 +183,7 @@ CJ_EXPORT void FfiVectorScriptItemSetElement(VectorScriptItemHandle handle, int6
 CJ_EXPORT void FfiVectorScriptItemDelete(VectorScriptItemHandle handle);
 CJ_EXPORT void FfiWebPinchSmooth(bool isEnabled);
 CJ_EXPORT void FfiWebAllowWindowOpenMethod(bool flag);
-CJ_EXPORT void FfiWebMediaOptions(int32_t resumeInterval, bool audioExclusive);
+CJ_EXPORT void FfiWebMediaOptions(int32_t resumeInterval, bool audioExclusive, int32_t audioSessionTypeNum);
 CJ_EXPORT void FfiWebJavaScriptOnDocumentStart(VectorScriptItemHandle handle);
 CJ_EXPORT void FfiWebJavaScriptOnDocumentEnd(VectorScriptItemHandle handle);
 CJ_EXPORT void FfiWebLayoutMode(int32_t layoutMode);

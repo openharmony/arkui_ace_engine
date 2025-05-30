@@ -45,6 +45,11 @@ enum MixedModeContent {
     MIXED_CONTENT_COMPATIBILITY_MODE = 2
 };
 
+enum WebAudioSessionType {
+    AUTO = 0,
+    AMBIENT = 3
+};
+
 enum WebCacheMode {
     DEFAULT = 0,
     USE_CACHE_ELSE_NETWORK,

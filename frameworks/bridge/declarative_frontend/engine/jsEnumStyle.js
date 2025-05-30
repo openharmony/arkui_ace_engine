@@ -4056,3 +4056,8 @@ let ColorSpace;
   ColorSpace[ColorSpace.SRGB = 0] = 'SRGB';
   ColorSpace[ColorSpace.DISPLAY_P3 = 1] = 'DISPLAY_P3';
 })(ColorSpace || (ColorSpace = {}));
+
+let AudioSessionType;
+(function (AudioSessionType) {
+  AudioSessionType[AudioSessionType.AMBIENT = 3] = 'AMBIENT';
+})(AudioSessionType || (AudioSessionType = {}));

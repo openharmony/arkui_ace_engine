@@ -3728,6 +3728,22 @@ void WebDelegate::UpdateAudioExclusive(const bool& audioExclusive)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateAudioExclusive");
 }
 
+void WebDelegate::UpdateAudioSessionType(const WebAudioSessionType& audioSessionType)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), audioSessionType]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAudioSessionType(static_cast<int32_t>(audioSessionType));
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateAudioSessionType");
+}
+
 void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled)
 {
     auto context = context_.Upgrade();

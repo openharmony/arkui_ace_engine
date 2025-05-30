@@ -3024,6 +3024,13 @@ void WebPattern::OnAudioExclusiveUpdate(bool audioExclusive)
     }
 }
 
+void WebPattern::OnAudioSessionTypeUpdate(WebAudioSessionType value)
+{
+     if (delegate_) {
+        delegate_->UpdateAudioSessionType(value);
+    }
+}
+
 void WebPattern::OnOverviewModeAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
@@ -3520,6 +3527,7 @@ void WebPattern::OnModifyDone()
         }
         delegate_->UpdateAudioResumeInterval(GetAudioResumeIntervalValue(-1));
         delegate_->UpdateAudioExclusive(GetAudioExclusiveValue(true));
+        delegate_->UpdateAudioSessionType(GetAudioSessionTypeValue(WebAudioSessionType::AUTO));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
         delegate_->UpdateDatabaseEnabled(GetDatabaseAccessEnabledValue(false));
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
