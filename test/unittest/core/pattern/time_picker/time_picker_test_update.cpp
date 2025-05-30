@@ -108,6 +108,19 @@ public:
     void SetUp() override;
     void TearDown() override;
     void CreateTimePickerColumnNode();
+    bool CompareOptionProperties(std::vector<PickerOptionProperty> option1, std::vector<PickerOptionProperty> option2)
+    {
+        int32_t size = option1.size();
+        for (int32_t i = 0; i < size; i++) {
+            if (option1[i].height != option2[i].height ||
+                option1[i].fontheight != option2[i].fontheight ||
+                option1[i].prevDistance != option2[i].prevDistance ||
+                option1[i].nextDistance != option2[i].nextDistance) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     RefPtr<FrameNode> columnNode_;
     RefPtr<TimePickerColumnPattern> columnPattern_;
@@ -2452,5 +2465,58 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerUpdateButtonFocus001, TestSize.L
     focusHub = buttonNode->GetOrCreateFocusHub();
     ASSERT_NE(buttonNode, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+@tc.name: TestFlushCurrentOptionsNormalCase
+@tc.desc: Test FlushCurrentOptions with normal parameters.
+@tc.type: FUNC
+*/
+HWTEST_F(TimePickerPatternTestUpdate, TestFlushCurrentOptionsNormalCase, TestSize.Level1)
+{
+    bool isDown = true;
+    bool isUpateTextContentOnly = false;
+    bool isUpdateAnimationProperties = true;
+    bool isTossPlaying = false;
+    /**
+     * @tc.steps: step1. Create TimePicker and get columnPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+
+    auto columnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->SetShowCount(SHOW_COUNT);
+    auto showOptionCount = columnPattern->GetShowCount();
+    auto child = minuteColumn->GetChildren();
+    EXPECT_EQ(showOptionCount, child.size());
+    auto initOptionProperties = columnPattern->optionProperties_;
+    /*
+    @tc.steps: step2. FlushCurrentOptions with parameters1.
+    */
+    columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
+    auto optionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
+
+    /*
+    @tc.steps: step3. FlushCurrentOptions with parameters2.
+    */
+    isDown = false;
+    isUpateTextContentOnly = true;
+    isUpdateAnimationProperties = false;
+    isTossPlaying = true;
+    columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
+    optionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
 }
 } // namespace OHOS::Ace::NG
