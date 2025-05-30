@@ -16,6 +16,9 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #include <unistd.h>
+#include "ui/base/ace_type.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/pipeline/base/element_register.h"
 
 #ifdef FFRT_EXISTS
 #include "base/longframe/long_frame_report.h"
@@ -92,6 +95,37 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     if (!result.second) {
         LOGW("Fail to emplace %{public}s render node", dirty->GetTag().c_str());
     }
+}
+
+bool UITaskScheduler::RemoveNodeFromDirtyRender(int32_t nodeId, int32_t pageId)
+{
+    auto it = dirtyRenderNodes_.find(pageId);
+    if (it == dirtyRenderNodes_.end()) {
+        return false;
+    }
+    auto& result = it->second;
+ 
+    auto iter = result.begin();
+    while (iter != result.end()) {
+        if ((*iter)->GetId() == nodeId) {
+            result.erase(iter);
+            removedDirtyRenderNodes_.emplace(nodeId);
+            return true;
+        } else {
+            ++iter;
+        }
+    }
+    return false;
+}
+
+bool UITaskScheduler::RemoveDirtyRenderNodes(uint32_t id)
+{
+    auto iter = removedDirtyRenderNodes_.find(id);
+    if (iter != removedDirtyRenderNodes_.end()) {
+        removedDirtyRenderNodes_.erase(iter);
+        return true;
+    }
+    return false;
 }
 
 void UITaskScheduler::ExpandSafeArea()
@@ -194,6 +228,18 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     CHECK_RUN_ON(UI);
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
+    }
+    if (!removedDirtyRenderNodes_.empty()) {
+        auto removedDirtyNodes = std::move(removedDirtyRenderNodes_);
+        for (int32_t id: removedDirtyNodes) {
+            auto node = ElementRegister::GetInstance()->GetNodeById(id);
+            auto framenode = AceType::DynamicCast<FrameNode>(node);
+            if (framenode) {
+                dirtyRenderNodes_[framenode->GetPageId()].emplace(framenode);
+                framenode->ResetRenderDirtyMarked(true);
+            }
+        }
+
     }
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation

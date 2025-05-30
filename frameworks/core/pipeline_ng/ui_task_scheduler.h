@@ -159,6 +159,10 @@ public:
     void FlushSyncGeometryNodeTasks();
     void FlushPostponedLayoutTask(bool forceUseMainThread);
 
+    bool RemoveNodeFromDirtyRender(int32_t nodeId, int32_t pageId);
+
+    bool RemoveDirtyRenderNodes(uint32_t id);
+
 private:
     bool NeedAdditionalLayout();
     void FlushAllSingleNodeTasks();
@@ -206,6 +210,9 @@ private:
     bool is64BitSystem_ = false;
     bool isLayouting_ = false;
     int32_t multiLayoutCount_ = 0;
+
+    //Record the dirtiness of nodes without destroying them after logging the tree.
+    std::set<int32_t> removedDirtyRenderNodes_;
 
     FrameInfo* frameInfo_ = nullptr;
 

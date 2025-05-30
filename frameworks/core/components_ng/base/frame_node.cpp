@@ -1545,6 +1545,11 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->OnAccessibilityDetachFromMainTree();
+
+    if (isRenderDirtyMarked_) {
+        context->RemoveNodeFromDirtyRenderNode(GetId(), GetPageId());
+        isRenderDirtyMarked_ = false;
+    }
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -6869,6 +6874,7 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveChangedFrameNode(GetId());
         pipeline->RemoveFrameNodeChangeListener(GetId());
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
+        pipeline->GetRemovedDirtyRenderAndErase(GetId());
     }
 }
 } // namespace OHOS::Ace::NG
