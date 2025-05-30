@@ -9139,6 +9139,28 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnMouse(frameNode, onEvent);
 }
 
+void SetOnAxisInfo(ArkUINodeEvent& event, AxisInfo& info, bool usePx)
+{
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    if (usePx) {
+        event.axisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+        event.axisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+        event.axisEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+        event.axisEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+        event.axisEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
+        event.axisEvent.height = info.GetTarget().area.GetHeight().ConvertToPx();
+    } else {
+        event.axisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToVp();
+        event.axisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToVp();
+        event.axisEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+        event.axisEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+        event.axisEvent.width = info.GetTarget().area.GetWidth().ConvertToVp();
+        event.axisEvent.height = info.GetTarget().area.GetHeight().ConvertToVp();
+    }
+    event.axisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+}
+
 void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -9170,6 +9192,7 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         event.axisEvent.deviceId = info.GetDeviceId();
 
+        SetOnAxisInfo(event, info, usePx);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(!event.axisEvent.propagation);
     };
