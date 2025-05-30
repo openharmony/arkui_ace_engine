@@ -158,12 +158,15 @@ void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color selectedColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], selectedColor, resObj)) {
         colorOpt = selectedColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetSelectedColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::SELECTED_COLOR, resObj);
+        IndexerModel::GetInstance()->SetSelectedColorByUser(setByUser);
     }
 }
 
@@ -175,11 +178,14 @@ void JSIndexer::SetColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color color;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], color, resObj)) {
         colorOpt = color;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->SetColorByUser(setByUser);
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::COLOR, resObj);
     }
 }
@@ -192,11 +198,14 @@ void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupColor, resObj)) {
         colorOpt = popupColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->SetPopupColorByUser(setByUser);
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_COLOR, resObj);
     }
 }
@@ -209,12 +218,15 @@ void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color selectedBackgroundColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], selectedBackgroundColor, resObj)) {
         colorOpt = selectedBackgroundColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetSelectedBackgroundColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::SELECTED_BACKGROUND_COLOR, resObj);
+        IndexerModel::GetInstance()->SetSelectedBGColorByUser(setByUser);
     }
 }
 
@@ -356,12 +368,12 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
     }
     IndexerModel::GetInstance()->SetAlignStyle(value);
     CalcDimension popupHorizontalSpace(-1.0);
+    RefPtr<ResourceObject> resObj;
     if (args.Length() > 1) {
-        RefPtr<ResourceObject> resObj;
         ParseJsDimensionVp(args[1], popupHorizontalSpace, resObj);
-        if (SystemProperties::ConfigChangePerform()) {
-            IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::ALIGN_OFFSET, resObj);
-        }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::ALIGN_OFFSET, resObj);
     }
     IndexerModel::GetInstance()->SetPopupHorizontalSpace(popupHorizontalSpace);
 }
@@ -443,12 +455,15 @@ void JSIndexer::SetPopupUnselectedColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupUnselectedColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupUnselectedColor, resObj)) {
         colorOpt = popupUnselectedColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupUnselectedColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_UNSELECTED_COLOR, resObj);
+        IndexerModel::GetInstance()->SetPopupUnselectedColorByUser(setByUser);
     }
 }
 
@@ -593,12 +608,15 @@ void JSIndexer::SetPopupTitleBackground(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupTitleBackground;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupTitleBackground, resObj)) {
         colorOpt = popupTitleBackground;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupTitleBackground(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_TITLE_BACKGROUND, resObj);
+        IndexerModel::GetInstance()->SetPopupTitleBackgroundByUser(setByUser);
     }
 }
 
