@@ -45,6 +45,18 @@ RefPtr<NavigationManager> GetNavigationManager()
     return pipeline ? pipeline->GetNavigationManager() : nullptr;
 }
 
+RefPtr<NavigationGroupNode> CreateNavigationNode(const RefPtr<MockNavigationStack>& stack)
+{
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    if (!navigationPattern) {
+        return nullptr;
+    }
+    navigationPattern->SetNavigationStack(stack);
+    return navigationGroupNode;
+}
+
 std::string BuildSerializedIntentInfo(
     const std::string& navigationInspectorId, const std::string& navDestinationName, const std::string& param)
 {
@@ -679,7 +691,6 @@ HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo001, TestSize.Level1)
  * @tc.desc: Branch: if serializedIntentInfo is invalid
  * @tc.expect: no any cpp-crash
  * @tc.type: FUNC
- * @tc.author:
  */
 HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo002, TestSize.Level1)
 {
@@ -700,5 +711,160 @@ HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo002, TestSize.Level1)
     ASSERT_EQ(intentInfo.navigationInspectorId, "");
     ASSERT_EQ(intentInfo.navDestinationName, "");
     ASSERT_EQ(intentInfo.param, "");
+}
+
+/**
+ * @tc.name: FindNavigationInTargetParentTest001
+ * @tc.desc: Branch: if several router and navigation exist.
+ * @tc.expect: could find correct navigations by router page id after the arkui-tree built.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, FindNavigationInTargetParentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager and all create necessary uiNodes.
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_TRUE(navigationManager->navigationMap_.empty());
+    auto routerPageOne = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ASSERT_NE(routerPageOne, nullptr);
+    auto routerPageTwo = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ASSERT_NE(routerPageTwo, nullptr);
+    auto routerPageThree = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ASSERT_NE(routerPageThree, nullptr);
+    auto navigationGroupNodeOne = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeOne, nullptr);
+    auto navigationGroupNodeTwo = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeTwo, nullptr);
+    auto navigationGroupNodeThree = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeThree, nullptr);
+    auto navigationGroupNodeFour = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeFour, nullptr);
+    /**
+     * @tc.steps: step2. build navigation struceture.
+     */
+    routerPageOne->onMainTree_ = true;
+    routerPageTwo->onMainTree_ = true;
+    routerPageThree->onMainTree_ = true;
+    routerPageOne->AddChild(navigationGroupNodeOne);
+    routerPageTwo->AddChild(navigationGroupNodeTwo);
+    routerPageThree->AddChild(navigationGroupNodeThree);
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 3);
+    routerPageThree->AddChild(navigationGroupNodeFour);
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 3);
+    /**
+     * @tc.steps: step3. Find navigation in target parent.
+     */
+    auto result = navigationManager->FindNavigationInTargetParent(routerPageOne->GetId());
+    std::vector<int32_t> expected = { navigationGroupNodeOne->GetId() };
+    EXPECT_EQ(result, expected);
+    result = navigationManager->FindNavigationInTargetParent(routerPageTwo->GetId());
+    expected = { navigationGroupNodeTwo->GetId() };
+    EXPECT_EQ(result, expected);
+    result = navigationManager->FindNavigationInTargetParent(routerPageThree->GetId());
+    expected = { navigationGroupNodeThree->GetId(), navigationGroupNodeFour->GetId() };
+    EXPECT_EQ(result, expected);
+    navigationManager->navigationMap_.clear();
+}
+
+/**
+ * @tc.name: FindNavigationInTargetParentTest002
+ * @tc.desc: Branch: if several router and navigation exist.
+ * @tc.expect: could remove navigations correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, FindNavigationInTargetParentTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager and all create necessary uiNodes.
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_TRUE(navigationManager->navigationMap_.empty());
+    auto routerPageOne = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ASSERT_NE(routerPageOne, nullptr);
+    auto routerPageTwo = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ASSERT_NE(routerPageTwo, nullptr);
+    auto routerPageThree = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ASSERT_NE(routerPageThree, nullptr);
+    auto navigationGroupNodeOne = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeOne, nullptr);
+    auto navigationGroupNodeTwo = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeTwo, nullptr);
+    auto navigationGroupNodeThree = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeThree, nullptr);
+    auto navigationGroupNodeFour = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeFour, nullptr);
+    /**
+     * @tc.steps: step2. build navigation struceture.
+     */
+    routerPageOne->onMainTree_ = true;
+    routerPageTwo->onMainTree_ = true;
+    routerPageThree->onMainTree_ = true;
+    routerPageOne->AddChild(navigationGroupNodeOne);
+    routerPageTwo->AddChild(navigationGroupNodeTwo);
+    routerPageThree->AddChild(navigationGroupNodeThree);
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 3);
+    routerPageThree->AddChild(navigationGroupNodeFour);
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 3);
+    /**
+     * @tc.steps: step3. test the ability of function `RemoveNavigation`.
+     */
+    navigationManager->RemoveNavigation(navigationGroupNodeOne->GetId());
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 2);
+    navigationManager->RemoveNavigation(navigationGroupNodeTwo->GetId());
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 1);
+    navigationManager->RemoveNavigation(navigationGroupNodeOne->GetId());
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 1);
+    navigationManager->RemoveNavigation(navigationGroupNodeThree->GetId());
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 1);
+    navigationManager->RemoveNavigation(navigationGroupNodeFour->GetId());
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 0);
+    navigationManager->navigationMap_.clear();
+}
+
+/**
+ * @tc.name: AddNavigationTest001
+ * @tc.desc: Branch: if iter == navigationMaps_.end() == true when find pageId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, AddNavigationTest001, TestSize.Level1)
+{
+    auto navigationManager = GetNavigationManager();
+    ASSERT_TRUE(navigationManager->navigationMap_.empty());
+    int32_t routerPageId = 1;
+    auto navigationGroupNodeOne = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeOne, nullptr);
+    navigationManager->AddNavigation(routerPageId, navigationGroupNodeOne);
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 1);
+    navigationManager->navigationMap_.clear();
+}
+
+/**
+ * @tc.name: AddNavigationTest002
+ * @tc.desc: Branch: if iter == navigationMaps_.end() == false when find pageId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, AddNavigationTest002, TestSize.Level1)
+{
+    auto navigationManager = GetNavigationManager();
+    ASSERT_TRUE(navigationManager->navigationMap_.empty());
+    int32_t routerPageId = 1;
+    auto navigationGroupNodeOne = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeOne, nullptr);
+    navigationManager->AddNavigation(routerPageId, navigationGroupNodeOne);
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 1);
+    auto navigationGroupNodeTwo = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNodeTwo, nullptr);
+    navigationManager->AddNavigation(routerPageId, navigationGroupNodeTwo);
+    ASSERT_EQ(navigationManager->navigationMap_.size(), 1);
+    ASSERT_NE(navigationManager->navigationMap_.find(routerPageId), navigationManager->navigationMap_.end());
+    ASSERT_EQ(navigationManager->navigationMap_[routerPageId].size(), 2);
+    navigationManager->navigationMap_.clear();
 }
 } // namespace OHOS::Ace::NG
