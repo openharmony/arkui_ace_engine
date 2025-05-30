@@ -3986,6 +3986,12 @@ let AccessibilityActionInterceptResult;
   AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_RISE = 2] = 'ACTION_RISE';
 })(AccessibilityActionInterceptResult || (AccessibilityActionInterceptResult = {}));
 
+let TipsAnchorType;
+(function (TipsAnchorType) {
+  TipsAnchorType[TipsAnchorType.TARGET = 0] = 'TARGET';
+  TipsAnchorType[TipsAnchorType.CURSOR = 1] = 'CURSOR';
+})(TipsAnchorType || (TipsAnchorType = {}));
+
 let TextMenuShowMode;
 (function (TextMenuShowMode) {
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';

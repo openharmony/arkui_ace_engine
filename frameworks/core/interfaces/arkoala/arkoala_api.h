@@ -679,6 +679,7 @@ struct ArkUIBindTipsOptionsArrow {
     ArkUI_Int32 arrowWidthUnit;
     ArkUI_Float64 arrowHeightValue;
     ArkUI_Int32 arrowHeightUnit;
+    ArkUI_Int32 showAtAnchor;
 };
 
 struct ArkUIFlexOptions {

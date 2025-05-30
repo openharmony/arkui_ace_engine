@@ -704,6 +704,13 @@ void ParseTipsParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& ti
     if (enableArrowValue->IsBoolean()) {
         tipsParam->SetEnableArrow(enableArrowValue->ToBoolean());
     }
+    auto showAtAnchor = tipsObj->GetProperty("showAtAnchor");
+    if (showAtAnchor->IsNumber()) {
+        auto type = static_cast<TipsAnchorType>(showAtAnchor->ToNumber<int32_t>());
+        if (type == TipsAnchorType::TARGET || type == TipsAnchorType::CURSOR) {
+            tipsParam->SetAnchorType(type);
+        }
+    }
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
     tipsParam->SetShowInSubWindow(true);

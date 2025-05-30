@@ -299,6 +299,19 @@ void ParseTipsOptionsArrowSize(EcmaVM* vm, Local<JSValueRef> arg, ArkUI_Float64&
     }
 }
 
+void ParseTipsOptionsShowAtAnchor(EcmaVM* vm, Local<JSValueRef> showAtAnchorArg, ArkUIBindTipsOptionsArrow& options)
+{
+    options.showAtAnchor = static_cast<int32_t>(TipsAnchorType::TARGET);
+    if (showAtAnchorArg->IsNumber()) {
+        int32_t temp = static_cast<int32_t>(showAtAnchorArg->ToNumber(vm)->Value());
+        if (temp <= static_cast<int32_t>(TipsAnchorType::CURSOR) &&
+            temp >= static_cast<int32_t>(TipsAnchorType::TARGET)) {
+            options.showAtAnchor = temp;
+            options.enableArrow = temp == static_cast<int32_t>(TipsAnchorType::CURSOR) ? false : options.enableArrow;
+        }
+    }
+}
+
 void ResetCalcDimensions(std::vector<std::optional<CalcDimension>>& optDimensions)
 {
     for (uint32_t index = 0; index < optDimensions.size(); index++) {
@@ -3813,6 +3826,7 @@ void ParseTipsParam(const RefPtr<PopupParam>& tipsParam, const ArkUIBindTipsOpti
     tipsParam->SetErrorArrowHeight(setArrowHeightError);
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
+    tipsParam->SetAnchorType(static_cast<TipsAnchorType>(arrowOptions.showAtAnchor));
 }
 
 ArkUINativeModuleValue CommonBridge::SetBindTips(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -3853,13 +3867,13 @@ ArkUINativeModuleValue CommonBridge::SetBindTips(ArkUIRuntimeCallInfo* runtimeCa
         arrowPointPosition = arrowPointPositionArg->ToString(vm)->ToString(vm);
         arrowOptions.arrowPointPosition = arrowPointPosition.c_str();
     }
+    ParseTipsOptionsShowAtAnchor(vm, runtimeCallInfo->GetCallArgRef(NUM_10), arrowOptions);
     ParseTipsOptionsArrowSize(vm, arrowWidthArg, arrowOptions.arrowWidthValue, arrowOptions.arrowWidthUnit);
     ParseTipsOptionsArrowSize(vm, arrowHeightArg, arrowOptions.arrowHeightValue, arrowOptions.arrowHeightUnit);
     if (styledString) {
         auto tipsParam = AceType::MakeRefPtr<PopupParam>();
         ParseTipsParam(tipsParam, timeOptions, arrowOptions);
-        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-        ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), styledString);
+        ViewAbstract::BindTips(tipsParam, AceType::Claim(reinterpret_cast<FrameNode*>(nativeNode)), styledString);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->setBindTips(
             nativeNode, message.c_str(), timeOptions, arrowOptions);

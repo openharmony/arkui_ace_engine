@@ -3289,7 +3289,8 @@ class BindTipsModifier extends ModifierWithKey<ArkBindTipsOptions> {
         this.value.options?.enableArrow,
         this.value.options?.arrowPointPosition,
         this.value.options?.arrowWidth,
-        this.value.options?.arrowHeight
+        this.value.options?.arrowHeight,
+        this.value.options?.showAtAnchor
       );
     }
   }
@@ -3327,6 +3328,10 @@ class BindTipsModifier extends ModifierWithKey<ArkBindTipsOptions> {
       !isBaseOrResourceEqual(
         this.stageValue.options.arrowHeight,
         this.value.options.arrowHeight
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.showAtAnchor,
+        this.value.options.showAtAnchor
       )
     );
   }
