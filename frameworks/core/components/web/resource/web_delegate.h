@@ -1259,6 +1259,7 @@ private:
     bool ZoomOut();
     int ConverToWebHitTestType(int hitType);
     void GetHitTestValue(HitTestResult& result);
+    int GetProgress();
     int GetPageHeight();
     std::string GetTitle();
     std::string GetDefaultUserAgent();

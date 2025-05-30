@@ -1705,6 +1705,14 @@ void WebDelegate::GetHitTestValue(HitTestResult& result)
     }
 }
 
+int WebDelegate::GetProgress()
+{
+    if (nweb_) {
+        return nweb_->PageLoadProgress();
+    }
+    return 0;
+}
+
 int WebDelegate::GetPageHeight()
 {
     if (nweb_) {
@@ -2505,6 +2513,13 @@ void WebDelegate::SetWebCallBack()
             if (delegate) {
                 delegate->GetHitTestValue(result);
             }
+        });
+        webController->SetGetProgressImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetProgress();
+            }
+            return 0;
         });
         webController->SetGetPageHeightImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
