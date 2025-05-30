@@ -167,6 +167,8 @@ public:
         const RefPtr<FrameNode>& node = nullptr);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
+    void OnDragAsyncEnd();
+    void SetCallAnsyncDragEnd(const std::function<void(DragStartRequestStatus)>& cb);
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
     void OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType);

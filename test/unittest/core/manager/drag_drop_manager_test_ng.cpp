@@ -2175,6 +2175,27 @@ HWTEST_F(DragDropManagerTestNg, HandleOnDragEnd001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleOnDragEnd002
+ * @tc.desc: HandleOnDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, HandleOnDragEnd002, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::READY);
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    GestureEvent info;
+    gestureEventHub->HandleOnDragStart(info);
+    ASSERT_EQ(DragDropGlobalController::GetInstance().GetCallAnsyncEnd(), nullptr);
+}
+
+/**
  * @tc.name: SetEnableDisallowStatusShowing
  * @tc.desc: Test SetEnableDisallowStatusShowing
  * @tc.type: FUNC
