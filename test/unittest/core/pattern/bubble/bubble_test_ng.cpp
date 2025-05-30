@@ -1628,6 +1628,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest004, TestSize.Level1)
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    EXPECT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. get pattern and layoutAlgorithm.
      * @tc.expected: step2. related function is called.
@@ -1638,7 +1639,12 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest004, TestSize.Level1)
     EXPECT_FALSE(bubbleLayoutProperty == nullptr);
     auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(bubbleLayoutAlgorithm == nullptr);
-
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto childWrapper = layoutWrapper;
+    EXPECT_FALSE(childWrapper == nullptr);
     /**
      * @tc.steps: step3. update layoutProp and arrowPlacement.
      * @tc.expected: step3. check whether the function is executed.
@@ -1660,7 +1666,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest004, TestSize.Level1)
     bubbleLayoutAlgorithm->bCaretMode_ = true;
     bubbleLayoutAlgorithm->bHorizontal_ = true;
     SizeF childSizeFull(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-    bubbleLayoutAlgorithm->GetChildPositionNew(childSizeFull, bubbleLayoutProperty);
+    bubbleLayoutAlgorithm->GetChildPositionNew(childSizeFull, bubbleLayoutProperty, childWrapper);
 }
 
 /**
@@ -1870,6 +1876,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    EXPECT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. get pattern and layoutAlgorithm.
      * @tc.expected: step2. related function is called.
@@ -1877,6 +1884,12 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
     auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
     auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto childWrapper = layoutWrapper;
+    EXPECT_FALSE(childWrapper == nullptr);
 
     /**
      * @tc.steps: step3. excute GetIfNeedArrow GetChildPosition
@@ -1904,7 +1917,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
          * @tc.steps: step4. excute GetChildPosition
          * @tc.expected: step4. GetChildPosition returns the result as the bubble position.
          */
-        auto resultOffset = bubbleLayoutAlgorithm->GetChildPositionNew(childSize, bubbleLayoutProperty);
+        auto resultOffset = bubbleLayoutAlgorithm->GetChildPositionNew(childSize, bubbleLayoutProperty, childWrapper);
         EXPECT_EQ(resultOffset, DISPLAY_WINDOW_OFFSET);
         OffsetF arrowPosition;
         /**

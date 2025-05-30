@@ -331,6 +331,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         auto placement = placementValue->ToNumber<int32_t>();
         if (placement >= 0 && placement < static_cast<int32_t>(Placement::NONE)) {
             popupParam->SetPlacement(static_cast<Placement>(placement));
+            popupParam->SetHasPlacement(true);
         }
     } else {
         SetPlacementOnTopVal(popupObj, popupParam);
@@ -549,6 +550,14 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         if (popupKeyboardAvoidMode >= static_cast<int>(PopupKeyboardAvoidMode::DEFAULT) &&
             popupKeyboardAvoidMode <= static_cast<int>(PopupKeyboardAvoidMode::NONE)) {
             popupParam->SetKeyBoardAvoidMode(static_cast<PopupKeyboardAvoidMode>(popupKeyboardAvoidMode));
+        }
+    }
+    auto avoidTargetValue = popupObj->GetProperty("avoidTarget");
+    if (avoidTargetValue->IsNumber()) {
+        auto avoidTargetNumValue = avoidTargetValue->ToNumber<int32_t>();
+        if (avoidTargetNumValue >= static_cast<int>(AvoidanceMode::COVER_TARGET) &&
+            avoidTargetNumValue <= static_cast<int>(AvoidanceMode::AVOID_AROUND_TARGET)) {
+            popupParam->SetAvoidTarget(static_cast<AvoidanceMode>(avoidTargetNumValue));
         }
     }
     SetPopupBorderWidthInfo(popupObj, popupParam, OUTER_BORDER_WIDTH);
