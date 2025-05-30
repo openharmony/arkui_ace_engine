@@ -1317,13 +1317,4 @@ int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
 }
-
-WidthLayoutBreakPoint SystemProperties::GetWidthLayoutBreakpoints()
-{
-    return widthLayoutBreakpoints_;
-}
-HeightLayoutBreakPoint SystemProperties::GetHeightLayoutBreakpoints()
-{
-    return heightLayoutBreakpoints_;
-}
 } // namespace OHOS::Ace

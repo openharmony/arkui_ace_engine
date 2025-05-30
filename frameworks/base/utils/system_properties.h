@@ -736,9 +736,15 @@ public:
 
     static int32_t getFormSharedImageCacheThreshold();
 
-    static WidthLayoutBreakPoint GetWidthLayoutBreakpoints();
+    static WidthLayoutBreakPoint GetWidthLayoutBreakpoints()
+    {
+        return widthLayoutBreakpoints_;
+    }
 
-    static HeightLayoutBreakPoint GetHeightLayoutBreakpoints();
+    static HeightLayoutBreakPoint GetHeightLayoutBreakpoints()
+    {
+        return heightLayoutBreakpoints_;
+    }
 
 private:
     static bool opincEnabled_;
