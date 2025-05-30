@@ -4124,7 +4124,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaStyle)(ArkUINodeHandle node);
     void (*setTextAreaSelectionMenuHidden)(ArkUINodeHandle node, ArkUI_Uint32 contextMenuHidden);
     void (*resetTextAreaSelectionMenuHidden)(ArkUINodeHandle node);
-    void (*setTextAreaMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
+    void (*setTextAreaMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine, ArkUI_Uint32 overflowMode);
     void (*resetTextAreaMaxLines)(ArkUINodeHandle node);
     void (*setTextAreaMinLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
     void (*resetTextAreaMinLines)(ArkUINodeHandle node);
@@ -4168,6 +4168,7 @@ struct ArkUITextAreaModifier {
     ArkUI_CharPtr (*getTextAreaText)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaCaretColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaMaxLength)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextAreaMinLines)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaPlaceholderColor)(ArkUINodeHandle node);
     void (*getTextAreaPlaceholderFont)(ArkUINodeHandle node, ArkUITextFont* font);
     ArkUI_Bool (*getTextAreaEditing)(ArkUINodeHandle node);

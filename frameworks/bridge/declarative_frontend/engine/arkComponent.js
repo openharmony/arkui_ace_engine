@@ -14528,11 +14528,12 @@ class TextAreaMaxLinesModifier extends ModifierWithKey {
       getUINativeModule().textArea.resetMaxLines(node);
     }
     else {
-      getUINativeModule().textArea.setMaxLines(node, this.value);
+      getUINativeModule().textArea.setMaxLines(node, this.value.value, this.value.overflowMode);
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) || 
+      !isBaseOrResourceEqual(this.stageValue.overflowMode, this.value.overflowMode);
   }
 }
 TextAreaMaxLinesModifier.identity = Symbol('textAreaMaxLines');
@@ -15742,8 +15743,11 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectionMenuHiddenModifier.identity, TextAreaSelectionMenuHiddenModifier, value);
     return this;
   }
-  maxLines(value) {
-    modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, value);
+  maxLines(value, options) {
+    let arkValue = new ArkTextFieldMaxLines();
+    arkValue.value = value;
+    arkValue.overflowMode = options?.overflowMode;
+    modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, arkValue);
     return this;
   }
   minLines(value) {
@@ -19301,6 +19305,17 @@ class ArkTextFieldShowCounter {
       (this.thresholdPercentage === another.thresholdPercentage);
   }
 }
+
+class ArkTextFieldMaxLines {
+    constructor() {
+      this.value = undefined;
+      this.overflowMode = undefined;
+    }
+    isEqual(another) {
+      return (this.value === another.value) &&
+        (this.overflowMode === another.overflowMode);
+    }
+  }
 class ArkTextInputFilter {
   constructor() {
     this.value = undefined;

@@ -355,6 +355,7 @@ public:
     virtual void SetMaxViewLines(uint32_t value) {};
     virtual void SetNormalMaxViewLines(uint32_t value) {};
     virtual void SetMinLines(uint32_t value) {};
+    virtual void SetOverflowMode(OverflowMode value) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
