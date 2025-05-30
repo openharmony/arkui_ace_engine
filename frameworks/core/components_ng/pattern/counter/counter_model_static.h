@@ -24,9 +24,17 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT CounterModelStatic {
 public:
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetOnInc(FrameNode* frameNode, CounterModel::CounterEventFunc&& onInc);
+    static void SetOnDec(FrameNode* frameNode, CounterModel::CounterEventFunc&& onDec);
+
+private:
+    static RefPtr<FrameNode> CreateButtonChild(
+        int32_t id, const std::u16string& symbol, const RefPtr<CounterTheme>& counterTheme);
+    static RefPtr<FrameNode> CreateContentNodeChild(int32_t contentId, const RefPtr<CounterTheme>& counterTheme);
 };
 
 } // namespace OHOS::Ace::NG

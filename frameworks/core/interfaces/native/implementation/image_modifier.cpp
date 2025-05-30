@@ -446,9 +446,13 @@ void ResizableImpl(Ark_NativePointer node,
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           const Opt_Boolean* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        return;
+    }
+    ViewAbstract::SetPrivacySensitive(frameNode, *convValue);
 }
 void EnhancedImageQualityImpl(Ark_NativePointer node,
                               const Opt_ResolutionQuality* value)
