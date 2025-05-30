@@ -82,7 +82,7 @@ constexpr int32_t MAX_RECORD_SECOND = 15;
 constexpr int32_t DEFAULT_RECORD_SECOND = 5;
 constexpr int32_t SECOND_TO_MILLISEC = 1000;
 constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
-constexpr int32_t  RATIO_OF_VSYNC_PERIOD = 2;
+constexpr int32_t RATIO_OF_VSYNC_PERIOD = 2;
 } // namespace
 
 namespace OHOS::Ace::NG {

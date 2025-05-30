@@ -19,7 +19,6 @@ class WeakRefPool {
   private static wmap_ = new WeakMap();
   // map weakref -> Map<tag, gc-callback>
   private static fmap_ = new Map();
-  //
   private static freg_ = new FinalizationRegistry((weakRef: WeakRef<object>) => {
     WeakRefPool.getTaggedCallbacks(weakRef).forEach(fn => fn());
     WeakRefPool.fmap_.delete(weakRef);
@@ -39,14 +38,14 @@ class WeakRefPool {
 
   // Add handler to track when the given object is GC'ed.
   // Tag is used by unregister() only. Pair <obj, tag> should be unique per callback
-  public static register<T extends object>(obj: T, tag: unknown, callback: () => void): void {
+  public static register<T extends object>(obj: T, tag: any, callback: () => void): void {
     const weakRef = WeakRefPool.get(obj);
     const tagMap = WeakRefPool.getTaggedCallbacks(weakRef);
     tagMap.size || WeakRefPool.freg_.register(obj, weakRef);
     tagMap.set(tag, callback);
   }
 
-  public static unregister<T extends object>(obj: T, tag: unknown): void {
+  public static unregister<T extends object>(obj: T, tag: any): void {
     const weakRef = WeakRefPool.get(obj);
     const tagMap = WeakRefPool.getTaggedCallbacks(weakRef);
     tagMap.delete(tag);

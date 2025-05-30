@@ -22,7 +22,6 @@
  * 
  */
 
-
 /**
  * WeakRef
  * ref to an Object that does not prevent the Object from getting GC'ed
