@@ -1426,8 +1426,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     auto targetId = menuWrapperPattern->GetTargetId();
     overlayManager->EraseMenuInfo(targetId);
     if ((menuWrapperPattern->IsContextMenu() ||
-            (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu()))) &&
-        (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
+            (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu())))) {
         if (overlayManager->RemoveMenuInSubWindow(menu)) {
             overlayManager->SetIsMenuShow(false);
         }

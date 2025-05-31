@@ -562,4 +562,34 @@ HWTEST_F(SelectControlSizeNg, SetShowDefaultSelectedIcon001, TestSize.Level1)
     SelectModelNG::SetShowDefaultSelectedIcon(selectFrameNode, false);
     EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), false);
 }
+
+/**
+ * @tc.name: CheckSkipMenuShow001
+ * @tc.desc: Test SelectPattern CheckSkipMenuShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectControlSizeNg, CheckSkipMenuShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CheckSkipMenuShow with invalid value,
+     * @tc.expected: SelectPattern's CheckSkipMenuShow return false with invalid value.
+     */
+
+    RefPtr<FrameNode> targetNode = nullptr;
+    EXPECT_EQ(selectPattern->CheckSkipMenuShow(targetNode), false);
+}
 } // namespace OHOS::Ace::NG
