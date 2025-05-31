@@ -477,19 +477,22 @@ bool IsAscending(const std::vector<double>& nums)
 
 bool ParseBreakPoints(const std::string& input, const size_t expectedCount, std::vector<double>& breakpointsVec)
 {
-    std::vector<double> numVec;
-    StringUtils::StringSplitter(input, ',', numVec);
-    if (numVec.size() != expectedCount) {
+    std::vector<std::string> numStrVec;
+    StringUtils::StringSplitter(input, ',', numStrVec);
+    if (numStrVec.size() != expectedCount) {
         return false;
     }
-
-    for (const double num : numVec) {
+    for (const std::string& numStr : numStrVec) {
+        std::string s = StringUtils::TrimStr(numStr);
+        if (!StringUtils::IsFloat(s)) {
+            return false;
+        }
+        double num = StringUtils::StringToDouble(s);
         if (LessOrEqual(num, 0)) {
             return false;
         }
         breakpointsVec.push_back(num);
     }
-
     return IsAscending(breakpointsVec);
 }
 
@@ -505,50 +508,36 @@ bool ParseHeightBreakPoints(const std::string& input, std::vector<double>& break
     return ParseBreakPoints(input, 2, breakpointsVec);
 }
 
-bool GetLayoutBreakpoints(const LayoutBreakPointPart partIndex, std::vector<double>& breakPoint,
-    bool (*parser)(const std::string&, std::vector<double>&))
+void GetLayoutBreakpoints(WidthLayoutBreakPoint& widthLayoutBreakpoints,
+    HeightLayoutBreakPoint& heightLayoutBreakpoints)
 {
-    auto param = system::GetParameter(LAYOUT_BREAKPOINT, LAYOUT_BREAKPOINT_DEFAULT);
+    auto param = StringUtils::TrimStr(system::GetParameter(LAYOUT_BREAKPOINT, LAYOUT_BREAKPOINT_DEFAULT));
     if (param == LAYOUT_BREAKPOINT_DEFAULT) {
-        LOGD("Using default layout breakpoints");
-        return false;
+        return;
     }
 
     std::vector<std::string> parts;
     StringUtils::StringSplitter(param, ';', parts);
     // 2 means that "const.arkui.layoutbreakpoint" must have exactly two parts
     if (parts.size() != 2) {
-        LOGE("Invalid parameter format");
-        return false;
+        return;
+    }
+    bool parseRet = false;
+    std::vector<double> widthLayoutBreakpointsVec;
+    if (ParseWidthBreakPoints(parts[static_cast<uint32_t>(LayoutBreakPointPart::WIDTH_PART)],
+        widthLayoutBreakpointsVec)) {
+        widthLayoutBreakpoints = WidthLayoutBreakPoint(widthLayoutBreakpointsVec[0],
+        widthLayoutBreakpointsVec[1], widthLayoutBreakpointsVec[2], widthLayoutBreakpointsVec[3]);
+        parseRet = true;
     }
 
-    if (parser(parts[static_cast<uint32_t>(partIndex)], breakPoint)) {
-        LOGD("Custom breakpoints applied");
-        return true;
+    std::vector<double> heightLayoutBreakpointsVec;
+    if (parseRet && ParseHeightBreakPoints(parts[static_cast<uint32_t>(LayoutBreakPointPart::HEIGHT_PART)],
+        heightLayoutBreakpointsVec)) {
+        heightLayoutBreakpoints = HeightLayoutBreakPoint(heightLayoutBreakpointsVec[0], heightLayoutBreakpointsVec[1]);
+    } else {
+        widthLayoutBreakpoints = WidthLayoutBreakPoint();
     }
-
-    LOGE("Failed to parse, using defaults");
-    return false;
-}
-
-WidthLayoutBreakPoint AcquireWidthLayoutBreakpoints()
-{
-    std::vector<double> vec;
-    bool ret = GetLayoutBreakpoints(LayoutBreakPointPart::WIDTH_PART, vec, ParseWidthBreakPoints);
-    if (ret) {
-        return WidthLayoutBreakPoint { vec[0], vec[1], vec[2], vec[3] };
-    }
-    return WidthLayoutBreakPoint();
-}
-
-HeightLayoutBreakPoint AcquireHeightLayoutBreakpoints()
-{
-    std::vector<double> vec;
-    bool ret = GetLayoutBreakpoints(LayoutBreakPointPart::HEIGHT_PART, vec, ParseHeightBreakPoints);
-    if (ret) {
-        return HeightLayoutBreakPoint { vec[0], vec[1] };
-    }
-    return HeightLayoutBreakPoint();
 }
 
 std::string InitSysBrand()
@@ -700,8 +689,8 @@ int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
-WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = AcquireWidthLayoutBreakpoints();
-HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = AcquireHeightLayoutBreakpoints();
+WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
+HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -870,8 +859,7 @@ void SystemProperties::InitDeviceInfo(
         screenShape_ = ScreenShape::NOT_ROUND;
     }
     InitDeviceTypeBySystemProperty();
-    widthLayoutBreakpoints_ = AcquireWidthLayoutBreakpoints();
-    heightLayoutBreakpoints_ = AcquireHeightLayoutBreakpoints();
+    GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)

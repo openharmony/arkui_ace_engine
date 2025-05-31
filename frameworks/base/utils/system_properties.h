@@ -82,15 +82,21 @@ union DebugFlags {
 };
 
 struct WidthLayoutBreakPoint {
-    double WidthVPXS = 320.0;
-    double WidthVPSM = 600.0;
-    double WidthVPMD = 840.0;
-    double WidthVPLG = 1440.0;
+    double widthVPXS_ = 320.0;
+    double widthVPSM_ = 600.0;
+    double widthVPMD_ = 840.0;
+    double widthVPLG_ = 1440.0;
+    WidthLayoutBreakPoint() = default;
+    WidthLayoutBreakPoint(double widthVPXS, double widthVPSM, double widthVPMD, double widthVPLG)
+        : widthVPXS_(widthVPXS), widthVPSM_(widthVPSM), widthVPMD_(widthVPMD), widthVPLG_(widthVPLG) {}
 };
 
 struct HeightLayoutBreakPoint {
-    double HeightVPRATIOSM = 0.8;
-    double HeightVPRATIOMD = 1.2;
+    double heightVPRATIOSM_ = 0.8;
+    double heightVPRATIOMD_ = 1.2;
+    HeightLayoutBreakPoint() = default;
+    HeightLayoutBreakPoint(double heightVPRATIOSM, double heightVPRATIOMD)
+        : heightVPRATIOSM_(heightVPRATIOSM), heightVPRATIOMD_(heightVPRATIOMD) {}
 };
 
 class ACE_FORCE_EXPORT SystemProperties final {

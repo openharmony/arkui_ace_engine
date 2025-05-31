@@ -113,13 +113,13 @@ WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBr
     }
 
     WidthBreakpoint breakpoint;
-    if (width < layoutBreakpoints.WidthVPXS) {
+    if (width < layoutBreakpoints.widthVPXS_) {
         breakpoint = WidthBreakpoint::WIDTH_XS;
-    } else if (width < layoutBreakpoints.WidthVPSM) {
+    } else if (width < layoutBreakpoints.widthVPSM_) {
         breakpoint = WidthBreakpoint::WIDTH_SM;
-    } else if (width < layoutBreakpoints.WidthVPMD) {
+    } else if (width < layoutBreakpoints.widthVPMD_) {
         breakpoint = WidthBreakpoint::WIDTH_MD;
-    } else if (width < layoutBreakpoints.WidthVPLG) {
+    } else if (width < layoutBreakpoints.widthVPLG_) {
         breakpoint = WidthBreakpoint::WIDTH_LG;
     } else {
         breakpoint = WidthBreakpoint::WIDTH_XL;
@@ -139,9 +139,9 @@ HeightBreakpoint Window::GetHeightBreakpoint(const HeightLayoutBreakPoint& layou
     }
 
     HeightBreakpoint breakpoint;
-    if (aspectRatio < layoutBreakpoints.HeightVPRATIOSM) {
+    if (aspectRatio < layoutBreakpoints.heightVPRATIOSM_) {
         breakpoint = HeightBreakpoint::HEIGHT_SM;
-    } else if (aspectRatio < layoutBreakpoints.HeightVPRATIOMD) {
+    } else if (aspectRatio < layoutBreakpoints.heightVPRATIOMD_) {
         breakpoint = HeightBreakpoint::HEIGHT_MD;
     } else {
         breakpoint = HeightBreakpoint::HEIGHT_LG;
