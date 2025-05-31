@@ -692,10 +692,6 @@ public:
     void SetAnchorType(TipsAnchorType anchorType)
     {
         anchorType_ = anchorType;
-        if (anchorType == TipsAnchorType::CURSOR) {
-            enableArrow_ = false;
-            placement_ = Placement::BOTTOM_LEFT;
-        }
     }
 
     TipsAnchorType GetAnchorType() const

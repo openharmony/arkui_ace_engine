@@ -26,6 +26,7 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
@@ -354,8 +355,14 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
             renderContext->UpdateBackShadow(param->GetShadow().value());
         }
         if (param->IsTips()) {
-            auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
-            renderContext->UpdateBackShadow(shadow);
+            do {
+                auto pipelineContext = popupNode->GetContextRefPtr();
+                CHECK_NULL_BREAK(pipelineContext);
+                auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+                CHECK_NULL_BREAK(shadowTheme);
+                Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, Container::CurrentColorMode());
+                renderContext->UpdateBackShadow(shadow);
+            } while (false);
         }
     }
     if (spanString) {
@@ -775,8 +782,14 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
                 popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor()));
         }
         if (param->IsTips()) {
-            auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
-            renderContext->UpdateBackShadow(shadow);
+            do {
+                auto pipelineContext = popupNode->GetContextRefPtr();
+                CHECK_NULL_BREAK(pipelineContext);
+                auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+                CHECK_NULL_BREAK(shadowTheme);
+                Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, Container::CurrentColorMode());
+                renderContext->UpdateBackShadow(shadow);
+            } while (false);
         }
     }
     RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();

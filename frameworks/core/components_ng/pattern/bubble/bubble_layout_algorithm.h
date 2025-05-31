@@ -263,6 +263,7 @@ private:
     bool useCustom_ = false;
     bool isTips_ = false;
     bool followCursor_ = false;
+    bool resetTipsSize_ = false;
     Placement tipsPlacement_ = Placement::BOTTOM_LEFT;
 
     BubbleDumpInfo dumpInfo_;
