@@ -155,6 +155,8 @@ using RSEllipsisMode = Rosen::EllipsisModal;
 using RSSymbolAnimation = Rosen::RSSymbolAnimation;
 using RSSymbolAnimationConfig = Rosen::TextEngine::SymbolAnimationConfig;
 using RSPictureRecorder = Rosen::Drawing::PictureRecorder;
+using RSCMSTransferFuncType = Rosen::Drawing::CMSTransferFuncType;
+using RSCMSMatrixType = Rosen::Drawing::CMSMatrixType;
 struct RSDataWrapper {
     std::shared_ptr<RSData> data;
 };
