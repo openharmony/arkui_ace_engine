@@ -4950,13 +4950,16 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea(
         return std::make_pair(0, SwiperItemInfo {});
     }
     for (const auto& item : itemPosition_) {
-        if (item.second.startPos < 0 && item.second.endPos < 0) {
+        if (LessNotEqualCustomPrecision(item.second.startPos, 0, -0.01f) &&
+            LessNotEqualCustomPrecision(item.second.endPos, 0, -0.01f)) {
             continue;
         }
-        if (item.second.startPos <= 0 && item.second.endPos > 0) {
+        if (LessOrEqualCustomPrecision(item.second.startPos, 0, 0.01f) &&
+            GreatNotEqualCustomPrecision(item.second.endPos, 0, 0.01f)) {
             return std::make_pair(item.first, SwiperItemInfo { item.second.startPos, item.second.endPos });
         }
-        if (item.second.startPos > 0 && item.second.endPos > 0) {
+        if (GreatNotEqualCustomPrecision(item.second.startPos, 0, 0.01f) &&
+            GreatNotEqualCustomPrecision(item.second.endPos, 0, 0.01f)) {
             return std::make_pair(item.first, SwiperItemInfo { item.second.startPos, item.second.endPos });
         }
     }
@@ -6806,15 +6809,17 @@ std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float addition
             endPos += itemSpace;
         }
 
-        if (LessNotEqual((startPos + additionalOffset), 0) && LessNotEqual((endPos + additionalOffset), 0)) {
+        if (LessNotEqualCustomPrecision((startPos + additionalOffset), 0, -0.01f) &&
+            LessNotEqualCustomPrecision((endPos + additionalOffset), 0, -0.01f)) {
             continue;
         }
-        if (GreatOrEqual((startPos + additionalOffset), 0) && GreatNotEqual((endPos + additionalOffset), 0)) {
+        if (GreatOrEqualCustomPrecision((startPos + additionalOffset), 0, -0.01f) &&
+            GreatNotEqualCustomPrecision((endPos + additionalOffset), 0, 0.01f)) {
             firstIndex = iter->first;
             currentTurnPageRate = 0.0f;
             break;
         }
-        if (GreatNotEqual((endPos + additionalOffset), 0)) {
+        if (GreatNotEqualCustomPrecision((endPos + additionalOffset), 0, 0.01f)) {
             firstIndex = iter->first;
             currentTurnPageRate =
                 (NearEqual(endPos, startPos) ? 0 : ((startPos + additionalOffset) / (endPos - startPos)));
@@ -6839,17 +6844,17 @@ std::pair<float, float> SwiperPattern::CalcCurrentPageStatus(float additionalOff
     float currentTurnPageRate = FLT_MAX;
     auto firstIndex = currentFirstIndex_;
     for (const auto& iter : itemPosition_) {
-        if (LessNotEqual((iter.second.startPos + additionalOffset), 0) &&
-            LessNotEqual((iter.second.endPos + additionalOffset), 0)) {
+        if (LessNotEqualCustomPrecision((iter.second.startPos + additionalOffset), 0, -0.01f) &&
+            LessNotEqualCustomPrecision((iter.second.endPos + additionalOffset), 0, -0.01f)) {
             continue;
         }
-        if (GreatOrEqual((iter.second.startPos + additionalOffset), 0) &&
-            GreatNotEqual((iter.second.endPos + additionalOffset), 0)) {
+        if (GreatOrEqualCustomPrecision((iter.second.startPos + additionalOffset), 0, -0.01f) &&
+            GreatNotEqualCustomPrecision((iter.second.endPos + additionalOffset), 0, 0.01f)) {
             firstIndex = iter.first;
             currentTurnPageRate = 0.0f;
             break;
         }
-        if (GreatNotEqual((iter.second.endPos + additionalOffset), 0)) {
+        if (GreatNotEqualCustomPrecision((iter.second.endPos + additionalOffset), 0, 0.01f)) {
             firstIndex = iter.first;
             currentTurnPageRate =
                 (NearEqual(iter.second.endPos, iter.second.startPos)
