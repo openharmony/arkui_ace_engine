@@ -174,6 +174,22 @@
     {
       "name": "Color_test4",
       "value": "#008B8B"
+    },
+    {
+      "name": "rColor",
+      "value": "#DDBA3333"
+    },
+    {
+      "name": "rColor1",
+      "value": "#DDBA33"
+    },
+    {
+      "name": "rColor2",
+      "value": "#DD6513"
+    },
+    {
+      "name": "rColor3",
+      "value": "#A5F563"
     }
   ]
 }
