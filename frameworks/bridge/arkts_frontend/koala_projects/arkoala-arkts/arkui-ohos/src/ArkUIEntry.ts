@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, getAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
 import { int32, int64 } from "@koalaui/common"
 import { pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
@@ -189,7 +189,7 @@ export class Application {
         let root: PeerNode | undefined = undefined
         try {
             this.manager = GlobalStateManager.instance
-            this.timer = createAnimationTimer(this.manager!)
+            this.timer = getAnimationTimer() ?? createAnimationTimer(this.manager!)
             /** @memo */
             let builder: UserViewBuilder
             if (this.entryPoint) {
