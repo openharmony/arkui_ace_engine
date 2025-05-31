@@ -1800,6 +1800,10 @@ typedef struct Ark_Edges Ark_Edges;
 typedef struct Opt_Edges Opt_Edges;
 typedef struct Ark_EdgesNumber Ark_EdgesNumber;
 typedef struct Opt_EdgesNumber Opt_EdgesNumber;
+typedef struct Ark_EdgesLengthMetrics Ark_EdgesLengthMetrics;
+typedef struct Opt_EdgesLengthMetrics Opt_EdgesLengthMetrics;
+typedef struct Ark_SizeLengthMetrics Ark_SizeLengthMetrics;
+typedef struct Opt_SizeLengthMetrics Opt_SizeLengthMetrics;
 typedef struct Ark_EdgeStyles Ark_EdgeStyles;
 typedef struct Opt_EdgeStyles Opt_EdgeStyles;
 typedef struct Ark_EdgeWidths Ark_EdgeWidths;
@@ -12262,6 +12266,30 @@ typedef struct Opt_EdgesNumber {
     Ark_Tag tag;
     Ark_EdgesNumber value;
 } Opt_EdgesNumber;
+typedef struct Ark_EdgesLengthMetrics {
+    Opt_Number top;
+    Opt_LengthUnit topUnit;
+    Opt_Number left;
+    Opt_LengthUnit leftUnit;
+    Opt_Number bottom;
+    Opt_LengthUnit bottomUnit;
+    Opt_Number right;
+    Opt_LengthUnit rightUnit;
+} Ark_EdgesLengthMetrics;
+typedef struct Opt_EdgesLengthMetrics {
+    Ark_Tag tag;
+    Ark_EdgesLengthMetrics value;
+} Opt_EdgesLengthMetrics;
+typedef struct Ark_SizeLengthMetrics {
+    Opt_Number width;
+    Opt_LengthUnit widthUnit;
+    Opt_Number height;
+    Opt_LengthUnit heightUnit;
+} Ark_SizeLengthMetrics;
+typedef struct Opt_SizeLengthMetrics {
+    Ark_Tag tag;
+    Ark_SizeLengthMetrics value;
+} Opt_SizeLengthMetrics;
 typedef struct Ark_EdgeStyles {
     Opt_BorderStyle top;
     Opt_BorderStyle right;
@@ -23836,6 +23864,18 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
     Ark_FrameNode (*createTypedFrameNode)(const Ark_String* type);
     Ark_String (*getNodeType)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToParent)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToScreen)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToWindow)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToParentWithTransform)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToScreenWithTransform)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToWindowWithTransform1)(Ark_FrameNode peer);
+    Ark_Size (*getMeasuredSize)(Ark_FrameNode peer);
+    Ark_Position (*getLayoutPosition)(Ark_FrameNode peer);
+    Ark_EdgesLengthMetrics (*getUserConfigBorderWidth)(Ark_FrameNode peer);
+    Ark_EdgesLengthMetrics (*getUserConfigPadding)(Ark_FrameNode peer);
+    Ark_EdgesLengthMetrics (*getUserConfigMargin)(Ark_FrameNode peer);
+    Ark_SizeLengthMetrics (*getUserConfigSize)(Ark_FrameNode peer);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {

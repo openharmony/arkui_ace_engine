@@ -34120,6 +34120,102 @@ void impl_ShapeClip_setCommandPath(Ark_NativePointer thisPtr, KSerializerBuffer 
         GetAccessors()->getShapeClipAccessor()->setCommandPath(self, (const Ark_CommandPath*)&path_value);
 }
 KOALA_INTEROP_DIRECT_V3(ShapeClip_setCommandPath, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_FrameNode_getPositionToParent(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToParent(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToParent, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToScreen(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToScreen(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToScreen, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToWindow(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToWindow(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToWindow, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToParentWithTransform(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToParentWithTransform(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToParentWithTransform, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToScreenWithTransform(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToScreenWithTransform(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToScreenWithTransform, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToWindowWithTransform1(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToWindowWithTransform1(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToWindowWithTransform1, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getMeasuredSize(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getMeasuredSize(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeSize(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getMeasuredSize, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getLayoutPosition(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getLayoutPosition(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getLayoutPosition, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getUserConfigBorderWidth(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getUserConfigBorderWidth(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeEdgesLengthMetrics(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getUserConfigBorderWidth, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getUserConfigPadding(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getUserConfigPadding(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeEdgesLengthMetrics(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getUserConfigPadding, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getUserConfigMargin(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getUserConfigMargin(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeEdgesLengthMetrics(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getUserConfigMargin, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getUserConfigSize(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getUserConfigSize(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeSizeLengthMetrics(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getUserConfigSize, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_Matrix4Transit_ctor() {
         return GetAccessors()->getMatrix4TransitAccessor()->ctor();
 }

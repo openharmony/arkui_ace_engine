@@ -4227,6 +4227,30 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNode_createTypedFrameNode(type: KStringPtr): KPointer
     @ani.unsafe.Quick
     native static _FrameNode_getNodeType(ptr: KPointer): string
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToParent(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToScreen(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToWindow(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToParentWithTransform(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToScreenWithTransform(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToWindowWithTransform1(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getMeasuredSize(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getLayoutPosition(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getUserConfigBorderWidth(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getUserConfigPadding(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getUserConfigMargin(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getUserConfigSize(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _LengthMetrics_ctor(): KPointer
     @ani.unsafe.Direct
