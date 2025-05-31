@@ -38,6 +38,8 @@ export struct SelectIndex {
     { name: 'SelectDividerNull', path: 'SelectDividerNull' },
     { name: 'SelectArrow', path: 'SelectArrow' },
     { name: 'SelectModifier', path: 'SelectOptionTextModifier' },
+    { name: 'SelectLevel00', path: 'SelectLevel00' },
+    { name: 'SelectLevel11', path: 'SelectLevel11' },
   ]
 
   build() {
