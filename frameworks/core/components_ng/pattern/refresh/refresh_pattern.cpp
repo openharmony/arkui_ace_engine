@@ -504,11 +504,7 @@ float RefreshPattern::CalculatePullDownRatio()
     }
     if (!ratio_.has_value()) {
         CHECK_NULL_RETURN(refreshTheme_, 1.0f);
-        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            ratio_ = refreshTheme_->GetGreatApiRatio();
-        } else {
-            ratio_ = refreshTheme_->GetRatio();
-        }
+        ratio_ = refreshTheme_->GetRatio();
     }
     auto gamma = scrollOffset_ / contentHeight;
     if (GreatOrEqual(gamma, 1.0)) {

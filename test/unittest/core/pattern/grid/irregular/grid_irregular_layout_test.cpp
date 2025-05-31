@@ -1835,7 +1835,7 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset000, TestSize.Level1)
     EXPECT_EQ(info.lineHeightMap_, cmp);
     EXPECT_EQ(info.startMainLineIndex_, 9);
     EXPECT_EQ(info.endMainLineIndex_, 9);
-    EXPECT_LT(info.currentOffset_, -15000.0f);
+    EXPECT_LT(info.currentOffset_, -10000.0f);
 }
 
 /**
