@@ -18,6 +18,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -762,6 +763,25 @@ void GridModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
     dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
+void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("GridFriction");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
+            pattern->SetFriction(friction);
+        }
+    };
+    pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
+}
+
 void GridModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
 {
     CHECK_NULL_VOID(frameNode);
@@ -808,5 +828,24 @@ void GridModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
     auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(onScroll));
+}
+
+void GridModelNG::CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("GridFriction");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
+            pattern->SetFriction(friction);
+        }
+    };
+    pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
+
 }
 } // namespace OHOS::Ace::NG

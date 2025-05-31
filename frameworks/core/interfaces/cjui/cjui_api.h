@@ -2231,7 +2231,7 @@ struct CJUIWaterFlowModifier {
     void (*resetLayoutDirection)(ArkUINodeHandle node);
     void (*setWaterFlowNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 scrollForward, ArkUI_Int32 scrollBackward);
     void (*resetWaterFlowNestedScroll)(ArkUINodeHandle node);
-    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
+    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction, void* frictionRawPtr);
     void (*resetWaterFlowFriction)(ArkUINodeHandle node);
     ArkUI_Int32 (*getLayoutDirection)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getColumnsTemplate)(ArkUINodeHandle node);

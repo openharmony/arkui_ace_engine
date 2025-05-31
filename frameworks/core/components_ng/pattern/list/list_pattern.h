@@ -454,6 +454,8 @@ public:
     }
 
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdateDefaultColor();
 
     void SetDraggingIndex(int32_t index)
     {

@@ -3829,6 +3829,35 @@ ScopeFocusAlgorithm ListPattern::GetScopeFocusAlgorithm()
         });
 }
 
+void ListPattern::UpdateDefaultColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ListTheme>();
+    CHECK_NULL_VOID(theme);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    if (!listLayoutProperty->HasDividerColorSetByUser() ||
+        (listLayoutProperty->HasDividerColorSetByUser() && !listLayoutProperty->GetDividerColorSetByUserValue())) {
+        V2::ItemDivider value;
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, host, value);
+        value.color = theme->GetDividerColor();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, value, host);
+    }
+}
+
+void ListPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    UpdateDefaultColor();
+    host->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
+}
+
 void ListPattern::OnMidIndexChanged()
 {
 #ifdef SUPPORT_DIGITAL_CROWN

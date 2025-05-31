@@ -363,6 +363,9 @@ public:
         return footer_.Upgrade();
     }
 
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdateDefaultColor();
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;

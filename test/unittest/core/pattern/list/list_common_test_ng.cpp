@@ -19,6 +19,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
@@ -3317,6 +3318,34 @@ HWTEST_F(ListCommonTestNg, ChainAnimation004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetChainDelta(1), -10);
     FlushUITasks();
     EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
+/**
+ * @tc.name: UpdateDefaultColorTest
+ * @tc.desc: Test ListPattern UpdateDefaultColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, UpdateDefaultColorTest, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<FrameNode> hostNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listPattern);
+    auto listTheme = MockPipelineContext::pipeline_->GetTheme<ListTheme>();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, DividerColorSetByUser, false, hostNode);
+    V2::ItemDivider value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, hostNode, value);
+    value.color = Color::RED;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, value, hostNode);
+    listPattern->UpdateDefaultColor();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, hostNode, value);
+    EXPECT_NE(value.color, Color::RED);
+
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, DividerColorSetByUser, true, hostNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, hostNode, value);
+    value.color = Color::RED;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, value, hostNode);
+    listPattern->UpdateDefaultColor();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, hostNode, value);
+    EXPECT_EQ(value.color, Color::RED);
 }
 
 /**
