@@ -192,7 +192,7 @@ struct TranslateTextExtraData {
     std::string initScript = "";
 };
 TranslateTextExtraData g_translateTextData;
-
+uint32_t g_currentControllerId;
 enum PictureInPictureState {
     PIP_STATE_ENTER = 0,
     PIP_STATE_EXIT,
@@ -220,7 +220,7 @@ std::mutex pipCallbackMapMutex_;
 
 void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "PIC PipStartPipCallback %{public}d", controllerId);
+    TAG_LOGI(AceLogTag::ACE_WEB, "PipStartPipCallback %{public}d", controllerId);
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     auto it = pipCallbackMap_.find(controllerId);
     if (it != pipCallbackMap_.end()) {
@@ -242,7 +242,7 @@ void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surf
 
 void PipLifeCycleCallback(uint32_t controllerId, PictureInPicture_PipState state, int32_t errorCode)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "PIC PipLifeCycleCallback, controllerId:%{public}u, "
+    TAG_LOGI(AceLogTag::ACE_WEB, "PipLifeCycleCallback, controllerId:%{public}u, "
         "PipState:%{public}d, errorCode:%{public}d", controllerId, state, errorCode);
     uint32_t event;
     {
@@ -265,7 +265,6 @@ void PipLifeCycleCallback(uint32_t controllerId, PictureInPicture_PipState state
             }
             if (event != PIP_STATE_NONE) {
                 auto pip = it->second;
-                TAG_LOGI(AceLogTag::ACE_WEB, "Pip send %{public}d event %{public}d", controllerId, event);
                 pip.pipWebPattern->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, event);
             }
             it->second.preStatus = state;
@@ -301,8 +300,6 @@ void PipControlEventCallback(
         auto it = pipCallbackMap_.find(controllerId);
         if (it != pipCallbackMap_.end()) {
             auto pip = it->second;
-            TAG_LOGI(AceLogTag::ACE_WEB, "Pip send %{public}d event %{public}d",
-                controllerId, event);
             pip.pipWebPattern->SendPipEvent(
                 pip.delegateId, pip.childId, pip.frameRoutingId, event);
         }
@@ -318,7 +315,6 @@ void PipResizeCallback(uint32_t controllerId, uint32_t width, uint32_t height, d
     auto it = pipCallbackMap_.find(controllerId);
     if (it != pipCallbackMap_.end()) {
         auto pip = it->second;
-        TAG_LOGI(AceLogTag::ACE_WEB, "Pip send resize");
         pip.pipWebPattern->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, PIP_STATE_RESIZE);
     }
 }
@@ -7762,7 +7758,6 @@ bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
     return true;
 }
 
-
 void WebPattern::OnPip(int status,
     int delegateId, int childId, int frameRoutingId, int width, int height)
 {
@@ -7779,7 +7774,6 @@ void WebPattern::SetPipNativeWindow(int delegateId, int childId, int frameRoutin
 
 void WebPattern::SendPipEvent(int delegateId, int childId, int frameRoutingId, int event)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::SendPipEvent event:%{public}d", event);
     if (delegate_) {
         delegate_->SendPipEvent(delegateId, childId, frameRoutingId, event);
     }
@@ -7828,7 +7822,7 @@ bool WebPattern::Pip(int status,
             break;
         }
         default:
-            TAG_LOGI(AceLogTag::ACE_WEB, "Pip status:%{public}d", status);
+            TAG_LOGE(AceLogTag::ACE_WEB, "Pip status:%{public}d", status);
     }
     return result;
 }
@@ -7875,11 +7869,11 @@ bool WebPattern::CreatePip(int status, napi_env env, bool& init, uint32_t &pipCo
     pipData.frameRoutingId = pipInfo.frameRoutingId;
     {
         std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+        g_currentControllerId = pipController;
         pipCallbackMap_.erase(pipController);
         pipCallbackMap_.insert(std::make_pair(pipController, pipData));
         pipController_.push_back(pipController);
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CreatePip id: %{public}d", pipController);
     return true;
 }
 
@@ -7902,7 +7896,6 @@ napi_env WebPattern::CreateEnv()
 
 bool WebPattern::RegisterPip(uint32_t pipController)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RegisterPip %{public}d", pipController);
     auto errCode = OH_PictureInPicture_RegisterStartPipCallback(pipController, PipStartPipCallback);
     if (errCode != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "RegisterStartPipCallback err:%{public}d", errCode);
@@ -7923,14 +7916,11 @@ bool WebPattern::RegisterPip(uint32_t pipController)
         TAG_LOGE(AceLogTag::ACE_WEB, "RegisterResizeListener err:%{public}d", errCode);
         return false;
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RegisterPip ok %{public}d", pipController);
     return true;
 }
 
 bool WebPattern::StartPip(uint32_t pipController)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::StartPip");
-
     auto errCode = OH_PictureInPicture_StartPip(pipController);
     if (errCode != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "OH_PictureInPicture_StartPip err: %{public}d", errCode);
@@ -7954,8 +7944,6 @@ void WebPattern::EnablePip(uint32_t pipController)
 
 bool WebPattern::StopPip(int delegateId, int childId, int frameRoutingId)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::StopPip");
-
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     for (auto &it : pipCallbackMap_) {
         auto pip = it.second;
@@ -7966,7 +7954,10 @@ bool WebPattern::StopPip(int delegateId, int childId, int frameRoutingId)
                 TAG_LOGE(AceLogTag::ACE_WEB, "OH_PictureInPicture_StopPip err: %{public}d", errCode);
                 return false;
             }
-            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::StopPip OK %{public}d", it.first);
+            if (g_currentControllerId != it.first) {
+                auto errCode = OH_PictureInPicture_StopPip(g_currentControllerId);
+                CHECK_NE_RETURN(errCode, 0, false);
+            }
             return true;
         }
     }
@@ -7975,7 +7966,6 @@ bool WebPattern::StopPip(int delegateId, int childId, int frameRoutingId)
 
 bool WebPattern::PlayPip(int delegateId, int childId, int frameRoutingId)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::PlayPip");
     bool flag = false;
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     for (auto &it : pipCallbackMap_) {
@@ -7999,7 +7989,6 @@ bool WebPattern::PlayPip(int delegateId, int childId, int frameRoutingId)
 
 bool WebPattern::PausePip(int delegateId, int childId, int frameRoutingId)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::PausePip");
     bool flag = false;
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     for (auto &it : pipCallbackMap_) {
