@@ -19,6 +19,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/flex_property.h"
@@ -2318,27 +2319,31 @@ void BorderImageImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
+    uint8_t bitSet = 0;
     Converter::VisitUnion(optValue->source,
-        [frameNode](const Ark_LinearGradient_common& src) {
+        [frameNode, &bitSet](const Ark_LinearGradient_common& src) {
             Gradient gradient = Converter::Convert<Gradient>(src);
-            // ViewAbstract::SetBorderImageGradient(frameNode, gradient);
+            ViewAbstract::SetBorderImageGradient(frameNode, gradient);
+            bitSet |= BorderImage::GRADIENT_BIT;
         },
-        [&borderImage](const auto& src) {
+        [&borderImage, &bitSet](const auto& src) {
             auto info = Converter::OptConvert<ImageSourceInfo>(src);
             if (info) {
+                bitSet |= BorderImage::SOURCE_BIT;
                 borderImage->SetSrc(info.value().GetSrc());
             }
         },
         []() {});
     auto repeat = Converter::OptConvert<BorderImageRepeat>(optValue->repeat);
     if (repeat) {
+        bitSet |= BorderImage::REPEAT_BIT;
         borderImage->SetRepeatMode(repeat.value());
     }
     auto fill = Converter::OptConvert<bool>(optValue->fill);
     if (fill) {
         borderImage->SetNeedFillCenter(fill.value());
     }
-    Converter::WithOptional(optValue->outset, [&borderImage](const auto& src) {
+    Converter::WithOptional(optValue->outset, [&borderImage, &bitSet](const auto& src) {
         switch (src.selector) {
             case CASE_0: {
                 auto outset = Converter::OptConvert<Dimension>(src.value0);
@@ -2347,6 +2352,7 @@ void BorderImageImpl(Ark_NativePointer node,
                     borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, outset.value());
                     borderImage->SetEdgeOutset(BorderImageDirection::TOP, outset.value());
                     borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, outset.value());
+                    bitSet |= BorderImage::OUTSET_BIT;
                 }
                 break;
             }
@@ -2367,6 +2373,7 @@ void BorderImageImpl(Ark_NativePointer node,
                 if (bottom) {
                     borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, bottom.value());
                 }
+                bitSet |= BorderImage::OUTSET_BIT;
                 break;
             }
             case CASE_2:
@@ -2378,7 +2385,7 @@ void BorderImageImpl(Ark_NativePointer node,
                 return;
         }
     });
-    Converter::WithOptional(optValue->slice, [&borderImage](const auto& src) {
+    Converter::WithOptional(optValue->slice, [&borderImage, &bitSet](const auto& src) {
         switch (src.selector) {
             case CASE_0: {
                 auto slice = Converter::OptConvert<Dimension>(src.value0);
@@ -2388,6 +2395,7 @@ void BorderImageImpl(Ark_NativePointer node,
                     borderImage->SetEdgeSlice(BorderImageDirection::TOP, slice.value());
                     borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, slice.value());
                 }
+                bitSet |= BorderImage::SLICE_BIT;
                 break;
             }
             case CASE_1: {
@@ -2407,6 +2415,7 @@ void BorderImageImpl(Ark_NativePointer node,
                 if (bottom) {
                     borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, bottom.value());
                 }
+                bitSet |= BorderImage::SLICE_BIT;
                 break;
             }
             case CASE_2:
@@ -2418,7 +2427,7 @@ void BorderImageImpl(Ark_NativePointer node,
                 return;
         }
     });
-    Converter::WithOptional(optValue->width, [&borderImage](const auto& src) {
+    Converter::WithOptional(optValue->width, [&borderImage, &bitSet](const auto& src) {
         switch (src.selector) {
             case CASE_0: {
                 auto width = Converter::OptConvert<Dimension>(src.value0);
@@ -2428,6 +2437,7 @@ void BorderImageImpl(Ark_NativePointer node,
                     borderImage->SetEdgeWidth(BorderImageDirection::TOP, width.value());
                     borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, width.value());
                 }
+                bitSet |= BorderImage::WIDTH_BIT;
                 break;
             }
             case CASE_1: {
@@ -2447,6 +2457,7 @@ void BorderImageImpl(Ark_NativePointer node,
                 if (bottom) {
                     borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, bottom.value());
                 }
+                bitSet |= BorderImage::WIDTH_BIT;
                 break;
             }
             case CASE_2:
@@ -2458,7 +2469,7 @@ void BorderImageImpl(Ark_NativePointer node,
                 return;
         }
     });
-    // ViewAbstract::SetBorderImage(frameNode, borderImage);
+    ViewAbstractModelStatic::SetBorderImage(frameNode, borderImage, bitSet);
 }
 void Outline0Impl(Ark_NativePointer node,
                   const Opt_OutlineOptions* value)
