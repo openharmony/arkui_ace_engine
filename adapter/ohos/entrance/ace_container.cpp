@@ -3777,10 +3777,17 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
         return false;
     }
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
-    dragPointerEvent.displayX = pointerItem.GetDisplayX();
-    dragPointerEvent.displayY = pointerItem.GetDisplayY();
-    dragPointerEvent.windowX = pointerItem.GetWindowX();
-    dragPointerEvent.windowY = pointerItem.GetWindowY();
+    if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+    } else {
+        dragPointerEvent.displayX = pointerItem.GetDisplayX();
+        dragPointerEvent.displayY = pointerItem.GetDisplayY();
+        dragPointerEvent.windowX = pointerItem.GetWindowX();
+        dragPointerEvent.windowY = pointerItem.GetWindowY();
+    }
     dragPointerEvent.deviceId = pointerItem.GetDeviceId();
     dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
@@ -3825,10 +3832,17 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
         !pointerItem.IsPressed()) {
         return false;
     }
-    dragPointerEvent.displayX = pointerItem.GetDisplayX();
-    dragPointerEvent.displayY = pointerItem.GetDisplayY();
-    dragPointerEvent.windowX = pointerItem.GetWindowX();
-    dragPointerEvent.windowY = pointerItem.GetWindowY();
+    if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+    } else {
+        dragPointerEvent.displayX = pointerItem.GetDisplayX();
+        dragPointerEvent.displayY = pointerItem.GetDisplayY();
+        dragPointerEvent.windowX = pointerItem.GetWindowX();
+        dragPointerEvent.windowY = pointerItem.GetWindowY();
+    }
     return true;
 }
 

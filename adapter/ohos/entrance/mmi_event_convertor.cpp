@@ -144,17 +144,24 @@ uint64_t GetPointerSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerE
     return inputTime;
 }
 
-TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
+TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType)
 {
     TouchPoint touchPoint;
     // just get the max of width and height
     touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
-    touchPoint.x = pointerItem.GetWindowX();
-    touchPoint.y = pointerItem.GetWindowY();
-    touchPoint.screenX = pointerItem.GetDisplayX();
-    touchPoint.screenY = pointerItem.GetDisplayY();
+    if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        touchPoint.x = static_cast<float>(pointerItem.GetWindowXPos());
+        touchPoint.y = static_cast<float>(pointerItem.GetWindowYPos());
+        touchPoint.screenX = static_cast<float>(pointerItem.GetDisplayXPos());
+        touchPoint.screenY = static_cast<float>(pointerItem.GetDisplayYPos());
+    } else {
+        touchPoint.x = pointerItem.GetWindowX();
+        touchPoint.y = pointerItem.GetWindowY();
+        touchPoint.screenX = pointerItem.GetDisplayX();
+        touchPoint.screenY = pointerItem.GetDisplayY();
+    }
     touchPoint.isPressed = pointerItem.IsPressed();
     touchPoint.force = static_cast<float>(pointerItem.GetPressure());
     touchPoint.tiltX = pointerItem.GetTiltX();
@@ -185,7 +192,7 @@ void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, To
             LOGE("get pointer item failed.");
             continue;
         }
-        auto touchPoint = ConvertTouchPoint(item);
+        auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType());
         touchPoint.CovertId();
         touchEvent.pointers.emplace_back(std::move(touchPoint));
     }
@@ -203,6 +210,9 @@ Offset GetTouchEventOriginOffset(const TouchEvent& event)
     bool ret = pointerEvent->GetPointerItem(pointerID, item);
     if (!ret) {
         return Offset();
+    }
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        return Offset(static_cast<float>(item.GetWindowXPos()), static_cast<float>(item.GetWindowYPos()));
     } else {
         return Offset(item.GetWindowX(), item.GetWindowY());
     }
@@ -299,7 +309,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         LOGE("get pointer item failed.");
         return TouchEvent();
     }
-    auto touchPoint = ConvertTouchPoint(item);
+    auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType());
     TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
     std::chrono::microseconds microseconds(GetPointerSensorTime(pointerEvent));
     TimeStamp time(microseconds);
@@ -400,10 +410,17 @@ void ConvertMouseEvent(
         return;
     }
     events.id = pointerID;
-    events.x = item.GetWindowX();
-    events.y = item.GetWindowY();
-    events.screenX = item.GetDisplayX();
-    events.screenY = item.GetDisplayY();
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        events.x = static_cast<float>(item.GetWindowXPos());
+        events.y = static_cast<float>(item.GetWindowYPos());
+        events.screenX = static_cast<float>(item.GetDisplayXPos());
+        events.screenY = static_cast<float>(item.GetDisplayYPos());
+    } else {
+        events.x = item.GetWindowX();
+        events.y = item.GetWindowY();
+        events.screenX = item.GetDisplayX();
+        events.screenY = item.GetDisplayY();
+    }
     events.rawDeltaX = item.GetRawDx();
     events.rawDeltaY = item.GetRawDy();
     GetMouseEventAction(pointerEvent->GetPointerAction(), events, isSceneBoardWindow);
@@ -504,10 +521,17 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     }
 
     event.id = item.GetPointerId();
-    event.x = static_cast<float>(item.GetWindowX());
-    event.y = static_cast<float>(item.GetWindowY());
-    event.screenX = static_cast<float>(item.GetDisplayX());
-    event.screenY = static_cast<float>(item.GetDisplayY());
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        event.x = static_cast<float>(item.GetWindowXPos());
+        event.y = static_cast<float>(item.GetWindowYPos());
+        event.screenX = static_cast<float>(item.GetDisplayXPos());
+        event.screenY = static_cast<float>(item.GetDisplayYPos());
+    } else {
+        event.x = static_cast<float>(item.GetWindowX());
+        event.y = static_cast<float>(item.GetWindowY());
+        event.screenX = static_cast<float>(item.GetDisplayX());
+        event.screenY = static_cast<float>(item.GetDisplayY());
+    }
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
@@ -576,10 +600,17 @@ static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN) {
         axisFakePntEvt.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
-        touchPoint.x = pointerItem.GetWindowX();
-        touchPoint.y = pointerItem.GetWindowY();
-        touchPoint.screenX = pointerItem.GetDisplayX();
-        touchPoint.screenY = pointerItem.GetDisplayY();
+        if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+            touchPoint.x = static_cast<float>(pointerItem.GetWindowXPos());
+            touchPoint.y = static_cast<float>(pointerItem.GetWindowYPos());
+            touchPoint.screenX = static_cast<float>(pointerItem.GetDisplayXPos());
+            touchPoint.screenY = static_cast<float>(pointerItem.GetDisplayYPos());
+        } else {
+            touchPoint.x = pointerItem.GetWindowX();
+            touchPoint.y = pointerItem.GetWindowY();
+            touchPoint.screenX = pointerItem.GetDisplayX();
+            touchPoint.screenY = pointerItem.GetDisplayY();
+        }
     } else {
         const float xOffset =
             cvtStep * pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
@@ -790,10 +821,17 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     event.pressed = pointerItem.IsPressed();
-    event.windowX = pointerItem.GetWindowX();
-    event.windowY = pointerItem.GetWindowY();
-    event.displayX = pointerItem.GetDisplayX();
-    event.displayY = pointerItem.GetDisplayY();
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        event.windowX = static_cast<float>(pointerItem.GetWindowXPos());
+        event.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+        event.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
+        event.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
+    } else {
+        event.windowX = pointerItem.GetWindowX();
+        event.windowY = pointerItem.GetWindowY();
+        event.displayX = pointerItem.GetDisplayX();
+        event.displayY = pointerItem.GetDisplayY();
+    }
     event.displayId = pointerEvent->GetTargetDisplayId();
     event.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / SIZE_DIVIDE;
     event.force = static_cast<float>(pointerItem.GetPressure());
@@ -848,10 +886,11 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
             MMI::PointerEvent::PointerItem item;
             if (pointerEvent->GetPointerItem(id, item)) {
                 TAG_LOGD(AceLogTag::ACE_UIEVENT,
-                    "all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
-                    "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
-                    actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(),
-                    item.GetTiltX(), item.GetTiltY());
+                    "all point info: id: %{public}d, x: %{public}d/%{public}f, y: %{public}d/%{public}f, isPressed: "
+                    "%{public}d, pressure: %{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                    actionId, item.GetWindowX(), static_cast<float>(item.GetWindowXPos()), item.GetWindowY(),
+                    static_cast<float>(item.GetWindowYPos()), item.IsPressed(), item.GetPressure(), item.GetTiltX(),
+                    item.GetTiltY());
             }
         }
     }
@@ -867,8 +906,7 @@ void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, cons
     if (ret) {
         float xRelative = item.GetWindowX();
         float yRelative = item.GetWindowY();
-        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
-            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             xRelative = item.GetWindowXPos();
             yRelative = item.GetWindowYPos();
         }
@@ -892,8 +930,7 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
     if (ret) {
         float xRelative = item.GetWindowX();
         float yRelative = item.GetWindowY();
-        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
-            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             xRelative = item.GetWindowXPos();
             yRelative = item.GetWindowYPos();
         }
@@ -949,8 +986,7 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
         }
         float xRelative = item.GetDisplayX();
         float yRelative = item.GetDisplayY();
-        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
-            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             xRelative = item.GetDisplayXPos();
             yRelative = item.GetDisplayYPos();
         }
