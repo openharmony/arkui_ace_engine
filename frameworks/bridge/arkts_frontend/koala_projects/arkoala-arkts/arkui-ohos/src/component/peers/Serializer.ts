@@ -7611,7 +7611,7 @@ export class Serializer extends SerializerBase {
             const value_footer_value  = value_footer!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_footer_value))
         }
-        const value_footerContent  = value.footerContent
+        const value_footerContent  = undefined
         let value_footerContent_type : int32 = RuntimeType.UNDEFINED
         value_footerContent_type = runtimeType(value_footerContent)
         valueSerializer.writeInt8(value_footerContent_type as int32)

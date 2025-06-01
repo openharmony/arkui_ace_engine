@@ -34,7 +34,7 @@ import { Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number
 import { ScrollState } from "./list"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
-import { Scroller } from "./scroll"
+import { Scroller, OnScrollFrameBeginCallback } from "./scroll"
 
 export class WaterFlowSectionsInternal {
     public static fromPtr(ptr: KPointer): WaterFlowSections {
@@ -331,7 +331,7 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._WaterFlowAttribute_onReachEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onScrollFrameBeginAttribute(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): void {
+    onScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -414,7 +414,7 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     cachedCount(count: number | undefined, show?: boolean): this
     onReachStart(value: (() => void) | undefined): this
     onReachEnd(value: (() => void) | undefined): this
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
     onWillScroll(value: OnWillScrollCallback | undefined): this
     onDidScroll(value: OnScrollCallback | undefined): this
@@ -445,7 +445,7 @@ export interface UIWaterFlowAttribute extends UIScrollableCommonMethod {
     /** @memo */
     onReachEnd(value: (() => void) | undefined): this
     /** @memo */
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
     /** @memo */
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
     /** @memo */
@@ -467,7 +467,7 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     cachedCount_value?: number | undefined
     onReachStart_value?: (() => void) | undefined
     onReachEnd_value?: (() => void) | undefined
-    onScrollFrameBegin_value?: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined
+    onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onScrollIndex_value?: ((first: number,last: number) => void) | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
@@ -507,7 +507,7 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     public onReachEnd(value: (() => void) | undefined): this {
         return this
     }
-    public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         return this
     }
     public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
@@ -654,9 +654,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         return this
     }
     /** @memo */
-    public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         if (this.checkPriority("onScrollFrameBegin")) {
-            const value_casted = value as (((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined)
+            const value_casted = value as (OnScrollFrameBeginCallback | undefined)
             this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
             return this
         }

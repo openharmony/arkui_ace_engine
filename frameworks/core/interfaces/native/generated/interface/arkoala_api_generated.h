@@ -23145,7 +23145,7 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
     void (*setOnReachEnd)(Ark_NativePointer node,
                           const Opt_Callback_Void* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
-                                  const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value);
+                                  const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
                              const Opt_Callback_Number_Number_Void* value);
     void (*setOnWillScroll)(Ark_NativePointer node,

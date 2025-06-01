@@ -9059,7 +9059,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                                const Opt_OnScrollFrameBeginCallback* value)
     {
     }
     void OnScrollIndexImpl(Ark_NativePointer node,
