@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, DataNode, memo } from "@koalaui/runtime";
+import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, DataNode, memo, scheduleCallback } from "@koalaui/runtime";
 import { pointer } from "@koalaui/interop";
 import { LazyForEachType, PeerNode, PeerNodeType } from "../PeerNode";
 import { InternalListener } from "../DataChangeListener";
@@ -36,21 +36,22 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
-    let changeCounter = rememberMutableState(0)
     const parent = contextNode<PeerNode>()
-    let listener = memo(() => { // re-run if dataSource is changed
+    let pool = rememberDisposable(() => new LazyItemPool(parent), (pool?: LazyItemPool) => {
+        pool?.dispose()
+    })
+    let changeCounter = rememberMutableState(0)
+    let listener = remember(() => {
         let res = new InternalListener(parent.peer.ptr, changeCounter)
         dataSource.registerDataChangeListener(res)
         return res
     })
+    changeCounter.value // subscribe
     const changeIndex = listener.flush(0) // first item index that's affected by DataChange
-
-    // Entering this method implies that the parameters have changed.
-    let pool = rememberDisposable(() => new LazyItemPool(parent), (pool?: LazyItemPool) => {
-        pool?.dispose()
-    })
     if (changeIndex < Number.POSITIVE_INFINITY) {
-        pool.pruneBy((index: int32) => index >= changeIndex)
+        scheduleCallback(() => {
+            pool.pruneBy((index: int32) => index >= changeIndex)
+        })
     }
 
     /**
