@@ -393,7 +393,7 @@ ArkUI_Bool AttachHostNode(ArkUINodeAdapterHandle handle, ArkUINodeHandle host)
     auto* uiNode = reinterpret_cast<NG::UINode*>(host);
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
         auto* frameNode = reinterpret_cast<NG::FrameNode*>(uiNode);
-        if (frameNode->GetPattern()->OnAttachAtapter(Referenced::Claim(frameNode), handle->node)) {
+        if (frameNode->GetPattern()->OnAttachAdapter(Referenced::Claim(frameNode), handle->node)) {
             return true;
         } else if (frameNode->GetFirstChild() == nullptr) {
             uiNode->AddChild(handle->node);

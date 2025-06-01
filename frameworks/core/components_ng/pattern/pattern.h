@@ -743,7 +743,7 @@ public:
 
     virtual void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> valueBase) {};
 
-    virtual bool OnAttachAtapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child)
+    virtual bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child)
     {
         return false;
     }

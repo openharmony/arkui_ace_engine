@@ -22,6 +22,7 @@ group("core_unittest") {
     "gestures:gestures_test_ng",
     "image:image_file_cache_test_ng",
     "image:image_provider_test_ng",
+    "interfaces:core_interfaces_unittest",
     "layout:core_layout_unittest",
     "manager:core_manager_unittest",
     "pattern:core_pattern_unittest",
