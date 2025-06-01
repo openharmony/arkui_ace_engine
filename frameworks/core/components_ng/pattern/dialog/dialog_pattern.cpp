@@ -564,8 +564,7 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     auto needAddMaskNode = props.maskTransitionEffect != nullptr || props.dialogTransitionEffect != nullptr;
-    if ((IsUIExtensionSubWindow() && props.isModal) ||
-        (needAddMaskNode && props.isModal && !props.isShowInSubWindow)) {
+    if (needAddMaskNode && props.isModal && !props.isShowInSubWindow) {
         auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(extraMaskNode);

@@ -259,6 +259,8 @@ public:
     virtual bool NeedFollowParentWindowLayout() = 0;
     virtual void AddFollowParentWindowLayoutNode(int32_t nodeId) = 0;
     virtual void RemoveFollowParentWindowLayoutNode(int32_t nodeId) = 0;
+    virtual void SetNodeId(int32_t nodeId) = 0;
+    virtual int32_t GetNodeId() const = 0;
 
 private:
     int32_t subwindowId_ = 0;

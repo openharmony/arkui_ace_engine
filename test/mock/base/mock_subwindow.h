@@ -131,6 +131,8 @@ public:
     MOCK_METHOD0(NeedFollowParentWindowLayout, bool());
     MOCK_METHOD1(AddFollowParentWindowLayoutNode, void(int32_t nodeId));
     MOCK_METHOD1(RemoveFollowParentWindowLayoutNode, void(int32_t nodeId));
+    MOCK_METHOD1(SetNodeId, void(int32_t nodeId));
+    MOCK_CONST_METHOD0(GetNodeId, int32_t());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H
