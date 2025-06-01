@@ -93,7 +93,7 @@ namespace GridModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = GridModelNG::CreateFrameNode(id);
+    auto frameNode = GridModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -103,8 +103,8 @@ namespace GridInterfaceModifier {
 void SetScroll(FrameNode* frameNode, const Opt_Scroller* scroller)
 {
     CHECK_NULL_VOID(scroller);
-    RefPtr<ScrollControllerBase> positionController = GridModelNG::GetOrCreateController(frameNode);
-    RefPtr<ScrollProxy> scrollBarProxy = GridModelNG::GetOrCreateScrollBarProxy(frameNode);
+    RefPtr<ScrollControllerBase> positionController = GridModelStatic::GetOrCreateController(frameNode);
+    RefPtr<ScrollProxy> scrollBarProxy = GridModelStatic::GetOrCreateScrollBarProxy(frameNode);
     auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
     CHECK_NULL_VOID(abstPeerPtrOpt);
     auto peerImplPtr = *abstPeerPtrOpt;
@@ -153,7 +153,7 @@ void SetGridOptionsImpl(Ark_NativePointer node,
             };
             options.getRectByIndex = modelCallback;
         }
-        GridModelNG::SetLayoutOptions(frameNode, options);
+        GridModelStatic::SetLayoutOptions(frameNode, options);
     }
     SetScroll(frameNode, scroller);
 }
@@ -169,7 +169,7 @@ void ColumnsTemplateImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetColumnsTemplate(frameNode, *convValue);
+    GridModelStatic::SetColumnsTemplate(frameNode, *convValue);
 }
 void RowsTemplateImpl(Ark_NativePointer node,
                       const Opt_String* value)
@@ -181,7 +181,7 @@ void RowsTemplateImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetRowsTemplate(frameNode, *convValue);
+    GridModelStatic::SetRowsTemplate(frameNode, *convValue);
 }
 void ColumnsGapImpl(Ark_NativePointer node,
                     const Opt_Length* value)
@@ -254,7 +254,7 @@ void OnScrollBarUpdateImpl(Ark_NativePointer node,
             arkIndex, arkOffset);
         return ResType(Convert<float>(arkResult.totalOffset), Convert<float>(arkResult.totalLength));
     };
-    GridModelNG::SetOnScrollBarUpdate(frameNode, std::move(onScrollBarUpdate));
+    GridModelStatic::SetOnScrollBarUpdate(frameNode, std::move(onScrollBarUpdate));
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
                        const Opt_Callback_Number_Number_Void* value)
@@ -271,7 +271,7 @@ void OnScrollIndexImpl(Ark_NativePointer node,
         auto arkLast = Converter::ArkValue<Ark_Number>(last);
         arkCallback.Invoke(arkFirst, arkLast);
     };
-    GridModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
+    GridModelStatic::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
 void CachedCount0Impl(Ark_NativePointer node,
                       const Opt_Number* value)
@@ -283,7 +283,7 @@ void CachedCount0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetCachedCount(frameNode, *convValue);
+    GridModelStatic::SetCachedCount(frameNode, *convValue);
 }
 void CachedCount1Impl(Ark_NativePointer node,
                       const Opt_Number* count,
@@ -295,9 +295,9 @@ void CachedCount1Impl(Ark_NativePointer node,
     if (convValue < 0) {
         convValue = 1;
     }
-    GridModelNG::SetCachedCount(frameNode, convValue);
+    GridModelStatic::SetCachedCount(frameNode, convValue);
     auto showValue = Converter::OptConvert<bool>(*show).value_or(false);
-    GridModelNG::SetShowCached(frameNode, showValue);
+    GridModelStatic::SetShowCached(frameNode, showValue);
 }
 void EditModeImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)
@@ -309,7 +309,7 @@ void EditModeImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetEditable(frameNode, *convValue);
+    GridModelStatic::SetEditable(frameNode, *convValue);
 }
 void MultiSelectableImpl(Ark_NativePointer node,
                          const Opt_Boolean* value)
@@ -321,7 +321,7 @@ void MultiSelectableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetMultiSelectable(frameNode, *convValue);
+    GridModelStatic::SetMultiSelectable(frameNode, *convValue);
 }
 void MaxCountImpl(Ark_NativePointer node,
                   const Opt_Number* value)
@@ -333,7 +333,7 @@ void MaxCountImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetMaxCount(frameNode, *convValue);
+    GridModelStatic::SetMaxCount(frameNode, *convValue);
 }
 void MinCountImpl(Ark_NativePointer node,
                   const Opt_Number* value)
@@ -345,7 +345,7 @@ void MinCountImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetMinCount(frameNode, *convValue);
+    GridModelStatic::SetMinCount(frameNode, *convValue);
 }
 void CellLengthImpl(Ark_NativePointer node,
                     const Opt_Number* value)
@@ -357,7 +357,7 @@ void CellLengthImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetCellLength(frameNode, *convValue);
+    GridModelStatic::SetCellLength(frameNode, *convValue);
 }
 void LayoutDirectionImpl(Ark_NativePointer node,
                          const Opt_GridDirection* value)
@@ -376,7 +376,7 @@ void SupportAnimationImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetSupportAnimation(frameNode, *convValue);
+    GridModelStatic::SetSupportAnimation(frameNode, *convValue);
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
                          const Opt_GridAttribute_onItemDragStart_event_type* value)
@@ -399,7 +399,7 @@ void OnItemDragStartImpl(Ark_NativePointer node,
         auto uiNode = builder->BuildSync(node);
         ViewStackProcessor::GetInstance()->Push(uiNode);
     };
-    GridModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
+    GridModelStatic::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }
 void OnItemDragEnterImpl(Ark_NativePointer node,
                          const Opt_Callback_ItemDragInfo_Void* value)
@@ -417,7 +417,7 @@ void OnItemDragEnterImpl(Ark_NativePointer node,
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         arkCallback.Invoke(arkDragInfo);
     };
-    GridModelNG::SetOnItemDragEnter(frameNode, std::move(onItemDragEnter));
+    GridModelStatic::SetOnItemDragEnter(frameNode, std::move(onItemDragEnter));
 }
 void OnItemDragMoveImpl(Ark_NativePointer node,
                         const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
@@ -437,7 +437,7 @@ void OnItemDragMoveImpl(Ark_NativePointer node,
         auto arkInsertIndex = Converter::ArkValue<Ark_Number>(insertIndex);
         arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex);
     };
-    GridModelNG::SetOnItemDragMove(frameNode, std::move(onItemDragMove));
+    GridModelStatic::SetOnItemDragMove(frameNode, std::move(onItemDragMove));
 }
 void OnItemDragLeaveImpl(Ark_NativePointer node,
                          const Opt_Callback_ItemDragInfo_Number_Void* value)
@@ -457,7 +457,7 @@ void OnItemDragLeaveImpl(Ark_NativePointer node,
         arkCallback.Invoke(arkDragInfo, arkItemIndex);
     };
 
-    GridModelNG::SetOnItemDragLeave(frameNode, std::move(onItemDragLeave));
+    GridModelStatic::SetOnItemDragLeave(frameNode, std::move(onItemDragLeave));
 }
 void OnItemDropImpl(Ark_NativePointer node,
                     const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
@@ -478,7 +478,7 @@ void OnItemDropImpl(Ark_NativePointer node,
         auto arkIsSuccess = Converter::ArkValue<Ark_Boolean>(isSuccess);
         arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex, arkIsSuccess);
     };
-    GridModelNG::SetOnItemDrop(frameNode, std::move(onItemDrop));
+    GridModelStatic::SetOnItemDrop(frameNode, std::move(onItemDrop));
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Opt_NestedScrollOptions* value)
@@ -490,7 +490,7 @@ void NestedScrollImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetNestedScroll(frameNode, *convValue);
+    GridModelStatic::SetNestedScroll(frameNode, *convValue);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
@@ -502,7 +502,7 @@ void EnableScrollInteractionImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridModelNG::SetScrollEnabled(frameNode, *convValue);
+    GridModelStatic::SetScrollEnabled(frameNode, *convValue);
 }
 void FrictionImpl(Ark_NativePointer node,
                   const Opt_Union_Number_Resource* value)
@@ -535,7 +535,7 @@ void OnScrollImpl(Ark_NativePointer node,
         auto arkScrollState = Converter::ArkValue<Ark_Number>(static_cast<int>(scrollState));
         arkCallback.Invoke(arkScrollOffset, arkScrollState);
     };
-    GridModelNG::SetOnScroll(frameNode, std::move(onScroll));
+    GridModelStatic::SetOnScroll(frameNode, std::move(onScroll));
 }
 void OnReachStartImpl(Ark_NativePointer node,
                       const Opt_Callback_Void* value)
@@ -669,7 +669,7 @@ void EdgeEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetEdgeEffect(frameNode, Converter::OptConvert<EdgeEffect>(*value),
+    GridModelStatic::SetEdgeEffect(frameNode, Converter::OptConvert<EdgeEffect>(*value),
         options ? Converter::OptConvert<bool>(*options) : std::nullopt);
 }
 } // GridAttributeModifier
