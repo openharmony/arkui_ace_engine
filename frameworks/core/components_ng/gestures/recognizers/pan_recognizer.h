@@ -200,6 +200,7 @@ private:
     OnPanDistanceFunc onChangeDistance_;
     // this callback will be triggered when pan end, but the enable state is false
     std::unique_ptr<GestureEventFunc> panEndOnDisableState_;
+    int32_t lastAction_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

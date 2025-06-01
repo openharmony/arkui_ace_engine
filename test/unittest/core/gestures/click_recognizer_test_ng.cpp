@@ -1963,4 +1963,30 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTypeTest003, TestSize.Level1)
     clickRecognizer->HandleReports(info, GestureCallbackType::START);
     EXPECT_EQ(clickRecognizer->GetRecognizerType(), GestureTypeName::TAP_GESTURE);
 }
+
+/**
+ * @tc.name: TriggerGestureJudgeCallbackTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    clickRecognizer->inputEventType_ = InputEventType::KEYBOARD;
+    clickRecognizer->deviceId_ = 1;
+
+    auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                    const std::list<RefPtr<NGGestureRecognizer>>& others) {
+        EXPECT_EQ(info->rawInputEventType_, InputEventType::KEYBOARD);
+        EXPECT_EQ(info->rawInputDeviceId_, 1);
+        return GestureJudgeResult::REJECT;
+    };
+    TouchEvent touchEvent;
+    touchEvent.rollAngle = 0;
+    clickRecognizer->touchPoints_[0] = touchEvent;
+    clickRecognizer->targetComponent_ = targetComponent;
+    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    clickRecognizer->TriggerGestureJudgeCallback();
+}
 } // namespace OHOS::Ace::NG

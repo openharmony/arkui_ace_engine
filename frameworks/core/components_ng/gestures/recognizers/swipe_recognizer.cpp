@@ -497,6 +497,9 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     if (prevAngle_) {
         info->SetAngle(prevAngle_.value());
     }
+    info->SetRawInputEventType(inputEventType_);
+    info->SetRawInputEvent(lastPointEvent_);
+    info->SetRawInputDeviceId(deviceId_);
     if (gestureRecognizerJudgeFunc) {
         return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }

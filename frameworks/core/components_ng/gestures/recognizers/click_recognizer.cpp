@@ -620,6 +620,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
         info->SetRollAngle(touchPoint.rollAngle.value());
     }
     info->SetSourceTool(touchPoint.sourceTool);
+    info->SetRawInputEventType(inputEventType_);
+    info->SetRawInputEvent(lastPointEvent_);
+    info->SetRawInputDeviceId(deviceId_);
     if (sysJudge_) {
         return sysJudge_(gestureInfo_, info);
     }
