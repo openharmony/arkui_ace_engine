@@ -58,10 +58,19 @@ export class PeerNode extends IncrementalNode {
             return
         }
         scheduleCallback(this._reuseCb) // could change states
+        for (let child = this.firstChild; child; child = child!.nextSibling) {
+            if (child instanceof PeerNode)
+                (child as PeerNode)!.onReuse()
+        }
     }
 
     onRecycle(): void {
         this._recycleCb?.()
+        // traverse subtree to notify all children
+        for (let child = this.firstChild; child; child = child!.nextSibling) {
+            if (child instanceof PeerNode)
+                (child as PeerNode)!.onRecycle()
+        }
     }
 
     updateReusePoolSize(size: number, reuseKey: string) {
