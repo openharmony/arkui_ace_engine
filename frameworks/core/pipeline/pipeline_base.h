@@ -1328,7 +1328,7 @@ public:
         vsyncTime_ = time;
     }
 
-    bool ReachResponseDeadline() const;
+    virtual bool ReachResponseDeadline() const;
 
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 

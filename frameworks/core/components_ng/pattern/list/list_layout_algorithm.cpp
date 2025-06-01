@@ -1616,8 +1616,7 @@ int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrappe
 bool ListLayoutAlgorithm::IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const
 {
     bool syncLoad = property->GetSyncLoad().value_or(true);
-    return (syncLoad && NearZero(currentDelta_) && !forwardFeature_ && !backwardFeature_ &&
-        (mainSizeIsDefined_ || !GreaterOrEqualToInfinity(contentMainSize_)));
+    return (syncLoad && NearZero(currentDelta_) && !targetIndex_.has_value() && mainSizeIsDefined_);
 }
 
 void ListLayoutAlgorithm::CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& wrapper)
