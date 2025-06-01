@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 
@@ -76,6 +77,26 @@ HWTEST_F(WaterFlowSWTest, LazyforeachReloaded01, TestSize.Level1)
     EXPECT_EQ(lazyForEachNode->FrameCount(), 20);
     ASSERT_TRUE(GetItem(0, true));
     EXPECT_FALSE(GetItem(0, true)->IsActive());
+}
+
+/**
+ * @tc.name: SyncLoad001
+ * @tc.desc: test load items frame by frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, SyncLoad001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetSyncLoad(false);
+
+    CreateRandomWaterFlowItems(10);
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 1);
 }
 
 /**

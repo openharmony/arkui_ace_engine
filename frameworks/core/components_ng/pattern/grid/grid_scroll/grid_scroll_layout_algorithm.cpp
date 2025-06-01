@@ -59,6 +59,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(frameSize_, axis));
+    syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren;
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), frameSize_);
     info_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(gridLayoutProperty, axis);
@@ -103,6 +104,9 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     info_.offsetEnd_ = moveToEndLineIndex_ > 0 ? (info_.endIndex_ + 1 >= info_.GetChildrenCount()) : info_.offsetEnd_;
 
     if (SystemProperties::GetGridCacheEnabled()) {
+        if (measureInNextFrame_) {
+            return;
+        }
         const bool sync = gridLayoutProperty->GetShowCachedItemsValue(false);
         if (sync) {
             SyncPreload(
@@ -687,6 +691,10 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
     // fill current line first
     FillCurrentLine(mainSize, crossSize, layoutWrapper);
 
+    if (measureInNextFrame_) {
+        return;
+    }
+
     if (GreatNotEqual(mainLength, mainSize)) {
         if (IsScrollToEndLine()) {
             TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
@@ -701,6 +709,11 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
         float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         if (GreatOrEqual(lineHeight, 0.0)) {
             mainLength += (lineHeight + mainGap_);
+            if (!syncLoad_ && NearEqual(info_.prevOffset_, info_.currentOffset_) &&
+                layoutWrapper->ReachResponseDeadline()) {
+                measureInNextFrame_ = true;
+                break;
+            }
             continue;
         }
         info_.reachEnd_ = true;
@@ -745,6 +758,11 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
             info_.endIndex_ = currentIndex;
             currentIndex++;
             doneFillCurrentLine = true;
+            if (!syncLoad_ && NearEqual(info_.prevOffset_, info_.currentOffset_) &&
+                layoutWrapper->ReachResponseDeadline()) {
+                measureInNextFrame_ = true;
+                break;
+            }
         }
         if (doneFillCurrentLine) {
             info_.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
@@ -1526,6 +1544,11 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         info_.endIndex_ = currentIndex;
         currentIndex++;
         doneFillLine = true;
+        if (!syncLoad_ && NearEqual(info_.prevOffset_, info_.currentOffset_) &&
+            layoutWrapper->ReachResponseDeadline()) {
+            measureInNextFrame_ = true;
+            break;
+        }
     }
 
     if (doneFillLine || info_.gridMatrix_.find(currentMainLineIndex_) != info_.gridMatrix_.end()) {

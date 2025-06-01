@@ -220,6 +220,8 @@ public:
 
     void PrintWaterFlowItems() const;
 
+    void UpdateItemStart(bool canOverScrollStart);
+
 private:
     inline float TopMargin() const
     {
