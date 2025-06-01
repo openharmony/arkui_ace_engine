@@ -241,7 +241,7 @@ public:
         clickBreak_ = value;
     }
 
-    virtual bool IsStartEndTimeDefined()
+    virtual bool IsTossNeedToStop()
     {
         return false;
     }

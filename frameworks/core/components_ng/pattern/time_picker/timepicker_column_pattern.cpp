@@ -149,6 +149,11 @@ bool TimePickerColumnPattern::IsStartEndTimeDefined()
     return timePickerRowPattern->IsStartEndTimeDefined();
 }
 
+bool TimePickerColumnPattern::IsTossNeedToStop()
+{
+    return IsStartEndTimeDefined();
+}
+
 void TimePickerColumnPattern::InitTextFontFamily()
 {
     auto host = GetHost();

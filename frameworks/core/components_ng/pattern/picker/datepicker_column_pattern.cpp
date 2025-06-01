@@ -580,16 +580,10 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(blendNode, false);
-    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
-    CHECK_NULL_RETURN(stackNode, false);
-    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
-    CHECK_NULL_RETURN(parentNode, false);
-    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    bool canLoop = GetCanLoopFromLayoutProperty();
     // When CanLoop is true and NotLoopOptions is false(which means LoopOptions are satisfied), CanMove returns true;
     // otherwise, validate the index legality.
-    if (dataPickerRowLayoutProperty->GetCanLoopValue(true) && !NotLoopOptions()) {
+    if (canLoop && !NotLoopOptions()) {
         return true;
     }
     int totalOptionCount = GetOptionCount();
@@ -689,5 +683,24 @@ bool DatePickerColumnPattern::GetOptionItemCount(uint32_t& itemCounts)
 bool DatePickerColumnPattern::IsLanscape(uint32_t itemCount)
 {
     return (itemCount == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER);
+}
+
+bool DatePickerColumnPattern::GetCanLoopFromLayoutProperty() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(blendNode, false);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_RETURN(stackNode, false);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_RETURN(parentNode, false);
+    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    return dataPickerRowLayoutProperty->GetCanLoopValue(true);
+}
+
+bool DatePickerColumnPattern::IsTossNeedToStop()
+{
+    return !GetCanLoopFromLayoutProperty();
 }
 } // namespace OHOS::Ace::NG

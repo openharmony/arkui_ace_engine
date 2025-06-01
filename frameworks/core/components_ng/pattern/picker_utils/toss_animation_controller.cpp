@@ -116,7 +116,7 @@ void TossAnimationController::StartSpringMotion()
         if (isTouchBreak == false) {
             column->SetTossStatus(false);
             column->SetYOffset(0.0);
-            if (!NearZero(column->GetOffset()) && column->IsStartEndTimeDefined()) {
+            if (!NearZero(column->GetOffset()) && column->IsTossNeedToStop()) {
                 column->TossStoped();
             }
         }

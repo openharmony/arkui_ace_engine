@@ -538,8 +538,8 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest006, TestSize.Level1)
  * @tc.desc: Test SetCanLoop with framenode.
  * @tc.type: FUNC
  */
- HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest007, TestSize.Level1)
- {
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest007, TestSize.Level1)
+{
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
@@ -549,5 +549,35 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest006, TestSize.Level1)
     ASSERT_NE(pickerProperty, nullptr);
     DatePickerModelNG::SetCanLoop(frameNode, false);
     EXPECT_FALSE(pickerProperty->GetCanLoopValue());
- }
+}
+
+/**
+ * @tc.name: DatePickerCanLoopTest008
+ * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create columnNode and default canLoop is true.
+    */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(columnPattern_->GetCanLoopFromLayoutProperty());
+
+    /**
+    * @tc.steps: step2. Set canLoop value to false.
+    */
+    DatePickerModelNG::SetCanLoop(frameNode, false);
+
+
+    /**
+    * @tc.steps: step3. GetCanLoopFromLayoutProperty.
+    */
+    EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutProperty());
+}
 } // namespace OHOS::Ace::NG
