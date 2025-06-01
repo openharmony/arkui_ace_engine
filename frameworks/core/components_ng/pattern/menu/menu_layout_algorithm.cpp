@@ -3181,16 +3181,14 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isShowInSubWindow)
     CHECK_NULL_VOID(theme);
     // false for phone devices
     isExpandDisplay_ = theme->GetExpandDisplay() || isFreeMultiWindow_;
-    if (isExpandDisplay_ && !isShowInSubWindow && containerId >= MIN_SUBCONTAINER_ID) {
+    auto isUIExtensionSubWindow = container->IsUIExtensionWindow();
+    if ((isExpandDisplay_ || isUIExtensionSubWindow) && !isShowInSubWindow && containerId >= MIN_SUBCONTAINER_ID) {
         canExpandCurrentWindow_ = true;
         isTargetNodeInSubwindow_ = true;
         return;
     }
     canExpandCurrentWindow_ = isExpandDisplay_ && isShowInSubWindow;
     if (containerId >= MIN_SUBCONTAINER_ID) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-        container = AceEngine::Get().GetContainer(parentContainerId);
-        CHECK_NULL_VOID(container);
         isUIExtensionSubWindow_ = container->IsUIExtensionWindow();
         if (isUIExtensionSubWindow_) {
             canExpandCurrentWindow_ = true;

@@ -114,7 +114,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
         if (param.height.has_value() && NonNegative(param.height.value().Value())) {
             dialogLayoutProp->UpdateHeight(param.height.value());
         }
-        if (dialogLayoutProp->GetShowInSubWindowValue(false) || !dialogLayoutProp->GetIsModal().value_or(true)) {
+        auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
+        if (isSubWindow || !dialogLayoutProp->GetIsModal().value_or(true)) {
             dialogContext->UpdateBackgroundColor(Color(0x00000000));
         } else {
             dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));

@@ -224,6 +224,14 @@ public:
     }
     void AddFollowParentWindowLayoutNode(int32_t nodeId) override;
     void RemoveFollowParentWindowLayoutNode(int32_t nodeId) override;
+    void SetNodeId(int32_t nodeId) override
+    {
+        nodeId_ = nodeId;
+    }
+    int32_t GetNodeId() const override
+    {
+        return nodeId_;
+    }
 
 private:
     RefPtr<StackElement> GetStack();
@@ -276,6 +284,7 @@ private:
     int32_t parentContainerId_ = -1;
     int32_t childContainerId_ = -1;
     uint64_t defaultDisplayId_ = 0;
+    int32_t nodeId_ = -1;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;

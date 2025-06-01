@@ -257,7 +257,7 @@ public:
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
     void DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode);
 
-    void OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
+    RefPtr<FrameNode> OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
     void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
@@ -753,6 +753,7 @@ public:
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
     static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode, int32_t type);
+    static int32_t GetSubwindowKeyNodeId(const RefPtr<FrameNode>& frameNode);
     static bool IsNeedAvoidFoldCrease(const RefPtr<FrameNode>& frameNode, bool checkSenboard, bool expandDisplay,
         std::optional<bool> enableHoverMode);
     void SkipMenuShow(int32_t targetId);

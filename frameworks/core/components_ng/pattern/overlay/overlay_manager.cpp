@@ -840,7 +840,13 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     if (container->IsDialogContainer() || isShowInSubWindow) {
-        SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
+        auto dialogProps = AceType::DynamicCast<DialogLayoutProperty>(node->GetLayoutProperty());
+        CHECK_NULL_VOID(dialogProps);
+        if (dialogPattern->IsUIExtensionSubWindow() && dialogProps->GetIsModal().value_or(true)) {
+            SubwindowManager::GetInstance()->RemoveSubwindowByNodeId(node->GetId());
+        } else {
+            SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
+        }
     }
 }
 
@@ -2569,7 +2575,7 @@ void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
         CHECK_NULL_CONTINUE(menuNode);
         auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_CONTINUE(menuWrapperPattern);
-        menuWrapperPattern->CallMenuAboutToAppearCallback();
+        menuWrapperPattern->CallMenuAboutToDisappearCallback();
         menuWrapperPattern->CallMenuDisappearCallback();
         menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
         menuWrapperPattern->SetOnMenuDisappear(false);
@@ -3277,13 +3283,14 @@ void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
     CustomDialogRecordEvent(dialogProps);
 }
 
-void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
+RefPtr<FrameNode> OverlayManager::OpenCustomDialog(
+    const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
 {
     RefPtr<UINode> customNode;
     bool showComponentContent = false;
     if (!callback) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of OpenCustomDialog are incomplete because of no callback.");
-        return;
+        return nullptr;
     }
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -3295,7 +3302,7 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
         if (!customNode) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
             callback(-1);
-            return;
+            return nullptr;
         }
     } else if (dialogProps.customBuilder) {
         TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder.");
@@ -3305,7 +3312,7 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
         if (!customNode) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
             callback(-1);
-            return;
+            return nullptr;
         }
     } else if (dialogProps.customCNode.Upgrade()) {
         auto contentNode = dialogProps.customCNode.Upgrade();
@@ -3313,19 +3320,19 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
         if (!customNode) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom cnode.");
             callback(-1);
-            return;
+            return nullptr;
         }
     } else {
         auto contentNode = dialogProps.contentNode.Upgrade();
         if (!contentNode) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of custom dialog is null");
             callback(ERROR_CODE_DIALOG_CONTENT_ERROR);
-            return;
+            return nullptr;
         }
         if (GetDialogNodeWithExistContent(contentNode)) {
             TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of custom dialog already existed.");
             callback(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
-            return;
+            return nullptr;
         }
         TAG_LOGD(AceLogTag::ACE_DIALOG, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
         customNode = RebuildCustomBuilder(contentNode);
@@ -3333,7 +3340,7 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
     }
     auto dialog = DialogView::CreateDialogNode(nodeId, dialogProps, customNode);
     OpenCustomDialogInner(dialogProps, std::move(callback), dialog, showComponentContent);
-    return;
+    return dialog;
 }
 
 void OverlayManager::CloseCustomDialog(const int32_t dialogId)
@@ -8653,7 +8660,7 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode,
     auto isSceneBoard = parentContainer->IsSceneBoardWindow();
     if (isCrossWindow || isSceneBoard) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
-            pipeContext->GetInstanceId(), static_cast<SubwindowType>(type));
+            pipeContext->GetInstanceId(), static_cast<SubwindowType>(type), GetSubwindowKeyNodeId(frameNode));
         CHECK_NULL_RETURN(subwindow, rect);
         rect = subwindow->GetFoldExpandAvailableRect();
     }
@@ -8663,6 +8670,20 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode,
         isCrossWindow, rect.ToString().c_str());
 
     return rect;
+}
+
+int32_t OverlayManager::GetSubwindowKeyNodeId(const RefPtr<FrameNode>& frameNode)
+{
+    int32_t defaultNodeId = -1;
+    CHECK_NULL_RETURN(frameNode, defaultNodeId);
+    auto dialogPattern = frameNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, defaultNodeId);
+    auto dialogProps = AceType::DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(dialogProps, defaultNodeId);
+    if (dialogPattern->IsUIExtensionSubWindow() && dialogProps->GetIsModal().value_or(true)) {
+        return frameNode->GetId();
+    }
+    return defaultNodeId;
 }
 
 int32_t OverlayManager::RemoveOverlayManagerNode()

@@ -1256,6 +1256,12 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));
     CHECK_NULL_RETURN(dialog, nullptr);
+    if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
+        window_->SetFollowParentWindowLayoutEnabled(true);
+        SetNodeId(dialog->GetId());
+        SubwindowManager::GetInstance()->AddSubwindow(
+            parentContainerId_, SubwindowType::TYPE_DIALOG, AceType::Claim(this), dialog->GetId());
+    }
     haveDialog_ = true;
     return dialog;
 }
@@ -1296,6 +1302,12 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialogWithNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
+    if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
+        window_->SetFollowParentWindowLayoutEnabled(true);
+        SetNodeId(dialog->GetId());
+        SubwindowManager::GetInstance()->AddSubwindow(
+            parentContainerId_, SubwindowType::TYPE_DIALOG, AceType::Claim(this), dialog->GetId());
+    }
     haveDialog_ = true;
     return dialog;
 }
@@ -1348,7 +1360,14 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    overlay->OpenCustomDialog(dialogProps, std::move(callback));
+    auto dialog = overlay->OpenCustomDialog(dialogProps, std::move(callback));
+    CHECK_NULL_VOID(dialog);
+    if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
+        window_->SetFollowParentWindowLayoutEnabled(true);
+        SetNodeId(dialog->GetId());
+        SubwindowManager::GetInstance()->AddSubwindow(
+            parentContainerId_, SubwindowType::TYPE_DIALOG, AceType::Claim(this), dialog->GetId());
+    }
     haveDialog_ = true;
 }
 
@@ -2196,7 +2215,8 @@ bool SubwindowOhos::Close()
 {
     // prevent repeated closure when subWindow's container is destroying
     if (isClosing_) {
-        return true;
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "current window is closing.");
+        return false;
     }
 
     CHECK_NULL_RETURN(window_, false);
