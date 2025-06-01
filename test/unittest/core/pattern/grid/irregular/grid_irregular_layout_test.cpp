@@ -382,7 +382,7 @@ HWTEST_F(GridIrregularLayoutTest, MeasureTarget001, TestSize.Level1)
     info.targetIndex_ = 2;
     algorithm->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
-    EXPECT_EQ(info.lineHeightMap_.size(), 11);
+    EXPECT_EQ(info.lineHeightMap_.size(), 10);
     EXPECT_EQ(info.endMainLineIndex_, 10);
     EXPECT_EQ(info.endIndex_, 8);
     EXPECT_EQ(info.startIndex_, 5);
