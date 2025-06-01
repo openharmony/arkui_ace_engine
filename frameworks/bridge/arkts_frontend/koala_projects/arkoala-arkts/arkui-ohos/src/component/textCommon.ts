@@ -220,38 +220,18 @@ export class TextMenuItemIdInternal {
 }
 export class TextMenuItemId implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
+    static readonly CUT : TextMenuItemId = TextMenuItemId.getCUT()
+    static readonly COPY : TextMenuItemId = TextMenuItemId.getCOPY()
+    static readonly PASTE : TextMenuItemId = TextMenuItemId.getPASTE()
+    static readonly SELECT_ALL : TextMenuItemId = TextMenuItemId.getSELECT_ALL()
+    static readonly COLLABORATION_SERVICE : TextMenuItemId = TextMenuItemId.getCOLLABORATION_SERVICE()
+    static readonly CAMERA_INPUT : TextMenuItemId = TextMenuItemId.getCAMERA_INPUT()
+    static readonly AI_WRITER : TextMenuItemId = TextMenuItemId.getAI_WRITER()
+    static readonly TRANSLATE : TextMenuItemId = TextMenuItemId.getTRANSLATE()
+    static readonly SEARCH : TextMenuItemId = TextMenuItemId.getSEARCH()
+    static readonly SHARE : TextMenuItemId = TextMenuItemId.getSHARE()
     public getPeer(): Finalizable | undefined {
         return this.peer
-    }
-    static get CUT(): TextMenuItemId {
-        return TextMenuItemId.getCUT()
-    }
-    static get COPY(): TextMenuItemId {
-        return TextMenuItemId.getCOPY()
-    }
-    static get PASTE(): TextMenuItemId {
-        return TextMenuItemId.getPASTE()
-    }
-    static get SELECT_ALL(): TextMenuItemId {
-        return TextMenuItemId.getSELECT_ALL()
-    }
-    static get COLLABORATION_SERVICE(): TextMenuItemId {
-        return TextMenuItemId.getCOLLABORATION_SERVICE()
-    }
-    static get CAMERA_INPUT(): TextMenuItemId {
-        return TextMenuItemId.getCAMERA_INPUT()
-    }
-    static get AI_WRITER(): TextMenuItemId {
-        return TextMenuItemId.getAI_WRITER()
-    }
-    static get TRANSLATE(): TextMenuItemId {
-        return TextMenuItemId.getTRANSLATE()
-    }
-    static get SEARCH(): TextMenuItemId {
-        return TextMenuItemId.getSEARCH()
-    }
-    static get SHARE(): TextMenuItemId {
-        return TextMenuItemId.getSHARE()
     }
     static ctor_textmenuitemid(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_ctor()
