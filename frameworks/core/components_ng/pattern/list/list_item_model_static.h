@@ -26,6 +26,19 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ListItemModelStatic {
 public:
     static void SetSticky(FrameNode* frameNode, const std::optional<V2::StickyMode>& stickyMode);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
+    static void SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback);
+    static void SetSelectChangeEvent(FrameNode* frameNode, OnSelectFunc&& changeEvent);
+    static void SetSelectable(FrameNode* frameNode, bool selectable);
+    static void SetSelected(FrameNode* frameNode, bool selected);
+    static void SetEditMode(FrameNode* frameNode, uint32_t editMode);
+    static void SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemStyle>& style);
+    static void SetDeleteArea(FrameNode* frameNode, UINode* footerNode, OnDeleteEvent&& onDelete,
+        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+        OnStateChangedEvent&& onStateChangeEvent, const std::optional<Dimension>& length, bool isStartArea);
+    static void SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,
+        std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc,
+        const std::optional<V2::SwipeEdgeEffect>& edgeEffect);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_MODEL_STATIC_H

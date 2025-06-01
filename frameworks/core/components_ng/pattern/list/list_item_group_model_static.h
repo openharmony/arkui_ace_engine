@@ -17,15 +17,27 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_GROUP_MODEL_STATIC_H
 
 
+#include "base/geometry/axis.h"
+#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_model.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ListItemGroupModelStatic {
 public:
     static void SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+    static void SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+    static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
+    static void SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupStyle>& style);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
+        FrameNode* frameNode, const std::optional<float>& defaultSize);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_GROUP_MODEL_STATIC_H
