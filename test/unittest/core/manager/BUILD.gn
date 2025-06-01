@@ -154,6 +154,19 @@ ace_unittest("drag_drop_behavior_reporter_test_ng") {
   sources = [ "./drag_drop/drag_drop_behavior_reporter_test_ng.cpp" ]
 }
 
+ace_unittest("theme_manager_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [
+    "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
+    "$ace_root/frameworks/core/components/dialog/dialog_theme.cpp",
+    "$ace_root/frameworks/core/components/picker/picker_theme.cpp",
+    "$ace_root/frameworks/core/components/theme/app_theme.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
+    "theme_manager_test_ng.cpp",
+  ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [
@@ -177,5 +190,6 @@ group("core_manager_unittest") {
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",
+    ":theme_manager_test_ng",
   ]
 }
