@@ -51,6 +51,8 @@ public:
         const std::function<void()>& finishCallback, const RefPtr<PipelineBase>& context = nullptr);
     static bool CloseImplicitAnimation(const RefPtr<PipelineBase>& context = nullptr);
     static bool CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& context = nullptr);
+    static CancelAnimationStatus CloseImplicitCancelAnimationReturnStatus(
+        const RefPtr<PipelineBase>& context = nullptr);
     static bool IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context = nullptr);
     static void Animate(const AnimationOption& option, const PropertyCallback& callback,
         const FinishCallback& finishCallback = nullptr, const RepeatCallback& repeatCallback = nullptr,

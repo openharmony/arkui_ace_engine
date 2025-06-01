@@ -243,3 +243,13 @@ declare class NativeUtils {
 
 declare function __getCustomProperty__(nodeId: number, key: string): Object | undefined;
 declare function __getCustomPropertyString__(nodeId: number, key: string): string | undefined;
+
+declare enum AnimationPropertyType {
+  ROTATION = 0,
+  TRANSLATION = 1,
+  SCALE = 2,
+  OPACITY = 3,
+}
+
+declare interface AnimateParam {
+}

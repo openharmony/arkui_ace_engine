@@ -39,6 +39,7 @@
 #include "base/geometry/matrix4.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "core/animation/animation_pub.h"
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
@@ -1763,6 +1764,7 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
         }
     }
     SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, opacity);
+    MarkNeedDrawNode(opacity < 1.0);
     RequestNextFrame();
 }
 
@@ -2633,6 +2635,7 @@ void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double 
             SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, end);
         },
         option.GetOnFinishEvent());
+    MarkNeedDrawNode(begin < 1.0 || end < 1.0);
 }
 
 void RosenRenderContext::ScaleAnimation(const AnimationOption& option, double begin, double end)
@@ -6662,6 +6665,7 @@ void RosenRenderContext::SetOpacity(float opacity)
 {
     CHECK_NULL_VOID(rsNode_);
     SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, opacity);
+    MarkNeedDrawNode(opacity < 1.0);
 }
 
 void RosenRenderContext::SetOpacityMultiplier(float opacity)
@@ -7477,7 +7481,7 @@ void RosenRenderContext::SetAnimationPropertyValue(AnimationPropertyType propert
     CHECK_NULL_VOID(rsNode_);
     switch (property) {
         case AnimationPropertyType::ROTATION: {
-            if (value.size() == 3) {
+            if (value.size() == ROTATION_PARAM_SIZE) {
                 // rotationX and rotationY are opposite between arkui and rs.
                 SetAnimatableProperty<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, -value[0]);
                 SetAnimatableProperty<Rosen::RSRotationYModifier, float>(rotationYUserModifier_, -value[1]);
@@ -7487,7 +7491,7 @@ void RosenRenderContext::SetAnimationPropertyValue(AnimationPropertyType propert
             break;
         }
         case AnimationPropertyType::TRANSLATION: {
-            if (value.size() == 2) {
+            if (value.size() == TRANSLATION_PARAM_SIZE) {
                 SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
                     translateXYUserModifier_, { value[0], value[1] });
                 NotifyHostTransformUpdated();
@@ -7495,7 +7499,7 @@ void RosenRenderContext::SetAnimationPropertyValue(AnimationPropertyType propert
             break;
         }
         case AnimationPropertyType::SCALE: {
-            if (value.size() == 2) {
+            if (value.size() == SCALE_PARAM_SIZE) {
                 SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(
                     scaleXYUserModifier_, { value[0], value[1] });
                 NotifyHostTransformUpdated();
@@ -7503,8 +7507,9 @@ void RosenRenderContext::SetAnimationPropertyValue(AnimationPropertyType propert
             break;
         }
         case AnimationPropertyType::OPACITY: {
-            if (value.size() == 1) {
+            if (value.size() == OPACITY_PARAM_SIZE) {
                 SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, value[0]);
+                MarkNeedDrawNode(value[0] < 1.0);
             }
             break;
         }
@@ -7583,6 +7588,58 @@ std::vector<float> RosenRenderContext::GetRenderNodePropertyValue(AnimationPrope
         }
     }
     return result;
+}
+
+void RosenRenderContext::SyncRSPropertyToRenderContext(AnimationPropertyType property)
+{
+    auto rsValue = GetRenderNodePropertyValue(property);
+    switch (property) {
+        case AnimationPropertyType::ROTATION: {
+            CHECK_NULL_VOID(rsValue.size() == ROTATION_PARAM_SIZE);
+            auto& transformProperty = GetOrCreateTransform();
+            float perspective = 0.0f;
+            if (transformProperty->propTransformRotateAngle.has_value()) {
+                perspective = transformProperty->propTransformRotateAngle->w;
+            } else if (transformProperty->propTransformRotate.has_value()) {
+                perspective = transformProperty->propTransformRotate->v;
+                transformProperty->ResetTransformRotate();
+            }
+            transformProperty->propTransformRotateAngle = { rsValue[0], rsValue[1], rsValue[2], perspective };
+            break;
+        }
+        case AnimationPropertyType::TRANSLATION: {
+            CHECK_NULL_VOID(rsValue.size() == TRANSLATION_PARAM_SIZE);
+            auto& transformProperty = GetOrCreateTransform();
+            CalcDimension translateZ { Dimension(0.0f, DimensionUnit::PX) };
+            if (transformProperty->propTransformTranslate.has_value()) {
+                translateZ = transformProperty->propTransformTranslate->z;
+            }
+            transformProperty->propTransformTranslate = TranslateOptions(
+                Dimension(rsValue[0], DimensionUnit::PX), Dimension(rsValue[1], DimensionUnit::PX), translateZ);
+            break;
+        }
+        case AnimationPropertyType::SCALE: {
+            CHECK_NULL_VOID(rsValue.size() == SCALE_PARAM_SIZE);
+            auto& transformProperty = GetOrCreateTransform();
+            transformProperty->propTransformScale = { rsValue[0], rsValue[1] };
+            break;
+        }
+        case AnimationPropertyType::OPACITY: {
+            CHECK_NULL_VOID(rsValue.size() == OPACITY_PARAM_SIZE);
+            propOpacity_ = rsValue[0];
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void RosenRenderContext::MarkNeedDrawNode(bool condition)
+{
+    if (condition && rsNode_) {
+        rsNode_->SetDrawNode();
+    }
 }
 
 std::shared_ptr<TransitionModifier> RosenRenderContext::GetOrCreateTransitionModifier()

@@ -1288,6 +1288,21 @@ HWTEST_F(RosenRenderContextTest, AnimationPropertyTest002, TestSize.Level1)
     EXPECT_TRUE(CompareVector(nodeScaleValue, scaleValue));
     EXPECT_TRUE(CompareVector(nodeTranslateValue, translateValue));
     EXPECT_TRUE(CompareVector(nodeOpacityValue, opacityValue));
+    /**
+     * @tc.steps: step3. call SyncRSPropertyToRenderContext function.
+     * @tc.expected: step3. The value on renderContext is same with set value.
+     */
+    rosenRenderContext->SyncRSPropertyToRenderContext(AnimationPropertyType::ROTATION);
+    rosenRenderContext->SyncRSPropertyToRenderContext(AnimationPropertyType::SCALE);
+    rosenRenderContext->SyncRSPropertyToRenderContext(AnimationPropertyType::TRANSLATION);
+    rosenRenderContext->SyncRSPropertyToRenderContext(AnimationPropertyType::OPACITY);
+    ASSERT_TRUE(rosenRenderContext->GetTransformRotateAngle().has_value());
+    EXPECT_TRUE(NearEqual(rotationValue[2], rosenRenderContext->GetTransformRotateAngle()->z));
+    ASSERT_TRUE(rosenRenderContext->GetTransformScale().has_value());
+    EXPECT_TRUE(NearEqual(scaleValue[0], rosenRenderContext->GetTransformScale()->x));
+    ASSERT_TRUE(rosenRenderContext->GetTransformTranslate().has_value());
+    ASSERT_TRUE(rosenRenderContext->GetOpacity().has_value());
+    EXPECT_TRUE(NearEqual(opacityValue[0], rosenRenderContext->GetOpacity().value()));
 }
 
 /**

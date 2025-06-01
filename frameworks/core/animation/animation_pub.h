@@ -26,6 +26,11 @@ using ShareId = std::string;
 
 int32_t GetAnimationFinshCount();
 
+constexpr uint32_t ROTATION_PARAM_SIZE = 3;
+constexpr uint32_t TRANSLATION_PARAM_SIZE = 2;
+constexpr uint32_t SCALE_PARAM_SIZE = 2;
+constexpr uint32_t OPACITY_PARAM_SIZE = 1;
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANIMATION_PUB_H
