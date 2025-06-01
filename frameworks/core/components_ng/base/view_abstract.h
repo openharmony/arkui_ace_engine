@@ -267,6 +267,7 @@ public:
     // customBackground
     static void SetBackgroundAlign(const Alignment &align);
     static void SetCustomBackgroundColor(const Color& color);
+    static void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj);
     static void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t layoutSafeAreaEdges);
     static void SetIsTransitionBackground(bool val);
     static void SetIsBuilderBackground(bool val);

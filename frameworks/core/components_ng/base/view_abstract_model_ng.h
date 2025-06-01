@@ -1538,6 +1538,10 @@ public:
         NG::ViewAbstract::SetBackgroundAlign(align);
     }
     void SetCustomBackgroundColor(const Color& color) override;
+    void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        NG::ViewAbstract::SetCustomBackgroundColorWithResourceObj(resObj);
+    }
     void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) override;
     void SetIsTransitionBackground(bool val) override
     {

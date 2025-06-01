@@ -12028,9 +12028,10 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 
     // parse custom background
     Color color = Color::TRANSPARENT;
+    RefPtr<ResourceObject> backgroundColorResObj;
     std::function<void()> builderFunc;
     BackgroundType backgroundType = BackgroundType::COLOR;
-    if (!ParseJsColor(info[0], color)) {
+    if (!ParseJsColor(info[0], color, backgroundColorResObj)) {
         if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
             backgroundType = BackgroundType::CUSTOM_BUILDER;
         } else {
@@ -12055,10 +12056,8 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
         }
     }
 
-    if (BackgroundType::COLOR == backgroundType) {
-        ignoreLayoutSafeAreaEdges = (NG::LAYOUT_SAFE_AREA_EDGE_NONE == ignoreLayoutSafeAreaEdges)
-                                        ? NG::LAYOUT_SAFE_AREA_EDGE_ALL
-                                        : ignoreLayoutSafeAreaEdges;
+    if (BackgroundType::COLOR == backgroundType && NG::LAYOUT_SAFE_AREA_EDGE_NONE == ignoreLayoutSafeAreaEdges) {
+        ignoreLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
     }
 
     // parameters parsed, set the properties parsed above
@@ -12073,7 +12072,11 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
     ViewAbstractModel::GetInstance()->SetBackgroundIgnoresLayoutSafeAreaEdges(ignoreLayoutSafeAreaEdges);
     ViewAbstractModel::GetInstance()->SetBackgroundAlign(alignment);
-    ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
+    if (SystemProperties::ConfigChangePerform() && backgroundColorResObj) {
+        ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(backgroundColorResObj);
+    } else {
+        ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
+    }
 }
 
 bool JSViewAbstract::ParseBackgroundBuilder(
