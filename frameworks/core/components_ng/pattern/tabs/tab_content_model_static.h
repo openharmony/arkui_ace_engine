@@ -24,10 +24,27 @@
 
 namespace OHOS::Ace::NG {
 
+using TabBarBuilderFunc = std::function<void()>;
+
 class ACE_EXPORT TabContentModelStatic {
 public:
     static void SetIndicator(FrameNode* frameNode, const std::optional<IndicatorStyle>& indicatorOpt);
     static void SetLabelStyle(FrameNode* frameNode, const std::optional<LabelStyle>& labelStyleOpt);
+    static void SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode);
+    static void SetBoard(FrameNode* node, const std::optional<BoardStyle>& board);
+    static void SetPadding(FrameNode* node, const std::optional<NG::PaddingProperty>& padding);
+    static void SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding);
+    static void SetId(FrameNode* node, const std::optional<std::string>& id);
+    static void SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle);
+    static void SetTabBar(FrameNode* node,
+        const std::optional<std::string>& label, const std::optional<std::string>& icon, TabBarBuilderFunc&& builder);
+    static void SetLayoutMode(FrameNode* node, const std::optional<LayoutMode>& layoutMode);
+    static void SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign);
+    static void SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible);
+    static void SetIconStyle(FrameNode* node, const std::optional<IconStyle>& iconStyle);
+    static void SetOnWillShow(FrameNode* node, std::function<void()>&& onWillShow);
+    static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG
 

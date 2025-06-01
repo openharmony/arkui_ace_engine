@@ -15,7 +15,6 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -58,113 +57,113 @@ void ValidatePaddingProperty(std::optional<PaddingProperty>& opt)
 } // namespace Validator
 
 auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& style) {
-    // // content
-    // std::optional<std::string> content = std::nullopt;
-    // Converter::VisitUnion(style._content,
-    //     [&content](const Ark_String& arkContent) {
-    //         content = Converter::OptConvert<std::string>(arkContent);
-    //     },
-    //     [&content](const Ark_Resource& arkContent) {
-    //         content = Converter::OptConvert<std::string>(arkContent);
-    //     },
-    //     [](const Ark_ComponentContent& arkContent) {
-    //         LOGE("TabContentAttributeModifier.TabBar1Impl content (type Ark_ComponentContent) is not supported yet.");
-    //     },
-    //     []() {}
-    // );
+    // content
+    std::optional<std::string> content = std::nullopt;
+    Converter::VisitUnion(style._content,
+        [&content](const Ark_String& arkContent) {
+            content = Converter::OptConvert<std::string>(arkContent);
+        },
+        [&content](const Ark_Resource& arkContent) {
+            content = Converter::OptConvert<std::string>(arkContent);
+        },
+        [](const Ark_ComponentContent& arkContent) {
+            LOGE("TabContentAttributeModifier.TabBar1Impl content (type Ark_ComponentContent) is not supported yet.");
+        },
+        []() {}
+    );
 
-    // // indicator
-    // TabContentModelStatic::SetIndicator(frameNode, Converter::OptConvert<IndicatorStyle>(style._indicator));
-    // // selectedMode
-    // TabContentModelNG::SetSelectedMode(frameNode, Converter::OptConvert<SelectedMode>(style._selectedMode));
-    // // board
-    // TabContentModelNG::SetBoard(frameNode, Converter::OptConvert<BoardStyle>(style._board));
-    // // labelStyle
-    // TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle));
-    // // padding
-    // std::optional<PaddingProperty> optPadding;
-    // bool useLocalizedPadding = false;
-    // Converter::VisitUnion(style._padding,
-    //     [&optPadding](const Ark_Union_Padding_Dimension& arkPadding) {
-    //         optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
-    //     },
-    //     [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
-    //         optPadding = Converter::OptConvert<PaddingProperty>(arkLocalizedPadding);
-    //         useLocalizedPadding = true;
-    //     },
-    //     []() {}
-    // );
-    // Validator::ValidatePaddingProperty(optPadding);
-    // TabContentModelNG::SetPadding(frameNode, optPadding);
-    // TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
-    // // id
-    // auto id = Converter::OptConvert<std::string>(style._id);
-    // TabContentModelNG::SetId(frameNode, id);
+    // indicator
+    TabContentModelStatic::SetIndicator(frameNode, Converter::OptConvert<IndicatorStyle>(style._indicator));
+    // selectedMode
+    TabContentModelStatic::SetSelectedMode(frameNode, Converter::OptConvert<SelectedMode>(style._selectedMode));
+    // board
+    TabContentModelStatic::SetBoard(frameNode, Converter::OptConvert<BoardStyle>(style._board));
+    // labelStyle
+    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle));
+    // padding
+    std::optional<PaddingProperty> optPadding;
+    bool useLocalizedPadding = false;
+    Converter::VisitUnion(style._padding,
+        [&optPadding](const Ark_Union_Padding_Dimension& arkPadding) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
+        },
+        [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkLocalizedPadding);
+            useLocalizedPadding = true;
+        },
+        []() {}
+    );
+    Validator::ValidatePaddingProperty(optPadding);
+    TabContentModelStatic::SetPadding(frameNode, optPadding);
+    TabContentModelStatic::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
+    // id
+    auto id = Converter::OptConvert<std::string>(style._id);
+    TabContentModelStatic::SetId(frameNode, id);
 
-    // TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::SUBTABBATSTYLE);
-    // TabContentModelNG::SetTabBar(frameNode, content, std::nullopt, nullptr);
+    TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::SUBTABBATSTYLE);
+    TabContentModelStatic::SetTabBar(frameNode, content, std::nullopt, nullptr);
 };
 
 auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarStyle& style) {
-    // // text
-    // std::optional<std::string> text = Converter::OptConvert<std::string>(style._text);
-    // // icon
-    // std::optional<std::string> icon = std::nullopt;
-    // Converter::VisitUnion(style._icon,
-    //     [&icon](const Ark_ResourceStr& arkIcon) {
-    //         icon = Converter::OptConvert<std::string>(arkIcon);
-    //     },
-    //     [](const Ark_TabBarSymbol& arkTabBarSymbol) {
-    //         LOGE("TabContentAttributeModifier.TabBar1Impl tabBarSymbol is not supported yet.");
-    //     },
-    //     []() {}
-    // );
-    // // layoutMode
-    // TabContentModelNG::SetLayoutMode(frameNode, Converter::OptConvert<LayoutMode>(style._layoutMode));
-    // // padding
-    // std::optional<PaddingProperty> optPadding;
-    // bool useLocalizedPadding = false;
-    // Converter::VisitUnion(style._padding,
-    //     [&optPadding](const Ark_Padding& arkPadding) {
-    //         optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
-    //     },
-    //     [&optPadding](const Ark_Length& arkLength) {
-    //         optPadding = Converter::OptConvert<PaddingProperty>(arkLength);
-    //     },
-    //     [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
-    //         optPadding = Converter::OptConvert<PaddingProperty>(arkLocalizedPadding);
-    //         useLocalizedPadding = true;
-    //     },
-    //     []() {}
-    // );
-    // Validator::ValidatePaddingProperty(optPadding);
-    // TabContentModelNG::SetPadding(frameNode, optPadding);
-    // TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
-    // // verticalAlign
-    // TabContentModelNG::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
-    // // symmetricExtensible
-    // TabContentModelNG::SetSymmetricExtensible(frameNode, Converter::OptConvert<bool>(style._symmetricExtensible));
-    // // labelStyle
-    // TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle));
-    // // iconStyle
-    // TabContentModelNG::SetIconStyle(frameNode, Converter::OptConvert<IconStyle>(style._iconStyle));
-    // // id
-    // auto id = Converter::OptConvert<std::string>(style._id);
-    // TabContentModelNG::SetId(frameNode, id);
+    // text
+    std::optional<std::string> text = Converter::OptConvert<std::string>(style._text);
+    // icon
+    std::optional<std::string> icon = std::nullopt;
+    Converter::VisitUnion(style._icon,
+        [&icon](const Ark_ResourceStr& arkIcon) {
+            icon = Converter::OptConvert<std::string>(arkIcon);
+        },
+        [](const Ark_TabBarSymbol& arkTabBarSymbol) {
+            LOGE("TabContentAttributeModifier.TabBar1Impl tabBarSymbol is not supported yet.");
+        },
+        []() {}
+    );
+    // layoutMode
+    TabContentModelStatic::SetLayoutMode(frameNode, Converter::OptConvert<LayoutMode>(style._layoutMode));
+    // padding
+    std::optional<PaddingProperty> optPadding;
+    bool useLocalizedPadding = false;
+    Converter::VisitUnion(style._padding,
+        [&optPadding](const Ark_Padding& arkPadding) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
+        },
+        [&optPadding](const Ark_Length& arkLength) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkLength);
+        },
+        [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkLocalizedPadding);
+            useLocalizedPadding = true;
+        },
+        []() {}
+    );
+    Validator::ValidatePaddingProperty(optPadding);
+    TabContentModelStatic::SetPadding(frameNode, optPadding);
+    TabContentModelStatic::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
+    // verticalAlign
+    TabContentModelStatic::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
+    // symmetricExtensible
+    TabContentModelStatic::SetSymmetricExtensible(frameNode, Converter::OptConvert<bool>(style._symmetricExtensible));
+    // labelStyle
+    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle));
+    // iconStyle
+    TabContentModelStatic::SetIconStyle(frameNode, Converter::OptConvert<IconStyle>(style._iconStyle));
+    // id
+    auto id = Converter::OptConvert<std::string>(style._id);
+    TabContentModelStatic::SetId(frameNode, id);
 
-    // TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::BOTTOMTABBATSTYLE);
-    // TabContentModelNG::SetTabBar(frameNode, text, icon, nullptr);
+    TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::BOTTOMTABBATSTYLE);
+    TabContentModelStatic::SetTabBar(frameNode, text, icon, nullptr);
 };
 
 namespace Converter {
-// template<>
-// TabBarOptions Convert(const Ark_TabBarOptions& src)
-// {
-//     TabBarOptions options;
-//     options.text = OptConvert<std::string>(src.text);
-//     options.icon = OptConvert<std::string>(src.icon);
-//     return options;
-// }
+template<>
+TabBarOptions Convert(const Ark_TabBarOptions& src)
+{
+    TabBarOptions options;
+    options.text = OptConvert<std::string>(src.text);
+    options.icon = OptConvert<std::string>(src.icon);
+    return options;
+}
 
 template<>
 IconStyle Convert(const Ark_TabBarIconStyle& src)
@@ -296,10 +295,9 @@ namespace TabContentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = TabContentModelNG::CreateFrameNode(id);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = TabContentModelStatic::CreateFrameNode(id);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // TabContentModifier
 namespace TabContentInterfaceModifier {
@@ -312,31 +310,40 @@ namespace TabContentAttributeModifier {
 void TabBar0Impl(Ark_NativePointer node,
                  const Opt_Union_String_Resource_CustomBuilder_TabBarOptions* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // std::optional<std::string> label = std::nullopt;
-    // std::optional<std::string> icon = std::nullopt;
-    // TabBarBuilderFunc builder = nullptr;
-    // auto options = Converter::OptConvert<TabBarOptionsVariant>(*value);
-    // if (auto arkText = std::get_if<Ark_String>(&options.value()); arkText) {
-    //     label = Converter::Convert<std::string>(*arkText);
-    // } else if (auto arkText = std::get_if<Ark_Resource>(&options.value()); arkText) {
-    //     label = Converter::OptConvert<std::string>(*arkText);
-    // } else if (auto arkText = std::get_if<CustomNodeBuilder>(&options.value()); arkText) {
-    //     builder = [callback = CallbackHelper(*arkText), node]() {
-    //         auto builderNode = callback.BuildSync(node);
-    //         NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-    //     };
-    // } else if (auto iconLabel = std::get_if<Ark_TabBarOptions>(&options.value()); iconLabel) {
-    //     if (auto tabBarOptions = Converter::OptConvert<TabBarOptions>(*iconLabel); tabBarOptions) {
-    //         label = tabBarOptions->text;
-    //         icon = tabBarOptions->icon;
-    //     }
-    // } else {
-    //     LOGE("ARKOALA TabContentAttributeModifier.TabBar0Impl unknown value format.");
-    // }
-    // TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-    // TabContentModelNG::SetTabBar(frameNode, label, icon, std::move(builder));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<std::string> label = std::nullopt;
+    std::optional<std::string> icon = std::nullopt;
+    TabBarBuilderFunc builder = nullptr;
+    auto options = Converter::OptConvert<TabBarOptionsVariant>(*value);
+    if (auto arkText = std::get_if<Ark_String>(&options.value()); arkText) {
+        label = Converter::Convert<std::string>(*arkText);
+        TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+        TabContentModelStatic::SetTabBar(frameNode, label, icon, std::move(builder));
+    } else if (auto arkText = std::get_if<Ark_Resource>(&options.value()); arkText) {
+        label = Converter::OptConvert<std::string>(*arkText);
+        TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+        TabContentModelStatic::SetTabBar(frameNode, label, icon, std::move(builder));
+    } else if (auto arkText = std::get_if<CustomNodeBuilder>(&options.value()); arkText) {
+        CallbackHelper(*arkText).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+            auto builder = [frameNode, uiNode]() {
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
+            }, node);
+    } else if (auto iconLabel = std::get_if<Ark_TabBarOptions>(&options.value()); iconLabel) {
+        if (auto tabBarOptions = Converter::OptConvert<TabBarOptions>(*iconLabel); tabBarOptions) {
+            label = tabBarOptions->text;
+            icon = tabBarOptions->icon;
+        }
+        TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+        TabContentModelStatic::SetTabBar(frameNode, label, icon, std::move(builder));
+    } else {
+        LOGE("ARKOALA TabContentAttributeModifier.TabBar0Impl unknown value format.");
+        TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+        TabContentModelStatic::SetTabBar(frameNode, label, icon, std::move(builder));
+    }
 }
 void TabBar1Impl(Ark_NativePointer node,
                  const Opt_Union_SubTabBarStyle_BottomTabBarStyle* value)
@@ -356,78 +363,78 @@ void TabBar1Impl(Ark_NativePointer node,
 void TabBar2Impl(Ark_NativePointer node,
                  const Opt_Type_TabContentAttribute_tabBar_content* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // Converter::VisitUnion(*value,
-    //     [](const Ark_ComponentContent& arkContent) {
-    //         LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContent is not supported yet.");
-    //     },
-    //     [frameNode](const Ark_SubTabBarStyle& style) {
-    //         g_setSubTabBarStyle(frameNode, style);
-    //     },
-    //     [frameNode](const Ark_BottomTabBarStyle& style) {
-    //         g_setBottomTabBarStyle(frameNode, style);
-    //     },
-    //     [frameNode](const Ark_String& arkContent) {
-    //         auto text = Converter::OptConvert<std::string>(arkContent);
-    //         TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-    //         TabContentModelNG::SetTabBar(frameNode, text, std::nullopt, nullptr);
-    //     },
-    //     [frameNode](const Ark_Resource& arkContent) {
-    //         auto text = Converter::OptConvert<std::string>(arkContent);
-    //         TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-    //         TabContentModelNG::SetTabBar(frameNode, text, std::nullopt, nullptr);
-    //     },
-    //     [frameNode](const CustomNodeBuilder& arkBuilder) {
-    //         auto builder = [callback = CallbackHelper(arkBuilder), frameNode]() {
-    //             auto builderNode = callback.BuildSync(frameNode);
-    //             NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-    //         };
-    //         TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-    //         TabContentModelNG::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
-    //     },
-    //     [frameNode](const Ark_TabBarOptions& arkTabBarOptions) {
-    //         std::optional<std::string> label;
-    //         std::optional<std::string> icon;
-    //         if (auto tabBarOptions = Converter::OptConvert<TabBarOptions>(arkTabBarOptions)) {
-    //             label = tabBarOptions->text;
-    //             icon = tabBarOptions->icon;
-    //         }
-    //         TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-    //         TabContentModelNG::SetTabBar(frameNode, label, icon, nullptr);
-    //     },
-    //     []() {}
-    // );
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Converter::VisitUnion(*value,
+        [](const Ark_ComponentContent& arkContent) {
+            LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContent is not supported yet.");
+        },
+        [frameNode](const Ark_SubTabBarStyle& style) {
+            g_setSubTabBarStyle(frameNode, style);
+        },
+        [frameNode](const Ark_BottomTabBarStyle& style) {
+            g_setBottomTabBarStyle(frameNode, style);
+        },
+        [frameNode](const Ark_String& arkContent) {
+            auto text = Converter::OptConvert<std::string>(arkContent);
+            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelStatic::SetTabBar(frameNode, text, std::nullopt, nullptr);
+        },
+        [frameNode](const Ark_Resource& arkContent) {
+            auto text = Converter::OptConvert<std::string>(arkContent);
+            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelStatic::SetTabBar(frameNode, text, std::nullopt, nullptr);
+        },
+        [frameNode](const CustomNodeBuilder& arkBuilder) {
+            auto builder = [callback = CallbackHelper(arkBuilder), frameNode]() {
+                auto builderNode = callback.BuildSync(frameNode);
+                NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+            };
+            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
+        },
+        [frameNode](const Ark_TabBarOptions& arkTabBarOptions) {
+            std::optional<std::string> label;
+            std::optional<std::string> icon;
+            if (auto tabBarOptions = Converter::OptConvert<TabBarOptions>(arkTabBarOptions)) {
+                label = tabBarOptions->text;
+                icon = tabBarOptions->icon;
+            }
+            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelStatic::SetTabBar(frameNode, label, icon, nullptr);
+        },
+        []() {}
+    );
 }
 void OnWillShowImpl(Ark_NativePointer node,
                     const Opt_VoidCallback* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto optValue = Converter::GetOptPtr(value);
-    // if (!optValue) {
-    //     // TODO: Reset value
-    //     return;
-    // }
-    // auto onWillShow = [arkCallback = CallbackHelper(*optValue)]() -> void {
-    //     arkCallback.Invoke();
-    // };
-    // TabContentModelNG::SetOnWillShow(frameNode, std::move(onWillShow));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TabContentModelStatic::SetOnWillShow(frameNode, nullptr);
+        return;
+    }
+    auto onWillShow = [arkCallback = CallbackHelper(*optValue)]() -> void {
+        arkCallback.Invoke();
+    };
+    TabContentModelStatic::SetOnWillShow(frameNode, std::move(onWillShow));
 }
 void OnWillHideImpl(Ark_NativePointer node,
                     const Opt_VoidCallback* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto optValue = Converter::GetOptPtr(value);
-    // if (!optValue) {
-    //     // TODO: Reset value
-    //     return;
-    // }
-    // auto onWillHide = [arkCallback = CallbackHelper(*optValue)]() -> void {
-    //     arkCallback.Invoke();
-    // };
-    // TabContentModelNG::SetOnWillHide(frameNode, std::move(onWillHide));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TabContentModelStatic::SetOnWillHide(frameNode, nullptr);
+        return;
+    }
+    auto onWillHide = [arkCallback = CallbackHelper(*optValue)]() -> void {
+        arkCallback.Invoke();
+    };
+    TabContentModelStatic::SetOnWillHide(frameNode, std::move(onWillHide));
 }
 } // TabContentAttributeModifier
 const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
