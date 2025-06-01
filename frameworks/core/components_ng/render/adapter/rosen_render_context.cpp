@@ -3102,6 +3102,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
 
 void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)
 {
+    CHECK_NULL_VOID(rsNode_);
     auto node = GetHost();
     CHECK_NULL_VOID(node);
     auto transitionModifier = GetOrCreateTransitionModifier();
@@ -3116,6 +3117,7 @@ void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)
 
 void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixelMap)
 {
+    CHECK_NULL_VOID(rsNode_);
     auto node = GetHost();
     CHECK_NULL_VOID(node);
     auto transitionModifier = GetOrCreateTransitionModifier();
@@ -3135,6 +3137,7 @@ void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixe
 
 void RosenRenderContext::OnCustomBackgroundColorUpdate(const Color& color)
 {
+    CHECK_NULL_VOID(rsNode_);
     auto node = GetHost();
     CHECK_NULL_VOID(node);
     auto transitionModifier = GetOrCreateTransitionModifier();
@@ -3149,12 +3152,14 @@ void RosenRenderContext::OnCustomBackgroundColorUpdate(const Color& color)
 
 void RosenRenderContext::OnBuilderBackgroundFlagUpdate(bool isBuilderBackground)
 {
+    CHECK_NULL_VOID(rsNode_);
     auto transitionModifier = GetOrCreateTransitionModifier();
     transitionModifier->SetIsBuilderBackground(isBuilderBackground);
 }
 
 void RosenRenderContext::UpdateCustomBackground()
 {
+    CHECK_NULL_VOID(rsNode_);
     ModifyCustomBackground();
     RequestNextFrame();
 }

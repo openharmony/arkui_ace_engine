@@ -1461,6 +1461,92 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg023, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetBackgroundOptions001
+ * @tc.desc: Test the background options
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetBackgroundOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+
+    /**
+     * @tc.steps: step2. init theme, pipeline and container.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto containerId = pipelineContext->GetInstanceId();
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
+
+    /**
+     * @tc.steps: step3. init background build func and alignment.
+     * @tc.expected: background function is successfully set.
+     */
+    auto mainFrameNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    Alignment alignment = Alignment::CENTER;
+    auto buildFunc = [mainFrameNode]() { flag++; };
+    viewAbstractModelNG.SetBackground(std::move(buildFunc));
+    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_NE(targetNode->builderFunc_, nullptr);
+
+    /**
+     * @tc.steps: step4. update background alignment.
+     * @tc.expected: background alignment is successfully set.
+     */
+    auto renderContext = targetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    alignment = Alignment::TOP_CENTER;
+    viewAbstractModelNG.SetBackgroundAlign(alignment);
+    auto backgroundAlign = renderContext->GetBackgroundAlign().value_or(Alignment::BOTTOM_CENTER);
+    EXPECT_EQ(backgroundAlign, alignment);
+
+    /**
+     * @tc.steps: step5. update background color.
+     * @tc.expected: background alignment is successfully set.
+     */
+    Color color = Color::BLUE;
+    viewAbstractModelNG.SetCustomBackgroundColor(color);
+    auto customBackgroundColor = renderContext->GetCustomBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(customBackgroundColor.GetValue(), color.GetValue());
+
+    /**
+     * @tc.steps: step6. update background flags.
+     * @tc.expected: background flags is successfully set.
+     */
+    viewAbstractModelNG.SetIsTransitionBackground(true);
+    EXPECT_TRUE(renderContext->GetIsTransitionBackground().value_or(false));
+    viewAbstractModelNG.SetIsBuilderBackground(true);
+    EXPECT_TRUE(renderContext->GetBuilderBackgroundFlag().value_or(false));
+
+    /**
+     * @tc.steps: step7. update background ignoresLayoutSafeAreaEdges.
+     * @tc.expected: background ignoresLayoutSafeAreaEdges is successfully set.
+     */
+    viewAbstractModelNG.SetBackgroundIgnoresLayoutSafeAreaEdges(NG::LAYOUT_SAFE_AREA_EDGE_ALL);
+    auto layoutProp = targetNode->GetLayoutProperty();
+    ASSERT_NE(layoutProp, nullptr);
+    EXPECT_EQ(layoutProp->GetBackgroundIgnoresLayoutSafeAreaEdges(), NG::LAYOUT_SAFE_AREA_EDGE_ALL);
+}
+
+/**
  * @tc.name: SetAccessibilitySelected001
  * @tc.desc: Test the SetAccessibilitySelected
  * @tc.type: FUNC
