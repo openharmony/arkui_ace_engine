@@ -81,6 +81,8 @@ constexpr int32_t MAX_FLUSH_COUNT = 2;
 constexpr int32_t MAX_RECORD_SECOND = 15;
 constexpr int32_t DEFAULT_RECORD_SECOND = 5;
 constexpr int32_t SECOND_TO_MILLISEC = 1000;
+constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
+constexpr int32_t RATIO_OF_VSYNC_PERIOD = 2;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -4852,9 +4854,22 @@ void PipelineContext::OnIdle(int64_t deadline)
     ACE_SCOPED_TRACE_COMMERCIAL("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
+    currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
-        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc();
+        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
+        frameCountForNotCallJSCleanUp_ = 0;
+    } else {
+        frameCountForNotCallJSCleanUp_++;
     }
+
+    // Check if there is more than 100 frame which does not execute the CallJSCleanUpIdleTaskFunc
+    // Force to invoke CallJSCleanUpIdleTaskFunc to make sure no OOM in JS side
+    if (frameCountForNotCallJSCleanUp_ >= MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION) {
+        // The longest execution time is half of vsync period
+        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(window_->GetVSyncPeriod() / RATIO_OF_VSYNC_PERIOD);
+        frameCountForNotCallJSCleanUp_ = 0;
+    }
+
     TriggerIdleCallback(deadline);
 }
 

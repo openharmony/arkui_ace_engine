@@ -30,10 +30,10 @@
  *
  */
 declare class WeakRef<T extends Object> {
-    constructor(o: T);
-    deref(): T;
-  }
-  
+  constructor(o: T);
+  deref(): T;
+}
+
   declare class DumpLog {
     static print(depth: number, content: string): void;
   }
