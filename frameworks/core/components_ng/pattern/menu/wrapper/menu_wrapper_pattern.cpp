@@ -17,9 +17,29 @@
 
 #include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string ConvertModalModeToString(std::optional<ModalMode> modalModeOpt)
+{
+    if (!modalModeOpt.has_value()) {
+        return "undefined";
+    }
+    auto modalMode = modalModeOpt.value();
+    switch (modalMode) {
+        case ModalMode::AUTO:
+            return "ModalMode.AUTO";
+        case ModalMode::NONE:
+            return "ModalMode.NONE";
+        case ModalMode::TARGET_WINDOW:
+            return "ModalMode.TARGET_WINDOW";
+        default:
+            return "ModalMode.AUTO";
+    }
+}
+} // namespace
 void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu, const HideMenuType& reason)
 {
     CHECK_NULL_VOID(menu);
@@ -750,12 +770,33 @@ bool MenuWrapperPattern::IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWr
     return true;
 }
 
-void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
+void MenuWrapperPattern::AddTargetWindowHotArea(std::vector<Rect>& rects)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    if (!IsNeedSetHotAreas(layoutWrapper)) {
+    if (menuParam_.modalMode.value_or(ModalMode::AUTO) != ModalMode::TARGET_WINDOW) {
         return;
     }
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto context = targetNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto container = AceEngine::Get().GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        return;
+    }
+    if (container->IsUIExtensionWindow()) {
+        auto windowRect = container->GetUIExtensionHostWindowRect();
+        rects.emplace_back(windowRect);
+    } else {
+        auto windowRect = context->GetDisplayWindowRectInfo();
+        auto titleHeight = context->GetCustomTitleHeight().ConvertToPx();
+        rects.emplace_back(Rect(
+            windowRect.Left(), windowRect.Top() + titleHeight, windowRect.Width(), windowRect.Height() - titleHeight));
+    }
+}
+
+void MenuWrapperPattern::AddWrapperChildHotArea(std::vector<Rect>& rects, const RefPtr<LayoutWrapper>& layoutWrapper)
+{
     auto layoutProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
     float safeAreaInsetsLeft = 0.0f;
@@ -765,7 +806,6 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
         safeAreaInsetsLeft = static_cast<float>(safeAreaInsets->left_.end);
         safeAreaInsetsTop = static_cast<float>(safeAreaInsets->top_.end);
     }
-    std::vector<Rect> rects;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         CHECK_NULL_VOID(child);
         auto childGeometryNode = child->GetGeometryNode();
@@ -782,17 +822,35 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 
         rects.emplace_back(rect);
     }
-    // If container is UIExtensionWindow, set hotArea size equals to subwindow's filterColumnNode's size
-    if (IsContextMenu() && GetPreviewMode() != MenuPreviewMode::NONE) {
-        auto filterNode = GetFilterColumnNode();
-        if (filterNode && GetIsFilterInSubwindow()) {
-            auto filterNodeGeometryNode = filterNode->GetGeometryNode();
-            CHECK_NULL_VOID(filterNodeGeometryNode);
-            auto frameRect = filterNodeGeometryNode->GetFrameRect();
-            auto rect = Rect(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
-            rects.emplace_back(rect);
-        }
+}
+
+void MenuWrapperPattern::AddFilterHotArea(std::vector<Rect>& rects)
+{
+    if (!IsContextMenu() || GetPreviewMode() == MenuPreviewMode::NONE) {
+        return;
     }
+    auto filterNode = GetFilterColumnNode();
+    if (filterNode && GetIsFilterInSubwindow()) {
+        auto filterNodeGeometryNode = filterNode->GetGeometryNode();
+        CHECK_NULL_VOID(filterNodeGeometryNode);
+        auto frameRect = filterNodeGeometryNode->GetFrameRect();
+        auto rect = Rect(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+        rects.emplace_back(rect);
+    }
+}
+
+void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    if (!IsNeedSetHotAreas(layoutWrapper)) {
+        return;
+    }
+
+    std::vector<Rect> rects;
+    AddTargetWindowHotArea(rects);
+    AddWrapperChildHotArea(rects, layoutWrapper);
+    // If container is UIExtensionWindow, set hotArea size equals to subwindow's filterColumnNode's size
+    AddFilterHotArea(rects);
     auto subwindowManager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(subwindowManager);
     auto host = GetHost();
@@ -1031,6 +1089,8 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("DefaultPlacement: " + dumpInfo_.defaultPlacement);
     DumpLog::GetInstance().AddDesc("FinalPosition: " + dumpInfo_.finalPosition.ToString());
     DumpLog::GetInstance().AddDesc("FinalPlacement: " + dumpInfo_.finalPlacement);
+    auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
+    DumpLog::GetInstance().AddDesc("ModalMode: " + modalMode);
 }
 
 void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1055,6 +1115,8 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("DefaultPlacement", dumpInfo_.defaultPlacement.c_str());
     json->Put("FinalPosition", dumpInfo_.finalPosition.ToString().c_str());
     json->Put("FinalPlacement", dumpInfo_.finalPlacement.c_str());
+    auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
+    json->Put("ModalMode", modalMode.c_str());
 }
 
 bool MenuWrapperPattern::CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point)

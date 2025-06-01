@@ -1203,6 +1203,13 @@ let HapticFeedbackMode;
   HapticFeedbackMode[HapticFeedbackMode.AUTO = 2] = 'AUTO';
 })(HapticFeedbackMode || (HapticFeedbackMode = {}));
 
+let ModalMode;
+(function (ModalMode) {
+  ModalMode[ModalMode.AUTO = 0] = 'AUTO';
+  ModalMode[ModalMode.NONE = 1] = 'NONE';
+  ModalMode[ModalMode.TARGET_WINDOW = 2] = 'TARGET_WINDOW';
+})(ModalMode || (ModalMode = {}));
+
 let TextChangeReason;
 (function (TextChangeReason) {
   TextChangeReason[TextChangeReason.UNKNOWN = 0] = 'UNKNOWN';
