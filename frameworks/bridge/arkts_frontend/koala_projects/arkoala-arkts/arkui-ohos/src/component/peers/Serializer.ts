@@ -169,6 +169,7 @@ import { MenuItemGroupOptions } from "./../menuItemGroup"
 import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
+import promptAction from '@ohos/promptAction'
 
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
@@ -17775,6 +17776,22 @@ export class Serializer extends SerializerBase {
         if ((RuntimeType.UNDEFINED) != (value_levelOrder_type)) {
             const value_levelOrder_value  = value_levelOrder!
             valueSerializer.writeLevelOrder(value_levelOrder_value)
+        }
+    }
+    writeShowToastOptions(value: promptAction.ShowToastOptions): void {
+        let valueSerializer : Serializer = this
+        const value_message  = value.message
+        let value_message_type : int32 = RuntimeType.UNDEFINED
+        value_message_type = runtimeType(value_message)
+        if (RuntimeType.STRING == value_message_type) {
+            valueSerializer.writeInt8(0 as int32)
+            const value_message_0  = value_message as string
+            valueSerializer.writeString(value_message_0)
+        }
+        else if (RuntimeType.OBJECT == value_message_type) {
+            valueSerializer.writeInt8(1 as int32)
+            const value_message_1  = value_message as Resource
+            valueSerializer.writeResource(value_message_1)
         }
     }
     writeAlertDialogParamWithButtons(value: AlertDialogParamWithButtons): void {

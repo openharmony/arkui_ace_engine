@@ -35092,6 +35092,12 @@ void impl_AlertDialog_show(KSerializerBuffer thisArray, int32_t thisLength) {
         GetAccessors()->getAlertDialogAccessor()->show((const Ark_Type_AlertDialog_show_value*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V2(AlertDialog_show, KSerializerBuffer, int32_t)
+void impl_PromptAction_showToast(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_ShowToastOptions value_value = thisDeserializer.readShowToastOptions();;
+        GetAccessors()->getPromptActionAccessor()->showToast((const Ark_ShowToastOptions*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V2(PromptAction_showToast, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_SpringProp_ctor(KInteropNumber mass, KInteropNumber stiffness, KInteropNumber damping) {
         return GetAccessors()->getSpringPropAccessor()->ctor((const Ark_Number*) (&mass), (const Ark_Number*) (&stiffness), (const Ark_Number*) (&damping));
 }

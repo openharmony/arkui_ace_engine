@@ -206,6 +206,7 @@ export class PromptAction {
 
     showToast(options: promptAction.ShowToastOptions): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        promptAction.showToast(options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
@@ -219,6 +220,7 @@ export class UIContext {
     atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspector | null = null;
     contextMenuController_: ContextMenuController;
+    promptAction_: PromptAction | null = null;
 
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
@@ -394,8 +396,10 @@ export class UIContext {
     }
 
     public getPromptAction(): PromptAction {
-        let promptAction : PromptAction = new PromptAction(this.instanceId_);
-        return promptAction;
+        if (!this.promptAction_) {
+            this.promptAction_ = new PromptAction(this.instanceId_);
+        }
+        return this.promptAction_ as PromptAction;
     }
 
     public showAlertDialog(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons |

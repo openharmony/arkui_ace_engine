@@ -754,6 +754,47 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ActionSheetOptions")
         }
     }
+    static isShowToastOptions(value: Object | string | number | undefined | boolean, duplicated_message: boolean, duplicated_duration: boolean, duplicated_bottom: boolean, duplicated_showMode: boolean, duplicated_alignment: boolean, duplicated_offset: boolean, duplicated_backgroundColor: boolean, duplicated_textColor: boolean, duplicated_backgroundBlurStyle: boolean, duplicated_shadow: boolean, duplicated_enableHoverMode: boolean, duplicated_hoverModeArea: boolean): boolean {
+        if ((!duplicated_message) && (value?.hasOwnProperty("message"))) {
+            return true
+        }
+        if ((!duplicated_duration) && (value?.hasOwnProperty("duration"))) {
+            return true
+        }
+        if ((!duplicated_bottom) && (value?.hasOwnProperty("bottom"))) {
+            return true
+        }
+        if ((!duplicated_showMode) && (value?.hasOwnProperty("showMode"))) {
+            return true
+        }
+        if ((!duplicated_alignment) && (value?.hasOwnProperty("alignment"))) {
+            return true
+        }
+        if ((!duplicated_offset) && (value?.hasOwnProperty("offset"))) {
+            return true
+        }
+        if ((!duplicated_backgroundColor) && (value?.hasOwnProperty("backgroundColor"))) {
+            return true
+        }
+        if ((!duplicated_textColor) && (value?.hasOwnProperty("textColor"))) {
+            return true
+        }
+        if ((!duplicated_backgroundBlurStyle) && (value?.hasOwnProperty("backgroundBlurStyle"))) {
+            return true
+        }
+        if ((!duplicated_shadow) && (value?.hasOwnProperty("shadow"))) {
+            return true
+        }
+        if ((!duplicated_enableHoverMode) && (value?.hasOwnProperty("enableHoverMode"))) {
+            return true
+        }
+        if ((!duplicated_hoverModeArea) && (value?.hasOwnProperty("hoverModeArea"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ShowToastOptions")
+        }
+    }
     static isAdaptiveColor(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (AdaptiveColor.DEFAULT)) {
             return true

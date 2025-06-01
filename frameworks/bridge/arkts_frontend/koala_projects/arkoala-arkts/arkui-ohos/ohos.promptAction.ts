@@ -17,8 +17,10 @@ import { Resource } from "global/resource"
 import { Alignment } from "./src/component/enums"
 import { ResourceColor, Offset } from "./src/component/units"
 import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./src/component/common"
+import { Serializer } from "./src/component/peers/Serializer"
+import { ArkUIGeneratedNativeModule } from "#components"
 
-namespace promtAction {
+namespace promptAction {
     export interface ShowToastOptions {
         message: string | Resource;
         duration?: number;
@@ -39,6 +41,13 @@ namespace promtAction {
         TOP_MOST = 1,
         SYSTEM_TOP_MOST = 2
     }
+
+    export function showToast(value: ShowToastOptions): void {
+        const thisSerializer : Serializer = Serializer.hold();
+        thisSerializer.writeShowToastOptions(value);
+        ArkUIGeneratedNativeModule._PromptAction_showToast(thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
 }
 
-export default promtAction
+export default promptAction

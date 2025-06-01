@@ -162,6 +162,7 @@ import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
 import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
+import promptAction from '@ohos/promptAction'
 
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
@@ -196,6 +197,9 @@ export class TypeChecker {
     }
     static isActionSheetOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean, arg34: boolean): boolean {
         return value instanceof ActionSheetOptions
+    }
+    static isShowToastOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean): boolean {
+        return value instanceof promptAction.ShowToastOptions
     }
     static isAdaptiveColor(value: Object | string | number | undefined): boolean {
         return value instanceof AdaptiveColor
