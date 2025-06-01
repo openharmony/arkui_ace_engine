@@ -16,6 +16,7 @@
 #include <optional>
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "ui/base/geometry/dimension.h"
@@ -541,7 +542,9 @@ Ark_Size GetMeasuredSizeImpl(Ark_FrameNode peer)
     }
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, {});
-    auto size = frameNode->GetGeometryNode()->GetFrameSize();
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto size = geometryNode->GetFrameSize();
     return Converter::ArkValue<Ark_Size>(size);
 }
 Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
@@ -552,7 +555,9 @@ Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
     }
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, {});
-    auto offset = frameNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto offset = geometryNode->GetMarginFrameOffset();
     return Converter::ArkValue<Ark_Position>(offset);
 }
 Ark_EdgesLengthMetrics GetUserConfigBorderWidthImpl(Ark_FrameNode peer)
@@ -628,7 +633,15 @@ Ark_SizeLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(frameNode, {});
     auto size = ViewAbstract::GetConfigSize(AceType::RawPtr(frameNode));
     if (!size.has_value()) {
-        return {};
+        LOGW("This frameNode do not have config size, return default.");
+        auto width = std::make_optional<CalcLength>();
+        auto height = std::make_optional<CalcLength>();
+        auto calcSize = std::make_optional<CalcSize>(width, height);
+        Ark_SizeLengthMetrics retValue = { .width = GetOptNumberFromCalcLength(calcSize->Width()),
+            .widthUnit = GetOptLengthUnitFromCalcLength(calcSize->Width()),
+            .height = GetOptNumberFromCalcLength(calcSize->Height()),
+            .heightUnit = GetOptLengthUnitFromCalcLength(calcSize->Height()) };
+        return retValue;
     }
     Ark_SizeLengthMetrics retValue = {
         .width = GetOptNumberFromCalcLength(size->Width()),

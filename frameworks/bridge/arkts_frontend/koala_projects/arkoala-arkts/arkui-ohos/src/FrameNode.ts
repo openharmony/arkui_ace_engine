@@ -20,9 +20,9 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { Position, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer,
-    MaterializedBase, NativeBuffer, nullptr, pointer } from "@koalaui/interop"
+    MaterializedBase, NativeBuffer, nullptr, pointer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Deserializer, Serializer } from "./component"
+import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode, RenderNodeInternal } from "./RenderNode"
 import { CommonAttribute, ArkCommonMethodPeer, CommonMethod } from './component/common'
@@ -57,6 +57,20 @@ export class FrameNodeInternal {
         return obj
     }
 }
+
+// @ts-ignore
+function GetExactRetValue(data: KSerializerBuffer | KUint8ArrayPtr): Array<byte> {
+    // @ts-ignore
+    const retval = data as FixedArray<byte>;
+    // @ts-ignore
+    let exactRetValue: byte[] = new Array<byte>();
+    for (let i = 0; i < retval.length; i++) {
+        // @ts-ignore
+        exactRetValue.push(new Byte(retval[i]));
+    }
+    return exactRetValue;
+}
+
 export class FrameNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
     uiContext: UIContext | undefined = undefined
@@ -457,74 +471,86 @@ export class FrameNode implements MaterializedBase {
         return obj;
     }
     private getPositionToParent_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToParent(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
-        return returnResult
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToParent(this.peer!.ptr);
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition();
+        return returnResult;
     }
     private getPositionToScreen_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToScreen(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getPositionToWindow_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindow(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getPositionToParentWithTransform_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToParentWithTransform(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getPositionToScreenWithTransform_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToScreenWithTransform(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getPositionToWindowWithTransform1_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform1(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getMeasuredSize_serialize(): Size {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getMeasuredSize(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : Size = retvalDeserializer.readSize()
         return returnResult
     }
     private getLayoutPosition_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getLayoutPosition(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getUserConfigBorderWidth_serialize(): Edges<LengthMetrics> {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigBorderWidth(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
         return returnResult
     }
     private getUserConfigPadding_serialize(): Edges<LengthMetrics> {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigPadding(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
         return returnResult
     }
     private getUserConfigMargin_serialize(): Edges<LengthMetrics> {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigMargin(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
         return returnResult
     }
     private getUserConfigSize_serialize(): SizeT<LengthMetrics> {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigSize(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
         const returnResult : SizeT<LengthMetrics> = retvalDeserializer.readSizeLengthMetrics()
         return returnResult
     }
