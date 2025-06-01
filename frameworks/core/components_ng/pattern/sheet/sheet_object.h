@@ -84,9 +84,14 @@ public:
         sheetHeight_ = height;
     }
 
-    SheetType GetSheetType()
+    SheetType GetSheetType() const
     {
         return sheetType_;
+    }
+
+    void UpdateSheetType(SheetType type)
+    {
+        sheetType_ = type;
     }
 
     void CopyData(const RefPtr<SheetObject>& other)
@@ -112,7 +117,7 @@ protected:
     float currentOffset_ = 0.0f;
     SheetType sheetType_;
     WeakPtr<SheetPresentationPattern> pattern_;
-    // not need copy, and 非Side 独有
+    // not need copy. Data that is not unique to the side style
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
 };
