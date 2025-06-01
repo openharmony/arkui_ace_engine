@@ -23,6 +23,7 @@
 #include "ui/base/utils/utils.h"
 #include "ui/resource/resource_object.h"
 #include <functional>
+#include <unordered_map>
 
 namespace OHOS::Ace {
 enum class BlurStyle {
