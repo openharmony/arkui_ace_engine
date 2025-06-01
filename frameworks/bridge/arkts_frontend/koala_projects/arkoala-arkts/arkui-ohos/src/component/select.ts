@@ -855,15 +855,17 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as Dimension
-                thisSerializer.writeLength(value_value_0)
-            }
-            else if (TypeChecker.isOptionWidthMode(value_value)) {
+            if (TypeChecker.isOptionWidthMode(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as OptionWidthMode
+                const value_value_1 = value_value as OptionWidthMode
                 thisSerializer.writeInt32(TypeChecker.OptionWidthMode_ToNumeric(value_value_1))
+            }
+            else if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) ||
+                (((RuntimeType.OBJECT) == (value_value_type)) &&
+                    (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0 = value_value as Dimension
+                thisSerializer.writeLength(value_value_0)
             }
         }
         ArkUIGeneratedNativeModule._SelectAttribute_optionWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1054,7 +1056,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_menuItemContentModifier1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    dividerAttribute(value: DividerOptions | undefined): void {
+    dividerAttribute(value: DividerOptions | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -1150,7 +1152,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_menuOutline(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    menuAlign0Attribute(alignType: MenuAlignType | undefined, offset?: Offset): void {
+    menuAlign0Attribute(alignType: MenuAlignType | undefined, offset?: Offset | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let alignType_type : int32 = RuntimeType.UNDEFINED
         alignType_type = runtimeType(alignType)
@@ -1248,7 +1250,7 @@ export interface SelectAttribute extends CommonMethod {
     menuBackgroundBlurStyle(value: BlurStyle | undefined): this
     controlSize(value: ControlSize | undefined): this
     menuItemContentModifier(value: ContentModifier | undefined): this
-    divider(value: DividerOptions | undefined): this
+    divider(value: DividerOptions | null | undefined): this
     textModifier(value: TextModifier | undefined): this
     arrowModifier(value: SymbolGlyphModifier | undefined): this
     optionTextModifier(value: TextModifier | undefined): this
@@ -1300,7 +1302,7 @@ export interface UISelectAttribute extends UICommonMethod {
     /** @memo */
     menuItemContentModifier(value: ContentModifier | undefined): this
     /** @memo */
-    divider(value: DividerOptions | undefined): this
+    divider(value: DividerOptions | null | undefined): this
     /** @memo */
     textModifier(value: TextModifier | undefined): this
     /** @memo */
@@ -1408,7 +1410,7 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     public menuItemContentModifier(value: ContentModifier | undefined): this {
         return this
     }
-    public divider(value: DividerOptions | undefined): this {
+    public divider(value: DividerOptions | null | undefined): this {
         return this
     }
     public textModifier(value: TextModifier | undefined): this {
@@ -1676,14 +1678,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
     public arrowPosition(value: ArrowPosition | undefined): this {
         if (this.checkPriority("arrowPosition")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (ArrowPosition | undefined)
                 this.getPeer()?.arrowPosition0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (ArrowPosition | undefined)
-                this.getPeer()?.arrowPosition1Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1748,14 +1745,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
     public menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
         if (this.checkPriority("menuBackgroundBlurStyle")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (BlurStyle | undefined)
                 this.getPeer()?.menuBackgroundBlurStyle0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (BlurStyle | undefined)
-                this.getPeer()?.menuBackgroundBlurStyle1Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1766,14 +1758,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
     public controlSize(value: ControlSize | undefined): this {
         if (this.checkPriority("controlSize")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
+            if ((RuntimeType.STRING == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (ControlSize | undefined)
                 this.getPeer()?.controlSize0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (ControlSize | undefined)
-                this.getPeer()?.controlSize1Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1799,9 +1786,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         return this
     }
     /** @memo */
-    public divider(value: DividerOptions | undefined): this {
+    public divider(value: DividerOptions | null | undefined): this {
         if (this.checkPriority("divider")) {
-            const value_casted = value as (DividerOptions | undefined)
+            const value_casted = value as (DividerOptions | null | undefined)
             this.getPeer()?.dividerAttribute(value_casted)
             return this
         }
@@ -1871,20 +1858,14 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         return this
     }
     /** @memo */
-    public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
+    public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset | undefined): this {
         if (this.checkPriority("menuAlign")) {
             const alignType_type = runtimeType(alignType)
             const offset_type = runtimeType(offset)
-            if ((RuntimeType.OBJECT == alignType_type) || (RuntimeType.OBJECT == alignType_type)) {
+            if ((RuntimeType.NUMBER == alignType_type) || (RuntimeType.UNDEFINED == alignType_type)) {
                 const alignType_casted = alignType as (MenuAlignType | undefined)
-                const offset_casted = offset as (Offset)
+                const offset_casted = offset as (Offset | undefined)
                 this.getPeer()?.menuAlign0Attribute(alignType_casted, offset_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == alignType_type) || (RuntimeType.OBJECT == alignType_type)) {
-                const alignType_casted = alignType as (MenuAlignType | undefined)
-                const offset_casted = offset as (Offset)
-                this.getPeer()?.menuAlign1Attribute(alignType_casted, offset_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
