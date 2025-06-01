@@ -16,12 +16,11 @@
 
 // HANDWRITTEN, DO NOT REGENERATE
 
-import { int32, uint32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
-import { __context, __id, DataNode, RepeatByArray, remember, NodeAttach } from '@koalaui/runtime';
+import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
+import { __context, __id, RepeatByArray, remember, NodeAttach } from '@koalaui/runtime';
 import { RepeatItem, UIRepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
 import { LazyForEachImpl } from './LazyForEachImpl';
-import { RepeatType } from '../PeerNode';
 import { ArkColumnPeer } from '../component/column';
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
@@ -99,19 +98,13 @@ class RepeatDataSource<T> implements IDataSource<T> {
     }
 }
 
-export class RepeatDataNode<T> extends DataNode<T> {
-    constructor(kind: uint32 = 1) {
-        super(kind);
-    }
-}
-
 // should be empty string, don't change it
 const RepeatEachFuncType: string = '';
 
 export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
-    arr_: RepeatArray<T>;
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
+    dataLength_: number = 0
     totalCount_?: number | (() => number);
     totalCountSpecified_?: boolean;
     templateOptions_: Map<string, number> = new Map<string, number>();
@@ -119,8 +112,8 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
     reusable_?: boolean;
     isVirtualScroll_: boolean = false;
 
-    constructor(arr: RepeatArray<T>) {
-        this.arr_ = arr;
+    updateDataLength(value: number) {
+        this.dataLength_ = value
     }
 
     /** @memo */
@@ -142,7 +135,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
     /** @memo */
     virtualScroll(options?: VirtualScrollOptions): UIRepeatAttributeImpl<T> {
         // use array length as default value
-        this.totalCount_ = this.arr_.length;
+        this.totalCount_ = this.dataLength_;
         this.totalCountSpecified_ = false;
 
         if (options?.totalCount && Number.isInteger(options?.totalCount!) && (options?.totalCount as number) >= 0) {
@@ -180,16 +173,6 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
         }
         this.ttypeGenFunc_ = typedFunc;
         return this;
-    }
-
-    /** @memo */
-    render(arr: RepeatArray<T>): void {
-        if (!this.itemGenFuncs_.get(RepeatEachFuncType)) {
-            throw new Error('Repeat item builder function unspecified. Usage error!');
-        }
-        this.isVirtualScroll_
-            ? virtualRender<T>(arr, this.itemGenFuncs_, this.keyGenFunc_, this.ttypeGenFunc_, this.reusable_)
-            : nonVirtualRender<T>(arr, this.itemGenFuncs_.get(RepeatEachFuncType)!, this.keyGenFunc_);
     }
 
     // normalize the template options
@@ -257,13 +240,15 @@ export function RepeatImpl<T>(
     style: ((attributes: UIRepeatAttribute<T>) => void) | undefined,
     arr: RepeatArray<T>
 ): void {
-    const receiver = remember(() => {
-        return new UIRepeatAttributeImpl<T>(arr);
+    const repeat = remember(() => { // just a data holder
+        return new UIRepeatAttributeImpl<T>();
     });
-    NodeAttach<RepeatDataNode<T>>((): RepeatDataNode<T> => {
-        return new RepeatDataNode<T>(RepeatType);
-    }, (_: RepeatDataNode<T>) => {
-        style?.(receiver);
-    });
-    receiver.render(arr);
+    repeat.updateDataLength(arr.length)
+    style?.(repeat);
+    if (!repeat.itemGenFuncs_.get(RepeatEachFuncType)) {
+        throw new Error('Repeat item builder function unspecified. Usage error!');
+    }
+    repeat.isVirtualScroll_
+        ? virtualRender<T>(arr, repeat.itemGenFuncs_, repeat.keyGenFunc_, repeat.ttypeGenFunc_, repeat.reusable_)
+        : nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
 }

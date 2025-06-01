@@ -51,8 +51,6 @@ export interface UIRepeatAttribute<T> {
         type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): UIRepeatAttribute<T>;
     /** @memo */
     templateId(typedFunc: TemplateTypedFunc<T>): UIRepeatAttribute<T>;
-    /** @memo */
-    render(arr: RepeatArray<T>): void;
 }
 
 /** @memo */
