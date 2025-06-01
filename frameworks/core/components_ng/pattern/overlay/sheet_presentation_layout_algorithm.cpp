@@ -63,25 +63,25 @@ float SheetPresentationLayoutAlgorithm::CalculateSheetHeightInOtherScenes(
     if (sheetType_ != SheetType::SHEET_CENTER || !isHoverMode_) {
         return height;
     }
-    float upScreenHeight = foldCreaseRect.Top() - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
-    float downScreenHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
+    float maxUpSheetHeight = foldCreaseRect.Top() - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
+    float maxDownSheetHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
     NG::RectF floatButtons;
     if (isWaterfallWindowMode_) {
         auto sheetWrapper = host->GetParent();
         CHECK_NULL_RETURN(sheetWrapper, height);
         auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
         CHECK_NULL_RETURN(sheetWrapperNode, height);
-        upScreenHeight = foldCreaseRect.Top() - sheetWrapperNode->GetOffsetRelativeToWindow().GetY() -
-                         DOUBLE_SIZE * (SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
+        maxUpSheetHeight = foldCreaseRect.Top() - sheetWrapperNode->GetPositionToScreen().GetY() -
+                           DOUBLE_SIZE * (SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
         if (sheetPattern->GetWindowButtonRectForAllAPI(floatButtons)) {
-            upScreenHeight =
+            maxUpSheetHeight =
                 foldCreaseRect.Top() - DOUBLE_SIZE * (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
         }
     }
-    TAG_LOGD(AceLogTag::ACE_SHEET, "upScreenHeight: %{public}f, downScreenHeight: %{public}f.", upScreenHeight,
-        downScreenHeight);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "maxUpSheetHeight: %{public}f, maxDownSheetHeight: %{public}f.", maxUpSheetHeight,
+        maxDownSheetHeight);
     return std::min(height,
-        (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN || isKeyBoardShow_) ? upScreenHeight : downScreenHeight);
+        (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN || isKeyBoardShow_) ? maxUpSheetHeight : maxDownSheetHeight);
 }
 
 void SheetPresentationLayoutAlgorithm::CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper)
@@ -107,8 +107,8 @@ void SheetPresentationLayoutAlgorithm::CalculateSheetOffsetInOtherScenes(LayoutW
         CHECK_NULL_VOID(sheetWrapper);
         auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
         CHECK_NULL_VOID(sheetWrapperNode);
-        upScreenHeight = foldCreaseRect.Top() - sheetWrapperNode->GetOffsetRelativeToWindow().GetY();
-        topStartOffsetY = SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
+        upScreenHeight = foldCreaseRect.Top() - sheetWrapperNode->GetPositionToScreen().GetY();
+        topStartOffsetY = 0.0f;
         if (sheetPattern->GetWindowButtonRectForAllAPI(floatButtons)) {
             upScreenHeight =
                 foldCreaseRect.Top() - DOUBLE_SIZE * (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
