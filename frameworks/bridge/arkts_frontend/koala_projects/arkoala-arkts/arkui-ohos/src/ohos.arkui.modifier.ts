@@ -19,6 +19,8 @@ export { AttributeUpdater } from './AttributeUpdater'
 
 export { CommonModifier } from './CommonModifier'
 
+export { DividerModifier } from "./DividerModifier"
+
 // export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
 
 // export { SymbolGlyphModifier } from "./handwritten/modifiers/ArkSymbolGlyphModifier"
