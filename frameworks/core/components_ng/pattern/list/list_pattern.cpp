@@ -715,6 +715,7 @@ void ListPattern::SetLayoutAlgorithmParams(
         SetChainAnimationToPosMap();
     }
     listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
+    listLayoutAlgorithm->SetDraggingIndex(draggingIndex_);
 }
 
 void ListPattern::SetChainAnimationToPosMap()
