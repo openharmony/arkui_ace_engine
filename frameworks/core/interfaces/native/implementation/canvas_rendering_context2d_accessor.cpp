@@ -19,6 +19,8 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "canvas_rendering_context2d_peer_impl.h"
+#include "frame_node_peer_impl.h"
+#include "ui_context_accessor_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -129,9 +131,8 @@ Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 }
 Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {
-    LOGE("ARKOALA CanvasRenderingContext2DAccessor::GetCanvasImpl type Ark_UIContext"
-        " is not fully implemented on the current platform.");
-    return {};
+    auto uiContext = PeerUtils::CreatePeer<UIContextPeer>();
+    return FrameNodePeer::Create(uiContext);
 }
 } // CanvasRenderingContext2DAccessor
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()
