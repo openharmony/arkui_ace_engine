@@ -46,7 +46,7 @@ void CheckBoxGroupPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
-    auto group = "";
+    std::string group = "";
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     if (eventHub) {
         group = currentNavId_.has_value() ? (eventHub->GetGroupName() + currentNavId_.value())
