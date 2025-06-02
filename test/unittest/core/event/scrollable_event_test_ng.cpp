@@ -38,7 +38,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Axis SCROLLABLE_EVENT_AXIS = Axis::VERTICAL;
 constexpr EdgeEffect SCROLLABLE_EVENT_EDGE_EFFECT = EdgeEffect::FADE;
-constexpr uint32_t SCROLL_TEST_RESULT_SIZE_1 = 1;
+constexpr uint32_t SCROLL_TEST_RESULT_SIZE_1 = 2;
 constexpr uint32_t SCROLL_TEST_RESULT_SIZE = 0;
 constexpr uint32_t SCROLL_EFFECTS_SIZE = 0;
 constexpr uint32_t SCROLL_EFFECTS_SIZE_1 = 1;
