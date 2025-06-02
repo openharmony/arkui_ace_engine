@@ -426,7 +426,8 @@ void EventManager::ExecuteTouchTestDoneCallback(
             continue;
         }
         auto touchTestDoneCallbackForInner = gestureEventHub->GetOnTouchTestDoneCallbackForInner();
-        if (!touchTestDoneCallbackForInner) {
+        auto touchTestDoneCallback = gestureEventHub->GetOnTouchTestDoneCallback();
+        if (!touchTestDoneCallbackForInner && !touchTestDoneCallback) {
             continue;
         }
         auto info = std::make_shared<BaseGestureEvent>();
@@ -456,7 +457,12 @@ void EventManager::ExecuteTouchTestDoneCallback(
             info->SetRollAngle(touchEvent.rollAngle.value());
         }
         info->SetSourceTool(touchEvent.sourceTool);
-        touchTestDoneCallbackForInner(info, responseLinkRecognizers);
+        if (touchTestDoneCallbackForInner) {
+            touchTestDoneCallbackForInner(info, responseLinkRecognizers);
+        }
+        if (touchTestDoneCallback) {
+            touchTestDoneCallback(info, responseLinkRecognizers);
+        }
     }
 }
 

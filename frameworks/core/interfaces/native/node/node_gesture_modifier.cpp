@@ -1129,6 +1129,15 @@ ArkUI_Int32 getDistanceByToolType(ArkUIGestureRecognizer* recognizer, int toolTy
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 setPreventBegin(ArkUIGestureRecognizer* recognizer)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    gestureRecognizer->SetPreventBegin(true);
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Bool isBuiltInGesture(ArkUIGestureRecognizer* recognizer)
 {
     auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
@@ -1245,6 +1254,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         .getTapGestureDistanceThreshold = getTapGestureDistanceThreshold,
         .setDistanceMap = setDistanceMap,
         .getDistanceByToolType = getDistanceByToolType,
+        .setPreventBegin = setPreventBegin,
         .isBuiltInGesture = isBuiltInGesture,
         .getGestureTag = getGestureTag,
         .getGestureBindNodeId = getGestureBindNodeId,
@@ -1333,6 +1343,79 @@ ArkUIGestureRecognizer* CreateGestureRecognizer(const RefPtr<NG::NGGestureRecogn
         delete arkUIGestureRecognizer;
     });
     return arkUIGestureRecognizer;
+}
+
+void GetTouchPoints(const std::shared_ptr<BaseGestureEvent>& info, std::array<ArkUITouchPoint, MAX_POINTS>& points,
+    ArkUITouchEvent& rawInputEvent)
+{
+    CHECK_NULL_VOID(info);
+    auto fingerList = info->GetFingerList();
+    rawInputEvent.touchPointSize = fingerList.size();
+    int32_t i = 0;
+    for (const auto& fingureIterator : fingerList) {
+        points[i].id = fingureIterator.fingerId_;
+        points[i].nodeX = fingureIterator.localLocation_.GetX();
+        points[i].nodeY = fingureIterator.localLocation_.GetY();
+        points[i].windowX = fingureIterator.globalLocation_.GetX();
+        points[i].windowY = fingureIterator.globalLocation_.GetY();
+        points[i].screenX = fingureIterator.screenLocation_.GetX();
+        points[i].screenY = fingureIterator.screenLocation_.GetY();
+        points[i].operatingHand = fingureIterator.operatingHand_;
+        points[i].tiltX = info->GetTiltX().value_or(0.0f);
+        points[i].tiltY = info->GetTiltY().value_or(0.0f);
+        points[i].toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
+        points[i].rollAngle = info->GetRollAngle().value_or(0.0f);
+        points[i].pressure = info->GetForce();
+        points[i].pressedTime = info->GetTimeStamp().time_since_epoch().count();
+        i++;
+    }
+    rawInputEvent.touchPointes = &(points[0]);
+    if (rawInputEvent.touchPointSize > 0) {
+        rawInputEvent.actionTouchPoint.nodeX = rawInputEvent.touchPointes[0].nodeX;
+        rawInputEvent.actionTouchPoint.nodeY = rawInputEvent.touchPointes[0].nodeY;
+        rawInputEvent.actionTouchPoint.windowX = rawInputEvent.touchPointes[0].windowX;
+        rawInputEvent.actionTouchPoint.windowY = rawInputEvent.touchPointes[0].windowY;
+        rawInputEvent.actionTouchPoint.screenX = rawInputEvent.touchPointes[0].screenX;
+        rawInputEvent.actionTouchPoint.screenY = rawInputEvent.touchPointes[0].screenY;
+        rawInputEvent.actionTouchPoint.operatingHand = rawInputEvent.touchPointes[0].operatingHand;
+        rawInputEvent.actionTouchPoint.tiltX = rawInputEvent.touchPointes[0].tiltX;
+        rawInputEvent.actionTouchPoint.tiltY = rawInputEvent.touchPointes[0].tiltY;
+        rawInputEvent.actionTouchPoint.toolType = rawInputEvent.touchPointes[0].toolType;
+        rawInputEvent.actionTouchPoint.rollAngle = rawInputEvent.touchPointes[0].rollAngle;
+        rawInputEvent.actionTouchPoint.pressure = rawInputEvent.touchPointes[0].pressure;
+        rawInputEvent.actionTouchPoint.pressedTime = rawInputEvent.touchPointes[0].pressedTime;
+    }
+}
+
+void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
+    ArkUI_UIInputEvent& inputEvent, const std::shared_ptr<BaseGestureEvent>& info,
+    std::array<ArkUITouchPoint, MAX_POINTS>& points)
+{
+    CHECK_NULL_VOID(info);
+    rawInputEvent.sourceType = static_cast<ArkUI_Int32>(info->GetSourceDevice());
+    rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
+    rawInputEvent.action =
+        info->GetLastAction().value_or(GetPointerEventAction(info->GetRawInputEventType(), info->GetRawInputEvent()));
+    rawInputEvent.deviceId = info->GetRawInputDeviceId();
+    rawInputEvent.stopPropagation = info->IsStopPropagation();
+    rawInputEvent.preventDefault = info->IsPreventDefault();
+    rawInputEvent.targetDisplayId = info->GetTargetDisplayId();
+    const auto& targetLocalOffset = info->GetTarget().area.GetOffset();
+    const auto& targetOrigin = info->GetTarget().origin;
+    // width height x y globalx globaly
+    rawInputEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+    rawInputEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+    rawInputEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+    rawInputEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+    rawInputEvent.width = info->GetTarget().area.GetWidth().ConvertToPx();
+    rawInputEvent.height = info->GetTarget().area.GetHeight().ConvertToPx();
+    GetTouchPoints(info, points, rawInputEvent);
+    inputEvent.inputType = ConvertInputEventTypeToArkuiUIInputEventType(info->GetRawInputEventType());
+    inputEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
+    inputEvent.inputEvent = &rawInputEvent;
+    if (ret) {
+        ret->rawPointerEvent = &inputEvent;
+    }
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

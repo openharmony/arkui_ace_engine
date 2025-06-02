@@ -436,7 +436,7 @@ public:
     void TransformForRecognizer(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false,
         bool isPostEventResult = false, int32_t postEventNodeId = -1);
 
-    void SetPreventDefault(bool preventDefault);
+    void SetPreventBegin(bool preventBegin);
 
     std::string GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback);
 protected:
@@ -465,7 +465,7 @@ protected:
     virtual void OnSucceedCancel() {}
     virtual void RemoveUnsupportEvent(int32_t touchId) {}
     bool ShouldResponse() override;
-    bool IsPreventDefault() const;
+    bool IsPreventBegin() const;
     bool CheckoutDownFingers(int32_t fingerId) const;
 
     void HandleWillAccept();
@@ -520,7 +520,7 @@ protected:
     bool isNeedResetVoluntarily_ = false;
     bool isNeedResetRecognizerState_ = false;
     std::vector<Matrix4> localMatrix_ = {};
-    bool preventDefault_ = false;
+    bool preventBegin_ = false;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

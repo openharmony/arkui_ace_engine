@@ -215,6 +215,8 @@ public:
     void SetOnGestureJudgeNativeBeginForMenu(GestureJudgeFunc&& gestureJudgeFunc);
     TouchTestDoneCallback GetOnTouchTestDoneCallbackForInner() const;
     void SetOnTouchTestDoneCallbackForInner(TouchTestDoneCallback&& touchTestDoneFunc);
+    TouchTestDoneCallback GetOnTouchTestDoneCallback() const;
+    void SetOnTouchTestDoneCallback(TouchTestDoneCallback&& touchTestDoneFunc);
     GetEventTargetImpl CreateGetEventTargetImpl() const;
     GestureJudgeFunc GetOnGestureJudgeBeginCallback() const;
     GestureJudgeFunc GetOnGestureJudgeNativeBeginCallback();
@@ -497,6 +499,7 @@ private:
     GestureJudgeFunc gestureJudgeNativeFuncForMenu_;
 
     TouchTestDoneCallback touchTestDoneCallbackForInner_;
+    TouchTestDoneCallback touchTestDoneCallback_;
 
     TouchInterceptFunc touchInterceptFunc_;
 

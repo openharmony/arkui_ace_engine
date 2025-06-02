@@ -584,6 +584,16 @@ void GestureEventHub::SetOnTouchTestDoneCallbackForInner(TouchTestDoneCallback&&
     touchTestDoneCallbackForInner_ = touchTestDoneFunc;
 }
 
+TouchTestDoneCallback GestureEventHub::GetOnTouchTestDoneCallback() const
+{
+    return touchTestDoneCallback_;
+}
+
+void GestureEventHub::SetOnTouchTestDoneCallback(TouchTestDoneCallback&& touchTestDoneFunc)
+{
+    touchTestDoneCallback_ = touchTestDoneFunc;
+}
+
 void GestureEventHub::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
 {
     touchInterceptFunc_ = std::move(touchInterceptFunc);

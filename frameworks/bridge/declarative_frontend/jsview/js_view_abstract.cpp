@@ -51,6 +51,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_touch_test_done_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
@@ -9174,6 +9175,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
         "shouldBuiltInRecognizerParallelWith", &JSViewAbstract::JsShouldBuiltInRecognizerParallelWith);
     JSClass<JSViewAbstract>::StaticMethod(
         "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
+    JSClass<JSViewAbstract>::StaticMethod("onTouchTestDone", &JSViewAbstract::JsOnTouchTestDone);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
@@ -10587,6 +10589,25 @@ void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
     }
     ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(
         std::move(onGestureRecognizerJudgefunc), exposeInnerGestureFlag);
+}
+
+void JSViewAbstract::JsOnTouchTestDone(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnTouchTestDone(nullptr);
+        return;
+    }
+    auto JsOnTouchTestDoneFunc = AceType::MakeRefPtr<JsTouchTestDoneFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onTouchTestDoneFunc = [execCtx = info.GetExecutionContext(), func = JsOnTouchTestDoneFunc, node = frameNode](
+                                   const std::shared_ptr<BaseGestureEvent>& info,
+                                   const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        ACE_SCORING_EVENT("onTouchTestDone");
+        PipelineContext::SetCallBackNode(node);
+        return func->Execute(info, others);
+    };
+    ViewAbstractModel::GetInstance()->SetOnTouchTestDone(std::move(onTouchTestDoneFunc));
 }
 
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)

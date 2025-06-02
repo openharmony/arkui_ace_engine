@@ -1134,6 +1134,11 @@ public:
         ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc), exposeInnerGestureFlag);
     }
 
+    void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback) override
+    {
+        ViewAbstract::SetOnTouchTestDone(std::move(touchTestDoneCallback));
+    }
+
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override
     {
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));

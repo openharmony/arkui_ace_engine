@@ -318,6 +318,7 @@ public:
     static void JsOnTouchIntercept(const JSCallbackInfo& info);
     static void JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info);
     static void JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info);
+    static void JsOnTouchTestDone(const JSCallbackInfo& info);
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);

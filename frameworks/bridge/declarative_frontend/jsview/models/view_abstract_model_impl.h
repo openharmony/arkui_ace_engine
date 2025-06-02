@@ -202,6 +202,7 @@ public:
     {}
     void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
+    void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override;
 #ifdef SUPPORT_DIGITAL_CROWN

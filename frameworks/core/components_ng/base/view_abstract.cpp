@@ -2211,6 +2211,23 @@ void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
     gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
 }
 
+void ViewAbstract::SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneCallback));
+}
+
+void ViewAbstract::SetOnTouchTestDone(FrameNode* frameNode, NG::TouchTestDoneCallback&& touchTestDoneCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneCallback));
+}
+
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();

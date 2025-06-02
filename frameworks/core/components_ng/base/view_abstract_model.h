@@ -308,6 +308,7 @@ public:
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) = 0;
     virtual void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
+    virtual void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) = 0;
 #ifdef SUPPORT_DIGITAL_CROWN

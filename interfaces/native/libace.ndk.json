@@ -3434,5 +3434,13 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_PostUITaskAndWait"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PreventGestureRecognizerBegin"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_SetTouchTestDoneCallback"
     }
 ]
