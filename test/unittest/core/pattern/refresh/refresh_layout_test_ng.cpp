@@ -497,4 +497,28 @@ HWTEST_F(RefreshLayoutTestNg, CustomBuilderNodeVisibility001, TestSize.Level1)
     EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
     EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
 }
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    RefreshModelNG model = CreateRefresh();
+    model.SetLoadingText("loadingText");
+    CreateDone();
+    EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+    EXPECT_NE(pattern_->refreshTheme_, nullptr);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+    EXPECT_TRUE(pattern_->hasLoadingText_);
+    
+    pattern_->OnColorConfigurationUpdate();
+    auto progressPaintProperty = pattern_->progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    EXPECT_EQ(progressPaintProperty->GetColorValue(Color::WHITE), Color::BLACK);
+    auto textLayoutProperty = pattern_->loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(0.0_vp), 14.0_fp);
+    EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::WHITE), Color::BLACK);
+}
 } // namespace OHOS::Ace::NG

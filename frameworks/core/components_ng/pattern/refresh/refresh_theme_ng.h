@@ -21,9 +21,6 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr int TEXT_FIELD_FONT_WEIGHT = 3;
-} // namespace
 
 /**
  * RefreshThemeNG should be built using RefreshThemeNG::Builder.
@@ -55,13 +52,11 @@ public:
                 LOGW("find pattern of refresh fail");
                 return;
             }
-            theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp));
+            theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 14.0_fp));
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK));
             theme->progressColor_ = pattern->GetAttr<Color>("progress_color", Color::BLACK);
             theme->loadingDistance_ = pattern->GetAttr<Dimension>("default_loading_distance", 16.0_vp);
             theme->progressDiameter_ = pattern->GetAttr<Dimension>("default_progress_diameter", 32.0_vp);
-            theme->textStyle_.SetFontWeight(
-                FontWeight(pattern->GetAttr<int>("textfield_font_weight", TEXT_FIELD_FONT_WEIGHT)));
             theme->ratio_ = pattern->GetAttr<double>("refresh_over_edge_following_ratio", 1.848f);
             theme->ratioGreatApi_ = pattern->GetAttr<double>("refresh_over_edge_following_ratio_api_twenty", 5.0f);
         }
