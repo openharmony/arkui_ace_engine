@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-export const getParamsInfo = (obj, special = []) => {
-  let str = `ljx\n`
+export const getParamsInfo = (obj, special = []): string => {
+  let str = `ljx\n`;
   if (obj) {
     Object.keys(obj).forEach((key) => {
-      let specialItem = special.find(item => item.key === key)
+      let specialItem = special.find(item => item.key === key);
       str += specialItem ? ` ${key}:${specialItem.type[obj[key]]}\n` : ` ${key}:${JSON.stringify(obj[key],
-        (key: string, value: string,) => typeof value === 'undefined' ? 'undefined' : value)}\n`
-    })
-    console.info(str)
-    return str
+        (key: string, value: string,) => typeof value === 'undefined' ? 'undefined' : value)}\n`;
+    });
+    console.info(str);
+    return str;
   } else {
-    return 'undefined'
+    return 'undefined';
   }
-}
+};
