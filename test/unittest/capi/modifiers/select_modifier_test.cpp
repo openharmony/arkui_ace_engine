@@ -1301,7 +1301,7 @@ HWTEST_F(SelectModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
         };
     };
 
-   auto arkCallback = Converter::ArkValue<Callback_Opt_Union_Number_Resource_Void>(checkCallback, contextId);
+    auto arkCallback = Converter::ArkValue<Callback_Opt_Union_Number_Resource_Void>(checkCallback, contextId);
     modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
