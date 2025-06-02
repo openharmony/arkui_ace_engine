@@ -28,12 +28,10 @@ static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext()
 {
-#ifndef PREVIEW
     auto contextValue = OHOS::Ace::Framework::AniContextModule::GetAniContext();
     if (contextValue) {
         return contextValue.get();
     }
-#endif
     return nullptr;
 }
 
@@ -55,9 +53,7 @@ void RestoreInstanceId()
 
 void SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj)
 {
-#ifndef PREVIEW
     Framework::AniGraphicsModule::SetDrawCallback(env, ptr, fnObj);
-#endif
 }
 
 const ArkUIAniCommonModifier* GetCommonAniModifier()
@@ -71,16 +67,12 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
 
 void SetDrawModifier(ani_env* env, ani_long ptr, ani_object fnObj)
 {
-#ifndef PREVIEW
     Framework::AniGraphicsModule::SetDrawModifier(env, ptr, fnObj);
-#endif
 }
 
 void Invalidate(ani_env* env, ani_long ptr)
 {
-#ifndef PREVIEW
     Framework::AniGraphicsModule::Invalidate(env, ptr);
-#endif
 }
 
 const ArkUIAniDrawModifier* GetArkUIAniDrawModifier()
