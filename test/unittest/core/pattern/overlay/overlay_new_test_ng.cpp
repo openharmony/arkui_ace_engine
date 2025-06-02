@@ -1701,4 +1701,58 @@ HWTEST_F(OverlayNewTestNg, IsNeedAvoidFoldCrease002, TestSize.Level1)
     std::optional<bool> enableHoverMode = true;
     EXPECT_FALSE(overlayManager.IsNeedAvoidFoldCrease(frameNode, true, true, enableHoverMode));
 }
+
+/**
+ * @tc.name: HandleModalShow001
+ * @tc.desc: if (contentCoverParam.transitionEffect != nullptr)
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, HandleModalShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create modal page node.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    ModalStyle modalStyle;
+    bool isShow = true;
+    std::function<void(int32_t info)> onWillDismiss = [](int32_t info) {};
+    RefPtr<NG::ChainedTransitionEffect> effect = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(1.0);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step3. set the transitionEffect.
+     * @tc.expected: GetVisibility is VISIBLE.
+     */
+    ContentCoverParam contentCoverParam;
+    contentCoverParam.onWillDismiss = onWillDismiss;
+    contentCoverParam.transitionEffect = std::move(effect);
+    overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, contentCoverParam, targetNode);
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+
+    const auto& layoutProperty = topModalNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
+}
 } // namespace OHOS::Ace::NG
