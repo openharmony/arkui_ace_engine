@@ -53,7 +53,7 @@ export class UniqueId {
         if (data instanceof Uint32Array) {
             return this.addU32Array(data)
         }
-        return this.addI32(data as int32)
+        return this.addI32(data.toInt())
     }
 
     public compute(): string {

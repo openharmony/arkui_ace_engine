@@ -78,7 +78,7 @@ export class FrameNode implements MaterializedBase {
         return
     }
     public getChild(index: number): FrameNode {
-        const index_casted = index as (number)
+        const index_casted = index
         return this.getChild_serialize(index_casted)
     }
     public getFirstChild(): FrameNode {
@@ -164,7 +164,7 @@ export class FrameNode implements MaterializedBase {
     }
     private getPositionToWindowWithTransform_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length.toInt());
         const returnResult : Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
