@@ -848,6 +848,38 @@ void ViewAbstractModelStatic::SetBorderRadius(FrameNode *frameNode, const Border
     ViewAbstract::SetBorderRadius(frameNode, value);
 }
 
+void ViewAbstractModelStatic::SetBorderImage(
+    FrameNode* frameNode, const RefPtr<BorderImage>& borderImage, uint8_t bitset)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(borderImage);
+    if (bitset & BorderImage::SOURCE_BIT) {
+        ViewAbstractModelStatic::SetBorderImageSource(
+            frameNode, borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
+    }
+    if (bitset & BorderImage::OUTSET_BIT) {
+        ViewAbstract::SetHasBorderImageOutset(frameNode, true);
+    }
+    if (bitset & BorderImage::SLICE_BIT) {
+        ViewAbstract::SetHasBorderImageSlice(frameNode, true);
+    }
+    if (bitset & BorderImage::REPEAT_BIT) {
+        ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
+    }
+    if (bitset & BorderImage::WIDTH_BIT) {
+        ViewAbstract::SetHasBorderImageWidth(frameNode, true);
+    }
+    ViewAbstract::SetBorderImage(frameNode, borderImage);
+}
+
+void ViewAbstractModelStatic::SetBorderImageSource(
+    FrameNode* frameNode, const std::string& imageSrc, const std::string& bundleName, const std::string& moduleName)
+{
+    ImageSourceInfo imageSourceInfo(imageSrc, bundleName, moduleName);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderSourceFromImage, true, frameNode);
+}
+
 void ViewAbstractModelStatic::SetDashGap(FrameNode *frameNode, const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(frameNode);
