@@ -886,4 +886,54 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest032, TestSize.Leve
         gatherNodeChildInfo, { COORDINATE_OFFSET.GetX(), COORDINATE_OFFSET.GetY() });
     EXPECT_EQ(renderContext->GetPositionValue(tempOffset), targetOffset);
 }
+
+/**
+ * @tc.name: DragEventActuatorRestartDragTaskTest002
+ * @tc.desc: Test RestartDragTask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorRestartDragTaskTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Execute RestartDragTask when actionStart_ is not null.
+     */
+
+    auto info = GestureEvent();
+    int unknownPropertyValue = UNKNOWN;
+    dragEventActuator->actionStart_ = [&unknownPropertyValue](
+                                          GestureEvent& gestureInfo) mutable { unknownPropertyValue++; };
+    dragEventActuator->RestartDragTask(info);
+    ASSERT_NE(unknownPropertyValue, UNKNOWN);
+
+    /**
+     * @tc.steps: step3. Execute RestartDragTask when OriginUIInputEventType() is AXIS.
+     */
+    info.CopyConvertInfoFrom(ConvertInfo { UIInputEventType::AXIS, UIInputEventType::TOUCH });
+    unknownPropertyValue = UNKNOWN;
+    dragEventActuator->RestartDragTask(info);
+    EXPECT_EQ(unknownPropertyValue, UNKNOWN);
+
+    /**
+     * @tc.steps: step4. Execute RestartDragTask when InputEventType() is AXIS.
+     */
+    info.CopyConvertInfoFrom(ConvertInfo { UIInputEventType::NONE, UIInputEventType::NONE });
+    info.inputEventType_ = InputEventType::AXIS;
+    unknownPropertyValue = UNKNOWN;
+    dragEventActuator->RestartDragTask(info);
+    EXPECT_EQ(unknownPropertyValue, UNKNOWN);
+}
 } // namespace OHOS::Ace::NG
