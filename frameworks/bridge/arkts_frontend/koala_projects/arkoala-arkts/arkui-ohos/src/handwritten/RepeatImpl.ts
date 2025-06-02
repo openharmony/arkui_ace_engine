@@ -245,7 +245,7 @@ export function RepeatImpl<T>(
     style: ((attributes: UIRepeatAttribute<T>) => void) | undefined,
     arr: RepeatArray<T>
 ): void {
-    const repeat = remember(() => { // just a data holder
+    const repeat = remember(() => {
         return new UIRepeatAttributeImpl<T>();
     });
     repeat.updateDataLength(arr.length)
