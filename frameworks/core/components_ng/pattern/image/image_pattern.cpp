@@ -127,9 +127,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. %{public}s."
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -148,9 +146,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. %{public}s."
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -170,9 +166,7 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. %{public}s."
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -192,9 +186,7 @@ OnCompleteInDataReadyNotifyTask ImagePattern::CreateCompleteCallBackInDataReady(
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. %{public}s."
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -434,7 +426,7 @@ void ImagePattern::OnImageLoadSuccess()
 
     image_ = loadingCtx_->MoveCanvasImage();
     if (!image_) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s OnImageLoadSuccess but Canvas image is null.",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s image is null.",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         return;
     }
@@ -975,7 +967,7 @@ void ImagePattern::ControlAnimation(int32_t index)
         if (context) {
             animator_->AttachScheduler(context);
         } else {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "pipeline is null.");
         }
     }
     switch (status_) {
@@ -1172,9 +1164,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "alt image sourceInfo does not match, ignore current callback. %{public}s. current: %{private}s vs "
-                "callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentAltSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -1206,9 +1196,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
         auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSrc != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "alt image sourceInfo does not match, ignore current callback. %{public}s. current: %{private}s vs "
-                "callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentAltSrc.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -1355,7 +1343,7 @@ void ImagePattern::OnWindowHide()
 
 void ImagePattern::OnWindowShow()
 {
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageReloadNeeded_ = %{public}d",
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageReloadNeeded_ = %{public}d",
         imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageReloadNeeded_);
     isShow_ = true;
     auto host = GetHost();
@@ -2261,8 +2249,7 @@ void ImagePattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNod
 void ImagePattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index)
 {
     if (index >= static_cast<int32_t>(images_.size())) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "PrepareImageInfo index error, index: %{public}d, size: %{public}zu", index,
-            images_.size());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "index error: %{public}d-%{public}zu", index, images_.size());
         return;
     }
     auto host = GetHost();
@@ -2393,7 +2380,7 @@ void ImagePattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameN
             }
             iter->isLoaded = true;
             if (pattern->nowImageIndex_ >= static_cast<int32_t>(pattern->images_.size())) {
-                TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnimator showImage index is invalid");
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "index is invalid");
                 return;
             }
             if (pattern->nowImageIndex_ == iter->index &&
@@ -2793,7 +2780,7 @@ void ImagePattern::OnActive()
             if (context) {
                 animator_->AttachScheduler(context);
             } else {
-                TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "pipeline is null.");
             }
         }
         animator_->Forward();

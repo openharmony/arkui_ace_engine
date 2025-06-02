@@ -251,7 +251,7 @@ void ControlledAnimator::Backward()
 void ControlledAnimator::Cancel()
 {
     if (!iteration_ || controlStatus_ == ControlledAnimator::ControlStatus::IDLE || pictureInfos_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already initial, do not need pause again.");
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already initial.");
         return;
     }
     if (cancelEvent_) {
@@ -271,7 +271,7 @@ void ControlledAnimator::Cancel()
 void ControlledAnimator::Pause()
 {
     if (!iteration_ || controlStatus_ == ControlledAnimator::ControlStatus::PAUSED || pictureInfos_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already paused, do not need pause again.");
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already paused.");
         return;
     }
     if (pauseEvent_) {
@@ -310,7 +310,7 @@ void ControlledAnimator::MovePictureToRightPosition(bool checkWithFillMode)
 void ControlledAnimator::Finish()
 {
     if (!iteration_ || controlStatus_ == ControlStatus::STOPPED || pictureInfos_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already stopped, do not need pause again.");
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already stopped.");
         return;
     }
     if (stopEvent_) {

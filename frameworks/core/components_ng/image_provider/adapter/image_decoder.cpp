@@ -159,7 +159,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
         imageDecoderConfig.photoDecodeFormat_ };
     auto pixmap = source->CreatePixelMap({ width, height }, mediaErrorCode, pixelMapConfig);
     if (!pixmap) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "PixelMap Create Fail, src = %{private}s-%{public}s.", src.c_str(),
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "PixelMap Create Fail, %{private}s-%{public}s.", src.c_str(),
             imageDfxConfig.ToStringWithoutSrc().c_str());
         errorInfo = { ImageErrorCode::MAKE_CANVAS_IMAGE_PIXELMAP_FAILED,
             "ErrorCode: " + std::to_string(mediaErrorCode) + ", pixelmap create failed." };
