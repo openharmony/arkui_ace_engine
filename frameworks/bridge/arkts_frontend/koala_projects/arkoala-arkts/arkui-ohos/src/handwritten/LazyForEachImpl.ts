@@ -54,6 +54,7 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
         })
     }
 
+    itemGenerator // subscribe to param
     /**
      * provide totalCount and callbacks to the backend
      */
