@@ -1501,6 +1501,58 @@ HWTEST_F(ListEventTestNg, CenterSnapAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBarSnapAnimation001
+ * @tc.desc: Test start snap align by scrollbar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ScrollBarSnapAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List.
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    // Make ListHeight not an integer multiple of ListItems
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    CreateListItems(5);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Trigger the snapAnimation by scrollbar.
+     * @tc.expected: the predictSnapOffset is correct.
+     */
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = -50.f,
+        .animationVelocity = 500.f,
+        .snapDirection = SnapDirection::NONE,
+        .fromScrollBar = true
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
+
+    /**
+     * @tc.steps: step3. Scroll to bottom.
+     * @tc.expected: the predictSnapOffset is correct.
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(Position(-100));
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step4. Trigger the snapAnimation by scrollBar.
+     * @tc.expected: the predictSnapOffset is correct.
+     */
+    snapAnimationOptions = {
+        .snapDelta = 50.f,
+        .animationVelocity = -500.f,
+        .snapDirection = SnapDirection::NONE,
+        .fromScrollBar = true
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
+}
+
+/**
  * @tc.name: HandleBoxSelectDragStart
  * @tc.desc: Handle drag start for box select
  * @tc.type: FUNC
