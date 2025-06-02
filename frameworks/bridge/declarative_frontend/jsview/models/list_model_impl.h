@@ -55,6 +55,7 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
     void SetScrollEnabled(bool scrollEnabled) override {};
     void SetFriction(double friction) override {};
+    void SetFocusWrapMode(FocusWrapMode focusWrapMode) override {};
     void SetMaintainVisibleContentPosition(bool enabled) override {};
     void SetStackFromEnd(bool enabled) override {};
     void SetSyncLoad(bool enabled) override {};

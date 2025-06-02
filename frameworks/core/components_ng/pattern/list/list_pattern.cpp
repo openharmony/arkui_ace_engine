@@ -2822,6 +2822,16 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
     return 0;
 }
 
+std::string static FocusWrapModeToString(FocusWrapMode mode)
+{
+    switch (mode) {
+        case FocusWrapMode::WRAP_WITH_ARROW:
+            return "WRAP_WITH_ARROW";
+        default:
+            return "DEFAULT";
+    }
+}
+
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollablePattern::ToJsonValue(json, filter);
@@ -2840,6 +2850,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     nestedScrollOptions->Put("scrollForward", nestedScroll.GetNestedScrollModeStr(nestedScroll.forward).c_str());
     nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
     json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
+    json->PutExtAttr("focusWrapMode", FocusWrapModeToString(focusWrapMode_).c_str(), filter);
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -3455,7 +3466,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNodeInList(FocusStep step, const Weak
             return nullptr;
         }
         LayoutListForFocus(nextIndex, curIndex);
-        auto nextFocusNode = FindChildFocusNodeByIndex(nextIndex, step);
+        auto nextFocusNode = FindChildFocusNodeByIndex(nextIndex, step, curIndex);
         if (nextFocusNode.Upgrade()) {
             // Scroll and display the ListItem.
             if (IsListItem(nextFocusNode)) {
@@ -3481,15 +3492,41 @@ bool ListPattern::IsListItemGroupByIndex(int32_t index)
     return frameNode && frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
 }
 
-WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(int32_t tarMainIndex, const FocusStep& step)
+FocusStep static JudgeFocusStep(
+    int32_t tarMainIndex, const FocusStep& step, int32_t curFocusIndex, FocusWrapMode focusWrapMode, bool isVertical)
 {
+    if (isVertical && focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+        if (curFocusIndex < tarMainIndex && step == FocusStep::RIGHT) {
+            return FocusStep::UP_END;
+        } else if (curFocusIndex > tarMainIndex && step == FocusStep::LEFT) {
+            return FocusStep::DOWN_END;
+        }
+    }
+    if (!isVertical && focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+        if (curFocusIndex < tarMainIndex && step == FocusStep::DOWN) {
+            return FocusStep::LEFT_END;
+        } else if (curFocusIndex > tarMainIndex && step == FocusStep::UP) {
+            return FocusStep::RIGHT_END;
+        }
+    }
+    return step;
+}
+
+WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(
+    int32_t tarMainIndex, const FocusStep& step, int32_t curFocusIndex)
+{
+    auto focusWrapMode = GetFocusWrapMode();
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    auto isVertical = listProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
+    CHECK_NULL_RETURN(listProperty, nullptr);
     // Only for GetNextFocusNodeInList.
     auto listFrame = GetHost();
     CHECK_NULL_RETURN(listFrame, nullptr);
     auto listFocus = listFrame->GetFocusHub();
     CHECK_NULL_RETURN(listFocus, nullptr);
     WeakPtr<FocusHub> target;
-    listFocus->AnyChildFocusHub([&target, tarMainIndex, step](const RefPtr<FocusHub>& childFocus) {
+    listFocus->AnyChildFocusHub([&target, tarMainIndex, step, curFocusIndex, focusWrapMode, isVertical](
+        const RefPtr<FocusHub>& childFocus) {
         if (!childFocus->IsFocusable()) {
             return false;
         }
@@ -3505,12 +3542,10 @@ WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(int32_t tarMainIndex, c
         if (!childItemPattern) {
             auto childItemGroupPattern = AceType::DynamicCast<ListItemGroupPattern>(childPattern);
             CHECK_NULL_RETURN(childItemGroupPattern, false);
-
             if (childItemGroupPattern->GetIndexInList() == tarMainIndex) {
-                auto isFindTailOrHead = childItemGroupPattern->FindHeadOrTailChild(childFocus, step, target);
-                if (!isFindTailOrHead) {
-                    target = childFocus;
-                }
+                auto tempStep = JudgeFocusStep(tarMainIndex, step, curFocusIndex, focusWrapMode, isVertical);
+                bool isFindTailOrHead = childItemGroupPattern->FindHeadOrTailChild(childFocus, tempStep, target);
+                target = isFindTailOrHead ? target : childFocus;
                 return true;
             }
             return false;
@@ -3550,7 +3585,6 @@ void ListPattern::DetermineMultiLaneStep(
     FocusStep step, bool isVertical, int32_t curIndex, int32_t& moveStep, int32_t& nextIndex)
 {
     // Only for GetNextFocusNodeInList.
-
     if ((step == FocusStep::UP_END) || (step == FocusStep::LEFT_END)) {
         moveStep = 1;
         nextIndex = 0;
@@ -3678,9 +3712,14 @@ void ListPattern::HandleIndexToBounds(int32_t& nextIndex, bool& loopFlag)
 int32_t ListPattern::GetCrossAxisNextIndex(int32_t curIndex, bool isVertical, int32_t moveStep, FocusStep step)
 {
     // Only for DetermineMultiLaneStep
+    auto focusWrapMode = GetFocusWrapMode();
     int32_t nextIndex = curIndex + moveStep;
     const bool isForward = (isVertical && step == FocusStep::RIGHT) || (!isVertical && step == FocusStep::DOWN);
     const bool isBackward = (isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP);
+
+    if (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+        return nextIndex;
+    }
 
     if (!isForward && !isBackward) {
         return nextIndex;
@@ -3827,6 +3866,20 @@ int32_t ListPattern::OnInjectionEvent(const std::string& command)
         return RET_FAILED;
     }
     return RET_SUCCESS;
+}
+
+void ListPattern::SetFocusWrapMode(FocusWrapMode focusWrapMode)
+{
+    if (focusWrapMode != FocusWrapMode::DEFAULT && focusWrapMode != FocusWrapMode::WRAP_WITH_ARROW) {
+        focusWrapMode_ = FocusWrapMode::DEFAULT;
+    } else {
+        focusWrapMode_ = focusWrapMode;
+    }
+}
+
+FocusWrapMode ListPattern::GetFocusWrapMode() const
+{
+    return focusWrapMode_;
 }
 
 } // namespace OHOS::Ace::NG

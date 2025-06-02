@@ -511,6 +511,20 @@ void JSList::SetFriction(const JSCallbackInfo& info)
     ListModel::GetInstance()->SetFriction(friction);
 }
 
+void JSList::SetFocusWrapMode(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+    auto focusWrapMode = static_cast<int32_t>(FocusWrapMode::DEFAULT);
+    if (!JSViewAbstract::ParseJsInt32(args[0], focusWrapMode) ||
+        focusWrapMode < static_cast<int32_t>(FocusWrapMode::DEFAULT) ||
+        focusWrapMode > static_cast<int32_t>(FocusWrapMode::WRAP_WITH_ARROW)) {
+        focusWrapMode = static_cast<int32_t>(FocusWrapMode::DEFAULT);
+    }
+    ListModel::GetInstance()->SetFocusWrapMode(static_cast<FocusWrapMode>(focusWrapMode));
+}
+
 void JSList::MaintainVisibleContentPosition(const JSCallbackInfo& args)
 {
     bool enabled = false;
@@ -629,6 +643,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
     JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
+    JSClass<JSList>::StaticMethod("focusWrapMode", &JSList::SetFocusWrapMode);
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);

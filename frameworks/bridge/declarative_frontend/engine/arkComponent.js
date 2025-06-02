@@ -33783,6 +33783,10 @@ class ArkListComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, ListFrictionModifier.identity, ListFrictionModifier, value);
     return this;
   }
+  focusWrapMode(value) {
+    modifierWithKey(this._modifiersWithKeys, ListFocusWrapModeModifier.identity, ListFocusWrapModeModifier, value);
+    return this;
+  }
   maintainVisibleContentPosition(value) {
     modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
       ListMaintainVisibleContentPositionModifier, value);
@@ -33990,6 +33994,20 @@ class ListItemOnSelectModifier extends ModifierWithKey {
   }
 }
 ListItemOnSelectModifier.identity = Symbol('listItemOnSelect');
+class ListFocusWrapModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetFocusWrapMode(node);
+    }
+    else {
+      getUINativeModule().list.setFocusWrapMode(node, this.value);
+    }
+  }
+}
+ListFocusWrapModeModifier.identity = Symbol('listFocusWrapMode');
 class ListItemInitializeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

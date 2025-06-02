@@ -76,6 +76,7 @@ public:
     static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetScrollSnapAlign(int32_t scrollSnapAlign);
     static void SetFriction(const JSCallbackInfo& info);
+    static void SetFocusWrapMode(const JSCallbackInfo& args);
     static void MaintainVisibleContentPosition(const JSCallbackInfo& args);
     static void SetStackFromEnd(const JSCallbackInfo& args);
     static void SetSyncLoad(const JSCallbackInfo& args);

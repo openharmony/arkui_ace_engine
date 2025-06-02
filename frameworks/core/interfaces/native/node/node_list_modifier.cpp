@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -789,6 +790,33 @@ void ResetListFadingEdge(ArkUINodeHandle node)
     NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
 }
 
+ArkUI_Int32 GetListFocusWrapMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto mode = ListModelNG::GetFocusWrapMode(frameNode);
+    if (mode == FocusWrapMode::WRAP_WITH_ARROW) {
+        return 1; // 1 means wrap with arrow
+    } else {
+        return 0; // 0 means default
+    }
+}
+
+void SetListFocusWrapMode(ArkUINodeHandle node, int32_t focusWrapMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FocusWrapMode mode = static_cast<FocusWrapMode>(focusWrapMode);
+    ListModelNG::SetFocusWrapMode(frameNode, mode);
+}
+
+void ResetListFocusWrapMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetFocusWrapMode(frameNode, FocusWrapMode::DEFAULT);
+}
+
 void SetShowCached(ArkUINodeHandle node, ArkUI_Bool show)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -833,6 +861,9 @@ const ArkUIListModifier* GetListModifier()
         .resetCachedCount = ResetCachedCount,
         .setCachedIsShown = SetCachedIsShown,
         .resetCachedIsShown = ResetCachedIsShown,
+        .getListFocusWrapMode = GetListFocusWrapMode,
+        .setListFocusWrapMode = SetListFocusWrapMode,
+        .resetListFocusWrapMode = ResetListFocusWrapMode,
         .getCachedIsShown = GetCachedIsShown,
         .getEnableScrollInteraction = GetEnableScrollInteraction,
         .setEnableScrollInteraction = SetEnableScrollInteraction,
@@ -992,6 +1023,9 @@ const CJUIListModifier* GetCJUIListModifier()
         .resetContentStartOffset = ResetContentStartOffset,
         .setContentEndOffset = SetContentEndOffset,
         .resetContentEndOffset = ResetContentEndOffset,
+        .getListFocusWrapMode = GetListFocusWrapMode,
+        .setListFocusWrapMode = SetListFocusWrapMode,
+        .resetListFocusWrapMode = ResetListFocusWrapMode,
         .listSetDivider = ListSetDivider,
         .listResetDivider = ListResetDivider,
         .setChainAnimationOptions = SetChainAnimationOptions,
