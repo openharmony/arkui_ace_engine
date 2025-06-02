@@ -165,6 +165,18 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
     args.SetReturnValue(args.This());
 }
 
+void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
+{
+    auto callbackInfo = args[0];
+    if (callbackInfo->IsFunction()) {
+        auto onScroll = [func = JSRef<JSFunc>::Cast(callbackInfo)](const Dimension& xOffset, const Dimension& yOffset) {
+            auto params = ConvertToJSValues(xOffset, yOffset);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        ScrollModel::GetInstance()->SetOnScroll(std::move(onScroll));
+    }
+}
+
 void JSScroll::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScroll>::Declare("Scroll");
@@ -172,6 +184,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("create", &JSScroll::Create, opt);
     JSClass<JSScroll>::StaticMethod("scrollable", &JSScroll::SetScrollable, opt);
     JSClass<JSScroll>::StaticMethod("onScrollBegin", &JSScroll::OnScrollBeginCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onScroll", &JSScroll::OnScrollCallback, opt);
     JSClass<JSScroll>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSScroll>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSScroll>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

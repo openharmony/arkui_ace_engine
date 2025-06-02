@@ -504,10 +504,6 @@ globalThis.Scroll.onScrollFrameBegin = function (value: (offset: number, state: 
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scroll.setScrollOnScrollFrameBegin(nodePtr, value);
 };
-globalThis.Scroll.onScroll = function (value: (xOffset: number, yOffset: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScroll(nodePtr, value);
-};
 globalThis.Scroll.onWillScroll = function (value: (xOffset: number, yOffset: number,
   scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
