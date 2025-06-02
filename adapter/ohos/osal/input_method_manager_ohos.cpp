@@ -108,7 +108,6 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
     // In window scene, focus change, need close keyboard.
     auto pattern = curFocusNode->GetPattern();
     if (!pattern->NeedSoftKeyboard()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowscenePage ready to close keyboard.");
         NG::WindowSceneHelper::IsCloseKeyboard(curFocusNode);
     }
 }
@@ -192,31 +191,32 @@ void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
     if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, Ime Not Attached, No need to close keyboard");
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Shown Or Attached, Need to close keyboard");
     if (disableNeedToRequestKeyboard) {
         textFieldManager->SetNeedToRequestKeyboard(false);
     }
 #if defined(ENABLE_STANDARD_INPUT)
-    // If pushpage, close it
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
-    if (inputMethod) {
-        inputMethod->Close();
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard SoftKeyboard Closes Successfully.");
+    if (!inputMethod) {
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
+        return;
     }
+    inputMethod->Close();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");
 #endif
 }
 
 void InputMethodManager::CloseKeyboardInPipelineDestroy()
 {
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipeline Destroyed, Ready to close SoftKeyboard.");
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
-    if (inputMethod) {
-        inputMethod->Close();
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipelinne Destroyed, Close SoftKeyboard Successfully.");
+    if (!inputMethod) {
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
+        return;
     }
+    inputMethod->Close();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipelinne Destroyed, Close SoftKeyboard Successfully.");
 }
 
 void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
@@ -238,24 +238,26 @@ void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
 void InputMethodManager::HideKeyboardAcrossProcesses()
 {
 #if defined(ENABLE_STANDARD_INPUT)
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard FrameNode notNeedSoftKeyboard.");
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
-    if (inputMethod) {
-        inputMethod->RequestHideInput();
-        inputMethod->Close();
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard SoftKeyboard Closes Successfully.");
+    if (!inputMethod) {
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
+        return;
     }
+    inputMethod->RequestHideInput();
+    inputMethod->Close();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard Successfully.");
 #endif
 }
 
 void InputMethodManager::CloseKeyboardInProcess()
 {
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Ready to close SoftKeyboard.");
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
-    if (inputMethod) {
-        inputMethod->Close();
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Close SoftKeyboard Successfully.");
+    if (!inputMethod) {
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
+        return;
     }
+    inputMethod->Close();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Successfully.");
 }
 
 void InputMethodManager::ProcessModalPageScene()
