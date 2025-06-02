@@ -361,7 +361,7 @@ export class RenderNode implements MaterializedBase {
         }
         InteropNativeModule._NativeLog("FFZZYY insertChildAfter 444")
         if (sibling === undefined || sibling === null) {
-            this.childrenList.splice(0, 0, child)
+            this.childrenList.splice(0 as int32, 0 as int32, child)
         } else {
             this.childrenList.splice(indexOfSibling + 1, 0, child)
         }

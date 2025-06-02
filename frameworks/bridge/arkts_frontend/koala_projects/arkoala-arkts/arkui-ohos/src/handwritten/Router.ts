@@ -275,7 +275,7 @@ class RouterImpl implements Router {
                 return entryPoint
             }
         }
-        //@ts-ignore 
+        //@ts-ignore
         catch (e: Error) {
             InteropNativeModule._NativeLog("AceRouter: catch RunPage error: " + e)
         }
@@ -285,9 +285,9 @@ class RouterImpl implements Router {
     pushOrReplace(url: string, push: boolean, params?: Map<string, Object>): Promise<void> {
         return new Promise<void>((
             resolve: (value: undefined) => void,
-            reject: (reason: string | undefined) => void
-        ): Promise<void> => {
-        return this.resolve(url)
+            reject: (reason: Error) => void
+        ): void => {
+        this.resolve(url)
             .then<void>((view: UserView | EntryPoint) => {
                 if (view instanceof UserView) {
                     InteropNativeModule._NativeLog("AceRouter: load page as UserView")
@@ -305,7 +305,7 @@ class RouterImpl implements Router {
                     this.activate(new RouterRegistryEntry(url, page), push ? RouteType_Push : RouteType_None, params, resolve)
                 }
             })
-            .catch<void>((error: string | undefined): void => reject(error))
+            .catch<void>((error: Error): void => reject(error))
         })
     }
 
@@ -457,7 +457,7 @@ class RouterImpl implements Router {
         InteropNativeModule._NativeLog("AceRouter: router back")
         return new Promise<void>((
             resolve: (dummy: undefined) => void,
-            reject: (reason: string | undefined) => void
+            reject: (reason: Error) => void
         ): void => {
             let entry: RouterStackEntry | undefined = undefined
             if (url) {
@@ -480,7 +480,7 @@ class RouterImpl implements Router {
                     resolve
                 )
             } else {
-                reject(`history is empty`)
+                reject(new Error(`history is empty`))
             }
         })
     }
