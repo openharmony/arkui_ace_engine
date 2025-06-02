@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-export { AttributeUpdater } from './AttributeUpdater'
+import { InteropNativeModule } from "@koalaui/interop";
+import { ArkBaseNode } from "./ArkBaseNode";
+import { BlankAttribute, ArkBlankPeer, ResourceColor } from "../../component";
 
-// export { ColumnModifier } from './handwritten/modifiers/ArkColumnModifier'
+export class ArkBlankNode extends ArkBaseNode implements BlankAttribute {
 
-export { CommonModifier } from './CommonModifier'
+    constructParam(...param: Object[]): this {
+        InteropNativeModule._NativeLog("blank constructParam enter");
+        return this;
+    }
 
-export { DividerModifier } from "./DividerModifier"
+    getPeer(): ArkBlankPeer {
+        return this.peer as ArkBlankPeer;
+    }
 
-export { BlankModifier } from "./BlankModifier"
-
-// export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
-
-// export { SymbolGlyphModifier } from "./handwritten/modifiers/ArkSymbolGlyphModifier"
-
-// export { GridItemModifier } from './handwritten/modifiers/ArkGridItemModifier'
+    color(value: ResourceColor | undefined): this {
+        return this;
+    }
+}

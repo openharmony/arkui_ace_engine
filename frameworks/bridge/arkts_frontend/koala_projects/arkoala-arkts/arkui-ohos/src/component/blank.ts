@@ -22,13 +22,16 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, AttributeModifier } from "./common"
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkBlankNode } from "../handwritten/modifiers/ArkBlankNode"
+import { ArkBlankAttributeSet, BlankModifier } from "../BlankModifier"
+
 export class ArkBlankPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -113,6 +116,29 @@ export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribut
 }
 /** @memo:stable */
 export class ArkBlankComponent extends ArkCommonMethodComponent implements UIBlankAttribute {
+    protected _modifierHost: ArkBlankNode | undefined
+    setModifierHost(value: ArkBlankNode): void {
+        this._modifierHost = value;
+    }
+    getModifierHost(): ArkBlankNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkBlankNode();
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost!;
+    }
+    getAttributeSet(): ArkBlankAttributeSet {
+        return this.getPeer()._attributeSet as ArkBlankAttributeSet;
+    }
+    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
+        let isCommonModifier: boolean = modifier instanceof BlankModifier;
+        if (isCommonModifier) {
+            let commonModifier = modifier as object as BlankModifier;
+            this.getPeer()._attributeSet = commonModifier.attributeSet;
+        } else if (this.getPeer()._attributeSet == null) {
+            this.getPeer()._attributeSet = new ArkBlankAttributeSet();
+        }
+    }
     getPeer(): ArkBlankPeer {
         return (this.peer as ArkBlankPeer)
     }
