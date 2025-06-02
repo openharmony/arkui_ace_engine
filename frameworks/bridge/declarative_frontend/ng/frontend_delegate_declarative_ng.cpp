@@ -26,6 +26,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -743,6 +744,11 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         dialogProperties.offset = dialogAttr.offset.value();
     }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
+void FrontendDelegateDeclarativeNG::RemoveCustomDialog()
+{
+    NG::ViewAbstract::DismissDialog();
 }
 
 DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
