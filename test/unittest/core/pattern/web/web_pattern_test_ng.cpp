@@ -208,7 +208,10 @@ public:
         return true;
     }
 };
-
+bool IsSnapshotPathValid(const std::string& snapshotPath)
+{
+    return true;
+}
 } // namespace OHOS::NWeb
 
 namespace OHOS::Ace::NG {
@@ -3209,4 +3212,33 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_004, TestSize.Level1)
 #endif
 }
 
+
+/**
+ * @tc.name: CreateSnapshotImageFrameNode_001
+ * @tc.desc: CreateSnapshotImageFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+   auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/web_frame_123456.png"), true);
+    std::string snapshotPath = "/data/storage/el2/base/cache/web/web_frame_123456.png";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    webPattern->RemoveSnapshotFrameNode();
+    webPattern->RemoveSnapshotFrameNode();
+    ASSERT_NE(webPattern, nullptr);
+    MockPipelineContext::TearDown();
+#endif
+}
 } // namespace OHOS::Ace::NG
