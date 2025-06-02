@@ -61,6 +61,9 @@ private:
     void HandleOnItemDragUpdate(const GestureEvent& info);
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();
+    void HandleZIndexAndPosition();
+    void HandleBackShadow();
+    void HandleTransformScale();
     void HandleDragEndAnimation();
     void HandleScrollCallback();
     void HandleSwapAnimation(int32_t from, int32_t to);
@@ -93,7 +96,7 @@ private:
     bool isStackFromEnd_ = false;
     bool isRtl_ = false;
     bool scrolling_ = false;
-    bool isSwapAnimationStopped_ = true;
+    bool isDragAnimationStopped_ = true;
     OffsetF realOffset_;
 
     int32_t fromIndex_ = -1;

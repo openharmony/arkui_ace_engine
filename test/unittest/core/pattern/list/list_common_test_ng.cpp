@@ -1931,6 +1931,92 @@ HWTEST_F(ListCommonTestNg, ForEachDrag011, TestSize.Level1)
 }
 
 /**
+* @tc.name: ForEachDrag012
+* @tc.desc: Drag to reachStart, will scroll(rtl mode)
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag012, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(TOTAL_ITEM_NUMBER, 1, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. scroll List to index 0, delta 10
+    * @tc.expected: List to index 0, delta 10
+    */
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    pattern_->ScrollBy(10.f);
+    FlushUITasks();
+    const auto& itemPosition = pattern_->GetItemPosition();
+    EXPECT_TRUE(IsEqual(pattern_->GetStartIndex(), 0));
+    EXPECT_TRUE(IsEqual(itemPosition.begin()->second.startPos, -10.f));
+
+    /**
+    * @tc.steps: step2. Drag to the starts of view
+    * @tc.expected: Will scroll with animation
+    */
+    auto dragManager = GetForEachItemDragManager(1);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(20.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(230.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
+    FlushUITasks();
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_FALSE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
+}
+
+/**
+* @tc.name: ForEachDrag013
+* @tc.desc: Drag to reachEnd, will scroll(rtl mode)
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag013, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(TOTAL_ITEM_NUMBER, 1, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. scroll List to end, delta -10
+    * @tc.expected: List to tail index, delta -10
+    */
+    pattern_->ScrollToIndex(TOTAL_ITEM_NUMBER - 1, false, ScrollAlign::END);
+    pattern_->ScrollBy(-10.f);
+    FlushUITasks();
+    const auto& itemPosition = pattern_->GetItemPosition();
+    EXPECT_TRUE(IsEqual(pattern_->GetEndIndex(), TOTAL_ITEM_NUMBER - 1));
+    EXPECT_TRUE(IsEqual(itemPosition.rbegin()->second.endPos, 250.f));
+
+    /**
+    * @tc.steps: step2. Drag to the end of view
+    * @tc.expected: Will scroll with animation
+    */
+    auto dragManager = GetForEachItemDragManager(TOTAL_ITEM_NUMBER - 2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(-20.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(10.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
+    FlushUITasks();
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_FALSE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
+}
+
+/**
  * @tc.name: LazyForEachDrag001
  * @tc.desc: Drag big delta to change order
  * @tc.type: FUNC
