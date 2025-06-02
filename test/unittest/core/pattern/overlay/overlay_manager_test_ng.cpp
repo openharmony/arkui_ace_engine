@@ -4537,7 +4537,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
     sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = 0.0_px;
     auto height = sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
-    EXPECT_EQ(height, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx());
+    EXPECT_EQ(height, sheetTheme->bigWindowMinHeight_.ConvertToPx());
     sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = -1.0_px;
     height = sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
     EXPECT_EQ(height, SHEET_BIG_WINDOW_HEIGHT.ConvertToPx());
