@@ -105,7 +105,6 @@ const LinearColor TEST_LINEARCOLOR = LinearColor(TEST_COLOR);
 constexpr float VALUE_OF_SET_VALUE = 10.0f;
 const std::vector<std::string> FONT_FAMILY = { "serif" };
 constexpr Dimension DEFAULT_SPACE = 3.0_vp;
-constexpr bool ACTIVE_SETTING_FALSE = false;
 constexpr uint32_t TOKEN_THEME_ID = 10001;
 
 struct TestProperty {

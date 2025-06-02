@@ -30,14 +30,27 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
+namespace OHOS::Ace::NG {
+class NodeRenderStatusMonitor;
+}
+
 namespace OHOS::Ace::Napi {
 class UIObserver {
 public:
+    struct NodeRenderListener {
+        int32_t id = -1;
+        std::list<std::shared_ptr<UIObserverListener>> listeners;
+        NodeRenderListener(int32_t id, std::list<std::shared_ptr<UIObserverListener>> listeners)
+            : id(id), listeners(listeners) {};
+    };
     static void RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener);
     static void RegisterNavigationCallback(
         std::string navigationId, const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterNavigationCallback(
+        int32_t navigationUniqueId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterNavigationCallback(napi_value cb);
     static void UnRegisterNavigationCallback(std::string navigationId, napi_value cb);
+    static void UnRegisterNavigationCallback(int32_t navigationUniqueId, napi_value cb);
     static void HandleNavigationStateChange(const NG::NavDestinationInfo& info);
 
     static void RegisterScrollEventCallback(const std::shared_ptr<UIObserverListener>& listener);
@@ -138,6 +151,11 @@ public:
             std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>&>;
     static PanGestureListenersPair GetPanGestureListeners(const NG::PanGestureInfo& panGestureInfo);
 
+    static void RegisterNodeRenderStateChangeCallback(RefPtr<NG::FrameNode> frameNode,
+        const std::shared_ptr<UIObserverListener>& listener, const RefPtr<NG::NodeRenderStatusMonitor>& monitor);
+    static void UnRegisterNodeRenderStateChangeCallback(
+        RefPtr<NG::FrameNode> frameNode, napi_value callback, const RefPtr<NG::NodeRenderStatusMonitor>& monitor);
+
     static bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str);
     static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
 private:
@@ -156,6 +174,8 @@ private:
     static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavigationListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedCNavigationListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedUniqueIdNavigationListeners_;
     static std::list<std::shared_ptr<UIObserverListener>> scrollEventListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedScrollEventListeners_;
@@ -195,6 +215,8 @@ private:
         abilityContextAfterPanEndListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedAfterPanEndListeners_;
+    static std::unordered_map<NG::FrameNode*, std::shared_ptr<NodeRenderListener>>
+        specifiedNodeRenderStateListeners_;
 
     static std::unordered_map<napi_ref, NavIdAndListenersMap> abilityUIContextNavDesSwitchListeners_;
     static std::unordered_map<int32_t, NavIdAndListenersMap> uiContextNavDesSwitchListeners_;

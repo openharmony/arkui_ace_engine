@@ -450,6 +450,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onAdsBlockedBlock(callback: (details: { url: string; adsBlocked: string[]; } | undefined) => void): this {
     throw new Error('Method not implemented.');
   }
+  onActivateContent(callback: () => void): this {
+    throw new Error('Method not implemented.');
+  }
 }
 
 // @ts-ignore

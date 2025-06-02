@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+#include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
@@ -45,6 +46,7 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -86,6 +88,7 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
+constexpr char UPDATE_FLAG_VALUE[] = "1";
 constexpr int32_t DEFAULT_PRECISION = 2;
 } // namespace
 namespace OHOS::Ace::NG {
@@ -481,25 +484,7 @@ FrameNode::~FrameNode()
             CleanVisibleAreaInnerCallback();
         }
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->RemoveOnAreaChangeNode(GetId());
-        pipeline->RemoveVisibleAreaChangeNode(GetId());
-        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
-        pipeline->FreeMouseStyleHoldNode(GetId());
-        pipeline->RemoveStoredNode(GetRestoreId());
-        auto dragManager = pipeline->GetDragDropManager();
-        if (dragManager) {
-            dragManager->RemoveDragFrameNode(GetId());
-            dragManager->UnRegisterDragStatusListener(GetId());
-        }
-        auto frameRateManager = pipeline->GetFrameRateManager();
-        if (frameRateManager) {
-            frameRateManager->RemoveNodeRate(GetId());
-        }
-        pipeline->RemoveChangedFrameNode(GetId());
-        pipeline->RemoveFrameNodeChangeListener(GetId());
-    }
+    CleanupPipelineResources();
     FireOnNodeDestroyCallback();
     FireOnExtraNodeDestroyCallback();
     FireFrameNodeDestructorCallback();
@@ -817,6 +802,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
     }
+    if (renderContext_->HasBorderRadius()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("BorderRadius: ").append(renderContext_->GetBorderRadius()->ToString().c_str()));
+    }
     if (layoutProperty_->GetMarginProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Margin: ").append(layoutProperty_->GetMarginProperty()->ToString().c_str()));
@@ -851,6 +840,13 @@ void FrameNode::DumpCommonInfo()
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(pipeline->GetDensity())));
+    }
+    auto layoutPolicy = layoutProperty_->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        std::string layoutPolicyStr = layoutPolicy.value().ToString();
+        if (layoutPolicyStr.length() > 0) {
+            DumpLog::GetInstance().AddDesc(layoutPolicyStr);
+        }
     }
     DumpAlignRulesInfo();
     DumpDragInfo();
@@ -1220,6 +1216,15 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
 }
 
+bool FrameNode::IsJsCustomPropertyUpdated() const
+{
+    auto iter = customPropertyMap_.find(UPDATE_FLAG_KEY);
+    if (iter != customPropertyMap_.end()) {
+        return iter->second == UPDATE_FLAG_VALUE;
+    }
+    return false;
+}
+
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     if (renderContext_) {
@@ -1245,6 +1250,17 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     }
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
     ExtraCustomPropertyToJsonValue(json, filter);
+    if (IsCNode() || !IsJsCustomPropertyUpdated()) {
+        auto jsonNode = JsonUtil::Create(true);
+        for (const auto &iter : customPropertyMap_) {
+            jsonNode->Put(iter.first.c_str(), iter.second.c_str());
+        }
+        if (!customPropertyMap_.empty()) {
+            json->Put("customProperty", jsonNode->ToString().c_str());
+        }
+    } else if (getCustomPropertyMapFunc_) {
+        json->Put("customProperty", getCustomPropertyMapFunc_().c_str());
+    }
 }
 
 void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -1374,12 +1390,45 @@ bool FrameNode::RenderCustomChild(int64_t deadline)
     return UINode::RenderCustomChild(deadline);
 }
 
+void FrameNode::NotifyColorModeChange(uint32_t colorMode)
+{
+    FireColorNDKCallback();
+
+    if (GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+        return;
+    }
+
+    auto parentNode = AceType::DynamicCast<FrameNode>(GetParent());
+    bool parentRerender = parentNode ? parentNode->GetRerenderable() : GetRerenderable();
+    // bool parentActive = parentNode ? parentNode->IsActive() : true;
+    SetRerenderable(parentRerender && ((IsVisible() && IsActive()) || CheckMeasureAnyway()));
+    
+    if (GetRerenderable()) {
+        SetDarkMode(GetContext()->GetColorMode() == ColorMode::DARK ? 1 : 0);
+    }
+
+    if (pattern_) {
+        pattern_->OnColorConfigurationUpdate();
+        pattern_->OnColorModeChange(colorMode);
+    }
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        frameNode->GetOverlayNode()->NotifyColorModeChange(colorMode);
+    }
+
+    UINode::NotifyColorModeChange(colorMode);
+}
+
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (cornerMarkNode_) {
+            CornerMark::UpdateCornerMarkNodeLanguage(Claim(this));
+        }
     }
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
@@ -1391,6 +1440,9 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         FireColorNDKCallback();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (cornerMarkNode_) {
+            CornerMark::UpdateCornerMarkNodeColorMode(Claim(this));
+        }
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
@@ -1493,6 +1545,11 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
+    for (auto [_, callback] : removeToolbarItemCallbacks_) {
+        if (callback) {
+            callback();
+        }
+    }
     auto focusHub = GetFocusHub();
     if (focusHub) {
         auto focusView = focusHub->GetFirstChildFocusView();
@@ -2925,7 +2982,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     bool consumed = false;
 
     HitTestMode onTouchInterceptresult = HitTestMode::HTMDEFAULT;
-    if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON) {
+    if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON &&
+            touchRestrict.touchEvent.type != TouchType::HOVER_ENTER) {
         onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
     }
     TouchResult touchRes;
@@ -4692,6 +4750,15 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             isLayoutDirtyMarked_ = true;
         }
         needSyncRsNode = false;
+    } else {
+        auto borderRadius = renderContext_->GetBorderRadius();
+        if (borderRadius.has_value()) {
+            renderContext_->SetBorderRadius(borderRadius.value());
+        }
+        auto outerBorderRadius = renderContext_->GetOuterBorderRadius();
+        if (outerBorderRadius.has_value()) {
+            renderContext_->SetOuterBorderRadius(outerBorderRadius.value());
+        }
     }
     if (GetTag() != V2::PAGE_ETS_TAG) {
         renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
@@ -5448,6 +5515,25 @@ void FrameNode::PaintDebugBoundary(bool flag)
     }
 }
 
+void SetChangeInfo(const TouchEvent& touchEvent, TouchLocationInfo &changedInfo)
+{
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
+    changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
+    changedInfo.SetTouchType(touchEvent.type);
+    changedInfo.SetForce(touchEvent.force);
+    changedInfo.SetPressedTime(touchEvent.pressedTime);
+    changedInfo.SetWidth(touchEvent.width);
+    changedInfo.SetHeight(touchEvent.height);
+    if (touchEvent.tiltX.has_value()) {
+        changedInfo.SetTiltX(touchEvent.tiltX.value());
+    }
+    if (touchEvent.tiltY.has_value()) {
+        changedInfo.SetTiltY(touchEvent.tiltY.value());
+    }
+    changedInfo.SetSourceTool(touchEvent.sourceTool);
+    changedInfo.SetDeviceId(touchEvent.deviceId);
+}
+
 HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
 {
     auto gestureHub = eventHub_ ? eventHub_->GetGestureEventHub() : nullptr;
@@ -5464,20 +5550,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
     changedInfo.SetLocalLocation(Offset(localX, localY));
-    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
-    changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
-    changedInfo.SetTouchType(touchEvent.type);
-    changedInfo.SetForce(touchEvent.force);
-    changedInfo.SetPressedTime(touchEvent.pressedTime);
-    changedInfo.SetWidth(touchEvent.width);
-    changedInfo.SetHeight(touchEvent.height);
-    if (touchEvent.tiltX.has_value()) {
-        changedInfo.SetTiltX(touchEvent.tiltX.value());
-    }
-    if (touchEvent.tiltY.has_value()) {
-        changedInfo.SetTiltY(touchEvent.tiltY.value());
-    }
-    changedInfo.SetSourceTool(touchEvent.sourceTool);
+    SetChangeInfo(touchEvent, changedInfo);
     event.AddChangedTouchLocationInfo(std::move(changedInfo));
 
     AddTouchEventAllFingersInfo(event, touchEvent);
@@ -6387,17 +6460,21 @@ void FrameNode::ResetPredictNodes()
     }
 }
 
-void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
+void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
+    std::function<std::string()>&& getCustomPropertyMapFunc)
 {
     bool result = func();
     if (IsCNode()) {
         return;
     }
     if (result) {
-        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
+        customPropertyMap_[UPDATE_FLAG_KEY] = UPDATE_FLAG_VALUE;
     }
     if (!getCustomProperty_) {
         getCustomProperty_ = getFunc;
+    }
+    if (getCustomPropertyMapFunc && (!getCustomPropertyMapFunc_)) {
+        getCustomPropertyMapFunc_ = std::move(getCustomPropertyMapFunc);
     }
 }
 
@@ -6628,5 +6705,36 @@ std::string FrameNode::PrintVisibilityDumpInfo() const
     }
     res += "]";
     return res;
+}
+
+int32_t FrameNode::OnRecvCommand(const std::string& command)
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_RETURN(pattern, RET_FAILED);
+    return pattern->OnRecvCommand(command);
+}
+
+void FrameNode::CleanupPipelineResources()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->RemoveOnAreaChangeNode(GetId());
+        pipeline->RemoveVisibleAreaChangeNode(GetId());
+        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(GetId());
+        pipeline->RemoveStoredNode(GetRestoreId());
+        auto dragManager = pipeline->GetDragDropManager();
+        if (dragManager) {
+            dragManager->RemoveDragFrameNode(GetId());
+            dragManager->UnRegisterDragStatusListener(GetId());
+        }
+        auto frameRateManager = pipeline->GetFrameRateManager();
+        if (frameRateManager) {
+            frameRateManager->RemoveNodeRate(GetId());
+        }
+        pipeline->RemoveChangedFrameNode(GetId());
+        pipeline->RemoveFrameNodeChangeListener(GetId());
+        pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
+    }
 }
 } // namespace OHOS::Ace::NG

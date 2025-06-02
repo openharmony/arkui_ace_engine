@@ -48,6 +48,26 @@ class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
+    void CreateWithForegroundColorResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithForegroundColorResourceObj(resObj);
+    }
+    void CreateWithOuterBorderColorResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithOuterBorderColorResourceObj(resObj);
+    }
+    void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithOuterBorderRadiusResourceObj(resObj);
+    }
+    void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithLightColorResourceObj(resObj);
+    }
+    void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithOuterBorderWidthResourceObj(resObj);
+    }
     void SetWidth(const CalcDimension& width) override
     {
         if (width.Unit() == DimensionUnit::CALC) {
@@ -63,6 +83,16 @@ public:
             ViewAbstract::SetHeight(NG::CalcLength(height.CalcValue()));
         } else {
             ViewAbstract::SetHeight(NG::CalcLength(height));
+        }
+    }
+
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isSetWidth) override
+    {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isSetWidth);
         }
     }
 
@@ -120,9 +150,20 @@ public:
         ViewAbstract::SetBackgroundColor(color);
     }
 
+    void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetBackgroundColorWithResourceObj(resObj);
+    }
+
     void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override
     {
         ViewAbstract::SetBackgroundImage(src);
+    }
+
+    void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject> &resObj, std::string &bundleName,
+        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override
+    {
+        ViewAbstract::SetBackgroundImageWithResourceObj(resObj, bundleName, moduleName);
     }
 
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override
@@ -140,7 +181,7 @@ public:
         ViewAbstract::SetBackgroundImageSize(bgImgSize);
     }
 
-    void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override
+    void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override
     {
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
     }
@@ -475,6 +516,11 @@ public:
         ViewAbstract::SetOuterBorderWidth(value);
     }
 
+    void SetOuterBorderWidthNew(const NG::BorderWidthProperty& property) override
+    {
+        ViewAbstract::SetOuterBorderWidth(property);
+    }
+
     void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
     {
@@ -568,6 +614,21 @@ public:
         ViewAbstract::SetAlign(alignment);
     }
 
+    void SetAlign(const std::string& localizedAlignment) override
+    {
+        ViewAbstract::SetAlign(localizedAlignment);
+    }
+
+    void SetLayoutGravity(const Alignment& alignment) override
+    {
+        ViewAbstract::SetLayoutGravity(alignment);
+    }
+
+    void SetIsMirrorable(const bool& isMirrorable) override
+    {
+        ViewAbstract::SetIsMirrorable(isMirrorable);
+    }
+
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override
     {
         ViewAbstract::SetAlignRules(alignRules);
@@ -642,6 +703,11 @@ public:
         ViewAbstract::SetRotate(NG::Vector5F(x, y, z, angle, perspective));
     }
 
+    void SetRotateAngle(float x, float y, float z, float perspective) override
+    {
+        ViewAbstract::SetRotateAngle(NG::Vector4F(x, y, z, perspective));
+    }
+
     void SetTransformMatrix(const std::vector<float>& matrix) override
     {
         NG::ViewAbstract::SetTransformMatrix(
@@ -652,6 +718,11 @@ public:
     void SetOpacity(double opacity, bool passThrough = false) override
     {
         ViewAbstract::SetOpacity(opacity);
+    }
+
+    void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj) override
+    {
+        ViewAbstract::CreateWithOpacityResourceObj(resobj);
     }
 
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override
@@ -791,6 +862,11 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
+    void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) override
+    {
+        ViewAbstract::CreateWithMaskResourceObj(progress);
+    }
+
     void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
         ViewAbstract::SetBackdropBlur(radius, blurOption, sysOptions);
@@ -855,6 +931,11 @@ public:
     void SetColorBlend(const Color& value) override
     {
         ViewAbstract::SetColorBlend(value);
+    }
+
+    void CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resobj) override
+    {
+        ViewAbstract::CreateWithColorBlendResourceObj(resobj);
     }
 
     void SetWindowBlur(float progress, WindowBlurStyle blurStyle) override {}
@@ -1330,6 +1411,8 @@ public:
         ViewAbstract::DismissPopup();
     }
 
+    void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
+
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
     int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
@@ -1543,6 +1626,11 @@ public:
         ViewAbstract::SetLightPosition(positionX, positionY, positionZ);
     }
 
+    void SetLightPosition(const NG::TranslateOptions& options) override
+    {
+        ViewAbstract::SetLightPosition(options);
+    }
+
     void SetLightIntensity(const float value) override
     {
         ViewAbstract::SetLightIntensity(value);
@@ -1571,6 +1659,11 @@ public:
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override
     {
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+    }
+
+    void EnableDropDisallowedBadge(bool enableDisallowStatusShowing) override
+    {
+        ViewAbstract::EnableDropDisallowedBadge(enableDisallowStatusShowing);
     }
 
     int32_t CancelDataLoading(const std::string& key) override
@@ -1647,6 +1740,26 @@ public:
     static std::string GetAccessibilityDescription(FrameNode* frameNode);
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
     static bool CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode);
+    static void SetFreeze(FrameNode* frameNode, bool freeze)
+    {
+        ViewAbstract::SetFreeze(frameNode, freeze);
+    }
+    static void SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect)
+    {
+        ViewAbstract::SetVisualEffect(frameNode, visualEffect);
+    }
+    static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter)
+    {
+        ViewAbstract::SetBackgroundFilter(frameNode, backgroundFilter);
+    }
+    static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter)
+    {
+        ViewAbstract::SetForegroundFilter(frameNode, foregroundFilter);
+    }
+    static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter)
+    {
+        ViewAbstract::SetCompositingFilter(frameNode, compositingFilter);
+    }
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

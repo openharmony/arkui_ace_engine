@@ -327,7 +327,7 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
-    
+
     void ResetIndicatorParameters()
     {
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
@@ -602,6 +602,7 @@ public:
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
     int32_t DisplayIndicatorTotalCount() const;
+    bool IsAutoLinear() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
@@ -798,8 +799,19 @@ public:
     {
         gestureStatus_ = gestureStatus;
     }
-
     bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
+    int32_t OnInjectionEvent(const std::string& command) override;
+
+    bool GetMaintainVisibleContentPosition()
+    {
+        auto props = GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_RETURN(props, false);
+        return props->GetMaintainVisibleContentPosition().value_or(false);
+    }
+
+    void NotifyDataChange(int32_t index, int32_t count) override;
+    void OnColorModeChange(uint32_t colorMode) override;
+    void ResetOnForceMeasure();
 
 protected:
     void MarkDirtyNodeSelf();
@@ -1023,7 +1035,6 @@ private:
     void StopSpringAnimationAndFlushImmediately();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
-    bool IsAutoLinear() const;
     bool AutoLinearAnimationNeedReset(float translate) const;
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
     /**
@@ -1177,8 +1188,8 @@ private:
                SwiperUtils::IsStretch(swiperLayoutProperty);
     }
 
-    void ResetOnForceMeasure();
     void UpdateTabBarIndicatorCurve();
+    const RefPtr<Curve> GetTabBarAnimationCurve(const RefPtr<Curve>& curve);
     bool CheckDragOutOfBoundary(double dragVelocity);
     void UpdateCurrentFocus();
 
@@ -1235,7 +1246,10 @@ private:
     void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
     void PostIdleTaskToCleanTabContent();
     std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
-
+    int32_t GetNodeId() const;
+    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
+    void ReportComponentChangeEvent(
+        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0) const;
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;

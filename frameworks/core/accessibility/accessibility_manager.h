@@ -27,6 +27,7 @@ namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 class AccessibilityElementOperator;
+class ExtraEventInfo;
 } // namespace OHOS::Accessibility
 
 namespace OHOS::Ace::NG {
@@ -72,6 +73,7 @@ struct AccessibilityEvent {
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
     int32_t startIndex = 0;
     int32_t endIndex = 0;
+    std::map<std::string, std::string> extraEventInfo;
 };
 
 enum class OperatorType {

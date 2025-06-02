@@ -37,6 +37,16 @@ class ArkFolderStackComponent extends ArkComponent implements FolderStackAttribu
     modifierWithKey(this._modifiersWithKeys, FolderStackAutoHalfFoldModifier.identity, FolderStackAutoHalfFoldModifier, value);
     return this;
   }
+  onFolderStateChange(callback: (event: { foldStatus: FoldStatus }) => void): this {
+    modifierWithKey(this._modifiersWithKeys, FolderStackOnFolderStateChangeModifier.identity,
+      FolderStackOnFolderStateChangeModifier, callback);
+    return this;
+  }
+  onHoverStatusChange(handler: (param: HoverEventParam) => void): this {
+    modifierWithKey(this._modifiersWithKeys, FolderStackOnHoverStatusChangeModifier.identity,
+      FolderStackOnHoverStatusChangeModifier, handler);
+    return this;
+  }
 }
 
 class FolderStackAlignContentModifier extends ModifierWithKey<number> {
@@ -80,6 +90,35 @@ class FolderStackAutoHalfFoldModifier extends ModifierWithKey<boolean> {
     }
   }
 }
+
+class FolderStackOnFolderStateChangeModifier extends ModifierWithKey<(event: { foldStatus: FoldStatus }) => void> {
+  constructor(value: (event: { foldStatus: FoldStatus }) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('folderStackOnFolderStateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().folderStack.resetOnFolderStateChange(node);
+    } else {
+      getUINativeModule().folderStack.setOnFolderStateChange(node, this.value);
+    }
+  }
+}
+
+class FolderStackOnHoverStatusChangeModifier extends ModifierWithKey<(param: HoverEventParam) => void	> {
+  constructor(value: (param: HoverEventParam) => void	) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('folderStackOnHoverStatusChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().folderStack.resetOnHoverStatusChange(node);
+    } else {
+      getUINativeModule().folderStack.setOnHoverStatusChange(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
 globalThis.FolderStack.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

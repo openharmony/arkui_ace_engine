@@ -23,6 +23,7 @@ build_component_ng("base_ng") {
     "inspector.cpp",
     "inspector_filter.cpp",
     "modifier.cpp",
+    "node_render_status_monitor.cpp",
     "observer_handler.cpp",
     "simplified_inspector.cpp",
     "transparent_node_detector.cpp",

@@ -85,6 +85,7 @@ protected:
         inheritStyle_ = false;
         drawTraversed_ = false;
     }
+    std::optional<RSRecordingPath> path_;
 };
 
 } // namespace OHOS::Ace::NG

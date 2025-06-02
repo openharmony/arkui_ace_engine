@@ -55,8 +55,16 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto childAlign = align;
+        auto childLayoutProperty = child->GetLayoutProperty();
+        if (childLayoutProperty && childLayoutProperty->GetPositionProperty() &&
+            childLayoutProperty->GetPositionProperty()->HasLayoutGravity()) {
+            auto rawChildAlign = childLayoutProperty->GetPositionProperty()->GetLayoutGravity().value_or(Alignment::CENTER);
+            childAlign = Alignment::GetAlignment(layoutDirection, rawChildAlign.GetAlignmentStr(TextDirection::AUTO));
+        }
         auto translate =
-            CalculateStackAlignment(contentSize, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+            CalculateStackAlignment(contentSize, child->GetGeometryNode()->GetMarginFrameSize(), childAlign) +
+            paddingOffset;
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
     }
     // Update content position.

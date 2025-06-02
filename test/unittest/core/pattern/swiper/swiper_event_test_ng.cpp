@@ -1330,10 +1330,6 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
 
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
     pattern_->currentFirstIndex_ = pattern_->TotalCount() - 2;
     pattern_->currentIndex_ = 0;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
@@ -1345,7 +1341,6 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
     pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
     pattern_->HandleTouchBottomLoop();
     EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

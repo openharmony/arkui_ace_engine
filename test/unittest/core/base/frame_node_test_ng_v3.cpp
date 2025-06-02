@@ -457,4 +457,26 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg106, TestSize.Level1)
     frameNode->AddChild(child);
     EXPECT_TRUE(frameNode->GetCurrentPageRootNode() != nullptr);
 }
+
+/**
+ * @tc.name: FrameNodeOnRecvCommand001
+ * @tc.desc: Test OnRecvCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnRecvCommand001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+     /**
+     * @tc.steps: step2. IPC command is ' "{"cmd":"click"}" '.
+     * @tc.expected: expect result is RET_SUCCESS(10).
+     */
+    std::string command =  "{\" cmd \":\" click \"}";
+    auto mainPattern = frameNode->GetPattern<Pattern>();
+    auto result = mainPattern->OnRecvCommand(command);
+    EXPECT_EQ(result, RET_SUCCESS);
+}
 } // namespace OHOS::Ace::NG

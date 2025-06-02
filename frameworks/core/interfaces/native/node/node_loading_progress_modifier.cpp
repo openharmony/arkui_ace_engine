@@ -32,7 +32,6 @@ void SetLoadingProgressColor(ArkUINodeHandle node, uint32_t colorValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetColorParseFailed(frameNode, false);
     LoadingProgressModelNG::SetColor(frameNode, Color(colorValue));
 }
 
@@ -40,13 +39,14 @@ void ResetLoadingProgressColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        LoadingProgressModelNG::ResetColor(frameNode);
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
-        LoadingProgressModelNG::SetColorParseFailed(frameNode, true);
-        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingParseFailedColor());
+        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingColor());
     }
 }
 
@@ -75,7 +75,6 @@ void SetLoadingProgressForegroundColor(ArkUINodeHandle node, ArkUI_Uint32 colorV
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetForegroundColorParseFailed(frameNode, false);
     LoadingProgressModelNG::SetForegroundColor(frameNode, Color(colorValue));
 }
 
@@ -83,8 +82,9 @@ void ResetLoadingProgressForegroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetForegroundColorParseFailed(frameNode, true);
-    LoadingProgressModelNG::ResetForegroundColor(frameNode);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        LoadingProgressModelNG::ResetColor(frameNode);
+    }
 }
 } // namespace
 

@@ -32,6 +32,8 @@
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
+#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -51,6 +53,8 @@ constexpr Dimension FORM_PAN_DISTANCE = 1.0_vp;
 constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
+constexpr int32_t NONE_POINT_OFFSET = 2;
+constexpr int32_t STEP_POINT_OFFSET = 1;
 const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
 const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -98,6 +102,7 @@ void SliderPattern::OnModifyDone()
     if (!panMoveFlag_) {
         UpdateToValidValue();
     }
+    InitSliderEnds();
     UpdateBlock();
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
@@ -120,6 +125,33 @@ void SliderPattern::OnModifyDone()
     InitSliderAccessibilityEnabledRegister();
     InitOrRefreshSlipFactor();
     InitHapticController();
+}
+
+void SliderPattern::InitSliderEnds()
+{
+    auto callback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->sliderContentModifier_);
+        pattern->stepPoints_ = pattern->sliderContentModifier_->GetStepPointVec();
+        pattern->blockStart_ = pattern->sliderContentModifier_->GetBlockBackStart();
+        pattern->blockEnd_ = pattern->sliderContentModifier_->GetBlockBackEnd();
+        if (pattern->HasPrefix()) {
+            pattern->UpdatePrefixPosition();
+        }
+
+        if (pattern->HasPrefix()) {
+            pattern->UpdateSuffixPosition();
+        }
+    };
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->RegisterStepPointCallback(std::move(callback));
+    CHECK_NULL_VOID(prefixNodeStack_);
+    prefixNodeStack_->MarkDirtyNode(
+        PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    CHECK_NULL_VOID(suffixNodeStack_);
+    suffixNodeStack_->MarkDirtyNode(
+        PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void SliderPattern::CreateTipToMountRoot()
@@ -371,7 +403,10 @@ bool SliderPattern::InitAccessibilityVirtualNode()
     FrameNode::ProcessOffscreenNode(parentAccessibilityNode_);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SaveAccessibilityVirtualNode(parentAccessibilityNode_);
-    ModifyAccessibilityVirtualNode();
+    if (pointAccessibilityNodeVec_.empty()) {
+        return false;
+    }
+    UpdateStepPointsAccessibilityVirtualNodeSelected();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     return true;
 }
@@ -400,8 +435,17 @@ void SliderPattern::ModifyAccessibilityVirtualNode()
     if (pointAccessibilityNodeVec_.empty()) {
         return;
     }
-    UpdateStepPointsAccessibilityVirtualNodeSelected();
+    AddStepPointsAccessibilityVirtualNode();
+    UpdateStepAccessibilityVirtualNode();
+    UpdateParentNodeSize();
+    FrameNode::ProcessOffscreenNode(parentAccessibilityNode_);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SaveAccessibilityVirtualNode(parentAccessibilityNode_);
+    accessibilityProperty->SetAccessibilityText(" ");
+    UpdateStepPointsAccessibilityVirtualNodeSelected();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
@@ -409,7 +453,9 @@ void SliderPattern::AddStepPointsAccessibilityVirtualNode()
 {
     CHECK_NULL_VOID(parentAccessibilityNode_);
     CHECK_NULL_VOID(sliderContentModifier_);
-    parentAccessibilityNode_->GetRenderContext()->ClearChildren();
+    while (!parentAccessibilityNode_->GetChildren().empty()) {
+        parentAccessibilityNode_->RemoveChild(parentAccessibilityNode_->GetChildren().back());
+    }
     pointAccessibilityNodeVec_.clear();
     pointAccessibilityNodeEventVec_.clear();
     for (uint32_t i = 0; i < sliderContentModifier_->GetStepPointVec().size(); i++) {
@@ -445,7 +491,7 @@ void SliderPattern::UpdateStepAccessibilityVirtualNode()
     for (uint32_t i = 0; i < pointCount; i++) {
         std::string txt = GetPointAccessibilityTxt(i, step, min, max);
         SetStepPointAccessibilityVirtualNode(pointAccessibilityNodeVec_[i], pointSize,
-            PointF(stepPointVec[i].GetX() - pointOffsetWidth, stepPointVec[i].GetY() - pointOffsetHeight), txt);
+            PointF(stepPointVec[i].GetX() - pointOffsetWidth, stepPointVec[i].GetY() - pointOffsetHeight), txt, i);
     }
     parentAccessibilityNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -466,7 +512,7 @@ std::string SliderPattern::GetPointAccessibilityTxt(uint32_t pointIndex, float s
 }
 
 void SliderPattern::SetStepPointAccessibilityVirtualNode(
-    const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt)
+    const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt, uint32_t index)
 {
     CHECK_NULL_VOID(pointNode);
     auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
@@ -478,7 +524,23 @@ void SliderPattern::SetStepPointAccessibilityVirtualNode(
     pointNodeContext->UpdatePosition(OffsetT(Dimension(point.GetX()), Dimension(point.GetY())));
     auto pointAccessibilityProperty = pointNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(pointAccessibilityProperty);
-    pointAccessibilityProperty->SetAccessibilityText(txt);
+    if (index == 0 && HasPrefix()) {
+        if (prefixAccessibilityoptions_.accessibilityText.empty()) {
+            prefixAccessibilityoptions_.accessibilityText = txt;
+        }
+        pointAccessibilityProperty->SetAccessibilityText(prefixAccessibilityoptions_.accessibilityText);
+        pointAccessibilityProperty->SetAccessibilityDescription(prefixAccessibilityoptions_.accessibilityDescription);
+        pointAccessibilityProperty->SetAccessibilityLevel(prefixAccessibilityoptions_.accessibilityLevel);
+    } else if (index == pointAccessibilityNodeVec_.size() - STEP_POINT_OFFSET && HasSuffix()) {
+        if (suffixAccessibilityoptions_.accessibilityText.empty()) {
+            suffixAccessibilityoptions_.accessibilityText = txt;
+        }
+        pointAccessibilityProperty->SetAccessibilityText(suffixAccessibilityoptions_.accessibilityText);
+        pointAccessibilityProperty->SetAccessibilityDescription(suffixAccessibilityoptions_.accessibilityDescription);
+        pointAccessibilityProperty->SetAccessibilityLevel(suffixAccessibilityoptions_.accessibilityLevel);
+    } else {
+        pointAccessibilityProperty->SetAccessibilityText(txt);
+    }
 }
 
 void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
@@ -530,7 +592,40 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
             pointAccessibilityProperty->SetAccessibilityText(unSelectedTxt + valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(disabledDesc);
         }
+
+        UpdateEndsAccessibilityVirtualNode(pointNode, i, rangeFromPointIndex, rangeToPointIndex, reverse);
     }
+}
+
+void SliderPattern::UpdateEndsAccessibilityVirtualNode(const RefPtr<FrameNode>& pointNode, uint32_t index,
+    uint32_t rangeFromPointIndex, uint32_t rangeToPointIndex, bool reverse)
+{
+    CHECK_NULL_VOID(pointNode);
+    auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(pointNodeProperty);
+    auto valueTxt = UtfUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
+    auto pointAccessibilityProperty = pointNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+    CHECK_NULL_VOID(pointAccessibilityProperty);
+
+    uint32_t indexPrefix = 0;
+    uint32_t indexSuffix = pointAccessibilityNodeVec_.size() - STEP_POINT_OFFSET;
+    if (reverse) {
+        indexPrefix = pointAccessibilityNodeVec_.size() - STEP_POINT_OFFSET;
+        indexSuffix = 0;
+    }
+
+    if (index == indexPrefix && HasPrefix() && index >= rangeFromPointIndex) {
+        pointAccessibilityProperty->SetAccessibilityText(prefixAccessibilityoptions_.accessibilityText + valueTxt);
+        pointAccessibilityProperty->SetAccessibilityDescription(prefixAccessibilityoptions_.accessibilityDescription);
+        pointAccessibilityProperty->SetAccessibilityLevel(prefixAccessibilityoptions_.accessibilityLevel);
+        pointAccessibilityProperty->SetAccessibilityGroup(prefixAccessibilityoptions_.accessibilityGroup);
+    } else if (index == indexSuffix && HasSuffix() && index <= rangeToPointIndex) {
+        pointAccessibilityProperty->SetAccessibilityText(suffixAccessibilityoptions_.accessibilityText + valueTxt);
+        pointAccessibilityProperty->SetAccessibilityDescription(suffixAccessibilityoptions_.accessibilityDescription);
+        pointAccessibilityProperty->SetAccessibilityLevel(suffixAccessibilityoptions_.accessibilityLevel);
+        pointAccessibilityProperty->SetAccessibilityGroup(suffixAccessibilityoptions_.accessibilityGroup);
+    }
+    SetStepPointsAccessibilityVirtualNodeEvent(pointNode, index, true, reverse);
 }
 
 void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
@@ -715,6 +810,76 @@ bool SliderPattern::UpdateParameters()
     borderBlank_ = (length - sliderLength_) * HALF;
 
     return true;
+}
+
+void SliderPattern::UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType,
+    const Gradient& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipelineContext = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (sliderColorType) {
+            case SliderColorType::BLOCK_COLOR:
+                paintProperty->UpdateBlockColor(color);
+                break;
+            case SliderColorType::TRACK_COLOR:
+                paintProperty->UpdateTrackBackgroundColor(value);
+                paintProperty->UpdateTrackBackgroundIsResourceColor(true);
+                break;
+            case SliderColorType::SELECT_COLOR:
+                paintProperty->UpdateSelectColor(color);
+                paintProperty->UpdateSelectGradientColor(value);
+                paintProperty->UpdateSelectIsResourceColor(true);
+                break;
+            case SliderColorType::BLOCK_BORDER_COLOR:
+                paintProperty->UpdateBlockBorderColor(color);
+                break;
+            case SliderColorType::STEP_COLOR:
+                paintProperty->UpdateStepColor(color);
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SliderPattern::UpdateSliderComponentMedia()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        UpdateBlock();
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SliderPattern::UpdateSliderComponentString(const bool isShowTips, const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateShowTips(isShowTips);
+        paintProperty->UpdateCustomContent(value);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void SliderPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -2002,6 +2167,213 @@ void SliderPattern::SetAccessibilityAction()
         }
         pattern->PaintFocusState();
     });
+}
+
+void SliderPattern::UpdatePrefixPosition()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(sliderLayoutProperty);
+    auto prefixNodeStackContext = prefixNodeStack_->GetRenderContext();
+    CHECK_NULL_VOID(prefixNodeStackContext);
+
+    auto reverse = GetReverseValue(GetLayoutProperty<SliderLayoutProperty>());
+    PointF block = { 0.0f, 0.0f };
+    float noneOffset = 50.0f;
+    float outsetOffset = 0.0f;
+    Dimension offsetWidth = 12.0_vp;
+    outsetOffset_ = static_cast<float>(offsetWidth.ConvertToPx())/HALF;
+    if (reverse) {
+        block = blockEnd_;
+        noneOffset = -noneOffset;
+        outsetOffset = -outsetOffset_;
+    } else {
+        block = blockStart_;
+        outsetOffset = outsetOffset_;
+    }
+    bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
+    if (!isShowSteps) {
+        UpdateEndsNotShowStepsPosition(prefixPosition_, block, prefixSize_, noneOffset, outsetOffset);
+    } else {
+        UpdateEndsIsShowStepsPosition(prefixPosition_, block, prefixSize_, outsetOffset, side_);
+    }
+    prefixNodeStackContext->UpdatePosition(OffsetT(
+        Dimension(prefixPosition_.GetX(), DimensionUnit::PX), Dimension(prefixPosition_.GetY(), DimensionUnit::PX)));
+
+    prefixNodeStack_->MarkDirtyNode(
+        PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void SliderPattern::UpdateSuffixPosition()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(sliderLayoutProperty);
+    auto suffixNodeStackContext = suffixNodeStack_->GetRenderContext();
+    CHECK_NULL_VOID(suffixNodeStackContext);
+    auto reverse = GetReverseValue(GetLayoutProperty<SliderLayoutProperty>());
+
+    PointF block = { 0.0f, 0.0f };
+    float noneOffset = -50.0f;
+    float outsetOffset = 0.0f;
+    Dimension offsetWidth = 12.0_vp;
+    outsetOffset_ = static_cast<float>(offsetWidth.ConvertToPx())/HALF;
+    if (reverse) {
+        block = blockStart_;
+        noneOffset = -noneOffset;
+        outsetOffset = outsetOffset_;
+    } else {
+        block = blockEnd_;
+        outsetOffset = -outsetOffset_;
+    }
+    bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
+    if (!isShowSteps) {
+        UpdateEndsNotShowStepsPosition(suffixPosition_, block, suffixSize_, noneOffset, outsetOffset);
+    } else {
+        UpdateEndsIsShowStepsPosition(suffixPosition_, block, suffixSize_, outsetOffset, !side_);
+    }
+    suffixNodeStackContext->UpdatePosition(OffsetT(
+        Dimension(suffixPosition_.GetX(), DimensionUnit::PX), Dimension(suffixPosition_.GetY(), DimensionUnit::PX)));
+
+    suffixNodeStack_->MarkDirtyNode(
+        PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void SliderPattern::UpdateEndsNotShowStepsPosition(
+    PointF& EndsPosition, PointF& block, SizeF& endsSize, float noneOffset, float outsetOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(sliderLayoutProperty);
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+    if (axis == Axis::HORIZONTAL) {
+        if (sliderMode == SliderModel::SliderMode::INSET) {
+            EndsPosition.SetX(block.GetX() - endsSize.Width() * HALF);
+            EndsPosition.SetY(block.GetY() - endsSize.Height() * HALF);
+        } else if (sliderMode == SliderModel::SliderMode::OUTSET) {
+            EndsPosition.SetX(block.GetX() - endsSize.Width() * HALF - outsetOffset);
+            EndsPosition.SetY(block.GetY() - endsSize.Height() * HALF);
+        } else {
+            EndsPosition.SetX(block.GetX() - endsSize.Width() * HALF + noneOffset);
+            EndsPosition.SetY(block.GetY() - endsSize.Height() * HALF);
+        }
+    } else {
+        if (sliderMode == SliderModel::SliderMode::INSET) {
+            EndsPosition.SetX(block.GetX() - endsSize.Width() * HALF);
+            EndsPosition.SetY(block.GetY() - endsSize.Height() * HALF);
+        } else if (sliderMode == SliderModel::SliderMode::OUTSET) {
+            EndsPosition.SetX(block.GetX() - endsSize.Width() * HALF);
+            EndsPosition.SetY(block.GetY() - endsSize.Height() * HALF - outsetOffset);
+        } else {
+            EndsPosition.SetX(block.GetX() - endsSize.Width() * HALF);
+            EndsPosition.SetY(block.GetY() - endsSize.Height() * HALF + noneOffset);
+        }
+    }
+}
+
+void SliderPattern::UpdateEndsIsShowStepsPosition(
+    PointF& EndsPosition, PointF& block, SizeF& endsSize, float outsetOffset, bool side)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(sliderLayoutProperty);
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+
+    int32_t noneModePoint = 1;
+    int32_t stepModePoint = 0;
+    if (!side) {
+        noneModePoint = stepPoints_.size() - NONE_POINT_OFFSET;
+        stepModePoint = stepPoints_.size() - STEP_POINT_OFFSET;
+    }
+
+    if (stepPoints_.size() < 1) {
+        return;
+    }
+    if (sliderMode == SliderModel::SliderMode::NONE) {
+        EndsPosition.SetX(stepPoints_[noneModePoint].GetX() - endsSize.Width() * HALF);
+        EndsPosition.SetY(stepPoints_[noneModePoint].GetY() - endsSize.Height() * HALF);
+    } else if (sliderMode == SliderModel::SliderMode::OUTSET) {
+        if (axis == Axis::HORIZONTAL) {
+            EndsPosition.SetX(stepPoints_[stepModePoint].GetX() - endsSize.Width() * HALF - outsetOffset);
+            EndsPosition.SetY(stepPoints_[stepModePoint].GetY() - endsSize.Height() * HALF);
+        } else {
+            EndsPosition.SetX(stepPoints_[stepModePoint].GetX() - endsSize.Width() * HALF);
+            EndsPosition.SetY(stepPoints_[stepModePoint].GetY() - endsSize.Height() * HALF - outsetOffset);
+        }
+    } else {
+        EndsPosition.SetX(stepPoints_[stepModePoint].GetX() - endsSize.Width() * HALF);
+        EndsPosition.SetY(stepPoints_[stepModePoint].GetY() - endsSize.Height() * HALF);
+    }
+}
+
+void SliderPattern::SetPrefix(const RefPtr<NG::UINode>& prefix, const NG::SliderPrefixOptions& options)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto prefixFrameNode = DynamicCast<FrameNode>(prefix);
+    if (!prefixFrameNode) {
+        return;
+    }
+    if (!prefixNodeStack_) {
+        prefixNodeStack_ = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
+        host->AddChild(prefixNodeStack_, 1);
+        prefixNodeStack_->AddChild(prefixFrameNode);
+        prefixNodeStack_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    }
+    prefix->SetActive(false);
+    prefixAccessibilityoptions_ = options;
+
+    prefix_ = prefix;
+}
+
+void SliderPattern::SetSuffix(const RefPtr<NG::UINode>& suffix, const NG::SliderSuffixOptions& options)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto suffixFrameNode = DynamicCast<FrameNode>(suffix);
+    if (!suffixFrameNode) {
+        return;
+    }
+    if (!suffixNodeStack_) {
+        suffixNodeStack_ = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
+        host->AddChild(suffixNodeStack_, 1);
+        suffixNodeStack_->AddChild(suffixFrameNode);
+        suffixNodeStack_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    }
+    suffix->SetActive(false);
+    suffixAccessibilityoptions_ = options;
+
+    suffix_ = suffix;
+}
+
+void SliderPattern::ResetPrefix()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    prefix_.Reset();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void SliderPattern::ResetSuffix()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    suffix_.Reset();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void SliderPattern::SetSliderValue(double value, int32_t mode)

@@ -354,7 +354,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest006, TestSize.Level1)
     touchEventInfo.changedTouches_.clear();
     touchEventInfo.changedTouches_.emplace_back(touchInfo);
     hyperlinkPattern->OnTouchEvent(touchEventInfo);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::NONE);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationFirst(), TextDecoration::NONE);
     touchInfo.SetTouchType(TouchType::CANCEL);
     touchEventInfo.changedTouches_.clear();
     touchEventInfo.changedTouches_.emplace_back(touchInfo);
@@ -443,7 +443,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
     hyperlinkPattern->OnHoverEvent(true);
     EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::BLACK);
     hyperlinkPattern->OnHoverEvent(false);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::NONE);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationFirst(), TextDecoration::NONE);
 }
 
 /**

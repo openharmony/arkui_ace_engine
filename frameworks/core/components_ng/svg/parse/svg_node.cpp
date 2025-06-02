@@ -518,7 +518,7 @@ void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
         OnTransform(canvas, lengthRule);
     }
     if (!hrefMaskId_.empty()) {
-        OnMask(canvas, svgCoordinateSystemContext.GetViewPort());
+        OnMask(canvas, svgCoordinateSystemContext);
     }
     if (!hrefFilterId_.empty()) {
         OnFilter(canvas, svgCoordinateSystemContext);
@@ -654,20 +654,10 @@ void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 
 void SvgNode::OnTransform(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
 {
-    auto containerRect = lengthRule.GetContainerRect();
-    Offset globalPivot = CalcGlobalPivot(attributes_.transformOrigin, containerRect);
-    auto matrix = (animateTransform_.empty()) ? NGSvgTransform::CreateMatrix4(attributes_.transformVec, globalPivot)
-                                              : SvgTransform::CreateMatrixFromMap(animateTransform_);
-    auto svgContext = svgContext_.Upgrade();
-    if (svgContext != nullptr && !attributes_.href.empty() &&
-        lengthRule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
-        auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
-        if (refSvgNode != nullptr) {
-            auto scaleX = matrix.GetScaleX();
-            auto scaleY = matrix.GetScaleY();
-            matrix.SetScale(scaleX * containerRect.Width(), scaleY * containerRect.Height(), 1.0);
-        }
-    }
+    Offset globalPivot = CalcGlobalPivot(attributes_.transformOrigin, lengthRule);
+    auto matrix = (animateTransform_.empty()) ?
+        NGSvgTransform::CreateMatrix4(attributes_.transformVec, globalPivot, lengthRule)
+        : SvgTransform::CreateMatrixFromMap(animateTransform_);
     canvas.ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
 }
 
@@ -998,22 +988,11 @@ void SvgNode::AnimateFromToTransform(const RefPtr<SvgAnimation>& animate, double
     animate->CreatePropertyAnimation(originalValue, std::move(callback));
 }
 
-Offset SvgNode::CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin, const Rect& baseRect)
+Offset SvgNode::CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin,
+    const SvgLengthScaleRule& lengthRule)
 {
-    Rect RectForX = baseRect;
-    Rect RectForY = baseRect;
-    Rect ReferenceBox = GetRootViewBox();
-    if (ReferenceBox == Rect(0, 0, 0, 0)) {
-        ReferenceBox = baseRect;
-    }
-    if (transformOrigin.first.Unit() == DimensionUnit::PERCENT) {
-        RectForX = ReferenceBox;
-    }
-    if (transformOrigin.second.Unit() == DimensionUnit::PERCENT) {
-        RectForY = ReferenceBox;
-    }
-    double x = ConvertDimensionToPx(transformOrigin.first, RectForX.GetSize(), SvgLengthType::HORIZONTAL);
-    double y = ConvertDimensionToPx(transformOrigin.second, RectForY.GetSize(), SvgLengthType::VERTICAL);
+    auto x = GetRegionLength(transformOrigin.first, lengthRule, SvgLengthType::HORIZONTAL);
+    auto y = GetRegionLength(transformOrigin.second, lengthRule, SvgLengthType::VERTICAL);
     return Offset(x, y);
 }
 
@@ -1051,5 +1030,15 @@ void SvgNode::TransformForCurrentOBB(RSCanvas& canvas, const SvgLengthScaleRule&
     // scale the graphic content of the given element non-uniformly
     canvas.Translate(translateX  + offset.GetX(), translateY + offset.GetY());
     canvas.Scale(scaleX, scaleY);
+}
+
+void SvgNode::ApplyTransform(RSRecordingPath& path, const SvgLengthScaleRule& lengthRule)
+{
+    if (!attributes_.transformVec.size()) {
+        return;
+    }
+    Offset globalPivot = CalcGlobalPivot(attributes_.transformOrigin, lengthRule);
+    auto matrix = NGSvgTransform::CreateMatrix4(attributes_.transformVec, globalPivot, lengthRule);
+    path.Transform(RosenSvgPainter::ToDrawingMatrix(matrix));
 }
 } // namespace OHOS::Ace::NG

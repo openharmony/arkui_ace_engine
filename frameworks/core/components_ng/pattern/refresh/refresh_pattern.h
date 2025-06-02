@@ -85,6 +85,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void OnColorModeChange(uint32_t colorMode) override;
+
     Axis GetAxis() const override
     {
         return Axis::VERTICAL;
@@ -104,6 +106,10 @@ public:
         return !NearZero(scrollOffset_);
     }
 
+    void SetRatio(float ratio)
+    {
+        ratio_ =  ratio;
+    }
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -112,6 +118,7 @@ private:
     void HandleDragEnd(float speed);
     void HandleDragCancel();
     float CalculatePullDownRatio();
+    float GetMaxPullDownDistance();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
     float GetFollowRatio();

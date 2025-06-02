@@ -203,6 +203,12 @@ class DragController {
         JSViewAbstract.cancelDataLoading(key);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    enableDropDisallowedBadge(enable) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.enableDropDisallowedBadge(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {
@@ -835,6 +841,10 @@ class UIContext {
         }
         __JSScopeUtil__.restoreInstanceId();
     }
+    
+    isAvailable() {
+        return __availableInstanceIds__.has(this.instanceId_);
+    }
 }
 
 class DynamicSyncScene {
@@ -966,6 +976,16 @@ class FocusController {
             __JSScopeUtil__.restoreInstanceId();
             return result;
         }
+    }
+
+    isActive() {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = this.ohos_focusController.isActive();
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
     }
 
     setAutoFocusTransfer(value) {
@@ -1679,4 +1699,22 @@ function __checkRegexValid__(pattern) {
     } finally {
         return result;
     }
+}
+
+const __availableInstanceIds__ = new Set();
+
+/**
+ * add available instanceId
+ * @param instanceId instanceId to add
+ */
+function __addAvailableInstanceId__(instanceId) {
+    __availableInstanceIds__.add(instanceId);
+}
+
+/**
+ * remove available instanceId
+ * @param instanceId instanceId to remove
+ */
+function __removeAvailableInstanceId__(instanceId) {
+    __availableInstanceIds__.delete(instanceId);
 }

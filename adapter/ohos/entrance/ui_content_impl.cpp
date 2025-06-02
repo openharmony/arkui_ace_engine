@@ -1668,6 +1668,10 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     if (!fontWeightScale.empty()) {
         SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
+    auto deviceType = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
+    if (!deviceType.empty()) {
+        SystemProperties::SetConfigDeviceType(deviceType);
+    }
 }
 
 std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
@@ -4918,6 +4922,29 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
         TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
 }
 
+void sendCommandCallbackInner(RefPtr<PipelineBase> pipeline)
+{
+    auto sendCommandCallback = [weakContext = WeakPtr(pipeline)](int32_t value) {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_VOID(pipeline);
+        KeyEvent keyEvent;
+        keyEvent.action = KeyAction::DOWN;
+        keyEvent.code = static_cast<KeyCode>(value);
+        keyEvent.pressedCodes = { keyEvent.code };
+
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakContext = WeakPtr(pipeline), keyEvent]() {
+                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+                CHECK_NULL_VOID(pipeline);
+                pipeline->OnNonPointerEvent(keyEvent);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionSendCommandKeyCode");
+    };
+    UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
+}
+
 void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
 {
     // set get inspector tree function for ui session manager
@@ -4959,6 +4986,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
     SetupGetPixelMapCallback(pipeline);
     RegisterGetCurrentPageName(pipeline);
     InitSendCommandFunctionsCallbacks(pipeline);
+    sendCommandCallbackInner(pipeline);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)

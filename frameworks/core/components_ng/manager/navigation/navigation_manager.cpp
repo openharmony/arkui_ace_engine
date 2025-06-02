@@ -108,14 +108,14 @@ std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPt
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find parent navigation node failed");
         return nullptr;
     }
-    
+
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(current);
     CHECK_NULL_RETURN(navigation, nullptr);
     auto pattern = navigation->GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto stack = pattern->GetNavigationStack();
     CHECK_NULL_RETURN(stack, nullptr);
-    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack);
+    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack, navigation->GetId());
 }
 
 bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& addCallback)

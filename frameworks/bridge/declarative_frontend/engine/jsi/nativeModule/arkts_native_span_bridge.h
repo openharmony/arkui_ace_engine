@@ -54,6 +54,8 @@ public:
     static ArkUINativeModuleValue ResetAccessibilityDescription(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetAccessibilityLevel(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetAccessibilityLevel(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnHover(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnHover(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

@@ -2247,4 +2247,30 @@ HWTEST_F(RatingTestNg, RatingOnChangeEventTest002, TestSize.Level1)
     rating.SetOnChange(frameNode, onChange);
     EXPECT_NE(eventHub->changeEvent_, nullptr);
 }
+
+/**
+ * @tc.name: StyleTest001
+ * @tc.desc: Test style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, StyleTest001, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetBackgroundSrc(RATING_BACKGROUND_URL);
+    rating.SetForegroundSrc(RATING_FOREGROUND_URL);
+    rating.SetSecondarySrc(RATING_SECONDARY_URL);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    // Test starStyle value.
+    EXPECT_EQ(ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_BACKGROUND_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_FOREGROUND_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_SECONDARY_URL);
+}
+
 } // namespace OHOS::Ace::NG

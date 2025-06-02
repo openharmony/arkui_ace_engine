@@ -54,11 +54,11 @@ ACE_EXPORT extern const char ATTRS_COMMON_ENABLE[];
 ACE_EXPORT extern const char ATTRS_COMMON_ZINDEX[];
 
 // root view
-ACE_EXPORT extern const char ROOT_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char ROOT_ETS_TAG[];
 // stage view
-ACE_EXPORT extern const char STAGE_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
-ACE_EXPORT extern const char PAGE_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char PAGE_ETS_TAG[];
 // overlay view
 ACE_EXPORT extern const char OVERLAY_ETS_TAG[];
 ACE_EXPORT extern const char ORDER_OVERLAY_ETS_TAG[];
@@ -153,6 +153,7 @@ ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_IMAGE_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_CONTENT_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_ETS_TAG[];
+ACE_EXPORT extern const char SPLIT_PLACEHOLDER_CONTENT_ETS_TAG[];
 
 // navRouter view
 ACE_EXPORT extern const char NAVROUTER_VIEW_ETS_TAG[];
@@ -415,6 +416,12 @@ ACE_EXPORT extern const char STEPPER_ETS_TAG[];
 // stepperItem
 ACE_EXPORT extern const char STEPPER_ITEM_COMPONENT_TAG[];
 ACE_EXPORT extern const char STEPPER_ITEM_ETS_TAG[];
+
+// toolbar
+ACE_EXPORT extern const char TOOLBAR_ETS_TAG[];
+
+// toolbaritem
+ACE_EXPORT extern const char TOOLBARITEM_ETS_TAG[];
 
 // scrollBar
 ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[];

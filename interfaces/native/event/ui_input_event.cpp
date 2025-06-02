@@ -19,6 +19,7 @@
 #include "interfaces/native/node/event_converter.h"
 #include "interfaces/native/node/node_model.h"
 #include "base/error/error_code.h"
+#include "frameworks/core/common/ace_application_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,13 +57,87 @@ int32_t OH_ArkUI_UIInputEvent_GetType(const ArkUI_UIInputEvent* event)
     if (!event) {
         return 0;
     }
+    if (event->apiVersion >= static_cast<int32_t>(OHOS::Ace::PlatformVersion::VERSION_TWENTY)) {
+        return event->inputType;
+    }
+    switch (event->eventTypeId) {
+        case C_KEY_EVENT_ID: {
+            return 0;
+        }
+        case C_FOCUS_AXIS_EVENT_ID: {
+            return 0;
+        }
+        case C_CLICK_EVENT_ID: {
+            if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
+                return 0;
+            }
+            return event->inputType;
+        }
+        default: {
+            break;
+        }
+    }
     return event->inputType;
+}
+
+int32_t OH_ArkUI_UIInputEvent_GetAction_Ext(const ArkUI_UIInputEvent* event)
+{
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!touchEvent) {
+                return -1;
+            }
+            return OHOS::Ace::NodeModel::ConvertToCTouchActionType(touchEvent->action);
+        }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return -1;
+            }
+            return OHOS::Ace::NodeModel::ConvertToCMouseActionType(mouseEvent->action);
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return -1;
+            }
+            return OHOS::Ace::NodeModel::ConvertToCAxisActionType(axisEvent->action);
+        }
+        case C_CLICK_EVENT_ID: {
+            const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
+            if (!keyEvent) {
+                return -1;
+            }
+            return OHOS::Ace::NodeModel::ConvertToCKeyActionType(keyEvent->type);
+        }
+        case TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
+            if (!touchEvent) {
+                return -1;
+            }
+            return OHOS::Ace::NodeModel::ConvertToCTouchActionType(static_cast<int32_t>(touchEvent->type));
+        }
+        case AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return -1;
+            }
+            return OHOS::Ace::NodeModel::ConvertToCAxisActionType(static_cast<int32_t>(axisEvent->action));
+        }
+        default:
+            break;
+    }
+    return -1;
 }
 
 int32_t OH_ArkUI_UIInputEvent_GetAction(const ArkUI_UIInputEvent* event)
 {
     if (!event) {
         return -1;
+    }
+    if (event->apiVersion >= static_cast<int32_t>(OHOS::Ace::PlatformVersion::VERSION_TWENTY)) {
+        return OH_ArkUI_UIInputEvent_GetAction_Ext(event);
     }
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
@@ -395,6 +470,14 @@ int32_t GetCTouchEventDeviceId(ArkUI_UIInputEvent* event)
     if (!touchEvent) {
         return -1;
     }
+    if (event->apiVersion < static_cast<int32_t>(OHOS::Ace::PlatformVersion::VERSION_TWENTY) &&
+        touchEvent->subKind == ON_TOUCH_INTERCEPT) {
+        return 0;
+    }
+    if (event->apiVersion < static_cast<int32_t>(OHOS::Ace::PlatformVersion::VERSION_TWENTY) &&
+        touchEvent->subKind == ON_HOVER_MOVE) {
+        return 0;
+    }
     return static_cast<int32_t>(touchEvent->deviceId);
 }
 
@@ -409,6 +492,16 @@ int32_t GetCHoverEventDeviceId(ArkUI_UIInputEvent* event)
 
 int32_t GetCClickEventDeviceId(ArkUI_UIInputEvent* event)
 {
+    if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
+        if (event->apiVersion >= static_cast<int32_t>(OHOS::Ace::PlatformVersion::VERSION_TWENTY)) {
+            const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
+            if (!keyEvent) {
+                return -1;
+            }
+            return static_cast<int32_t>(keyEvent->deviceId);
+        }
+        return 0;
+    }
     const auto* clickEvent = reinterpret_cast<ArkUIClickEvent*>(event->inputEvent);
     if (!clickEvent) {
         return -1;
@@ -419,8 +512,16 @@ int32_t GetCClickEventDeviceId(ArkUI_UIInputEvent* event)
 int32_t GetCAxisEventDeviceId(ArkUI_UIInputEvent* event)
 {
     const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+    if (axisEvent->subKind == ON_AXIS &&
+        event->apiVersion < static_cast<int32_t>(OHOS::Ace::PlatformVersion::VERSION_TWENTY)) {
+        return 0;
+    }
     if (!axisEvent) {
         return -1;
+    }
+    if (axisEvent->subKind == ON_AXIS &&
+        event->apiVersion < static_cast<int32_t>(OHOS::Ace::PlatformVersion::VERSION_TWENTY)) {
+        return 0;
     }
     return static_cast<int32_t>(axisEvent->deviceId);
 }
@@ -436,6 +537,9 @@ int32_t GetAxisEventDeviceId(ArkUI_UIInputEvent* event)
 
 int32_t GetTouchEventDeviceId(ArkUI_UIInputEvent* event)
 {
+    if (event->apiVersion < static_cast<int32_t>(OHOS::Ace::PlatformVersion::VERSION_TWENTY)) {
+        return 0;
+    }
     const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
     if (!touchEvent) {
         return -1;

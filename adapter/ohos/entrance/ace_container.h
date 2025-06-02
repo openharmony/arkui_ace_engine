@@ -347,6 +347,8 @@ public:
 
     bool DumpRSNodeByStringID(const std::vector<std::string>& params);
 
+    bool DumpExistDarkRes(const std::vector<std::string>& params);
+
     bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
@@ -796,6 +798,7 @@ public:
         auto rect = uiWindow_->GetHostWindowRect(instanceId);
         return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
+    void UpdateColorMode(uint32_t colorMode) override;
     void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
 
@@ -841,6 +844,8 @@ public:
     {
         foldStatusFromListener_ = GetCurrentFoldStatus();
     }
+
+    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId);
 
 private:
     virtual bool MaybeRelease() override;

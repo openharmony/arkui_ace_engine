@@ -96,8 +96,9 @@ RefPtr<MutableSpanString> RichEditorStyledStringTestNg::CreateTextStyledString(c
     auto styledString = AceType::MakeRefPtr<MutableSpanString>(content);
     auto length = styledString->GetLength();
     styledString->AddSpan(AceType::MakeRefPtr<FontSpan>(TEST_FONT, 0, length));
-    styledString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TEXT_DECORATION_VALUE, TEXT_DECORATION_COLOR_VALUE,
-        TextDecorationStyle::WAVY, 0, length));
+    styledString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TEXT_DECORATION_VALUE}), TEXT_DECORATION_COLOR_VALUE,
+        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(TEST_BASELINE_OFFSET, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(LETTER_SPACING, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(SHADOWS, 0, length));
@@ -240,7 +241,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController001, TestSize.Level
     EXPECT_EQ(fontStyle->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(fontStyle->GetFontFamily(), FONT_FAMILY_VALUE);
     EXPECT_EQ(fontStyle->GetTextColor(), OHOS::Ace::Color::RED);
-    EXPECT_EQ(fontStyle->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(fontStyle->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationStyle(), TextDecorationStyle::WAVY);
     EXPECT_EQ(fontStyle->GetLetterSpacing(), LETTER_SPACING);
@@ -576,7 +577,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level
     EXPECT_EQ(fontStyle->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(fontStyle->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(fontStyle->GetTextColor(), TEXT_COLOR_VALUE);
-    EXPECT_EQ(fontStyle->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(fontStyle->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(fontStyle->GetLetterSpacing(), LETTER_SPACING);
     EXPECT_EQ(fontStyle->GetTextShadow(), SHADOWS);
@@ -1330,5 +1331,42 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Le
     focusHub->currentFocus_ = true;
     richEditorPattern->DeleteValueInStyledString(0, 10, true, false);
     EXPECT_FALSE(richEditorPattern->previewLongPress_);
+}
+
+/**
+ * @tc.name: DeleteTextDecorationType
+ * @tc.desc: Test deleteDecorationType of DecorationSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, DeleteTextDecorationType, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a spanString and AddSpan
+     * @tc.expected: The SpanString and style should be successfully created and applied
+     */
+    std::string buffer;
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({ TextDecoration::UNDERLINE, TextDecoration::OVERLINE }), Color::RED,
+        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1);
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    buffer.clear();
+    buffer = decorationSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+
+    /**
+     * @tc.steps2:remove overline to decorationSpan
+     * @tc.expected: The decorationSpan types removed Overline ,size equal 1
+     */
+    decorationSpan->RemoveTextDecorationType(TextDecoration::OVERLINE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationTypes().size(), 1);
+
+    /**
+     * @tc.steps3:remove none to decorationSpan
+     * @tc.expected: The decorationSpan types can remove None, size equal 1
+     */
+    decorationSpan->RemoveTextDecorationType(TextDecoration::NONE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationTypes().size(), 1);
 }
 } // namespace OHOS::Ace::NG

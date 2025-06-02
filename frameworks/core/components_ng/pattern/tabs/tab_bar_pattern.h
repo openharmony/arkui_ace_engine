@@ -240,6 +240,9 @@ public:
 
     bool IsContainsBuilder();
 
+    void SetAnimationCurve(const RefPtr<Curve>& curve);
+    const RefPtr<Curve> GetAnimationCurve(const RefPtr<Curve>& defaultCurve) const;
+
     void SetAnimationDuration(int32_t animationDuration)
     {
         animationDuration_ = animationDuration;
@@ -560,6 +563,8 @@ public:
         focusIndicator_ = focusIndicator;
     }
 
+    void ChangeIndex(int32_t index);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -718,6 +723,7 @@ private:
     int32_t accessibilityFocusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     std::unordered_map<int32_t, TabBarParamType> tabBarType_;
+    RefPtr<Curve> animationCurve_;
     std::optional<int32_t> animationDuration_;
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;

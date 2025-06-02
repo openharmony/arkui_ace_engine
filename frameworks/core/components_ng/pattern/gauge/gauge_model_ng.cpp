@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 
@@ -96,7 +97,23 @@ void GaugeModelNG::SetMarkedTextColor(const Color& color) {}
 
 void GaugeModelNG::SetShadowOptions(const GaugeShadowOptions& shadowOptions)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GaugePattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto&& updateFunc = [shadowOptions, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        GaugeShadowOptions shadowValue = shadowOptions;
+        shadowValue.ReloadResources();
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, ShadowOptions, shadowValue, frameNode);
+    };
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, ShadowOptions, shadowOptions);
+    updateFunc(resObj);
+    pattern->AddResObj("gauge.trackShadow", resObj, std::move(updateFunc));
 }
 
 void GaugeModelNG::SetIsShowIndicator(bool isShowIndicator)
@@ -176,8 +193,8 @@ void GaugeModelNG::SetIsShowIndicator(FrameNode* frameNode, bool isShowIndicator
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IsShowIndicator, isShowIndicator, frameNode);
 }
 
-void GaugeModelNG::SetIndicatorIconPath(FrameNode* frameNode,
-    const std::string& iconPath, const std::string& bundleName, const std::string& moduleName)
+void GaugeModelNG::SetIndicatorIconPath(
+    FrameNode* frameNode, const std::string& iconPath, const std::string& bundleName, const std::string& moduleName)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(
         GaugePaintProperty, IndicatorIconSourceInfo, ImageSourceInfo(iconPath, bundleName, moduleName), frameNode);
@@ -185,8 +202,8 @@ void GaugeModelNG::SetIndicatorIconPath(FrameNode* frameNode,
 
 void GaugeModelNG::ResetIndicatorIconPath(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorIconSourceInfo,
-        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        GaugePaintProperty, IndicatorIconSourceInfo, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void GaugeModelNG::SetIndicatorSpace(FrameNode* frameNode, const Dimension& space)
@@ -227,4 +244,72 @@ void GaugeModelNG::SetBuilderFunc(FrameNode* frameNode, NG::GaugeMakeCallback&& 
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
 }
+
+void HandleStrokeWidthResource(const RefPtr<ResourceObject>& resObj, const RefPtr<GaugePattern>& pattern)
+{
+    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result) || result.Unit() == DimensionUnit::PERCENT) {
+            result = CalcDimension(0);
+        }
+        pattern->UpdateStrokeWidth(result, isFirstLoad);
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj("gauge.strokeWidth", resObj, std::move(updateFunc));
+}
+
+void HandleIndicatorIconResource(const RefPtr<ResourceObject>& resObj, const RefPtr<GaugePattern>& pattern)
+{
+    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        std::string result;
+        if (ResourceParseUtils::ParseResMedia(resObj, result)) {
+            pattern->UpdateIndicatorIconPath(result, resObj->GetBundleName(), resObj->GetModuleName(), isFirstLoad);
+        }
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj("gauge.indicator.icon", resObj, std::move(updateFunc));
+}
+
+void HandleIndicatorSpaceResource(const RefPtr<ResourceObject>& resObj, const RefPtr<GaugePattern>& pattern)
+{
+    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            result = NG::INDICATOR_DISTANCE_TO_TOP;
+        }
+        if (result.IsNegative()) {
+            result = NG::INDICATOR_DISTANCE_TO_TOP;
+        }
+        pattern->UpdateIndicatorSpace(result, isFirstLoad);
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj("gauge.indicator.space", resObj, std::move(updateFunc));
+}
+
+void GaugeModelNG::CreateWithResourceObj(GaugeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GaugePattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        switch (jsResourceType) {
+            case GaugeResourceType::STROKE_WIDTH: {
+                HandleStrokeWidthResource(resObj, pattern);
+                break;
+            }
+            case GaugeResourceType::INDICATOR_ICON: {
+                HandleIndicatorIconResource(resObj, pattern);
+                break;
+            }
+            case GaugeResourceType::INDICATOR_SPACE: {
+                HandleIndicatorSpaceResource(resObj, pattern);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

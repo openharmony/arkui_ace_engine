@@ -133,7 +133,8 @@ DataReadyNotifyTask RatingPattern::CreateDataReadyCallback(int32_t imageFlag)
 
 LoadFailNotifyTask RatingPattern::CreateLoadFailCallback(int32_t imageFlag)
 {
-    auto task = [weak = WeakClaim(this), imageFlag](const ImageSourceInfo& sourceInfo, const std::string& msg) {
+    auto task = [weak = WeakClaim(this), imageFlag](
+                    const ImageSourceInfo& sourceInfo, const std::string& msg, const ImageErrorInfo& /* errorInfo */) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         // check image info has changed or not

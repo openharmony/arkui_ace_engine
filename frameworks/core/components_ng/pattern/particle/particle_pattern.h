@@ -84,6 +84,8 @@ private:
     void GetSpinJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& particleOption) const;
 
     std::unique_ptr<JsonValue> ParseEmitterParticleJson(const ParticleOption& particleOption) const;
+    std::unique_ptr<JsonValue> ParseAnnulusRegionJson(const ParticleOption& particleOption,
+        const ParticleAnnulusRegion& annulusRegion) const;
     std::unique_ptr<JsonValue> ParseColorUpdater(ParticleColorPropertyUpdater& updater) const;
     std::unique_ptr<JsonValue> ParseFloatObjectJson(const ParticleFloatPropertyOption& updaterObject) const;
     void ParseParticleObject(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

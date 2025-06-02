@@ -33,6 +33,7 @@ public:
 
     void SetWidth(const CalcDimension& width) override;
     void SetHeight(const CalcDimension& height) override;
+    void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
     void ClearWidthOrHeight(bool isWidth) override {};
     void SetMinWidth(const CalcDimension& minWidth) override;
     void SetMinHeight(const CalcDimension& minHeight) override;
@@ -42,10 +43,13 @@ public:
     void ResetMaxSize(bool resetWidth) override {};
 
     void SetBackgroundColor(const Color& color) override;
+    void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
+    void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject> &resObj, std::string &bundleName,
+        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override{};
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
-    void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
+    void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override;
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override;
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
@@ -84,6 +88,7 @@ public:
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) override {}
     void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) override {}
     void SetOuterBorderWidth(const Dimension& value) override {}
+    void SetOuterBorderWidthNew(const NG::BorderWidthProperty& property) override {}
     void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override {}
     void SetOuterBorderStyle(const BorderStyle& value) override {}
@@ -98,6 +103,9 @@ public:
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
     void SetAlign(const Alignment& alignment) override;
+    void SetAlign(const std::string& localizedAlignment) override {}
+    void SetLayoutGravity(const Alignment& alignment) override {}
+    void SetIsMirrorable(const bool& isMirrorable) override {}
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
     void SetChainStyle(const ChainInfo& chainInfo) override {}
     void SetBias(const BiasPair& biasPair) override {}
@@ -120,6 +128,7 @@ public:
     void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override;
+    void SetRotateAngle(float x, float y, float z, float perspective = 0.0f) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
 
     void SetOpacity(double opacity, bool passThrough = false) override;
@@ -249,6 +258,7 @@ public:
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
     void SetPrivacySensitive(bool flag) override {};
     void SetMonopolizeEvents(bool monopolizeEvents) override {};
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) override {};
 
     // Disable event.
     void DisableOnClick() override {};
@@ -368,10 +378,12 @@ public:
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
+    void EnableDropDisallowedBadge(bool dragEventStrictReportingEnabled) override {};
     int32_t CancelDataLoading(const std::string& key) override { return 0; };
     void SetDisableDataPrefetch(bool disableDataPrefetch) override {};
     void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
     // global light
+    void SetLightPosition(const NG::TranslateOptions& option) override {};
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
     void SetLightIntensity(const float value) override {};

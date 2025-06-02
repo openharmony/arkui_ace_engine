@@ -16,7 +16,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/flex/flex_model_ng.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -93,9 +93,9 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(500));
         ViewAbstract::SetHeight(CalcLength(300));
         column1 = CreateColumn([](ColumnModelNG model) {
-            FlexModelNG model1;
-            model1.SetWidthLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
-            model1.SetHeightLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
         });
     });
     ASSERT_NE(column, nullptr);
@@ -151,9 +151,9 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest002, TestSize.Level1)
             ViewAbstract::SetFlexShrink(2);
         });
         column3 = CreateColumn([](ColumnModelNG model) {
-            FlexModelNG model1;
-            model1.SetWidthLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
-            model1.SetHeightLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
             ViewAbstract::SetFlexShrink(2);
         });
     });

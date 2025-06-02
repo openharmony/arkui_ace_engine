@@ -97,12 +97,13 @@ bool OnJsCommonDialog(
     const std::string &url,
     const std::string &message,
     const std::string &value = "",
-    RefPtr<TaskExecutor> task = nullptr)
+    RefPtr<TaskExecutor> task = nullptr,
+    bool isReload = false)
 {
     CHECK_NULL_RETURN(task, false);
     bool jsResult = false;
     auto param = std::make_shared<WebDialogEvent>(url, message, value, dialogEventType,
-        AceType::MakeRefPtr<ResultOhos>(result));
+        AceType::MakeRefPtr<ResultOhos>(result), isReload);
     task->PostSyncTask(
         [&webClientImpl, dialogEventType, &param, &jsResult] {
             if (webClientImpl == nullptr) {
@@ -810,6 +811,14 @@ void WebClientImpl::OnWindowNewByJS(
     delegate->OnWindowNew(targetUrl, isAlert, isUserTrigger, handler);
 }
 
+void WebClientImpl::OnActivateContentByJS()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnActivateContent();
+}
+
 void WebClientImpl::OnWindowExitByJS()
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1347,6 +1356,7 @@ void WebClientImpl::OnScrollStart(const float x, const float y)
     delegate->OnScrollStart(x, y);
 }
 
+
 bool WebClientImpl::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1354,4 +1364,35 @@ bool WebClientImpl::OnNestedScroll(float& x, float& y, float& xVelocity, float& 
     ContainerScope scope(delegate->GetInstanceId());
     return delegate->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
 }
+
+bool WebClientImpl::OnBeforeUnloadByJSV2(
+    const std::string& url, const std::string& message, bool isReload, std::shared_ptr<NWeb::NWebJSDialogResult> result)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, result, url, message, "",
+        delegate->GetTaskExecutor(), isReload);
+}
+
+void WebClientImpl::OnLoadStarted(const std::string& url)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnLoadStarted(url);
+}
+
+void WebClientImpl::OnLoadFinished(const std::string& url)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnLoadFinished(url);
+}
+
 } // namespace OHOS::Ace

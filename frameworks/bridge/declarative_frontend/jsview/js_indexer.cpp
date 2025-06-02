@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_indexer_theme.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
@@ -151,7 +152,16 @@ void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    IndexerModel::GetInstance()->SetSelectedColor(PaseColor(args));
+    std::optional<Color> colorOpt;
+    Color selectedColor;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], selectedColor, resObj)) {
+        colorOpt = selectedColor;
+    }
+    IndexerModel::GetInstance()->SetSelectedColor(colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::SELECTED_COLOR, resObj);
+    }
 }
 
 void JSIndexer::SetColor(const JSCallbackInfo& args)
@@ -159,7 +169,16 @@ void JSIndexer::SetColor(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    IndexerModel::GetInstance()->SetColor(PaseColor(args));
+    std::optional<Color> colorOpt;
+    Color color;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], color, resObj)) {
+        colorOpt = color;
+    }
+    IndexerModel::GetInstance()->SetColor(colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::COLOR, resObj);
+    }
 }
 
 void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
@@ -167,7 +186,16 @@ void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    IndexerModel::GetInstance()->SetPopupColor(PaseColor(args));
+    std::optional<Color> colorOpt;
+    Color popupColor;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], popupColor, resObj)) {
+        colorOpt = popupColor;
+    }
+    IndexerModel::GetInstance()->SetPopupColor(colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_COLOR, resObj);
+    }
 }
 
 void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
@@ -175,7 +203,16 @@ void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    IndexerModel::GetInstance()->SetSelectedBackgroundColor(PaseColor(args));
+    std::optional<Color> colorOpt;
+    Color selectedBackgroundColor;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], selectedBackgroundColor, resObj)) {
+        colorOpt = selectedBackgroundColor;
+    }
+    IndexerModel::GetInstance()->SetSelectedBackgroundColor(colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::SELECTED_BACKGROUND_COLOR, resObj);
+    }
 }
 
 void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
@@ -183,7 +220,16 @@ void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    IndexerModel::GetInstance()->SetPopupBackground(PaseColor(args));
+    std::optional<Color> colorOpt;
+    Color popupBackground;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], popupBackground, resObj)) {
+        colorOpt = popupBackground;
+    }
+    IndexerModel::GetInstance()->SetPopupBackground(colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_BACKGROUND, resObj);
+    }
 }
 
 void JSIndexer::SetUsingPopup(bool state)
@@ -196,14 +242,17 @@ void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    std::optional<Dimension> fontSize;
-    std::optional<FontWeight> fontWeight;
-    std::optional<std::vector<std::string>> fontFamily;
-    std::optional<FontStyle> fontStyle;
+    IndexerTextStyle textStyle;
     if (args[0]->IsObject()) {
-        GetFontContent(args, fontSize, fontWeight, fontFamily, fontStyle);
+        GetFontContent(args, textStyle);
     }
-    IndexerModel::GetInstance()->SetSelectedFont(fontSize, fontWeight, fontFamily, fontStyle);
+    IndexerModel::GetInstance()->SetSelectedFont(
+        textStyle.fontSize, textStyle.fontWeight, textStyle.fontFamily, textStyle.fontStyle);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::SELECTED_FONT_SIZE, textStyle.fontSizeResObj);
+        IndexerModel::GetInstance()->CreateWithResourceObj(
+            IndexerJsResourceType::SELECTED_FONT_FAMILY, textStyle.fontFamilyResObj);
+    }
 }
 
 void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
@@ -211,14 +260,17 @@ void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    std::optional<Dimension> fontSize;
-    std::optional<FontWeight> fontWeight;
-    std::optional<std::vector<std::string>> fontFamily;
-    std::optional<FontStyle> fontStyle;
+    IndexerTextStyle textStyle;
     if (args[0]->IsObject()) {
-        GetFontContent(args, fontSize, fontWeight, fontFamily, fontStyle);
+        GetFontContent(args, textStyle);
     }
-    IndexerModel::GetInstance()->SetPopupFont(fontSize, fontWeight, fontFamily, fontStyle);
+    IndexerModel::GetInstance()->SetPopupFont(
+        textStyle.fontSize, textStyle.fontWeight, textStyle.fontFamily, textStyle.fontStyle);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_FONT_SIZE, textStyle.fontSizeResObj);
+        IndexerModel::GetInstance()->CreateWithResourceObj(
+            IndexerJsResourceType::POPUP_FONT_FAMILY, textStyle.fontFamilyResObj);
+    }
 }
 
 void JSIndexer::SetFont(const JSCallbackInfo& args)
@@ -226,14 +278,16 @@ void JSIndexer::SetFont(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    std::optional<Dimension> fontSize;
-    std::optional<FontWeight> fontWeight;
-    std::optional<std::vector<std::string>> fontFamily;
-    std::optional<FontStyle> fontStyle;
+    IndexerTextStyle textStyle;
     if (args[0]->IsObject()) {
-        GetFontContent(args, fontSize, fontWeight, fontFamily, fontStyle);
+        GetFontContent(args, textStyle);
     }
-    IndexerModel::GetInstance()->SetFont(fontSize, fontWeight, fontFamily, fontStyle);
+    IndexerModel::GetInstance()->SetFont(
+        textStyle.fontSize, textStyle.fontWeight, textStyle.fontFamily, textStyle.fontStyle);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::FONT_SIZE, textStyle.fontSizeResObj);
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::FONT_FAMILY, textStyle.fontFamilyResObj);
+    }
 }
 
 void JSIndexer::JsOnSelected(const JSCallbackInfo& args)
@@ -291,34 +345,32 @@ void JSIndexer::JsOnPopupSelected(const JSCallbackInfo& args)
     }
 }
 
-void JSIndexer::GetFontContent(const JSCallbackInfo& args, std::optional<Dimension>& fontSize,
-    std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
-    std::optional<FontStyle>& fontStyle)
+void JSIndexer::GetFontContent(const JSCallbackInfo& args, IndexerTextStyle& textStyle)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     JSRef<JSVal> size = obj->GetProperty("size");
     CalcDimension fontSizeData;
-    if (ParseJsDimensionFp(size, fontSizeData) && !fontSizeData.IsNegative() &&
+    if (ParseJsDimensionFp(size, fontSizeData, textStyle.fontSizeResObj) && !fontSizeData.IsNegative() &&
         fontSizeData.Unit() != DimensionUnit::PERCENT) {
-        fontSize = fontSizeData;
+        textStyle.fontSize = fontSizeData;
     }
 
     JSRef<JSVal> weight = obj->GetProperty("weight");
     if (weight->IsString() || weight->IsNumber()) {
-        fontWeight = ConvertStrToFontWeight(weight->ToString());
+        textStyle.fontWeight = ConvertStrToFontWeight(weight->ToString());
     }
 
     JSRef<JSVal> family = obj->GetProperty("family");
     std::vector<std::string> fontFamilies;
-    if (ParseJsFontFamilies(family, fontFamilies)) {
-        fontFamily = fontFamilies;
+    if (ParseJsFontFamilies(family, fontFamilies, textStyle.fontFamilyResObj)) {
+        textStyle.fontFamily = fontFamilies;
     }
 
     JSRef<JSVal> style = obj->GetProperty("style");
     if (style->IsNumber()) {
         int32_t value = style->ToNumber<int32_t>();
         if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-            fontStyle = FONT_STYLES[value];
+            textStyle.fontStyle = FONT_STYLES[value];
         }
     }
 }
@@ -354,7 +406,11 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
     IndexerModel::GetInstance()->SetAlignStyle(value);
     CalcDimension popupHorizontalSpace(-1.0);
     if (args.Length() > 1) {
-        ParseJsDimensionVp(args[1], popupHorizontalSpace);
+        RefPtr<ResourceObject> resObj;
+        ParseJsDimensionVp(args[1], popupHorizontalSpace, resObj);
+        if (SystemProperties::ConfigChangePerform()) {
+            IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::ALIGN_OFFSET, resObj);
+        }
     }
     IndexerModel::GetInstance()->SetPopupHorizontalSpace(popupHorizontalSpace);
 }
@@ -388,15 +444,21 @@ void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         CalcDimension x;
         CalcDimension y;
+        RefPtr<ResourceObject> resObjX;
+        RefPtr<ResourceObject> resObjY;
         JSRef<JSVal> xVal = obj->GetProperty("x");
         JSRef<JSVal> yVal = obj->GetProperty("y");
         if ((xVal->IsString() && StringUtils::StringToCalcDimensionNG(xVal->ToString(), x, false)) ||
-            (!xVal->IsString() && JSViewAbstract::ParseJsDimensionVp(xVal, x))) {
+            (!xVal->IsString() && JSViewAbstract::ParseJsDimensionVp(xVal, x, resObjX))) {
             xOpt = x;
         }
         if ((yVal->IsString() && StringUtils::StringToCalcDimensionNG(yVal->ToString(), y, false)) ||
-            (!yVal->IsString() && JSViewAbstract::ParseJsDimensionVp(yVal, y))) {
+            (!yVal->IsString() && JSViewAbstract::ParseJsDimensionVp(yVal, y, resObjY))) {
             yOpt = y;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_POSITION_X, resObjX);
+            IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_POSITION_Y, resObjY);
         }
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
@@ -410,7 +472,16 @@ void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    IndexerModel::GetInstance()->SetPopupSelectedColor(PaseColor(args));
+    std::optional<Color> colorOpt;
+    Color popupSelectedColor;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], popupSelectedColor, resObj)) {
+        colorOpt = popupSelectedColor;
+    }
+    IndexerModel::GetInstance()->SetPopupSelectedColor(colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_SELECTED_COLOR, resObj);
+    }
 }
 
 void JSIndexer::SetPopupUnselectedColor(const JSCallbackInfo& args)
@@ -418,19 +489,29 @@ void JSIndexer::SetPopupUnselectedColor(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    IndexerModel::GetInstance()->SetPopupUnselectedColor(PaseColor(args));
+    std::optional<Color> colorOpt;
+    Color popupUnselectedColor;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], popupUnselectedColor, resObj)) {
+        colorOpt = popupUnselectedColor;
+    }
+    IndexerModel::GetInstance()->SetPopupUnselectedColor(colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_UNSELECTED_COLOR, resObj);
+    }
 }
 
 void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
 {
     CalcDimension fontSize;
     std::string weight;
+    RefPtr<ResourceObject> resObj;
     if (args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> size = obj->GetProperty("size");
         if (!size->IsNull()) {
             CalcDimension fontSizeData;
-            if (ParseJsDimensionFp(size, fontSizeData) && !fontSizeData.IsNegative() &&
+            if (ParseJsDimensionFp(size, fontSizeData, resObj) && !fontSizeData.IsNegative() &&
                 fontSizeData.Unit() != DimensionUnit::PERCENT) {
                 fontSize = fontSizeData;
             }
@@ -447,6 +528,9 @@ void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
     }
     IndexerModel::GetInstance()->SetFontSize(fontSize);
     IndexerModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight, FontWeight::MEDIUM));
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_ITEM_FONT_SIZE, resObj);
+    }
 }
 
 void JSIndexer::SetPopupItemBackgroundColor(const JSCallbackInfo& args)
@@ -454,7 +538,16 @@ void JSIndexer::SetPopupItemBackgroundColor(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    IndexerModel::GetInstance()->SetPopupItemBackground(PaseColor(args));
+    std::optional<Color> colorOpt;
+    Color popupItemBackgroundColor;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], popupItemBackgroundColor, resObj)) {
+        colorOpt = popupItemBackgroundColor;
+    }
+    IndexerModel::GetInstance()->SetPopupItemBackground(colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_ITEM_BACKGROUND_COLOR, resObj);
+    }
 }
 
 std::optional<Color> JSIndexer::PaseColor(const JSCallbackInfo& args)
@@ -546,7 +639,16 @@ void JSIndexer::SetPopupTitleBackground(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    IndexerModel::GetInstance()->SetPopupTitleBackground(PaseColor(args));
+    std::optional<Color> colorOpt;
+    Color popupTitleBackground;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], popupTitleBackground, resObj)) {
+        colorOpt = popupTitleBackground;
+    }
+    IndexerModel::GetInstance()->SetPopupTitleBackground(colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_TITLE_BACKGROUND, resObj);
+    }
 }
 
 void JSIndexer::SetWidth(const JSCallbackInfo& args)

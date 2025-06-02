@@ -60,6 +60,7 @@ public:
     void JsStroke(const JSCallbackInfo& info) {}
     void JsClip(const JSCallbackInfo& info) {}
     void JsRect(const JSCallbackInfo& info) {}
+    void JsRoundRect(const JSCallbackInfo& info) {}
     void JsBeginPath(const JSCallbackInfo& info) {}
     void JsClosePath(const JSCallbackInfo& info) {}
     void JsRestore(const JSCallbackInfo& info) {}

@@ -36,18 +36,19 @@ namespace {
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
-std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
+std::string GetDeclaration(const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
     auto jsonSpanDeclaration = JsonUtil::Create(true);
     jsonSpanDeclaration->Put(
-        "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
+        "type", V2::ConvertWrapTextDecorationToStirng(textDecorations).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     jsonSpanDeclaration->Put("style",
         V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID))
             .c_str());
     return jsonSpanDeclaration->ToString();
 }
+
 inline std::unique_ptr<JsonValue> ConvertShadowToJson(const Shadow& shadow)
 {
     auto jsonShadow = JsonUtil::Create(true);
@@ -90,7 +91,8 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         json->PutExtAttr("font", GetFont().c_str(), filter);
         json->PutExtAttr("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str(), filter);
         json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
-            fontStyle->GetTextDecoration(), fontStyle->GetTextDecorationStyle()).c_str(), filter);
+            fontStyle->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})),
+            fontStyle->GetTextDecorationStyle()).c_str(), filter);
         json->PutExtAttr("letterSpacing",
             fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
         json->PutExtAttr("textCase",
@@ -452,20 +454,25 @@ void SpanItem::UpdateFontStyle(TextStyle& spanTextStyle, const TextStyle& textSt
         UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
         UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
         UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, LetterSpacing, LetterSpacing);
+        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, StrokeWidth, StrokeWidth);
     } else {
         UPDATE_SPAN_TEXT_STYLE(fontStyle, FontSize, FontSize);
         UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
         UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
         UPDATE_SPAN_TEXT_STYLE(fontStyle, LetterSpacing, LetterSpacing);
+        UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeWidth, StrokeWidth);
     }
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextColor, TextColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextShadow, TextShadows);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, ItalicFontStyle, FontStyle);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, Superscript, Superscript);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontWeight, FontWeight);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFeature, FontFeatures);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecoration, TextDecoration);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeColor, StrokeColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationStyle, TextDecorationStyle);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, LineThicknessScale, LineThicknessScale);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextCase, TextCase);
 
     UPDATE_SPAN_TEXT_STYLE(fontStyle, VariableFontWeight, VariableFontWeight);
@@ -496,6 +503,7 @@ void SpanItem::UpdateReLayoutTextStyle(
         UPDATE_SPAN_TEXT_STYLE(textLineStyle, BaselineOffset, BaselineOffset);
         UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineSpacing, LineSpacing);
     }
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, HalfLeading, HalfLeading);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextOverflow, TextOverflow);
@@ -816,24 +824,10 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
 RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<SpanItem>();
-    COPY_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
-    COPY_TEXT_STYLE(fontStyle, TextColor, UpdateTextColor);
-    COPY_TEXT_STYLE(fontStyle, TextShadow, UpdateTextShadow);
-    COPY_TEXT_STYLE(fontStyle, ItalicFontStyle, UpdateItalicFontStyle);
-    COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
-    COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
-    COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
-    COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
-    COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
-    COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
-    COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
-    COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
-    COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
-    COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
-    COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
-    COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
+    GetFontStyleSpanItem(sameSpan);
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
     COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
+    COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
     COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
     COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
     COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
@@ -857,7 +851,32 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    sameSpan->onTouch = onTouch;
     return sameSpan;
+}
+
+void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
+{
+    COPY_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
+    COPY_TEXT_STYLE(fontStyle, TextColor, UpdateTextColor);
+    COPY_TEXT_STYLE(fontStyle, TextShadow, UpdateTextShadow);
+    COPY_TEXT_STYLE(fontStyle, ItalicFontStyle, UpdateItalicFontStyle);
+    COPY_TEXT_STYLE(fontStyle, Superscript, UpdateSuperscript);
+    COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
+    COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
+    COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
+    COPY_TEXT_STYLE(fontStyle, StrokeWidth, UpdateStrokeWidth);
+    COPY_TEXT_STYLE(fontStyle, StrokeColor, UpdateStrokeColor);
+    COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
+    COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
+    COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
+    COPY_TEXT_STYLE(fontStyle, LineThicknessScale, UpdateLineThicknessScale);
+    COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
+    COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
+    COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
+    COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
+    COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
+    COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
@@ -918,8 +937,8 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle, FontStyle);
     WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
+    WRITE_TLV_INHERIT(fontStyle, Superscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle, Superscript);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
-    WRITE_TLV_INHERIT(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration, TextDecoration);
     WRITE_TLV_INHERIT(
         fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color, TextDecorationColor);
     WRITE_TLV_INHERIT(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle,
@@ -928,6 +947,13 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension, AdaptMinFontSize);
     WRITE_TLV_INHERIT(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension, AdaptMaxFontSize);
     WRITE_TLV_INHERIT(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension, LetterSpacing);
+    WRITE_TLV_INHERIT(fontStyle, LineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float,
+        LineThicknessScale);
+    if (fontStyle->HasTextDecoration()) {
+        TLVUtil::WriteTextDecorations(buff, fontStyle->GetTextDecoration().value());
+    } else if (textStyle_.has_value()) {
+        TLVUtil::WriteTextDecorations(buff, textStyle_->GetTextDecoration());
+    }
 }
 
 void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
@@ -972,8 +998,8 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateSuperscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
-            READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationStyle,
                 TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle);
@@ -981,6 +1007,16 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateLineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float);
+            case TLV_SPAN_FONT_STYLE_TEXTDECORATION: {
+                sameSpan->fontStyle->UpdateTextDecoration(TLVUtil::ReadTextDecorations(buff, cursor));
+                auto types = sameSpan->fontStyle->GetTextDecoration().value();
+                std::cout << "DecodeTlv TextDecorations:" << types.size() << std::endl;
+                for (TextDecoration value : types) {
+                    std::cout << "DecodeTlv TextDecoration:" << static_cast<int32_t>(value) << std::endl;
+                }
+                break;
+            }
 
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
@@ -1496,6 +1532,7 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("SymbolEffect",
             spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
     }
+    json->Put("LineThicknessScale", std::to_string(textStyle->GetLineThicknessScale()).c_str());
 }
 
 void SpanNode::UpdateContent(const uint32_t& unicode)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ export class ProgressButton extends ViewPU {
     }
     this.__progress = new SynchedPropertySimpleOneWayPU(i1.progress, this, 'progress');
     this.__textProgress = new ObservedPropertySimplePU(EMPTY_STRING, this, 'textProgress');
-    this.__content = new SynchedPropertySimpleOneWayPU(i1.content, this, 'content');
+    this.__content = new SynchedPropertyObjectOneWayPU(i1.content, this, 'content');
     this.__isLoading = new ObservedPropertySimplePU(false, this, 'isLoading');
     this.progressButtonWidth = BUTTON_NORMARL_WIDTH;
     this.clickCallback = () => { };

@@ -28,9 +28,6 @@ void ProgressPaintMethod::GetThemeData(int32_t themeScopeId)
         bgColor_ = progressTheme->GetCapsuleBgColor();
     } else if (progressType_ == ProgressType::RING) {
         bgColor_ = progressTheme->GetRingProgressBgColor();
-    } else if (progressType_ == ProgressType::SCALE) {
-        color_ = progressTheme->GetScaleTrackSelectedColor();
-        bgColor_ = progressTheme->GetTrackBgColor();
     } else {
         bgColor_ = progressTheme->GetTrackBgColor();
     }
@@ -108,7 +105,8 @@ void ProgressPaintMethod::UpdateCapsuleProgress(PaintWrapper* paintWrapper)
     bool isInprogress = LessNotEqual(0.0f, value_) && LessNotEqual(value_, maxValue_);
 
     if (!paintProperty->HasBackgroundColor()) {
-        bgColor_ = capsuleInprogressBgColor_;
+        bgColor_ = (isInprogress || Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY))
+                       ? capsuleInprogressBgColor_ : bgColor_;
         bgColor_ = isFocused ? capsuleBgFocusedColor_ : bgColor_;
     }
     bgColor_ = progressModifier_->CalculateHoverPressColor(bgColor_);
@@ -120,7 +118,8 @@ void ProgressPaintMethod::UpdateCapsuleProgress(PaintWrapper* paintWrapper)
     color_ = progressModifier_->CalculateHoverPressColor(color_);
     progressModifier_->SetColor(LinearColor(color_));
 
-    if (paintProperty->GetBorderColorValue(defaultBorderColor_) == defaultBorderColor_) {
+    if (paintProperty->GetBorderColorValue(defaultBorderColor_) == defaultBorderColor_ &&
+        (isInprogress || Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY))) {
         borderColor_ = capsuleInprogressBorderColor_;
     }
     borderColor_ = progressModifier_->CalculateHoverPressColor(borderColor_);

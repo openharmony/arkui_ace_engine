@@ -490,6 +490,20 @@ public:
         return isDeviceAccess_;
     }
 
+    static void SetConfigDeviceType(const std::string& type)
+    {
+        configDeviceType_ = type;
+    }
+
+    static const std::string& GetConfigDeviceType()
+    {
+        return configDeviceType_;
+    }
+
+    static float GetScrollCoefficients();
+
+    static bool GetTransformEnabled();
+
     static void InitMccMnc(int32_t mcc, int32_t mnc);
 
     static ScreenShape GetScreenShape()
@@ -577,6 +591,8 @@ public:
     static bool IsFormAnimationLimited();
 
     static bool GetResourceDecoupling();
+
+    static bool ConfigChangePerform();
 
     static int32_t GetJankFrameThreshold();
 
@@ -701,6 +717,8 @@ public:
 
     static bool IsPageTransitionFreeze();
 
+    static int32_t getFormSharedImageCacheThreshold();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -744,6 +762,9 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static std::string configDeviceType_;
+    static bool transformEnabled_;
+    static float scrollCoefficients_;
     static DebugFlags debugFlags_;
     static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
@@ -762,6 +783,7 @@ private:
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
+    static bool configChangePerform_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
@@ -786,6 +808,7 @@ private:
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
     static bool pageTransitionFrzEnabled_;
+    static int32_t formSharedImageCacheThreshold_;
 };
 
 } // namespace OHOS::Ace

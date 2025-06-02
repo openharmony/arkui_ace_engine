@@ -21,6 +21,23 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
+struct PixelMapConfig {
+    AIImageQuality imageQuality = AIImageQuality::NONE;
+    bool isHdrDecoderNeed = false;
+    PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN;
+
+    bool operator==(const PixelMapConfig& other) const
+    {
+        return (imageQuality == other.imageQuality) && (isHdrDecoderNeed == other.isHdrDecoderNeed) &&
+               (photoDecodeFormat == other.photoDecodeFormat);
+    }
+
+    bool operator!=(const PixelMapConfig& other) const
+    {
+        return !(*this == other);
+    }
+};
+
 class PixelMap;
 
 class ACE_EXPORT ImageSource : public AceType {
@@ -30,18 +47,17 @@ public:
     using Size = std::pair<int32_t, int32_t>;
 
     static RefPtr<ImageSource> Create(int32_t fd);
-    static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size);
+    static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size, uint32_t& errorCode);
     static RefPtr<ImageSource> Create(const std::string& filePath);
     static bool IsAstc(const uint8_t* data, size_t size);
     static Size GetASTCInfo(const uint8_t* data, size_t size);
 
     virtual std::string GetProperty(const std::string& key) = 0;
 
-    virtual RefPtr<PixelMap> CreatePixelMap(const Size& size, AIImageQuality imageQuality = AIImageQuality::NONE,
-        bool isHdrDecoderNeed = false, PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) = 0;
-    virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size,
-        AIImageQuality imageQuality = AIImageQuality::NONE, bool isHdrDecoderNeed = false,
-        PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) = 0;
+    virtual RefPtr<PixelMap> CreatePixelMap(
+        const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) = 0;
+    virtual RefPtr<PixelMap> CreatePixelMap(
+        uint32_t index, const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap() = 0;
     virtual Size GetImageSize() = 0;
     virtual uint32_t GetFrameCount() = 0;

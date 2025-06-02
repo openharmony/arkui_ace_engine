@@ -110,6 +110,11 @@ struct DragPointerEvent final : public PointerEvent {
         return displayY;
     }
 
+    int32_t GetDisplayId() const
+    {
+        return displayId;
+    }
+
     void UpdatePressedKeyCodes(std::vector<KeyCode> keyCodes)
     {
         pressedKeyCodes = keyCodes;

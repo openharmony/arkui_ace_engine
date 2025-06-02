@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -89,6 +90,194 @@ void ButtonModelNG::SetButtonStyle(const std::optional<ButtonStyleMode>& buttonS
         BackgroundColor(bgColor, true);
         SetFontColor(textColor);
     }
+}
+
+void ButtonModelNG::CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonColorType buttonColorType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "button" + ColorTypeToString(buttonColorType);
+    auto&& updateFunc = [pattern, key, buttonColorType](const RefPtr<ResourceObject>& resObj) {
+        std::string color = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (color.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            pattern->AddResCache(key, result.ColorToString());
+        } else {
+            result = Color::ColorFromString(color);
+        }
+        pattern->UpdateComponentColor(result, buttonColorType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ButtonModelNG::CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonStringType buttonStringType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "button" + StringTypeToStr(buttonStringType);
+    auto&& updateFunc = [pattern, key, buttonStringType](const RefPtr<ResourceObject>& resObj) {
+        std::string label = pattern->GetResCacheMapByKey(key);
+        std::string result;
+        if (label.empty()) {
+            ResourceParseUtils::ParseResString(resObj, result);
+            pattern->AddResCache(key, result);
+        } else {
+            result = label;
+        }
+        pattern->UpdateComponentString(result, buttonStringType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ButtonModelNG::CreateWithFamiliesResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonStringType buttonStringType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "button" + StringTypeToStr(buttonStringType);
+    auto&& updateFunc = [pattern, key, buttonStringType](const RefPtr<ResourceObject>& resObj) {
+        std::string familyStr = pattern->GetResCacheMapByKey(key);
+        std::vector<std::string> result;
+        if (familyStr.empty()) {
+            if (ResourceParseUtils::ParseResFontFamilies(resObj, result)) {
+                pattern->AddResCache(key, pattern->VectorToString(result, "|"));
+            }
+        } else {
+            result = pattern->StringToVector(familyStr, '|');
+        }
+        pattern->UpdateComponentFamilies(result, buttonStringType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ButtonModelNG::CreateWithDimensionFpResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonDimensionType buttonDimensionType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "button" + DimensionTypeToString(buttonDimensionType);
+    auto&& updateFunc = [pattern, key, buttonDimensionType](const RefPtr<ResourceObject>& resObj) {
+        std::string cacheValue = pattern->GetResCacheMapByKey(key);
+        CalcDimension result;
+        if (cacheValue.empty()) {
+            ResourceParseUtils::ParseResDimensionFpNG(resObj, result, false);
+            pattern->AddResCache(key, result.ToString());
+        } else {
+            result = CalcDimension::FromString(cacheValue);
+        }
+        pattern->UpdateComponentDimension(result, buttonDimensionType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ButtonModelNG::CreateWithDoubleResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonDoubleType buttonDoubleType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "button" + DoubleTypeToString(buttonDoubleType);
+    auto&& updateFunc = [pattern, key, buttonDoubleType](const RefPtr<ResourceObject>& resObj) {
+        std::string cacheValue = pattern->GetResCacheMapByKey(key);
+        double result;
+        if (cacheValue.empty()) {
+            ResourceParseUtils::ParseResDouble(resObj, result);
+            pattern->AddResCache(key, std::to_string(result));
+        } else {
+            result = std::stod(cacheValue);
+        }
+        pattern->UpdateComponentDouble(result, buttonDoubleType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+std::string ButtonModelNG::ColorTypeToString(const ButtonColorType buttonColorType)
+{
+    std::string rst;
+    switch (buttonColorType) {
+        case ButtonColorType::FONT_COLOR:
+            rst = "FontColor";
+            break;
+        case ButtonColorType::BACKGROUND_COLOR:
+            rst = "BackgroundColor";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+std::string ButtonModelNG::StringTypeToStr(const ButtonStringType buttonStringType)
+{
+    std::string rst;
+    switch (buttonStringType) {
+        case ButtonStringType::LABEL:
+            rst = "Label";
+            break;
+        case ButtonStringType::FONT_FAMILY:
+            rst = "FontFamily";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+std::string ButtonModelNG::DimensionTypeToString(const ButtonDimensionType buttonDimensionType)
+{
+    std::string rst;
+    switch (buttonDimensionType) {
+        case ButtonDimensionType::MIN_FONT_SIZE:
+            rst = "MinFontSize";
+            break;
+        case ButtonDimensionType::MAX_FONT_SIZE:
+            rst = "MaxFontSize";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+std::string ButtonModelNG::DoubleTypeToString(const ButtonDoubleType buttonDoubleType)
+{
+    std::string rst;
+    switch (buttonDoubleType) {
+        case ButtonDoubleType::MIN_FONT_SCALE:
+            rst = "MinFontScale";
+            break;
+        case ButtonDoubleType::MAX_FONT_SCALE:
+            rst = "MaxFontScale";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
 }
 
 void ButtonModelNG::SetRole(const std::optional<ButtonRole>& buttonRole)

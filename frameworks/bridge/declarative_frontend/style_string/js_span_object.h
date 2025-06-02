@@ -43,6 +43,9 @@ public:
     static void ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsFontFamily(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsFontStyle(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font);
     void GetFontColor(const JSCallbackInfo& info);
     void SetFontColor(const JSCallbackInfo& info);
     void GetFontFamily(const JSCallbackInfo& info);
@@ -53,6 +56,12 @@ public:
     void SetFontWeight(const JSCallbackInfo& info);
     void GetFontStyle(const JSCallbackInfo& info);
     void SetFontStyle(const JSCallbackInfo& info);
+    void GetStrokeWidth(const JSCallbackInfo& info);
+    void SetStrokeWidth(const JSCallbackInfo& info);
+    void GetStrokeColor(const JSCallbackInfo& info);
+    void SetStrokeColor(const JSCallbackInfo& info);
+    void GetSuperscript(const JSCallbackInfo& info);
+    void SetSuperscript(const JSCallbackInfo& info);
 
     const RefPtr<FontSpan>& GetFontSpan();
     void SetFontSpan(const RefPtr<FontSpan>& fontSpan);
@@ -115,13 +124,18 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSDecorationSpan* decorationSpan);
     static void JSBind(BindingTarget globalObj);
-    static RefPtr<DecorationSpan> ParseJsDecorationSpan(const JSRef<JSObject>& obj);
+    static RefPtr<DecorationSpan> ParseJsDecorationSpan(const JSCallbackInfo& args);
+    static TextDecorationOptions ParseJsDecorationOptions(const JSRef<JSObject>& obj);
     void GetTextDecorationType(const JSCallbackInfo& info);
     void SetTextDecorationType(const JSCallbackInfo& info);
     void GetTextDecorationColor(const JSCallbackInfo& info);
     void SetTextDecorationColor(const JSCallbackInfo& info);
     void GetTextDecorationStyle(const JSCallbackInfo& info);
     void SetTextDecorationStyle(const JSCallbackInfo& info);
+    void GetLineThicknessScale(const JSCallbackInfo& info);
+    void SetLineThicknessScale(const JSCallbackInfo& info);
+    void GetTextDecorationOptions(const JSCallbackInfo& info);
+    void SetTextDecorationOptions(const JSCallbackInfo& info);
 
     RefPtr<DecorationSpan>& GetDecorationSpan();
     void SetDecorationSpan(const RefPtr<DecorationSpan>& decorationSpan);

@@ -143,6 +143,28 @@ public:
         return declaration_->GetPageFinishedEventId();
     }
 
+    void SetOnLoadStartedEventId(const EventMarker& onLoadStartedEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetOnLoadStartedEventId(onLoadStartedEventId);
+    }
+
+    const EventMarker& GetOnLoadStartedEventId() const
+    {
+        return declaration_->GetOnLoadStartedEventId();
+    }
+
+    void SetOnLoadFinishedEventId(const EventMarker& onLoadFinishedEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetOnLoadFinishedEventId(onLoadFinishedEventId);
+    }
+
+    const EventMarker& GetOnLoadFinishedEventId() const
+    {
+        return declaration_->GetOnLoadFinishedEventId();
+    }
+
     using OnProgressChangeImpl = std::function<void(const BaseEventInfo* info)>;
     void OnProgressChange(const BaseEventInfo* info) const
     {
@@ -337,6 +359,17 @@ public:
         if (onWindowNewImpl_) {
             onWindowNewImpl_(info);
         }
+    }
+
+    void SetActivateContentEventId(const EventMarker& activateContentEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetActivateContentEventId(activateContentEventId);
+    }
+
+    const EventMarker& GetActivateContentEventId() const
+    {
+        return declaration_->GetActivateContentEventId();
     }
 
     void SetWindowExitEventId(const EventMarker& windowExitEventId)
@@ -564,6 +597,18 @@ public:
     void SetWebDebuggingAccessEnabled(bool isEnabled)
     {
         isWebDebuggingAccessEnabled_ = isEnabled;
+        webDebuggingPort_ = 0;
+    }
+
+    const std::tuple<bool, int32_t> GetWebDebuggingAccessEnabledAndPort() const
+    {
+        return std::make_tuple(isWebDebuggingAccessEnabled_, webDebuggingPort_);
+    }
+
+    void SetWebDebuggingAccessEnabledAndPort(bool isEnabled, int32_t port)
+    {
+        isWebDebuggingAccessEnabled_ = isEnabled;
+        webDebuggingPort_ = port;
     }
 
     bool GetPinchSmoothModeEnabled() const
@@ -646,6 +691,11 @@ public:
     void SetIntrinsicSizeEnabled(bool isEnabled)
     {
         isIntrinsicSize_ = isEnabled;
+    }
+
+    void SetCssDisplayChangeEnabled(bool isEnabled)
+    {
+        isCssDisplayChangeEnabled_ = isEnabled;
     }
 
     const std::tuple<bool, bool>& GetNativeVideoPlayerConfig() const
@@ -1185,6 +1235,7 @@ private:
     int32_t textZoomRatioNum_ = DEFAULT_TEXT_ZOOM_RATIO;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
+    int32_t webDebuggingPort_ = 0;
     bool isMultiWindowAccessEnabled_ = false;
     bool isAllowWindowOpenMethod_ = false;
     OnMouseCallback onMouseEvent_;
@@ -1196,6 +1247,7 @@ private:
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
     bool isIntrinsicSize_ = false;
+    bool isCssDisplayChangeEnabled_ = false;
     std::string tag_;
     std::string tag_type_;
     OnDragFunc onDragStartId_;

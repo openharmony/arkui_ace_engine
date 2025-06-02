@@ -158,6 +158,7 @@ struct ParagraphStyle {
     int32_t textStyleUid = 0;
     bool isOnlyBetweenLines = false;
     bool isFirstParagraphLineSpacing = true;
+    bool optimizeTrailingSpace = false;
 
     bool operator==(const ParagraphStyle others) const
     {

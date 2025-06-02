@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -26,13 +27,6 @@ void LoadingProgressModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::LOADING_PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     stack->Push(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId());
-    CHECK_NULL_VOID(theme);
-    if (frameNode->GetThemeScopeId()) {
-        ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, theme->GetLoadingColor());
-    }
 }
 RefPtr<FrameNode> LoadingProgressModelNG::CreateFrameNode(int32_t nodeId)
 {
@@ -42,11 +36,6 @@ RefPtr<FrameNode> LoadingProgressModelNG::CreateFrameNode(int32_t nodeId)
 }
 void LoadingProgressModelNG::SetColor(const Color& value)
 {
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetColorLock(true);
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
@@ -60,24 +49,10 @@ void LoadingProgressModelNG::SetEnableLoading(bool enable)
 
 void LoadingProgressModelNG::ResetColor()
 {
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetColorLock(false);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
-}
-
-void LoadingProgressModelNG::SetForegroundColorParseFailed(bool isParseFailed)
-{
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetForegroundColorParseFailed(isParseFailed);
 }
 
 uint32_t LoadingProgressModelNG::GetColor(FrameNode* frameNode)
@@ -132,25 +107,59 @@ void LoadingProgressModelNG::ResetColor(FrameNode* frameNode)
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
 }
 
-void LoadingProgressModelNG::ResetForegroundColor(FrameNode* frameNode)
+void LoadingProgressModelNG::CreateWithResourceObj(LoadingProgressResourceType LoadingProgressResourceType, const RefPtr<ResourceObject>& resObj)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
-}
-
-void LoadingProgressModelNG::SetForegroundColorParseFailed(FrameNode* frameNode, bool isParseFailed)
-{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetForegroundColorParseFailed(isParseFailed);
-}
+    
+    if (!resObj) {
+        return;
+    }
 
-void LoadingProgressModelNG::SetColorParseFailed(FrameNode* frameNode, bool isParseFailed)
-{
-    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetColorLock(isParseFailed);
+    auto createUpdateFunc = [pattern](const std::string& key) {
+        return [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+            std::string color = pattern->GetResCacheMapByKey(key);
+            Color result;
+            if (color.empty()) {
+                if (ResourceParseUtils::ParseResColor(resObj, result)) {
+                    pattern->AddResCache(key, result.ColorToString());
+                } else {
+                    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                        return;
+                    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+                        auto pipeline = PipelineBase::GetCurrentContext();
+                        CHECK_NULL_VOID(pipeline);
+                        auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+                        CHECK_NULL_VOID(progressTheme);
+                        result = progressTheme->GetLoadingColor();
+                    }
+                }
+            } else {
+                result = Color::ColorFromString(color);
+            }
+            pattern->UpdateColor(result, isFirstLoad);
+        };
+    };
+
+    switch (LoadingProgressResourceType) {
+        case LoadingProgressResourceType::COLOR: {
+            const std::string key = "loadingProgressColor";
+            auto updateFunc = createUpdateFunc(key);
+            updateFunc(resObj, true);
+            pattern->AddResObj(key, resObj, std::move(updateFunc));
+            break;
+        }
+        case LoadingProgressResourceType::FOREGROUNDCOLOR: {
+            const std::string key = "loadingProgressForegroundColor";
+            auto updateFunc = createUpdateFunc(key);
+            updateFunc(resObj, true);
+            pattern->AddResObj(key, resObj, std::move(updateFunc));
+            break;
+        }
+        default:
+            break;
+    }
 }
 } // namespace OHOS::Ace::NG

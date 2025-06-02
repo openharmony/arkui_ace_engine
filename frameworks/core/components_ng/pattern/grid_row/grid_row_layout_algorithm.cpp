@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,6 +92,30 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
         idealSize.SetHeight(finalSize.Height());
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+    auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    if (widthLayoutPolicy != LayoutCalPolicy::NO_MATCH || heightLayoutPolicy != LayoutCalPolicy::NO_MATCH) {
+        auto policySize = MeasureSelfByLayoutPolicy(layoutWrapper, childHeight + padding.Height(),
+            widthLayoutPolicy, heightLayoutPolicy);
+        idealSize.UpdateSizeWithCheck(policySize);
+        layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
+    }
+}
+
+OptionalSizeF GridRowLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrapper* layoutWrapper, float childHeight,
+    LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy)
+{
+    OptionalSizeF realSize;
+    if (heightLayoutPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        return realSize;
+    }
+    auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint({std::nullopt, childHeight},
+        layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+    realSize.SetHeight(fixIdealSize.Height());
+    return realSize;
 }
 
 /* Measure each child and return total height */
@@ -126,7 +150,12 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
         gridCol->UpdateSizeType(sizeType);
 
         /* Measure child */
-        auto span = std::min(gridCol->GetSpan(sizeType), columnNum);
+        int32_t span = 0;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            span = std::min(gridCol->GetSpan(sizeType), columnNum);
+        } else {
+            span = gridCol->GetSpan(sizeType) >= 0 ? std::min(gridCol->GetSpan(sizeType), columnNum) : columnNum;
+        }
 
         /* Calculate line break */
         NewLineOffset newLineOffset;

@@ -247,4 +247,9 @@ void CustomDialogControllerModelImpl::SetCloseDialog(DialogProperties& dialogPro
     CloseDialog(
         dialogProperties, pending, isShown, std::move(cancelTask), dialogComponent, customDialog, dialogOperation);
 }
+
+PromptActionCommonState CustomDialogControllerModelImpl::GetState(std::vector<WeakPtr<AceType>>& dialogs)
+{
+    return PromptActionCommonState::UNINITIALIZED;
+}
 } // namespace OHOS::Ace::Framework

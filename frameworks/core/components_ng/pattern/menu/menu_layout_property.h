@@ -49,6 +49,9 @@ struct SelectMenuAlignOption {
 class ACE_EXPORT MenuLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(MenuLayoutProperty, LayoutProperty);
 
+private:
+    std::function<void(WeakPtr<NG::FrameNode>)> expandSymbol_;
+
 public:
     MenuLayoutProperty() = default;
 
@@ -94,6 +97,16 @@ public:
         ResetExpandingMode();
         ResetItemDivider();
         ResetItemGroupDivider();
+    }
+
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetExpandSymbol()
+    {
+        return expandSymbol_;
+    }
+
+    void SetExpandSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        expandSymbol_ = symbol;
     }
 
     // if is a rect in target frameNode

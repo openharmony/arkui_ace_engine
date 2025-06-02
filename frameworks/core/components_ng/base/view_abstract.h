@@ -167,11 +167,14 @@ public:
     static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color &color);
+    static void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj);
     static void SetBackgroundImage(const ImageSourceInfo &src);
+    static void SetBackgroundImageWithResourceObj(
+        const RefPtr<ResourceObject> &resObj, std::string &bundleName, std::string &moduleName);
     static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
     static void SetBackgroundImageSyncMode(bool syncMode);
     static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
-    static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
+    static void SetBackgroundImagePosition(BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetMotionBlur(const MotionBlurOption& motionBlurOption);
     static void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
@@ -204,6 +207,7 @@ public:
     static void SetDashWidth(const Dimension &value);
     static void SetDashWidth(const BorderWidthProperty &value);
     static void SetOpacity(double opacity);
+    static void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
     static void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
     static void* GetFrameNode();
@@ -262,6 +266,7 @@ public:
     static void SetInvert(const InvertVariant &value);
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
+    static void CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resobj);
     static void SetSystemBarEffect(bool systemBarEffect);
     static void SetSystemBarEffect(FrameNode *frameNode, bool enable);
 
@@ -270,8 +275,19 @@ public:
     static void SetSweepGradient(const NG::Gradient &gradient);
     static void SetRadialGradient(const NG::Gradient &gradient);
 
+    static void CreateWithForegroundColorResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithOuterBorderColorResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void SetLightPosition(FrameNode* frameNode, const NG::TranslateOptions& options);
+    static void SetLightPosition(const NG::TranslateOptions& options);
+
     // layout
     static void SetAlign(Alignment alignment);
+    static void SetAlign(std::string localizedAlignment);
+    static void SetLayoutGravity(Alignment alignment);
+    static void SetIsMirrorable(bool isMirrorable);
     static void SetAlignRules(const std::map<AlignDirection, AlignRule> &alignRules);
     static void SetChainStyle(const ChainInfo& chainInfo);
     static void SetBias(const BiasPair& biasPair);
@@ -299,6 +315,7 @@ public:
     static void SetPivot(const DimensionOffset &value);
     static void SetTranslate(const NG::TranslateOptions &value);
     static void SetRotate(const NG::Vector5F &value);
+    static void SetRotateAngle(const NG::Vector4F &value);
 
     static void SetTransformMatrix(const Matrix4 &matrix);
 
@@ -349,6 +366,7 @@ public:
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
     static void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest);
+    static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
     static void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback);
     static void SetDraggable(bool draggable);
     static void SetDragPreviewOptions(const DragPreviewOption& previewOption);
@@ -371,6 +389,7 @@ public:
         FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
     static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
+    static void EnableDropDisallowedBadge(bool enableDropDisallowedBadge);
     static int32_t CancelDataLoading(const std::string& key);
     static void SetDisableDataPrefetch(bool disableDataPrefetch);
     static void SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch);
@@ -546,6 +565,7 @@ public:
     static void SetBloom(FrameNode* frameNode, float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
     static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);
@@ -578,6 +598,7 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
+    static void SetLayoutGravity(FrameNode* frameNode, Alignment alignment);
     static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption,
         const SysOptions& sysOptions = SysOptions());
     static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption);
@@ -609,9 +630,11 @@ public:
     static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(
         FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
-    static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
+    static void SetBackgroundImagePosition(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
+    static void SetBackgroundImage(
+        FrameNode* frameNode, const ImageSourceInfo& src, const RefPtr<ResourceObject>& resObj);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat);
     static void SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
@@ -622,6 +645,7 @@ public:
     static const std::string GetGeometryTransition(FrameNode* frameNode,
         bool* followWithoutTransition, bool* doRegisterSharedTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
+    static void SetRotateAngle(FrameNode* frameNode, const NG::Vector4F& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option);
@@ -697,6 +721,7 @@ public:
         NG::TransitionFinishCallback&& finishCallback = nullptr);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
+    static void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
@@ -767,6 +792,7 @@ public:
     static bool GetNeedFocus(FrameNode* frameNode);
     static int RequestFocus(FrameNode* frameNode);
     static void ClearFocus(int32_t instanceId);
+    static bool GetFocusActive();
     static void FocusActivate(int32_t instanceId, bool isActive, bool isAutoInactive);
     static void SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer);
     static double GetOpacity(FrameNode* frameNode);
@@ -838,6 +864,7 @@ public:
     static Alignment GetAlign(FrameNode* frameNode);
     static NG::VectorF GetScale(FrameNode* frameNode);
     static NG::Vector5F GetRotate(FrameNode* frameNode);
+    static NG::Vector4F GetRotateAngle(FrameNode* frameNode);
     static Dimension GetBrightness(FrameNode* frameNode);
     static Dimension GetSaturate(FrameNode* frameNode);
     static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);
@@ -899,6 +926,11 @@ public:
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
     static void SetPrivacySensitive(FrameNode* frameNode, bool flag);
+    static void SetFreeze(FrameNode* frameNode, bool isFreeze);
+    static void SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect);
+    static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
+    static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
+    static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
 
 private:
     static void AddDragFrameNodeToManager();

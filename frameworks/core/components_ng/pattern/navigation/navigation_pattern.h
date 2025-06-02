@@ -74,6 +74,7 @@ public:
     void OnWindowHide() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */) override;
+    void UpdateColorModeForNodes(const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -505,6 +506,21 @@ public:
     void OnStartOneTransitionAnimation();
     void OnFinishOneTransitionAnimation();
 
+    void InitToolBarManager()
+    {
+        if (!toolbarManager_) {
+            auto pipeline = GetHost()->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            toolbarManager_ = pipeline->GetToolbarManager();
+            UpdateNavigationStatus();
+        }
+    }
+
+    RefPtr<ToolbarManager> GetToolBarManager()
+    {
+        return toolbarManager_;
+    }
+
 private:
     void FireOnNewParam(const RefPtr<UINode>& uiNode);
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
@@ -541,6 +557,9 @@ private:
     bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node);
     int32_t GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList);
     void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
+    RefPtr<FrameNode> GetNavigationNode() const;
+    RefPtr<FrameNode> GetNavBarNode() const;
+    RefPtr<FrameNode> GetContentNode() const;
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
@@ -608,6 +627,9 @@ private:
     RefPtr<UINode> FindNavDestinationNodeInPreList(const uint64_t navDestinationId) const;
     bool IsStandardPage(const RefPtr<UINode>& uiNode) const;
     void UpdateDividerBackgroundColor();
+    void SetNavigationWidthToolBarManager(float navBarWidth, float navDestWidth, float dividerWidth);
+    void NavigationModifyDoneToolBarManager();
+    void UpdateNavigationStatus();
 
     void GetVisibleNodes(bool isPre, std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestinationGroupNode>& preTopDestination,
@@ -638,6 +660,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<PanEvent> dragBarPanEvent_;
+    RefPtr<ToolbarManager> toolbarManager_;
     std::vector<RefPtr<NavigationTransitionProxy>> proxyList_;
     RectF dragRect_;
     RectF dragBarRect_;
@@ -649,6 +672,7 @@ private:
     bool ifNeedInit_ = true;
     float preNavBarWidth_ = 0.0f;
     float realNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();
+    float initNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();
     float realDividerWidth_ = 2.0f;
     bool navigationStackProvided_ = false;
     bool navBarVisibilityChange_ = false;

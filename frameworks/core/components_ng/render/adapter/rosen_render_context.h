@@ -531,6 +531,7 @@ protected:
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
     void OnTransformRotateUpdate(const Vector5F& value) override;
+    void OnTransformRotateAngleUpdate(const Vector4F& value) override;
 
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
     void OnOffsetEdgesUpdate(const EdgesParam& value) override;
@@ -639,6 +640,7 @@ protected:
     void PaintPixmapBgImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+    void UpdateBlurStyleForColorMode(const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
     bool UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle);
@@ -714,6 +716,8 @@ protected:
 #endif
     void DetachModifiers();
 
+    void OnEmitterPropertyUpdate();
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
@@ -736,8 +740,6 @@ protected:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
-    int32_t densityChangedCallbackId_ = DEFAULT_CALLBACK_ID;
-    static constexpr int32_t DEFAULT_CALLBACK_ID = -1;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;

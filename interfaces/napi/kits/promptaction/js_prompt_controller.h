@@ -29,6 +29,7 @@ public:
     static napi_value DialogControllerConstructor(napi_env env, napi_callback_info info);
     static void DialogControllerDestructor(napi_env env, void* nativeObject, void* finalize);
     static napi_value CloseDialog(napi_env env, napi_callback_info info);
+    static napi_value GetState(napi_env env, napi_callback_info info);
 };
 
 } // namespace OHOS::Ace::Napi

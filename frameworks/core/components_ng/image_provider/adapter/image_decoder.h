@@ -39,7 +39,7 @@ public:
 
     // decode image using ImageFramework, return true if process is successful.
     static RefPtr<CanvasImage> MakePixmapImage(
-        const RefPtr<ImageObject>& obj, const ImageDecoderConfig& imageDecoderConfig);
+        const RefPtr<ImageObject>& obj, const ImageDecoderConfig& imageDecoderConfig, ImageErrorInfo& errorInfo);
 
     static WeakPtr<PixelMap> GetFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size);
     static void RemoveFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size);

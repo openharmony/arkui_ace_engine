@@ -41,6 +41,7 @@
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -255,10 +256,6 @@ RosenRenderContext::~RosenRenderContext()
 
 void RosenRenderContext::DetachModifiers()
 {
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    if (pipeline && densityChangedCallbackId_ != DEFAULT_CALLBACK_ID) {
-        pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
-    }
     CHECK_NULL_VOID(rsNode_ && rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE);
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
@@ -290,6 +287,7 @@ void RosenRenderContext::DetachModifiers()
     if (baseRotateInZ_) {
         rsNode_->RemoveModifier(baseRotateInZ_);
     }
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
         pipeline->RequestFrame();
     }
@@ -686,6 +684,7 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
             OnParticleOptionArrayUpdate(propParticleOptionArray_.value());
         }
     }
+    OnEmitterPropertyUpdate();
 }
 
 void RosenRenderContext::PaintDebugBoundary(bool flag)
@@ -1028,6 +1027,44 @@ bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOpt
     return blurEnable;
 }
 
+void RosenRenderContext::UpdateBlurStyleForColorMode(
+    const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(this), bgBlurStyle, sysOptions](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto render = weak.Upgrade();
+        CHECK_NULL_VOID(render);
+        CHECK_NULL_VOID(render->rsNode_);
+        const auto& groupProperty = render->GetOrCreateBackground();
+        if (groupProperty->CheckBlurStyleOption(bgBlurStyle) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
+            // Same with previous value.
+            // If colorMode is following system and has valid blurStyle, still needs updating
+            if (bgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
+                return;
+            }
+            if (bgBlurStyle->blurOption.grayscale.size() > 1) {
+                Rosen::Vector2f grayScale(bgBlurStyle->blurOption.grayscale[0], bgBlurStyle->blurOption.grayscale[1]);
+                render->rsNode_->SetGreyCoef(grayScale);
+            }
+        } else {
+            groupProperty->propBlurStyleOption = bgBlurStyle;
+            groupProperty->propSysOptions = sysOptions;
+        }
+        if (!render->UpdateBlurBackgroundColor(bgBlurStyle)) {
+            render->rsNode_->SetBackgroundFilter(nullptr);
+            return;
+        }
+        render->SetBackBlurFilter();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("backgroundBlurStyle.blurStyle", resObj, std::move(updateFunc));
+}
+
 void RosenRenderContext::UpdateBackBlurStyle(
     const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions)
 {
@@ -1047,7 +1084,7 @@ void RosenRenderContext::UpdateBackBlurStyle(
         groupProperty->propBlurStyleOption = bgBlurStyle;
         groupProperty->propSysOptions = sysOptions;
     }
-
+    UpdateBlurStyleForColorMode(bgBlurStyle, sysOptions);
     if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
         rsNode_->SetBackgroundFilter(nullptr);
         return;
@@ -1180,6 +1217,31 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
     };
     rsNode_->SetParticleParams(particleParams, finishCallback);
     RequestNextFrame();
+}
+
+void RosenRenderContext::OnEmitterPropertyUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto particlePattern = AceType::DynamicCast<ParticlePattern>(pattern);
+    CHECK_NULL_VOID(particlePattern);
+    auto property = particlePattern->GetEmitterProperty();
+    if (property.empty()) {
+        return;
+    }
+    for (const auto& prop : property) {
+        if (!prop.annulusRegion.has_value()) {
+            continue;
+        }
+        const auto& annulusRegion = prop.annulusRegion.value();
+        if (annulusRegion.center_.first.Unit() == DimensionUnit::PERCENT ||
+            annulusRegion.center_.second.Unit() == DimensionUnit::PERCENT) {
+            particlePattern->updateEmitterPosition(property);
+            return;
+        }
+    }
 }
 
 void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
@@ -1327,6 +1389,23 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
     auto shapeInt = static_cast<int32_t>(shapeOpt.value_or(ParticleEmitterShape::RECTANGLE));
     auto lifeTimeRange = OHOS::Rosen::Range<int64_t>(
         lifeTimeMin.value_or(PARTICLE_DEFAULT_LIFETIME), lifeTimeMax.value_or(PARTICLE_DEFAULT_LIFETIME));
+
+    // The default value for the centerXY axis is 50 percent,
+    // for the innerRadius or outerRadius is 0,
+    // for the startAngle is 0, for the endAngle is 360.
+    std::shared_ptr<Rosen::AnnulusRegion> rsAnnulusRegion = std::make_shared<Rosen::AnnulusRegion>(
+        OHOS::Rosen::Vector2f(DEFAULT_CENTER_VALUE.ConvertToPxWithSize(rect.Width()),
+        DEFAULT_CENTER_VALUE.ConvertToPxWithSize(rect.Height())),
+        DEFAULT_RADIUS_VALUE, DEFAULT_RADIUS_VALUE, DEFAULT_START_ANGLE_VALUE, DEFAULT_END_ANGLE_VALUE);
+    auto annulusRegionOpt = emitterOption.GetAnnulusRegion();
+    if (annulusRegionOpt.has_value() && shapeInt == static_cast<int32_t>(ParticleEmitterShape::ANNULUS)) {
+        auto annulusRegion = annulusRegionOpt.value();
+        auto center = annulusRegion.center_;
+        auto rsCenter = OHOS::Rosen::Vector2f(center.first.ConvertToPxWithSize(rect.Width()),
+            center.second.ConvertToPxWithSize(rect.Height()));
+        rsAnnulusRegion = std::make_shared<Rosen::AnnulusRegion>(rsCenter, annulusRegion.innerRadius_.ConvertToPx(),
+            annulusRegion.outerRadius_.ConvertToPx(), annulusRegion.startAngle_, annulusRegion.endAngle_);
+    }
     if (particleType == ParticleType::IMAGE) {
         auto imageParameter = particleConfig.GetImageParticleParameter();
         auto imageSource = imageParameter.GetImageSource();
@@ -1339,16 +1418,20 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
         }
         rsImagePtr->SetImageFit(static_cast<int32_t>(imageParameter.GetImageFit().value_or(ImageFit::COVER)));
         OHOS::Rosen::Vector2f rsImageSize(imageWidth.ConvertToPx(), imageHeight.ConvertToPx());
-        return OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
+        auto emitterConfig =  OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
             static_cast<OHOS::Rosen::ShapeType>(shapeInt), rsPoint, rsSize, particleCount, lifeTimeRange,
             OHOS::Rosen::ParticleType::IMAGES, 0.0f, rsImagePtr, rsImageSize);
+        emitterConfig.SetConfigShape(rsAnnulusRegion);
+        return emitterConfig;
     } else {
         auto pointParameter = particleConfig.GetPointParticleParameter();
         auto radius = pointParameter.GetRadius();
-        return OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
+        auto emitterConfig =  OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
             static_cast<OHOS::Rosen::ShapeType>(shapeInt), rsPoint, rsSize, particleCount, lifeTimeRange,
             OHOS::Rosen::ParticleType::POINTS, radius, std::make_shared<OHOS::Rosen::RSImage>(),
             OHOS::Rosen::Vector2f());
+        emitterConfig.SetConfigShape(rsAnnulusRegion);
+        return emitterConfig;
     }
 }
 
@@ -1413,8 +1496,8 @@ void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& wi
         auto imagePtr = imageContext->MoveCanvasImage();
         renderContent->OnParticleImageLoaded(imageSrc, imagePtr);
     };
-    auto loadingErrorCallback = [weak = WeakClaim(this), imageSrc = src](
-                                    const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+    auto loadingErrorCallback = [weak = WeakClaim(this), imageSrc = src](const ImageSourceInfo& sourceInfo,
+                                    const std::string& errorMsg, const ImageErrorInfo& /* errorInfo */) {
         auto renderContent = weak.Upgrade();
         CHECK_NULL_VOID(renderContent);
         renderContent->OnParticleImageLoaded(imageSrc, nullptr);
@@ -1838,6 +1921,18 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector5F& rotate)
     SetAnimatableProperty<Rosen::RSRotationYModifier, float>(rotationYUserModifier_, -rotate.w * rotate.y / norm);
     SetAnimatableProperty<Rosen::RSRotationModifier, float>(rotationZUserModifier_, rotate.w * rotate.z / norm);
     SetAnimatableProperty<Rosen::RSCameraDistanceModifier, float>(cameraDistanceUserModifier_, rotate.v);
+    NotifyHostTransformUpdated();
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnTransformRotateAngleUpdate(const Vector4F& rotate)
+{
+    CHECK_NULL_VOID(rsNode_);
+    
+    SetAnimatableProperty<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, -rotate.x);
+    SetAnimatableProperty<Rosen::RSRotationYModifier, float>(rotationYUserModifier_, -rotate.y);
+    SetAnimatableProperty<Rosen::RSRotationModifier, float>(rotationZUserModifier_, rotate.z);
+    SetAnimatableProperty<Rosen::RSCameraDistanceModifier, float>(cameraDistanceUserModifier_, rotate.w);
     NotifyHostTransformUpdated();
     RequestNextFrame();
 }
@@ -2437,30 +2532,8 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::RegisterDensityChangedCallback()
-{
-    if (densityChangedCallbackId_ == DEFAULT_CALLBACK_ID) {
-        auto context = GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        densityChangedCallbackId_ = context->RegisterDensityChangedCallback(
-            [self = WeakClaim(this)](double density) {
-            auto renderContext = self.Upgrade();
-            CHECK_NULL_VOID(renderContext);
-            auto borderRadius = renderContext->GetBorderRadius();
-            if (borderRadius.has_value()) {
-                renderContext->SetBorderRadius(borderRadius.value());
-            }
-            auto outerBorderRadius = renderContext->GetOuterBorderRadius();
-            if (outerBorderRadius.has_value()) {
-                renderContext->SetOuterBorderRadius(outerBorderRadius.value());
-            }
-        });
-    }
-}
-
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    RegisterDensityChangedCallback();
     CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
@@ -2554,7 +2627,6 @@ void RosenRenderContext::SetDashWidth(const BorderWidthProperty& value)
 
 void RosenRenderContext::OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    RegisterDensityChangedCallback();
     SetOuterBorderRadius(value);
 }
 

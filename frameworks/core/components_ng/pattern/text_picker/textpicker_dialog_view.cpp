@@ -109,6 +109,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     OptionsCreateNode(textPickerPattern, settingData, textPickerNode, showCount, 1, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
     SetTextProperties(pickerTheme, settingData.properties);
+    SetSelectedBackgroundStyle(pickerTheme, settingData.pickerBgStyle);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(textPickerNode, std::move(changeEvent));
     auto scrollStopEvent = dialogEvent["scrollStopId"];
@@ -268,6 +269,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     OptionsShowInternal(textPickerPattern, settingData, textPickerNode, showCount, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
     SetTextProperties(pickerTheme, settingData.properties);
+    SetSelectedBackgroundStyle(pickerTheme, settingData.pickerBgStyle);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(textPickerNode, std::move(changeEvent));
     auto scrollStopEvent = dialogEvent["scrollStopId"];
@@ -955,6 +957,16 @@ void TextPickerDialogView::SetRange(
     const RefPtr<TextPickerPattern>& textPickerPattern, const std::vector<NG::RangeContent>& value)
 {
     textPickerPattern->SetRange(value);
+}
+
+void TextPickerDialogView::SetSelectedBackgroundStyle(const RefPtr<PickerTheme>& pickerTheme,
+    const PickerBackgroundStyle& pickerBgStyle)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
+        pickerBgStyle.color.value_or(pickerTheme->GetSelectedBackgroundColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius,
+        pickerBgStyle.borderRadius.value_or(pickerTheme->GetSelectedBorderRadius()));
 }
 
 void TextPickerDialogView::SetTextProperties(

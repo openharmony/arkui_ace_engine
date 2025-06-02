@@ -446,4 +446,28 @@ void UiSessionManagerOhos::SendPixelMap(std::vector<std::pair<int32_t, std::shar
         LOGW("send pixel maps failed,process id:%{public}d", processMap_["pixel"]);
     }
 }
+
+bool UiSessionManagerOhos::IsHasReportObject()
+{
+    return !reportObjectMap_.empty();
+}
+
+void UiSessionManagerOhos::SendCommand(const std::string& command)
+{
+    if (sendCommandFunction_) {
+        auto json = InspectorJsonUtil::ParseJsonString(command);
+        if (!json || json->IsNull()) {
+            LOGW("SendCommand ParseJsonString failed");
+            return;
+        }
+
+        int32_t value = json->GetInt("cmd");
+        sendCommandFunction_(value);
+    }
+}
+
+void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& function)
+{
+    sendCommandFunction_ = std::move(function);
+}
 } // namespace OHOS::Ace

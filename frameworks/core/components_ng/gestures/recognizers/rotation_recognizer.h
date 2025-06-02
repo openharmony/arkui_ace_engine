@@ -21,6 +21,7 @@
 #include <map>
 
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -59,7 +60,8 @@ private:
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     double ComputeAngle();
     void OnResetStatus() override;
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
+    void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
     static double ChangeValueRange(double value);
 

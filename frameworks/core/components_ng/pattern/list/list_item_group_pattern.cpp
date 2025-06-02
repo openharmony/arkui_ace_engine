@@ -779,6 +779,14 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
     }
 }
 
+void ListItemGroupPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
+}
+
 void ListItemGroupPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("itemStartIndex", itemStartIndex_);

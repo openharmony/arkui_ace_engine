@@ -344,6 +344,12 @@ void OffscreenCanvasRenderingContext2DModelNG::AddRect(const Rect& rect)
     pattern_->AddRect(rect);
 }
 
+void OffscreenCanvasRenderingContext2DModelNG::AddRoundRect(const Rect& rect, const std::vector<double>& radii)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->AddRoundRect(rect, radii);
+}
+
 void OffscreenCanvasRenderingContext2DModelNG::BeginPath()
 {
     CHECK_NULL_VOID(pattern_);

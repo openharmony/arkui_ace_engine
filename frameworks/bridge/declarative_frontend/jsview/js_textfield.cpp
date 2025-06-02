@@ -1595,6 +1595,16 @@ void JSTextField::SetEnableAutoFill(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnableAutoFill(jsValue->ToBoolean());
 }
 
+void JSTextField::SetEnableAutoFillAnimation(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    if (!jsValue->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetEnableAutoFillAnimation(true);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetEnableAutoFillAnimation(jsValue->ToBoolean());
+}
+
 static CleanNodeStyle ConvertStrToCleanNodeStyle(const std::string& value)
 {
     if (value == "CONSTANT") {
@@ -1774,7 +1784,7 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
-        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
+        TextDecoration textDecoration = theme->GetTextDecoration();
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
         }
@@ -2117,6 +2127,31 @@ void JSTextField::SetOnWillChange(const JSCallbackInfo& info)
         return true;
     };
     TextFieldModel::GetInstance()->SetOnWillChangeEvent(std::move(onWillChange));
+}
+
+void JSTextField::SetStrokeWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension value;
+    if (!ParseLengthMetricsToDimension(info[0], value)) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetStrokeWidth(value);
+}
+
+void JSTextField::SetStrokeColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color strokeColor;
+    if (!ParseJsColor(info[0], strokeColor)) {
+        TextFieldModel::GetInstance()->ResetStrokeColor();
+        return;
+    }
+    TextFieldModel::GetInstance()->SetStrokeColor(strokeColor);
 }
 
 } // namespace OHOS::Ace::Framework

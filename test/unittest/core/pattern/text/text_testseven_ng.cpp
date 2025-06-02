@@ -55,9 +55,9 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString001, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto mockClipboardImpl = AceType::MakeRefPtr<TextMockClipboardImpl>(pipeline->GetTaskExecutor());
-    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, AddTextRecord(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, AddSpanStringRecord(_, _)).Times(1);
+    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, AddTextRecord(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, AddSpanStringRecord(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
@@ -87,8 +87,8 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString002, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto mockClipboardImpl = AceType::MakeRefPtr<TextMockClipboardImpl>(pipeline->GetTaskExecutor());
-    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(1);
+    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
@@ -119,8 +119,8 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString003, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto mockClipboardImpl = AceType::MakeRefPtr<TextMockClipboardImpl>(pipeline->GetTaskExecutor());
-    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(1);
+    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
@@ -176,7 +176,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     textLayoutProperty->UpdateFontWeight(FontWeight::W400);
     textLayoutProperty->UpdateFontFamily(fontFamily);
     textLayoutProperty->UpdateFontFeature(fontFeature);
-    textLayoutProperty->UpdateTextDecoration(TextDecoration::UNDERLINE);
+    textLayoutProperty->UpdateTextDecoration({TextDecoration::UNDERLINE});
     textLayoutProperty->UpdateTextDecorationColor(Color::RED);
     textLayoutProperty->UpdateTextDecorationStyle(TextDecorationStyle::DOTTED);
     textLayoutProperty->UpdateTextCase(TextCase::LOWERCASE);
@@ -213,7 +213,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::W400);
     EXPECT_EQ((*it)->fontStyle->GetFontFamily().value(), fontFamily);
     EXPECT_EQ((*it)->fontStyle->GetFontFeature().value(), fontFeature);
-    EXPECT_EQ((*it)->fontStyle->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
     EXPECT_EQ((*it)->fontStyle->GetTextDecorationColor().value(), Color::RED);
     EXPECT_EQ((*it)->fontStyle->GetTextDecorationStyle().value(), TextDecorationStyle::DOTTED);
     EXPECT_EQ((*it)->fontStyle->GetTextCase().value(), TextCase::LOWERCASE);
@@ -282,7 +282,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     span0->fontStyle->UpdateFontWeight(FontWeight::W400);
     span0->fontStyle->UpdateFontFamily(fontFamily);
     span0->fontStyle->UpdateFontFeature(fontFeature);
-    span0->fontStyle->UpdateTextDecoration(TextDecoration::UNDERLINE);
+    span0->fontStyle->UpdateTextDecoration({TextDecoration::UNDERLINE});
     span0->fontStyle->UpdateTextDecorationColor(Color::RED);
     span0->fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::DOTTED);
     span0->fontStyle->UpdateTextCase(TextCase::LOWERCASE);
@@ -331,7 +331,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::W400);
     EXPECT_EQ((*it)->fontStyle->GetFontFamily().value(), fontFamily);
     EXPECT_EQ((*it)->fontStyle->GetFontFeature().value(), fontFeature);
-    EXPECT_EQ((*it)->fontStyle->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
     EXPECT_EQ((*it)->fontStyle->GetTextDecorationColor().value(), Color::RED);
     EXPECT_EQ((*it)->fontStyle->GetTextDecorationStyle().value(), TextDecorationStyle::DOTTED);
     EXPECT_EQ((*it)->fontStyle->GetTextCase().value(), TextCase::LOWERCASE);

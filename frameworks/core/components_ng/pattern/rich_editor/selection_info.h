@@ -129,12 +129,14 @@ struct TextStyleResult {
     bool halfLeading = false;
     double letterSpacing = 0.0;
     double lineSpacing = 0.0;
+    bool optimizeTrailingSpace = false;
     std::optional<Dimension> paragraphSpacing;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
     FONT_FEATURES_LIST fontFeature;
     std::string fontFamily;
     int32_t decorationType = 0;
+    std::vector<TextDecoration> decorationTypes;
     std::string decorationColor;
     int32_t decorationStyle = 0;
     int32_t textAlign = 0;
@@ -143,6 +145,7 @@ struct TextStyleResult {
     std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
     std::vector<Shadow> textShadows;
     std::optional<TextBackgroundStyle> textBackgroundStyle;
+    float lineThicknessScale = 1.0f;
 };
 
 struct ImageStyleResult {

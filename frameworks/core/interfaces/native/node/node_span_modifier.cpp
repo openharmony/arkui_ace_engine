@@ -200,13 +200,20 @@ void ResetSpanFontFamily(ArkUINodeHandle node)
     SpanModelNG::ResetFontFamily(uiNode);
 }
 
-void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration,
+    ArkUI_Uint32 color, ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = 1.0f)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     SpanModelNG::SetTextDecoration(uiNode, static_cast<TextDecoration>(decoration));
     SpanModelNG::SetTextDecorationStyle(uiNode, static_cast<TextDecorationStyle>(style));
     SpanModelNG::SetTextDecorationColor(uiNode, Color(color));
+    SpanModelNG::SetLineThicknessScale(uiNode, lineThicknessScale);
+}
+
+void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+{
+    SetSpanDecoration(node, decoration, color, style, 1.0f); // make cj happy
 }
 
 void GetSpanDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration)
@@ -226,6 +233,7 @@ void ResetSpanDecoration(ArkUINodeHandle node)
     SpanModelNG::ResetTextDecoration(uiNode);
     SpanModelNG::ResetTextDecorationStyle(uiNode);
     SpanModelNG::ResetTextDecorationColor(uiNode);
+    SpanModelNG::ResetLineThicknessScale(uiNode);
 }
 
 void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor)
@@ -486,6 +494,25 @@ ArkUI_CharPtr GetSpanFontFamily(ArkUINodeHandle node)
     g_strValue = families;
     return g_strValue.c_str();
 }
+
+void SetSpanOnHover(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onHover = reinterpret_cast<OnHoverFunc*>(callback);
+        SpanModelNG::SetOnHover(frameNode, std::move(*onHover));
+    } else {
+        SpanModelNG::ResetOnHover(frameNode);
+    }
+}
+
+void ResetSpanOnHover(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::ResetOnHover(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
@@ -540,6 +567,8 @@ const ArkUISpanModifier* GetSpanModifier()
         .resetAccessibilityDescription = ResetAccessibilityDescription,
         .setAccessibilityLevel = SetAccessibilityLevel,
         .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setSpanOnHover = SetSpanOnHover,
+        .resetSpanOnHover = ResetSpanOnHover,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

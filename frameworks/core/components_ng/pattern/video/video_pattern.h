@@ -220,7 +220,7 @@ public:
 
     void OnCurrentTimeChange(uint32_t currentPos);
 
-    void OnError(const std::string& errorId);
+    void OnError(int32_t code, const std::string& message);
 
     void OnResolutionChange() const;
 
@@ -267,6 +267,8 @@ public:
 
     void SetCurrentVolume(float currentVolume);
     float GetCurrentVolume() const;
+    static bool ParseCommand(const std::string& command);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -357,7 +359,7 @@ private:
     void checkNeedAutoPlay();
 
     // Fire error manually, eg. src is not existed. It must run on ui.
-    void FireError();
+    void FireError(int32_t code, const std::string& message);
 
     HiddenChangeEvent CreateHiddenChangeEvent();
 

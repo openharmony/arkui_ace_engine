@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT IndexerModelNG : public OHOS::Ace::IndexerModel {
 public:
+    void CreateWithResourceObj(IndexerJsResourceType jsType, const RefPtr<ResourceObject>& resObj) override;
     void Create(std::vector<std::string>& indexerArray, int32_t selectedVal, bool isArc = false) override;
     void SetSelectedColor(const std::optional<Color>& color) override;
     void SetColor(const std::optional<Color>& color) override;

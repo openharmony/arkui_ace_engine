@@ -34,6 +34,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/property/layout_policy_property.h"
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -157,6 +158,12 @@ public:
 
     void UpdateAlignment(Alignment value);
 
+    void UpdateLocalizedAlignment(std::string value);
+
+    void UpdateLayoutGravity(Alignment value);
+
+    void UpdateIsMirrorable(bool value);
+
     void UpdateLayoutWeight(float value);
 
     void UpdateChainWeight(const ChainWeightPair& value);
@@ -199,6 +206,10 @@ public:
     void UpdateCalcLayoutProperty(const MeasureProperty& constraint);
 
     void UpdateUserDefinedIdealSize(const CalcSize& value);
+
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth);
+
+    std::optional<NG::LayoutPolicyProperty> GetLayoutPolicyProperty();
 
     void ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight);
 
@@ -407,10 +418,13 @@ public:
     void CheckLocalizedBorderImageWidth(const TextDirection& direction);
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
     void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
+    void CheckLocalizedAlignment(const TextDirection& direction);
 
     virtual void OnPropertyChangeMeasure() {}
 
     std::string LayoutInfoToString();
+
+    std::string GetAlignmentStringFromLocalized(TextDirection layoutDirection, std::string localizedAlignment);
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
@@ -451,6 +465,7 @@ private:
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
     std::optional<MarginPropertyF> marginResult_;
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy_;
 
     std::unique_ptr<SafeAreaExpandOpts> safeAreaExpandOpts_;
     std::unique_ptr<SafeAreaInsets> safeAreaInsets_;

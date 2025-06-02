@@ -349,6 +349,16 @@ public:
         return requestId_;
     }
 
+    void SetDisplayId(int32_t displayId)
+    {
+        displayId_ = displayId;
+    }
+
+    int32_t GetDisplayId() const
+    {
+        return displayId_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -376,6 +386,7 @@ private:
     std::function<void()> executeDropAnimation_;
     int32_t requestId_ = -1;
     bool isDragEndPending_ = false;
+    int32_t displayId_ = -1;
 };
 
 class NotifyDragEvent : public DragEvent {

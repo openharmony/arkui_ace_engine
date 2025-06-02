@@ -55,7 +55,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -208,7 +208,6 @@ void SwiperPattern::OnIndexChange(bool isInLayout)
     if (NonPositive(totalCount)) {
         return;
     }
-
     auto oldIndex = GetLoopIndex(oldIndex_);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != totalCount) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
@@ -341,6 +340,19 @@ void SwiperPattern::ResetOnForceMeasure()
     MarkDirtyNodeSelf();
 }
 
+const RefPtr<Curve> SwiperPattern::GetTabBarAnimationCurve(const RefPtr<Curve>& curve)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, curve);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, curve);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, curve);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_RETURN(tabBarPattern, curve);
+    return tabBarPattern->GetAnimationCurve(curve);
+}
+
 void SwiperPattern::UpdateTabBarIndicatorCurve()
 {
     CHECK_NULL_VOID(swiperController_);
@@ -352,7 +364,7 @@ void SwiperPattern::UpdateTabBarIndicatorCurve()
         auto props = host->GetPaintProperty<SwiperPaintProperty>();
         CHECK_NULL_VOID(props);
         auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-        props->UpdateCurve(curve);
+        props->UpdateCurve(swiperPattern->GetTabBarAnimationCurve(curve));
     };
     swiperController_->SetUpdateCubicCurveCallback(std::move(updateCubicCurveCallback));
 }
@@ -560,7 +572,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
 
     if (lastCurrentIndex != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)
         || hadCachedCapture != hasCachedCapture_) {
-        jumpIndex_ = GetLoopIndex(currentIndex_);
+        jumpIndex_ = (!isInit_ && GetMaintainVisibleContentPosition())
+                         ? jumpIndex_.value_or(GetLoopIndex(currentIndex_))
+                         : GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
         SetIndicatorJumpIndex(jumpIndex_);
@@ -1383,6 +1397,13 @@ void SwiperPattern::HandleTabsAncestor()
 
 void SwiperPattern::UpdateLayoutProperties(const RefPtr<SwiperLayoutAlgorithm>& algo)
 {
+    for (const auto& item : itemPosition_) {
+        if (algo->GetItemPosition().find(item.first) == algo->GetItemPosition().end() &&
+            algo->GetItemPosition().find(GetLoopIndex(item.first)) == algo->GetItemPosition().end() &&
+            item.second.node) {
+            item.second.node->SetActive(false);
+        }
+    }
     autoLinearReachBoundary_ = false;
     startMainPos_ = algo->GetStartPosition();
     endMainPos_ = algo->GetEndPosition();
@@ -1527,6 +1548,7 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
         CHECK_NULL_VOID(host);
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
+    ReportComponentChangeEvent("onChange", currentIndex, false);
 }
 
 void SwiperPattern::FireAnimationStartEvent(
@@ -1553,6 +1575,7 @@ void SwiperPattern::FireAnimationEndEvent(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    ReportComponentChangeEvent("onAnimationEnd", currentIndex, true, info.currentOffset.value_or(0.0));
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -2999,8 +3022,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     currentFirstIndex_ = currentPageStatus.second;
 
     groupTurnPageRate_ =
-        (IsSwipeByGroup() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
-        CalculateGroupTurnPageRate(additionalOffset) : 0.0f);
+        (!IsAutoLinear() && IsSwipeByGroup() ? CalculateGroupTurnPageRate(additionalOffset) : 0.0f);
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
@@ -3094,10 +3116,9 @@ float SwiperPattern::CalculateGroupTurnPageRate(float additionalOffset)
 
 std::pair<int32_t, int32_t> SwiperPattern::CalculateStepAndItemCount() const
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (IsAutoLinear()) {
         return { RealTotalCount(), 1 };
     }
-
     auto displaycount = GetDisplayCount();
 
     int32_t itemCount = (IsSwipeByGroup() ? TotalCount() : DisplayIndicatorTotalCount());
@@ -4488,7 +4509,11 @@ float SwiperPattern::GetMainContentSize() const
     CHECK_NULL_RETURN(host, 0.0);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0);
-    return geometryNode->GetPaddingSize().Width();
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, 0.0);
+    auto size = props->GetDirection().value_or(Axis::HORIZONTAL) == Axis::VERTICAL ?
+        geometryNode->GetPaddingSize().Height() : geometryNode->GetPaddingSize().Width();
+    return size;
 }
 
 float SwiperPattern::GetItemSpace() const
@@ -4772,10 +4797,9 @@ int32_t SwiperPattern::RealTotalCount() const
 
 int32_t SwiperPattern::DisplayIndicatorTotalCount() const
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (IsAutoLinear()) {
         return RealTotalCount();
     }
-
     auto displayCount = GetDisplayCount();
     auto realTotalCount = RealTotalCount();
     if (realTotalCount <= 0) {
@@ -6423,7 +6447,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
     bool releaseLeftTouchBottomStart = (currentIndex == totalCount - 1);
     bool releaseLeftTouchBottomEnd = (currentFirstIndex == 0);
     bool releaseRightTouchBottom = (currentFirstIndex == totalCount - 1);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSwipeByGroup()) {
+    if (!IsAutoLinear() && IsSwipeByGroup()) {
         commTouchBottom = (currentFirstIndex >= totalCount - displayCount);
         releaseLeftTouchBottomStart = (currentIndex == totalCount - displayCount);
         releaseRightTouchBottom = (currentFirstIndex >= totalCount - displayCount);
@@ -6464,7 +6488,7 @@ void SwiperPattern::HandleTouchBottomLoop()
 
     bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
     bool releaseTouchBottom = (currentIndex == TotalCount() - 1);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSwipeByGroup()) {
+    if (!IsAutoLinear() && IsSwipeByGroup()) {
         commTouchBottom = currentFirstIndex >= TotalCount() - GetDisplayCount();
         releaseTouchBottom = currentIndex >= TotalCount() - GetDisplayCount();
     }
@@ -7263,5 +7287,104 @@ void SwiperPattern::ResetIndicatorNode()
     CHECK_NULL_VOID(indicatorPattern);
     indicatorPattern->ResetSwiperNode();
     indicatorNode_ = nullptr;
+}
+
+bool SwiperPattern::GetTargetIndex(const std::string& command, int32_t& targetIndex)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || !json->IsValid() || !json->IsObject()) {
+        return false;
+    }
+
+    if (json->GetString("cmd") != "changeIndex") {
+        TAG_LOGW(AceLogTag::ACE_SWIPER, "Invalid command");
+        return false;
+    }
+
+    auto paramJson = json->GetValue("params");
+    if (!paramJson || !paramJson->IsObject()) {
+        return false;
+    }
+
+    targetIndex = paramJson->GetInt("index");
+    return true;
+}
+
+int32_t SwiperPattern::OnInjectionEvent(const std::string& command)
+{
+    if (hasTabsAncestor_) {
+        return RET_FAILED;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    int32_t targetIndex = 0;
+    if (!GetTargetIndex(command, targetIndex)) {
+        return RET_FAILED;
+    }
+    ChangeIndex(targetIndex, true);
+    return RET_SUCCESS;
+}
+
+int32_t SwiperPattern::GetNodeId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    if (hasTabsAncestor_) {
+        auto tabsNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_RETURN(tabsNode, -1);
+        return tabsNode->GetId();
+    }
+    return host->GetId();
+}
+
+void SwiperPattern::ReportComponentChangeEvent(
+    const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset) const
+{
+    if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
+        return;
+    }
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("index", currentIndex);
+    if (includeOffset) {
+        params->Put("currentOffset", offset);
+    }
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("cmd", eventType.data());
+    json->Put("params", params);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    int32_t nodeId = GetNodeId();
+    result->Put("nodeId", nodeId);
+    result->Put("event", json);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+}
+
+void SwiperPattern::NotifyDataChange(int32_t index, int32_t count)
+{
+    ACE_SCOPED_TRACE("Swiper NotifyDataChange index %d count %d", index, count);
+    if (!oldChildrenSize_.has_value() || count == 0) {
+        return;
+    }
+    auto curretIndex = GetLoopIndex(currentIndex_, oldChildrenSize_.value());
+    if (GetMaintainVisibleContentPosition() && index < curretIndex) {
+        jumpIndex_ = jumpIndex_.value_or(CheckIndexRange(curretIndex + count));
+    }
+}
+
+void SwiperPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto swiperNode = GetHost();
+    CHECK_NULL_VOID(swiperNode);
+    if (!isBindIndicator_) {
+        InitIndicator();
+    } else if (NeedForceMeasure()) {
+        MarkDirtyBindIndicatorNode();
+    }
+    InitArrow();
+    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

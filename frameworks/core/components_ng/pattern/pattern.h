@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -64,6 +65,20 @@ private:
     std::function<void()> callback_;
 };
 
+class PropertyValueBase : public virtual AceType {
+    DECLARE_ACE_TYPE(PropertyValueBase, AceType);
+public:
+    virtual ~PropertyValueBase() = default;
+};
+ 
+template<typename T>
+class PropertyValue : public PropertyValueBase {
+    DECLARE_ACE_TYPE(PropertyValue<T>, PropertyValueBase);
+public:
+    T value;
+    explicit PropertyValue(const T& val) : value(val) {}
+};
+ 
 // Pattern is the base class for different measure, layout and paint behavior.
 class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -117,6 +132,21 @@ public:
         return false;
     }
 
+    virtual bool IsEnableMatchParent()
+    {
+        return false;
+    }
+
+    virtual bool IsEnableChildrenMatchParent()
+    {
+        return false;
+    }
+
+    virtual bool IsEnableFix()
+    {
+        return false;
+    }
+
     virtual std::optional<RenderContext::ContextParam> GetContextParam() const
     {
         return std::nullopt;
@@ -143,7 +173,7 @@ public:
     {
         return false;
     }
-    
+
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
     {
         return MakeRefPtr<AccessibilityProperty>();
@@ -507,6 +537,7 @@ public:
     virtual void HandleDragEvent(const DragPointerEvent& info) {};
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
+    virtual void OnColorModeChange(uint32_t colorMode);
     virtual void OnDirectionConfigurationUpdate() {}
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
@@ -586,7 +617,6 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
-
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -610,6 +640,7 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        layoutProperty->CheckLocalizedAlignment(layoutDirection);
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
     }
@@ -658,6 +689,17 @@ public:
         return false;
     }
 
+    void AddResObj(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
+    
+    void RemoveResObj(const std::string& key);
+
+    void AddResCache(const std::string& key, const std::string& value);
+
+    std::string GetResCacheMapByKey(const std::string& key);
+
     int32_t GetThemeScopeId() const
     {
         auto host = GetHost();
@@ -681,17 +723,41 @@ public:
     virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
     virtual void EndTranslate() {};
     virtual void SendTranslateResult(std::string results) {};
+    int32_t OnRecvCommand(const std::string& command);
+    virtual int32_t OnInjectionEvent(const std::string& command)
+    {
+        return RET_SUCCESS;
+    };
 
     virtual bool BorderUnoccupied() const
     {
         return false;
     }
 
+    void UnRegisterResource(const std::string& key);
+ 
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
+ 
+    template<typename T>
+    void UpdateResource(const std::string& key, const RefPtr<ResourceObject>& resObj);
+    
+    template<typename T>
+    void UpdateProperty(const std::string& key, T value, RefPtr<FrameNode> frameNode);
+ 
+    template<typename T>
+    T ParseResObjToValue(const RefPtr<ResourceObject>& resObj);
+ 
+    virtual void UpdatePropertyImpl(
+        const std::string& key, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {};
+
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
 
     WeakPtr<FrameNode> frameNode_;
+    RefPtr<PatternResourceManager> resourceMgr_;
 
 private:
     bool onDetach_ = false;

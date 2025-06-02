@@ -132,7 +132,8 @@ void ScrollBar::UpdateScrollBarRegion(
 {
     // return if nothing changes to avoid changing opacity
     if (!positionModeUpdate_ && !normalWidthUpdate_ && paintOffset_ == offset && viewPortSize_ == size &&
-        lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) && !isReverseUpdate_) {
+        lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) && !isReverseUpdate_ &&
+        !isScrollBarMarginUpdate_) {
         return;
     }
     // When the scroll jumps without animation and is at the top or bottom before and after the jump,
@@ -168,6 +169,7 @@ void ScrollBar::UpdateScrollBarRegion(
         positionModeUpdate_ = false;
         normalWidthUpdate_ = false;
         isReverseUpdate_ = false;
+        isScrollBarMarginUpdate_ = false;
     }
     needAddLayoutInfo =false;
 }
@@ -203,8 +205,11 @@ void ScrollBar::UpdateActiveRectOffset(double activeMainOffset)
 void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
 {
     if (shapeMode_ == ShapeMode::RECT) {
-        double height =
-            std::max(size.Height() - NormalizeToPx(startReservedHeight_) - NormalizeToPx(endReservedHeight_), 0.0);
+        double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
+        auto scrollBarMarginStart = scrollBarMargin_.value_or(ScrollBarMargin()).start_.ConvertToPxWithSize(mainSize);
+        auto scrollBarMarginEnd = scrollBarMargin_.value_or(ScrollBarMargin()).end_.ConvertToPxWithSize(mainSize);
+        double height = std::max(size.Height() - NormalizeToPx(startReservedHeight_) -
+            NormalizeToPx(endReservedHeight_) - scrollBarMarginStart - scrollBarMarginEnd, 0.0);
         if (positionMode_ == PositionMode::LEFT) {
             barRect_ = Rect(NormalizeToPx(padding_.Left()), 0.0, barWidth_, height) + offset;
         } else if (positionMode_ == PositionMode::RIGHT) {
@@ -212,7 +217,8 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
                 Rect(size.Width() - barWidth_ - NormalizeToPx(padding_.Right()), 0.0, barWidth_, height) + offset;
         } else if (positionMode_ == PositionMode::BOTTOM) {
             auto trackWidth =
-                std::max(size.Width() - NormalizeToPx(startReservedHeight_) - NormalizeToPx(endReservedHeight_), 0.0);
+                std::max(size.Width() - NormalizeToPx(startReservedHeight_) - NormalizeToPx(endReservedHeight_) -
+                    scrollBarMarginStart - scrollBarMarginEnd, 0.0);
             barRect_ =
                 Rect(0.0, size.Height() - barWidth_ - NormalizeToPx(padding_.Bottom()), trackWidth, barWidth_) +
                 offset;
@@ -224,26 +230,34 @@ void ScrollBar::SetRectTrickRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource)
 {
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
-    barRegionSize_ = std::max(mainSize - NormalizeToPx(endReservedHeight_) - NormalizeToPx(startReservedHeight_), 0.0);
+    auto scrollBarMarginStart = scrollBarMargin_.value_or(ScrollBarMargin()).start_.ConvertToPxWithSize(mainSize);
+    auto scrollBarMarginEnd = scrollBarMargin_.value_or(ScrollBarMargin()).end_.ConvertToPxWithSize(mainSize);
+    barRegionSize_ = std::max(mainSize - NormalizeToPx(endReservedHeight_) - NormalizeToPx(startReservedHeight_) -
+        scrollBarMarginStart - scrollBarMarginEnd, 0.0);
     if (LessOrEqual(estimatedHeight, 0.0)) {
         return;
     }
-    double activeSize = barRegionSize_ * mainSize / estimatedHeight - outBoundary_;
-
-    if (!NearZero(outBoundary_)) {
-        activeSize =
-            std::max(std::max(activeSize, NormalizeToPx(minHeight_) - outBoundary_), NormalizeToPx(minDynamicHeight_));
+    double activeBarSize = barRegionSize_ * mainSize / estimatedHeight;
+    double activeSize = activeBarSize - outBoundary_;
+    if (LessNotEqual(barRegionSize_, NormalizeToPx(minHeight_)) && scrollBarMargin_.has_value()) {
+        activeSize = 0.0;
     } else {
-        activeSize = std::max(activeSize, NormalizeToPx(minHeight_));
-    }
-    barWidth_ = NormalizeToPx(normalWidth_);
-    if (LessOrEqual(activeSize, barWidth_)) {
-        if (GreatNotEqual(barWidth_, mainSize)) {
-            barWidth_ = NormalizeToPx(themeNormalWidth_);
+        if (!NearZero(outBoundary_)) {
+            activeSize = std::max(
+                std::max(activeSize, NormalizeToPx(minHeight_) - outBoundary_), NormalizeToPx(minDynamicHeight_));
         } else {
-            activeSize = barWidth_;
+            activeSize = std::max(activeSize, NormalizeToPx(minHeight_));
+        }
+        barWidth_ = NormalizeToPx(normalWidth_);
+        if (LessOrEqual(activeSize, barWidth_)) {
+            if (GreatNotEqual(barWidth_, mainSize)) {
+                barWidth_ = NormalizeToPx(themeNormalWidth_);
+            } else {
+                activeSize = barWidth_;
+            }
         }
     }
+
     double lastMainOffset =
         std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
     if (NearEqual(mainSize, estimatedHeight)) {
@@ -252,8 +266,8 @@ void ScrollBar::SetRectTrickRegion(
         offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
     }
     // Avoid crossing the top or bottom boundary.
-    double activeMainOffset =
-        std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize) + NormalizeToPx(startReservedHeight_);
+    double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize) +
+        NormalizeToPx(startReservedHeight_) + scrollBarMarginStart;
     activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset;
     bool canUseAnimation = NearZero(outBoundary_) && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
     double inactiveSize = 0.0;
@@ -962,6 +976,8 @@ void ScrollBar::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("hostBorderRadius: ").append(hostBorderRadius_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("startReservedHeight: ").append(startReservedHeight_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("endReservedHeight: ").append(endReservedHeight_.ToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("scrollBarMargin").append(scrollBarMargin_.value_or(ScrollBarMargin()).ToString()));
     DumpLog::GetInstance().AddDesc(std::string("isScrollable: ").append(std::to_string(isScrollable_)));
     DumpLog::GetInstance().AddDesc(std::string("isReverse: ").append(std::to_string(isReverse_)));
     DumpLog::GetInstance().AddDesc("==========================innerScrollBarLayoutInfos==========================");
@@ -1210,6 +1226,7 @@ void ScrollBar::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("hostBorderRadius", hostBorderRadius_.ToString().c_str());
     json->Put("startReservedHeight", startReservedHeight_.ToString().c_str());
     json->Put("endReservedHeight", endReservedHeight_.ToString().c_str());
+    json->Put("scrollBarMargin", scrollBarMargin_.value_or(ScrollBarMargin()).ToString().c_str());
     json->Put("isScrollable", std::to_string(isScrollable_).c_str());
     json->Put("isReverse", std::to_string(isReverse_).c_str());
 

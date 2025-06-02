@@ -20,6 +20,7 @@
 #include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/node/node_model.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +34,7 @@ constexpr InputStyle DEFAULT_INPUT_STYLE = InputStyle::DEFAULT;
 constexpr bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr bool DEFAULT_SHOW_UNDER_LINE = false;
 constexpr bool DEFAULT_ENABLE_AUTO_FILL = true;
+constexpr bool DEFAULT_ENABLE_AUTO_FILL_ANIMATION = true;
 constexpr bool DEFAULT_REQUEST_KEYBOARD_ON_FOCUS = true;
 constexpr DisplayMode DEFAULT_BAR_STATE = DisplayMode::AUTO;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
@@ -332,6 +334,27 @@ void ResetTextInputEnableAutoFill(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnableAutoFill(frameNode, DEFAULT_ENABLE_AUTO_FILL);
+}
+
+void SetTextInputEnableAutoFillAnimation(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFillAnimation)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoFillAnimation(frameNode, static_cast<bool>(enableAutoFillAnimation));
+}
+
+ArkUI_Int32 GetTextInputEnableAutoFillAnimation(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetEnableAutoFillAnimation(frameNode));
+}
+
+void ResetTextInputEnableAutoFillAnimation(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoFillAnimation(frameNode, DEFAULT_ENABLE_AUTO_FILL_ANIMATION);
 }
 
 ArkUI_Int32 GetTextInputSelectAll(ArkUINodeHandle node)
@@ -1116,7 +1139,8 @@ void SetTextInputLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetLineHeight(frameNode, CalcDimension(value, (DimensionUnit)unit));
+    TextFieldModelNG::SetLineHeight(frameNode,
+        CalcDimension(LessNotEqual(value, 0.0f) ? 0.0f : value, (DimensionUnit)unit));
 }
 
 void ResetTextInputLineHeight(ArkUINodeHandle node)
@@ -1955,6 +1979,47 @@ void ResetTextInputOnWillChange(ArkUINodeHandle node)
     TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
 }
 
+void SetTextInputStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeWidth(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextInputStrokeWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeWidth(frameNode, 0.0_px);
+}
+
+ArkUI_Float32 GetTextInputStrokeWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetStrokeWidth(frameNode).Value();
+}
+
+void SetTextInputStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeColor(frameNode, Color(color));
+}
+
+void ResetTextInputStrokeColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetStrokeColor(frameNode);
+}
+
+ArkUI_Uint32 GetTextInputStrokeColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetStrokeColor(frameNode).GetValue();
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -2170,6 +2235,15 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .setTextInputKeyboardAppearance = SetTextInputKeyboardAppearance,
         .getTextInputKeyboardAppearance = GetTextInputKeyboardAppearance,
         .resetTextInputKeyboardAppearance = ResetTextInputKeyboardAppearance,
+        .setTextInputStrokeWidth = SetTextInputStrokeWidth,
+        .resetTextInputStrokeWidth = ResetTextInputStrokeWidth,
+        .getTextInputStrokeWidth = GetTextInputStrokeWidth,
+        .setTextInputStrokeColor = SetTextInputStrokeColor,
+        .resetTextInputStrokeColor = ResetTextInputStrokeColor,
+        .getTextInputStrokeColor = GetTextInputStrokeColor,
+        .setTextInputEnableAutoFillAnimation = SetTextInputEnableAutoFillAnimation,
+        .getTextInputEnableAutoFillAnimation = GetTextInputEnableAutoFillAnimation,
+        .resetTextInputEnableAutoFillAnimation = ResetTextInputEnableAutoFillAnimation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2400,6 +2474,26 @@ void SetOnTextInputChangeWithPreviewText(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&eventWithPreview);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
+}
+
+void SetOnTextInputWillChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onWillChange = [node, extraParam](const ChangeValueInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT_CHANGE;
+        std::string utf8StrValue = UtfUtils::Str16DebugToStr8(info.value);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(info.previewText.value);
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textChangeEvent.subKind = ON_TEXT_INPUT_WILL_CHANGE;
+        event.textChangeEvent.nativeStringPtr = const_cast<char*>(utf8StrValue.c_str());
+        event.textChangeEvent.extendStringPtr = const_cast<char*>(utf8Str.c_str());
+        event.textChangeEvent.numArgs = info.previewText.offset;
+        SendArkUISyncEvent(&event);
+        return true;
+    };
+    TextFieldModelNG::SetOnWillChangeEvent(frameNode, std::move(onWillChange));
 }
 
 void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam)
@@ -2655,6 +2749,10 @@ void ResetOnTextInputInputFilterError(ArkUINodeHandle node)
 void ResetTextInputOnTextContentScroll(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnContentScroll(node);
+}
+void ResetOnTextInputWillChange(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnWillChange(node);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

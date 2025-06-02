@@ -85,6 +85,8 @@ public:
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
+    void SetLineThicknessScale(float value) override;
+    void SetOptimizeTrailingSpace(bool trim) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -184,6 +186,9 @@ public:
     static bool GetHalfLeading(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static size_t GetLineCount(FrameNode* frameNode);
+    static void SetLineThicknessScale(FrameNode* frameNode, float value);
+    static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
+    static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

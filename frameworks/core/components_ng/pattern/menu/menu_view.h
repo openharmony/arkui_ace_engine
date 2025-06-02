@@ -96,7 +96,7 @@ private:
     static void CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
     static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
-        const MenuParam& menuParam, RefPtr<FrameNode> column);
+        const MenuParam& menuParam, RefPtr<FrameNode> column, const RefPtr<FrameNode>& targetNode);
     static void UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
     static void UpdateMenuPositionTop(MarginProperty& menuNodeMargin,
@@ -111,6 +111,8 @@ private:
     static void UpdateMenuNodePositionLeft(MarginProperty& menuNodeMargin,
         std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuLeft,
         std::map<std::string, AlignRule>& alignMap);
+    static void UpdateMenuOutlineWhenArrow(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 

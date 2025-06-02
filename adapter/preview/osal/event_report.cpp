@@ -62,16 +62,6 @@ void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std
 
 void EventReport::SendEventInner(const EventInfo& eventInfo) {}
 
-void EventReport::ReportEventComplete(DataBase& data) {}
-
-void EventReport::ReportEventJankFrame(DataBase& data) {}
-
-void EventReport::ReportJankFrameApp(JankInfo& info) {}
-
-void EventReport::ReportJankFrameFiltered(JankInfo& info) {}
-
-void EventReport::ReportJankFrameUnFiltered(JankInfo& info) {}
-
 void EventReport::ReportDoubleClickTitle(int32_t stateChange) {}
 
 void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange) {}
@@ -84,9 +74,6 @@ void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t
 
 void EventReport::ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool isHoverMode,
                                           int32_t appRotation, int32_t windowMode) {}
-
-void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
-                                    const std::string& pageName) {}
 
 void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
     const std::string& abilityName, const std::string& moduleName, int32_t dimension)

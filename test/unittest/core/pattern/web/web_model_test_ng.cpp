@@ -235,6 +235,12 @@ HWTEST_F(WebModelTestNg, SetWindowNewEvent004, TestSize.Level1)
     webModelNG.SetDarkMode(WebDarkMode::On);
     webModelNG.SetForceDarkAccess(true);
     webModelNG.SetAllowWindowOpenMethod(true);
+    callbackCalled = false;
+    webModelNG.SetActivateContentEventId([&callbackCalled](const BaseEventInfo* info) {
+        callbackCalled = true;
+    });
+    webEventHub->FireOnActivateContentEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
 #endif
 }
 

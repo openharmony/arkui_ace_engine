@@ -326,7 +326,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonRowNode()
 
 void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);

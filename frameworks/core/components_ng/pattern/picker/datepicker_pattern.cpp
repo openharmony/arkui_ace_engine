@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
+#include <functional>
 #include <stdint.h>
 #include <string>
 #include <utility>
@@ -61,6 +62,7 @@ const int32_t MONTH_DECEMBER = 12;
 constexpr int32_t RATIO_ZERO = 0;
 constexpr int32_t RATIO_ONE = 1;
 constexpr int32_t SECOND_PAGE = 1;
+constexpr float PICKER_MAXFONTSCALE = 1.0f;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -92,12 +94,12 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(pickerTheme, false);
     auto children = host->GetChildren();
     auto height = pickerTheme->GetDividerSpacing();
-    auto buttonSpace = pickerTheme->GetSelectorItemSpace();
     auto currentFocusStackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_RETURN(currentFocusStackChild, false);
     auto currentFocusButtonNode = DynamicCast<FrameNode>(currentFocusStackChild->GetFirstChild());
     CHECK_NULL_RETURN(currentFocusButtonNode, false);
     for (const auto& child : children) {
+        CHECK_NULL_CONTINUE(child->GetLastChild());
         auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
         CHECK_NULL_RETURN(columnNode, false);
         auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
@@ -113,7 +115,7 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         auto maxButtonHeight = static_cast<float>(datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height());
         auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
+            CalcSize(CalcLength(width - pickerTheme->GetSelectorItemSpace().ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         if (!useButtonFocusArea_) {
             buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -310,7 +312,7 @@ void DatePickerPattern::ColumnPatternInitHapticController()
         if (!columnPattern) {
             continue;
         }
-        columnPattern->InitHapticController();
+        columnPattern->InitHapticController(columnNode);
     }
 }
 
@@ -323,7 +325,7 @@ void DatePickerPattern::ColumnPatternInitHapticController(const RefPtr<FrameNode
     isHapticChanged_ = false;
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_VOID(columnPattern);
-    columnPattern->InitHapticController();
+    columnPattern->InitHapticController(columnNode);
 }
 
 void DatePickerPattern::ColumnPatternStopHaptic()
@@ -597,15 +599,20 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pickerTheme);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-    auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    if (!SystemProperties::ConfigChangePerform()) {
+        auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+        auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+        auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+        CHECK_NULL_VOID(pickerProperty);
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
     if (isPicker_) {
-        OnModifyDone();
+        if (!SystemProperties::ConfigChangePerform()) {
+            OnModifyDone();
+        }
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
@@ -1096,27 +1103,28 @@ void DatePickerPattern::FlushMonthDaysColumn()
 bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const std::string& eventData)
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     auto dataJson = JsonUtil::ParseJsonString(eventData);
     CHECK_NULL_RETURN(dataJson, false);
-    auto value = InspectorJsonUtil::Create();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
+    params->Put("month", static_cast<int32_t>(dataJson->GetUInt("month") + 1)); // month: 1-12
+    params->Put("day", static_cast<int32_t>(dataJson->GetUInt("day")));
+    params->Put("hour", static_cast<int32_t>(dataJson->GetUInt("hour")));
+    params->Put("minute", static_cast<int32_t>(dataJson->GetUInt("minute")));
+    auto value = JsonUtil::Create();
     CHECK_NULL_RETURN(value, false);
+    value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
-    value->Put("year", dataJson->GetUInt("year"));
-    value->Put("month", dataJson->GetUInt("month") + 1); // month: 1-12
-    value->Put("day", dataJson->GetUInt("day"));
-    value->Put("hour", dataJson->GetUInt("hour"));
-    value->Put("minute", dataJson->GetUInt("minute"));
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
-#endif
+    value->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
     return true;
 }
 
 bool DatePickerPattern::ReportDateChangeEvent(const std::string& compName,
     const std::string& eventName, const std::string& eventData)
 {
-    auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
-    if ((datePickerEventHub != nullptr) && datePickerEventHub->HasSetDialogChange()) {
+    if (GetIsShowInDialog()) {
         return false;
     }
     auto host = GetHost();
@@ -3008,4 +3016,118 @@ bool DatePickerPattern::CurrentIsLunar()
     return rowLayoutProperty->GetLunarValue(false);
 }
 
+Dimension DatePickerPattern::ConvertFontScaleValue(const Dimension& fontSizeValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, fontSizeValue);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
+    float fontScale = pipeline->GetFontScale();
+    if (NearZero(fontScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
+        return fontSizeValue;
+    }
+    if (GreatOrEqualCustomPrecision(fontScale, PICKER_MAXFONTSCALE) && follow) {
+        fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+        if (!NearZero(fontScale)) {
+            return Dimension(fontSizeValue / fontScale);
+        }
+    }
+    return fontSizeValue;
+}
+
+void DatePickerPattern::UpdateTextStyleCommon(
+    const PickerTextStyle& textStyle,
+    const TextStyle& defaultTextStyle,
+    std::function<void(const Color&)> updateTextColorFunc,
+    std::function<void(const Dimension&)> updateFontSizeFunc,
+    std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc
+)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        updateTextColorFunc(textStyle.textColor.value_or(defaultTextStyle.GetTextColor()));
+
+        Dimension fontSize = defaultTextStyle.GetFontSize();
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            fontSize = textStyle.fontSize.value();
+        }
+        updateFontSizeFunc(ConvertFontScaleValue(fontSize));
+
+        updateFontFamilyFunc(textStyle.fontFamily.value_or(defaultTextStyle.GetFontFamilies()));
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void DatePickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetDisappearOptionStyle();
+    auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateDisappearColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateDisappearFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateDisappearFontFamily(fontFamily); }
+    );
+}
+
+void DatePickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateFontFamily(fontFamily); }
+    );
+}
+
+void DatePickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
+    auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateSelectedColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateSelectedFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateSelectedFontFamily(fontFamily); }
+    );
+}
 } // namespace OHOS::Ace::NG

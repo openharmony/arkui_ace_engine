@@ -4942,7 +4942,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest067, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    int32_t abnormalType = static_cast<int32_t>(ARKUI_NODE_CUSTOM_SPAN) + 1;
+    int32_t abnormalType = static_cast<int32_t>(ARKUI_NODE_EMBEDDED_COMPONENT) + 1;
     EXPECT_EQ(nodeAPI->createNode(static_cast<ArkUI_NodeType>(abnormalType)), nullptr);
     nodeAPI->disposeNode(nullptr);
     EXPECT_EQ(nodeAPI->addChild(nullptr, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -6663,5 +6663,70 @@ HWTEST_F(NativeNodeTest, NativeNodeTest126, TestSize.Level1)
     OH_ArkUI_SwiperArrowStyle_SetArrowSize(arrowStyle, 25.0f);
     EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowSize(arrowStyle), 25.0f);
     OH_ArkUI_SwiperArrowStyle_Destroy(arrowStyle);
+}
+
+/**
+ * @tc.name: NativeNodeTest127
+ * @tc.desc: Test ArkUI_SupportedUIStates.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest127, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle styleButton = nodeAPI->createNode(ARKUI_NODE_BUTTON);
+    int32_t settingUIStatus = 1;
+    EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(
+        styleButton, settingUIStatus, nullptr, false, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RemoveSupportedUIStates(styleButton, settingUIStatus), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeTest141
+ * @tc.desc: Test embeddedComponent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest141, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_EMBEDDED_COMPONENT);
+    ASSERT_NE(rootNode, nullptr);
+    ArkUI_AttributeItem item0 = {nullptr, 0, nullptr, nullptr};
+    nodeAPI->setAttribute(rootNode, NODE_EMBEDDED_COMPONENT_WANT, &item0);
+    nodeAPI->setAttribute(rootNode, NODE_EMBEDDED_COMPONENT_OPTION, &item0);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest128
+ * @tc.desc: Test optimizeTrailingSpace function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest128, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT, nullptr, true});
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    value[0].i32 = false;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    item.size = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item),
+    ARKUI_ERROR_CODE_PARAM_INVALID);
+    item.size = 1;
+    value[0].i32 = 2;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item),
+    ARKUI_ERROR_CODE_PARAM_INVALID);
+    value[0].i32 = true;
+
+    nodeAPI->resetAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 } // namespace OHOS::Ace

@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "base/error/error_code.h"
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -41,6 +42,7 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t MAX_POINTS = 10;
+    constexpr int32_t API_TARGET_VERSION_MASK = 1000;
 }
 ArkUIGesture* createPanGesture(
     ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, bool limitFingerCount, void* userData = nullptr)
@@ -311,6 +313,10 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
         case InputEventType::AXIS :
             ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_AXIS);
             break;
+        case InputEventType::KEYBOARD:
+            ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_KEY);
+            ret.deviceId = info.GetDeviceId();
+            break;
         default:
             break;
     }
@@ -475,6 +481,7 @@ void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
     eventData.nodeId = 0;
     eventData.extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
     eventData.gestureAsyncEvent.subKind = eventKind;
+    eventData.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
     GetGestureEvent(eventData.gestureAsyncEvent, info);
     if (info.GetInputEventType() == InputEventType::AXIS) {
         ArkUIAxisEvent rawInputEvent;
@@ -486,6 +493,14 @@ void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         ArkUIMouseEvent rawInputEvent;
         ConvertIMMEventToMouseEvent(info, rawInputEvent);
+        eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
+        SendArkUISyncEvent(&eventData);
+        return;
+    }
+    if (info.GetInputEventType() == InputEventType::KEYBOARD) {
+        ArkUIKeyEvent rawInputEvent;
+        // only support deviceId when trigger by key
+        rawInputEvent.deviceId = info.GetDeviceId();
         eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
         SendArkUISyncEvent(&eventData);
         return;
@@ -573,6 +588,13 @@ void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 p
     }
     gesturePtr->SetGestureMask(gestureMask);
     gestureHub->AttachGesture(gesturePtr);
+    GestureEventFunc clickEvent = NG::GetTapGestureEventFunc(gesturePtr);
+    if (clickEvent) {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(true, false);
+        focusHub->SetOnClickCallback(std::move(clickEvent));
+    }
 }
 
 void addGestureToNodeWithRefCountDecrease(
@@ -765,8 +787,8 @@ void setGestureInterrupterToNodeWithUserData(
         }
         interruptInfo.responseLinkRecognizer = othersRecognizer;
         interruptInfo.count = count;
-        ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID,
-            &rawInputEvent };
+        ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &rawInputEvent };
+        inputEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
         interruptInfo.inputEvent = &inputEvent;
         interruptInfo.gestureEvent = &arkUIGestureEvent;

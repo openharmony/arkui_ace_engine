@@ -132,14 +132,14 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
 
-void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback)
+void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback, ArkUI_Bool isExcludeInner)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
-    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, isExcludeInner);
     func = nullptr;
 }
 
@@ -449,6 +449,7 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextInputOnWillDelete,
     NodeModifier::SetTextInputOnDidDelete,
     NodeModifier::SetOnTextInputChangeWithPreviewText,
+    NodeModifier::SetOnTextInputWillChange,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -466,6 +467,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnWillDeleteValue,
     NodeModifier::SetTextAreaOnDidDeleteValue,
     NodeModifier::SetOnTextAreaChangeWithPreviewText,
+    NodeModifier::SetOnTextAreaWillChange,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -674,6 +676,7 @@ const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS
     nullptr,
     nullptr,
     NodeModifier::ResetOnTextInputChangeWithPreviewText,
+    NodeModifier::ResetOnTextInputWillChange,
 };
 
 const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -691,6 +694,7 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     nullptr,
     nullptr,
     NodeModifier::ResetOnTextAreaChangeWithPreviewText,
+    NodeModifier::ResetOnTextAreaWillChange,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -2057,6 +2061,11 @@ ArkUI_Int32 SetDialogFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
     return CustomDialog::SetFocusable(handle, focusable);
 }
 
+ArkUI_Int32 GetDialogState(ArkUIDialogHandle handle, ArkUI_Int32* dialogState)
+{
+    return CustomDialog::GetDialogState(handle, dialogState);
+}
+
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
 {
     return CustomDialog::OpenCustomDialog(handle, callback);
@@ -2099,6 +2108,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .close = CloseDialog,
         .registerOnWillDismiss = RegisterOnWillDialogDismiss,
         .registerOnWillDismissWithUserData = RegisterOnWillDismissWithUserData,
+        .getState = GetDialogState,
         .setKeyboardAvoidDistance = SetKeyboardAvoidDistance,
         .setLevelMode = SetDialogLevelMode,
         .setLevelUniqueId = SetDialogLevelUniqueId,

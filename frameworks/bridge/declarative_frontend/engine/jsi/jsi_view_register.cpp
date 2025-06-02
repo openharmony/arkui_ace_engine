@@ -666,6 +666,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
 
     NG::InspectorFilter filter;
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    bool isLayoutInspector = false;
     if (argc == PARAM_SIZE_ONE) {
         if (!firstArg->IsArray(vm)) {
             JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
@@ -680,11 +681,15 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
                 return panda::StringRef::NewFromUtf8(vm, "");
             }
             auto itemVal = panda::Local<panda::StringRef>(subItemVal);
+            if (itemVal->ToString(vm) == "isLayoutInspector") {
+                isLayoutInspector = true;
+                continue;
+            }
             filter.AddFilterAttr(itemVal->ToString(vm));
         }
     }
     bool needThrow = false;
-    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+    auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, filter, needThrow);
     if (needThrow) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
         return panda::StringRef::NewFromUtf8(vm, "");
@@ -1435,6 +1440,10 @@ void JsRegisterFormViews(
     buttonType.Constant("Arc", (int)ButtonType::ARC);
     buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
+    JSObjectTemplate toolbaritemPlacement;
+    toolbaritemPlacement.Constant("TOP_BAR_LEADING", (int)ToolBarItemPlacement::TOP_BAR_LEADING);
+    toolbaritemPlacement.Constant("TOP_BAR_TRAILING", (int)ToolBarItemPlacement::TOP_BAR_TRAILING);
+
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
     iconPosition.Constant("End", 1);
@@ -1451,6 +1460,7 @@ void JsRegisterFormViews(
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToolBarItemPlacement"), *toolbaritemPlacement);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
@@ -1649,6 +1659,10 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     buttonType.Constant("Arc", (int)ButtonType::ARC);
     buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
+    JSObjectTemplate toolbaritemPlacement;
+    toolbaritemPlacement.Constant("TOP_BAR_LEADING", (int)ToolBarItemPlacement::TOP_BAR_LEADING);
+    toolbaritemPlacement.Constant("TOP_BAR_TRAILING", (int)ToolBarItemPlacement::TOP_BAR_TRAILING);
+
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
     iconPosition.Constant("End", 1);
@@ -1670,6 +1684,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToolBarItemPlacement"), *toolbaritemPlacement);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);

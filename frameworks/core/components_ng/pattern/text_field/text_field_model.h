@@ -48,11 +48,16 @@ struct Font {
     std::optional<Color> fontColor;
     std::optional<std::vector<std::string>> fontFamiliesNG;
     std::optional<bool> enableVariableFontWeight;
+    std::optional<Dimension> strokeWidth;
+    std::optional<Color> strokeColor;
+    std::optional<SuperscriptStyle> superscript;
 
     bool IsEqual(const Font& other) const
     {
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
-                    fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight;
+                    fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight &&
+                    strokeWidth == other.strokeWidth && strokeColor == other.strokeColor &&
+                    superscript == other.superscript;
         if (!flag) {
             return false;
         }
@@ -90,6 +95,16 @@ struct Font {
         }
         return ss.str();
     }
+    
+    std::optional<Color> GetStrokeColor() const
+    {
+        return strokeColor;
+    }
+    
+    std::optional<Dimension> GetStrokeWidth() const
+    {
+        return strokeWidth;
+    }
 
     std::optional<FontWeight> GetFontWeight() const
     {
@@ -104,6 +119,11 @@ struct Font {
     std::optional<FontStyle> GetFontStyle() const
     {
         return fontStyle;
+    }
+
+    std::optional<SuperscriptStyle> GetSuperscript() const
+    {
+        return superscript;
     }
 };
 
@@ -332,6 +352,8 @@ public:
     virtual void SetBarState(DisplayMode value) {};
     virtual void SetMaxViewLines(uint32_t value) {};
     virtual void SetNormalMaxViewLines(uint32_t value) {};
+    virtual void SetOverflowMode(OverflowMode value) {};
+    virtual void SetMinLines(uint32_t value) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
@@ -344,6 +366,7 @@ public:
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) = 0;
     virtual void SetPasswordRules(const std::string& passwordRules) = 0;
     virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
+    virtual void SetEnableAutoFillAnimation(bool enableAutoFillAnimation) = 0;
     virtual void SetCounterType(int32_t value) {};
     virtual void SetShowCounterBorder(bool value) {};
     virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
@@ -380,6 +403,9 @@ public:
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) = 0;
+    virtual void SetStrokeWidth(const Dimension& value) {};
+    virtual void SetStrokeColor(const Color& value) {};
+    virtual void ResetStrokeColor() {};
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

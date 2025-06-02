@@ -264,6 +264,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.width = width;
     event.height = height;
     event.pressedTime = pressedTime;
+    event.convertInfo = convertInfo;
     return event;
 }
 

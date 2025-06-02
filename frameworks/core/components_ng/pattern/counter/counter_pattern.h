@@ -90,12 +90,41 @@ public:
         return { FocusType::SCOPE, true, FocusStyleType::OUTER_BORDER };
     }
 
+    void UpdateTextColor(const RefPtr<FrameNode>& frameNode, const Color& value)
+    {
+        CHECK_NULL_VOID(frameNode);
+        auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(value);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        textLayoutProperty->ResetTextColor();
+    }
+
     bool OnThemeScopeUpdate(int32_t themeScopeId) override
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto counterRenderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(counterRenderContext, false);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto counterTheme = pipeline->GetTheme<CounterTheme>(host->GetThemeScopeId());
+        CHECK_NULL_RETURN(counterTheme, false);
+        Color textColor = counterRenderContext->GetForegroundColor().has_value()
+                              ? counterRenderContext->GetForegroundColorValue()
+                              : counterTheme->GetContentTextStyle().GetTextColor();
+        auto subNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(subId_.value())));
+        CHECK_NULL_RETURN(subNode, false);
+        auto subTextNode = AceType::DynamicCast<FrameNode>(subNode->GetChildren().front());
+        CHECK_NULL_RETURN(subTextNode, false);
+        UpdateTextColor(subTextNode, textColor);
+
+        auto addNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(addId_.value())));
+        CHECK_NULL_RETURN(addNode, false);
+        auto addTextNode = AceType::DynamicCast<FrameNode>(addNode->GetChildren().front());
+        CHECK_NULL_RETURN(addTextNode, false);
+        UpdateTextColor(addTextNode, textColor);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return !counterRenderContext->GetForegroundColor().has_value();
     }

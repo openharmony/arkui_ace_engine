@@ -35,6 +35,12 @@ struct ConfigurationChange {
                fontScaleUpdate || fontWeightScaleUpdate || hotReloadUpdate;
     }
 
+    bool OnlyColorModeChange() const
+    {
+        return colorModeUpdate && !(languageUpdate || directionUpdate || dpiUpdate || fontUpdate || skinUpdate ||
+               fontScaleUpdate || fontWeightScaleUpdate || hotReloadUpdate);
+    }
+
     void MergeConfig(const ConfigurationChange& config)
     {
         colorModeUpdate |= config.colorModeUpdate;

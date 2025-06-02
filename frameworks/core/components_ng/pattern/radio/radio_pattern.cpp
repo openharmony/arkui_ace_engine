@@ -978,6 +978,34 @@ void RadioPattern::SetRadioChecked(bool check)
     OnModifyDone();
 }
 
+void RadioPattern::UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (radioColorType) {
+            case RadioColorType::CHECKED_BACKGROUND_COLOR:
+                paintProperty->UpdateRadioCheckedBackgroundColor(color);
+                break;
+            case RadioColorType::UNCHECKED_BORDER_COLOR:
+                paintProperty->UpdateRadioUncheckedBorderColor(color);
+                break;
+            case RadioColorType::INDICATOR_COLOR:
+                paintProperty->UpdateRadioIndicatorColor(color);
+                ImageNodeCreate();
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 void RadioPattern::FireBuilder()
 {
     auto host = GetHost();

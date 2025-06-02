@@ -21,6 +21,7 @@
 #include "core/components/slider/render_slider.h"
 #include "core/components/slider/slider_element.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
@@ -88,6 +89,8 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSlider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSlider>::StaticMethod("enableHapticFeedback", &JSSlider::SetEnableHapticFeedback);
+    JSClass<JSSlider>::StaticMethod("prefix", &JSSlider::SetPrefix);
+    JSClass<JSSlider>::StaticMethod("suffix", &JSSlider::SetSuffix);
     JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -234,11 +237,24 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         return;
     }
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        bool state = ParseJsColor(info[0], colorVal, resObj);
+        if (state) {
+            if (resObj) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
+            }
+            SliderModel::GetInstance()->SetBlockColor(colorVal);
+            return;
+        }
         SliderModel::GetInstance()->ResetBlockColor();
-        return;
+    } else {
+        if (!ParseJsColor(info[0], colorVal)) {
+            SliderModel::GetInstance()->ResetBlockColor();
+            return;
+        }
+        SliderModel::GetInstance()->SetBlockColor(colorVal);
     }
-    SliderModel::GetInstance()->SetBlockColor(colorVal);
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)
@@ -250,9 +266,15 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
+        RefPtr<ResourceObject> resObj;
+        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetTrackColor();
             return;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            if (resObj) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
+            }
         }
         isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
@@ -303,9 +325,15 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        if (!ParseJsColor(info[0], colorVal)) {
+        RefPtr<ResourceObject> resObj;
+        if (!ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetSelectColor();
             return;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            if (resObj) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::SELECT_COLOR);
+            }
         }
         isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
@@ -422,10 +450,16 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
     }
 
     std::optional<std::string> content;
+    RefPtr<ResourceObject> resObj;
     if (info.Length() == SLIDER_SHOW_TIPS_MAX_PARAMS) {
         std::string str;
-        if (ParseJsString(info[1], str)) {
+        if (ParseJsString(info[1], str, resObj)) {
             content = str;
+        }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (resObj) {
+            SliderModel::GetInstance()->CreateWithStringResourceObj(resObj, showTips);
         }
     }
 
@@ -439,9 +473,15 @@ void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetBlockBorderColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (resObj) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_BORDER_COLOR);
+        }
     }
     SliderModel::GetInstance()->SetBlockBorderColor(colorVal);
 }
@@ -471,9 +511,15 @@ void JSSlider::SetStepColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetStepColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (resObj) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::STEP_COLOR);
+        }
     }
     SliderModel::GetInstance()->SetStepColor(colorVal);
 }
@@ -561,14 +607,20 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
     auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
     if (type == SliderModel::BlockStyleType::IMAGE) {
         std::string src;
+        RefPtr<ResourceObject> resObj;
         auto image = jsObj->GetProperty("image");
-        if (!ParseJsMedia(image, src)) {
+        if (!ParseJsMedia(image, src, resObj)) {
             ResetBlockStyle();
             return;
         }
         std::string bundleName;
         std::string moduleName;
         GetJsMediaBundleInfo(image, bundleName, moduleName);
+        if (SystemProperties::ConfigChangePerform()) {
+            if (resObj) {
+                SliderModel::GetInstance()->CreateWithMediaResourceObj(resObj, bundleName, moduleName);
+            }
+        }
         SliderModel::GetInstance()->SetBlockImage(src, bundleName, moduleName);
     } else if (type == SliderModel::BlockStyleType::SHAPE) {
         auto shape = jsObj->GetProperty("shape");
@@ -639,6 +691,116 @@ void JSSlider::SetEnableHapticFeedback(const JSCallbackInfo& info)
         isEnableHapticFeedback = info[0]->ToBoolean();
     }
     SliderModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
+
+RefPtr<NG::UINode> SetPrefix_SuffixWithFrameNode(const JSRef<JSObject>& sliderJsObject)
+{
+    JSRef<JSVal> builderNodeParam = sliderJsObject->GetProperty("builderNode_");
+    if (!builderNodeParam->IsEmpty()) {
+        auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+        JSRef<JSVal> nodePtr = builderNodeObject->GetProperty("nodePtr_");
+        if (!nodePtr.IsEmpty()) {
+            const auto* vm = nodePtr->GetEcmaVM();
+            CHECK_NULL_RETURN(vm, nullptr);
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* myUINode = reinterpret_cast<NG::UINode*>(node);
+            if (!myUINode) {
+                return nullptr;
+            }
+            auto refPtrUINode = AceType::Claim(myUINode);
+            return refPtrUINode;
+        }
+    }
+    return nullptr;
+}
+
+void JSSlider::SetPrefix(const JSCallbackInfo& args)
+{
+    if (args.Length() < 2) {
+        return;
+    }
+    if (!args[0]->IsObject() || !args[1]->IsObject()) {
+        return;
+    }
+
+    RefPtr<NG::UINode> refPtrUINode = nullptr;
+    auto sliderContentObject = JSRef<JSObject>::Cast(args[0]);
+    if (!sliderContentObject->IsEmpty()) {
+        refPtrUINode = SetPrefix_SuffixWithFrameNode(sliderContentObject);
+    }
+
+    NG::SliderPrefixOptions prefixOption;
+    if (args.Length() > 1) {
+        auto prefixOptions = JSRef<JSObject>::Cast(args[1]);
+        if (!prefixOptions->IsEmpty() && !prefixOptions->IsUndefined()) {
+            auto accessibilityTextProperty = prefixOptions->GetProperty("accessibilityText");
+            if (!accessibilityTextProperty->IsEmpty()) {
+                prefixOption.accessibilityText = accessibilityTextProperty->ToString();
+            }
+
+            auto accessibilityDescriptionProperty = prefixOptions->GetProperty("accessibilityDescription");
+            if (!accessibilityDescriptionProperty->IsEmpty()) {
+                prefixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            }
+
+            auto accessibilityLevelProperty = prefixOptions->GetProperty("accessibilityLevel");
+            if (!accessibilityLevelProperty->IsEmpty()) {
+                prefixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            }
+
+            auto accessibilityGroupProperty = prefixOptions->GetProperty("accessibilityGroup");
+            if (!accessibilityGroupProperty->IsEmpty()) {
+                prefixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
+            }
+        }
+    }
+
+    SliderModel::GetInstance()->SetPrefix(refPtrUINode, prefixOption);
+
+    args.ReturnSelf();
+}
+
+void JSSlider::SetSuffix(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+
+    RefPtr<NG::UINode> refPtrUINode = nullptr;
+    auto sliderContentObject = JSRef<JSObject>::Cast(args[0]);
+    if (!sliderContentObject->IsEmpty()) {
+        refPtrUINode = SetPrefix_SuffixWithFrameNode(sliderContentObject);
+    }
+
+    NG::SliderSuffixOptions suffixOption;
+    if (args.Length() > 1) {
+        JSRef<JSObject> suffixOptions = JSRef<JSObject>::Cast(args[1]);
+        if (!suffixOptions->IsEmpty() && !suffixOptions->IsUndefined()) {
+            auto accessibilityTextProperty = suffixOptions->GetProperty("accessibilityText");
+            if (!accessibilityTextProperty->IsEmpty()) {
+                suffixOption.accessibilityText = accessibilityTextProperty->ToString();
+            }
+
+            auto accessibilityDescriptionProperty = suffixOptions->GetProperty("accessibilityDescription");
+            if (!accessibilityDescriptionProperty->IsEmpty()) {
+                suffixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            }
+
+            auto accessibilityLevelProperty = suffixOptions->GetProperty("accessibilityLevel");
+            if (!accessibilityLevelProperty->IsEmpty()) {
+                suffixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            }
+
+            auto accessibilityGroupProperty = suffixOptions->GetProperty("accessibilityGroup");
+            if (!accessibilityGroupProperty->IsEmpty()) {
+                suffixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
+            }
+        }
+    }
+
+    SliderModel::GetInstance()->SetSuffix(refPtrUINode, suffixOption);
+
+    args.ReturnSelf();
 }
 
 void JSSlider::ResetBlockStyle()

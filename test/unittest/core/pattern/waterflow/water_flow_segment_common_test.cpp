@@ -961,6 +961,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Spring001, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
+    ChangeRadio();
     EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
     pattern_->SetAnimateCanOverScroll(true);
 

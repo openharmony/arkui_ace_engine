@@ -20,6 +20,7 @@
 
 #include "core/components/common/properties/text_style.h"
 #include "core/components/picker/picker_data.h"
+#include "core/common/resource/resource_object.h"
 #include "frameworks/base/i18n/time_format.h"
 
 namespace OHOS::Ace::NG {
@@ -60,12 +61,24 @@ struct PickerTextStyle {
     std::optional<Dimension> minFontSize;
     std::optional<Dimension> maxFontSize;
     std::optional<Ace::TextOverflow> textOverflow;
+
+    RefPtr<ResourceObject> textColorResObj;
+    RefPtr<ResourceObject> fontSizeResObj;
+    RefPtr<ResourceObject> fontFamilyResObj;
+    RefPtr<ResourceObject> minFontSizeResObj;
+    RefPtr<ResourceObject> maxFontSizeResObj;
 };
+
 struct PickerTextProperties {
     PickerTextStyle disappearTextStyle_;
     PickerTextStyle normalTextStyle_;
     PickerTextStyle selectedTextStyle_;
     PickerTextStyle defaultTextStyle_;
+};
+
+struct PickerBackgroundStyle {
+    std::optional<Color> color;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
 };
 
 // textpicker column kind
@@ -117,6 +130,7 @@ struct TextPickerSettingData {
     bool canLoop = true;
     int32_t crownSensitivity;
     PickerTextProperties properties;
+    PickerBackgroundStyle pickerBgStyle;
     std::vector<uint32_t> selectedValues;
     std::vector<std::string> values;
     std::vector<NG::TextCascadePickerOptions> options;

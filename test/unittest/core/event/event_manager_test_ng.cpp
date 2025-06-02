@@ -705,7 +705,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
     EXPECT_FALSE(retFlag);
 
     /**
-     * @tc.steps: step3. Call DispatchAxisEventNG with axisTestResults_ empty
+     * @tc.steps: step3. Call DispatchAxisEventNG with axisTestResultsMap_[event.id] empty
      * @tc.expected: retFlag is false
      */
     event.horizontalAxis = 1;
@@ -713,14 +713,14 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
     EXPECT_TRUE(retFlag);
 
     /**
-     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResults_ not empty
+     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResultsMap_[event.id] not empty
      * @tc.expected: retFlag is false
      */
     auto axisEventTarget = AceType::MakeRefPtr<AxisEventTarget>();
     auto onAxisCallback = [](AxisInfo&) -> void {};
     axisEventTarget->SetOnAxisCallback(onAxisCallback);
 
-    eventManager->axisTestResults_.push_back(axisEventTarget);
+    eventManager->axisTestResultsMap_[event.id].push_back(axisEventTarget);
     retFlag = eventManager->DispatchAxisEventNG(event);
     EXPECT_TRUE(retFlag);
 }

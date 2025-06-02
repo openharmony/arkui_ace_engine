@@ -30,7 +30,7 @@ ResourceManager& ResourceManager::GetInstance()
     return instance;
 }
 
-RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(RefPtr<ResourceObject>& resourceObject)
+RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr<ResourceObject>& resourceObject)
 {
     int32_t instanceId = resourceObject->GetInstanceId();
     std::string bundleName = resourceObject->GetBundleName();

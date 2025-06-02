@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,7 +84,7 @@ export type SubHeaderV2SelectOnSelect = (selectedIndex: number, selectedContent?
 export interface SubHeaderV2SelectOptions {
   options: SelectOption[];
   selectedIndex?: number;
-  selectedContent?: string;
+  selectedContent?: ResourceStr;
   onSelect?: SubHeaderV2SelectOnSelect;
   defaultFocus?: boolean;
 }
@@ -96,7 +96,7 @@ export class SubHeaderV2Select {
   @Trace
   public selectedIndex?: number;
   @Trace
-  public selectedContent?: string;
+  public selectedContent?: ResourceStr;
   @Trace
   public onSelect?: SubHeaderV2SelectOnSelect;
   @Trace

@@ -34,6 +34,10 @@ public:
 protected:
     bool CreateParagraphEx(const TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
+private:
+    void CalcMeasureContentWithMinLines(
+        std::optional<SizeF>& size, LayoutWrapper* layoutWrapper, const LayoutConstraintF& contentConstraint);
 };
 } // namespace OHOS::Ace::NG
 

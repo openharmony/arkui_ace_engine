@@ -533,6 +533,24 @@ class TextInputEnableAutoFillModifier extends ModifierWithKey<boolean> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class TextInputEnableAutoFillAnimationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableAutoFillAnimation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoFillAnimation(node);
+    } else {
+      getUINativeModule().textInput.setEnableAutoFillAnimation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputShowErrorModifier extends ModifierWithKey<ResourceStr | undefined> {
   constructor(value: ResourceStr | undefined) {
     super(value);
@@ -1476,6 +1494,42 @@ interface TextInputParam {
   controller?: TextInputController;
 }
 
+class TextInputStrokeWidthModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputStrokeWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    } else {
+      getUINativeModule().textArea.setStrokeWidth(node, this.value.value, this.value.unit);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputStrokeColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputStrokeColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetStrokeColor(node);
+    } else {
+      getUINativeModule().text.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1521,6 +1575,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   passwordRules(value: string): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputPasswordRulesModifier.identity,
       TextInputPasswordRulesModifier, value);
+    return this;
+  }
+  enableAutoFillAnimation(value: boolean): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillAnimationModifier.identity,
+      TextInputEnableAutoFillAnimationModifier, value);
     return this;
   }
   showCounter(value: boolean, options?: InputCounterOptions): TextInputAttribute {
@@ -2005,6 +2064,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   enableHapticFeedback(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableHapticFeedbackModifier.identity, TextInputEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  strokeWidth(value: LengthMetrics): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputStrokeWidthModifier.identity, TextInputStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputStrokeColorModifier.identity, TextInputStrokeColorModifier, value);
     return this;
   }
 }

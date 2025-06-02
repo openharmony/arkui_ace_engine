@@ -154,6 +154,19 @@ public:
 
     void UpdateSelectedState(const RefPtr<FrameNode>& swiperNode, const RefPtr<TabBarPattern>& tabBarPattern,
         const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ReportComponentChangeEvent(int32_t currentIndex);
+
+    void UpdateDividerStrokeWidth()
+    {
+        OnUpdateShowDivider();
+    }
+    void UpdateDividerColor()
+    {
+        OnUpdateShowDivider();
+    }
+
+    void OnColorModeChange(uint32_t colorMode) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -171,7 +184,7 @@ private:
     void InitFocusEvent();
     RefPtr<FocusHub> GetCurrentFocusNode(FocusIntension intension);
     void InitAccessibilityZIndex();
-
+    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
     bool isInit_ = true;

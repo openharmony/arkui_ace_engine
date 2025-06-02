@@ -44,6 +44,11 @@ enum class ButtonType {
     ROUNDED_RECTANGLE,
 };
 
+enum class ToolBarItemPlacement {
+    TOP_BAR_LEADING,
+    TOP_BAR_TRAILING
+};
+
 enum class RectWidthStyle {
     TIGHT,
     MAX,
@@ -386,6 +391,11 @@ enum class TextOverflow {
     DEFAULT,
 };
 
+enum class OverflowMode {
+    CLIP,
+    SCROLL,
+};
+
 enum class TextSelectableMode {
     SELECTABLE_UNFOCUSABLE = 0,
     SELECTABLE_FOCUSABLE,
@@ -677,6 +687,8 @@ enum class PixelRoundMode {
 enum class LayoutCalPolicy {
     NO_MATCH = 0,
     MATCH_PARENT = 1,
+    WRAP_CONTENT = 2,
+    FIX_AT_IDEAL_SIZE = 3,
 };
 
 const ImageRepeat IMAGE_REPEATS[] = {

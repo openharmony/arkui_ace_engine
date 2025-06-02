@@ -48,6 +48,9 @@ class BaseNode extends ViewBuildNodeBase {
     postTouchEvent(touchEvent) {
         return this.builderBaseNode_.postTouchEvent(touchEvent);
     }
+    postInputEvent(event) {
+        return this.builderBaseNode_.postInputEvent(event);
+    }
     disposeNode() {
         return this.builderBaseNode_.disposeNode();
     }
@@ -87,6 +90,7 @@ class BuilderNode {
         let id = Symbol('BuilderRootFrameNode');
         BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
         BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
+        this._isDisposed = false;
     }
     update(params) {
         this._JSBuilderNode.update(params);
@@ -110,8 +114,18 @@ class BuilderNode {
         __JSScopeUtil__.restoreInstanceId();
         return ret;
     }
+    postInputEvent(event) {
+        __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+        let ret = this._JSBuilderNode.postInputEvent(event);
+        __JSScopeUtil__.restoreInstanceId();
+        return ret;
+    }
     dispose() {
+        this._isDisposed = true;
         this._JSBuilderNode.dispose();
+    }
+    isDisposed() {
+        return this._isDisposed && (this._JSBuilderNode?.isDisposed() ?? true);
     }
     reuse(param) {
         this._JSBuilderNode.reuse(param);
@@ -135,6 +149,7 @@ class JSBuilderNode extends BaseNode {
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this._supportNestingBuilder = false;
+        this._isDisposed = false;
     }
     reuse(param) {
         this.updateStart();
@@ -209,6 +224,9 @@ class JSBuilderNode extends BaseNode {
         const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
         this.params_ = params;
+        if (options?.localStorage instanceof LocalStorage) {
+            this.setShareLocalStorage(options.localStorage);
+        }
         this.updateFuncByElmtId.clear();
         if (this.bindedViewOfBuilderNode) {
             globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode);
@@ -418,7 +436,11 @@ class JSBuilderNode extends BaseNode {
         return this._nativeRef?.getNativeHandle();
     }
     dispose() {
+        this._isDisposed = true;
         this.frameNode_?.dispose();
+    }
+    isDisposed() {
+        return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null);
     }
     disposeNode() {
         super.disposeNode();
@@ -476,14 +498,19 @@ class NodeAdapter {
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
         getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
+        this._isDisposed = false;
     }
     dispose() {
+        this._isDisposed = true;
         let hostNode = this.attachedNodeRef_.deref();
         if (hostNode !== undefined) {
             NodeAdapter.detachNodeAdapter(hostNode);
         }
         this.nativeRef_.dispose();
         this.nativePtr_ = null;
+    }
+    isDisposed() {
+        return this._isDisposed && (this.nativePtr_ === undefined || this.nativePtr_ === null);
     }
     set totalNodeCount(count) {
         if (count < 0) {
@@ -743,6 +770,15 @@ var ExpandMode;
     ExpandMode[ExpandMode["EXPAND"] = 1] = "EXPAND";
     ExpandMode[ExpandMode["LAZY_EXPAND"] = 2] = "LAZY_EXPAND";
 })(ExpandMode || (ExpandMode = {}));
+
+var UIState;
+(function (UIState) {
+    UIState[UIState["NORMAL"] = 0] = "NORMAL";
+    UIState[UIState["PRESSED"] = 1 << 0] = "PRESSED";
+    UIState[UIState["FOCUSED"] = 1 << 1] = "FOCUSED";
+    UIState[UIState["DISABLED"] = 1 << 2] = "DISABLED";
+    UIState[UIState["SELECTED"] = 1 << 3] = "SELECTED";
+})(UIState || (UIState = {}));
 class FrameNode {
     constructor(uiContext, type, options) {
         if (uiContext === undefined) {
@@ -756,6 +792,7 @@ class FrameNode {
         this.instanceId_ = uiContext.instanceId_;
         this.uiContext_ = uiContext;
         this._nodeId = -1;
+        this._isDisposed = false;
         this._childList = new Map();
         if (type === 'BuilderRootFrameNode') {
             this.renderNode_ = new RenderNode(type);
@@ -845,11 +882,15 @@ class FrameNode {
         }
     }
     dispose() {
+        this._isDisposed = true;
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
         this._nativeRef = null;
         this.nodePtr_ = null;
+    }
+    isDisposed() {
+        return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null || this._nativeRef.invalid());
     }
     static disposeTreeRecursively(node) {
         if (node === null) {
@@ -1287,6 +1328,16 @@ class FrameNode {
     recycle() {
         this.triggerOnRecycle();
     }
+    addSupportedUIStates(uistates, statesChangeHandler, excludeInner) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, statesChangeHandler, excludeInner);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    removeSupportedUIStates(uiStates) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     isModifiable() {
@@ -1344,6 +1395,7 @@ class ProxyFrameNode extends ImmutableFrameNode {
         return this.nodePtr_;
     }
     dispose() {
+        this._isDisposed = true;
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
@@ -1952,6 +2004,7 @@ class ShapeMask extends BaseShape {
 }
 class RenderNode {
     constructor(type) {
+        this._isDisposed = false;
         this.nodePtr = null;
         this.childrenList = [];
         this.parentRenderNode = null;
@@ -2315,11 +2368,15 @@ class RenderNode {
         this._nativeRef = null;
     }
     dispose() {
+        this._isDisposed = true;
         this._nativeRef?.dispose();
         this.baseNode_?.disposeNode();
         this._frameNode?.deref()?.resetNodePtr();
         this._nativeRef = null;
         this.nodePtr = null;
+    }
+    isDisposed() {
+        return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null);
     }
     getNodePtr() {
         return this.nodePtr;
@@ -2536,6 +2593,7 @@ class ComponentContent extends Content {
         let builderNode = new BuilderNode(uiContext, {});
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params ?? undefined, options);
+        this._isDisposed = false;
     }
     update(params) {
         this.builderNode_.update(params);
@@ -2565,9 +2623,13 @@ class ComponentContent extends Content {
         this.builderNode_.onRecycleWithBindObject();
     }
     dispose() {
+        this._isDisposed = true;
         this.detachFromParent();
         this.attachNodeRef_?.dispose();
         this.builderNode_?.dispose();
+    }
+    isDisposed() {
+        return this._isDisposed && (this.builderNode_?.isDisposed() ?? true);
     }
     detachFromParent() {
         if (this.parentWeak_ === undefined) {
@@ -2639,5 +2701,5 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter, ExpandMode
+    typeNode, NodeAdapter, ExpandMode, UIState
 };

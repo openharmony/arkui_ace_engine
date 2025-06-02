@@ -142,6 +142,7 @@ const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";
 const char BACK_BUTTON_IMAGE_ETS_TAG[] = "BackButtonImage";
 const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
+const char SPLIT_PLACEHOLDER_CONTENT_ETS_TAG[] = "SplitPlaceholderContentNode";
 const char NAVBAR_ETS_TAG[] = "NavBar";
 
 // navRouter view
@@ -407,6 +408,12 @@ const char STEPPER_ETS_TAG[] = "Stepper";
 // stepperItem
 const char STEPPER_ITEM_COMPONENT_TAG[] = "StepperItemComponentV2";
 const char STEPPER_ITEM_ETS_TAG[] = "StepperItem";
+
+// toolbar
+const char TOOLBAR_ETS_TAG[] = "Tool_Bar";
+
+// toolbaritem
+const char TOOLBARITEM_ETS_TAG[] = "ToolBarItem";
 
 // scrollbar
 const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";

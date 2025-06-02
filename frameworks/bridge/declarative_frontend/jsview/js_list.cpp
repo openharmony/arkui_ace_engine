@@ -354,10 +354,14 @@ void JSList::SetLanes(const JSCallbackInfo& info)
 
     if (info.Length() >= 2 && !(info[1]->IsNull())) { /* 2: parameter count */
         CalcDimension laneGutter;
-        if (JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
+        RefPtr<ResourceObject> resObjLaneGutter;
+        if (JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter, resObjLaneGutter)) {
             if (laneGutter.IsNegative()) {
                 laneGutter.Reset();
             }
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            ListModel::GetInstance()->CreateWithResourceObjLaneGutter(resObjLaneGutter);
         }
         ListModel::GetInstance()->SetLaneGutter(laneGutter);
     }
@@ -379,11 +383,16 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         }
         CalcDimension minLengthValue;
         CalcDimension maxLengthValue;
-        if (!ParseJsDimensionVp(minLengthParam, minLengthValue)
-            || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+        RefPtr<ResourceObject> resObjMinLengthValue;
+        RefPtr<ResourceObject> resObjMaxLengthValue;
+        if (!ParseJsDimensionVp(minLengthParam, minLengthValue, resObjMinLengthValue)
+            || !ParseJsDimensionVp(maxLengthParam, maxLengthValue, resObjMinLengthValue)) {
             ListModel::GetInstance()->SetLanes(1);
             ListModel::GetInstance()->SetLaneConstrain(-1.0_vp, -1.0_vp);
             return;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            ListModel::GetInstance()->CreateWithResourceObjLaneConstrain(resObjMinLengthValue, resObjMaxLengthValue);
         }
         ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
     }
@@ -425,12 +434,18 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     V2::ItemDivider divider;
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        RefPtr<ResourceObject> resObjStrokeWidth;
+        RefPtr<ResourceObject> resObjColor;
+        RefPtr<ResourceObject> resObjStartMargin;
+        RefPtr<ResourceObject> resObjEndMargin;
         bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
-            !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+                         !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
+        if (needReset ||
+            !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth, resObjStrokeWidth)) {
             divider.strokeWidth = 0.0_vp;
         }
-        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color, resObjColor)) {
             // Failed to get color from param, using default color defined in theme
             RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
             if (listTheme) {
@@ -439,15 +454,23 @@ void JSList::SetDivider(const JSCallbackInfo& args)
         }
 
         needReset = obj->GetProperty("startMargin")->IsString() &&
-            !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)) {
+                    !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset ||
+            !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin, resObjStartMargin)) {
             divider.startMargin = 0.0_vp;
         }
 
         needReset = obj->GetProperty("endMargin")->IsString() &&
-            !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)) {
+                    !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin, resObjEndMargin)) {
             divider.endMargin = 0.0_vp;
+        }
+
+        if (SystemProperties::ConfigChangePerform()) {
+            ListModel::GetInstance()->ParseResObjDividerStrokeWidth(resObjStrokeWidth);
+            ListModel::GetInstance()->ParseResObjDividerColor(resObjColor);
+            ListModel::GetInstance()->ParseResObjDividerStartMargin(resObjStartMargin);
+            ListModel::GetInstance()->ParseResObjDividerEndMargin(resObjEndMargin);
         }
     }
     ListModel::GetInstance()->SetDivider(divider);
@@ -505,8 +528,12 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
 void JSList::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
-    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+    RefPtr<ResourceObject> resObj;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction, resObj)) {
         friction = -1.0;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ListModel::GetInstance()->CreateWithResourceObjFriction(resObj);
     }
     ListModel::GetInstance()->SetFriction(friction);
 }

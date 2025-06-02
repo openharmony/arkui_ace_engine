@@ -455,7 +455,9 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const s
     auto needReLayout = textStyle.NeedReLayout();
     ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout[maxSize:%s][Len:%d][needReCreateParagraph:%d][needReLayout:%d]",
         maxSize.ToString().c_str(), static_cast<int32_t>(content.length()), needReCreateParagraph_, needReLayout);
-
+    auto str = UtfUtils::Str16DebugToStr8(content);
+    auto firstSpanContent = spans_.size() > 0 && spans_[0].size() > 0 ?
+        UtfUtils::Str16DebugToStr8((spans_[0].front()->content)) : "";
     if (needReCreateParagraph_ && !CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
     }

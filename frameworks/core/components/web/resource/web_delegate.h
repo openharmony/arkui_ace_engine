@@ -295,6 +295,9 @@ public:
     void Paste() const override;
     void Cut() const override;
     void SelectAll() const override;
+    void Undo() const override;
+    void Redo() const override;
+    void PasteAndMatchStyle() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
@@ -828,6 +831,7 @@ public:
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
     void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
+    void UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port);
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
@@ -852,6 +856,7 @@ public:
     void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
+    void UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
@@ -1006,6 +1011,7 @@ public:
     NWeb::NWebDragData::DragOperation op_ = NWeb::NWebDragData::DragOperation::DRAG_OPERATION_NONE;
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
+    void OnActivateContent();
     void OnWindowExit();
     void OnPageVisible(const std::string& url);
     void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
@@ -1126,6 +1132,10 @@ public:
     void OnOnlineRenderToForeground();
     void NotifyForNextTouchEvent();
 
+    std::string GetAllTextInfo() const;
+    int GetSelectStartIndex() const;
+    int GetSelectEndIndex() const;
+
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
@@ -1201,6 +1211,13 @@ public:
     void UnRegisterWebWindowFocusChangedListener();
     
     void OnDragAttach();
+
+    void OnLoadStarted(const std::string& param);
+
+    void OnLoadFinished(const std::string& param);
+
+    void SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomLeft,
+        double borderRadiusBottomRight);
 
 private:
     void InitWebEvent();
@@ -1302,6 +1319,8 @@ private:
     EventCallback onPageFinished_;
     EventCallback onPageError_;
     EventCallback onMessage_;
+    EventCallback onLoadStarted_;
+    EventCallback onLoadFinished_;
     Method reloadMethod_;
     Method updateUrlMethod_;
     Method routerBackMethod_;
@@ -1333,6 +1352,7 @@ private:
     EventCallbackV2 onScrollV2_;
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
+    EventCallbackV2 onActivateContentV2_;
     EventCallbackV2 onWindowExitV2_;
     EventCallbackV2 onPageVisibleV2_;
     EventCallbackV2 onTouchIconUrlV2_;
@@ -1354,6 +1374,8 @@ private:
     EventCallbackV2 onViewportFitChangedV2_;
     std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
     EventCallbackV2 onAdsBlockedV2_;
+    EventCallbackV2 onLoadStartedV2_;
+    EventCallbackV2 onLoadFinishedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;

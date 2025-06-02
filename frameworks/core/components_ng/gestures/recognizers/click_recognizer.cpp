@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/manager/event/json_child_report.h"
+#include "core/components_ng/manager/event/json_report.h"
+#include "core/common/reporter/reporter.h"
+#include "core/components_ng/event/event_constants.h"
 
 #include "base/ressched/ressched_report.h"
 #include "core/common/recorder/event_definition.h"
@@ -91,7 +95,7 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     if (distanceThreshold_ <= 0) {
         distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
-    
+
     SetOnAccessibility(GetOnAccessibilityEventFunc());
 }
 
@@ -192,7 +196,7 @@ void ClickRecognizer::OnAccepted()
         remoteMessage_(info);
     }
     UpdateFingerListInfo();
-    SendCallbackMsg(onAction_);
+    SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
 
     int64_t overTime = GetSysTimestamp();
     if (SystemProperties::GetTraceInputEventEnabled()) {
@@ -509,20 +513,48 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetPointerEvent(lastPointEvent_);
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     info.SetInputEventType(inputEventType_);
+    info.CopyConvertInfoFrom(touchPoint.convertInfo);
     return info;
 }
 
-void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& onAction)
+void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& onAction, GestureCallbackType type)
 {
     if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
         return;
     }
     if (onAction && *onAction) {
         GestureEvent info = GetGestureEventInfo();
+        info.SetGestureTypeName(GestureTypeName::TAP_GESTURE);
         // onAction may be overwritten in its invoke so we copy it first
         auto onActionFunction = *onAction;
         onActionFunction(info);
+        HandleReports(info, type);
         RecordClickEventIfNeed(info);
+    }
+}
+
+void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
+{
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    if (GetRecognizerType() == GestureTypeName::CLICK) {
+        ClickJsonReport clickReport;
+        clickReport.SetCallbackType(type);
+        clickReport.SetGestureType(GetRecognizerType());
+        clickReport.SetId(frameNode->GetId());
+        clickReport.SetCount(count_);
+        clickReport.SetPoint(info.GetGlobalPoint());
+        clickReport.SetFingerList(info.GetFingerList());
+        Reporter::GetInstance().HandleUISessionReporting(clickReport);
+    } else if (GetRecognizerType() == GestureTypeName::TAP_GESTURE) {
+        TapJsonReport tapReport;
+        tapReport.SetCallbackType(type);
+        tapReport.SetGestureType(GetRecognizerType());
+        tapReport.SetId(frameNode->GetId());
+        tapReport.SetCount(count_);
+        tapReport.SetPoint(info.GetGlobalPoint());
+        tapReport.SetFingerList(info.GetFingerList());
+        Reporter::GetInstance().HandleUISessionReporting(tapReport);
     }
 }
 

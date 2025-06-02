@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 
+
 namespace OHOS::Ace::NG {
 
 class SwiperPaintProperty;
@@ -45,8 +46,10 @@ public:
     void SetWidthAuto(bool isAuto) override;
     void SetHeightAuto(bool isAuto) override;
     void SetBarAdaptiveHeight(bool barAdaptiveHeight) override;
+    void SetNoMinHeightLimit(bool NoMinHeightLimit) override;
     void SetIsVertical(bool isVertical) override;
     void SetScrollable(bool scrollable) override;
+    void SetAnimationCurve(const RefPtr<Curve>& curve) override;
     void SetAnimationDuration(float duration) override;
     void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) override;
     void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) override;
@@ -73,6 +76,7 @@ public:
     void SetPageFlipMode(int32_t pageFlipMode) override;
     void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) override;
     void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) override;
+    void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -91,14 +95,17 @@ public:
     static void SetScrollable(FrameNode* frameNode, bool scrollable);
     static void SetTabBarWidth(FrameNode* frameNode, const Dimension& tabBarWidth);
     static void SetTabBarHeight(FrameNode* frameNode, const Dimension& tabBarHeight);
+    static void SetAnimationCurve(FrameNode* frameNode, const RefPtr<Curve>& curve);
     static void SetAnimationDuration(FrameNode* frameNode, float duration);
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
+    static void SetNoMinHeightLimit(FrameNode* frameNode, bool NoMinHeightLimit);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
     static void SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode);
     static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect);
     static void SetTabBarIndex(FrameNode* frameNode, int32_t index);
     static void SetTabsController(FrameNode* frameNode, const RefPtr<SwiperController>& tabsController);
+    static void SetBarModifier(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& onApply);
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static void SetCachedMaxCount(FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode);
@@ -110,6 +117,20 @@ public:
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& gestureSwipe);
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
+
+    static void HandleBarBackgroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBarHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBarGridGutter(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBarGridMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleScrollableBarMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBackgroundEffectColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBackgroundEffectInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

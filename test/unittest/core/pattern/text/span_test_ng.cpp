@@ -116,7 +116,7 @@ HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
     spanModelNG.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
     spanModelNG.SetTextCase(TEXT_CASE_VALUE);
     spanModelNG.SetLetterSpacing(LETTER_SPACING);
-    EXPECT_EQ(spanNode->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(spanNode->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(spanNode->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(spanNode->GetTextCase(), TEXT_CASE_VALUE);
     EXPECT_EQ(spanNode->GetLetterSpacing(), LETTER_SPACING);
@@ -1152,7 +1152,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!");
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", {});
     eventHub->FireErrorEvent(loadImageFailEvent);
     EXPECT_EQ(isTrigger, true);
 }
@@ -1258,5 +1258,46 @@ HWTEST_F(SpanTestNg, SpanNodeDumpInfo001, TestSize.Level1)
     symbolNode->DumpInfo();
     EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_SPAN_ETS_TAG);
     EXPECT_NE(DumpLog::GetInstance().description_.size(), 1);
+}
+
+/**
+ * @tc.name: SpanOnHoverEvent
+ * @tc.desc: test text_select_overlay.cpp on hover event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanOnHoverEvent, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create textFrameNode.
+    */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+    * @tc.steps: step2. case.
+    */
+    std::list<RefPtr<SpanItem>> spans;
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    OnHoverFunc callback = [](bool isHover, HoverInfo& info) {
+        isHover = false;
+    };
+    spanModelNG.SetOnHover(std::move(callback));
+    spans.emplace_back(spanNode->spanItem_);
+    EXPECT_EQ(spans.size(), 1);
+    textPattern->spans_ = spans;
+
+    EXPECT_EQ(textPattern->HasSpanOnHoverEvent(), true);
+    textPattern->InitSpanMouseEvent();
+    textPattern->TriggerSpansOnHover(HoverInfo(), PointF());
+    textPattern->ExitSpansForOnHoverEvent(HoverInfo());
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
 }
 } // namespace OHOS::Ace::NG

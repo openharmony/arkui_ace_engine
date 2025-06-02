@@ -88,6 +88,8 @@ public:
     virtual void SetDatabaseAccessEnabled(bool isDatabaseAccessEnabled) = 0;
     virtual void SetTextZoomRatio(int32_t textZoomRatioNum) = 0;
     virtual void SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled) = 0;
+    virtual void SetWebDebuggingAccessEnabledAndPort(
+        bool isWebDebuggingAccessEnabled, int32_t webDebuggingPort) = 0;
     virtual void SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback) = 0;
     virtual void SetResourceLoadId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetScaleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
@@ -109,6 +111,7 @@ public:
     virtual void SetOnDrop(std::function<void(const RefPtr<DragEvent>&, const std::string&)>&& onDropId) = 0;
     virtual void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) = 0;
     virtual void SetWindowNewEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) = 0;
+    virtual void SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 
     virtual void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnable) = 0;
@@ -160,6 +163,7 @@ public:
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;
     virtual void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) = 0;
+    virtual void SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) = 0;
     virtual void RegisterNativeEmbedRule(const std::string&, const std::string&) = 0;
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
@@ -207,6 +211,8 @@ public:
     virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
     virtual void SetWebMediaAVSessionEnabled(bool isEnabled) {};
     virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
+    virtual void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

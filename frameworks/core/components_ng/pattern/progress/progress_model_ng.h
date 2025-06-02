@@ -55,6 +55,7 @@ public:
     void ResetStrokeRadius() override;
     void SetBorderRadius(const Dimension& value) override;
     void ResetBorderRadius() override;
+    void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type);
     static void SetValue(FrameNode* frameNode, double value);
@@ -95,8 +96,8 @@ public:
     static void ResetColor(FrameNode* frameNode);
     static void ResetBackgroundColor(FrameNode* frameNode);
     static void ResetGradientColor(FrameNode* frameNode);
-    static void SetModifierInitiatedColor(FrameNode* frameNode, bool value);
-    static void SetModifierInitiatedBgColor(FrameNode* frameNode, bool value);
+    static void ResetBorderColor(FrameNode* frameNode);
+    static void ResetFontColor(FrameNode* frameNode);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

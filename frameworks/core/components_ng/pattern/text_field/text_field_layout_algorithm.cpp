@@ -27,6 +27,7 @@
 #include "core/common/font_manager.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text_field/auto_fill_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -71,18 +72,28 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
     UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
-    if (!pattern->GetTextUtf16Value().empty()) {
+    auto autofillController = pattern->GetAutoFillController();
+    CHECK_NULL_VOID(autofillController);
+    auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
+    if (autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
             textFieldPaintProperty->HasTextColorFlagByUser());
-        textContent = pattern->GetTextUtf16Value();
-        UpdateTextStyleTextOverflowAndWordBreak(textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty,
-            textFieldTheme->TextFadeoutEnabled());
+        textContent = autofillController->GetAutoFillTextUtf16Value();
+        UpdateTextStyleTextOverflowAndWordBreak(
+            textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty, textFieldTheme->TextFadeoutEnabled());
     } else {
-        UpdatePlaceholderTextStyle(
-            frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
-            textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false));
-        textContent = textFieldLayoutProperty->GetPlaceholderValue(u"");
-        showPlaceHolder = true;
+        if (!pattern->GetTextUtf16Value().empty()) {
+            UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
+                textFieldPaintProperty->HasTextColorFlagByUser());
+            textContent = pattern->GetTextUtf16Value();
+            UpdateTextStyleTextOverflowAndWordBreak(
+                textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty, textFieldTheme->TextFadeoutEnabled());
+        } else {
+            UpdatePlaceholderTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle,
+                pattern->IsDisabled(), textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false));
+            textContent = textFieldLayoutProperty->GetPlaceholderValue(u"");
+            showPlaceHolder = true;
+        }
     }
 
     textIndent_ = textStyle.GetTextIndent();
@@ -356,6 +367,13 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
                       : std::max(preferredHeight_, paragraph_->GetHeight());
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, SizeF());
+    auto lineCount = paragraph_->GetLineCount() != 0 ? paragraph_->GetLineCount() : 1;
+    if (textFieldLayoutProperty->HasNormalMaxViewLines() && ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        auto maxline = (height / lineCount) * textFieldLayoutProperty->GetNormalMaxViewLines().value();
+        contentHeight = std::min(contentHeight, maxline);
+    }
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
     return SizeF(contentWidth, contentHeight);
@@ -536,7 +554,12 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
     textStyle.SetLineBreakStrategy(layoutProperty->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
     textStyle.SetFontWeight(layoutProperty->GetFontWeightValue(theme->GetFontWeight()));
+
     UpdateTextStyleSetTextColor(frameNode, layoutProperty, theme, textStyle, isDisabled, isTextColorByUser);
+    if (layoutProperty->HasStrokeWidth()) {
+        textStyle.SetStrokeWidth(layoutProperty->GetStrokeWidth().value());
+        textStyle.SetStrokeColor(layoutProperty->GetStrokeColor().value_or(textStyle.GetTextColor()));
+    }
     if (layoutProperty->GetMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetMaxLines().value());
     }
@@ -805,6 +828,32 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     inlineParagraph_->Build();
 }
 
+void TextFieldLayoutAlgorithm::CreateAutoFillParagraph(const TextStyle& textStyle, std::u16string content,
+    bool needObscureText, int32_t nakedCharPosition, CreateParagraphData paragraphData)
+{
+    auto paraStyle = GetParagraphStyle(textStyle, content, paragraphData.fontSize);
+    if (!paragraphData.disableTextAlign) {
+        paraStyle.align = textStyle.GetTextAlign();
+    }
+    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+    CHECK_NULL_VOID(paragraph_);
+    StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto displayText = TextFieldPattern::CreateDisplayText(
+        content, nakedCharPosition, needObscureText, theme->IsShowPasswordDirectly());
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()), displayText.length(), 0);
+    for (size_t i = 0; i < displayText.length(); i++) {
+        paragraph_->PushStyle(textStyle);
+        std::u16string tempStr(1, displayText[i]);
+        paragraph_->AddText(tempStr);
+        paragraph_->PopStyle();
+    }
+    paragraph_->Build();
+}
+
 TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::u16string& content, TextDirection direction)
 {
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
@@ -868,7 +917,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
-    modifier->SetTextDecoration(textStyle.GetTextDecoration(), textStyle.GetTextDecorationColor(),
+    modifier->SetTextDecoration(textStyle.GetTextDecorationFirst(), textStyle.GetTextDecorationColor(),
         textStyle.GetTextDecorationStyle());
 }
 
@@ -1201,5 +1250,25 @@ bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
         IsAdaptFontSizeExceedLineHeight(paragraph) ||
            GreatNotEqual(paragraph->GetHeight(), maxSize.Height());
+}
+
+void TextFieldLayoutAlgorithm::UpdateTextAreaMaxLines(
+    TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        textStyle.SetMaxLines(INT32_MAX);
+    } else {
+        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+    }
+}
+
+bool TextFieldLayoutAlgorithm::ShouldUseInfiniteMaxLines(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    return textFieldLayoutProperty->HasOverflowMode() &&
+           textFieldLayoutProperty->GetOverflowMode() == OverflowMode::SCROLL &&
+           (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::NONE ||
+               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::CLIP);
 }
 } // namespace OHOS::Ace::NG

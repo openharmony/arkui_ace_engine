@@ -257,7 +257,8 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
         LOGE("imageLoader create failed. imageInfo: %{private}s", imageInfo.ToString().c_str());
         return nullptr;
     }
-    auto data = imageLoader->LoadImageData(imageInfo, context);
+    ImageErrorInfo errorInfo;
+    auto data = imageLoader->LoadImageData(imageInfo, errorInfo, context);
     if (data && imageCache) {
 #ifndef USE_ROSEN_DRAWING
         // cache sk data.
@@ -311,7 +312,8 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
             LOGE("load image failed when create image loader.");
             return;
         }
-        auto imageData = imageLoader->LoadImageData(info, context);
+        ImageErrorInfo errorInfo;
+        auto imageData = imageLoader->LoadImageData(info, errorInfo, context);
         if (imageData) {
 #ifndef USE_ROSEN_DRAWING
             const auto svgStream = std::make_unique<SkMemoryStream>(std::move(imageData));
@@ -699,7 +701,8 @@ sk_sp<SkImage> ImageProvider::GetSkImage(const std::string& src, const WeakPtr<P
         LOGE("Invalid src, src is %{private}s", src.c_str());
         return nullptr;
     }
-    auto imageSkData = imageLoader->LoadImageData(info, context);
+    ImageErrorInfo errorInfo;
+    auto imageSkData = imageLoader->LoadImageData(info, errorInfo, context);
     if (!imageSkData) {
         LOGE("fetch data failed. src: %{private}s", src.c_str());
         return nullptr;
@@ -722,7 +725,8 @@ std::shared_ptr<RSImage> ImageProvider::GetDrawingImage(
         LOGE("Invalid src, src is %{private}s", src.c_str());
         return nullptr;
     }
-    auto imageData = imageLoader->LoadImageData(info, context);
+    ImageErrorInfo errorInfo;
+    auto imageData = imageLoader->LoadImageData(info, errorInfo, context);
     if (!imageData) {
         LOGE("fetch data failed. src: %{private}s", src.c_str());
         return nullptr;

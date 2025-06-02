@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
@@ -58,6 +59,13 @@ ArkUI_Int32 GetExpandMode(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 ind
     Local<JSValueRef> expandModeArg = runtimeCallInfo->GetCallArgRef(index);
     CHECK_NULL_RETURN(!expandModeArg.IsNull(), 1);
     return expandModeArg->IsNumber() || expandModeArg->IsBoolean() ? expandModeArg->ToNumber(vm)->Value() : 1;
+}
+ArkUI_Bool GetIsExcludeInner(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> isExcludeInnerArg = runtimeCallInfo->GetCallArgRef(index);
+    CHECK_NULL_RETURN(!isExcludeInnerArg.IsNull(), false);
+    return isExcludeInnerArg->IsBoolean() ? isExcludeInnerArg->ToBoolean(vm)->Value() : false;
 }
 } // namespace
 ArkUI_Bool FrameNodeBridge::IsCustomFrameNode(FrameNode* node)
@@ -314,7 +322,8 @@ static ArkUINodeType ParseNodeType(
         { "GridItem", ARKUI_GRID_ITEM }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK },
         { "TextTimer", ARKUI_TEXT_TIMER }, { "Marquee", ARKUI_MARQUEE }, { "TextArea", ARKUI_TEXTAREA },
         { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
-        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE } };
+        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE },
+        { "EmbeddedComponent", ARKUI_EMBEDDED_COMPONENT } };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     auto iter = typeMap.find(type);
     if (iter != typeMap.end()) {
@@ -1602,8 +1611,10 @@ ArkUINativeModuleValue FrameNodeBridge::SetCustomPropertyModiferByKey(ArkUIRunti
     std::function<bool()> funcCallback = ParseFunc(runtimeCallInfo);
     CHECK_NULL_RETURN(funcCallback, panda::BooleanRef::New(vm, false));
     std::function<std::string(const std::string&)> getFuncCallback = ParseGetFunc(runtimeCallInfo, nodeId);
+    std::function<std::string()> getCustomPropertyMapCallback = Framework::JsGetCustomMapFunc(vm, nodeId);
     GetArkUINodeModifiers()->getFrameNodeModifier()->setCustomPropertyModiferByKey(
-        nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback));
+        nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback),
+            reinterpret_cast<void*>(&getCustomPropertyMapCallback));
     return defaultReturnValue;
 }
 
@@ -1979,8 +1990,9 @@ ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo*
         panda::Local<panda::JSValueRef> params[1] = { stateValues };
         func->Call(vm, func.ToLocal(), params, 1);
     };
+    int isExcludeInner = GetIsExcludeInner(runtimeCallInfo, 3);
     GetArkUINodeModifiers()->getUIStateModifier()->addSupportedUIState(
-        nativeNode, state, reinterpret_cast<void*>(&callback));
+        nativeNode, state, reinterpret_cast<void*>(&callback), isExcludeInner);
     return defaultReturnValue;
 }
 

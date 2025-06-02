@@ -20,6 +20,7 @@
 #include <string>
 
 #include "core/common/container_consts.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/geometry/point.h"
 
 namespace OHOS::Ace::NG {
 enum class DragStartResult : int32_t {
@@ -55,6 +56,11 @@ enum class DragReporterPharse {
     DRAG_STOP
 };
 
+enum class DropResult {
+    DROP_SUCCESS,
+    DROP_FAIL,
+};
+
 class DragDropBehaviorReporter {
 public:
     static DragDropBehaviorReporter& GetInstance();
@@ -65,8 +71,17 @@ public:
     void UpdateDragStopResult(DragStopResult result);
     void UpdateRecordSize(int32_t recordSize);
     void UpdateSummaryType(const std::string& summaryType);
+    void UpdateStartPoint(Point startPoint);
+    void UpdateEndPoint(Point endPoint);
+    void UpdateFrameNodeId(int32_t frameNodeId);
+    void UpdateLongPressDurationStart(int64_t longPressDurationStart);
+    void UpdateLongPressDurationEnd(int64_t longPressDurationEnd);
+    void UpdateDropResult(DropResult dropResult);
+    void HandleDragReport(DragReporterPharse pharse, std::string hostName);
     void UpdateContainerId(int32_t containerId);
     void Submit(DragReporterPharse pharse, int32_t contanerID);
+    void HandleBehaviorEventReport(DragReporterPharse pharse, int32_t contanerID);
+    void HandleUISessionReport(DragReporterPharse pharse, int32_t contanerID);
 
 private:
     DragDropBehaviorReporter() = default;
@@ -80,6 +95,12 @@ private:
     DragStopResult stopResult_ = DragStopResult::UNKNOW;
     std::string summaryType_;
     std::set<std::string> allowDropType_;
+    Point startPoint_;
+    Point endPoint_;
+    int32_t id_;
+    int64_t longPressDurationStart_ = 0;
+    int64_t longPressDurationEnd_ = 500;
+    DropResult dropResult_ = DropResult::DROP_FAIL;
 };
 
 class DragDropBehaviorReporterTrigger final {

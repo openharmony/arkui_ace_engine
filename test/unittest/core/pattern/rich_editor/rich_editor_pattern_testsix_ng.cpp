@@ -110,6 +110,7 @@ HWTEST_F(RichEditorPatternTestSixNg, InsertValueInStyledString001, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
+    richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->InsertValueInStyledString(PREVIEW_TEXT_VALUE1);
     EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
 }
@@ -223,6 +224,38 @@ HWTEST_F(RichEditorPatternTestSixNg, RemoveEmptySpanNodes002, TestSize.Level1)
         }
     }
     EXPECT_TRUE(emptySpanNodeRemoved);
+}
+
+/**
+ * @tc.name: HandleUserTouchEvent001
+ * @tc.desc: test HandleUserTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, HandleUserTouchEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    bool isTouchTrigger = false;
+    firstSpanItem->onTouch = [&isTouchTrigger](TouchEventInfo& info) { isTouchTrigger = true; };
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    TouchEventInfo info = TouchEventInfo("default");
+    TouchLocationInfo locationInfo = TouchLocationInfo(0);
+    locationInfo.SetLocalLocation(Offset(3, 3));
+    info.AddTouchLocationInfo(std::move(locationInfo));
+    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    richEditorPattern->HandleUserTouchEvent(info);
+    EXPECT_TRUE(isTouchTrigger);
 }
 
 /**
@@ -1135,5 +1168,44 @@ HWTEST_F(RichEditorPatternTestSixNg, HandleClickEvent003, TestSize.Level1)
     richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     richEditorPattern->HandleClickEvent(info);
     EXPECT_FALSE(richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_);
+}
+
+/**
+ * @tc.name: ReportAfterContentChangeEvent001
+ * @tc.desc: Test ReportAfterContentChangeEvent non-span string mode with content added
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    std::string firstText = "abcd";
+    AddSpan(firstText);
+    std::string space = " ";
+    std::string secondText = "content";
+    AddSpan(space + secondText);
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->textCache_ = "abcd";
+    richEditorPattern->ReportAfterContentChangeEvent();
+    EXPECT_EQ(richEditorPattern->textCache_, "abcd content");
+}
+
+/**
+ * @tc.name: ReportAfterContentChangeEvent002
+ * @tc.desc: Test ReportAfterContentChangeEvent in span mode with content removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textCache_ = "nihaodajia";
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(PREVIEW_TEXT_VALUE1);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->ReportAfterContentChangeEvent();
+    EXPECT_EQ(richEditorPattern->textCache_, "nihao");
 }
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 #include "frameworks/base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
+GestureEventFunc GetTapGestureEventFunc(const RefPtr<NG::Gesture>& gesture);
 class ACE_EXPORT GestureModelNG : public OHOS::Ace::GestureModel {
 public:
     void Create(int32_t priorityNum, int32_t gestureMaskNum) override;

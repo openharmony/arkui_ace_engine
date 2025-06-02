@@ -1078,12 +1078,15 @@ ArkThemeWhiteList.whiteList = [
     'Badge',
     'Button',
     'DataPanel',
+    'LoadingProgress',
     'Menu',
     'MenuItem',
     'PatternLock',
+    'Progress',
     'QRCode',
     'Radio',
     'Scroll',
     'Swiper',
     'Text',
+    'TextClock'
 ];

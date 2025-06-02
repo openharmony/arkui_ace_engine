@@ -90,6 +90,9 @@ void RichEditorDragTestNg::TearDownTestSuite()
  */
 HWTEST_F(RichEditorDragTestNg, RichEditorDragTest001, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -140,6 +143,9 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest001, TestSize.Level1)
  */
 HWTEST_F(RichEditorDragTestNg, RichEditorDragTest002, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -194,6 +200,9 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest002, TestSize.Level1)
  */
 HWTEST_F(RichEditorDragTestNg, RichEditorDragTest003, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -234,6 +243,9 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest003, TestSize.Level1)
  */
 HWTEST_F(RichEditorDragTestNg, RichEditorDragTest004, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();

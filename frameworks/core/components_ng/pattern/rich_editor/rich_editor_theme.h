@@ -113,6 +113,7 @@ public:
             theme->scanSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.line_viewfinder");
             theme->imageSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.picture");
             theme->chevronRightSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
+            theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("rich_editor_border_radius", 0.0_vp));
         }
     };
 
@@ -275,6 +276,11 @@ public:
     {
         return chevronRightSymbolId_;
     }
+
+    const Radius& GetBorderRadius() const
+    {
+        return borderRadius_;
+    }
 protected:
     RichEditorTheme() = default;
     TextStyle textStyle_;
@@ -314,6 +320,7 @@ private:
     uint32_t scanSymbolId_;
     uint32_t imageSymbolId_;
     uint32_t chevronRightSymbolId_;
+    Radius borderRadius_;
 };
 } // namespace OHOS::Ace::NG
 

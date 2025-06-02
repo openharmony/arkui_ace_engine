@@ -119,4 +119,11 @@ bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool ani
 {
     return true;
 }
+
+void AceContainer::UpdateColorMode(uint32_t colorMode) {}
+
+void AceContainer::DispatchExtensionDataToHostWindow(
+    uint32_t code, const AAFwk::Want& data, int32_t persistenId)
+{
+}
 } // namespace OHOS::Ace::Platform

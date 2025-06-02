@@ -70,8 +70,7 @@ public:
             auto indicatorLayoutAlgorithm = MakeRefPtr<DotIndicatorLayoutAlgorithm>();
             indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
             indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
-
-            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
+            auto indicatorDisplayCount = !swiperPattern->IsAutoLinear() ?
                 swiperPattern->DisplayIndicatorTotalCount() : swiperPattern->TotalCount();
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
@@ -105,6 +104,7 @@ public:
         paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
         paintMethod->SetItemCount(swiperPattern->DisplayIndicatorTotalCount());
         paintMethod->SetTotalItemCount(swiperPattern->TotalCount());
+        paintMethod->SetIsAutoLinear(swiperPattern->IsAutoLinear());
         paintMethod->SetSwipeByGroup(swiperLayoutProperty->GetSwipeByGroup().value_or(false));
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         gestureState_ = swiperPattern->GetGestureState();
@@ -122,7 +122,7 @@ public:
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
-        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
+        auto currentTurnPageRate = !swiperPattern->IsAutoLinear() &&
             swiperLayoutProperty->GetSwipeByGroup().value_or(false) ?
             swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate(true);
         paintMethod->SetTouchBottomPageRate(currentTurnPageRate);
@@ -272,7 +272,6 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
     void HandleDragStart(const GestureEvent& info);
-    virtual void HandleDragEnd(double dragVelocity);
     void GetMouseClickIndex();
     void UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
@@ -353,6 +352,7 @@ protected:
     virtual int32_t GetTouchCurrentIndex() const;
     virtual std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex);
     virtual void HandleLongDragUpdate(const TouchLocationInfo& info);
+    virtual void HandleDragEnd(double dragVelocity);
 
     RefPtr<SwiperPattern> GetSwiperPattern() const
     {

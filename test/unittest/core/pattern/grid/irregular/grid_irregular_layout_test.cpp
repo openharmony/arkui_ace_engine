@@ -1780,6 +1780,7 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset000, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20, GridItemStyle::NONE);
     CreateDone();
+    ChangeRadio();
 
     int32_t targetIndex = 19;
     auto& info = pattern_->info_;

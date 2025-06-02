@@ -67,7 +67,7 @@ public:
             auto leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension();
             progressModifier_->SetRingProgressLeftPadding(leftPadding);
         }
-        return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_, isUserInitiatedColor_);
+        return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -144,28 +144,9 @@ public:
     }
 
     void OnAccessibilityEvent();
-
-    void SetUserInitiatedColor(bool value)
-    {
-        isUserInitiatedColor_ = value;
-    }
-
-    void SetUserInitiatedBgColor(bool value)
-    {
-        isUserInitiatedBgColor_ = value;
-    }
-
-    void IsModifierInitiatedColor(bool value)
-    {
-        isModifierInitiatedColor_ = value;
-    }
-
-    void IsModifierInitiatedBgColor(bool value)
-    {
-        isModifierInitiatedBgColor_ = value;
-    }
-
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void UpdateGradientColor(const NG::Gradient& gradient, bool isFirstLoad);
+    void UpdateColor(const Color& color, bool isFirstLoad);
 
 private:
     void InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty);
@@ -231,10 +212,6 @@ private:
     bool isTextFromUser_ = false;
     bool visibilityProp_ = true;
     bool isRightToLeft_ = false;
-    bool isUserInitiatedColor_ = false;
-    bool isUserInitiatedBgColor_ = false;
-    bool isModifierInitiatedColor_ = false;
-    bool isModifierInitiatedBgColor_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };
 } // namespace OHOS::Ace::NG

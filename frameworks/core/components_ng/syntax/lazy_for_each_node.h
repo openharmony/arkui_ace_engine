@@ -61,6 +61,8 @@ public:
         return builder_ ? builder_->GetTotalCount() : 0;
     }
 
+    void NotifyColorModeChange(uint32_t colorMode) override;
+
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
     void UpdateLazyForEachItems(int32_t newStartIndex, int32_t newEndIndex,

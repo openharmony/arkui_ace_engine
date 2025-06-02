@@ -40,6 +40,7 @@ public:
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
     int32_t SendCommand(int32_t id, const std::string& command) override;
     int32_t SendCommandAsync(int32_t id, const std::string& command) override;
+    int32_t SendCommand(const std::string command) override;
     int32_t UnregisterClickEventCallback() override;
     int32_t UnregisterSearchEventCallback() override;
     int32_t UnregisterRouterChangeEventCallback() override;

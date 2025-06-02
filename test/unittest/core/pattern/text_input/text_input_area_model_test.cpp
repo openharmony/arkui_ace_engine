@@ -20,6 +20,8 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
@@ -48,6 +50,8 @@ const Dimension DEFAULT_INDENT_SIZE5 = Dimension(9, DimensionUnit::VP);
 const Dimension DEFAULT_INDENT_SIZE6 = Dimension(10, DimensionUnit::VP);
 const float PADDING_FIVE = 5.0f;
 const Color COLOR_DEFAULT = Color::RED;
+const Color STROKE_COLOR_VALUE_0 = Color::FromRGB(255, 100, 100);
+const Color STORKE_COLOR_VALUE_1 = Color::FromRGB(255, 255, 100);
 struct ExpectParagraphParams {
     float height = 50.f;
     float longestLine = 460.f;
@@ -1072,4 +1076,29 @@ HWTEST_F(TextInputAreaTest, accessibilityProperty002, TestSize.Level1)
     textFieldModelNG.SetCopyOption(CopyOptions::None);
     accessibilityProperty->SetSpecificSupportAction();
 }
+
+/**
+ * @tc.name: testStroke001
+ * @tc.desc: test textInput and textArea of the stroke
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testStroke001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    textFieldModelNG.SetStrokeWidth(Dimension(2.0));
+    textFieldModelNG.SetStrokeColor(STORKE_COLOR_VALUE_1);
+
+    EXPECT_EQ(layoutProperty->GetStrokeWidth(), Dimension(2.0));
+    EXPECT_EQ(layoutProperty->GetStrokeColor(), STORKE_COLOR_VALUE_1);
+
+    textFieldModelNG.ResetStrokeColor();
+    EXPECT_EQ(layoutProperty->GetStrokeColor().has_value(), false);
+}
+
 } // namespace OHOS::Ace::NG

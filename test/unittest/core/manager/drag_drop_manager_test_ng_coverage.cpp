@@ -1956,4 +1956,38 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage070, TestSi
     dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, drag);
     EXPECT_NE(dragDropManager->info_.textNode, nullptr);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage071
+ * @tc.desc: Test OnDragDrop IsDragEndPending
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage071, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    ASSERT_NE(pipeline->taskExecutor_, nullptr);
+    frameNode->context_ = AceType::RawPtr(pipeline);
+    DragPointerEvent pointerEvent;
+    dragEvent->SetResult(DragRet::DRAG_SUCCESS);
+    dragDropManager->OnDragDrop(dragEvent, frameNode, pointerEvent);
+    EXPECT_EQ(dragEvent->GetResult(), DragRet::DRAG_SUCCESS);
+    int32_t displayId = 0;
+    dragEvent->SetDisplayId(displayId);
+    dragEvent->SetResult(DragRet::DRAG_SUCCESS);
+    dragEvent->SetIsDragEndPending(true);
+    dragEvent->SetRequestIdentify(1);
+    dragDropManager->OnDragDrop(dragEvent, frameNode, pointerEvent);
+    EXPECT_EQ(dragEvent->GetResult(), DragRet::DRAG_FAIL);
+    auto retDisplayId = dragEvent->GetDisplayId();
+    EXPECT_EQ(retDisplayId, displayId);
+}
 } // namespace OHOS::Ace::NG

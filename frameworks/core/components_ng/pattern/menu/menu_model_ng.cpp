@@ -34,6 +34,13 @@ void MenuModelNG::Create()
         // default min width
         layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
     }
+    if (menuNode->GetThemeScopeId() && menuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto pipeline = menuNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>(menuNode->GetThemeScopeId());
+        CHECK_NULL_VOID(theme);
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, theme->GetFontColor());
+    }
 }
 
 void MenuModelNG::SetFontSize(const Dimension& fontSize)
@@ -117,6 +124,23 @@ void MenuModelNG::SetExpandingMode(const SubMenuExpandingMode& expandingMode)
 void MenuModelNG::SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode, frameNode);
+}
+
+void MenuModelNG::SetExpandSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->SetExpandSymbol(expandSymbol);
+}
+
+void MenuModelNG::SetExpandSymbol(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->SetExpandSymbol(expandSymbol);
 }
 
 void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode)

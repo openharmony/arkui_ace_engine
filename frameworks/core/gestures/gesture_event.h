@@ -16,7 +16,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_EVENT_H
 
 #include "core/gestures/gesture_info.h"
-
+#include "core/components/common/layout/constants.h"
 namespace OHOS::MMI {
 class PointerEvent;
 } // namespace OHOS::MMI
@@ -314,6 +314,16 @@ public:
     {
         return pointerEventId_;
     }
+
+    void SetGestureTypeName(GestureTypeName gestureType)
+    {
+        gestureType_ = gestureType;
+    }
+
+    GestureTypeName GetGestureTypeName() const
+    {
+        return gestureType_;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -387,6 +397,7 @@ private:
     bool isInterpolated_ = false;
     float inputXDeltaSlope_ = 0.0f;
     float inputYDeltaSlope_ = 0.0f;
+    GestureTypeName gestureType_ = GestureTypeName::UNKNOWN;
 };
 
 using GestureEventFunc = std::function<void(GestureEvent& info)>;

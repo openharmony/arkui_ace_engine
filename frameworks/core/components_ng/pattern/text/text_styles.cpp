@@ -128,6 +128,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecoration, TextDecoration);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationStyle, TextDecorationStyle);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, LineThicknessScale, LineThicknessScale);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextCase, TextCase);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, VariableFontWeight, VariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
@@ -160,6 +161,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineBreakStrategy, LineBreakStrategy);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ParagraphSpacing, ParagraphSpacing);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
 }
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
@@ -190,9 +192,13 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
         UPDATE_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
+        UPDATE_TEXT_STYLE(fontStyle, StrokeWidth, SetStrokeWidth);
+        UPDATE_TEXT_STYLE(fontStyle, StrokeColor, SetStrokeColor);
+        UPDATE_TEXT_STYLE(fontStyle, Superscript, SetSuperscript);
         UPDATE_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
+        UPDATE_TEXT_STYLE(fontStyle, LineThicknessScale, SetLineThicknessScale);
         UPDATE_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
 
         UPDATE_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
@@ -218,6 +224,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
             UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
             UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
         }
+        UPDATE_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, SetOptimizeTrailingSpace);
         UPDATE_TEXT_STYLE(textLineStyle, HalfLeading, SetHalfLeading);
         UPDATE_TEXT_STYLE(textLineStyle, TextBaseline, SetTextBaseline);
         UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);

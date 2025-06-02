@@ -760,4 +760,69 @@ HWTEST_F(TextAreaTestTwo, UpdatePressStyle005, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
 }
 
+/**
+ * @tc.name: CalcMeasureContentWithMinLines001
+ * @tc.desc: Test is textarea, CalcMeasureContentWithMinLines, minlines = 3
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, CalcMeasureContentWithMinLines001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetLineHeight(30.0_px); });
+    auto geometryNode = frameNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto originContentSize = geometryNode->GetContentSize();
+    layoutProperty_->UpdateMinLines(3);
+    FlushLayoutTask(frameNode_);
+    auto minLinesContentSize = geometryNode->GetContentSize();
+    EXPECT_EQ(minLinesContentSize.Height(), originContentSize.Height() * 3);
+}
+
+/**
+ * @tc.name: CalcMeasureContentWithMinLines002
+ * @tc.desc: Test is textarea, CalcMeasureContentWithMinLines, minlines = 3, maxlines = 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, CalcMeasureContentWithMinLines002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLineHeight(30.0_px);
+        model.SetNormalMaxViewLines(1);
+    });
+    auto geometryNode = frameNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto originContentSize = geometryNode->GetContentSize();
+    layoutProperty_->UpdateMinLines(3);
+    FlushLayoutTask(frameNode_);
+    auto minLinesContentSize = geometryNode->GetContentSize();
+    EXPECT_EQ(minLinesContentSize.Height(), originContentSize.Height());
+}
+
+/**
+ * @tc.name: CalcMeasureContentWithMinLines003
+ * @tc.desc: Test is textarea, CalcMeasureContentWithMinLines, minlines = 3, constraintSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, CalcMeasureContentWithMinLines003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetLineHeight(30.0_px); });
+    auto geometryNode = frameNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    layoutProperty_->UpdateMinLines(3);
+    layoutProperty_->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(100.0_px)));
+    layoutProperty_->UpdateCalcMaxSize(CalcSize(std::nullopt, CalcLength(200.0_px)));
+    FlushLayoutTask(frameNode_);
+    auto minLinesContentSize = geometryNode->GetContentSize();
+    EXPECT_EQ(minLinesContentSize.Height(), geometryNode->GetFrameSize().Height());
+
+    layoutProperty_->UpdateMinLines(1);
+    FlushLayoutTask(frameNode_);
+    minLinesContentSize = geometryNode->GetContentSize();
+    EXPECT_EQ(minLinesContentSize.Height(), 100);
+
+    layoutProperty_->UpdateMinLines(10);
+    FlushLayoutTask(frameNode_);
+    minLinesContentSize = geometryNode->GetContentSize();
+    EXPECT_EQ(minLinesContentSize.Height(), 200);
+}
+
 } // namespace OHOS::Ace::NG

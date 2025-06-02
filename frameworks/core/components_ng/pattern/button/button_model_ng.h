@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_NG_H
 
+#include "core/common/resource/resource_object.h"
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/pattern/button/button_model.h"
 #include "core/components/button/button_theme.h"
@@ -61,6 +62,16 @@ public:
     void SetCreateWithLabel(bool createWithLabel) override;
     void SetMinFontScale(float minFontScale) override;
     void SetMaxFontScale(float maxFontScale) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonColorType buttonColorType) override;
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonStringType buttonStringType) override;
+    void CreateWithDimensionFpResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonDimensionType buttonDimensionType) override;
+    void CreateWithDoubleResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonDoubleType buttonDoubleType) override;
+    void CreateWithFamiliesResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonStringType buttonStringType) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight);
@@ -104,6 +115,10 @@ private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label);
     static void SetButtonSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
         RefPtr<ButtonTheme> buttonTheme);
+    std::string ColorTypeToString(const ButtonColorType buttonColorType);
+    std::string StringTypeToStr(const ButtonStringType buttonStringType);
+    std::string DimensionTypeToString(const ButtonDimensionType buttonDimensionType);
+    std::string DoubleTypeToString(const ButtonDoubleType buttonDoubleType);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_NG_H

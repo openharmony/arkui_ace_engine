@@ -221,6 +221,7 @@ struct ButtonInfo {
 
 struct DialogProperties {
     DialogType type = DialogType::COMMON; // type of dialog, current support common dialog and alert dialog.
+    bool isAlertDialog = false;
     std::string title;                    // title of dialog.
     std::string subtitle;                 // subtitle of dialog.
     std::string content;                  // message of dialog.
@@ -355,6 +356,14 @@ struct PromptDialogAttr {
     WeakPtr<NG::UINode> customCNode;
 };
 
+enum class PromptActionCommonState {
+    UNINITIALIZED = 0,
+    INITIALIZED = 1,
+    APPEARING = 2,
+    APPEARED = 3,
+    DISAPPEARING = 4,
+    DISAPPEARED  = 5,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H

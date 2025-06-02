@@ -42,12 +42,22 @@ public:
     bool Put(const char* key, bool value);
     bool Put(const char* key, const std::unique_ptr<InspectorJsonValue>& value);
     bool Put(const std::unique_ptr<InspectorJsonValue>& value);
+    bool Put(double value);
     bool Replace(const char* key, const char* value);
     // serialize
     std::string ToString();
     bool IsObject() const;
+    bool IsNull() const;
+    bool IsString() const;
+    bool IsNumber() const;
     bool Contains(const std::string& key) const;
     const JsonObject* GetJsonObject() const;
+
+    std::string GetString() const;
+    std::string GetString(const std::string& key, const std::string& defaultVal = "") const;
+    std::unique_ptr<InspectorJsonValue> GetValue(const std::string& key) const;
+    int32_t GetInt() const;
+    int32_t GetInt(const std::string& key, int32_t defaultVal = 0) const;
 
 private:
     JsonObject* object_ = nullptr;
@@ -59,7 +69,11 @@ public:
     InspectorJsonUtil() = delete;
     ~InspectorJsonUtil() = delete;
     static std::shared_ptr<InspectorJsonValue> Create(bool isRoot = true);
-    static std::shared_ptr<InspectorJsonValue> CreateArray(bool isRoot = true);
+    static std::unique_ptr<InspectorJsonValue> CreateArray(bool isRoot = true);
+    static std::unique_ptr<InspectorJsonValue> CreateObject(bool isRoot = true);
+    static std::unique_ptr<InspectorJsonValue> ParseJsonData(const char* data, const char** parseEnd = nullptr);
+    static std::unique_ptr<InspectorJsonValue> ParseJsonString(
+        const std::string& content, const char** parseEnd = nullptr);
 };
 
 } // namespace OHOS::Ace

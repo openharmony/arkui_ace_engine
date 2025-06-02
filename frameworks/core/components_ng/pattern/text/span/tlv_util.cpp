@@ -68,6 +68,28 @@ double TLVUtil::ReadDouble(std::vector<uint8_t>& buff, int32_t& cursor)
     return value;
 }
 
+void TLVUtil::WriteFloat(std::vector<uint8_t>& buff, float value)
+{
+    WriteUint8(buff, TLV_FLOAT_TAG);
+    std::vector<uint8_t> bytes(sizeof(float));
+    auto valuePtr = reinterpret_cast<uint8_t*>(&value);
+    std::copy(valuePtr, valuePtr + sizeof(float), bytes.begin());
+    buff.insert(buff.end(), bytes.begin(), bytes.end());
+}
+
+float TLVUtil::ReadFloat(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    if (ReadUint8(buff, cursor) != TLV_FLOAT_TAG) {
+        return 0.0;
+    }
+    auto start = buff.begin() + cursor;
+    auto end = start + sizeof(float);
+    float value;
+    std::copy(start, end, reinterpret_cast<uint8_t*>(&value));
+    cursor += sizeof(float);
+    return value;
+}
+
 void TLVUtil::WriteColor(std::vector<uint8_t>& buff, Color& value)
 {
     WriteUint8(buff, TLV_COLOR_TAG);
@@ -181,6 +203,28 @@ std::vector<Shadow> TLVUtil::ReadTextShadows(std::vector<uint8_t>& buff, int32_t
     }
     return shadows;
 }
+
+void TLVUtil::WriteTextDecorations(std::vector<uint8_t>& buff, const std::vector<TextDecoration>& values)
+{
+    WriteUint8(buff, TLV_SPAN_FONT_STYLE_TEXTDECORATION);
+    WriteInt32(buff, values.size());
+    for (TextDecoration value: values) {
+        WriteInt32(buff, static_cast<int32_t>(value));
+    }
+}
+
+std::vector<TextDecoration> TLVUtil::ReadTextDecorations(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    std::vector<TextDecoration> textDecorations;
+    int32_t size = ReadInt32(buff, cursor);
+    std::cout << "ReadTextDecorations size:" << size << std::endl;
+    for (auto i = 0; i < size; i ++) {
+        int32_t value = ReadInt32(buff, cursor);
+        textDecorations.emplace_back(static_cast<TextDecoration>(value));
+    }
+    return textDecorations;
+}
+
 
 void TLVUtil::WriteFontFeature(std::vector<uint8_t>& buff, std::list<std::pair<std::string, int32_t>>& value)
 {

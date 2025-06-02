@@ -376,7 +376,7 @@ void JSVideo::JsOnError(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onError");
         PipelineContext::SetCallBackNode(node);
-        std::vector<std::string> keys = { "error" };
+        std::vector<std::string> keys = { "code", "name", "message" };
         func->Execute(keys, param);
     };
     VideoModel::GetInstance()->SetOnError(std::move(onError));

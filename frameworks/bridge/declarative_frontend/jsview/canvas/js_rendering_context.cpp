@@ -147,6 +147,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("stroke", &JSCanvasRenderer::JsStroke);
     JSClass<JSRenderingContext>::CustomMethod("clip", &JSCanvasRenderer::JsClip);
     JSClass<JSRenderingContext>::CustomMethod("rect", &JSCanvasRenderer::JsRect);
+    JSClass<JSRenderingContext>::CustomMethod("roundRect", &JSRenderingContext::JsRoundRect);
     JSClass<JSRenderingContext>::CustomMethod("beginPath", &JSCanvasRenderer::JsBeginPath);
     JSClass<JSRenderingContext>::CustomMethod("closePath", &JSCanvasRenderer::JsClosePath);
     JSClass<JSRenderingContext>::CustomMethod("restore", &JSCanvasRenderer::JsRestore);

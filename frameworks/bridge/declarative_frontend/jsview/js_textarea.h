@@ -24,12 +24,14 @@
 #include "frameworks/core/components/text_field/textfield_theme.h"
 
 namespace OHOS::Ace::Framework {
+const std::vector<OverflowMode> OVERFLOWS_MODE = { OverflowMode::CLIP, OverflowMode::SCROLL };
 
 class JSTextArea : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetMinLines(const JSCallbackInfo& info);
 };
 
 class JSTextAreaController final : public Referenced {

@@ -79,6 +79,8 @@ public:
     Color CalculateHoverPressColor(const Color& color);
 
 private:
+    void PaintScaleRingWithApiCheck(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintCapsuleWithApiCheck(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintCapsuleForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintVerticalCapsuleForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;

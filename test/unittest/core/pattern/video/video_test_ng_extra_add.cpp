@@ -1463,4 +1463,80 @@ HWTEST_F(VideoTestExtraAddNg, RecoverState001, TestSize.Level1)
     /* Indirectly call the RecoverState function by calling the ExitFullScreen function */
     EXPECT_TRUE(fullScreenPattern->ExitFullScreen());
 }
+
+/**
+ * @tc.name: CallVideoPatternMeasureVideoContentLayoutFunc
+ * @tc.desc: Test ApplyImageFit
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, CallVideoPatternMeasureVideoContentLayoutFunc, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a video and get the videoPattern.
+     * @tc.expected: step1. Create and get successfully.
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create and set Video LayoutProperty.
+     * @tc.expected: step2. Create successfully.
+     */
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    ASSERT_NE(videoLayoutProperty, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, videoLayoutProperty);
+    layoutWrapper->skipMeasureContent_ = false;
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(AceType::MakeRefPtr<LayoutAlgorithm>());
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithm;
+    layoutWrapper->layoutAlgorithm_->skipMeasure_ = false;
+
+    std::unique_ptr<VideoStyle> tempPtr = std::make_unique<VideoStyle>();
+    videoLayoutProperty->propVideoStyle_ = std::move(tempPtr);
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, VIDEO_HEIGHT);
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
+
+    /**
+     * @tc.steps: step3. Set OjectFit.
+     * @tc.expected: step3. Call MeasureVideoContentLayout Func.
+     */
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    videoPattern->renderContextForMediaPlayer_ = mockRenderContext;
+    ASSERT_NE(videoPattern->renderContextForMediaPlayer_, nullptr);
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::TOP_LEFT);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::TOP);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::TOP_END);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::START);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::CENTER);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::END);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::BOTTOM_START);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::BOTTOM);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::BOTTOM_END);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+}
 } // namespace OHOS::Ace::NG

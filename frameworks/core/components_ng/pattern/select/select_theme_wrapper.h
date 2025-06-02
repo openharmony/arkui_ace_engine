@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 
@@ -52,6 +53,9 @@ public:
         if (auto colors = theme.Colors(); colors) {
             SetFontColor(colors->FontPrimary());
             SetButtonBackgroundColor(colors->CompBackgroundTertiary());
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+                SetSecondaryFontColor(colors->FontPrimary());
+            }
         }
     }
 

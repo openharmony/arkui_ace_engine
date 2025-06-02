@@ -137,6 +137,14 @@ constexpr uint8_t TLV_CUSTOM_MARSHALL_BUFFER_START = 0x97;
 
 constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING = 0x98;
 
+constexpr uint8_t TLV_SPAN_FONT_STYLE_LineThicknessScale = 0x99;
+constexpr uint8_t TLV_FLOAT_TAG = 0x9A;
+
+constexpr uint8_t TLV_SPAN_STRING_MODE_FLAG = 0x9B;
+
+constexpr uint8_t TLV_SUPERSCRIPT_TAG = 0x9C;
+constexpr uint8_t TLV_SPAN_FONT_STYLE_SUPERSCRIPT = 0x9D;
+
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
     static void Write##type(std::vector<uint8_t>& buff, type value)         \
@@ -196,6 +204,7 @@ public:
 
     TLV_DEFINE_ENUM_TYPE(FontStyle, TLV_ITALICSFONTSTYLE_TAG);
     TLV_DEFINE_ENUM_TYPE(FontWeight, TLV_FONTWEIGHT_TAG);
+    TLV_DEFINE_ENUM_TYPE(SuperscriptStyle, TLV_SUPERSCRIPT_TAG);
     TLV_DEFINE_ENUM_TYPE(TextDecoration, TLV_TEXTDECORATION_TAG);
     TLV_DEFINE_ENUM_TYPE(TextDecorationStyle, TLV_TEXTDECORATIONSTYLE_TAG);
     TLV_DEFINE_ENUM_TYPE(TextCase, TLV_TEXTCASE_TAG);
@@ -241,6 +250,10 @@ public:
     static ImageSpanAttribute ReadImageSpanAttribute(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteLeadingMargin(std::vector<uint8_t>& buff, NG::LeadingMargin& value);
     static NG::LeadingMargin ReadLeadingMargin(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteTextDecorations(std::vector<uint8_t>& buff, const std::vector<TextDecoration>& values);
+    static std::vector<TextDecoration> ReadTextDecorations(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteFloat(std::vector<uint8_t>& buff, float value);
+    static float ReadFloat(std::vector<uint8_t>& buff, int32_t& cursor);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_TLV_UTIL_H

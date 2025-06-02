@@ -111,6 +111,16 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     modifierWithKey(this._modifiersWithKeys, MinResponsiveDistanceModifier.identity, MinResponsiveDistanceModifier, value);
     return this;
   }
+  prefix(value: KNode, options: SliderCustomContentOptions): this {
+    let prefix = new ArkPrefixOrSuffix(value, options);
+    modifierWithKey(this._modifiersWithKeys, PrefixModifier.identity, PrefixModifier, prefix);
+    return this;
+  }
+  suffix(value: KNode, options: SliderCustomContentOptions): this {
+    let suffix = new ArkPrefixOrSuffix(value, options);
+    modifierWithKey(this._modifiersWithKeys, SuffixModifier.identity, SuffixModifier, suffix);
+    return this;
+  }
   contentModifier(value: ContentModifier<SliderConfiguration>): this {
     modifierWithKey(this._modifiersWithKeys, SliderContentModifier.identity, SliderContentModifier, value);
     return this;
@@ -228,6 +238,48 @@ class StepSizeModifier extends ModifierWithKey<Length> {
       getUINativeModule().slider.resetStepSize(node);
     } else {
       getUINativeModule().slider.setStepSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class PrefixModifier extends ModifierWithKey<ArkPrefixOrSuffix> {
+  options:SliderCustomContentOptions;
+  constructor(value: ArkPrefixOrSuffix) {
+    super(value);
+    this.options = value.options;
+  }
+  static identity: Symbol = Symbol('sliderPrefix');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetPrefix(node);
+    } else {
+      getUINativeModule().slider.setPrefix(node, this.value.value, this.options.text, 
+        this.options.description, this.options.level, this.options.group);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SuffixModifier extends ModifierWithKey<ArkPrefixOrSuffix> {
+  options:SliderCustomContentOptions;
+  constructor(value: ArkPrefixOrSuffix) {
+    super(value);
+    this.options = value.options;
+  }
+  static identity: Symbol = Symbol('sliderSuffix');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetSuffix(node);
+    } else {
+      getUINativeModule().slider.setSuffix(node, this.value.value, this.options.text, 
+        this.options.description, this.options.level, this.options.group);
     }
   }
 

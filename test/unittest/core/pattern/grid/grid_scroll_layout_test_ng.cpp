@@ -1390,6 +1390,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(3);
     CreateDone();
+    ChangeRadio();
 
     /**
      * @tc.steps: step1. Simulate a scrolling gesture.
@@ -1443,6 +1444,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(3);
     CreateDone();
+    ChangeRadio();
 
     /**
      * @tc.steps: step1. Simulate a scrolling gesture.
@@ -1495,6 +1497,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest003, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(3);
     CreateDone();
+    ChangeRadio();
 
     /**
      * @tc.steps: step1. Simulate a scrolling gesture.
@@ -1547,6 +1550,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest004, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(3);
     CreateDone();
+    ChangeRadio();
 
     /**
      * @tc.steps: step1. Simulate a scrolling gesture.
@@ -1599,6 +1603,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest005, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
     CreateFixedItems(21);
     CreateDone();
+    ChangeRadio();
 
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
@@ -1653,6 +1658,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest006, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20);
     CreateDone();
+    ChangeRadio();
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(pattern_->IsAtBottom());
 
@@ -1709,6 +1715,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest007, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(40);
     CreateDone();
+    ChangeRadio();
 
     /**
      * @tc.steps: step1. Simulate a scrolling gesture.
@@ -1761,6 +1768,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest008, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(40);
     CreateDone();
+    ChangeRadio();
 
     /**
      * @tc.steps: step1. Simulate a scrolling gesture.

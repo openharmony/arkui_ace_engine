@@ -56,6 +56,11 @@ void NavigationModelImpl::SetTitleHeight(const Dimension& height, bool isValid)
     return;
 }
 
+void NavigationModelImpl::SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid)
+{
+    return;
+}
+
 void NavigationModelImpl::SetTitleMode(NG::NavigationTitleMode mode)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -105,6 +110,42 @@ void NavigationModelImpl::SetBackButtonIcon(const std::function<void(WeakPtr<NG:
     const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
     const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
     const std::string& backButtonAccessibilityText)
+{
+    return;
+}
+
+void NavigationModelImpl::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    const RefPtr<ResourceObject>& resObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+    const std::string& backButtonAccessibilityText)
+{
+    return;
+}
+
+void NavigationModelImpl::SetBackButtonIconTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText, const RefPtr<ResourceObject>& resObj)
+{
+    return;
+}
+
+void NavigationModelImpl::SetBackButtonIconSrcAndTextRes(
+    const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    const RefPtr<ResourceObject>& backButtonResObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+    const RefPtr<ResourceObject>& backButtonTextResObj)
+{
+    return;
+}
+
+void NavigationModelImpl::UpdateBackButtonIcon(const std::vector<std::string>& nameList,
+    NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj)
+{
+    return;
+}
+
+void NavigationModelImpl::UpdateBackButtonIconText(bool userDefinedAccessibilityText,
+    const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonTextResObj)
 {
     return;
 }

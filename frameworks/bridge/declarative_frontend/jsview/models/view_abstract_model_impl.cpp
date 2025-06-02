@@ -215,6 +215,8 @@ void ViewAbstractModelImpl::SetHeight(const CalcDimension& height)
     }
 }
 
+void ViewAbstractModelImpl::SetToolbarBuilder(std::function<void()>&& buildFunc) {}
+
 void ViewAbstractModelImpl::SetMinWidth(const CalcDimension& minWidth)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -303,7 +305,7 @@ void ViewAbstractModelImpl::SetBackgroundImageSize(const BackgroundImageSize& bg
     decoration->SetImage(image);
 }
 
-void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
+void ViewAbstractModelImpl::SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition)
 {
     auto decoration = GetBackDecoration();
     auto image = decoration->GetImage();
@@ -672,6 +674,8 @@ void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle, fl
     option.SetAllowRunningAsynchronously(false);
     transform->Rotate(x, y, z, angle, option);
 }
+
+void ViewAbstractModelImpl::SetRotateAngle(float x, float y, float z, float perspective) {}
 
 void ViewAbstractModelImpl::SetTransformMatrix(const std::vector<float>& matrix)
 {

@@ -258,6 +258,8 @@ public:
 
     virtual void OnLayoutCompleted(const std::string& componentId) = 0;
     virtual void OnDrawCompleted(const std::string& componentId) = 0;
+    virtual void OnDrawChildrenCompleted(const std::string& componentId) = 0;
+    virtual bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) = 0;
 
     virtual void TriggerGarbageCollection() {}
 

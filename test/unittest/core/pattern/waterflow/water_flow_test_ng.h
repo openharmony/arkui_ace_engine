@@ -96,6 +96,7 @@ protected:
     void DeleteItemInLazyForEach(int32_t index);
     RefPtr<WaterFlowPaintMethod> UpdateOverlayModifier();
     RefPtr<WaterFlowPaintMethod> UpdateContentModifier();
+    void ChangeRadio();
 
     RefPtr<WaterFlowPattern> pattern_;
     RefPtr<WaterFlowEventHub> eventHub_;

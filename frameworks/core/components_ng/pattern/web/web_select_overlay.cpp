@@ -321,6 +321,12 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = true;
     }
+
+    if (isSelectAll_) {
+        selectInfo.menuInfo.showCopyAll = false;
+        isSelectAll_ = false;
+    }
+
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (!queryWord.empty()) {
@@ -329,6 +335,13 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showSearch = false;
         selectInfo.menuInfo.showTranslate = false;
+    }
+    if (!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) ||
+        (copyOption == OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) ||
+        !pattern->IsShowAIWrite()) {
+        selectInfo.menuInfo.showAIWrite = false;
+    } else {
+        selectInfo.menuInfo.showAIWrite = true;
     }
 }
 
@@ -792,7 +805,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::COPY:
             quickMenuCallback_->Continue(
                 OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            pattern->CloseSelectOverlay();
+            HideMenu(true);
             break;
         case OptionMenuActionId::CUT:
             quickMenuCallback_->Continue(
@@ -807,6 +820,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::SELECT_ALL:
             quickMenuCallback_->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
                 OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            isSelectAll_ = true;
             break;
         case OptionMenuActionId::TRANSLATE:
             HandleOnTranslate();
@@ -816,6 +830,11 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
             pattern->CloseSelectOverlay();
+            SelectCancel();
+            return;
+        case OptionMenuActionId::AI_WRITE:
+            pattern->GetHandleInfo(webSelectInfo_);
+            pattern->HandleOnAIWrite();
             SelectCancel();
             return;
         case OptionMenuActionId::DISAPPEAR:

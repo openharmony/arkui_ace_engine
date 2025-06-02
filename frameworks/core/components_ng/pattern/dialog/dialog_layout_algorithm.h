@@ -109,6 +109,7 @@ private:
     bool customSize_ = false;
     SafeAreaInsets safeAreaInsets_;
     bool isModal_ = true;
+    bool hasAddMaskNode_ = false;
     bool isShowInSubWindow_ = false;
     bool isSuitableForElderly_ = false;
     bool isSuitOldMeasure_ = false;

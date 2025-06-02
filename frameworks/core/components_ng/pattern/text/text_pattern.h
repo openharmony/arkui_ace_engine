@@ -733,6 +733,13 @@ protected:
     virtual void InitAISpanHoverEvent();
     virtual void HandleAISpanHoverEvent(const MouseInfo& info);
     void OnHover(bool isHover);
+    void InitSpanMouseEvent();
+    HoverInfo ConvertHoverInfoFromMouseInfo(const MouseInfo& info) const;
+    void HandleSpanMouseEvent(const MouseInfo& info);
+    void TriggerSpanOnHoverEvent(const HoverInfo& info, const RefPtr<SpanItem>& item, bool isOnHover);
+    void TriggerSpansOnHover(const HoverInfo& info, const PointF& textOffset);
+    void ExitSpansForOnHoverEvent(const HoverInfo& info);
+    bool HasSpanOnHoverEvent();
     void InitMouseEvent();
     void InitFocusEvent();
     void InitHoverEvent();
@@ -819,7 +826,7 @@ protected:
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
     virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
-
+    void HandleSpanStringTouchEvent(TouchEventInfo& info);
     bool enabled_ = true;
     Status status_ = Status::NONE;
     bool contChange_ = false;
@@ -827,6 +834,7 @@ protected:
     int32_t recoverEnd_ = 0;
     bool aiSpanHoverEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
+    bool spanMouseEventInitialized_ = false;
     bool isHover_ = false;
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
@@ -880,6 +888,8 @@ protected:
     bool ShowShadow(const PointF& textOffset, const Color& color);
     virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
     bool hasUrlSpan_ = false;
+    void UpdatePropertyImpl(
+        const std::string& key, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) override;
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -894,6 +904,7 @@ private:
     void InitUrlTouchEvent();
     void HandleUrlMouseEvent(const MouseInfo& info);
     void HandleUrlTouchEvent(const TouchEventInfo& info);
+    void InitSpanStringTouchEvent();
     void URLOnHover(bool isHover);
     bool HandleUrlClick();
     Color GetUrlHoverColor();
@@ -960,11 +971,18 @@ private:
     void EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
+    RefPtr<SpanItem> FindSpanItemByOffset(const PointF& textOffset);
     void UpdateMarqueeStartPolicy();
     void ProcessVisibleAreaCallback();
     void PauseSymbolAnimation();
     void ResumeSymbolAnimation();
     bool IsLocationInFrameRegion(const Offset& localOffset) const;
+    void GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
+        NG::TextLineStyle& textLineStyle, const std::optional<TextStyle>& textStyle);
+    RefPtr<TaskExecutor> GetTaskExecutorItem();
+    void AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanString);
+    void AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& pasteData);
+    std::list<RefPtr<SpanItem>> GetSpanSelectedContent();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -981,6 +999,7 @@ private:
 
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
+    bool spanStringTouchInitialized_ = false;
     bool moveOverClickThreshold_ = false;
     bool isMarqueeRunning_ = false;
 

@@ -39,7 +39,9 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
     }
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
+    auto progressTheme = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                             ? pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId())
+                             : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_RETURN(progressTheme, std::nullopt);
 
     float defaultHeight = contentConstraint.percentReference.Height();

@@ -54,16 +54,26 @@ public:
 private:
     void CalculateBlockOffset(
         LayoutWrapper* layoutWrapper, const RectF& contentRect, float selectOffset, Axis axis, bool reverse);
+    void CalculatePrefixOffset(
+        LayoutWrapper* layoutWrapper, const RectF& contentRect, float borderBlank, Axis axis, bool reverse);
+    void CalculateSuffixOffset(
+        LayoutWrapper* layoutWrapper, const RectF& contentRect, float borderBlank, Axis axis, bool reverse);
     SizeF CalculateHotSize(LayoutWrapper* layoutWrapper, const SizeF& blockSize, float themeBlockHotSize);
     void GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dimension& themeTrackThickness, Dimension& themeBlockSize,
         Dimension& hotBlockShadowWidth, Dimension& themeBlockHotSize);
     float CalculateSliderWidth(
         float width, float height, Axis direction, const Dimension& hotBlockShadowWidth, SliderModel::SliderMode mode);
-
+    float CalculateSliderLength(float width, float height, Axis direction, SliderModel::SliderMode mode, bool Ends);
+    void SetChildConstraint(RefPtr<LayoutWrapper> child, float maxWidth, float maxHeight);
+    
 private:
     float trackThickness_ = 0.0f;
     SizeF blockSize_;
     SizeF blockHotSize_;
+    float maxWidth = 0.0f;
+    float maxHeight = 0.0f;
+    float langRatio = 0.1;
+    float shortRatio = 0.7;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderLayoutAlgorithm);
 };

@@ -16,6 +16,10 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/common/resource/resource_parse_utils.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -1535,5 +1539,29 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractHandleHoverTipsInfoTest001, TestSize.Le
         }
     }
     EXPECT_EQ(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
+}
+
+/**
+ * @tc.name: BackgroundResourceTest001
+ * @tc.desc: Test set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.The FrameNode is null, related function is called.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    std::string bundleName = "";
+    std::string moduleName = "";
+    ViewAbstract::SetBackgroundColorWithResourceObj(resourceObject);
+    ViewAbstract::SetBackgroundColor(nullptr, BLUE, resourceObject);
+    ViewAbstract::SetBackgroundImageWithResourceObj(resourceObject, bundleName, moduleName);
+    ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo, resourceObject);
+
+    /**
+     * @tc.expected: Return expected results..
+     */
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 } // namespace OHOS::Ace::NG

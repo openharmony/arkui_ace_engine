@@ -56,6 +56,10 @@
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "ui/rs_surface_node.h"
 #include "core/components_ng/pattern/web/web_select_overlay.h"
+#include "core/components_ng/pattern/text_field/text_select_controller.h"
+#include "core/common/ai/ai_write_adapter.h"
+#include "core/common/ime/text_input_client.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -76,8 +80,6 @@ namespace OHOS::NWeb {
     class NWebMessage;
     class NWebKeyEvent;
     class NWebSelectMenuBound;
-    class NWebUpdateScrollUpdateData;
-    class NWebNestedScrollUpdateDataImpl;
     enum class CursorType;
 }
 namespace OHOS::Ace::NG {
@@ -452,7 +454,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DatabaseAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextZoomRatio, int32_t);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabledAndPort,
+        WebPatternProperty::WebDebuggingConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, PinchSmoothModeEnabled, bool);
@@ -483,6 +486,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CssDisplayChangeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
@@ -631,6 +635,7 @@ public:
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state, bool isDelayed = false);
+    void UpdateScrollBarWithBorderRadius();
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
@@ -761,6 +766,13 @@ public:
     void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
 
+    bool IsShowAIWrite();
+    int GetSelectStartIndex() const;
+    int GetSelectEndIndex() const;
+    std::string GetAllTextInfo() const;
+    void GetHandleInfo(SelectOverlayInfo& infoHandle);
+    void HandleOnAIWrite();
+
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -814,7 +826,8 @@ private:
     void OnFileFromUrlAccessEnabledUpdate(bool value);
     void OnDatabaseAccessEnabledUpdate(bool value);
     void OnTextZoomRatioUpdate(int32_t value);
-    void OnWebDebuggingAccessEnabledUpdate(bool value);
+    void OnWebDebuggingAccessEnabledAndPortUpdate(
+        const WebPatternProperty::WebDebuggingConfigType& enabled_and_port);
     void OnPinchSmoothModeEnabledUpdate(bool value);
     void OnBackgroundColorUpdate(int32_t value);
     void OnInitialScaleUpdate(float value);
@@ -845,6 +858,7 @@ private:
     void OnMetaViewportUpdate(bool value);
     void OnNativeEmbedModeEnabledUpdate(bool value);
     void OnIntrinsicSizeEnabledUpdate(bool value);
+    void OnCssDisplayChangeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
@@ -1036,6 +1050,13 @@ private:
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    bool UpdateKeyboardSafeArea(bool hideOrClose, double height = 0.0f);
+
+    void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
+    void FormatIndex(int32_t& startIndex, int32_t& endIndex);
+    std::u16string GetSelectedValue(int32_t startIndex, int32_t endIndex);
+    RefPtr<TextFieldTheme> GetTheme() const;
+    void GetAIWriteInfo(AIWriteInfo& info);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1221,6 +1242,11 @@ private:
     bool keyboardGetready_ = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
+
+    RectF firstInfoHandle_;
+    RectF secondInfoHandle_;
+    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    std::u16string content_;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

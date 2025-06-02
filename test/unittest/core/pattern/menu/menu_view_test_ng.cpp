@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -101,6 +102,7 @@ void MenuViewTestNg::SetUp()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     InitMenuTestNg();
     isSubMenuBuilded_ = false;
+    MockContainer::SetUp();
 }
 
 void MenuViewTestNg::MockPipelineContextGetTheme()
@@ -132,6 +134,7 @@ void MenuViewTestNg::TearDown()
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     ScreenSystemManager::GetInstance().dipScale_ = 1.0;
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+    MockContainer::TearDown();
 }
 
 int32_t MenuViewTestNg::GetNodeId()
@@ -291,5 +294,136 @@ HWTEST_F(MenuViewTestNg, SkipMenuTest002, TestSize.Level1)
     overlayManger->ResumeMenuShow(TARGET_ID);
     ASSERT_TRUE(overlayManger->skipTargetIds_.empty());
     EXPECT_FALSE(overlayManger->CheckSkipMenuShow(TARGET_ID));
+}
+
+/**
+ * @tc.name: SetHasCustomOutline001
+ * @tc.desc: Verify SetHasCustomOutline function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetHasCustomOutline001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    BorderWidthProperty outlineWidth;
+    outlineWidth.SetBorderWidth(Dimension(10.0));
+    menuParam.outlineWidth = outlineWidth;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    MenuView::SetHasCustomOutline(wrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_TRUE(menuWrapperPattern->GetHasCustomOutlineWidth());
+}
+
+/**
+ * @tc.name: SetHasCustomOutline002
+ * @tc.desc: Verify SetHasCustomOutline function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetHasCustomOutline002, TestSize.Level1)
+{
+    MenuParam menuParam;
+    BorderWidthProperty outlineWidth;
+    outlineWidth.SetBorderWidth(Dimension(-1));
+    menuParam.outlineWidth = outlineWidth;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    MenuView::SetHasCustomOutline(wrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->GetHasCustomOutlineWidth());
+}
+
+/**
+ * @tc.name: UpdateMenuProperties001
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuProperties001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.outlineWidth->SetBorderWidth(Dimension(10));
+    menuParam.enableArrow = true;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHasCustomOutlineWidth(true);
+    MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);
+    EXPECT_EQ(menuWrapperPattern->GetMenuParam().outlineWidth->leftDimen->ToString(), "10.00px");
+}
+
+/**
+ * @tc.name: SetWordBreak001
+ * @tc.desc: Test MenuView GetSetWordBreak is BREAK_WORD.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetWordBreak001, TestSize.Level1)
+{
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuWordBreak_ = WordBreak::BREAK_WORD;
+    auto textProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProperty->UpdateWordBreak(theme->GetWordBreak());
+    EXPECT_EQ(textProperty->GetWordBreak(), WordBreak::BREAK_WORD);
+}
+
+/**
+ * @tc.name: SetWordBreak002
+ * @tc.desc: Test MenuView GetSetWordBreak is BREAK_ALL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetWordBreak002, TestSize.Level1)
+{
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuWordBreak_ = WordBreak::BREAK_ALL;
+    auto textProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProperty->UpdateWordBreak(theme->GetWordBreak());
+    EXPECT_EQ(textProperty->GetWordBreak(), WordBreak::BREAK_ALL);
+}
+
+/**
+ * @tc.name: UpdateMenuMaskType001
+ * @tc.desc: Verify UpdateMenuMaskType with UpdateMenuParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuMaskType001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.enableHoverMode = true;
+    menuParam.maskEnable = true;
+    menuParam.maskType = NG::MenuMaskType();
+    menuParam.maskType->maskColor = Color::RED;
+    menuParam.maskType->maskBackGroundBlueStyle = BlurStyle::REGULAR;
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(menuWrapperNode, nullptr);
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(frameNode->GetId(), frameNode->GetTag(), MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto filterRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(filterRenderContext, nullptr);
+    columnNode->renderContext_ = filterRenderContext;
+
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetMenuParam(menuParam);
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->pipelineContext_ = pipeline;
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->SetFilterColumnNode(columnNode);
+
+    MenuView::UpdateMenuParam(menuWrapperNode, menuNode, menuParam);
+
+    EXPECT_EQ(filterRenderContext->GetBackgroundColorValue(), Color::RED);
+    EXPECT_EQ(filterRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
 }
 } // namespace OHOS::Ace::NG

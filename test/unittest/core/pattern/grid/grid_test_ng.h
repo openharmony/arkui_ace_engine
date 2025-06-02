@@ -70,6 +70,7 @@ public:
 
     void CheckPreloadListEqual(const std::list<int32_t>& expectedList) const;
     RefPtr<FrameNode> GetItem(int32_t idx, bool asCache);
+    void ChangeRadio();
 
     RefPtr<GridPattern> pattern_;
     RefPtr<GridEventHub> eventHub_;

@@ -150,6 +150,8 @@ private:
     static void SetTextDisappearProperties(const RefPtr<PickerTheme>& pickerTheme,
         const PickerTextProperties& properties);
     static void SetDefaultTextStyle(const NG::PickerTextStyle& value);
+    static void SetSelectedBackgroundStyle(const RefPtr<PickerTheme>& pickerTheme,
+        const PickerBackgroundStyle& pickerBgStyle);
 
     static WeakPtr<FrameNode> dialogNode_;
     static uint32_t dialogNodePage_;

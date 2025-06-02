@@ -205,7 +205,7 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
 
 void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 {
-    textDecoration_ = textStyle.GetTextDecoration();
+    textDecoration_ = textStyle.GetTextDecorationFirst();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
     auto alpha = textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha();
     textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(alpha);
@@ -603,6 +603,7 @@ void TextContentModifier::ModifyTextShadowsInTextStyle(TextStyle& textStyle)
 
 void TextContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
 {
+    // seems no need add here
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         if (textDecorationAnimatable_) {
             uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));

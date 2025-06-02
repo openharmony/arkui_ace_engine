@@ -1885,7 +1885,7 @@ void SearchModelNG::SetTextDecoration(Ace::TextDecoration value)
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateTextDecoration(value);
+    textFieldLayoutProperty->UpdateTextDecoration({value});
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1896,7 +1896,7 @@ void SearchModelNG::SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration 
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateTextDecoration(value);
+    textFieldLayoutProperty->UpdateTextDecoration({value});
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -2316,5 +2316,49 @@ void SearchModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearan
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardAppearance(value);
+}
+
+void SearchModelNG::SetStrokeWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeWidth, value);
+}
+
+Dimension SearchModelNG::GetStrokeWidth(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SearchLayoutProperty, StrokeWidth, value, frameNode, value);
+    return value;
+}
+
+void SearchModelNG::SetStrokeColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeColor, value);
+}
+
+Color SearchModelNG::GetStrokeColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SearchLayoutProperty, StrokeColor, value, frameNode, value);
+    return value;
+}
+
+void SearchModelNG::ResetStrokeColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SearchLayoutProperty, StrokeColor, PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeWidth, value, frameNode);
+}
+
+void SearchModelNG::SetStrokeColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeColor, value, frameNode);
+}
+
+void SearchModelNG::ResetStrokeColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeColor, frameNode);
 }
 } // namespace OHOS::Ace::NG

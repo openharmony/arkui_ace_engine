@@ -17,7 +17,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
-
+#include "base/log/dump_log.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -26,7 +26,7 @@
 
 using namespace testing;
 using namespace testing::ext;
- 
+
 namespace OHOS::Ace {
 namespace NG {
 
@@ -421,5 +421,61 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg140, TestSize.Level1)
     ASSERT_NE(context_->textFieldManager_, nullptr);
 }
 
+/**
+ * @tc.name: PipelineContextTestNg141
+ * @tc.desc: Test the function OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg141, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    /**
+     * @tc.steps2: init a vector with some string params and
+                call OnDumpInfo with every param array.
+     * @tc.expected: The return value is same as the expectation.
+     */
+    auto testJson = R"({"cmd":"changeIndex","params":{"index":0}} 6)";
+    auto testErrorJson = R"({"cmd":"changeIndex","params":{"index":2}} -1)";
+    std::vector<std::vector<std::string>> params = { { "-injection", testJson }, { "-injection", testErrorJson } };
+    int turn = 0;
+    for (; turn < params.size(); turn++) {
+        EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
+    }
+}
+
+/**
+ * @tc.name: PipelineContextTestNg142
+ * @tc.desc: Test PipelineContext::SyncWindowsFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg142, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: initialize pipeline, properties.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetRootSize(1.0f, 800, 1600);
+    context_->SetupRootElement();
+    EXPECT_NE(context_->rootNode_, nullptr);
+    SystemProperties::focusCanBeActive_.store(true);
+    context_->isFocusActive_= true;
+
+    /**
+     * @tc.steps2: Call the function SyncWindowsFocus.
+     * @tc.expected: Test the stability of this function.
+     */
+    context_->SyncWindowsFocus(false, FocusActiveReason::USE_API);
+    EXPECT_FALSE(context_->isFocusActive_);
+}
 } // namespace NG
 } // namespace OHOS::Ace

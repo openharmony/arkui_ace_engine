@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/loading_progress_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_loading_progress_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
@@ -71,22 +72,49 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
 void JSLoadingProgress::Create()
 {
     LoadingProgressModel::GetInstance()->Create();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        JSLoadingProgressTheme::ApplyTheme();
+    }
 }
 
 void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
 {
     Color progressColor;
-    if (!ParseJsColor(info[0], progressColor)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
-            CHECK_NULL_VOID(progressTheme);
-            progressColor = progressTheme->GetLoadingParseFailedColor();
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsColor(info[0], progressColor, resObj);
+        if (resObj) {
+            LoadingProgressModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::LoadingProgressResourceType::COLOR, resObj);
+        } else if (state) {
+            LoadingProgressModel::GetInstance()->SetColor(progressColor);
         } else {
-            return;
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                LoadingProgressModel::GetInstance()->ResetColor();
+                return;
+            } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+                RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
+                CHECK_NULL_VOID(progressTheme);
+                progressColor = progressTheme->GetLoadingColor();
+            } else {
+                return;
+            }
+            LoadingProgressModel::GetInstance()->SetColor(progressColor);
         }
+    } else {
+        if (!ParseJsColor(info[0], progressColor)) {
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                LoadingProgressModel::GetInstance()->ResetColor();
+                return;
+            } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+                RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
+                CHECK_NULL_VOID(progressTheme);
+                progressColor = progressTheme->GetLoadingColor();
+            } else {
+                return;
+            }
+        }
+        LoadingProgressModel::GetInstance()->SetColor(progressColor);
     }
-
-    LoadingProgressModel::GetInstance()->SetColor(progressColor);
 }
 
 void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
@@ -97,15 +125,28 @@ void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
         return;
     }
     Color progressColor;
-    if (!ParseJsColor(info[0], progressColor)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(true);
-            LoadingProgressModel::GetInstance()->ResetColor();
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsColor(info[0], progressColor, resObj);
+        if (resObj) {
+            LoadingProgressModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::LoadingProgressResourceType::FOREGROUNDCOLOR, resObj);
+        } else if (state) {
+            LoadingProgressModel::GetInstance()->SetColor(progressColor);
+        } else {
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                LoadingProgressModel::GetInstance()->ResetColor();
+            }
+            return;
         }
-        return;
+    } else {
+        if (!ParseJsColor(info[0], progressColor)) {
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                LoadingProgressModel::GetInstance()->ResetColor();
+            }
+            return;
+        }
+        LoadingProgressModel::GetInstance()->SetColor(progressColor);
     }
-    LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(false);
-    LoadingProgressModel::GetInstance()->SetColor(progressColor);
 }
 
 void JSLoadingProgress::SetEnableLoading(const JSCallbackInfo& info)

@@ -61,6 +61,9 @@ enum class UIContentBusinessCode : uint32_t {
     // avoid info business begin
     NOTIFY_AVOID_INFO_CHANGE = 3001,
     GET_AVOID_INFO = 3002,
+    // extension window code from 10000 to 20000
+    WINDOW_CODE_BEGIN = 10000,
+    WINDOW_CODE_END = 20000,
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UIEXTENSION_CONFIG_H

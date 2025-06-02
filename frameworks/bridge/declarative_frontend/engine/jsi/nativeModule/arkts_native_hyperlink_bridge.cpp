@@ -31,10 +31,12 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
         GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }

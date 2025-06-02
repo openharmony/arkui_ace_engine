@@ -933,6 +933,21 @@ void CustomPaintPaintMethod::AddRect(const Rect& rect)
     isPathChanged_ = true;
 }
 
+void CustomPaintPaintMethod::AddRoundRect(const Rect& rect, const std::vector<double>& radii)
+{
+    if (radii.size() != 4) { // 4: four corners.
+        return;
+    }
+    RSRect rsRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
+    std::vector<RSPoint> radiusXY = {
+        RSPoint(radii[0], radii[0]), RSPoint(radii[1], radii[1]),   // 0: top-left, 1: top-right.
+        RSPoint(radii[2], radii[2]), RSPoint(radii[3], radii[3])    // 2: bottom-right, 3: bottom-left.
+    };
+    RSRoundRect rsRoundRect(rsRect, radiusXY);
+    rsPath_.AddRoundRect(rsRoundRect, RSPathDirection::CCW_DIRECTION);
+    isPathChanged_ = true;
+}
+
 void CustomPaintPaintMethod::Ellipse(const EllipseParam& param)
 {
     // Init the start and end angle, then calculated the sweepAngle.
@@ -1040,6 +1055,9 @@ void CustomPaintPaintMethod::ParsePath2D(const RefPtr<CanvasPath2D>& path)
                 break;
             case PathCmd::RECT:
                 Path2DRect(args);
+                break;
+            case PathCmd::ROUND_RECT:
+                Path2DRoundRect(args);
                 break;
             case PathCmd::CLOSE_PATH:
                 Path2DClosePath();
@@ -2109,6 +2127,18 @@ void CustomPaintPaintMethod::PaintImageShadow(
 void CustomPaintPaintMethod::Path2DRect(const PathArgs& args)
 {
     rsPath2d_.AddRect(RSRect(args.para1, args.para2, args.para3 + args.para1, args.para4 + args.para2));
+}
+
+void CustomPaintPaintMethod::Path2DRoundRect(const PathArgs& args)
+{
+    RSRect rsRect(args.para1, args.para2, args.para3 + args.para1, args.para4 + args.para2);
+    std::vector<RSPoint> radiusXY = {
+        RSPoint(args.para5, args.para5), RSPoint(args.para6, args.para6),
+        RSPoint(args.para7, args.para7), RSPoint(args.para8, args.para8)
+    };
+    RSRoundRect rsRoundRect(rsRect, radiusXY);
+    rsPath2d_.AddRoundRect(rsRoundRect, RSPathDirection::CCW_DIRECTION);
+    isPath2dChanged_ = true;
 }
 
 void CustomPaintPaintMethod::SetTransform(const TransformParam& param)

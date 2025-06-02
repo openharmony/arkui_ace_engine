@@ -19,6 +19,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/core/components/navigation_bar/navigation_container_component.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "frameworks/core/components_ng/pattern/navigation/navigation_options.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -31,6 +32,7 @@ public:
     static void SetTitle(const JSCallbackInfo& info);
     static void SetSubTitle(const std::string& subTitle);
     static void SetEnableModeChangeAnimation(const JSCallbackInfo& info);
+    static void SetSplitPlaceholder(const JSCallbackInfo& info);
     static void SetHideTitleBar(const JSCallbackInfo& info);
     static void SetHideBackButton(bool hide);
     static void SetHideToolBar(const JSCallbackInfo& info);
@@ -53,6 +55,10 @@ public:
 
     static void ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPtr<AceType>>& items);
     static bool ParseCommonTitle(const JSRef<JSObject>& jsObj);
+    static void ParseCommonAndCustomTitle(const JSRef<JSObject>& jsObj);
+    static void ParseBackButtonText(const JSCallbackInfo& info, RefPtr<PixelMap>& pixMap,
+        const NG::ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
+        std::string src, const std::vector<std::string>& nameList, RefPtr<ResourceObject>& backButtonIconResObj);
 
     static void SetCustomNavContentTransition(const JSCallbackInfo& info);
 

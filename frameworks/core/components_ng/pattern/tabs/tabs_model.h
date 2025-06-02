@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 enum class LayoutStyle {
@@ -39,6 +40,24 @@ enum class LayoutStyle {
     ALWAYS_AVERAGE_SPLIT,
     SPACE_BETWEEN_OR_CENTER,
 };
+
+namespace {
+enum class TabJsResType {
+    BAR_BACKGROUND_COLOR,
+    BAR_WIDTH,
+    BAR_HEIGHT,
+    BAR_GRID_GUTTER,
+    BAR_GRID_MARGIN,
+    DIVIDER_STROKE_WIDTH,
+    DIVIDER_COLOR,
+    DIVIDER_START_MARGIN,
+    DIVIDER_END_MARGIN,
+    SCROLLABLE_BAR_MARGIN,
+    COLOR,
+    INACTIVE_COLOR,
+    BlurStyle_INACTIVE_COLOR
+};
+}
 
 enum class TabsCacheMode {
     CACHE_BOTH_SIDE = 0,
@@ -130,8 +149,10 @@ public:
     virtual void SetWidthAuto(bool isAuto) = 0;
     virtual void SetHeightAuto(bool isAuto) = 0;
     virtual void SetBarAdaptiveHeight(bool barAdaptiveHeight) = 0;
+    virtual void SetNoMinHeightLimit(bool NoMinHeightLimit) = 0;
     virtual void SetIsVertical(bool isVertical) = 0;
     virtual void SetScrollable(bool scrollable) = 0;
+    virtual void SetAnimationCurve(const RefPtr<Curve>& curve) {};
     virtual void SetAnimationDuration(float duration) = 0;
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
     virtual void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) = 0;
@@ -158,6 +179,7 @@ public:
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
     virtual void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) {}
     virtual void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) {}
+    virtual void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

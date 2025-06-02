@@ -184,8 +184,8 @@ class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   }
 }
 
-class TextAreaMaxLinesModifier extends ModifierWithKey<number | undefined> {
-  constructor(value: number | undefined) {
+class TextAreaMaxLinesModifier extends ModifierWithKey<ArkTextFieldMaxLines> {
+  constructor(value: ArkTextFieldMaxLines) {
     super(value);
   }
   static identity: Symbol = Symbol('textAreaMaxLines');
@@ -193,7 +193,25 @@ class TextAreaMaxLinesModifier extends ModifierWithKey<number | undefined> {
     if (reset) {
       getUINativeModule().textArea.resetMaxLines(node);
     } else {
-      getUINativeModule().textArea.setMaxLines(node, this.value!);
+      getUINativeModule().textArea.setMaxLines(node, this.value.value!, this.value.overflowMode!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.overflowMode, this.value.overflowMode);
+  }
+}
+
+class TextAreaMinLinesModifier extends ModifierWithKey<number | undefined> {
+  constructor(value: number | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaMinLines');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMinLines(node);
+    } else {
+      getUINativeModule().textArea.setMinLines(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -1264,6 +1282,42 @@ class TextAreaEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
   }
 }
 
+class TextAreaStrokeWidthModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaStrokeWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    } else {
+      getUINativeModule().textArea.setStrokeWidth(node, this.value.value, this.value.unit);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaStrokeColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaStrokeColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetStrokeColor(node);
+    } else {
+      getUINativeModule().textArea.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1394,8 +1448,15 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectionMenuHiddenModifier.identity, TextAreaSelectionMenuHiddenModifier, value);
     return this;
   }
-  maxLines(value: number): TextAreaAttribute {
-    modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, value);
+  maxLines(value: number, options?:MaxLinesOptions): TextAreaAttribute {
+    let arkValue: ArkTextFieldMaxLines = new ArkTextFieldMaxLines();
+    arkValue.value = value;
+    arkValue.overflowMode = options?.overflowMode;
+    modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, arkValue);
+    return this;
+  }
+  minLines(value: number): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaMinLinesModifier.identity, TextAreaMinLinesModifier, value);
     return this;
   }
   fontFeature(value: FontFeature): TextAreaAttribute {
@@ -1707,6 +1768,14 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   enableHapticFeedback(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableHapticFeedbackModifier.identity, TextAreaEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  strokeWidth(value: LengthMetrics): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaStrokeWidthModifier.identity, TextAreaStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaStrokeColorModifier.identity, TextAreaStrokeColorModifier, value);
     return this;
   }
 }

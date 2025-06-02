@@ -17,6 +17,7 @@
 #include "base/utils/linear_map.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 #include "core/components_ng/svg/parse/svg_transform.h"
+#include "core/components_ng/svg/base/svg_length_scale_rule.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -50,7 +51,29 @@ void NGSvgTransform::ApplyTransformPivot(const std::string& funcType, const Offs
     matrix = Matrix4::CreateTranslate(x, y, 0) * matrix * Matrix4::CreateTranslate(-x, -y, 0);
 }
 
-bool CreateFromTranslate(const std::vector<std::string>& paramVec, Matrix4& matrix)
+double NGSvgTransform::ObjectBoundingBoxTransform(double srcLength, const SvgLengthScaleRule& rule,
+    SvgLengthType lengthType)
+{
+    double length = 0;
+    switch (lengthType) {
+        case SvgLengthType::HORIZONTAL:
+            length = (rule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     srcLength :
+                     srcLength * rule.GetContainerRect().Width();
+            break;
+        case SvgLengthType::VERTICAL:
+            length = (rule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     srcLength :
+                     srcLength * rule.GetContainerRect().Height();
+            break;
+        default:
+            break;
+    }
+    return length;
+}
+
+bool CreateFromTranslate(const std::vector<std::string>& paramVec, Matrix4& matrix,
+    const SvgLengthScaleRule& lengthRule)
 {
     double tx = 0.0f;
     double ty = 0.0f;
@@ -62,11 +85,14 @@ bool CreateFromTranslate(const std::vector<std::string>& paramVec, Matrix4& matr
     } else {
         return false;
     }
-    matrix = Matrix4::CreateTranslate(tx, ty, 0);
+    auto x = NGSvgTransform::ObjectBoundingBoxTransform(tx, lengthRule, SvgLengthType::HORIZONTAL);
+    auto y = NGSvgTransform::ObjectBoundingBoxTransform(ty, lengthRule, SvgLengthType::VERTICAL);
+    matrix = Matrix4::CreateTranslate(x, y, 0);
     return true;
 }
 
-bool CreateFromScale(const std::vector<std::string>& paramVec, Matrix4& matrix)
+bool CreateFromScale(const std::vector<std::string>& paramVec, Matrix4& matrix,
+    const SvgLengthScaleRule& lengthRule)
 {
     double sx = 0.0f;
     double sy = 0.0f;
@@ -79,11 +105,14 @@ bool CreateFromScale(const std::vector<std::string>& paramVec, Matrix4& matrix)
     } else {
         return false;
     }
-    matrix = Matrix4::CreateScale(sx, sy, 1);
+    auto scaleX = NGSvgTransform::ObjectBoundingBoxTransform(sx, lengthRule, SvgLengthType::HORIZONTAL);
+    auto scaleY = NGSvgTransform::ObjectBoundingBoxTransform(sy, lengthRule, SvgLengthType::VERTICAL);
+    matrix = Matrix4::CreateScale(scaleX, scaleY, 1);
     return true;
 }
 
-bool CreateFromRotate(const std::vector<std::string>& paramVec, Matrix4& matrix)
+bool CreateFromRotate(const std::vector<std::string>& paramVec, Matrix4& matrix,
+    const SvgLengthScaleRule& lengthRule)
 {
     if ((paramVec.size() != PARAM_COUNT1) && (paramVec.size() != PARAM_COUNT3)) {
         return false;
@@ -93,7 +122,8 @@ bool CreateFromRotate(const std::vector<std::string>& paramVec, Matrix4& matrix)
     return true;
 }
 
-bool CreateFromSkewx(const std::vector<std::string>& paramVec, Matrix4& matrix)
+bool CreateFromSkewx(const std::vector<std::string>& paramVec, Matrix4& matrix,
+    const SvgLengthScaleRule& lengthRule)
 {
     if (paramVec.size() != PARAM_COUNT1) {
         return false;
@@ -104,7 +134,8 @@ bool CreateFromSkewx(const std::vector<std::string>& paramVec, Matrix4& matrix)
     return true;
 }
 
-bool CreateFromSkewy(const std::vector<std::string>& paramVec, Matrix4& matrix)
+bool CreateFromSkewy(const std::vector<std::string>& paramVec, Matrix4& matrix,
+    const SvgLengthScaleRule& lengthRule)
 {
     if (paramVec.size() != PARAM_COUNT1) {
         return false;
@@ -115,7 +146,8 @@ bool CreateFromSkewy(const std::vector<std::string>& paramVec, Matrix4& matrix)
     return true;
 }
 
-bool CreateFromMatrix(const std::vector<std::string>& paramVec, Matrix4& matrix)
+bool CreateFromMatrix(const std::vector<std::string>& paramVec, Matrix4& matrix,
+    const SvgLengthScaleRule& lengthRule)
 {
     if (paramVec.size() != TRANSFORM_MATRIX_PARA_AMOUNT) {
         return false;
@@ -130,10 +162,12 @@ bool CreateFromMatrix(const std::vector<std::string>& paramVec, Matrix4& matrix)
     return true;
 }
 
-using TransformMatrixCreator = bool (*)(const std::vector<std::string>& paramVec, Matrix4& matrix);
+using TransformMatrixCreator = bool (*)(const std::vector<std::string>& paramVec, Matrix4& matrix,
+    const SvgLengthScaleRule& lengthRule);
 
 bool NGSvgTransform::UpdateSingleTransform(
-    const std::string& funcType, const std::vector<std::string>& paramVec, Matrix4& matrix)
+    const std::string& funcType, const std::vector<std::string>& paramVec, Matrix4& matrix,
+    const SvgLengthScaleRule& lengthRule)
 {
     static const LinearMapNode<TransformMatrixCreator> matrix4Creator[] = {
         { TRANSFORM_MATRIX, CreateFromMatrix },
@@ -147,7 +181,7 @@ bool NGSvgTransform::UpdateSingleTransform(
     if (index < 0) {
         return false;
     }
-    return matrix4Creator[index].value(paramVec, matrix);
+    return matrix4Creator[index].value(paramVec, matrix, lengthRule);
 }
 
 void UpdateTransformPivot(const std::string& funcType, const std::vector<std::string>& paramVec, Offset& finalPivot)
@@ -158,13 +192,14 @@ void UpdateTransformPivot(const std::string& funcType, const std::vector<std::st
     }
 }
 
-Matrix4 NGSvgTransform::CreateMatrix4(const std::vector<NG::TransformInfo>& transformVec, const Offset& globalPivot)
+Matrix4 NGSvgTransform::CreateMatrix4(const std::vector<NG::TransformInfo>& transformVec, const Offset& globalPivot,
+    const SvgLengthScaleRule& lengthRule)
 {
     Matrix4 retMatrix;
     for (auto& attr : transformVec) {
         Matrix4 funcMatrix;
         Offset finalPivot = globalPivot;
-        bool isUpdated = UpdateSingleTransform(attr.funcType, attr.paramVec, funcMatrix);
+        bool isUpdated = UpdateSingleTransform(attr.funcType, attr.paramVec, funcMatrix, lengthRule);
         if (!isUpdated) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "CreateMatrix4 failed. funcType:[%{public}s], param cnt:%{public}zu",
                 attr.funcType.c_str(), attr.paramVec.size());

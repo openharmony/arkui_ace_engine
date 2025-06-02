@@ -74,6 +74,11 @@ void GetTextCaretMetrics(RefPtr<FrameNode>& targetNode, CaretMetricsF& caretMetr
     }
 }
 
+namespace TextChangeType {
+    const std::string ADD = "addText";
+    const std::string REMOVE = "removeText";
+};
+
 class TextGestureSelector : public virtual AceType {
     DECLARE_ACE_TYPE(TextGestureSelector, AceType);
 
@@ -254,6 +259,10 @@ public:
     {
         return (sourceTool == SourceTool::MOUSE || sourceTool == SourceTool::TOUCHPAD);
     }
+    std::u16string TruncateText(const std::u16string& text, const size_t& length) const;
+    size_t CountUtf16Chars(const std::u16string& s);
+    static void DetectTextDiff(const std::string& beforeText, const std::string& latestContent, std::string& addedText,
+        std::string& removedText);
 
 protected:
     TextSelector textSelector_;
@@ -265,6 +274,8 @@ protected:
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     RectF contentRect_;
     Dimension avoidKeyboardOffset_ = 24.0_vp;
+    // for text change accessibility event
+    std::string textCache_;
     ACE_DISALLOW_COPY_AND_MOVE(TextBase);
 };
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,16 +98,6 @@ public:
         useContentModifier_->Set(useContentModifier);
     }
 
-    void SetForegroundColorParseFailed(bool isForegroundColorParseFailed)
-    {
-        isForegroundColorParseFailed_ = isForegroundColorParseFailed;
-    }
-
-    bool GetForegroundColorParseFailed() const
-    {
-        return isForegroundColorParseFailed_;
-    }
-
 private:
     void AdjustMatrix(RSCamera3D& camera, RSMatrix& matrix);
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
@@ -135,7 +125,6 @@ private:
     LoadingProgressOwner loadingProgressOwner_;
     bool isLoading_ = false;
     bool isVisible_ = false;
-    bool isForegroundColorParseFailed_ = false;
     float recycleSizeScale_ = 1.0f;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };

@@ -555,6 +555,8 @@ void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
 void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node) {}
 
+void PipelineContext::SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node) {}
+
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
@@ -1018,6 +1020,13 @@ ColorMode PipelineContext::GetColorMode() const
     return MockContainer::mockColorMode_;
 }
 
+const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonitor()
+{
+    if (!nodeRenderStatusMonitor_) {
+        nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
+    }
+    return nodeRenderStatusMonitor_;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1311,5 +1320,7 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 {
     windowSizeChangeReason_ = reason;
 }
+
+void NG::PipelineContext::NotifyColorModeChange(uint32_t colorMode) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

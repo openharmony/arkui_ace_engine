@@ -16,6 +16,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_clock_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "frameworks/base/geometry/calc_dimension.h"
@@ -84,7 +85,7 @@ ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     std::string format;
-    ArkTSUtils::GetStringFromJS(vm, formatArg, format);
+    ArkTSUtils::ParseJsString(vm, formatArg, format);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (0 == format.length() || DEFAULT_STR == format) {
@@ -476,6 +477,12 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockTimeZoneOffset(ArkUIRuntimeC
     }
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto themeColors = Framework::JSThemeUtils::GetThemeColors();
+        if (themeColors.has_value()) {
+            nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, themeColors->FontSecondary().GetValue());
+        }
+    }
     nodeModifiers->getTextClockModifier()->setTextClockTimeZoneOffset(nativeNode, hourWest);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -488,6 +495,14 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockController(ArkUIRuntimeCallI
     Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto themeColors = Framework::JSThemeUtils::GetThemeColors();
+        if (themeColors.has_value()) {
+            auto nodeModifiers = GetArkUINodeModifiers();
+            CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+            nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, themeColors->FontSecondary().GetValue());
+        }
+    }
 
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));

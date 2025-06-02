@@ -216,6 +216,33 @@ int32_t UIContentServiceProxy::SendCommandAsync(int32_t id, const std::string& c
     return Remote()->SendRequest(SENDCOMMAND_ASYNC_EVENT, data, reply, option);
 }
 
+int32_t UIContentServiceProxy::SendCommand(const std::string command)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCommand write interface token failed");
+        return FAILED;
+    }
+
+    if (report_ == nullptr) {
+        LOGW("SendCommand is nullptr,connect is not execute");
+        return FAILED;
+    }
+
+    if (!data.WriteString(command)) {
+        LOGW("SendCommand WriteStringVector  failed");
+        return FAILED;
+    }
+
+    if (Remote()->SendRequest(SEND_COMMAND, data, reply, option) != ERR_NONE) {
+        LOGW("SendCommand send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceProxy::UnregisterClickEventCallback()
 {
     MessageParcel data;

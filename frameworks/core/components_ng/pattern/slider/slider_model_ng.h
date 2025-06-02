@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
+#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 
 namespace OHOS::Ace::NG {
 class SliderConfiguration : public CommonConfiguration {
@@ -63,6 +64,13 @@ public:
     void SetSliderInteractionMode(SliderInteraction mode) override;
     void SetMinResponsiveDistance(float value) override;
     void SetValidSlideRange(float fromValue, float toValue) override;
+    void SetPrefix(const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options) override;
+    void SetSuffix(const RefPtr<UINode>& content, const NG::SliderSuffixOptions& options) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const SliderColorType sliderColorType) override;
+    void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj,
+        const std::string bundleName, const std::string moduleName) override;
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, const bool isShowTips) override;
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
 #endif
@@ -107,6 +115,8 @@ public:
     static void SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode);
     static void SetMinResponsiveDistance(FrameNode* frameNode, float value);
     static void SetValidSlideRange(FrameNode* frameNode, float fromValue, float toValue);
+    static void SetPrefix(FrameNode* frameNode, const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options);
+    static void SetSuffix(FrameNode* frameNode, const RefPtr<UINode>& content, const NG::SliderSuffixOptions& options);
     static void SetBlockImage(
         FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName);
     static void SetSelectedBorderRadius(FrameNode* frameNode, const Dimension& value);
@@ -130,6 +140,8 @@ public:
     static void ResetSelectedBorderRadius(FrameNode* frameNode);
     static void ResetSliderInteractionMode(FrameNode* frameNode);
     static void ResetMinResponsiveDistance(FrameNode* frameNode);
+    static void ResetPrefix(FrameNode* frameNode);
+    static void ResetSuffix(FrameNode* frameNode);
 #ifdef SUPPORT_DIGITAL_CROWN
     static void ResetDigitalCrownSensitivity(FrameNode* frameNode);
 #endif
@@ -171,6 +183,7 @@ public:
 
 private:
     void SetSliderValue(float value);
+    std::string ColorTypeToString(const SliderColorType sliderColorType);
 };
 
 } // namespace OHOS::Ace::NG

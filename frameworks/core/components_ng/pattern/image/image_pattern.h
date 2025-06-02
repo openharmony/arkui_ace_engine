@@ -433,7 +433,7 @@ private:
     bool CheckIfNeedLayout();
     void OnImageDataReady();
     void OnCompleteInDataReady();
-    void OnImageLoadFail(const std::string& errorMsg);
+    void OnImageLoadFail(const std::string& errorMsg, const ImageErrorInfo& errorInfo);
     void OnImageLoadSuccess();
     void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
@@ -508,6 +508,8 @@ private:
     void ControlAnimation(int32_t index);
     void SetObscured();
     void OnKeyEvent();
+    void ReportComponentChangeEvent(const std::string& value);
+
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;

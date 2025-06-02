@@ -1293,7 +1293,10 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg028, TestSize.Level1)
      * @tc.steps: step2. create option pattern.
      * @tc.expected: option bg color meet expectations
      */
-    auto optionPattern = AceType::MakeRefPtr<MenuItemPattern>(true, 0);
+    auto optionNode =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(optionNode, nullptr);
+    auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(optionPattern, nullptr);
     EXPECT_EQ(optionPattern->GetBgColor(), Color::TRANSPARENT);
 }

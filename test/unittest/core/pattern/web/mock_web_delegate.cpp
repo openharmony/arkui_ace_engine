@@ -644,6 +644,7 @@ void WebDelegate::UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnable
 void WebDelegate::UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled) {}
 void WebDelegate::UpdateTextZoomRatio(const int32_t& textZoomRatioNum) {}
 void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled) {}
+void WebDelegate::UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port) {}
 void WebDelegate::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) {}
 void WebDelegate::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess) {}
 void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled) {}
@@ -665,6 +666,7 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
 void WebDelegate::UpdateOverlayScrollbarEnabled(bool isEnabled) {}
 void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled) {}
 void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) {}
+void WebDelegate::UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) {}
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag) {}
 void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}
@@ -854,6 +856,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
 #else
 #endif
 }
+void WebDelegate::OnActivateContent() {}
 void WebDelegate::OnWindowExit() {}
 void WebDelegate::OnPageVisible(const std::string& url) {}
 void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs) {}
@@ -1158,6 +1161,18 @@ std::string WebDelegate::GetSelectInfo() const
 {
     return "";
 }
+std::string WebDelegate::GetAllTextInfo() const
+{
+    return "";
+}
+int WebDelegate::GetSelectStartIndex() const
+{
+    return 0;
+}
+int WebDelegate::GetSelectEndIndex() const
+{
+    return 0;
+}
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {
     return Offset();
@@ -1236,4 +1251,7 @@ std::string WebDelegate::GetCurrentLanguage()
 void WebDelegate::RegisterWebWindowFocusChangedListener() {}
 void WebDelegate::UnRegisterWebWindowFocusChangedListener() {}
 void WebDelegate::OnDragAttach() {}
+void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
+    double borderRadiusBottomLeft, double borderRadiusBottomRight)
+{}
 } // namespace OHOS::Ace

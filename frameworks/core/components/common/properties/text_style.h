@@ -85,6 +85,13 @@ enum class FontStyle {
     NONE
 };
 
+enum class SuperscriptStyle {
+    NORMAL,
+    SUPERSCRIPT,
+    SUBSCRIPT,
+    NONE
+};
+
 namespace StringUtils {
 inline std::string ToString(const FontStyle& fontStyle)
 {
@@ -544,11 +551,18 @@ public:
     bool operator==(const TextStyle& rhs) const;
     bool operator!=(const TextStyle& rhs) const;
 
+    static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style,
+        const NG::InspectorFilter& filter);
+
+    static std::string GetDeclarationString(
+        const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
+        const std::optional<TextDecorationStyle>& textDecorationStyle, const std::optional<float>& lineThicknessScale);
+
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextBaseline, TextBaseline, TextBaseline::ALPHABETIC, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(BaselineOffset, Dimension, TextStyleAttribute::BASELINE_SHIFT);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
-        TextDecoration, TextDecoration, TextDecoration::NONE, TextStyleAttribute::DECRATION);
+        TextDecoration, std::vector<TextDecoration>, { TextDecoration::NONE }, TextStyleAttribute::DECRATION);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextDecorationStyle, TextDecorationStyle, TextDecorationStyle::SOLID, TextStyleAttribute::DECORATION_STYLE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
@@ -594,7 +608,17 @@ public:
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         TextDirection, TextDirection, TextDirection::AUTO, ParagraphStyleAttribute::DIRECTION);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(HeightOnly, bool, false, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
+        LineThicknessScale, float, 1.0f, TextStyleAttribute::DECORATION_THICKNESS_SCALE);
+    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
+        StrokeWidth, Dimension, Dimension(0.0f, DimensionUnit::PX), TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE(StrokeColor, Color, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
+        Superscript, SuperscriptStyle, SuperscriptStyle::NORMAL, TextStyleAttribute::RE_CREATE);
 
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
+        OptimizeTrailingSpace, bool, false, ParagraphStyleAttribute::RE_CREATE);
+    
     // for Symbol
     ACE_DEFINE_SYMBOL_STYLE(RenderColors, std::vector<Color>, SymbolStyleAttribute::COLOR_LIST);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(RenderStrategy, int32_t, 0, SymbolStyleAttribute::RENDER_MODE);
@@ -672,6 +696,18 @@ public:
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::HEIGHT_ONLY));
         lineHeight_ = lineHeight;
         hasHeightOverride_ = hasHeightOverride;
+    }
+
+    void SetTextDecoration(TextDecoration value)
+    {
+        std::vector<TextDecoration> array { value };
+        SetTextDecoration(array);
+    }
+
+    TextDecoration GetTextDecorationFirst() const
+    {
+        return GetTextDecoration().size() > 0 ?
+            GetTextDecoration()[0] : TextDecoration::NONE;
     }
 
     const Dimension& GetParagraphSpacing() const

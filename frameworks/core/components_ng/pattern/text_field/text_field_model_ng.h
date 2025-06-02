@@ -86,6 +86,8 @@ public:
     void SetBarState(OHOS::Ace::DisplayMode value) override;
     void SetMaxViewLines(uint32_t value) override;
     void SetNormalMaxViewLines(uint32_t value) override;
+    void SetOverflowMode(OverflowMode value) override;
+    void SetMinLines(uint32_t value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetNormalUnderlineColor(const Color& normalColor) override;
@@ -104,6 +106,7 @@ public:
     void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) override;
     void SetPasswordRules(const std::string& passwordRules) override;
     void SetEnableAutoFill(bool enableAutoFill) override;
+    void SetEnableAutoFillAnimation(bool enableAutoFillAnimation) override;
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override;
     void SetCancelIconSize(const CalcDimension& iconSize) override;
     void SetCanacelIconSrc(
@@ -136,6 +139,9 @@ public:
     void SetEnableHapticFeedback(bool state) override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
+    void SetStrokeWidth(const Dimension& value) override;
+    void SetStrokeColor(const Color& value) override;
+    void ResetStrokeColor() override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -144,6 +150,7 @@ public:
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetHalfLeading(FrameNode* frameNode, const bool& value);
     static void SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines);
+    static float GetLineSpacing(FrameNode* frameNode);
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
     static void SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value);
@@ -160,12 +167,15 @@ public:
     static bool GetSelectionMenuHidden(FrameNode* frameNode);
     static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);
     static void SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill);
+    static void SetEnableAutoFillAnimation(FrameNode* frameNode, bool enableAutoFillAnimation);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetBarState(FrameNode* frameNode, OHOS::Ace::DisplayMode value);
     static void SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value);
+    static void SetOverflowMode(FrameNode* frameNode, OverflowMode value);
+    static void SetMinLines(FrameNode* frameNode, uint32_t value);
     static void SetType(FrameNode* frameNode, TextInputType value);
     static void SetContentType(const FrameNode* frameNode, const TextContentType& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
@@ -269,6 +279,7 @@ public:
     static void SetInputFilterError(FrameNode* frameNode, const std::function<void(const std::u16string&)>& onError);
     static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
     static bool GetEnableAutoFill(FrameNode* frameNode);
+    static bool GetEnableAutoFillAnimation(FrameNode* frameNode);
     static TextContentType GetContentType(FrameNode* frameNode);
     static UserUnderlineColor GetUnderLineColor(FrameNode* frameNode);
     static std::string GetPasswordRules(FrameNode* frameNode);
@@ -313,6 +324,11 @@ public:
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static int32_t GetKeyboardAppearance(FrameNode* frameNode);
+    static Dimension GetStrokeWidth(FrameNode* frameNode);
+    static Color GetStrokeColor(FrameNode* frameNode);
+    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetStrokeColor(FrameNode* frameNode, const Color& value);
+    static void ResetStrokeColor(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

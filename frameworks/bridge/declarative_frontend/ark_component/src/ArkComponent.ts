@@ -707,8 +707,8 @@ class OpacityModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class AlignModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class AlignModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
     super(value);
   }
   static identity: Symbol = Symbol('align');
@@ -720,6 +720,20 @@ class AlignModifier extends ModifierWithKey<number> {
     }
   }
 }
+
+class LayoutGravityModifier extends ModifierWithKey<string> {
+    constructor(value: string) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('layoutGravity');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().common.resetLayoutGravity(node);
+      } else {
+        getUINativeModule().common.setLayoutGravity(node, this.value);
+      }
+    }
+  }
 
 class BackdropBlurModifier extends ModifierWithKey<ArkBlurOptions> {
   constructor(value: ArkBlurOptions) {
@@ -1554,8 +1568,8 @@ class ScaleModifier extends ModifierWithKey<ScaleOptions> {
   }
 }
 
-class RotateModifier extends ModifierWithKey<RotateOptions> {
-  constructor(value: RotateOptions) {
+class RotateModifier extends ModifierWithKey<RotateOptions | RotateAngleOptions> {
+  constructor(value: RotateOptions | RotateAngleOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('rotate');
@@ -1563,12 +1577,35 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
     if (reset) {
       getUINativeModule().common.resetRotate(node);
     } else {
-      getUINativeModule().common.setRotate(node, this.value.x, this.value.y, this.value.z, this.value.angle,
-        this.value.centerX, this.value.centerY, this.value.centerY, this.value.perspective);
+      if ('angle' in this.value) {
+        getUINativeModule().common.setRotate(
+          node,
+          this.value.x,
+          this.value.y,
+          this.value.z,
+          this.value.angle,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      } else {
+        getUINativeModule().common.setRotateAngle(
+          node,
+          this.value.angleX,
+          this.value.angleY,
+          this.value.angleZ,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      }
     }
   }
   checkObjectDiff(): boolean {
-    return !(
+    if ('angle' in this.value) {
+      return !(
       this.value.x === this.stageValue.x &&
       this.value.y === this.stageValue.y &&
       this.value.z === this.stageValue.z &&
@@ -1577,7 +1614,18 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
       this.value.centerY === this.stageValue.centerY &&
       this.value.centerZ === this.stageValue.centerZ &&
       this.value.perspective === this.stageValue.perspective
-    );
+      );
+    } else {
+      return !(
+        this.value.angleX === this.stageValue.angleX &&
+        this.value.angleY === this.stageValue.angleY &&
+        this.value.angleZ === this.stageValue.angleZ &&
+        this.value.centerX === (this.stageValue.centerX) &&
+        this.value.centerY === (this.stageValue.centerY) &&
+        this.value.centerZ === (this.stageValue.centerZ) &&
+        this.value.perspective === this.stageValue.perspective
+      );
+    }
   }
 }
 
@@ -2504,6 +2552,20 @@ class AccessibilityFocusCallbackModifier extends ModifierWithKey<AccessibilityFo
       getUINativeModule().common.resetAccessibilityFocusCallback(node);
     } else {
       getUINativeModule().common.setAccessibilityFocusCallback(node, this.value);
+    }
+  }
+}
+
+class AccessibilityActionInterceptCallbackModifier extends ModifierWithKey<AccessibilityActionInterceptCallback> {
+  constructor(value: AccessibilityActionInterceptCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAccessibilityActionIntercept');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAccessibilityActionIntercept(node);
+    } else {
+      getUINativeModule().common.setOnAccessibilityActionIntercept(node, this.value);
     }
   }
 }
@@ -3505,6 +3567,95 @@ class FocusBoxModifier extends ModifierWithKey<FocusBoxStyle> {
   }
 }
 
+class ParticleEmitterModifier extends ModifierWithKey<object> {
+  constructor(value) {
+    super(value);
+  }
+  
+  static identity: Symbol = Symbol('emitter');
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().particle.resetEmitter(node);
+    }
+    else {
+      let dataArray = [];
+      if (!Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let arkEmitterPropertyOptions = new ArkEmitterPropertyOptions();
+        let data = this.value[i];
+        arkEmitterPropertyOptions.index = 0;
+        if (data.index > 0) {
+          arkEmitterPropertyOptions.index = data.index;
+        }
+
+        if (isNumber(data.emitRate)) {
+          arkEmitterPropertyOptions.isSetEmitRate = 1;
+          if (data.emitRate >= 0) {
+            arkEmitterPropertyOptions.emitRate = data.emitRate;
+          } else {
+            arkEmitterPropertyOptions.emitRate = 5;
+          }
+        }
+
+        if (isObject(data.position)) {
+          if (isNumber(data.position.x) && isNumber(data.position.y)) {
+            arkEmitterPropertyOptions.isSetPosition = 1;
+            arkEmitterPropertyOptions.positionX = data.position.x;
+            arkEmitterPropertyOptions.positionY = data.position.y;
+          }
+        }
+
+        if (isObject(data.size)) {
+          if (data.size.width > 0 && data.size.height > 0) {
+            arkEmitterPropertyOptions.isSetSize = 1;
+            arkEmitterPropertyOptions.sizeWidth = data.size.width;
+            arkEmitterPropertyOptions.sizeHeight = data.size.height;
+          }
+        }
+
+        if (isObject(data.annulusRegion)) {
+          arkEmitterPropertyOptions.isSetAnnulusRegion = 1;
+          if (isObject(data.annulusRegion.center) &&
+            isObject(data.annulusRegion.center.x) && isObject(data.annulusRegion.center.y)) {
+            arkEmitterPropertyOptions.isSetCenter = 1;
+            arkEmitterPropertyOptions.centerXValue = data.annulusRegion.center.x.value;
+            arkEmitterPropertyOptions.centerXUnit = data.annulusRegion.center.x.unit;
+            arkEmitterPropertyOptions.centerYValue = data.annulusRegion.center.y.value;
+            arkEmitterPropertyOptions.centerYUnit = data.annulusRegion.center.y.unit;
+          }
+          if (isObject(data.annulusRegion.innerRadius)) {
+            arkEmitterPropertyOptions.isSetInnerRadius = 1;
+            arkEmitterPropertyOptions.innerRadiusValue = data.annulusRegion.innerRadius.value;
+            arkEmitterPropertyOptions.innerRadiusUnit = data.annulusRegion.innerRadius.unit;
+          }
+          if (isObject(data.annulusRegion.outerRadius)) {
+            arkEmitterPropertyOptions.isSetOuterRadius = 1;
+            arkEmitterPropertyOptions.outerRadiusValue = data.annulusRegion.outerRadius.value;
+            arkEmitterPropertyOptions.outerRadiusUnit = data.annulusRegion.outerRadius.unit;
+          }
+          if (isNumber(data.annulusRegion.startAngle)) {
+            arkEmitterPropertyOptions.isSetStartAngle = 1;
+            arkEmitterPropertyOptions.startAngle = data.annulusRegion.startAngle;
+          }
+          if (isNumber(data.annulusRegion.endAngle)) {
+            arkEmitterPropertyOptions.isSetEndAngle = 1;
+            arkEmitterPropertyOptions.endAngle = data.annulusRegion.endAngle;
+          }
+        }
+        dataArray.push(arkEmitterPropertyOptions);
+      }
+      getUINativeModule().particle.setEmitter(node, dataArray);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class NextFocusModifier extends ModifierWithKey<FocusMovement> {
   constructor(value: FocusMovement) {
     super(value);
@@ -3520,6 +3671,149 @@ class NextFocusModifier extends ModifierWithKey<FocusMovement> {
   }
 }
 
+declare type PreDragCallback = (preDragStatus?: PreDragStatus) => void;
+class PreDragModifier extends ModifierWithKey<PreDragCallback> {
+  constructor(value: PreDragCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onPreDrag');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnPreDrag(node);
+    } else {
+      getUINativeModule().common.setOnPreDrag(node, this.value);
+    }
+  }
+}
+
+class OnVisibleAreaChangeModifier extends ModifierWithKey<ArkOnVisibleAreaChange> {
+  constructor(value: ArkOnVisibleAreaChange) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('onVisibleAreaChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnVisibleAreaChange(node);
+    } else {
+      getUINativeModule().common.setOnVisibleAreaChange(node, this.value.ratios, this.value.event);
+    }
+  }
+}
+
+declare type TouchInterceptCallback = Callback<TouchEvent, HitTestMode>;
+class OnTouchInterceptModifier extends ModifierWithKey<TouchInterceptCallback> {
+  constructor(value: TouchInterceptCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onTouchIntercept');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnTouchIntercept(node);
+    } else {
+      getUINativeModule().common.setOnTouchIntercept(node, this.value);
+    }
+  }
+}
+
+declare type ChildTouchTestCallback = (value: Array<TouchTestInfo>) => TouchResult;
+class OnChildTouchTestModifier extends ModifierWithKey<ChildTouchTestCallback> {
+  constructor(value: ChildTouchTestCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onChildTouchTest');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+        getUINativeModule().common.resetOnChildTouchTest(node);
+      } else {
+        getUINativeModule().common.setOnChildTouchTest(node, this.value);
+    }
+  }
+}
+
+class VisualEffectModifier extends ModifierWithKey<VisualEffect> {
+  constructor(value: VisualEffect) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('visualEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetVisualEffect(node);
+    } else {
+      getUINativeModule().common.setVisualEffect(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.value === this.stageValue);
+  }
+}
+
+class BackgroundFilterModifier extends ModifierWithKey<Filter> {
+  constructor(value: Filter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundFilter(node);
+    } else {
+      getUINativeModule().common.setBackgroundFilter(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.value === this.stageValue);
+  }
+}
+
+class ForegroundFilterModifier extends ModifierWithKey<Filter> {
+  constructor(value: Filter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('foregroundFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetForegroundFilter(node);
+    } else {
+      getUINativeModule().common.setForegroundFilter(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.value === this.stageValue);
+  }
+}
+
+class CompositingFilterModifier extends ModifierWithKey<Filter> {
+  constructor(value: Filter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('compositingFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetCompositingFilter(node);
+    } else {
+      getUINativeModule().common.setCompositingFilter(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.value === this.stageValue);
+  }
+}
+
+class FreezeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('freeze');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFreeze(node);
+    } else {
+      getUINativeModule().common.setFreeze(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -3577,6 +3871,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _gestureEvent: UIGestureEvent;
   _instanceId: number;
   _needDiff: boolean;
+  private _onVisibleAreaChange: ArkOnVisibleAreaChange = null;
+  private _onPreDragEvent: PreDragCallback = null;
+  private _onTouchInterceptEvent: TouchInterceptCallback = null;
+  private _onChildTouchTestEvent: ChildTouchTestCallback = null;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this.nativePtr = nativePtr;
@@ -4542,11 +4840,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  align(value: Alignment): this {
-    if (isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
-    } else {
+  align(value: Alignment | LocalizedAlignment): this {
+    if (!isNumber(value) && !isString(value)) {
       modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
+    }
+    return this;
+  }
+
+  layoutGravity(value:string): this {
+    if (!isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, value);
     }
     return this;
   }
@@ -4713,7 +5020,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onPreDrag(event: (preDragStatus: PreDragStatus) => void): this {
-    throw new Error('Method not implemented.');
+    this._onPreDragEvent = event;
+    modifierWithKey(this._modifiersWithKeys, PreDragModifier.identity, PreDragModifier, event);
+    return this;
   }
 
   allowDrop(value: Array<UniformDataType>): this {
@@ -4936,7 +5245,28 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onVisibleAreaChange(ratios: Array<number>, event: (isVisible: boolean, currentRatio: number) => void): this {
-    throw new Error('Method not implemented.');
+    let onVisibleAreaChange = new ArkOnVisibleAreaChange();
+    onVisibleAreaChange.ratios = ratios;
+    onVisibleAreaChange.event = event;
+    this._onVisibleAreaChange = onVisibleAreaChange;
+    if (typeof ratios === 'undefined' || typeof event === 'undefined') {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaChangeModifier.identity, OnVisibleAreaChangeModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaChangeModifier.identity, OnVisibleAreaChangeModifier, onVisibleAreaChange);
+    }
+    return this;
+  }
+
+  onChildTouchTest(event: (value: Array<TouchTestInfo>) => TouchResult): this {
+    this._onChildTouchTestEvent = event;
+    modifierWithKey(this._modifiersWithKeys, OnChildTouchTestModifier.identity, OnChildTouchTestModifier, event);
+    return this;
+  }
+
+  onTouchIntercept(callback: Callback<TouchEvent, HitTestMode>): this {
+    this._onTouchInterceptEvent = callback;
+    modifierWithKey(this._modifiersWithKeys, OnTouchInterceptModifier.identity, OnTouchInterceptModifier, callback);
+    return this;
   }
 
   sphericalEffect(value: number): this {
@@ -4998,6 +5328,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onAccessibilityFocus(value: AccessibilityFocusCallback): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
+    return this;
+  }
+
+  onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback): this {
+    modifierWithKey(this._modifiersWithKeys,
+      AccessibilityActionInterceptCallbackModifier.identity, AccessibilityActionInterceptCallbackModifier, value);
     return this;
   }
 
@@ -5103,6 +5439,38 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   nextFocus(value:FocusMovement):this {
     modifierWithKey(this._modifiersWithKeys, NextFocusModifier.identity, NextFocusModifier, value);
+  }
+  visualEffect(effect: VisualEffect): this {
+    modifierWithKey(this._modifiersWithKeys, VisualEffectModifier.identity, VisualEffectModifier, effect);
+    return this;
+  }
+  backgroundFilter(filter: Filter): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundFilterModifier.identity, BackgroundFilterModifier, filter);
+    return this;
+  }
+  foregroundFilter(filter: Filter): this {
+    modifierWithKey(this._modifiersWithKeys, ForegroundFilterModifier.identity, ForegroundFilterModifier, filter);
+    return this;
+  }
+  compositingFilter(filter: Filter): this {
+    modifierWithKey(this._modifiersWithKeys, CompositingFilterModifier.identity, CompositingFilterModifier, filter);
+    return this;
+  }
+  foregroundEffect(options: ForegroundEffectOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, options);
+    return this;
+  }
+  freeze(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, FreezeModifier.identity, FreezeModifier, value);
+    return this;
+  }
+  maskShape(value: CircleShape | EllipseShape | PathShape | RectShape): this {
+    modifierWithKey(this._modifiersWithKeys, MaskShapeModifier.identity, MaskShapeModifier, value);
+    return this;
+  }
+  clipShape(value: CircleShape | EllipseShape | PathShape | RectShape): this {
+    modifierWithKey(this._modifiersWithKeys, ClipShapeModifier.identity, ClipShapeModifier, value);
+    return this;
   }
 }
 
@@ -5538,6 +5906,31 @@ function __getCustomPropertyString__(nodeId: number, key: string): string | unde
   }
 
   return undefined;
+}
+
+function getCustomPropertyMapString(nodeId: number): string | undefined {
+  const customProperties = __elementIdToCustomProperties__.get(nodeId);
+  if (customProperties === undefined) {
+    return undefined;
+  }
+  const resultObj = Object.create(null);
+  const obj = Object.fromEntries(customProperties);
+  Object.keys(obj).forEach(key => {
+    const value = obj[key];
+    let str = "{}";
+    try {
+      str = JSON.stringify(value);
+    } catch (err) {
+      resultObj[key] = "Unsupported Type";
+      return;
+    }
+    if ((value !== "{}" && str === "{}") || str == null) {
+      resultObj[key] = "Unsupported Type";
+    } else {
+      resultObj[key] = value;
+    }
+  });
+  return JSON.stringify(resultObj);
 }
 
 function __setCustomProperty__(nodeId: number, key: string, value: Object): boolean {

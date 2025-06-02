@@ -103,11 +103,13 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
     };
 
     auto onActiveRange = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onActiveRange")](
-        int32_t fromIndex, int32_t toIndex, bool isLoop) -> void {
+        int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto params = ConvertToJSValues(
             fromIndex != INT32_MAX ? fromIndex : std::numeric_limits<double>::quiet_NaN(),
             toIndex != INT32_MAX ? toIndex : std::numeric_limits<double>::quiet_NaN(),
+            vStart != INT32_MAX ? vStart : std::numeric_limits<double>::quiet_NaN(),
+            vEnd != INT32_MAX ? vEnd : std::numeric_limits<double>::quiet_NaN(),
             isLoop);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
@@ -336,6 +338,12 @@ void JSRepeatVirtualScroll2::SetCreateByTemplate(const JSCallbackInfo& info)
     RepeatVirtualScroll2Model::GetInstance()->SetCreateByTemplate(info[0]->ToBoolean());
 }
 
+void JSRepeatVirtualScroll2::IsInAnimation(const JSCallbackInfo& info)
+{
+    auto result = RepeatVirtualScroll2Model::GetInstance()->IsInAnimation();
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
 void JSRepeatVirtualScroll2::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeatVirtualScroll2>::Declare("RepeatVirtualScroll2Native");
@@ -352,6 +360,7 @@ void JSRepeatVirtualScroll2::JSBind(BindingTarget globalObj)
 
     JSClass<JSRepeatVirtualScroll2>::StaticMethod("onMove", &JSRepeatVirtualScroll2::OnMove);
     JSClass<JSRepeatVirtualScroll2>::StaticMethod("setCreateByTemplate", &JSRepeatVirtualScroll2::SetCreateByTemplate);
+    JSClass<JSRepeatVirtualScroll2>::StaticMethod("isInAnimation", &JSRepeatVirtualScroll2::IsInAnimation);
     JSClass<JSRepeatVirtualScroll2>::Bind<>(globalObj);
 }
 

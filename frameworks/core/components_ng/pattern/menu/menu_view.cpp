@@ -146,7 +146,10 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
-
+    auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+    if (targetNode && targetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        menuNode->SetThemeScopeId(targetNode->GetThemeScopeId());
+    }
     auto renderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
@@ -154,7 +157,9 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         if (!pipeLineContext) {
             return { wrapperNode, menuNode };
         }
-        auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+        auto selectTheme = targetNode && targetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                               ? pipeLineContext->GetTheme<SelectTheme>(targetNode->GetThemeScopeId())
+                               : pipeLineContext->GetTheme<SelectTheme>();
         if (!selectTheme) {
             return { wrapperNode, menuNode };
         }
@@ -805,14 +810,56 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     geometryNode->SetFrameOffset(imageOffset);
 }
 
-void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
+void ShowFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<OverlayManager>& manager,
+    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<Container>& container)
 {
+    CHECK_NULL_VOID(targetNode && manager && columnNode && menuWrapperNode && container);
     auto parent = targetNode->GetParent();
     CHECK_NULL_VOID(parent);
     while (parent->GetDepth() != 1) {
         parent = parent->GetParent();
         CHECK_NULL_VOID(parent);
     }
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto menuNode = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
+    auto showFilter = [columnNode, manager, menuWrapperNode](const RefPtr<UINode>& parent) {
+        columnNode->MountToParent(parent);
+        columnNode->OnMountToParentDone();
+        manager->SetHasFilter(true);
+        manager->SetFilterActive(true);
+        manager->SetFilterColumnNode(columnNode);
+        parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        manager->ShowFilterAnimation(columnNode, menuWrapperNode);
+    };
+    if ((menuWrapperPattern->GetMenuMaskEnable() &&
+        (menuPattern->GetMenuType() == MenuType::MENU || menuWrapperPattern->GetIsOpenMenu()) &&
+        !isShowInSubWindow)) {
+        auto rootNodeWeak = manager->GetRootNode();
+        auto rootNode = rootNodeWeak.Upgrade();
+        CHECK_NULL_VOID(rootNode);
+        showFilter(rootNode);
+    } else if (container->IsScenceBoardWindow()) {
+        auto windowScene = manager->FindWindowScene(targetNode);
+        manager->MountFilterToWindowScene(columnNode, windowScene);
+        manager->ShowFilterAnimation(columnNode, menuWrapperNode);
+    } else if (container->IsUIExtensionWindow()) {
+        // mount filter node on subwindow to ensure filter node's size equals to host window's size
+        menuWrapperPattern->SetFilterColumnNode(columnNode);
+    } else {
+        showFilter(parent);
+    }
+}
+
+void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
+{
+    auto parent = targetNode->GetParent();
+    CHECK_NULL_VOID(parent);
     auto containerId = Container::CurrentId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
         containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
@@ -827,8 +874,11 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
+        CHECK_NULL_VOID(menuWrapperNode);
+        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID(isBindOverlayValue && menuTheme->GetHasFilter());
+        CHECK_NULL_VOID((menuWrapperPattern->GetMenuMaskEnable() || isBindOverlayValue) && menuTheme->GetHasFilter());
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -837,26 +887,21 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
         if (accessibilityProperty) {
             accessibilityProperty->SetAccessibilityHoverPriority(true); // consume barrierfree hover event
         }
-        // set filter
-        if (container->IsScenceBoardWindow()) {
-            auto windowScene = manager->FindWindowScene(targetNode);
-            manager->MountFilterToWindowScene(columnNode, windowScene);
-            manager->ShowFilterAnimation(columnNode);
-        } else if (container->IsUIExtensionWindow()) {
-            // mount filter node on subwindow to ensure filter node's size equals to host window's size
-            CHECK_NULL_VOID(menuWrapperNode);
-            auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-            CHECK_NULL_VOID(menuWrapperPattern);
-            menuWrapperPattern->SetFilterColumnNode(columnNode);
-        } else {
-            columnNode->MountToParent(parent);
-            columnNode->OnMountToParentDone();
-            manager->SetHasFilter(true);
-            manager->SetFilterActive(true);
-            manager->SetFilterColumnNode(columnNode);
-            parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            manager->ShowFilterAnimation(columnNode);
+        ShowFilter(targetNode, manager, columnNode, menuWrapperNode, container);
+    }
+}
+
+void SetFilterToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
+    const MenuParam& menuParam, bool isAllowedDrag, bool isLiftingDisabled)
+{
+    if (menuParam.maskEnable.has_value()) {
+        if (menuParam.maskEnable.value()) {
+            SetFilter(targetNode, wrapperNode);
         }
+    } else if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE ||
+               (isAllowedDrag && !isLiftingDisabled)) {
+        DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
+        SetFilter(targetNode, wrapperNode);
     }
 }
 
@@ -876,11 +921,9 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
             isAllowedDrag = false;
         }
     }
-    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE ||
-        (isAllowedDrag && !isLiftingDisabled)) {
-        DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
-        SetFilter(targetNode, wrapperNode);
-    }
+
+    SetFilterToMenu(targetNode, wrapperNode, menuParam, isAllowedDrag, isLiftingDisabled);
+
     if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE ||
         (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::NONE &&
             menuParam.menuBindType == MenuBindingType::LONG_PRESS && isAllowedDrag && !isLiftingDisabled) ||
@@ -1033,6 +1076,45 @@ void UpdateMenuBackgroundStyleOption(const RefPtr<FrameNode>& menuNode, const Me
         SetBackgroundEffect(menuNode, backgroundEffectOption);
     }
 }
+
+void UpdateMenuMaskType(const RefPtr<FrameNode>& wrapperNode)
+{
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
+    if (maskEnable) {
+        auto context = wrapperNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto container = Container::GetContainer(context->GetInstanceId());
+        CHECK_NULL_VOID(container);
+        if (container->IsUIExtensionWindow()) {
+            menuWrapperPattern->UpdateFilterMaskType();
+        } else {
+            auto manager = context->GetOverlayManager();
+            CHECK_NULL_VOID(manager);
+            manager->UpdateFilterMaskType(wrapperNode);
+        }
+    }
+}
+
+void UpdateMenuMask(
+    const RefPtr<FrameNode>& wrapperNode, int32_t targetId, const std::string& targetTag, const MenuParam& menuParam)
+{
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuParam.maskEnable.value_or(false)) {
+        menuWrapperPattern->SetMenuMaskEnable(menuParam.maskEnable.value());
+        if (menuParam.maskType.has_value() && menuParam.maskType->maskColor.has_value()) {
+            menuWrapperPattern->SetMenuMaskColor(menuParam.maskType->maskColor.value());
+        }
+        if (menuParam.maskType.has_value() && menuParam.maskType->maskBackGroundBlueStyle.has_value()) {
+            menuWrapperPattern->SetMenuMaskblurStyle(menuParam.maskType->maskBackGroundBlueStyle.value());
+        }
+        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+        SetFilter(targetNode, wrapperNode);
+    }
+}
 } // namespace
 
 void MenuView::SetHasCustomOutline(
@@ -1148,13 +1230,17 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+    if (targetNode && column && targetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        column->UpdateThemeScopeId(targetNode->GetThemeScopeId());
+    }
     if (!menuParam.title.empty()) {
         CreateTitleNode(menuParam.title, column);
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     SetHasCustomOutline(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
-    MountOptionToColumn(params, menuNode, menuParam, column);
+    MountOptionToColumn(params, menuNode, menuParam, column, targetNode);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
@@ -1180,6 +1266,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
     menuNode->MarkModifyDone();
+
+    if (type == MenuType::MENU) {
+        UpdateMenuMask(wrapperNode, targetId, targetTag, menuParam);
+    }
     return wrapperNode;
 }
 
@@ -1300,6 +1390,11 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
         MountTextNode(wrapperNode, previewCustomNode);
+    } else if (type == MenuType::MENU) {
+        if (menuParam.maskEnable.value_or(false)) {
+            auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+            SetFilter(targetNode, wrapperNode);
+        }
     }
     return wrapperNode;
 }
@@ -1315,6 +1410,7 @@ void MenuView::UpdateMenuParam(
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    UpdateMenuMaskType(wrapperNode);
 }
 
 void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
@@ -1322,14 +1418,10 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
 {
     CHECK_NULL_VOID(menuNode);
     CHECK_NULL_VOID(wrapperNode);
-    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
+        UpdateMenuOutlineWhenArrow(menuNode, wrapperNode, menuParam);
     }
     menuNode->MarkModifyDone();
 
@@ -1502,6 +1594,22 @@ void MenuView::UpdateMenuBorderEffect(
     }
 }
 
+void UpdateStyleOptionColorMode(
+    const PipelineContext* pipeLineContext, BlurStyleOption& styleOption, const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_VOID(menuNode);
+    if (menuNode->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        return;
+    }
+    CHECK_NULL_VOID(pipeLineContext);
+    if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::LIGHT) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+    }
+    if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::DARK) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    }
+}
+
 void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     auto menuNodeRenderContext = menuNode->GetRenderContext();
@@ -1514,11 +1622,9 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         BlurStyleOption styleOption;
         if (menuParam.blurStyleOption.has_value()) {
             styleOption = menuParam.blurStyleOption.value();
-            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-                pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
-            } else {
-                pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
-            }
+            styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE
+                ? pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId())
+                : pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
         }
         Color color;
         if (selectTheme->GetMenuBlendBgColor()) {
@@ -1535,6 +1641,7 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         if (menuParam.blurStyleOption.has_value() && menuNodeRenderContext->GetBackgroundEffect().has_value()) {
             menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
         }
+        UpdateStyleOptionColorMode(pipeLineContext, styleOption, menuNode);
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(color);
         if (menuParam.effectOption.has_value()) {
@@ -1669,7 +1776,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
 }
 
 void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
-    const MenuParam& menuParam, RefPtr<FrameNode> column)
+    const MenuParam& menuParam, RefPtr<FrameNode> column, const RefPtr<FrameNode>& targetNode)
 {
     bool optionsHasIcon = GetHasIcon(params);
     bool optionsHasSymbol = GetHasSymbol(params);
@@ -1710,8 +1817,14 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
         if (optionsHasIcon) {
             props->UpdateHasIcon(true);
         }
+        if (targetNode && targetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            optionNode->UpdateThemeScopeId(targetNode->GetThemeScopeId());
+        }
         optionNode->MountToParent(column);
         optionNode->MarkModifyDone();
+    }
+    if (targetNode && targetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        menuNode->UpdateThemeScopeId(targetNode->GetThemeScopeId());
     }
 }
 
@@ -1841,6 +1954,7 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto textAlign = static_cast<TextAlign>(theme->GetOptionContentNormalAlign());
     auto convertValue = ConvertTxtTextAlign(IsRightToLeft, textAlign);
     textProperty->UpdateAlignment(convertValue);
+    textProperty->UpdateWordBreak(theme->GetWordBreak());
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
 
@@ -2145,5 +2259,26 @@ void MenuView::UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, cons
     }
     menuNodeRenderContext->UpdateTransformCenter(DimensionOffset(Offset(x, y)));
     menuNodeRenderContext->UpdateTransformScale({ 0.4f, 0.4f });
+}
+
+void MenuView::UpdateMenuOutlineWhenArrow(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (!menuWrapperPattern->GetHasCustomOutlineWidth()) {
+        return;
+    }
+    CHECK_NULL_VOID(menuNode);
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderWidthProperty outerWidthProp;
+    outerWidthProp.SetBorderWidth(Dimension(0));
+    renderContext->SetOuterBorderWidth(outerWidthProp);
+    BorderColorProperty outerColorProp;
+    outerColorProp.SetColor(Color::TRANSPARENT);
+    renderContext->SetOuterBorderColor(outerColorProp);
+    menuWrapperPattern->SetMenuParam(menuParam);
 }
 } // namespace OHOS::Ace::NG

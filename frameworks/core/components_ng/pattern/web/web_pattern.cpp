@@ -489,6 +489,13 @@ WebPattern::~WebPattern()
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
     ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
     UninitTouchEventListener();
+    if (setWebIdCallback_) {
+        auto setWebIdTask = [callback = setWebIdCallback_]() {
+            CHECK_NULL_VOID(callback);
+            callback(-1);
+        };
+        PostTaskToUI(std::move(setWebIdTask), "ArkUIWebviewControllerSetWebIdTask");
+    }
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
@@ -2878,10 +2885,17 @@ void WebPattern::OnTextZoomRatioUpdate(int32_t value)
     }
 }
 
-void WebPattern::OnWebDebuggingAccessEnabledUpdate(bool value)
+void WebPattern::OnWebDebuggingAccessEnabledAndPortUpdate(
+    const WebPatternProperty::WebDebuggingConfigType& enabled_and_port)
 {
     if (delegate_) {
-        delegate_->UpdateWebDebuggingAccess(value);
+        bool enabled = std::get<0>(enabled_and_port);
+        int32_t port = std::get<1>(enabled_and_port);
+        if (port > 0) {
+            delegate_->UpdateWebDebuggingAccessAndPort(enabled, port);
+        } else {
+            delegate_->UpdateWebDebuggingAccess(enabled);
+        }
     }
 }
 
@@ -3034,6 +3048,13 @@ void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
 {
     if (delegate_) {
         delegate_->UpdateIntrinsicSizeEnabled(value);
+    }
+}
+
+void WebPattern::OnCssDisplayChangeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateCssDisplayChangeEnabled(value);
     }
 }
 
@@ -3342,7 +3363,16 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
         delegate_->UpdateDatabaseEnabled(GetDatabaseAccessEnabledValue(false));
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
-        delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
+        auto webDebugingConfig = GetWebDebuggingAccessEnabledAndPort();
+        if (webDebugingConfig) {
+            bool enabled = std::get<0>(webDebugingConfig.value());
+            int32_t port = std::get<1>(webDebugingConfig.value());
+            if (port > 0) {
+                delegate_->UpdateWebDebuggingAccessAndPort(enabled, port);
+            } else {
+                delegate_->UpdateWebDebuggingAccess(enabled);
+            }
+        }
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
         delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
         delegate_->UpdateMultiWindowAccess(GetMultiWindowAccessEnabledValue(false));
@@ -3384,6 +3414,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateIntrinsicSizeEnabled(GetIntrinsicSizeEnabledValue(false));
+        delegate_->UpdateCssDisplayChangeEnabled(GetCssDisplayChangeEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
 
@@ -3393,6 +3424,7 @@ void WebPattern::OnModifyDone()
         if (GetEnableFollowSystemFontWeight()) {
             delegate_->UpdateEnableFollowSystemFontWeight(GetEnableFollowSystemFontWeight().value());
         }
+        UpdateScrollBarWithBorderRadius();
     }
 
     if (!GetBackgroundColor()) {
@@ -3435,11 +3467,42 @@ void WebPattern::OnModifyDone()
     if (delegate_) {
         delegate_->SetSurfaceDensity(density_);
     }
+    UpdateScrollBarWithBorderRadius();
 }
 
 void WebPattern::SetSurfaceDensity(double density)
 {
     density_ = density;
+}
+
+void WebPattern::UpdateScrollBarWithBorderRadius()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (!renderContext->GetBorderRadius().has_value()) {
+        return;
+    }
+    auto borderRadius = renderContext->GetBorderRadius().value();
+    auto clipState = renderContext->GetClipEdge().value_or(false);
+
+    bool hasBorderRadiusValue = !borderRadius.radiusTopLeft.has_value() || !borderRadius.radiusTopRight.has_value() ||
+                                !borderRadius.radiusBottomLeft.has_value() ||
+                                !borderRadius.radiusBottomRight.has_value();
+    if (hasBorderRadiusValue) {
+        return;
+    }
+
+    CHECK_NULL_VOID(delegate_);
+    if (clipState) {
+        delegate_->SetBorderRadiusFromWeb(borderRadius.radiusTopLeft.value().Value(),
+            borderRadius.radiusTopRight.value().Value(), borderRadius.radiusBottomLeft.value().Value(),
+            borderRadius.radiusBottomRight.value().Value());
+    } else {
+        delegate_->SetBorderRadiusFromWeb(0.0f, 0.0f, 0.0f, 0.0f);
+    }
 }
 
 extern "C" {
@@ -3714,19 +3777,20 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     CHECK_NULL_RETURN(safeAreaManager, false);
     bool keyboardSafeAreaEnabled = safeAreaManager->KeyboardSafeAreaEnabled();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "ProcessVirtualKeyBoard width:%{public}d, height:%{public}d, keyboard:%{public}f, safeArea:%{public}d",
-        width, height, keyboard, keyboardSafeAreaEnabled);
-
+        "ProcessVirtualKeyBoard width:%{public}d, height:%{public}d, keyboard:%{public}f, safeArea:%{public}d", width,
+        height, keyboard, keyboardSafeAreaEnabled);
     if (!isFocus_ || !isVisible_) {
         UpdateOnFocusTextField(false);
         ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
+        UpdateKeyboardSafeArea(true);
         return false;
     }
     UpdateOnFocusTextField(!NearZero(keyboard));
     if (NearZero(keyboard)) {
-        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
+        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled) && UpdateKeyboardSafeArea(true);
     }
-    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled);
+    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled) &&
+           UpdateKeyboardSafeArea(false, keyboard);
 }
 
 void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate)
@@ -4466,6 +4530,157 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
            AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
 }
 
+std::string WebPattern::GetAllTextInfo() const
+{
+    CHECK_NULL_RETURN(delegate_, std::string());
+    return delegate_->GetAllTextInfo();
+}
+
+int WebPattern::GetSelectStartIndex() const
+{
+    CHECK_NULL_RETURN(delegate_, 0);
+    return delegate_->GetSelectStartIndex();
+}
+
+int WebPattern::GetSelectEndIndex() const
+{
+    CHECK_NULL_RETURN(delegate_, 0);
+    return delegate_->GetSelectEndIndex();
+}
+
+void WebPattern::GetHandleInfo(SelectOverlayInfo& infoHandle)
+{
+    firstInfoHandle_ = infoHandle.firstHandle.paintRect;
+    secondInfoHandle_ = infoHandle.secondHandle.paintRect;
+}
+
+RefPtr<TextFieldTheme> WebPattern::GetTheme() const
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, nullptr);
+    auto context = tmpHost->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
+    return theme;
+}
+
+bool WebPattern::IsShowAIWrite()
+{
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    auto bundleName = textFieldTheme->GetAIWriteBundleName();
+    auto abilityName = textFieldTheme->GetAIWriteAbilityName();
+    if (bundleName.empty() || abilityName.empty()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Failed to obtain AI write package name!");
+        return false;
+    }
+    aiWriteAdapter_->SetBundleName(bundleName);
+    aiWriteAdapter_->SetAbilityName(abilityName);
+    auto isAISupport = false;
+    if (textFieldTheme->GetAIWriteIsSupport() == "true") {
+        isAISupport = true;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "Whether the device supports AI write: %{public}d, nodeId: %{public}d", isAISupport,
+        host->GetId());
+    return isAISupport;
+}
+
+void WebPattern::HandleOnAIWrite()
+{
+    AIWriteInfo info;
+    GetAIWriteInfo(info);
+    CloseSelectOverlay();
+    CloseKeyboard();
+    auto callback = [weak = WeakClaim(this), info](std::vector<uint8_t>& buffer) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAIWriteResult(info.selectStart, info.selectEnd, buffer);
+        auto aiWriteAdapter = pattern->aiWriteAdapter_;
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
+    };
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    aiWriteAdapter_->SetPipelineContext(pipeline);
+    aiWriteAdapter_->ShowModalUIExtension(info, callback);
+}
+
+void WebPattern::FormatIndex(int32_t& startIndex, int32_t& endIndex)
+{
+    startIndex = std::min(startIndex, endIndex);
+    endIndex = std::max(startIndex, endIndex);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content_.length()));
+    endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content_.length()));
+}
+
+std::u16string WebPattern::GetSelectedValue(int32_t startIndex, int32_t endIndex)
+{
+    auto allText = GetAllTextInfo();
+    content_ = UtfUtils::Str8ToStr16(allText);
+    FormatIndex(startIndex, endIndex);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content_.length()));
+    auto selectedValue = content_.substr(startIndex, endIndex - startIndex);
+    if (selectedValue.empty()) {
+        selectedValue = TextEmojiProcessor::SubU16string(startIndex, endIndex - startIndex, content_);
+    }
+    return selectedValue;
+}
+
+void WebPattern::GetAIWriteInfo(AIWriteInfo& info)
+{
+    info.firstHandle = firstInfoHandle_.ToString();
+    info.secondHandle = secondInfoHandle_.ToString();
+    info.selectStart = GetSelectStartIndex();
+    info.selectEnd = GetSelectEndIndex();
+
+    // serialize the selected text
+    auto selectContent = GetSelectInfo();
+    std::u16string selectContentAllValue = UtfUtils::Str8ToStr16(selectContent);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContentAllValue);
+    spanString->EncodeTlv(info.selectBuffer);
+    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
+
+    // serialize the sentenced-level text
+    auto host = GetHost();
+    auto contentAll = UtfUtils::Str8ToStr16(GetAllTextInfo());
+    auto sentenceStart = 0;
+    auto sentenceEnd = static_cast<int32_t>(contentAll.length());
+    TAG_LOGD(AceLogTag::ACE_WEB, "Selected range=[%{public}d--%{public}d], content size=%{public}zu", info.selectStart,
+        info.selectEnd, spanString->GetString().size());
+    for (int32_t i = info.selectStart; i >= 0; --i) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceStart = i + 1;
+            break;
+        }
+    }
+    for (int32_t i = info.selectEnd; i < info.selectLength; i++) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceEnd = i;
+            break;
+        }
+    }
+    info.start = info.selectStart - sentenceStart;
+    info.end = info.selectEnd - sentenceStart;
+    auto sentenceContent = GetSelectedValue(sentenceStart, sentenceEnd);
+    spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
+    spanString->EncodeTlv(info.sentenceBuffer);
+    TAG_LOGD(AceLogTag::ACE_WEB, "Sentence range=[%{public}d--%{public}d], content size=%{public}zu", sentenceStart,
+        sentenceEnd, spanString->GetString().size());
+    info.componentType = host->GetTag();
+}
+
+void WebPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
+{
+    return;
+}
+
 bool WebPattern::RequestAutoSave()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoSave");
@@ -4756,6 +4971,7 @@ void WebPattern::CloseCustomKeyboard()
     keyboardOverlay_->CloseKeyboard(frameNode->GetId());
     isUsingCustomKeyboardAvoid_ = false;
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard end");
+    UpdateKeyboardSafeArea(true);
 }
 
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
@@ -5445,6 +5661,7 @@ void WebPattern::OnInActive()
 
 void WebPattern::OnActive()
 {
+    UpdateScrollBarWithBorderRadius();
     CHECK_NULL_VOID(delegate_);
     bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
@@ -5477,6 +5694,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         CloseSelectOverlay();
         SelectCancel();
         DestroyAnalyzerOverlay();
+        OnTooltip("");
         isDragEndMenuShow_ = false;
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
             OnInActive();
@@ -6686,6 +6904,7 @@ void WebPattern::RemoveDataListNode()
 
 void WebPattern::CloseKeyboard()
 {
+    UpdateKeyboardSafeArea(true);
     InputMethodManager::GetInstance()->CloseKeyboard();
 }
 
@@ -7264,4 +7483,23 @@ void WebPattern::RegisterSurfaceDensityCallback()
         });
     }
 }
+
+bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    auto keyboardInset = safeAreaManager->GetKeyboardInset();
+    if (hideOrClose) {
+        auto newBottom = std::optional<uint32_t>(keyboardInset.end);
+        safeAreaManager->UpdateKeyboardSafeArea(0, newBottom);
+    } else {
+        safeAreaManager->UpdateKeyboardSafeArea(height);
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

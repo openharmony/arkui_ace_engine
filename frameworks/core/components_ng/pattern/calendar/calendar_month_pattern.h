@@ -139,6 +139,8 @@ public:
 
     void FireIsFoldStatusChanged();
 
+    void UpdateDayRadius(const CalcDimension& dayRadius);
+
 private:
     void OnAttachToFrameNode() override;
     void OnColorConfigurationUpdate() override;

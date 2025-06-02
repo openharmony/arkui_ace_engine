@@ -176,6 +176,7 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
     CreateDone();
+    ChangeRadio();
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->UpdateCurrentOffset(10000, SCROLL_FROM_UPDATE);
     FlushUITasks();
@@ -363,6 +364,7 @@ HWTEST_F(WaterFlowTestNg, OverScroll001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(50);
     CreateDone();
+    ChangeRadio();
     pattern_->SetAnimateCanOverScroll(true);
     auto info = pattern_->layoutInfo_;
     for (int i = 0; i < 50; ++i) {
@@ -658,6 +660,7 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     CreateWaterFlowItems(3);
     CreateDone();
 
+    ChangeRadio();
     GestureEvent info;
     info.SetMainVelocity(-1200.f);
     info.SetMainDelta(-100.f);

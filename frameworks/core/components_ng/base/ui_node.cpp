@@ -44,6 +44,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         auto distributedUI = container->GetDistributedUI();
         CHECK_NULL_BREAK(distributedUI);
         distributedUI->AddNewNode(nodeId_);
+        isDarkMode_ = container->GetColorMode() == ColorMode::DARK ? 1 : 0;
     } while (false);
 #endif
     instanceId_ = Container::CurrentId();
@@ -528,6 +529,24 @@ void UINode::DoAddChild(
         if (parentVirtualNode) {
             child->SetAccessibilityNodeVirtual();
             child->SetAccessibilityVirtualNodeParent(parentVirtualNode);
+        }
+    }
+
+    if (GetInspectorId().has_value()) {
+        auto pipeline = GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto front = pipeline->GetFrontend();
+        if (front) {
+            auto hasDrawChildCallback = front->IsDrawChildrenCallbackFuncExist(GetInspectorId().value_or(""));
+            if (hasDrawChildCallback) {
+                child->SetObserverParentForDrawChildren(Claim(this));
+            }
+        }
+    }
+    if (IsObservedByDrawChildren()) {
+        auto parentForObserverDrawChildren = GetObserverParentForDrawChildren();
+        if (parentForObserverDrawChildren) {
+            child->SetObserverParentForDrawChildren(parentForObserverDrawChildren);
         }
     }
 
@@ -1452,6 +1471,30 @@ void UINode::OnRecycle()
     }
 }
 
+void UINode::NotifyColorModeChange(uint32_t colorMode)
+{
+    if (CheckShouldClearCache()) {
+        auto customNode = DynamicCast<CustomNode>(this);
+        if (customNode) {
+            ContainerScope scope(instanceId_);
+            ACE_LAYOUT_TRACE_BEGIN("UINode %d %s is customnode %d",
+                GetId(), GetTag().c_str(), customNode ? true : false);
+            customNode->FireClearAllRecycleFunc();
+            SetShouldClearCache(false);
+            ACE_LAYOUT_TRACE_END()
+        }
+    }
+    for (const auto& child : GetChildren()) {
+        child->SetShouldClearCache(CheckShouldClearCache());
+        child->SetRerenderable(GetRerenderable());
+        child->SetMeasureAnyway(CheckMeasureAnyway());
+        if (!AceType::DynamicCast<FrameNode>(child)) {
+            child->SetDarkMode(CheckIsDarkMode());
+        }
+        child->NotifyColorModeChange(colorMode);
+    }
+}
+
 void UINode::OnReuse()
 {
     for (const auto& child : GetChildren()) {
@@ -2082,5 +2125,15 @@ bool UINode::LessThanAPITargetVersion(PlatformVersion version) const
         return apiVersion_ < static_cast<int32_t>(version);
     }
     return context_->LessThanAPITargetVersion(version);
+}
+
+void UINode::SetObserverParentForDrawChildren(const RefPtr<UINode>& parent)
+{
+    CHECK_NULL_VOID(parent);
+    isObservedByDrawChildren_ = true;
+    drawChildrenParent_ = parent;
+    for (const auto& child : GetChildren()) {
+        child->SetObserverParentForDrawChildren(parent);
+    }
 }
 } // namespace OHOS::Ace::NG

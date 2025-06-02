@@ -59,6 +59,23 @@ const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
 constexpr int32_t MEDIA_TYPE_AUD = 0;
 constexpr float VOLUME_STEP = 0.05f;
+const std::unordered_set<ImageFit> EXPORT_IMAGEFIT_SUPPORT_TYPES = {
+    ImageFit::FILL,
+    ImageFit::CONTAIN,
+    ImageFit::COVER,
+    ImageFit::FITWIDTH, //FITWIDTH is used instead of AUTO
+    ImageFit::NONE,
+    ImageFit::SCALE_DOWN,
+    ImageFit::TOP_LEFT,
+    ImageFit::TOP,
+    ImageFit::TOP_END,
+    ImageFit::START,
+    ImageFit::CENTER,
+    ImageFit::END,
+    ImageFit::BOTTOM_START,
+    ImageFit::BOTTOM,
+    ImageFit::BOTTOM_END
+};
 
 enum SliderChangeMode {
     BEGIN = 0,
@@ -123,28 +140,88 @@ SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
     return CalculateFitContain(videoSize, layoutSize);
 }
 
-SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
+RectF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
 {
     if (!layoutProperty || !layoutProperty->HasVideoSize()) {
-        return layoutSize;
+        return {0.0f, 0.0f, layoutSize.Width(), layoutSize.Height()};
     }
 
     auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
+    auto videoFrameSize = videoSize;
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
+    auto rect = RectF();
     switch (imageFit) {
-        case ImageFit::CONTAIN:
-            return CalculateFitContain(videoSize, layoutSize);
+        case ImageFit::CONTAIN: case ImageFit::FITWIDTH: //FITWIDTH is used instead of AUTO
+            videoFrameSize = CalculateFitContain(videoSize, layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
         case ImageFit::FILL:
-            return CalculateFitFill(layoutSize);
+            videoFrameSize = CalculateFitFill(layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
         case ImageFit::COVER:
-            return CalculateFitCover(videoSize, layoutSize);
+            videoFrameSize = CalculateFitCover(videoSize, layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
         case ImageFit::NONE:
-            return CalculateFitNone(videoSize);
+            videoFrameSize = CalculateFitNone(videoSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
         case ImageFit::SCALE_DOWN:
-            return CalculateFitScaleDown(videoSize, layoutSize);
+            videoFrameSize = CalculateFitScaleDown(videoSize, layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
+        case ImageFit::TOP_LEFT:
+            rect = RectF{0.0f, 0.0f, videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::TOP:
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE, 0.0f,
+                videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::TOP_END:
+            rect = RectF{layoutSize.Width() - videoFrameSize.Width(), 0.0f, videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::START:
+            rect = RectF{0.0f, (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::CENTER:
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::END:
+            rect = RectF{layoutSize.Width() - videoFrameSize.Width(),
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::BOTTOM_START:
+            rect = RectF{0.0f, layoutSize.Height() - videoFrameSize.Height(), videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::BOTTOM:
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                layoutSize.Height() - videoFrameSize.Height(), videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::BOTTOM_END:
+            rect = RectF{layoutSize.Width() - videoFrameSize.Width(), layoutSize.Height() - videoFrameSize.Height(),
+                videoSize.Width(), videoSize.Height()};
+            break;
         default:
-            return CalculateFitContain(videoSize, layoutSize);
+            videoFrameSize = CalculateFitCover(videoSize, layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
     }
+    return rect;
 }
 
 float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
@@ -260,12 +337,12 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             }, "ArkUIVideoPlayerStatusChange");
     };
 
-    auto&& errorEvent = [weak, uiTaskExecutor, instanceId]() {
-        uiTaskExecutor.PostTask([weak, instanceId] {
+    auto&& errorEvent = [weak, uiTaskExecutor, instanceId](int32_t code, const std::string& message) {
+        uiTaskExecutor.PostTask([weak, instanceId, code, message] {
             auto video = weak.Upgrade();
             CHECK_NULL_VOID(video);
             ContainerScope scope(instanceId);
-            video->OnError("");
+            video->OnError(code, message);
             }, "ArkUIVideoError");
     };
 
@@ -348,7 +425,7 @@ void VideoPattern::ResetMediaPlayerOnBg()
             uiTaskExecutor.PostTask([weak]() {
                 auto videoPattern = weak.Upgrade();
                 CHECK_NULL_VOID(videoPattern);
-                videoPattern->FireError();
+                videoPattern->FireError(ERROR_CODE_VIDEO_SOURCE_INVALID, "Not a valid source");
                 }, "ArkUIVideoFireError");
             return;
         }
@@ -383,7 +460,7 @@ void VideoPattern::ResetMediaPlayer()
         TAG_LOGW(AceLogTag::ACE_VIDEO, "Video set source for mediaPlayer failed.");
 
         // It need post on ui thread.
-        FireError();
+        FireError(ERROR_CODE_VIDEO_SOURCE_INVALID, "Not a valid source");
         return;
     }
 
@@ -427,7 +504,7 @@ void VideoPattern::PrepareMediaPlayer()
 
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         // It need post on ui thread.
-        FireError();
+        FireError(ERROR_CODE_VIDEO_CREATE_PLAYER_FAILED, "MediaPlayer create failed");
         return;
     }
 
@@ -576,7 +653,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
     ChangePlayerStatus(status);
 }
 
-void VideoPattern::OnError(const std::string& errorId)
+void VideoPattern::OnError(int32_t code, const std::string& message)
 {
     AddChild();
     auto host = GetHost();
@@ -587,7 +664,7 @@ void VideoPattern::OnError(const std::string& errorId)
 
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireErrorEvent();
+    eventHub->FireErrorEvent(code, message);
 }
 
 void VideoPattern::OnResolutionChange() const
@@ -1126,6 +1203,9 @@ void VideoPattern::UpdatePreviewImage()
         CHECK_NULL_VOID(posterLayoutProperty);
         posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+        if (EXPORT_IMAGEFIT_SUPPORT_TYPES.find(imageFit) == EXPORT_IMAGEFIT_SUPPORT_TYPES.end()) {
+            imageFit = ImageFit::COVER;
+        }
         posterLayoutProperty->UpdateImageFit(imageFit);
         image->MarkModifyDone();
     }
@@ -1235,18 +1315,17 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto videoNodeSize = geometryNode->GetContentSize();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+    auto videoFrameRect = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+    auto videoFrameSize = SizeF(videoFrameRect.Width(), videoFrameRect.Height());
     // Change the surface layout for drawing video frames
     if (renderContextForMediaPlayer_) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            auto rect = AdjustPaintRect((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
-                videoFrameSize.Height(), true);
+            auto rect = AdjustPaintRect(videoFrameRect.GetX(), videoFrameRect.GetY(),
+                videoFrameRect.Width(), videoFrameRect.Height(), true);
             renderContextForMediaPlayer_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
         } else {
-            renderContextForMediaPlayer_->SetBounds((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
-                videoFrameSize.Height());
+            renderContextForMediaPlayer_->SetBounds(videoFrameRect.GetX(), videoFrameRect.GetY(),
+                videoFrameRect.Width(), videoFrameRect.Height());
         }
     }
 
@@ -1290,7 +1369,8 @@ void VideoPattern::OnAreaChangedInner()
         auto videoNodeSize = geometryNode->GetContentSize();
         auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+        auto videoFrameRect = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+        auto videoFrameSize = SizeF(videoFrameRect.Width(), videoFrameRect.Height());
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
 
         Rect rect =
@@ -1712,7 +1792,7 @@ void VideoPattern::Stop()
     SetIsSeeking(false);
 }
 
-void VideoPattern::FireError()
+void VideoPattern::FireError(int32_t code, const std::string& message)
 {
     ContainerScope scope(instanceId_);
     auto host = GetHost();
@@ -1721,11 +1801,11 @@ void VideoPattern::FireError()
     CHECK_NULL_VOID(context);
 
     // OnError function must be excuted on ui, so get the uiTaskExecutor.
-    auto task = [weak = WeakClaim(this)] {
+    auto task = [weak = WeakClaim(this), code, message] {
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         ContainerScope scope(videoPattern->instanceId_);
-        videoPattern->OnError("");
+        videoPattern->OnError(code, message);
     };
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     if (uiTaskExecutor.IsRunOnCurrentThread()) {
@@ -2229,5 +2309,29 @@ void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
             : "",
         filter);
     json->PutExtAttr("enableShortcutKey", isEnableShortcutKey_ ? "true" : "false", filter);
+}
+
+bool VideoPattern::ParseCommand(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return false;
+    }
+    std::string value = json->GetString("cmd");
+    return value == "play";
+}
+
+int32_t VideoPattern::OnInjectionEvent(const std::string& command)
+{
+    TAG_LOGD(AceLogTag::ACE_VIDEO, "OnInjectionEvent command : %{public}s", command.c_str());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto pattern = host->GetPattern<VideoPattern>();
+    CHECK_NULL_RETURN(pattern, RET_FAILED);
+    if (!ParseCommand(command)) {
+        return RET_FAILED;
+    }
+    pattern->Start();
+    return RET_SUCCESS;
 }
 } // namespace OHOS::Ace::NG

@@ -204,16 +204,13 @@ void CounterLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void CounterLayoutAlgorithm::UpdateTextColor(const RefPtr<FrameNode>& frameNode, const Color& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColorByRender(value);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+        renderContext->ResetForegroundColorStrategy();
+    }
     renderContext->UpdateForegroundColor(value);
-    renderContext->ResetForegroundColorStrategy();
-    renderContext->UpdateForegroundColorFlag(true);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->UpdateFontColor(value);
+    renderContext->UpdateForegroundColorFlag(false);
 }
 } // namespace OHOS::Ace::NG

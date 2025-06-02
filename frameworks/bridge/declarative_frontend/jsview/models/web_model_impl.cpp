@@ -415,6 +415,16 @@ void WebModelImpl::SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled
     webComponent->SetWebDebuggingAccessEnabled(isWebDebuggingAccessEnabled);
 }
 
+void WebModelImpl::SetWebDebuggingAccessEnabledAndPort(
+    bool isWebDebuggingAccessEnabled, int32_t webDebuggingPort)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(
+        ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetWebDebuggingAccessEnabledAndPort(
+        isWebDebuggingAccessEnabled, webDebuggingPort);
+}
+
 void WebModelImpl::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -542,6 +552,14 @@ void WebModelImpl::SetWindowNewEvent(std::function<void(const std::shared_ptr<Ba
     webComponent->SetWindowNewEvent(std::move(jsCallback));
 }
 
+void WebModelImpl::SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+    webComponent->SetActivateContentEventId(eventMarker);
+}
+
 void WebModelImpl::SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -592,6 +610,13 @@ void WebModelImpl::SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
+}
+
+void WebModelImpl::SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetCssDisplayChangeEnabled(isCssDisplayChangeEnabled);
 }
 
 void WebModelImpl::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
@@ -688,4 +713,21 @@ void WebModelImpl::SetOptimizeParserBudgetEnabled(bool enable)
     CHECK_NULL_VOID(webComponent);
     webComponent->SetOptimizeParserBudgetEnabled(enable);
 }
+
+void WebModelImpl::SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+    webComponent->SetOnLoadStartedEventId(eventMarker);
+}
+
+void WebModelImpl::SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+    webComponent->SetOnLoadFinishedEventId(eventMarker);
+}
+
 } // namespace OHOS::Ace::Framework

@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/container_modal/container_modal_toolbar.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 
@@ -538,6 +539,13 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
     inactiveColor_ = inactiveColor;
     isCustomColor_ = true;
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
+
+    CHECK_NULL_VOID(titleMgr_);
+    if (IsContainerModalTransparent()) {
+        titleMgr_->UpdateTargetNodesBarMargin();
+    } else {
+        titleMgr_->ResetExpandStackNode();
+    }
 }
 
 Color ContainerModalPattern::GetContainerColor(bool isFocus)
@@ -592,6 +600,13 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     UpdateGestureRowVisible();
     TrimFloatingWindowLayout();
+    InitColumnTouchTestFunc();
+    CHECK_NULL_VOID(titleMgr_);
+    if (customTitleSettedShow) {
+        titleMgr_->UpdateTargetNodesBarMargin();
+    } else {
+        titleMgr_->ResetExpandStackNode();
+    }
 }
 
 bool ContainerModalPattern::GetContainerModalTitleVisible(bool isImmersive)
@@ -621,6 +636,14 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
     auto gestureRow = GetGestureRow();
     UpdateRowHeight(gestureRow, titleHeight_);
     CallButtonsRectChange();
+    if (floatTitleMgr_ != nullptr) {
+        auto floatingTitleRow = GetFloatingTitleRow();
+        CHECK_NULL_VOID(floatingTitleRow);
+        UpdateRowHeight(floatingTitleRow, titleHeight_);
+    }
+    if (titleMgr_ != nullptr) {
+        titleMgr_->UpdateTargetNodesBarMargin();
+    }
 }
 
 int32_t ContainerModalPattern::GetContainerModalTitleHeight()
@@ -818,7 +841,7 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
     CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto rowHeight = CONTAINER_TITLE_HEIGHT;
-    if (!isFloating) {
+    if (!isFloating || (isFloating && floatTitleMgr_ != nullptr)) {
         rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
     }
     titleRowProperty->UpdateUserDefinedIdealSize(
@@ -869,6 +892,10 @@ void ContainerModalPattern::InitColumnTouchTestFunc()
     auto column = GetColumnNode();
     CHECK_NULL_VOID(column);
     auto eventHub = column->GetOrCreateGestureEventHub();
+    if (customTitleSettedShow_) {
+        eventHub->SetOnTouchTestFunc(nullptr);
+        return;
+    }
     bool defaultResEnable = enableContainerModalCustomGesture_;
     auto func = [defaultResEnable](const std::vector<TouchTestInfo>& touchInfo) -> TouchResult {
         TouchResult touchRes;
@@ -939,6 +966,14 @@ bool ContainerModalPattern::CanShowCustomTitle()
     CHECK_NULL_RETURN(buttonsRow, false);
     auto visibility = buttonsRow->GetLayoutProperty()->GetVisibilityValue(VisibleType::GONE);
     return visibility == VisibleType::VISIBLE;
+}
+
+bool ContainerModalPattern::IsContainerModalTransparent() const
+{
+    if (!isCustomColor_) {
+        return false;
+    }
+    return activeColor_.GetAlpha() == 0 && inactiveColor_.GetAlpha() == 0;
 }
 
 void ContainerModalPattern::TrimFloatingWindowLayout()
@@ -1027,5 +1062,22 @@ void ContainerModalPattern::EnableContainerModalCustomGesture(RefPtr<PipelineCon
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetEnableContainerModalCustomGesture(enable);
     containerPattern->InitColumnTouchTestFunc();
+}
+
+void ContainerModalPattern::SetToolbarBuilder(
+    const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(parent);
+    if (titleMgr_ == nullptr) {
+        auto title = GetCustomTitleRow();
+        titleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, false);
+    }
+    if (floatTitleMgr_ == nullptr) {
+        auto title = GetFloatingTitleRow();
+        floatTitleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, true);
+    }
+
+    titleMgr_->SetToolbarBuilder(parent, builder);
+    floatTitleMgr_->SetToolbarBuilder(parent, builder);
 }
 } // namespace OHOS::Ace::NG

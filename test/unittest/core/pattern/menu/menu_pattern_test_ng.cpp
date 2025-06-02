@@ -122,6 +122,7 @@ void MenuPatternTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void MenuPatternTestNg::TearDown()
@@ -1623,5 +1624,121 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTest089, TestSize.Level1)
     ASSERT_NE(menuPattern, nullptr);
     auto width = menuPattern->GetSelectMenuWidthFromTheme();
     EXPECT_EQ(width, 108);
+}
+
+/**
+ * @tc.name: MenuPatternTest090
+ * @tc.desc: Test OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTest090, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    MenuModelNG menuModelInstance;
+    MenuItemModelNG menuItemModelInstance;
+    menuModelInstance.Create();
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    itemOption.startIcon = ImageSourceInfo(IMAGE_SRC_URL);
+    menuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto menuItemLayoutProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuItemLayoutProperty, nullptr);
+    itemPattern->OnModifyDone();
+    itemNode->MountToParent(menuNode);
+    itemNode->OnMountToParentDone();
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    auto labelNode = itemPattern->GetLabelNode();
+    ASSERT_NE(labelNode, nullptr);
+
+    // Verify OnThemeScopeUpdate.
+    EXPECT_FALSE(menuPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId()));
+    menuPattern->AddOptionNode(itemNode);
+    menuModelInstance.SetFontColor(Referenced::RawPtr(menuNode), Color::RED);
+    EXPECT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    EXPECT_TRUE(menuPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId()));
+    EXPECT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+
+    std::optional<Color> color;
+    menuModelInstance.SetFontColor(Referenced::RawPtr(menuNode), color);
+    EXPECT_FALSE(layoutProperty->GetFontColor().has_value());
+    EXPECT_TRUE(menuPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId()));
+    EXPECT_FALSE(layoutProperty->GetFontColor().has_value());
+
+    menuModelInstance.SetFontColor(Referenced::RawPtr(menuNode), Color::RED);
+    EXPECT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    EXPECT_TRUE(menuPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId()));
+}
+
+/**
+ * @tc.name: RegisterAccessibilityChildActionNotify001
+ * @tc.desc: Test callback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, RegisterAccessibilityChildActionNotify001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    /**
+     * @tc.steps: step1. create outter menu and set show in subwindow true
+     */
+    auto outterMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(outterMenuNode, nullptr);
+    auto outterMenuLayoutProps = outterMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(outterMenuLayoutProps, nullptr);
+    outterMenuLayoutProps->UpdateShowInSubWindow(true);
+    /**
+     * @tc.steps: step2. create inner menu and set show in subwindow false
+     */
+    auto innerMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuLayoutProps = innerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(innerMenuLayoutProps, nullptr);
+    innerMenuLayoutProps->UpdateShowInSubWindow(false);
+    innerMenuLayoutProps->UpdateExpandingMode(SubMenuExpandingMode::STACK);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+    innerMenuNode->MountToParent(outterMenuNode);
+    outterMenuNode->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->expandingMode_ = innerMenuLayoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+
+    /**
+     * @tc.steps: step3. call ShowSubMenu to create submenu
+     * @tc.expected: expect subMenu's showInSubwindow param is true
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->ShowSubMenu(ShowSubMenuType::LONG_PRESS);
+    auto menuAccessibilityProperty_ = innerMenuNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(menuAccessibilityProperty_, nullptr);
+    auto callback = menuAccessibilityProperty_->GetNotifyChildActionFunc();
+    ASSERT_NE(callback, nullptr);
+    auto reuslt = callback(NotifyChildActionType::ACTION_CLICK);
+    EXPECT_EQ(reuslt, AccessibilityActionResult::ACTION_OK);
 }
 } // namespace OHOS::Ace::NG

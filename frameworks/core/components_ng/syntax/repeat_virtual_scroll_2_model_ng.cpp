@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 void RepeatVirtualScroll2ModelNG::Create(uint32_t arrLen, uint32_t totalCount,
     const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
     const std::function<void(int32_t, int32_t)>& onRecycleItems,
-    const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>& onActiveRange,
     const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll2ModelNG::Create");
@@ -127,5 +127,10 @@ void RepeatVirtualScroll2ModelNG::SetCreateByTemplate(bool isCreatedByTemplate)
     if (childOfRepeat) {
         childOfRepeat->SetAllowReusableV2Descendant(!isCreatedByTemplate);
     }
+}
+
+bool RepeatVirtualScroll2ModelNG::IsInAnimation()
+{
+    return AnimationUtils::IsImplicitAnimationOpen();
 }
 } // namespace OHOS::Ace::NG

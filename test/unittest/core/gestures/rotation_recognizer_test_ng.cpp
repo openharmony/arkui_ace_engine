@@ -487,7 +487,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTest006, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     std::unique_ptr<GestureEventFunc> onAction;
-    rotationRecognizer->SendCallbackMsg(onAction);
+    rotationRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(rotationRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -496,7 +496,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTest006, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>();
-    rotationRecognizer->SendCallbackMsg(onAction);
+    rotationRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(rotationRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -505,7 +505,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTest006, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    rotationRecognizer->SendCallbackMsg(onAction);
+    rotationRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(rotationRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -515,7 +515,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTest006, TestSize.Level1)
      */
     TouchEvent touchEvent;
     rotationRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    rotationRecognizer->SendCallbackMsg(onAction);
+    rotationRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(rotationRecognizer->touchPoints_.size(), 1);
 
     /**
@@ -526,7 +526,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTest006, TestSize.Level1)
     touchEvent.tiltX = 0.0f;
     touchEvent.tiltY = 0.0f;
     rotationRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    rotationRecognizer->SendCallbackMsg(onAction);
+    rotationRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(rotationRecognizer->touchPoints_.size(), 1);
 }
 
@@ -709,7 +709,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerSendCallbackMsgTest001, Tes
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    rotationRecognizer->SendCallbackMsg(onAction);
+    rotationRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(rotationRecognizer->touchPoints_.size(), 0);
 }
 
@@ -1679,17 +1679,17 @@ HWTEST_F(RotationRecognizerTestNg, SendCallbackMsg001, TestSize.Level1)
     OHOS::Ace::GestureEventFunc onActionCancel1;
     std::unique_ptr<GestureEventFunc> onActionCancel =  std::make_unique<GestureEventFunc>();
     rotationRecognizerPtr->SetOnActionCancel(onActionCancel1);
-    rotationRecognizerPtr->SendCallbackMsg(onActionCancel);
+    rotationRecognizerPtr->SendCallbackMsg(onActionCancel, GestureCallbackType::CANCEL);
     EXPECT_NE(rotationRecognizerPtr->onActionCancel_, nullptr);
 
     auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
     rotationRecognizerPtr->SetGestureInfo(gestureInfo);
-    rotationRecognizerPtr->SendCallbackMsg(onActionCancel);
+    rotationRecognizerPtr->SendCallbackMsg(onActionCancel, GestureCallbackType::CANCEL);
     EXPECT_FALSE(gestureInfo->disposeTag_);
 
     gestureInfo->SetDisposeTag(true);
     rotationRecognizerPtr->SetGestureInfo(gestureInfo);
-    rotationRecognizerPtr->SendCallbackMsg(onActionCancel);
+    rotationRecognizerPtr->SendCallbackMsg(onActionCancel, GestureCallbackType::CANCEL);
     EXPECT_TRUE(gestureInfo->disposeTag_);
 }
 } // namespace OHOS::Ace::NG

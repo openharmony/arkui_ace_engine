@@ -50,6 +50,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -72,6 +73,7 @@ namespace OHOS::Ace::NG {
 using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
+class NodeRenderStatusMonitor;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -332,6 +334,7 @@ public:
 
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
+    void OnDrawChildrenCompleted(const std::string& componentId);
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
@@ -536,6 +539,9 @@ public:
 
     bool SetIsFocusActive(bool isFocusActive,
         FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT, bool autoFocusInactive = true);
+    bool SyncWindowsFocus(
+        bool isFocusActive, FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT,
+        bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -929,6 +935,11 @@ public:
         return privacySensitiveManager_;
     }
 
+    const RefPtr<ToolbarManager>& GetToolbarManager() const
+    {
+        return toolbarManager_;
+    }
+
     void ChangeSensitiveNodes(bool flag) override
     {
         privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
@@ -1092,6 +1103,8 @@ public:
     void RegisterAttachedNode(UINode* uiNode);
     void RemoveAttachedNode(UINode* uiNode);
 
+    void NotifyColorModeChange(uint32_t colorMode) override;
+
     bool GetContainerFloatingTitleVisible() override;
 
     bool GetContainerCustomTitleVisible() override;
@@ -1105,7 +1118,7 @@ public:
     {
         uiTranslateManager_ = uiTranslateManager;
     }
-    
+
     void RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node)
     {
         uiTranslateManager_->AddTranslateListener(node);
@@ -1163,6 +1176,13 @@ public:
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
     {
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
+    }
+
+    const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
+    void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
+
+    bool GetPassThroughResult() {
+        return passThroughResult_;
     }
 
 protected:
@@ -1283,6 +1303,7 @@ private:
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
     void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
+    void OnDumpInjection(const std::vector<std::string>& params) const;
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -1305,7 +1326,7 @@ private:
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
-    
+
     void FlushAnimationDirtysWhenExist(const AnimationOption& option);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
@@ -1377,6 +1398,7 @@ private:
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
+    RefPtr<ToolbarManager> toolbarManager_ = MakeRefPtr<ToolbarManager>();
     Rect displayAvailableRect_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
@@ -1484,6 +1506,10 @@ private:
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
     friend class ScopedLayout;
     friend class FormGestureManager;
+    RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
+    std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
+    std::mutex needRenderForDrawChildrenNodesMutex_;
+    bool passThroughResult_ = true;
 };
 
 /**

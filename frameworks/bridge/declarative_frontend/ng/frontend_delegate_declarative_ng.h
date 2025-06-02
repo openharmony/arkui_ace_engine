@@ -71,6 +71,9 @@ public:
     void SetMediaQueryCallback(MediaQueryCallback&& mediaQueryCallback);
     void SetLayoutInspectorCallback(const LayoutInspectorCallback& layoutInspectorCallback);
     void SetDrawInspectorCallback(const DrawInspectorCallback& drawInspectorCallback);
+    void SetDrawChildrenInspectorCallback(const DrawChildrenInspectorCallback& drawChildrenInspectorCallback);
+    void SetIsDrawChildrenCallbackFuncExistCallback(
+        const IsDrawChildrenCallbackFuncExistCallback& IsDrawChildrenCallbackFuncExistCallback);
     void SetOnStartContinuationCallBack(OnStartContinuationCallBack&& onStartContinuationCallBack);
     void SetOnCompleteContinuationCallBack(OnCompleteContinuationCallBack&& onCompleteContinuationCallBack);
     void SetOnSaveDataCallBack(OnSaveDataCallBack&& onSaveDataCallBack);
@@ -94,6 +97,8 @@ public:
     void OnMediaQueryUpdate(bool isSynchronous = false) override;
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
+    void OnDrawChildrenCompleted(const std::string& componentId);
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId);
     void FireExternalEvent(const std::string& eventId, const std::string& componentId, uint32_t nodeId, bool isDestroy);
 
     // FrontendDelegate overrides.
@@ -341,6 +346,8 @@ private:
     MediaQueryCallback mediaQueryCallback_;
     LayoutInspectorCallback layoutInspectorCallback_;
     DrawInspectorCallback drawInspectorCallback_;
+    DrawChildrenInspectorCallback drawChildrenInspectorCallback_;
+    IsDrawChildrenCallbackFuncExistCallback isDrawChildrenCallbackFuncExistCallback_;
     OnStartContinuationCallBack onStartContinuationCallBack_;
     OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
     OnSaveDataCallBack onSaveDataCallBack_;

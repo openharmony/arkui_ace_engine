@@ -60,6 +60,7 @@ public:
     static void SetBitmapMesh(FrameNode* frameNode, const std::vector<float>& mesh, int32_t column, int32_t row);
     static void SetWidth(FrameNode* frameNode) {}
     static void SetHeight(FrameNode* frameNode) {}
+    static void InitBox(FrameNode* frameNode, const RefPtr<PixelMap>& pixMap);
 };
 
 } // namespace OHOS::Ace::NG

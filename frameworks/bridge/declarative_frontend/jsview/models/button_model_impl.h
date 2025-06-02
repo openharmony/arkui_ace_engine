@@ -45,6 +45,16 @@ public:
         const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) override {};
     void SetRemoteMessage(RemoteCallback&& remoteCallback) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonColorType buttonColorType) override {};
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonStringType buttonStringType) override {};
+    void CreateWithDimensionFpResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonDimensionType buttonDimensionType) override {};
+    void CreateWithDoubleResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonDoubleType buttonDoubleType) override {};
+    void CreateWithFamiliesResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonStringType buttonStringType) override {};
 
 private:
     static RefPtr<TextComponent> GetTextComponent();

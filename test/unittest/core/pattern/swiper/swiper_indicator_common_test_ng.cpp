@@ -803,10 +803,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
     ASSERT_NE(indicatorPattern, nullptr);
     ASSERT_NE(pattern_, nullptr);
 
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
     TouchEventInfo touchEventInfo("default");
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetLocalLocation(Offset(18.0f, 1.0f));
@@ -818,6 +814,5 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
     indicatorPattern->HandleDragStart(info);
     indicatorPattern->HandleTouchEvent(touchEventInfo);
     EXPECT_EQ(pattern_->jumpIndex_.value(), 2);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

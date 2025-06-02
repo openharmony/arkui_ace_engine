@@ -94,6 +94,7 @@
       OHOS::Ace::NG::DragDropFuncWrapper::*;
       OHOS::Ace::NG::DragControllerFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
+      OHOS::Ace::NG::Reporter::*;
       OHOS::Ace::WindowUtils::*;
       OHOS::Ace::NG::ParallelPagePattern::*;
       OHOS::Ace::NG::ViewAdvancedRegister::*;
@@ -315,6 +316,7 @@
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
       OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
       OHOS::Ace::DumpLog::*;
+      OHOS::Ace::NG::UIExtensionAdapter::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -358,6 +360,7 @@
       vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
       vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
       vtable?for?OHOS::Ace::NG::TimePickerModelNG;
+      vtable?for?OHOS::Ace::NG::Pattern;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -386,6 +389,7 @@
       VTT?for?OHOS::Ace::NG::ParallelPagePattern;
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
+      VTT?for?OHOS::Ace::NG::Pattern;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -404,6 +408,9 @@
       OHOS::Ace::V2::COLUMN_ETS_TAG;
       OHOS::Ace::V2::IMAGE_ETS_TAG;
       OHOS::Ace::V2::MOVING_PHOTO_ETS_TAG;
+      OHOS::Ace::V2::ROOT_ETS_TAG;
+      OHOS::Ace::V2::STAGE_ETS_TAG;
+      OHOS::Ace::V2::PAGE_ETS_TAG;
       OHOS::Ace::NG::AccessibilityProperty::*;
       OHOS::Ace::NG::BoxLayoutAlgorithm::*;
       OHOS::Ace::NG::EventHub::*;
@@ -467,6 +474,7 @@
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
       "OHOS::Ace::ElementRegister::AddUINode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::ElementRegister::GetNodeById(int)";
+      "OHOS::Ace::ElementRegister::GetUINodeById(int)";
 
       construction?vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm-in-OHOS::Ace::NG::MovingPhotoLayoutAlgorithm;
       construction?vtable?for?OHOS::Ace::NG::EventHub-in-OHOS::Ace::NG::MovingPhotoEventHub;
@@ -532,6 +540,7 @@
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
+      OHOS::Ace::NG::NodeRenderStatusMonitor::*;
     };
   local:
     *;

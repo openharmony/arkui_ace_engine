@@ -317,7 +317,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg010, TestSize.Lev
      */
     for (int32_t index = 0; index <= 4; index++) {
         auto testTextDecoration = static_cast<TextDecoration>(index);
-        RSTextDecoration retTextDecoration = ToRSTextDecoration(testTextDecoration);
+        RSTextDecoration retTextDecoration = ToRSTextDecoration({testTextDecoration});
         switch (testTextDecoration) {
             case TextDecoration::OVERLINE:
                 EXPECT_EQ(retTextDecoration, RSTextDecoration::OVERLINE);

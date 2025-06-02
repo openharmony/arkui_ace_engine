@@ -59,6 +59,7 @@ public:
             theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
             theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            theme->autoFillSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.security_shield");
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle || !theme) {
                 return;
@@ -250,6 +251,8 @@ public:
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 theme->cancelIconSize_ = pattern->GetAttr<Dimension>("textfield_cancel_icon_size", 16.0_vp);
             }
+            theme->autoFillIconPrimaryColor_ = pattern->GetAttr<Color>("auto_fill_icon_primary_color", Color());
+            theme->autoFillIconEmphasizeColor_ = pattern->GetAttr<Color>("auto_fill_icon_emphasize_color", Color());
         }
     };
 
@@ -445,6 +448,11 @@ public:
         return showSymbolId_;
     }
 
+    uint32_t GetAutoFillSymbolId() const
+    {
+        return autoFillSymbolId_;
+    }
+
     uint32_t GetHideSymbolId() const
     {
         return hideSymbolId_;
@@ -518,6 +526,12 @@ public:
     TextStyle GetTextStyle() const
     {
         return textStyle_;
+    }
+
+    TextDecoration GetTextDecoration() const
+    {
+        return textStyle_.GetTextDecoration().size() > 0 ?
+            textStyle_.GetTextDecoration()[0] : TextDecoration::NONE;
     }
 
     const TextStyle& GetErrorTextStyle() const
@@ -850,6 +864,21 @@ public:
         return contentHoverPadding_;
     }
 
+    const Color& GetAutoFillIconPrimaryColor() const
+    {
+        return autoFillIconPrimaryColor_;
+    }
+
+    const Color& GetAutoFillIconEmphasizeColor() const
+    {
+        return autoFillIconEmphasizeColor_;
+    }
+
+    const Dimension& GetAutoFillIconSize() const
+    {
+        return autoFillIconSize_;
+    }
+
 protected:
     TextFieldTheme() = default;
     TextStyle textStyle_;
@@ -937,6 +966,7 @@ private:
     uint32_t showSymbolId_ = 0;
     uint32_t hideSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
+    uint32_t autoFillSymbolId_ = 0;
 
     // UX::insert cursor offset up by 24vp
     Dimension insertCursorOffset_ = 24.0_vp;
@@ -997,6 +1027,9 @@ private:
     std::string cancelImageText_;
     bool needFocusBox_ = false;
     Dimension focusPadding_;
+    Color autoFillIconPrimaryColor_;
+    Color autoFillIconEmphasizeColor_;
+    Dimension autoFillIconSize_ = 24.0_vp;
 };
 
 } // namespace OHOS::Ace

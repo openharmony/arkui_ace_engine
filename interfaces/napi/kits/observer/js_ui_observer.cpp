@@ -16,7 +16,9 @@
 #include "js_ui_observer.h"
 #include "ui_observer.h"
 
-
+#include "core/common/ace_engine.h"
+#include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/node_render_status_monitor.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 
@@ -72,6 +74,9 @@ static constexpr uint32_t ROTATION_GESTURE = 5;
 static constexpr uint32_t DRAG = 6;
 static constexpr uint32_t CLICK = 7;
 
+static constexpr uint32_t ABOUT_TO_RENDER_IN = 0;
+static constexpr uint32_t ABOUT_TO_RENDER_OUT = 1;
+
 static constexpr uint32_t READY = 0;
 static constexpr uint32_t DETECTING = 1;
 static constexpr uint32_t PENDING = 2;
@@ -93,6 +98,9 @@ constexpr char BEFORE_PAN_START[] = "beforePanStart";
 constexpr char BEFORE_PAN_END[] = "beforePanEnd";
 constexpr char AFTER_PAN_START[] = "afterPanStart";
 constexpr char AFTER_PAN_END[] = "afterPanEnd";
+constexpr char NODE_RENDER_STATE[] = "nodeRenderState";
+constexpr char NODE_RENDER_STATE_REGISTER_ERR_MSG[] =
+    "The count of nodes monitoring render state is over the limitation";
 
 bool IsUIAbilityContext(napi_env env, napi_value context)
 {
@@ -159,6 +167,38 @@ bool IsNavDestSwitchOptions(napi_env env, napi_value obj, std::string& navigatio
     napi_value navId = nullptr;
     napi_get_named_property(env, obj, "navigationId", &navId);
     return ParseStringFromNapi(env, navId, navigationId);
+}
+
+RefPtr<NG::FrameNode> ParseNodeRenderStateFrameNode(napi_env env, napi_value value)
+{
+    if (MatchValueType(env, value, napi_number)) {
+        int32_t uniqueId = 0;
+        napi_get_value_int32(env, value, &uniqueId);
+        auto node = OHOS::Ace::ElementRegister::GetInstance()->GetUINodeById(uniqueId);
+        CHECK_NULL_RETURN(node, nullptr);
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+        if (!frameNode) {
+            TAG_LOGW(AceLogTag::ACE_OBSERVER, "node with id: %{public}d not exist.", uniqueId);
+            return nullptr;
+        }
+        if (node->GetTag() == V2::ROOT_ETS_TAG || node->GetTag() == V2::STAGE_ETS_TAG ||
+            node->GetTag() == V2::PAGE_ETS_TAG) {
+            return nullptr;
+        }
+        return frameNode;
+    }
+    if (MatchValueType(env, value, napi_string)) {
+        std::string inspectorId;
+        if (!ParseStringFromNapi(env, value, inspectorId)) {
+            return nullptr;
+        }
+        auto frameNode = NG::Inspector::GetFrameNodeByKey(inspectorId);
+        if (!frameNode) {
+            TAG_LOGW(AceLogTag::ACE_OBSERVER, "node with id: %{public}s not exist.", inspectorId.c_str());
+        }
+        return frameNode;
+    }
+    return nullptr;
 }
 
 struct NavDestinationSwitchParams {
@@ -343,6 +383,7 @@ ObserverProcess::ObserverProcess()
         { AFTER_PAN_START, &ObserverProcess::ProcessAfterPanStartRegister },
         { BEFORE_PAN_END, &ObserverProcess::ProcessBeforePanEndRegister },
         { AFTER_PAN_END, &ObserverProcess::ProcessAfterPanEndRegister },
+        { NODE_RENDER_STATE, &ObserverProcess::ProcessNodeRenderStateRegister },
     };
     unregisterProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
@@ -359,6 +400,7 @@ ObserverProcess::ObserverProcess()
         { AFTER_PAN_START, &ObserverProcess::ProcessAfterPanStartUnRegister },
         { BEFORE_PAN_END, &ObserverProcess::ProcessBeforePanEndUnRegister },
         { AFTER_PAN_END, &ObserverProcess::ProcessAfterPanEndUnRegister },
+        { NODE_RENDER_STATE, &ObserverProcess::ProcessNodeRenderStateUnRegister },
     };
 }
 
@@ -421,6 +463,15 @@ napi_value ObserverProcess::ProcessNavigationRegister(napi_env env, napi_callbac
         }
     }
 
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        int32_t navigationUniqueId;
+        if (napi_get_value_int32(env, argv[PARAM_INDEX_ONE], &navigationUniqueId) == napi_ok) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            UIObserver::RegisterNavigationCallback(navigationUniqueId, listener);
+        }
+    }
+
     napi_value result = nullptr;
     return result;
 }
@@ -449,6 +500,21 @@ napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callb
         std::string id;
         if (ParseNavigationId(env, argv[PARAM_INDEX_ONE], id)) {
             UIObserver::UnRegisterNavigationCallback(id, argv[PARAM_INDEX_TWO]);
+        }
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number)) {
+        int32_t navigationUniqueId;
+        if (napi_get_value_int32(env, argv[PARAM_INDEX_ONE], &navigationUniqueId) == napi_ok) {
+            UIObserver::UnRegisterNavigationCallback(navigationUniqueId, nullptr);
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        int32_t navigationUniqueId;
+        if (napi_get_value_int32(env, argv[PARAM_INDEX_ONE], &navigationUniqueId) == napi_ok) {
+            UIObserver::UnRegisterNavigationCallback(navigationUniqueId, argv[PARAM_INDEX_TWO]);
         }
     }
 
@@ -1304,6 +1370,54 @@ napi_value ObserverProcess::ProcessAfterPanEndUnRegister(napi_env env, napi_call
     return nullptr;
 }
 
+napi_value ObserverProcess::ProcessNodeRenderStateRegister(napi_env env, napi_callback_info info)
+{
+    auto container = AceEngine::Get().GetContainer(Container::CurrentIdSafely());
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto monitor = pipelineContext->GetNodeRenderStatusMonitor();
+    if (monitor->IsRegisterNodeRenderStateChangeCallbackExceedLimit()) {
+        TAG_LOGE(AceLogTag::ACE_OBSERVER, "register node render state change callback exceed limit.");
+        NapiThrow(env, NODE_RENDER_STATE_REGISTER_ERR_MSG, NODE_RENDER_STATE_REGISTER_ERR_CODE);
+        return nullptr;
+    }
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        auto frameNode = ParseNodeRenderStateFrameNode(env, argv[PARAM_INDEX_ONE]);
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+        UIObserver::RegisterNodeRenderStateChangeCallback(frameNode, listener, monitor);
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessNodeRenderStateUnRegister(napi_env env, napi_callback_info info)
+{
+    auto container = AceEngine::Get().GetContainer(Container::CurrentIdSafely());
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto monitor = pipelineContext->GetNodeRenderStatusMonitor();
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    RefPtr<NG::FrameNode> frameNode = nullptr;
+    napi_value callback = nullptr;
+    if (argc == PARAM_SIZE_TWO) {
+        frameNode = ParseNodeRenderStateFrameNode(env, argv[PARAM_INDEX_ONE]);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        frameNode = ParseNodeRenderStateFrameNode(env, argv[PARAM_INDEX_ONE]);
+        callback = argv[PARAM_INDEX_TWO];
+    }
+    UIObserver::UnRegisterNodeRenderStateChangeCallback(frameNode, callback, monitor);
+    return nullptr;
+}
+
 napi_value ObserverOn(napi_env env, napi_callback_info info)
 {
     return ObserverProcess::GetInstance().ProcessRegister(env, info);
@@ -1372,6 +1486,18 @@ napi_value CreateNavDestinationState(napi_env env)
     napi_create_uint32(env, ON_INACTIVE, &prop);
     napi_set_named_property(env, navDestinationState, "ON_INACTIVE", prop);
     return navDestinationState;
+}
+
+napi_value AddToNodeRenderStateType(napi_env env)
+{
+    napi_value nodeRenderStateType = nullptr;
+    napi_value prop = nullptr;
+    napi_create_object(env, &nodeRenderStateType);
+    napi_create_uint32(env, ABOUT_TO_RENDER_IN, &prop);
+    napi_set_named_property(env, nodeRenderStateType, "ABOUT_TO_RENDER_IN", prop);
+    napi_create_uint32(env, ABOUT_TO_RENDER_OUT, &prop);
+    napi_set_named_property(env, nodeRenderStateType, "ABOUT_TO_RENDER_OUT", prop);
+    return nodeRenderStateType;
 }
 
 napi_value AddToTabContentState(napi_env env)
@@ -1449,6 +1575,9 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     napi_value gestureRecognizerState = nullptr;
     gestureRecognizerState = AddToGestureRecognizerState(env);
 
+    napi_value nodeRenderStateType = nullptr;
+    nodeRenderStateType = AddToNodeRenderStateType(env);
+
     napi_property_descriptor uiObserverDesc[] = {
         DECLARE_NAPI_FUNCTION("on", ObserverOn),
         DECLARE_NAPI_FUNCTION("off", ObserverOff),
@@ -1458,6 +1587,7 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("TabContentState", tabContentState),
         DECLARE_NAPI_PROPERTY("GestureType", gestureType),
         DECLARE_NAPI_PROPERTY("GestureRecognizerState", gestureRecognizerState),
+        DECLARE_NAPI_PROPERTY("NodeRenderState", nodeRenderStateType),
     };
     NAPI_CALL(
         env, napi_define_properties(env, exports, sizeof(uiObserverDesc) / sizeof(uiObserverDesc[0]), uiObserverDesc));

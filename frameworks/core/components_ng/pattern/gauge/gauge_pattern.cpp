@@ -273,7 +273,8 @@ DataReadyNotifyTask GaugePattern::CreateDataReadyCallback()
 
 LoadFailNotifyTask GaugePattern::CreateLoadFailCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& /* sourceInfo */, const std::string& msg) {
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& /* sourceInfo */, const std::string& msg,
+                    const ImageErrorInfo& /* errorInfo */) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnImageLoadFail();
@@ -345,5 +346,52 @@ void GaugePattern::OnSensitiveStyleChange(bool isSensitive)
     CHECK_NULL_VOID(gaugePaintProperty);
     gaugePaintProperty->UpdateIsSensitive(isSensitive);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void GaugePattern::UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto layoutProperty = host->GetLayoutProperty<GaugeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    paintProperty->UpdateStrokeWidth(strokeWidth);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    layoutProperty->UpdateStrokeWidth(strokeWidth);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void GaugePattern::UpdateIndicatorIconPath(
+    const std::string& iconPath, const std::string& bundleName, const std::string& moduleName, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        paintProperty->UpdateIndicatorIconSourceInfo(ImageSourceInfo(iconPath, bundleName, moduleName));
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void GaugePattern::UpdateIndicatorSpace(const CalcDimension& space, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        paintProperty->UpdateIndicatorSpace(space);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 } // namespace OHOS::Ace::NG

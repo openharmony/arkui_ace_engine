@@ -33,6 +33,14 @@ public:
     CalendarPickerPattern() : LinearLayoutPattern(false) {};
     ~CalendarPickerPattern() override = default;
 
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+    }
+
     bool IsAtomicNode() const override
     {
         return true;
@@ -180,6 +188,7 @@ public:
     bool GetMarkToday();
     void SetDisabledDateRange(const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange);
     std::string GetDisabledDateRange();
+    void UpdateTextStyle(const PickerTextStyle& textStyle);
 
 private:
     void OnModifyDone() override;

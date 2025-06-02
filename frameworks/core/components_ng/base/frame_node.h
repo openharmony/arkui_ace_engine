@@ -88,6 +88,11 @@ struct CacheMatrixInfo {
     RectF paintRectWithTransform;
 };
 
+enum {
+    RET_FAILED = 11,
+    RET_SUCCESS = 10,
+};
+
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -437,11 +442,6 @@ public:
 
     bool IsAtomicNode() const override;
 
-    int32_t OnRecvCommand(const std::string& command) override
-    {
-        return 0;
-    }
-
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void RebuildRenderContextTree() override;
@@ -474,6 +474,8 @@ public:
     }
 
     void ChangeSensitiveStyle(bool isSensitive);
+
+    bool IsJsCustomPropertyUpdated() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
@@ -512,6 +514,8 @@ public:
     // call by recycle framework.
     void OnRecycle() override;
     void OnReuse() override;
+
+    void NotifyColorModeChange(uint32_t colorMode) override;
 
     OffsetF GetOffsetRelativeToWindow() const;
 
@@ -1158,7 +1162,7 @@ public:
     void SetDeleteRsNode(bool isDelete) {
         isDeleteRsNode_ = isDelete;
     }
- 
+
     bool GetIsDelete() const {
         return isDeleteRsNode_;
     }
@@ -1166,7 +1170,7 @@ public:
     void SetPositionZ(bool hasPositionZ) {
         hasPositionZ_ = hasPositionZ;
     }
- 
+
     bool HasPositionZ() const {
         return hasPositionZ_;
     }
@@ -1215,7 +1219,8 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
+        std::function<std::string()>&& getCustomPropertyMapFunc = nullptr);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
@@ -1342,6 +1347,23 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
+    
+    void SetRemoveToolbarItemCallback(uint32_t id, std::function<void()>&& callback)
+    {
+        removeToolbarItemCallbacks_[id] = callback;
+    }
+
+    int32_t OnRecvCommand(const std::string& command) override;
+
+    const RefPtr<FrameNode>& GetCornerMarkNode() const
+    {
+        return cornerMarkNode_;
+    }
+
+    void SetCornerMarkNode(const RefPtr<FrameNode>& cornerMarkNode)
+    {
+        cornerMarkNode_ = cornerMarkNode;
+    }
 
 protected:
     void DumpInfo() override;
@@ -1488,6 +1510,7 @@ private:
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
     const char* GetPaintPropertyTypeName() const;
+    void CleanupPipelineResources();
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1517,6 +1540,7 @@ private:
     std::set<std::string> allowDrop_;
     std::function<void()> removeCustomProperties_;
     std::function<std::string(const std::string& key)> getCustomProperty_;
+    std::function<std::string()> getCustomPropertyMapFunc_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1639,6 +1663,10 @@ private:
 
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
+
+    std::unordered_map<uint32_t, std::function<void()>> removeToolbarItemCallbacks_;
+
+    RefPtr<FrameNode> cornerMarkNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

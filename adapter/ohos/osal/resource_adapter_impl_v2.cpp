@@ -56,7 +56,7 @@ const std::unordered_set<std::string> PATTERN_SET = { THEME_PATTERN_BUTTON, THEM
     THEME_PATTERN_SECURITY_COMPONENT, THEME_PATTERN_FORM, THEME_PATTERN_SIDE_BAR, THEME_PATTERN_PATTERN_LOCK,
     THEME_PATTERN_GAUGE, THEME_PATTERN_SHEET, THEME_PATTERN_AGING_ADAPATION_DIALOG, THEME_PATTERN_LINEAR_INDICATOR,
     THEME_BLUR_STYLE_COMMON, THEME_PATTERN_SHADOW, THEME_PATTERN_CONTAINER_MODAL, THEME_PATTERN_SCROLLABLE,
-    THEME_PATTERN_APP };
+    THEME_PATTERN_APP, THEME_PATTERN_CORNER_MARK };
 
 
 constexpr char RESOURCE_TOKEN_PATTERN[] = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
@@ -1045,5 +1045,53 @@ RefPtr<ResourceAdapter> ResourceAdapterImplV2::GetOverrideResourceAdapter(
     }
     auto overrideResMgr = sysResourceManager_->GetOverrideResourceManager(overrideResConfig);
     return AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
+}
+
+bool ResourceAdapterImplV2::ExistDarkResById(const std::string& resourceId)
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto resId = StringUtils::StringToUintCheck(resourceId, UINT32_MAX);
+    if (resId == UINT32_MAX) {
+        return false;
+    }
+    auto colorMode = GetResourceColorMode();
+    bool colorChanged = false;
+    if (colorMode == ColorMode::LIGHT) {
+        UpdateColorMode(ColorMode::DARK);
+        colorChanged = true;
+    }
+    auto appResCfg = Global::Resource::CreateResConfig();
+    auto state = manager->GetResConfigById(resId, *appResCfg);
+    if (colorChanged) {
+        UpdateColorMode(ColorMode::LIGHT);
+    }
+    return (state == Global::Resource::SUCCESS) &&
+        (appResCfg->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK);
+}
+
+bool ResourceAdapterImplV2::ExistDarkResByName(const std::string& resourceName, const std::string& resourceType)
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto resType = StringUtils::StringToUintCheck(resourceType, UINT32_MAX);
+    if (resType < OHOS::Global::Resource::ResType::VALUES ||
+        resType > OHOS::Global::Resource::ResType::MAX_RES_TYPE) {
+        return false;
+    }
+    auto type = static_cast<OHOS::Global::Resource::ResType>(resType);
+    auto colorMode = GetResourceColorMode();
+    bool colorChanged = false;
+    if (colorMode == ColorMode::LIGHT) {
+        UpdateColorMode(ColorMode::DARK);
+        colorChanged = true;
+    }
+    auto appResCfg = Global::Resource::CreateResConfig();
+    auto state = manager->GetResConfigByName(resourceName, type, *appResCfg);
+    if (colorChanged) {
+        UpdateColorMode(ColorMode::LIGHT);
+    }
+    return (state == Global::Resource::SUCCESS) &&
+        (appResCfg->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK);
 }
 } // namespace OHOS::Ace

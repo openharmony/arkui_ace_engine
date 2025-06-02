@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
@@ -113,4 +114,72 @@ void DataPanelModelNG::SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCal
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
 }
+
+void HandleTrackBackgroundColor(
+    const RefPtr<ResourceObject>& resObj, const RefPtr<DataPanelPattern>& pattern, const std::string& key)
+{
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        std::string color = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (color.empty()) {
+            if (ResourceParseUtils::ParseResColor(resObj, result)) {
+                pattern->AddResCache(key, result.ColorToString());
+            } else {
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto theme = pipeline->GetTheme<DataPanelTheme>();
+                CHECK_NULL_VOID(theme);
+                result = theme->GetBackgroundColor();
+            }
+        } else {
+            result = Color::ColorFromString(color);
+        }
+        pattern->UpdateTrackBackground(result, isFirstLoad);
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void HandleStrokeWidth(
+    const RefPtr<ResourceObject>& resObj, const RefPtr<DataPanelPattern>& pattern, const std::string& key)
+{
+    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            pattern->UpdateStrokeWidth(result, isFirstLoad);
+        } else {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<DataPanelTheme>();
+            CHECK_NULL_VOID(theme);
+            result = theme->GetThickness();
+            pattern->UpdateStrokeWidth(result, isFirstLoad);
+        }
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void DataPanelModelNG::CreateWithResourceObj(DataPanelResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        switch (jsResourceType) {
+            case DataPanelResourceType::TRACK_BACKGROUND_COLOR: {
+                HandleTrackBackgroundColor(resObj, pattern, "dataPanel.trackBackgroundColor");
+                break;
+            }
+            case DataPanelResourceType::STROKE_WIDTH: {
+                HandleStrokeWidth(resObj, pattern, "dataPanel.StrokeWidth");
+                break;
+            }
+            default:
+                break;
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

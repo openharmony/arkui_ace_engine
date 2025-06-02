@@ -22,6 +22,9 @@
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
@@ -31,6 +34,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -108,6 +112,7 @@ constexpr int32_t ERROR_CODE_NO_ERROR = 0;
 constexpr Dimension ARROW_ZERO_PERCENT = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT = 0.5_pct;
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT = 1.0_pct;
+constexpr int32_t API_TARGET_VERSION_MASK = 1000;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -187,6 +192,26 @@ Alignment ParseAlignment(int32_t align)
             break;
     }
     return alignment;
+}
+
+Alignment ParseLocalizedAlignment(std::string localizedAlignment)
+{
+    static const std::unordered_map<std::string, Alignment> alignmentMap = {
+        {"top_start", Alignment::TOP_LEFT},
+        {"top", Alignment::TOP_CENTER},
+        {"top_end", Alignment::TOP_RIGHT},
+        {"start", Alignment::CENTER_LEFT},
+        {"center", Alignment::CENTER},
+        {"end", Alignment::CENTER_RIGHT},
+        {"bottom_start", Alignment::BOTTOM_LEFT},
+        {"bottom", Alignment::BOTTOM_CENTER},
+        {"bottom_end", Alignment::BOTTOM_RIGHT}
+    };
+    auto it = alignmentMap.find(localizedAlignment);
+    if (it != alignmentMap.end()) {
+        return it->second;
+    }
+    return Alignment::CENTER;
 }
 
 int32_t ConvertAlignmentToInt(Alignment alignment)
@@ -677,11 +702,17 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, Ar
     bgImgPosition.SetSizeY(animatableDimensionY);
 }
 
-void SetBackgroundColor(ArkUINodeHandle node, uint32_t color)
+void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBackgroundColor(frameNode, Color(color));
+    if (!SystemProperties::ConfigChangePerform() || !bgColorRawPtr) {
+        ViewAbstract::SetBackgroundColor(frameNode, Color(color));
+    } else {
+        auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+        auto backgroundColorResObj = AceType::Claim(bgColor);
+        ViewAbstract::SetBackgroundColor(frameNode, Color(color), backgroundColorResObj);
+    }
 }
 
 void ResetBackgroundColor(ArkUINodeHandle node)
@@ -1121,11 +1152,35 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     ViewAbstract::SetAlign(frameNode, alignment);
 }
 
+void SetLocalizedAlign(ArkUINodeHandle node, ArkUI_CharPtr align)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string localizedAlignment(align);
+    ViewAbstract::SetAlign(localizedAlignment);
+    ViewAbstract::SetIsMirrorable(true);
+}
+
 void ResetAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
+}
+
+void SetLayoutGravity(ArkUINodeHandle node, ArkUI_CharPtr align)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Alignment alignment = ParseLocalizedAlignment(align);
+    ViewAbstract::SetLayoutGravity(frameNode, alignment);
+}
+
+void ResetLayoutGravity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutGravity(frameNode, Alignment::CENTER);
 }
 
 void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
@@ -1908,8 +1963,52 @@ void ResetBorder(ArkUINodeHandle node)
     ViewAbstract::SetDashWidth(frameNode, Dimension(-1));
 }
 
-void SetBackgroundImagePosition(
-    ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types, ArkUI_Bool isAlign, ArkUI_Int32 size)
+void SetBackgroundImagePositionUpdateFunc(
+    BackgroundImagePosition& bgImgPosition, void* bgImageXRawPtr, void* bgImageYRawPtr)
+{
+    CHECK_NULL_VOID(bgImageXRawPtr);
+    auto* bgImageX = reinterpret_cast<ResourceObject*>(bgImageXRawPtr);
+    auto resObjX = AceType::Claim(bgImageX);
+    auto&& updateFuncX = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension x;
+        double valueX;
+        DimensionUnit typeX;
+        ResourceParseUtils::ParseResDimensionVp(resObj, x);
+        if (x.Unit() == DimensionUnit::PERCENT) {
+            valueX = x.Value();
+            typeX = DimensionUnit::PERCENT;
+        } else {
+            valueX = x.ConvertToPx();
+            typeX = DimensionUnit::PX;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeX(AnimatableDimension(valueX, typeX, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionX", resObjX, std::move(updateFuncX));
+
+    CHECK_NULL_VOID(bgImageYRawPtr);
+    auto* bgImageY = reinterpret_cast<ResourceObject*>(bgImageYRawPtr);
+    auto resObjY = AceType::Claim(bgImageY);
+    auto&& updateFuncY = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension y;
+        double valueY;
+        DimensionUnit typeY;
+        ResourceParseUtils::ParseResDimensionVp(resObj, y);
+        if (y.Unit() == DimensionUnit::PERCENT) {
+            valueY = y.Value();
+            typeY = DimensionUnit::PERCENT;
+        } else {
+            valueY = y.ConvertToPx();
+            typeY = DimensionUnit::PX;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeY(AnimatableDimension(valueY, typeY, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionY", resObjY, std::move(updateFuncY));
+}
+
+void SetBackgroundImagePosition(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
+    ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1917,6 +2016,7 @@ void SetBackgroundImagePosition(
         return;
     }
     BackgroundImagePosition bgImgPosition;
+    SetBackgroundImagePositionUpdateFunc(bgImgPosition, bgImageXRawPtr, bgImageYRawPtr);
     double valueX = values[NUM_0];
     double valueY = values[NUM_1];
     DimensionUnit typeX = static_cast<OHOS::Ace::DimensionUnit>(types[NUM_0]);
@@ -2032,15 +2132,22 @@ void ResetBackgroundImageSize(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
-void SetBackgroundImage(
-    ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle, ArkUI_CharPtr module, ArkUI_Int32 repeatIndex)
+void SetBackgroundImage(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle,
+    ArkUI_CharPtr module, ArkUI_Int32 repeatIndex, void* bgImageRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string srcStr(src);
     std::string bundleStr(bundle);
     std::string moduleStr(module);
-    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundleStr, moduleStr });
+    if (!SystemProperties::ConfigChangePerform() || !bgImageRawPtr) {
+        ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundleStr, moduleStr });
+    } else {
+        auto* bgImage = reinterpret_cast<ResourceObject*>(bgImageRawPtr);
+        auto backgroundImageResObj = AceType::Claim(bgImage);
+        ViewAbstract::SetBackgroundImage(
+            frameNode, OHOS::Ace::ImageSourceInfo{srcStr, bundleStr, moduleStr}, backgroundImageResObj);
+    }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
     if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
         ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);
@@ -2185,6 +2292,17 @@ void GetRotate(ArkUINodeHandle node, ArkUIRotateType* rotateType)
     rotateType->sightDistance = rotate.v;
 }
 
+void GetRotateAngle(ArkUINodeHandle node, ArkUIRotateAngleType* rotateType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto rotateAngle = ViewAbstract::GetRotateAngle(frameNode);
+    rotateType->angleX = rotateAngle.x;
+    rotateType->angleY = rotateAngle.y;
+    rotateType->angleZ = rotateAngle.z;
+    rotateType->sightDistance = rotateAngle.w;
+}
+
 ArkUI_Float32 GetBrightness(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2282,6 +2400,30 @@ void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
     ViewAbstract::SetPivot(frameNode, center);
 }
 
+void SetRotateAngle(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const ArkUI_Int32* units,
+    ArkUI_Int32 unitLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (valLength != NUM_7 || unitLength != NUM_3) {
+        return;
+    }
+    auto centerX = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    auto centerY = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    auto centerZ = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    auto angleX = values[NUM_3];
+    auto angleY = values[NUM_4];
+    auto angleZ = values[NUM_5];
+    auto perspective = values[NUM_6];
+    ViewAbstract::SetRotateAngle(frameNode, NG::Vector4F(angleX, angleY, angleZ, perspective));
+
+    DimensionOffset center(centerX, centerY);
+    if (!NearZero(centerZ.Value())) {
+        center.SetZ(centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
 /**
  * @param values
  * values[0]: xDirection;values[1]: yDirection;values[2]: zDirection
@@ -2304,6 +2446,22 @@ void SetRotateWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* 
     ViewAbstract::SetRotate(frameNode, NG::Vector5F(xDirection, yDirection, zDirection, angle, perspective));
 }
 
+void SetRotateAngleWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (valLength < NUM_4) {
+        return;
+    }
+
+    auto angleX = values[NUM_0];
+    auto angleY = values[NUM_1];
+    auto angleZ = values[NUM_2];
+    auto perspective = values[NUM_3];
+    ViewAbstract::SetRotateAngle(frameNode, NG::Vector4F(angleX, angleY, angleZ, perspective));
+}
+
 void ResetRotate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2317,6 +2475,30 @@ void ResetRotate(ArkUINodeHandle node)
         center.SetZ(rotate.centerZ);
     }
     ViewAbstract::SetPivot(frameNode, center);
+}
+
+void ResetRotateAngle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::RotateAngleOptions rotate(0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+    ViewAbstract::SetRotate(
+        frameNode, NG::Vector5F(rotate.angleX, rotate.angleY, rotate.angleZ, 0.0, rotate.perspective));
+
+    DimensionOffset center(rotate.centerX, rotate.centerY);
+    if (!NearZero(rotate.centerZ.Value())) {
+        center.SetZ(rotate.centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
+void ResetRotateAngleWithoutTransformCenter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::RotateAngleOptions rotateAngle(0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+    ViewAbstract::SetRotateAngle(
+        frameNode, NG::Vector4F(rotateAngle.angleX, rotateAngle.angleY, rotateAngle.angleZ, rotateAngle.perspective));
 }
 
 void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options)
@@ -5826,6 +6008,29 @@ void GetTranslate(ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 
     (*values)[NUM_2] = translate.z.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
+void GetTranslateWithPercentage(
+    ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 (*units)[2], ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto translate = ViewAbstract::GetTranslate(frameNode);
+    if (translate.x.Unit() != DimensionUnit::PERCENT) {
+        (*units)[0] = NUM_0;
+        (*values)[0] = translate.x.GetNativeValue(static_cast<DimensionUnit>(unit));
+    } else {
+        (*units)[0] = NUM_1;
+        (*values)[0] = translate.x.Value();
+    }
+    if (translate.y.Unit() != DimensionUnit::PERCENT) {
+        (*units)[1] = NUM_0;
+        (*values)[1] = translate.y.GetNativeValue(static_cast<DimensionUnit>(unit));
+    } else {
+        (*units)[1] = NUM_1;
+        (*values)[1] = translate.y.Value();
+    }
+    (*values)[NUM_2] = translate.z.GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
 ArkUI_Float32 GetAspectRatio(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -7007,6 +7212,79 @@ void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
     ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
 }
 
+void SetVisualEffect(ArkUINodeHandle node, void* visualEffect)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto visualEffectPtr = static_cast<Rosen::VisualEffect*>(visualEffect);
+    ViewAbstractModelNG::SetVisualEffect(frameNode, visualEffectPtr);
+}
+
+void ResetVisualEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetVisualEffect(frameNode, nullptr);
+}
+
+void SetBackgroundFilter(ArkUINodeHandle node, void* backgroundFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto backgroundFilterPtr = static_cast<Rosen::Filter*>(backgroundFilter);
+    ViewAbstractModelNG::SetBackgroundFilter(frameNode, backgroundFilterPtr);
+}
+
+void ResetBackgroundFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetBackgroundFilter(frameNode, nullptr);
+}
+
+void SetForegroundFilter(ArkUINodeHandle node, void* foregroundFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto foregroundFilterPtr = static_cast<Rosen::Filter*>(foregroundFilter);
+    ViewAbstractModelNG::SetForegroundFilter(frameNode, foregroundFilterPtr);
+}
+
+void ResetForegroundFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetForegroundFilter(frameNode, nullptr);
+}
+
+void SetCompositingFilter(ArkUINodeHandle node, void* compositingFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto compositingFilterPtr = static_cast<Rosen::Filter*>(compositingFilter);
+    ViewAbstractModelNG::SetCompositingFilter(frameNode, compositingFilterPtr);
+}
+
+void ResetCompositingFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetCompositingFilter(frameNode, nullptr);
+}
+
+void SetFreeze(ArkUINodeHandle node, ArkUI_Bool freeze)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetFreeze(frameNode, freeze);
+}
+
+void ResetFreeze(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetFreeze(frameNode, false);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -7047,7 +7325,10 @@ const ArkUICommonModifier* GetCommonModifier()
         .setOpacity = SetOpacity,
         .resetOpacity = ResetOpacity,
         .setAlign = SetAlign,
+        .setLocalizedAlign = SetLocalizedAlign,
         .resetAlign = ResetAlign,
+        .setLayoutGravity = SetLayoutGravity,
+        .resetLayoutGravity = ResetLayoutGravity,
         .setBackdropBlur = SetBackdropBlur,
         .resetBackdropBlur = ResetBackdropBlur,
         .setHueRotate = SetHueRotate,
@@ -7101,8 +7382,12 @@ const ArkUICommonModifier* GetCommonModifier()
         .setScaleWithoutTransformCenter = SetScaleWithoutTransformCenter,
         .resetScale = ResetScale,
         .setRotate = SetRotate,
+        .setRotateAngle = SetRotateAngle,
         .setRotateWithoutTransformCenter = SetRotateWithoutTransformCenter,
+        .setRotateAngleWithoutTransformCenter = SetRotateAngleWithoutTransformCenter,
+        .resetRotateAngleWithoutTransformCenter = ResetRotateAngleWithoutTransformCenter,
         .resetRotate = ResetRotate,
+        .resetRotateAngle = ResetRotateAngle,
         .setGeometryTransition = SetGeometryTransition,
         .resetGeometryTransition = ResetGeometryTransition,
         .setBindTips = SetBindTips,
@@ -7332,6 +7617,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getLayoutWeight = GetLayoutWeight,
         .getScale = GetScale,
         .getRotate = GetRotate,
+        .getRotateAngle = GetRotateAngle,
         .getBrightness = GetBrightness,
         .getSaturate = GetSaturate,
         .getBackgroundImagePosition = GetBackgroundImagePosition,
@@ -7359,6 +7645,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getMargin = GetMargin,
         .getMarginDimension = GetMarginDimension,
         .getTranslate = GetTranslate,
+        .getTranslateWithPercentage = GetTranslateWithPercentage,
         .setMoveTransition = SetMoveTransition,
         .getMoveTransition = GetMoveTransition,
         .resetMask = ResetMask,
@@ -7446,6 +7733,16 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetPrivacySensitive = ResetPrivacySensitve,
         .freezeUINodeById = FreezeUINodeById,
         .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
+        .setVisualEffect = SetVisualEffect,
+        .resetVisualEffect = ResetVisualEffect,
+        .setBackgroundFilter = SetBackgroundFilter,
+        .resetBackgroundFilter = ResetBackgroundFilter,
+        .setForegroundFilter = SetForegroundFilter,
+        .resetForegroundFilter = ResetForegroundFilter,
+        .setCompositingFilter = SetCompositingFilter,
+        .resetCompositingFilter = ResetCompositingFilter,
+        .setFreeze = SetFreeze,
+        .resetFreeze = ResetFreeze,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -7486,6 +7783,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetOpacity = ResetOpacity,
         .setAlign = SetAlign,
         .resetAlign = ResetAlign,
+        .setLayoutGravity = SetLayoutGravity,
+        .resetLayoutGravity = ResetLayoutGravity,
         .setBackdropBlur = SetBackdropBlur,
         .resetBackdropBlur = ResetBackdropBlur,
         .setHueRotate = SetHueRotate,
@@ -7781,6 +8080,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getMargin = GetMargin,
         .getMarginDimension = GetMarginDimension,
         .getTranslate = GetTranslate,
+        .getTranslateWithPercentage = GetTranslateWithPercentage,
         .setMoveTransition = SetMoveTransition,
         .getMoveTransition = GetMoveTransition,
         .resetMask = ResetMask,
@@ -7832,8 +8132,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getExpandSafeArea = GetExpandSafeArea,
         .setTransition = SetTransition,
         .setDragPreview = SetDragPreview,
-        .resetDragPreview = ResetDragPreview,
         .freezeUINodeById = FreezeUINodeById,
+        .resetDragPreview = ResetDragPreview,
         .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
@@ -8125,6 +8425,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
         // modifierkeystates
         event.keyEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
 
         std::vector<int32_t> pressKeyCodeList;
         auto pressedKeyCodes = info.GetPressedKeyCodes();
@@ -8161,6 +8462,7 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
         event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
 
         std::vector<int32_t> pressKeyCodeList;
         auto pressedKeyCodes = info.GetPressedKeyCodes();
@@ -8197,6 +8499,7 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
         event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
 
         std::vector<int32_t> pressKeyCodeList;
         auto pressedKeyCodes = info.GetPressedKeyCodes();
@@ -8258,6 +8561,7 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
         }
         event.focusAxisEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.focusAxisEvent.targetDisplayId = info.GetTargetDisplayId();
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -8519,6 +8823,8 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         touchEvent.touchEvent.historySize = 0;
         touchEvent.touchEvent.subKind = ON_TOUCH_INTERCEPT;
         touchEvent.touchEvent.interceptResult = 0;
+        touchEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
+        touchEvent.touchEvent.deviceId = eventInfo.GetDeviceId();
         SendArkUISyncEvent(&touchEvent);
         return static_cast<NG::HitTestMode>(touchEvent.touchEvent.interceptResult);
     };
@@ -8627,6 +8933,8 @@ void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
         event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
         event.touchEvent.actionTouchPoint.rollAngle = info.GetRollAngle().value_or(0.0f);
+        event.touchEvent.deviceId = info.GetDeviceId();
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnHoverMove(frameNode, onEvent);
@@ -8733,6 +9041,8 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.axisEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.axisEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
+        event.axisEvent.deviceId = info.GetDeviceId();
 
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(!event.axisEvent.propagation);

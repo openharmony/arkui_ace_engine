@@ -272,7 +272,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     bool sizeDiminished =
         !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
-    CheckRestartSpring(sizeDiminished);
+
+    if (!GetCanStayOverScroll()) {
+        CheckRestartSpring(sizeDiminished);
+    }
 
     DrivenRender(dirty);
 
@@ -1654,7 +1657,9 @@ void ListPattern::ScrollTo(float position)
     jumpIndex_.reset();
     targetIndex_.reset();
     currentDelta_ = 0.0f;
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    SetIsOverScroll(GetCanStayOverScroll());
     MarkDirtyNodeSelf();
     isScrollEnd_ = true;
 }
@@ -1948,6 +1953,7 @@ void ListPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType 
 void ListPattern::ScrollBy(float offset)
 {
     StopAnimate();
+    SetIsOverScroll(false);
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
     isScrollEnd_ = true;
 }
@@ -3126,6 +3132,14 @@ SizeF ListPattern::GetChildrenExpandedSize()
         return SizeF(estimatedHeight, viewSize.Height());
     }
     return SizeF();
+}
+
+void ListPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
 }
 
 void ListPattern::OnMidIndexChanged()

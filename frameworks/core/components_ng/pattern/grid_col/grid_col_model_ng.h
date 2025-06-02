@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr int32_t DEFAULT_SPAN_NUMBER = -1;
+
 class FrameNode;
 
 class ACE_EXPORT GridColModelNG : public GridColModel {

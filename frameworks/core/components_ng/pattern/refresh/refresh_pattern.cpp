@@ -49,7 +49,7 @@ constexpr float PERCENT = 0.01f; // Percent
 constexpr float FOLLOW_TO_RECYCLE_DURATION = 600.0f;
 constexpr float CUSTOM_BUILDER_ANIMATION_DURATION = 100.0f;
 constexpr float LOADING_ANIMATION_DURATION = 350.0f;
-constexpr float MAX_OFFSET = 100000.0f;
+constexpr float MAX_OFFSET = std::numeric_limits<float>::infinity();
 constexpr float HALF = 0.5f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 constexpr Dimension TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0_vp;
@@ -317,6 +317,21 @@ void RefreshPattern::OnColorConfigurationUpdate()
     }
 }
 
+void RefreshPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    if (isCustomBuilderExist_ || !hasLoadingText_) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(loadingTextNode_);
+    auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+    loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void RefreshPattern::InitChildNode()
 {
     if (isCustomBuilderExist_) {
@@ -442,7 +457,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
             return { delta, true };
         }
         auto pullDownRatio = CalculatePullDownRatio();
-        scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
+        scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, GetMaxPullDownDistance());
         UpdateFirstChildPlacement();
         FireOnOffsetChange(scrollOffset_);
         if (!isSourceFromAnimation_) {
@@ -497,17 +512,23 @@ float RefreshPattern::CalculatePullDownRatio()
         CHECK_NULL_RETURN(context, 1.0f);
         auto scrollableTheme = context->GetTheme<ScrollableTheme>();
         CHECK_NULL_RETURN(scrollableTheme, 1.0f);
-        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            ratio_ = scrollableTheme->GetGreatApiRatio();
-        } else {
-            ratio_ = scrollableTheme->GetRatio();
-        }
+        ratio_ = scrollableTheme->GetRatio();
     }
     auto gamma = scrollOffset_ / contentHeight;
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
     }
     return exp(-ratio_.value() * gamma);
+}
+
+float RefreshPattern::GetMaxPullDownDistance()
+{
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    if (layoutProperty->GetMaxPullDownDistance().has_value()) {
+        return Dimension(layoutProperty->GetMaxPullDownDistance().value(), DimensionUnit::VP).ConvertToPx();
+    }
+    return MAX_OFFSET;
 }
 
 float RefreshPattern::GetFollowRatio()
@@ -708,9 +729,10 @@ void RefreshPattern::InitOffsetProperty()
         auto propertyCallback = [weak = AceType::WeakClaim(this)](float scrollOffset) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->scrollOffset_ = scrollOffset;
+            auto scrollOffsetLimit = std::clamp(scrollOffset, 0.0f, pattern->GetMaxPullDownDistance());
+            pattern->scrollOffset_ = scrollOffsetLimit;
             pattern->UpdateFirstChildPlacement();
-            pattern->FireOnOffsetChange(scrollOffset);
+            pattern->FireOnOffsetChange(scrollOffsetLimit);
         };
         offsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
         auto host = GetHost();

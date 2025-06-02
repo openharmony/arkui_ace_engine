@@ -111,6 +111,9 @@ public:
     void SetBackBorderRadius() override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
+    void SetStrokeWidth(const Dimension& value) override;
+    void SetStrokeColor(const Color& value) override;
+    void ResetStrokeColor() override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -191,6 +194,11 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static Dimension GetStrokeWidth(FrameNode* frameNode);
+    static Color GetStrokeColor(FrameNode* frameNode);
+    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetStrokeColor(FrameNode* frameNode, const Color& value);
+    static void ResetStrokeColor(FrameNode* frameNode);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);

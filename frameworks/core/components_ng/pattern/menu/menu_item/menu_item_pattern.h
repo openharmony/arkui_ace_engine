@@ -308,6 +308,7 @@ public:
     // XTS inspector functions
     std::string InspectorGetFont();
     float GetSelectOptionWidth();
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     inline void SetIcon(const std::string& src)
     {
@@ -409,6 +410,10 @@ public:
     {
         optionBgColor_ = color;
     }
+    inline bool IsExpanded() const
+    {
+        return isExpanded_;
+    }
     void AttachBottomDivider();
     void RemoveBottomDivider();
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
@@ -451,6 +456,7 @@ private:
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void AddExpandIcon(RefPtr<FrameNode>& row);
+    bool ISNeedAddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void SetRowAccessibilityLevel();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
@@ -526,7 +532,7 @@ private:
     {
         return !(config.skipMeasure && config.skipLayout);
     }
-
+    void RegisterAccessibilityChildActionNotify();
     std::list<TouchRegion> hoverRegions_;
 
     RefPtr<InputEvent> wrapperMouseEvent_;

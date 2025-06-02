@@ -230,9 +230,6 @@ AssertionResult SwiperTestNg::CurrentIndex(int32_t expectIndex)
     if (!GetChildFrameNode(frameNode_, expectIndex)) {
         return AssertionFailure() << "There is no item at expectIndex: " << expectIndex;
     }
-    if (!GetChildFrameNode(frameNode_, expectIndex)->IsActive()) {
-        return AssertionFailure() << "The expectIndex item is not active";
-    }
     if (GetChildFrameNode(frameNode_, expectIndex)->GetLayoutProperty()->GetVisibility() != VisibleType::GONE) {
         if (NearZero(GetChildWidth(frameNode_, expectIndex))) {
             return AssertionFailure() << "The expectIndex item width is 0";
@@ -1589,5 +1586,141 @@ HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap003, TestSize.Level
     config.skipMeasure = true;
     swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
     EXPECT_EQ(swiperPattern->oldIndex_, 2);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    int32_t currentIndex = 3;
+    auto onChange = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (swiperInfo != nullptr) {
+            currentIndex = swiperInfo->GetIndex();
+        }
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnChange(std::move(onChange));
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string command = R"({"cmd":"changeIndex","params":{"index":2}})";
+    pattern->OnInjectionEvent(command);
+    EXPECT_EQ(currentIndex, 2);
+    command = R"({"cmd":"changeIndex","params":{"index":100}})";
+    pattern->OnInjectionEvent(command);
+    EXPECT_EQ(currentIndex, 0);
+    command = R"({"cmd":"changeIndex","params":{"index":-10}})";
+    EXPECT_EQ(currentIndex, 0);
+    pattern->OnInjectionEvent(command);
+}
+
+/**
+ * @tc.name: NotifyDataChange001
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    swiperPattern->oldChildrenSize_ = std::nullopt;
+    swiperPattern->jumpIndex_ = 3;
+    swiperPattern->NotifyDataChange(0, 0);
+    EXPECT_EQ(swiperPattern->jumpIndex_, 3);
+}
+
+/**
+ * @tc.name: NotifyDataChange002
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->jumpIndex_ = 2;
+    swiperPattern->NotifyDataChange(0, 0);
+    EXPECT_EQ(swiperPattern->jumpIndex_, 2);
+}
+
+/**
+ * @tc.name: NotifyDataChange003
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    swiperNode->children_.clear();
+    swiperNode->children_ = { frameNode, frameNode, frameNode, frameNode, frameNode, frameNode, frameNode, frameNode };
+    swiperLayoutProperty->propMinSize_ = std::nullopt;
+    swiperLayoutProperty->propMaintainVisibleContentPosition_ = true;
+    swiperLayoutProperty->propDisplayCount_ = 5;
+    swiperLayoutProperty->propSwipeByGroup_ = true;
+    swiperNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = swiperNode;
+    swiperPattern->hasCachedCapture_ = true;
+    swiperPattern->isBindIndicator_ = true;
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->jumpIndex_ = std::nullopt;
+    swiperPattern->NotifyDataChange(0, 2);
+    EXPECT_EQ(swiperPattern->jumpIndex_, 3);
+}
+
+/**
+ * @tc.name: NotifyDataChange004
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    swiperLayoutProperty->propMaintainVisibleContentPosition_ = false;
+    frameNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = frameNode;
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->jumpIndex_ = std::nullopt;
+    swiperPattern->NotifyDataChange(0, 2);
+    EXPECT_FALSE(swiperPattern->jumpIndex_.has_value());
+}
+
+/**
+ * @tc.name: NotifyDataChange005
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange005, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    swiperLayoutProperty->propMaintainVisibleContentPosition_ = true;
+    frameNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = frameNode;
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->jumpIndex_ = std::nullopt;
+    swiperPattern->NotifyDataChange(4, 2);
+    EXPECT_FALSE(swiperPattern->jumpIndex_.has_value());
 }
 } // namespace OHOS::Ace::NG

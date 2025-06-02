@@ -105,6 +105,12 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
+    void UpdateTextColor(const Color& color, bool isFirstLoad = false);
+    void UpdateFontWeight(const FontWeight& value, bool isFirstLoad = false);
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdateFontSize(const Dimension& value, bool isFirstLoad = false);
+    void UpdateFontFamily(const std::vector<std::string>& fontFamilies, bool isFirstLoad);
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

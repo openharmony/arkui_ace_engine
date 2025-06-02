@@ -722,6 +722,7 @@ void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, Drag
     event.displayX = touchPoint.screenX;
     event.displayY = touchPoint.screenY;
     event.deviceId = touchPoint.deviceId;
+    event.displayId = touchPoint.targetDisplayId;
     event.x = event.windowX;
     event.y = event.windowY;
     event.pressedKeyCodes.clear();
@@ -957,7 +958,8 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
     CHECK_NULL_RETURN(gestureHub, false);
 
     if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
-        touchRestrict.inputEventType == InputEventType::AXIS) {
+        touchRestrict.inputEventType == InputEventType::AXIS ||
+        touchRestrict.touchEvent.convertInfo.first == UIInputEventType::AXIS) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
             "frameNode draggable is %{public}d, custom set is %{public}d",

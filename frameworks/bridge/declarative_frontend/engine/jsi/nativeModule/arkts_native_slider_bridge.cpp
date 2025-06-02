@@ -23,6 +23,10 @@ namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr int32_t NUM_3 = 3;
+constexpr int32_t NUM_4 = 4;
+constexpr int32_t NUM_5 = 5;
+constexpr int32_t NUM_6 = 6;
 constexpr int NUM_8 = 8;
 constexpr int SLIDER_MIN = 0;
 constexpr int SLIDER_MAX = 100;
@@ -827,6 +831,144 @@ ArkUINativeModuleValue SliderBridge::ResetEnableHapticFeedback(ArkUIRuntimeCallI
     auto SliderModifier = nodeModifiers->getSliderModifier();
     CHECK_NULL_RETURN(SliderModifier, panda::NativePointerRef::New(vm, nullptr));
     SliderModifier->resetEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+static void ParsePrefixOrSuffixOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUISliderCustomContentOptions& options)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    if (runtimeCallInfo->GetArgsNumber() < NUM_6) {
+        return;
+    }
+    Local<JSValueRef> textArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> descriptionArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> levelArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> groupArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    CalcDimension dimension;
+    if (!textArg.IsNull() && !textArg->IsUndefined()) {
+        if (textArg->IsString(vm)) {
+            options.accessibilityText = textArg->ToString(vm)->ToString(vm).c_str();
+        } else if (ArkTSUtils::ParseJsResource(vm, textArg, dimension)) {
+            options.accessibilityText = dimension.ToString().c_str();
+        }
+    }
+
+    if (!descriptionArg.IsNull() && !descriptionArg->IsUndefined()) {
+        if (descriptionArg->IsString(vm)) {
+            options.accessibilityDescription = descriptionArg->ToString(vm)->ToString(vm).c_str();
+        } else if (ArkTSUtils::ParseJsResource(vm, descriptionArg, dimension)) {
+            options.accessibilityDescription = dimension.ToString().c_str();
+        }
+    }
+
+    if (!levelArg.IsNull() && !levelArg->IsUndefined()) {
+        if (levelArg->IsString(vm)) {
+            options.accessibilityLevel = levelArg->ToString(vm)->ToString(vm).c_str();
+        } else if (ArkTSUtils::ParseJsResource(vm, levelArg, dimension)) {
+            options.accessibilityLevel = dimension.ToString().c_str();
+        }
+    }
+    if (!groupArg.IsNull() && !groupArg->IsUndefined() && groupArg->IsBoolean()) {
+        options.accessibilityGroup = groupArg->ToBoolean(vm)->Value();
+    }
+}
+
+ArkUINativeModuleValue SliderBridge::SetPrefix(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    if (runtimeCallInfo->GetArgsNumber() < NUM_3) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+
+    Local<JSValueRef> prefixArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto prefixNode = nodePtr(prefixArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(prefixNode, panda::NativePointerRef::New(vm, nullptr));
+
+    ArkUISliderCustomContentOptions options;
+    ParsePrefixOrSuffixOptions(runtimeCallInfo, options);
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto SliderModifier = nodeModifiers->getSliderModifier();
+    CHECK_NULL_RETURN(SliderModifier, panda::NativePointerRef::New(vm, nullptr));
+    SliderModifier->setPrefix(nativeNode, prefixNode, static_cast<ArkUISliderCustomContentOptions*>(&options));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::ResetPrefix(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+
+    Local<JSValueRef> prefixArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto prefixNode = nodePtr(prefixArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(prefixNode, panda::NativePointerRef::New(vm, nullptr));
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+
+    auto SliderModifier = nodeModifiers->getSliderModifier();
+    CHECK_NULL_RETURN(SliderModifier, panda::NativePointerRef::New(vm, nullptr));
+    SliderModifier->resetPrefix(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::SetSuffix(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    if (runtimeCallInfo->GetArgsNumber() < NUM_3) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+
+    Local<JSValueRef> suffixtArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto suffixNode = nodePtr(suffixtArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(suffixNode, panda::NativePointerRef::New(vm, nullptr));
+
+    ArkUISliderCustomContentOptions options;
+    ParsePrefixOrSuffixOptions(runtimeCallInfo, options);
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto SliderModifier = nodeModifiers->getSliderModifier();
+    CHECK_NULL_RETURN(SliderModifier, panda::NativePointerRef::New(vm, nullptr));
+    SliderModifier->setSuffix(nativeNode, suffixNode, static_cast<ArkUISliderCustomContentOptions*>(&options));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::ResetSuffix(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+
+    Local<JSValueRef> suffixtArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto suffixNode = nodePtr(suffixtArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(suffixNode, panda::NativePointerRef::New(vm, nullptr));
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+
+    auto SliderModifier = nodeModifiers->getSliderModifier();
+    CHECK_NULL_RETURN(SliderModifier, panda::NativePointerRef::New(vm, nullptr));
+    SliderModifier->resetSuffix(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

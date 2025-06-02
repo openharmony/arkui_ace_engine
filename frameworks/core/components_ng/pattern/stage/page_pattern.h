@@ -151,6 +151,9 @@ public:
         return { 0 };
     }
 
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+
     const SharedTransitionMap& GetSharedTransitionMap() const
     {
         return sharedTransitionMap_;

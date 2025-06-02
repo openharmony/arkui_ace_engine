@@ -70,7 +70,7 @@ RefPtr<SpanItem> SpanModelNG::CreateSpanItem(ArkUI_SpanItem* item)
             break;
             break;
     }
-    UPDATE_SPAN_FONT_STYLE_ITEM(spanItem, TextDecoration, decoration);
+    UPDATE_SPAN_FONT_STYLE_ITEM(spanItem, TextDecoration, {decoration});
     UPDATE_SPAN_FONT_STYLE_ITEM(
         spanItem, TextDecorationStyle, static_cast<TextDecorationStyle>(textStyle->decorationStyle));
     UPDATE_SPAN_FONT_STYLE_ITEM(spanItem, TextDecorationColor,

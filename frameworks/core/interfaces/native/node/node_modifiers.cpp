@@ -44,6 +44,7 @@
 #include "core/interfaces/native/node/nav_router_modifier.h"
 #include "core/interfaces/native/node/navigation_modifier.h"
 #include "core/interfaces/native/node/navigator_modifier.h"
+#include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_container_modifier.h"
@@ -100,6 +101,7 @@
 #include "core/interfaces/native/node/shape_modifier.h"
 #include "core/interfaces/native/node/side_bar_container_modifier.h"
 #include "core/interfaces/native/node/stepper_item_modifier.h"
+#include "core/interfaces/native/node/stepper_modifier.h"
 #include "core/interfaces/native/node/swiper_controller_modifier.h"
 #include "core/interfaces/native/node/tab_content_modifier.h"
 #include "core/interfaces/native/node/tabs_modifier.h"
@@ -129,9 +131,14 @@
 #include "core/interfaces/native/node/web_modifier.h"
 #endif
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/interfaces/native/node/embeddedComponent_modifier.h"
+#endif
+
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 13
+#define MODIFIER_COUNTS 14
+#define MODIFIER_COUNTS_CJ 13
 #define BLANK_LINES 6
 
 extern "C" {
@@ -301,6 +308,13 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
         .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
         .getLazyGridLayoutModifier = NodeModifier::GetLazyGridLayoutModifier,
+    #ifdef WINDOW_SCENE_SUPPORTED
+        .getEmbeddedComponentModifier = NodeModifier::GetEmbeddedComponentModifier,
+    #else
+        .getEmbeddedComponentModifier = nullptr,
+    #endif
+        .getCanvasModifier = NodeModifier::GetCanvasModifier,
+        .getStepperModifier = NodeModifier::GetStepperModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;
@@ -473,7 +487,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
 
         .getContainerSpanModifier = NodeModifier::GetCJUIContainerSpanModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(modifiers, MODIFIER_COUNTS, BLANK_LINES, 0); // don't move this line
+    CHECK_INITIALIZED_FIELDS_END(modifiers, MODIFIER_COUNTS_CJ, BLANK_LINES, 0); // don't move this line
     return &modifiers;
 }
 }

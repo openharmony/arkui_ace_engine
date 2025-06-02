@@ -30,10 +30,14 @@ class NavigationStack;
 struct NavigationInfo {
     std::string navigationId;
     WeakPtr<NavigationStack> pathStack;
-
+    int32_t uniqueId;
+    
     NavigationInfo() = default;
     NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack)
         : navigationId(std::move(id)), pathStack(navigationStack)
+    {}
+    NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack, int32_t navigationUniqueId)
+        : navigationId(std::move(id)), pathStack(navigationStack), uniqueId(std::move(navigationUniqueId))
     {}
 };
 

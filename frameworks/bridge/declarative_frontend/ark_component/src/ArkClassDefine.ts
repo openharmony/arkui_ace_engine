@@ -61,6 +61,20 @@ class ArkBorderStyle {
   }
 }
 
+class ArkOnVisibleAreaChange {
+  ratios: Array<number>;
+  event: (isVisible: boolean, currentRatio: number) => void;
+
+  constructor(ratios: Array<number> | undefined, event: (isVisible: boolean, currentRatio: number) => void | undefined) {
+    this.ratios = ratios;
+    this.event = event;
+  }
+
+  isEqual(another: ArkOnVisibleAreaChange): boolean {
+    return this.ratios === another.ratios && this.event === another.event;
+  }
+}
+
 class ArkBorderColor {
   startColor: LocalizedEdgeColors;
   endColor: LocalizedEdgeColors;
@@ -448,6 +462,20 @@ class ArkMenuAlignType {
 
   isEqual(another: ArkMenuAlignType): boolean {
     return this.alignType === another.alignType && this.dx === another.dx && this.dy === another.dy;
+  }
+}
+
+class ArkPrefixOrSuffix {
+  value: CustomBuilder;
+  options: SliderCustomContentOptions;
+
+  constructor(value: CustomBuilder, options?:SliderCustomContentOptions) {
+    this.value = value;
+    this.options = options;
+  }
+
+  isEqual(another: ArkPrefixOrSuffix): boolean {
+    return this.value === another.value && this.options === another.options;
   }
 }
 
@@ -1095,6 +1123,19 @@ class ArkTextFieldShowCounter {
   }
 }
 
+class ArkTextFieldMaxLines {
+  value: number | undefined;
+  overflowMode?: MaxLinesMode;
+  constructor() {
+    this.value = undefined;
+    this.overflowMode = undefined;
+  }
+  isEqual(another: ArkTextFieldMaxLines): boolean {
+    return (this.value === another.value) &&
+      (this.overflowMode === another.overflowMode);
+  }
+}
+
 class ArkTextInputFilter {
   value: ResourceStr | undefined;
   error?: (value: string) => void;
@@ -1717,6 +1758,62 @@ class ArkNavHideTitleBarOrToolBar {
   }
   isEqual(another: ArkNavHideTitleBarOrToolBar): boolean {
     return (this.isHide === another.isHide) && (this.animated === another.animated);
+  }
+}
+
+class ArkEmitterPropertyOptions {
+  index: number | undefined;
+  isSetEmitRate: number;
+  emitRate: number | undefined;
+  isSetPosition: number;
+  positionX: number | undefined;
+  positionY: number | undefined;
+  isSetSize: number;
+  sizeWidth: number | undefined;
+  sizeHeight: number | undefined;
+  isSetAnnulusRegion: number;
+  isSetCenter: number;
+  centerXValue: number | undefined;
+  centerXUnit: number | undefined;
+  centerYValue: number | undefined;
+  centerYUnit: number | undefined;
+  isSetInnerRadius: number;
+  innerRadiusValue: number | undefined;
+  innerRadiusUnit: number | undefined;
+  isSetOuterRadius: number;
+  outerRadiusValue: number | undefined;
+  outerRadiusUnit: number | undefined;
+  isSetStartAngle: number;
+  startAngle: number | undefined;
+  isSetEndAngle: number;
+  endAngle: number | undefined;
+
+  constructor() {
+    this.index = undefined;
+    this.isSetEmitRate = 0;
+    this.emitRate = undefined;
+    this.isSetPosition = 0;
+    this.positionX = undefined;
+    this.positionY = undefined;
+    this.isSetSize = 0;
+    this.sizeWidth = undefined;
+    this.sizeHeight = undefined;
+    this.isSetAnnulusRegion = 0;
+    this.isSetCenter = 0;
+    this.centerXValue = undefined;
+    this.centerXUnit = undefined;
+    this.centerYValue = undefined;
+    this.centerYUnit = undefined;
+    this.isSetInnerRadius = 0;
+    this.innerRadiusValue = undefined;
+    this.innerRadiusUnit = undefined;
+    this.isSetOuterRadius = 0;
+    this.outerRadiusValue = undefined;
+    this.outerRadiusUnit = undefined;
+    this.isSetStartAngle = 0;
+    this.startAngle = undefined;
+    this.isSetEndAngle = 0;
+    this.endAngle = undefined;
   }
 }
 

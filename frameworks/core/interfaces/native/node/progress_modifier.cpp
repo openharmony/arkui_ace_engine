@@ -137,7 +137,6 @@ void SetProgressColor(ArkUINodeHandle node, uint32_t color)
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
-    ProgressModelNG::SetModifierInitiatedColor(frameNode, true);
     ProgressModelNG::SetColor(frameNode, Color(color));
 }
 
@@ -145,6 +144,11 @@ void ResetProgressColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        ProgressModelNG::ResetGradientColor(frameNode);
+        ProgressModelNG::ResetColor(frameNode);
+        return;
+    }
     Color endColor;
     Color beginColor;
     Color colorVal;
@@ -159,9 +163,9 @@ void ResetProgressColor(ArkUINodeHandle node)
         endColor = progressTheme->GetRingProgressEndSideColor();
         beginColor = progressTheme->GetRingProgressBeginSideColor();
     } else if (progresstype == ProgressType::CAPSULE) {
-        colorVal = progressTheme->GetCapsuleParseFailedSelectColor();
+        colorVal = progressTheme->GetCapsuleSelectColor();
     } else {
-        colorVal = progressTheme->GetTrackParseFailedSelectedColor();
+        colorVal = progressTheme->GetTrackSelectedColor();
     }
 
     OHOS::Ace::NG::Gradient gradient;
@@ -174,7 +178,6 @@ void ResetProgressColor(ArkUINodeHandle node)
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
-    ProgressModelNG::SetModifierInitiatedColor(frameNode, false);
     ProgressModelNG::SetColor(frameNode, colorVal);
 }
 
@@ -330,11 +333,16 @@ void SetCapsuleStyleOptions(FrameNode* node)
     CHECK_NULL_VOID(textTheme);
     std::optional<std::string> textOpt = std::nullopt;
     ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP));
-    ProgressModelNG::SetBorderColor(node, Color(0x33006cde));
     ProgressModelNG::SetSweepingEffect(node, false);
     ProgressModelNG::SetShowText(node, false);
     ProgressModelNG::SetText(node, textOpt);
-    ProgressModelNG::SetFontColor(node, Color(0xff182431));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        ProgressModelNG::SetBorderColor(node, Color(0x33006cde));
+        ProgressModelNG::SetFontColor(node, Color(0xff182431));
+    } else {
+        ProgressModelNG::ResetBorderColor(node);
+        ProgressModelNG::ResetFontColor(node);
+    }
     ProgressModelNG::SetFontSize(node, Dimension(DEFAULT_FONT_SIZE, DimensionUnit::FP));
     ProgressModelNG::SetFontWeight(node, textTheme->GetTextStyle().GetFontWeight());
     ProgressModelNG::SetFontFamily(node, textTheme->GetTextStyle().GetFontFamilies());
@@ -366,7 +374,6 @@ void SetProgressBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ProgressModelNG::SetModifierInitiatedBgColor(frameNode, true);
     ProgressModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
@@ -374,6 +381,10 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        ProgressModelNG::ResetBackgroundColor(frameNode);
+        return;
+    }
     auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto progresstype = progressLayoutProperty->GetType();
@@ -384,14 +395,13 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
 
     Color backgroundColor;
     if (progresstype == ProgressType::CAPSULE) {
-        backgroundColor = theme->GetCapsuleParseFailedBgColor();
+        backgroundColor = theme->GetCapsuleBgColor();
     } else if (progresstype == ProgressType::RING) {
-        backgroundColor = theme->GetRingProgressParseFailedBgColor();
+        backgroundColor = theme->GetRingProgressBgColor();
     } else {
-        backgroundColor = theme->GetTrackParseFailedBgColor();
+        backgroundColor = theme->GetTrackBgColor();
     }
 
-    ProgressModelNG::SetModifierInitiatedBgColor(frameNode, false);
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 

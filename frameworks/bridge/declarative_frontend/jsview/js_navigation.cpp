@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<NavigationModel> NavigationModel::instance_ = nullptr;
@@ -146,13 +147,86 @@ bool JSNavigation::ParseCommonTitle(const JSRef<JSObject>& jsObj)
     JSRef<JSVal> title = jsObj->GetProperty("main");
     std::string mainTitle;
     std::string subTitle;
-    bool hasSub = ParseJsString(subtitle, subTitle);
-    bool hasMain = ParseJsString(title, mainTitle);
+    RefPtr<ResourceObject> subResObj;
+    RefPtr<ResourceObject> mainResObj;
+    bool hasSub = ParseJsString(subtitle, subTitle, subResObj);
+    bool hasMain = ParseJsString(title, mainTitle, mainResObj);
     if (hasSub || hasMain) {
-        return NavigationModel::GetInstance()->ParseCommonTitle(
-            hasSub, hasMain, subTitle, mainTitle);
+        if (SystemProperties::ConfigChangePerform() && (mainResObj || subResObj)) {
+            return NavigationModel::GetInstance()->ParseCommonTitle(
+                hasSub, hasMain, subResObj, mainResObj);
+        } else {
+            return NavigationModel::GetInstance()->ParseCommonTitle(
+                hasSub, hasMain, subTitle, mainTitle);
+        }
     }
     return false;
+}
+
+void JSNavigation::ParseCommonAndCustomTitle(const JSRef<JSObject>& jsObj)
+{
+    // NavigationCommonTitle
+    if (ParseCommonTitle(jsObj)) {
+        return;
+    }
+    // CustomBuilder | NavigationCustomTitle
+    CalcDimension titleHeight;
+    if (!jsObj->HasProperty("height")) {
+        NavigationModel::GetInstance()->SetTitleHeight(titleHeight, false);
+        return;
+    }
+    JSRef<JSVal> height = jsObj->GetProperty("height");
+    RefPtr<ResourceObject> heightResObj;
+    bool isValid = JSContainerBase::ParseJsDimensionVpNG(height, titleHeight, heightResObj);
+    if (height->IsString()) {
+        std::string heightValue;
+        ParseJsString(height, heightValue);
+        if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
+            NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+            return;
+        }
+        if (heightValue == NG::TITLE_MAIN) {
+            NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+            return;
+        }
+    }
+    if (SystemProperties::ConfigChangePerform() && heightResObj) {
+        NavigationModel::GetInstance()->SetTitleHeight(heightResObj);
+        return;
+    }
+    if (!isValid || titleHeight.Value() < 0) {
+        NavigationModel::GetInstance()->SetTitleHeight(Dimension(), true);
+        return;
+    }
+    NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
+}
+
+void JSNavigation::ParseBackButtonText(const JSCallbackInfo& info, RefPtr<PixelMap>& pixMap,
+    const NG::ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, std::string src,
+    const std::vector<std::string>& nameList, RefPtr<ResourceObject>& backButtonIconResObj)
+{
+    std::string backButtonAccessibilityText;
+    RefPtr<ResourceObject> backButtonTextResObj;
+    JSViewAbstract::ParseJsString(info[1], backButtonAccessibilityText, backButtonTextResObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        if (backButtonIconResObj && backButtonTextResObj) {
+            NavigationModel::GetInstance()->SetBackButtonIconSrcAndTextRes(
+                iconSymbol, backButtonIconResObj, imageOption, pixMap, nameList, true, backButtonTextResObj);
+            return;
+        }
+        if (backButtonTextResObj) {
+            NavigationModel::GetInstance()->SetBackButtonIconTextRes(
+                iconSymbol, src, imageOption, pixMap, nameList, true, backButtonTextResObj);
+            return;
+        }
+        if (backButtonIconResObj) {
+            NavigationModel::GetInstance()->SetBackButtonIcon(
+                iconSymbol, backButtonIconResObj, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
+            return;
+        }
+    }
+    NavigationModel::GetInstance()->SetBackButtonIcon(
+        iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
 
 void JSNavigation::Create(const JSCallbackInfo& info)
@@ -283,6 +357,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("recoverable", &JSNavigation::SetRecoverable);
     JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
     JSClass<JSNavigation>::StaticMethod("enableModeChangeAnimation", &JSNavigation::SetEnableModeChangeAnimation);
+    JSClass<JSNavigation>::StaticMethod("splitPlaceholder", &JSNavigation::SetSplitPlaceholder);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -293,41 +368,16 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     }
     // Resource and string type.
     std::string title;
-    if (ParseJsString(info[0], title)) {
-        NavigationModel::GetInstance()->ParseCommonTitle(false, true, "", title);
+    RefPtr<ResourceObject> mainResObj;
+    if (ParseJsString(info[0], title, mainResObj)) {
+        if (SystemProperties::ConfigChangePerform() && mainResObj) {
+            NavigationModel::GetInstance()->ParseCommonTitle(false, true, nullptr, mainResObj);
+        } else {
+            NavigationModel::GetInstance()->ParseCommonTitle(false, true, "", title);
+        }
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-        do {
-            // NavigationCommonTitle
-            if (ParseCommonTitle(jsObj)) {
-                break;
-            }
-            // CustomBuilder | NavigationCustomTitle
-            CalcDimension titleHeight;
-            if (!jsObj->HasProperty("height")) {
-                NavigationModel::GetInstance()->SetTitleHeight(titleHeight, false);
-                break;
-            }
-            JSRef<JSVal> height = jsObj->GetProperty("height");
-            bool isValid = JSContainerBase::ParseJsDimensionVpNG(height, titleHeight);
-            if (height->IsString()) {
-                std::string heightValue;
-                ParseJsString(height, heightValue);
-                if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
-                    NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
-                    break;
-                }
-                if (heightValue == NG::TITLE_MAIN) {
-                    NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
-                    break;
-                }
-            }
-            if (!isValid || titleHeight.Value() < 0) {
-                NavigationModel::GetInstance()->SetTitleHeight(Dimension(), true);
-                break;
-            }
-            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
-        } while (0);
+        ParseCommonAndCustomTitle(jsObj);
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
@@ -393,6 +443,40 @@ void JSNavigation::SetEnableModeChangeAnimation(const JSCallbackInfo& info)
     NavigationModel::GetInstance()->SetEnableModeChangeAnimation(true);
 }
 
+void JSNavigation::SetSplitPlaceholder(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "SplitPlaceholder is invalid");
+        return;
+    }
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        NavigationModel::GetInstance()->ResetSplitPlaceholder();
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+    if (!builderNodeParam->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "builderNode_ property is not an object");
+        return;
+    }
+    JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+    if (nodeptr.IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "nodePtr_ is empty");
+        return;
+    }
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(info.GetExecutionContext());
+    const auto* vm = nodeptr->GetEcmaVM();
+    CHECK_NULL_VOID(nodeptr->GetLocalHandle()->IsNativePointer(vm));
+    auto* node = reinterpret_cast<NG::UINode*>(nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value());
+    CHECK_NULL_VOID(node);
+    RefPtr<NG::UINode> refPtrNode = AceType::Claim(node);
+    NavigationModel::GetInstance()->SetSplitPlaceholder(refPtrNode);
+}
+
 void JSNavigation::SetHideNavBar(bool hide)
 {
     NavigationModel::GetInstance()->SetHideNavBar(hide);
@@ -404,7 +488,8 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
         return;
     }
     std::string src;
-    auto noPixMap = ParseJsMedia(info[0], src);
+    RefPtr<ResourceObject> backButtonIconResObj;
+    auto noPixMap = ParseJsMedia(info[0], src, backButtonIconResObj);
     auto isValidImage = false;
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -429,14 +514,15 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
     if (isSymbol) {
         SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
-    if (info.Length() > 1) {
-        if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
-            std::string backButtonAccessibilityText;
-            ParseJsString(info[1], backButtonAccessibilityText);
-            NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList,
-                true, backButtonAccessibilityText);
-            return;
-        }
+    bool configChange = SystemProperties::ConfigChangePerform();
+    if (info.Length() > 1 && !info[1]->IsNull() && !info[1]->IsUndefined()) {
+        ParseBackButtonText(info, pixMap, imageOption, iconSymbol, src, nameList, backButtonIconResObj);
+        return;
+    }
+    if (configChange && backButtonIconResObj) {
+        NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, backButtonIconResObj, imageOption,
+            pixMap, nameList);
+        return;
     }
     NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
@@ -517,8 +603,13 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
                 auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
                 JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
             }
-            NavigationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
-            NavigationModel::GetInstance()->SetToolbarConfiguration(std::move(toolbarItems));
+            if (SystemProperties::ConfigChangePerform()) {
+                NavigationModel::GetInstance()->SetToolbarConfiguration(
+                    std::move(toolbarItems), std::move(toolbarMoreButtonOptions));
+            } else {
+                NavigationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
+                NavigationModel::GetInstance()->SetToolbarConfiguration(std::move(toolbarItems));
+            }
         } else {
             std::list<RefPtr<AceType>> items;
             NavigationModel::GetInstance()->GetToolBarItems(items);
@@ -681,7 +772,8 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
     }
 
     CalcDimension navBarWidth;
-    if (!ParseJsDimensionVp(info[0], navBarWidth)) {
+    RefPtr<ResourceObject> navBarWidthResObj;
+    if (!ParseJsDimensionVp(info[0], navBarWidth, navBarWidthResObj)) {
         return;
     }
 
@@ -689,6 +781,10 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
         navBarWidth.SetValue(DEFAULT_NAV_BAR_WIDTH);
     }
 
+    if (SystemProperties::ConfigChangePerform() && navBarWidthResObj) {
+        NavigationModel::GetInstance()->SetNavBarWidth(navBarWidthResObj);
+        return;
+    }
     NavigationModel::GetInstance()->SetNavBarWidth(navBarWidth);
 }
 
@@ -699,7 +795,8 @@ void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
     }
 
     CalcDimension minContentWidth;
-    if (!ParseJsDimensionVp(info[0], minContentWidth)) {
+    RefPtr<ResourceObject> minContentWidthResObj;
+    if (!ParseJsDimensionVp(info[0], minContentWidth, minContentWidthResObj)) {
         NavigationModel::GetInstance()->SetMinContentWidth(DEFAULT_MIN_CONTENT_WIDTH);
         return;
     }
@@ -708,6 +805,10 @@ void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
         minContentWidth = DEFAULT_MIN_CONTENT_WIDTH;
     }
 
+    if (SystemProperties::ConfigChangePerform() && minContentWidthResObj) {
+        NavigationModel::GetInstance()->SetMinContentWidth(minContentWidthResObj);
+        return;
+    }
     NavigationModel::GetInstance()->SetMinContentWidth(minContentWidth);
 }
 
@@ -730,17 +831,29 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
 
     CalcDimension minNavBarWidth;
     CalcDimension maxNavBarWidth;
-    if (min->IsNull() || min->IsUndefined() || !ParseJsDimensionVp(min, minNavBarWidth)) {
+    RefPtr<ResourceObject> minNavBarWidthResObj;
+    if (min->IsNull() || min->IsUndefined() || !ParseJsDimensionVp(min, minNavBarWidth, minNavBarWidthResObj)) {
         minNavBarWidth = NG::DEFAULT_MIN_NAV_BAR_WIDTH;
     }
     if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
         minNavBarWidth.SetValue(0);
     }
-    NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
+    if (SystemProperties::ConfigChangePerform() && minNavBarWidthResObj) {
+        NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidthResObj);
+    } else {
+        NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
+    }
 
-    if (max->IsNull() || max->IsUndefined() || !ParseJsDimensionVp(max, maxNavBarWidth)) {
+    RefPtr<ResourceObject> maxNavBarWidthResObj;
+    if (max->IsNull() || max->IsUndefined() || !ParseJsDimensionVp(max, maxNavBarWidth, maxNavBarWidthResObj)) {
         maxNavBarWidth = NG::DEFAULT_MAX_NAV_BAR_WIDTH;
     }
+
+    if (SystemProperties::ConfigChangePerform() && maxNavBarWidthResObj) {
+        NavigationModel::GetInstance()->SetMaxNavBarWidth(maxNavBarWidthResObj);
+        return;
+    }
+
     if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
         maxNavBarWidth.SetValue(0);
     }

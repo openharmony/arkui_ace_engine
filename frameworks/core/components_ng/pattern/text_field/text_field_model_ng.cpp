@@ -749,6 +749,16 @@ void TextFieldModelNG::SetNormalMaxViewLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, value);
 }
 
+void TextFieldModelNG::SetOverflowMode(OverflowMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OverflowMode, value);
+}
+
+void TextFieldModelNG::SetMinLines(uint32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinLines, value);
+}
+
 void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
     Color backgroundColor = color;
@@ -885,6 +895,11 @@ void TextFieldModelNG::SetEnableAutoFill(bool enableAutoFill)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFill, enableAutoFill);
 }
 
+void TextFieldModelNG::SetEnableAutoFillAnimation(bool enableAutoFillAnimation)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFillAnimation, enableAutoFillAnimation);
+}
+
 void TextFieldModelNG::SetAdaptMinFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, value);
@@ -1006,7 +1021,7 @@ void TextFieldModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
 
 void TextFieldModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value});
 }
 
 void TextFieldModelNG::SetTextDecorationColor(const Color& value)
@@ -1154,6 +1169,16 @@ void TextFieldModelNG::SetNormalMaxViewLines(FrameNode* frameNode, uint32_t valu
 {
     auto normalMaxViewLines = value <= 0 ? Infinity<uint32_t>() : value;
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, normalMaxViewLines, frameNode);
+}
+
+void TextFieldModelNG::SetOverflowMode(FrameNode* frameNode, OverflowMode value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OverflowMode, value, frameNode);
+}
+
+void TextFieldModelNG::SetMinLines(FrameNode* frameNode, uint32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinLines, value, frameNode);
 }
 
 void TextFieldModelNG::SetType(FrameNode* frameNode, TextInputType value)
@@ -1408,6 +1433,12 @@ void TextFieldModelNG::SetPasswordRules(FrameNode* frameNode, const std::string&
 void TextFieldModelNG::SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFill, enableAutoFill, frameNode);
+}
+
+void TextFieldModelNG::SetEnableAutoFillAnimation(FrameNode* frameNode, bool enableAutoFillAnimation)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextFieldLayoutProperty, EnableAutoFillAnimation, enableAutoFillAnimation, frameNode);
 }
 
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
@@ -1807,7 +1838,7 @@ void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
 
 void TextFieldModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value}, frameNode);
 }
 
 void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
@@ -1840,6 +1871,16 @@ void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines, frameNode);
+}
+
+float TextFieldModelNG::GetLineSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineSpacing(0);
+    auto value = layoutProperty->GetLineSpacing().value_or(defaultLineSpacing);
+    return static_cast<float>(value.Value());
 }
 
 void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
@@ -1966,6 +2007,14 @@ bool TextFieldModelNG::GetEnableAutoFill(FrameNode* frameNode)
 {
     bool value = true;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, EnableAutoFill, value, frameNode, value);
+    return value;
+}
+
+bool TextFieldModelNG::GetEnableAutoFillAnimation(FrameNode* frameNode)
+{
+    bool value = true;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, EnableAutoFillAnimation, value, frameNode, value);
     return value;
 }
 
@@ -2363,5 +2412,49 @@ void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
 void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, frameNode);
+}
+
+void TextFieldModelNG::SetStrokeWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, value);
+}
+
+Dimension TextFieldModelNG::GetStrokeWidth(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, StrokeWidth, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetStrokeColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeColor, value);
+}
+
+Color TextFieldModelNG::GetStrokeColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, StrokeColor, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::ResetStrokeColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, StrokeColor, PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, value, frameNode);
+}
+
+void TextFieldModelNG::SetStrokeColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeColor, value, frameNode);
+}
+
+void TextFieldModelNG::ResetStrokeColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeColor, frameNode);
 }
 } // namespace OHOS::Ace::NG

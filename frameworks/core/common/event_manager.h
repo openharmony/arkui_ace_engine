@@ -338,6 +338,14 @@ public:
 
     void AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer);
 
+    bool GetIsStopPropagationRecored() {
+        return isStopPropagationRecored_;
+    }
+
+    bool GetIsStopTouchEventRecored() {
+        return isStopTouchEventRecored_;
+    }
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -369,13 +377,13 @@ private:
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
     void UpdateDragInfo(TouchEvent& point);
     void UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch);
-    void DoSingleMouseActionRelease(MouseButton button);
+    void DoSingleMouseActionRelease(const PressMouseInfo& pressMouseInfo);
     bool DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event);
     bool DispatchMouseEventInLessAPI13(const MouseEvent& event);
     void DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
         MouseTestResult& handledResults, bool& isStopPropagation);
     bool DispatchMouseEventToCurResults(
-        const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
+        const MouseEvent& event, const MouseTestResult& handledResults, bool& isStopPropagation);
     bool DispatchMouseEventToCurResultsInLessAPI13(
         const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     void CheckMousePendingRecognizersState(const TouchEvent& event);
@@ -385,7 +393,7 @@ private:
     // used less than API13
     MouseTestResult pressMouseTestResults_;
     // used great or equal API13
-    std::unordered_map<MouseButton, MouseTestResult> pressMouseTestResultsMap_;
+    std::unordered_map<PressMouseInfo, MouseTestResult, PressMouseInfoHashFunc> pressMouseTestResultsMap_;
     HoverTestResult currHoverTestResults_;
     HoverTestResult lastHoverTestResults_;
     HoverTestResult curAccessibilityHoverResults_;
@@ -393,7 +401,7 @@ private:
     HoverTestResult curPenHoverResults_;
     HoverTestResult curPenHoverMoveResults_;
     HoverTestResult lastPenHoverResults_;
-    AxisTestResult axisTestResults_;
+    std::unordered_map<int32_t, AxisTestResult> axisTestResultsMap_;
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;
     std::unordered_map<size_t, TouchTestResult> axisTouchTestResults_;
@@ -437,6 +445,8 @@ private:
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<WeakPtr<NG::NGGestureRecognizer>> mousePendingRecognizers_;
+    bool isStopPropagationRecored_ = true;
+    bool isStopTouchEventRecored_ = true;
 };
 
 } // namespace OHOS::Ace

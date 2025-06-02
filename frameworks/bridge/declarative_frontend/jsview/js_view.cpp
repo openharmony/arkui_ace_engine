@@ -42,6 +42,7 @@
 #include "core/components_ng/base/view_partial_update_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/napi/kits/promptaction/prompt_controller.h"
@@ -694,6 +695,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         return jsView->jsViewFunction_->ExecuteOnDumpInfo();
     };
 
+    auto clearAllRecycleFunc = [weak = AceType::WeakClaim(this)]() -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteClearAllRecycle();
+    };
+
     auto getThisFunc = [weak = AceType::WeakClaim(this)]() -> void* {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
@@ -732,6 +740,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
+        .clearAllRecycleFunc = std::move(clearAllRecycleFunc),
         .getThisFunc = std::move(getThisFunc),
         .recycleFunc = std::move(recycleFunc),
         .reuseFunc = std::move(reuseFunc),
@@ -1131,6 +1140,9 @@ void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty<std::string>("navigationId", result->navigationId);
     obj->SetPropertyObject("pathStack", navPathStackObj);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        obj->SetProperty<int32_t>("uniqueId", result->uniqueId);
+    }
     info.SetReturnValue(obj);
 }
 

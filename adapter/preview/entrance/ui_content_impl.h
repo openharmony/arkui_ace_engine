@@ -18,14 +18,13 @@
 
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
-#include "native_engine/native_engine.h"
-#include "native_engine/native_value.h"
 #include "previewer/include/window.h"
 
 #include "adapter/preview/entrance/ace_run_args.h"
 #include "adapter/preview/external/ability/context.h"
 #include "adapter/preview/external/ability/fa/fa_context.h"
 #include "adapter/preview/external/ability/stage/stage_context.h"
+#include "frameworks/core/common/window_animation_config.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
@@ -66,6 +65,14 @@ public:
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
 
+    void OnConfigurationChanged(const DeviceConfig& newConfig);
+    void SurfaceChanged(
+        const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height,
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
+    void LoadDocument(const std::string& url, const std::string& componentName,
+        Platform::SystemParams& systemParams) override;
+    std::string GetJSONTree() override;
+    bool OperateComponent(const std::string& attrsJson) override;
     // UI content event process
     bool ProcessBackPressed() override;
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
@@ -198,6 +205,8 @@ private:
     bool isRound_ = false;
     Platform::SendCurrentRouterCallback onRouterChange_;
     DeviceConfig deviceConfig_;
+    Platform::AceRunArgs runArgs_;
+    Platform::ConfigChanges configChanges_;
 
     std::string bundleName_;
     std::string moduleName_;

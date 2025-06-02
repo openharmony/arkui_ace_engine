@@ -26,7 +26,11 @@ constexpr int32_t SIZE_OF_THREE = 3;
 constexpr int32_t POS_0 = 0;
 constexpr int32_t POS_1 = 1;
 constexpr int32_t POS_2 = 2;
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
 constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
@@ -729,6 +733,66 @@ void ResetTextPickerOnScrollStop(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextPickerModelNG::SetOnScrollStop(frameNode, nullptr);
 }
+
+void SetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node, ArkUI_Bool* getValue, ArkUI_Uint32 color,
+    ArkUI_Float32* value, ArkUI_Int32* unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = theme->GetSelectedBackgroundColor();
+    pickerBgStyle.borderRadius = theme->GetSelectedBorderRadius();
+    if (getValue[NUM_0]) {
+        pickerBgStyle.color = Color(color);
+    }
+    if (getValue[NUM_1]) {
+        pickerBgStyle.borderRadius->radiusTopLeft = Dimension(
+            value[NUM_0], static_cast<DimensionUnit>(unit[NUM_0]));
+    }
+    if (getValue[NUM_2]) {
+        pickerBgStyle.borderRadius->radiusTopRight = Dimension(
+            value[NUM_1], static_cast<DimensionUnit>(unit[NUM_1]));
+    }
+    if (getValue[NUM_3]) {
+        pickerBgStyle.borderRadius->radiusBottomLeft = Dimension(
+            value[NUM_2], static_cast<DimensionUnit>(unit[NUM_2]));
+    }
+    if (getValue[NUM_4]) {
+        pickerBgStyle.borderRadius->radiusBottomRight = Dimension(
+            value[NUM_3], static_cast<DimensionUnit>(unit[NUM_3]));
+    }
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+}
+
+void GetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node, ArkUINumberValue* result)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pickerBgStyle = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode);
+    result[NUM_0].u32 = pickerBgStyle.color->GetValue();
+    result[NUM_1].f32 = pickerBgStyle.borderRadius->radiusTopLeft->Value();
+    result[NUM_2].f32 = pickerBgStyle.borderRadius->radiusTopRight->Value();
+    result[NUM_3].f32 = pickerBgStyle.borderRadius->radiusBottomLeft->Value();
+    result[NUM_4].f32 = pickerBgStyle.borderRadius->radiusBottomRight->Value();
+}
+
+void ResetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = theme->GetSelectedBackgroundColor();
+    pickerBgStyle.borderRadius = theme->GetSelectedBorderRadius();
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -786,6 +850,9 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .resetTextPickerOnScrollStop = ResetTextPickerOnScrollStop,
         .setTextPickerIconRangeStr = SetTextPickerIconRangeStr,
         .setTextCascadePickRangeContent = SetTextCascadePickRangeContent,
+        .setTextPickerSelectedBackgroundStyle = SetTextPickerSelectedBackgroundStyle,
+        .getTextPickerSelectedBackgroundStyle = GetTextPickerSelectedBackgroundStyle,
+        .resetTextPickerSelectedBackgroundStyle = ResetTextPickerSelectedBackgroundStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

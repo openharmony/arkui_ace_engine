@@ -66,6 +66,7 @@ void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEve
     event.dragEvent.velocityY = info->GetVelocity().GetVelocityY();
     event.dragEvent.velocity = info->GetVelocity().GetVelocityValue();
     event.dragEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info->GetPressedKeyCodes());
+    event.dragEvent.displayId = info->GetDisplayId();
     auto summary = info->GetSummary();
     event.dragEvent.dataTypesCount = static_cast<int32_t>(summary.size());
 
@@ -280,6 +281,7 @@ void SetOnDragEnd(ArkUINodeHandle node, void* extraParam)
         // Did NOT define pressCode, so will NOT pass presscode to UI.
         event.dragEvent.dragResult = static_cast<ArkUI_Int32>(info->GetResult());
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(info->GetDragBehavior());
+        event.dragEvent.displayId = static_cast<ArkUI_Int32>(info->GetDisplayId());
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);

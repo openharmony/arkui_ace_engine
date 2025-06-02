@@ -78,7 +78,7 @@ const auto ON_RECYCLE_ITEMS = [](IndexType fromIndex, IndexType toIndex) -> void
     return;
 };
 
-const auto ON_ACTIVE_RANGE = [](int32_t fromIndex, int32_t toIndex, bool isLoop) -> void {
+const auto ON_ACTIVE_RANGE = [](int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop) -> void {
     return;
 };
 
@@ -714,5 +714,25 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test015, TestSize.Level1)
     EXPECT_EQ(mappedIndex, 5);
     mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(6);
     EXPECT_EQ(mappedIndex, 6);
+}
+
+/**
+ * @tc.name: RepeatNodeCache2Test016
+ * @tc.desc: Test caches.NotifyColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test016, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(1016, 10, 10);
+    repeatNode->caches_.l1Rid4Index_ = {
+        {0, 1}, {1, 2}, {2, 3}, {3, 4}
+    };
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2016, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = {
+        { 1, cacheItem }, { 2, cacheItem }, { 3, cacheItem }, { 4, cacheItem }
+    };
+    repeatNode->NotifyColorModeChange(1);
+    EXPECT_EQ(repeatNode->GetChildren().size(), 4);
 }
 } // namespace OHOS::Ace::NG

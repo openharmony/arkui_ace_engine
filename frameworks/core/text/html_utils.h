@@ -29,6 +29,9 @@ class ACE_FORCE_EXPORT HtmlUtils {
 public:
     static RefPtr<MutableSpanString> FromHtml(const std::string& str);
     static std::string ToHtml(const SpanString* str);
+    static std::string ToHtml(const std::list<RefPtr<NG::SpanItem>>& spanItems);
+    static std::string ToHtmlForNormalType(const NG::FontStyle& fontStyle,
+        const NG::TextLineStyle& textLineStyle, const std::u16string& contentStr);
 };
 
 } // namespace OHOS::Ace

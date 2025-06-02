@@ -17,12 +17,15 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CALENDAR_PICKER_MODEL_IMPL_H
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::Framework {
 class CalendarPickerModelImpl : public OHOS::Ace::CalendarPickerModel {
 public:
     void Create(const NG::CalendarSettingData& settingData) override {};
     void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset) override {};
+    void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset,
+        const std::vector<RefPtr<ResourceObject>>& resArray) override {};
     void SetTextStyle(const NG::PickerTextStyle& textStyle) override {};
     void SetOnChange(NG::SelectedChangeEvent&& onChange) override {};
     void SetChangeEvent(NG::SelectedChangeEvent&& onChange) override {};

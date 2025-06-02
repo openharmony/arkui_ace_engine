@@ -16,6 +16,9 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/manager/event/json_child_report.h"
+#include "core/common/reporter/reporter.h"
+#include "core/components_ng/manager/event/json_report.h"
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -709,6 +712,7 @@ void PanRecognizer::GetGestureEventHalfInfo(GestureEvent* info)
     info->SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
     info->SetDelta(delta_);
     info->SetVelocity(panVelocity_.GetVelocity());
+    info->SetGestureTypeName(GestureTypeName::PAN_GESTURE);
     info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
 }
 
@@ -739,11 +743,13 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
         info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         info.SetPointerEventId(lastAxisEvent_.touchEventId);
+        info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPointerEventId(lastTouchEvent_.touchEventId);
+        info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -766,6 +772,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             // callback may be overwritten in its invoke so we copy it first
             auto callbackFunction = *panEndOnDisableState_;
             callbackFunction(info);
+            HandleReports(info, type);
             return;
         }
     }
@@ -775,8 +782,25 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         auto callbackFunction = *callback;
         HandlePanGestureAccept(info, PanGestureState::BEFORE, callback);
         callbackFunction(info);
+        HandleReports(info, type);
         HandlePanGestureAccept(info, PanGestureState::AFTER, callback);
     }
+}
+
+void PanRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
+{
+    if (type == GestureCallbackType::ACTION || type == GestureCallbackType::UPDATE) {
+        return;
+    }
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    PanJsonReport panReport;
+    panReport.SetCallbackType(type);
+    panReport.SetGestureType(GetRecognizerType());
+    panReport.SetId(frameNode->GetId());
+    panReport.SetPanDirection(static_cast<int32_t>(direction_.type));
+    panReport.SetPoint(info.GetGlobalPoint());
+    Reporter::GetInstance().HandleUISessionReporting(panReport);
 }
 
 GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()

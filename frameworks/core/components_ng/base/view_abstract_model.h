@@ -43,6 +43,7 @@
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/layout_policy_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -65,9 +66,16 @@ public:
     static ViewAbstractModel* GetInstance();
     virtual ~ViewAbstractModel() = default;
 
+    virtual void CreateWithForegroundColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithOuterBorderColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
     virtual void SetHeight(const CalcDimension& height) = 0;
+    virtual void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) = 0;
     virtual void ClearWidthOrHeight(bool isWidth) = 0;
     virtual void SetMinWidth(const CalcDimension& minWidth) = 0;
     virtual void SetMinHeight(const CalcDimension& minHeight) = 0;
@@ -78,10 +86,13 @@ public:
 
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
+    virtual void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
+    virtual void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject>& resObj, std::string& bundleName,
+        std::string& moduleName, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
-    virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
+    virtual void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(
         const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) = 0;
     virtual void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions()) {}
@@ -153,6 +164,7 @@ public:
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
     virtual void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) = 0;
     virtual void SetOuterBorderWidth(const Dimension& value) = 0;
+    virtual void SetOuterBorderWidthNew(const NG::BorderWidthProperty& property) = 0;
     virtual void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
     virtual void SetOuterBorderStyle(const BorderStyle& value) = 0;
@@ -169,6 +181,9 @@ public:
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
+    virtual void SetAlign(const std::string& localizedAlignment) = 0;
+    virtual void SetLayoutGravity(const Alignment& alignment) = 0;
+    virtual void SetIsMirrorable(const bool& isMirrorable) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
     virtual void SetChainStyle(const ChainInfo& chainInfo) = 0;
     virtual void SetBias(const BiasPair& biasPair) = 0;
@@ -191,10 +206,12 @@ public:
     virtual void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) = 0;
+    virtual void SetRotateAngle(float x, float y, float z, float perspective = 0.0f) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
 
     // display props
     virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
+    virtual void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj) {};
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
     virtual void CleanTransition() {};
     virtual void SetChainedTransition(
@@ -246,6 +263,7 @@ public:
     virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetBlendApplyType(BlendApplyType blendApplyType) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
+    virtual void CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resobj) {};
     virtual void SetWindowBlur(float progress, WindowBlurStyle blurStyle) = 0;
     virtual void SetBrightness(const Dimension& value) = 0;
     virtual void SetGrayScale(const Dimension& value) = 0;
@@ -367,6 +385,7 @@ public:
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
     virtual void NotifyDragStartRequest(DragStartRequestStatus dragStatus) {}
     virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
+    virtual void EnableDropDisallowedBadge(bool enableDropDisallowedBadge) = 0;
     virtual int32_t CancelDataLoading(const std::string& key) = 0;
     virtual void SetDisableDataPrefetch(bool disableDataPrefetch);
     virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {}
@@ -374,6 +393,9 @@ public:
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
     virtual void SetPrivacySensitive(bool flag) = 0;
 
+    // toolbar
+    virtual void SetToolbarBuilder(std::function<void()>&& buildFunc) = 0;
+    
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
 
@@ -437,6 +459,7 @@ public:
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
+    virtual void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) {};
     // foregroundColor
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
@@ -456,6 +479,7 @@ public:
     // global light
     virtual void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
+    virtual void SetLightPosition(const NG::TranslateOptions& options) = 0;
     virtual void SetLightIntensity(const float value) = 0;
     virtual void SetLightColor(const Color& value) = 0;
     virtual void SetLightIlluminated(const uint32_t value) = 0;

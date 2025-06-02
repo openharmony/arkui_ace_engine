@@ -22,6 +22,7 @@
 #include "base/error/error_code.h"
 #include "core/event/touch_event.h"
 #include "interfaces/native/drag_and_drop.h"
+#include "interfaces/native/native_key_event.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -370,6 +371,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_AXIS;
         case NODE_TEXT_SPAN_ON_LONG_PRESS:
             return ON_TEXT_SPAN_LONG_PRESS;
+        case NODE_TEXT_AREA_ON_WILL_CHANGE:
+            return ON_TEXT_AREA_WILL_CHANGE;
+        case NODE_TEXT_INPUT_ON_WILL_CHANGE:
+            return ON_TEXT_INPUT_WILL_CHANGE;
         default:
             return -1;
     }
@@ -610,6 +615,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_AXIS;
         case ON_TEXT_SPAN_LONG_PRESS:
             return NODE_TEXT_SPAN_ON_LONG_PRESS;
+        case ON_TEXT_AREA_WILL_CHANGE:
+            return NODE_TEXT_AREA_ON_WILL_CHANGE;
+        case ON_TEXT_INPUT_WILL_CHANGE:
+            return NODE_TEXT_INPUT_ON_WILL_CHANGE;
         default:
             return -1;
     }
@@ -827,6 +836,23 @@ int32_t ConvertToCAxisActionType(int32_t originActionType)
             break;
     }
     return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_NONE);
+}
+
+int32_t ConvertToCKeyActionType(int32_t originActionType)
+{
+    switch (originActionType) {
+        case ORIGIN_TOUCH_ACTION_DOWN:
+            return static_cast<int32_t>(ARKUI_KEY_EVENT_DOWN);
+        case ORIGIN_TOUCH_ACTION_UP:
+            return static_cast<int32_t>(ARKUI_KEY_EVENT_UP);
+        case ORIGIN_TOUCH_ACTION_MOVE:
+            return static_cast<int32_t>(ARKUI_KEY_EVENT_UNKNOWN);
+        case ORIGIN_TOUCH_ACTION_CANCEL:
+            return static_cast<int32_t>(ARKUI_KEY_EVENT_UNKNOWN);
+        default:
+            break;
+    }
+    return -1;
 }
 
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_CompatibleNodeEvent* event)

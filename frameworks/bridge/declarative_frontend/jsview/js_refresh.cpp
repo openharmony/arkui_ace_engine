@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
 #include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/refresh/refresh_model.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace {
@@ -99,6 +100,7 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onOffsetChange", &JSRefresh::OnOffsetChange);
     JSClass<JSRefresh>::StaticMethod("pullDownRatio", &JSRefresh::SetPullDownRatio);
+    JSClass<JSRefresh>::StaticMethod("maxPullDownDistance", &JSRefresh::SetMaxPullDownDistance);
     JSClass<JSRefresh>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
@@ -121,6 +123,26 @@ void JSRefresh::SetPullDownRatio(const JSCallbackInfo& info)
     }
     pulldownRatio = std::clamp(args->ToNumber<float>(), 0.f, 1.f);
     RefreshModel::GetInstance()->SetPullDownRatio(pulldownRatio);
+}
+
+void JSRefresh::SetMaxPullDownDistance(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto args = info[0];
+    if (!args->IsNumber()) {
+        RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        return;
+    }
+    float maxPullDownDistance = args->ToNumber<float>();
+    if (std::isnan(maxPullDownDistance)) {
+        RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        return;
+    }
+    maxPullDownDistance = std::max(maxPullDownDistance, 0.0f);
+    RefreshModel::GetInstance()->SetMaxPullDownDistance(maxPullDownDistance);
 }
 
 void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)
@@ -184,6 +206,16 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
 
     std::string loadingStr = "";
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsString(promptText, loadingStr, resObj)) {
+            RefreshModel::GetInstance()->CreateWithResourceObj(resObj);
+            RefreshModel::GetInstance()->SetLoadingText(loadingStr);
+        } else {
+            RefreshModel::GetInstance()->ResetLoadingText();
+        }
+        return;
+    }
     if (ParseJsString(promptText, loadingStr)) {
         RefreshModel::GetInstance()->SetLoadingText(loadingStr);
     } else {

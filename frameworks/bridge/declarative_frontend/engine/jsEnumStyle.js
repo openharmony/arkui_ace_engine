@@ -84,6 +84,12 @@ let FontWeight;
   FontWeight.Bolder = 'bolder';
 })(FontWeight || (FontWeight = {}));
 
+let MaxLinesMode;
+(function (MaxLinesMode) {
+    MaxLinesMode[MaxLinesMode.CLIP = 0] = 'clip';
+    MaxLinesMode[MaxLinesMode.SCROLL = 1] = 'scroll';
+})(MaxLinesMode || (MaxLinesMode = {}));
+
 let WordBreak;
 (function (WordBreak) {
   WordBreak[WordBreak.NORMAL = 0] = 'normal';
@@ -346,6 +352,19 @@ let Alignment;
   Alignment[Alignment.Bottom = 7] = 'Bottom';
   Alignment[Alignment.BottomEnd = 8] = 'BottomEnd';
 })(Alignment || (Alignment = {}));
+
+let LocalizedAlignment;
+(function (LocalizedAlignment) {
+  LocalizedAlignment.TOP_START = 'top_start';
+  LocalizedAlignment.TOP = 'top';
+  LocalizedAlignment.TOP_END = 'top_end';
+  LocalizedAlignment.START = 'start';
+  LocalizedAlignment.CENTER = 'center';
+  LocalizedAlignment.END = 'end';
+  LocalizedAlignment.BOTTOM_START = 'bottom_start';
+  LocalizedAlignment.BOTTOM = 'bottom';
+  LocalizedAlignment.BOTTOM_END = 'bottom_end';
+})(LocalizedAlignment || (LocalizedAlignment = {}));
 
 let ChainStyle;
 (function (ChainStyle) {
@@ -654,6 +673,14 @@ class LayoutPolicy {
 
   static get matchParent() {
     return new LayoutPolicy('matchParent');
+  }
+
+  static get wrapContent() {
+    return new LayoutPolicy('wrapContent');
+  }
+
+  static get fixAtIdealSize() {
+    return new LayoutPolicy('fixAtIdealSize');
   }
 }
 
@@ -1149,6 +1176,12 @@ let RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType.SELECT = 2] = 'SELECT';
   RichEditorResponseType[RichEditorResponseType.DEFAULT = 3] = 'DEFAULT';
 })(RichEditorResponseType || (RichEditorResponseType = {}));
+
+let UndoStyle;
+(function (UndoStyle) {
+  UndoStyle[UndoStyle.CLEAR_STYLE = 0] = 'CLEAR_STYLE';
+  UndoStyle[UndoStyle.KEEP_STYLE = 1] = 'KEEP_STYLE';
+})(UndoStyle || (UndoStyle = {}));
 
 let MenuType;
 (function (MenuType) {
@@ -3321,6 +3354,7 @@ let ParticleEmitterShape;
   ParticleEmitterShape[ParticleEmitterShape.RECTANGLE = 0] = 'RECTANGLE';
   ParticleEmitterShape[ParticleEmitterShape.CIRCLE = 1] = 'CIRCLE';
   ParticleEmitterShape[ParticleEmitterShape.ELLIPSE = 2] = 'ELLIPSE';
+  ParticleEmitterShape[ParticleEmitterShape.ANNULUS = 3] = 'ANNULUS';
 })(ParticleEmitterShape || (ParticleEmitterShape = {}));
 
 let DistributionType;
@@ -3639,6 +3673,13 @@ let TextDeleteDirection;
     TextDeleteDirection[TextDeleteDirection.FORWARD = 1] = 'FORWARD';
 })(TextDeleteDirection || (TextDeleteDirection = {}));
 
+let SuperscriptStyle;
+(function (SuperscriptStyle) {
+  SuperscriptStyle[SuperscriptStyle.NORMAL = 0] = 'NORMAL';
+  SuperscriptStyle[SuperscriptStyle.SUPERSCRIPT = 1] = 'SUPERSCRIPT';
+  SuperscriptStyle[SuperscriptStyle.SUBSCRIPT = 2] = 'SUBSCRIPT';
+})(SuperscriptStyle || (SuperscriptStyle = {}));
+
 let GestureRecognizerState;
 (function (GestureRecognizerState) {
   GestureRecognizerState[GestureRecognizerState.READY = 0] = 'READY';
@@ -3925,3 +3966,13 @@ let AxisAction;
   AxisAction[AxisAction.END = 3] = 'END';
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
+
+let CommonState;
+(function (CommonState) {
+  CommonState[CommonState.UNINITIALIZED = 0] = 'UNINITIALIZED';
+  CommonState[CommonState.INITIALIZED = 1] = 'INITIALIZED';
+  CommonState[CommonState.APPEARING = 2] = 'APPEARING';
+  CommonState[CommonState.APPEARED = 3] = 'APPEARED';
+  CommonState[CommonState.DISAPPEARING = 4] = 'DISAPPEARING';
+  CommonState[CommonState.DISAPPEARED = 5] = 'DISAPPEARED';
+})(CommonState || (CommonState = {}));

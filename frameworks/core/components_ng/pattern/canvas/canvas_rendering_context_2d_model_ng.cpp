@@ -475,6 +475,13 @@ void CanvasRenderingContext2DModelNG::AddRect(const Rect& rect)
     pattern->AddRect(rect);
 }
 
+void CanvasRenderingContext2DModelNG::AddRoundRect(const Rect& rect, const std::vector<double>& radii)
+{
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddRoundRect(rect, radii);
+}
+
 void CanvasRenderingContext2DModelNG::BeginPath()
 {
     auto pattern = weakPattern_.Upgrade();

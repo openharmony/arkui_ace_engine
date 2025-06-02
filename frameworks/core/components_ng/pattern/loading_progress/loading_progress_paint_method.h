@@ -49,7 +49,9 @@ public:
         CHECK_NULL_VOID(paintProperty);
         auto host = paintProperty->GetHost();
         auto themeScopeId = host ? host->GetThemeScopeId() : 0;
-        auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
+        auto progressTheme = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                                 ? pipeline->GetTheme<ProgressTheme>(themeScopeId)
+                                 : pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(progressTheme);
         loadingProgressModifier_->SetEnableLoading(paintProperty->GetEnableLoadingValue(true));
         loadingProgressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
@@ -59,10 +61,8 @@ public:
         if (renderContext->HasForegroundColorStrategy()) {
             paintProperty->UpdateColor(Color::FOREGROUND);
         }
-        if (!loadingProgressModifier_->GetForegroundColorParseFailed() || themeScopeId) {
-            color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
-            loadingProgressModifier_->SetColor(LinearColor(color_));
-        }
+        color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
+        loadingProgressModifier_->SetColor(LinearColor(color_));
         if (loadingProgressModifier_->GetOwner() == LoadingProgressOwner::SELF) {
             loadingProgressModifier_->ChangeSizeScaleData(1.0f);
             loadingProgressModifier_->StartRecycle();

@@ -348,6 +348,8 @@ public:
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event,
         DragDropInfo dragPreviewInfo, const RefPtr<PipelineContext>& pipeline);
     void HideMenu();
+    GestureEvent GetGestureEventInfo();
+    ClickInfo GetClickInfo();
 #if defined(PIXEL_MAP_SUPPORTED)
     static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(
@@ -376,6 +378,7 @@ public:
     void DumpVelocityInfoFroPanEvent(int32_t fingerId);
 
     bool IsDragNewFwk() const;
+    bool TriggerTouchEvent(const TouchEvent& point);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

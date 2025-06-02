@@ -116,6 +116,8 @@ const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 constexpr Dimension FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE = 10.0_vp;
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr int32_t AUTO_FILL_CANCEL = 2;
+constexpr size_t MAX_PLACEHOLDER_SIZE = 256;
+constexpr size_t MAX_ABILITY_NAME_SIZE = 32;
 #endif
 
 // need to be moved to formatter
@@ -466,6 +468,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     selectController_->InitContentController(contentController_);
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     selectOverlay_ = MakeRefPtr<TextFieldSelectOverlay>(WeakClaim(this));
+    autoFillController_ = MakeRefPtr<AutoFillController>(WeakClaim(this));
     if (SystemProperties::GetDebugEnabled()) {
         twinklingInterval_ = 3000; // 3000 : for AtuoUITest
     }
@@ -3070,7 +3073,10 @@ void TextFieldPattern::ScheduleCursorTwinkling()
 
 void TextFieldPattern::StartTwinkling()
 {
-    if (isTransparent_ || !HasFocus() || focusIndex_ == FocuseIndex::CANCEL || focusIndex_ == FocuseIndex::UNIT) {
+    auto autoFillAnimationStatus =
+        autoFillController_ ? autoFillController_->GetAutoFillAnimationStatus() : AutoFillAnimationStatus::INIT;
+    if (isTransparent_ || !HasFocus() || focusIndex_ == FocuseIndex::CANCEL || focusIndex_ == FocuseIndex::UNIT ||
+        autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
         return;
     }
     // Ignore the result because all ops are called on this same thread (ACE UI).
@@ -3540,6 +3546,19 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     return true;
 }
 
+void GetTextDiffObscured(
+    const std::string& beforeText, const std::string& latestContent, std::string& addedText, std::string& removedText)
+{
+    auto changeLen = beforeText.length() - latestContent.length();
+    char16_t obscuring =
+        Localization::GetInstance()->GetLanguage() == "ar" ? OBSCURING_CHARACTER_FOR_AR : OBSCURING_CHARACTER;
+    if (changeLen > 0) {
+        addedText = UtfUtils::Str16DebugToStr8(std::u16string(changeLen, obscuring));
+    } else if (changeLen < 0) {
+        removedText = UtfUtils::Str16DebugToStr8(std::u16string(-changeLen, obscuring));
+    }
+}
+
 void TextFieldPattern::AddTextFireOnChange()
 {
     auto host = GetHost();
@@ -3555,6 +3574,7 @@ void TextFieldPattern::AddTextFireOnChange()
         CHECK_NULL_VOID(eventHub);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
+        auto newText = UtfUtils::Str16DebugToStr8(pattern->GetTextContentController()->GetTextUtf16Value());
         layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextUtf16Value());
         ChangeValueInfo changeValueInfo;
         changeValueInfo.value = pattern->GetBodyTextValue();
@@ -3568,6 +3588,25 @@ void TextFieldPattern::AddTextFireOnChange()
         eventHub->FireOnChange(changeValueInfo);
 
         pattern->RecordTextInputEvent();
+        std::string addedText, removedText;
+        if (pattern->IsInPasswordMode()) {
+            GetTextDiffObscured(pattern->textCache_, newText, addedText, removedText);
+        } else {
+            DetectTextDiff(pattern->textCache_, newText, addedText, removedText);
+        }
+        if (!addedText.empty() && removedText.empty()) {
+            SEC_TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "textCache, in=%{public}s, newText=%{public}s, addedText=%{public}s", pattern->textCache_.c_str(),
+                newText.c_str(), addedText.c_str());
+            pattern->OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
+        }
+        if (!removedText.empty() && addedText.empty()) {
+            SEC_TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "textCache, in=%{public}s, newText=%{public}s, removedText=%{public}s", pattern->textCache_.c_str(),
+                newText.c_str(), removedText.c_str());
+            pattern->OnAccessibilityEventTextChange(TextChangeType::REMOVE, removedText);
+        }
+        pattern->textCache_ = newText;
     });
 }
 
@@ -3957,6 +3996,7 @@ void TextFieldPattern::InitEditingValueText(std::u16string content)
     if (HasInputOperation()) {
         return;
     }
+    textCache_ = UtfUtils::Str16DebugToStr8(content);
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetTextUtf16Value().length());
     if (GetIsPreviewText() && GetTextUtf16Value().empty()) {
@@ -3974,6 +4014,7 @@ bool TextFieldPattern::InitValueText(std::u16string content)
     if (HasInputOperation() && content != u"") {
         return false;
     }
+    textCache_ = UtfUtils::Str16DebugToStr8(content);
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldContent = GetBodyTextValue();
     changeValueInfo.value = content;
@@ -4535,9 +4576,11 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
         "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
-        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u",
+        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u"
+        " placeholderLength:%{public}zu",
         tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
-        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard, sourceType);
+        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard, sourceType,
+        CountUtf16Chars(textConfig.inputAttribute.placeholder));
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
     if (systemWindowId) {
@@ -4627,6 +4670,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto textPaintOffset = GetPaintRectGlobalOffset();
     double height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
              textPaintOffset.GetY() + offset - positionY;
+    std::u16string placeholder = TruncateText(GetPlaceHolder(), MAX_PLACEHOLDER_SIZE);
+    std::u16string abilityName = TruncateText(UtfUtils::Str8ToStr16(AceApplicationInfo::GetInstance()
+        .GetAbilityName()), MAX_ABILITY_NAME_SIZE);
 
     GetInlinePositionYAndHeight(positionY, height);
 
@@ -4644,7 +4690,10 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
         .isTextPreviewSupported = hasSupportedPreviewText_,
-        .immersiveMode = static_cast<int32_t>(keyboardAppearance_)};
+        .immersiveMode = static_cast<int32_t>(keyboardAppearance_),
+        .placeholder = placeholder,
+        .abilityName = abilityName,
+        .capitalizeMode = static_cast<MiscServices::CapitalizeMode>(GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
@@ -8078,14 +8127,8 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
     if (!contentController_ || contentController_->GetTextValue() == nodeWrap->GetValue()) {
         return;
     }
-    bool isWillChange = OnWillChangePreSetValue(UtfUtils::Str8DebugToStr16(nodeWrap->GetValue()));
-    if (!isWillChange) {
-        return;
-    }
-    contentController_->SetTextValue(UtfUtils::Str8DebugToStr16(nodeWrap->GetValue()));
-    auto textLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
-    selectController_->UpdateCaretIndex(textLength);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    BeforeAutoFillAnimation(UtfUtils::Str8DebugToStr16(nodeWrap->GetValue()), type);
 }
 
 bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
@@ -10999,4 +11042,68 @@ void TextFieldPattern::OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode)
     }
 }
 
+void TextFieldPattern::BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto enableAutoFillAnimation = layoutProperty->GetEnableAutoFillAnimationValue(true);
+    auto textValue = content;
+    contentController_->FilterValue(textValue);
+    CHECK_NULL_VOID(autoFillController_);
+    autoFillController_->SetAutoFillTextUtf16Value(textValue);
+    auto onFinishCallback = [weak = AceType::WeakClaim(this), textValue, unFilteredValue = content]() {
+        auto textFieldPattern = weak.Upgrade();
+        CHECK_NULL_VOID(textFieldPattern);
+        auto autoFillController = textFieldPattern->GetAutoFillController();
+        CHECK_NULL_VOID(autoFillController);
+        autoFillController->ResetAutoFillAnimationStatus();
+        auto hostNode = textFieldPattern->GetHost();
+        CHECK_NULL_VOID(hostNode);
+        if (!textFieldPattern->OnWillChangePreSetValue(unFilteredValue)) {
+            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+        auto contentController = textFieldPattern->GetTextContentController();
+        CHECK_NULL_VOID(contentController);
+        contentController->SetTextValue(unFilteredValue);
+        auto textLength = static_cast<int32_t>(contentController->GetTextUtf16Value().length());
+        auto selectController = textFieldPattern->GetTextSelectController();
+        CHECK_NULL_VOID(selectController);
+        selectController->UpdateCaretIndex(textLength);
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto needsAnimation = pipeline && enableAutoFillAnimation &&
+                          (type == AceAutoFillType::ACE_NEW_PASSWORD || type == AceAutoFillType::ACE_PASSWORD) &&
+                          textValue.length() > 0;
+    if (needsAnimation) {
+        autoFillController_->SetAutoFillAnimationStatus(AutoFillAnimationStatus::SHOW_ICON);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        pipeline->AddAfterLayoutTask(
+            [weak = AceType::WeakClaim(this), onFinish = std::move(onFinishCallback), textValue]() {
+                auto textFieldPattern = weak.Upgrade();
+                CHECK_NULL_VOID(textFieldPattern);
+                auto autoFillController = textFieldPattern->GetAutoFillController();
+                CHECK_NULL_VOID(autoFillController);
+                autoFillController->StartAutoFillAnimation(onFinish, textValue);
+            });
+    } else {
+        onFinishCallback();
+    }
+}
+
+void TextFieldPattern::OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    event.nodeId = host->GetAccessibilityId();
+    event.extraEventInfo.insert({ changeType, changeString });
+    pipeline->SendEventToAccessibilityWithNode(event, GetHost());
+}
 } // namespace OHOS::Ace::NG

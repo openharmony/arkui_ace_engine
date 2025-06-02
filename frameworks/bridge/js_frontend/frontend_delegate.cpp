@@ -158,6 +158,14 @@ bool FrontendDelegate::Activate(bool isActive, bool autoInactive)
     return pipeline->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, autoInactive);
 }
 
+bool FrontendDelegate::GetFocusActive()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    bool ret = pipeline->GetIsFocusActive();
+    return ret;
+}
+
 void FrontendDelegate::SetAutoFocusTransfer(bool isAutoFocusTransfer)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();

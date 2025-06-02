@@ -15,11 +15,13 @@
 
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
+#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -221,6 +223,38 @@ void SliderModelNG::SetBlockShape(const RefPtr<BasicShape>& value)
 void SliderModelNG::SetStepSize(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, StepSize, value);
+}
+void SliderModelNG::SetPrefix(const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPrefix(content, options);
+}
+void SliderModelNG::SetSuffix(const RefPtr<UINode>& content, const NG::SliderSuffixOptions& options)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSuffix(content, options);
+}
+void SliderModelNG::SetPrefix(
+    FrameNode* frameNode, const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPrefix(content, options);
+}
+void SliderModelNG::SetSuffix(
+    FrameNode* frameNode, const RefPtr<UINode>& content, const NG::SliderSuffixOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSuffix(content, options);
 }
 #ifdef SUPPORT_DIGITAL_CROWN
 void SliderModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
@@ -523,6 +557,22 @@ void SliderModelNG::ResetValidSlideRange(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ValidSlideRange, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
+void SliderModelNG::ResetPrefix(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetPrefix();
+}
+
+void SliderModelNG::ResetSuffix(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSuffix();
+}
+
 RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -764,6 +814,107 @@ Gradient SliderModelNG::CreateSolidGradient(Color value)
     gradientColorEnd.SetDimension(Dimension(1.0f));
     gradient.AddColor(gradientColorEnd);
     return gradient;
+}
+
+void SliderModelNG::CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+    const SliderColorType sliderColorType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "slider" + ColorTypeToString(sliderColorType);
+    auto&& updateFunc = [pattern, key, sliderColorType](const RefPtr<ResourceObject>& resObj) {
+        std::string color = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (color.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            pattern->AddResCache(key, result.ColorToString());
+        } else {
+            result = Color::ColorFromString(color);
+        }
+        Gradient gradient = SliderModelNG::CreateSolidGradient(result);
+        pattern->UpdateSliderComponentColor(result, sliderColorType, gradient);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void SliderModelNG::CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj,
+    const std::string bundleName, const std::string moduleName)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "sliderImage";
+    auto&& updateFunc = [pattern, key, bundleName, moduleName](const RefPtr<ResourceObject>& resObj) {
+        std::string image = pattern->GetResCacheMapByKey(key);
+        std::string result;
+        if (image.empty()) {
+            ResourceParseUtils::ParseResMedia(resObj, result);
+            pattern->AddResCache(key, result);
+        } else {
+            result = image;
+        }
+        ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockImage, result);
+        ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockImageBundleName, bundleName);
+        ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockImageModuleName, moduleName);
+        pattern->UpdateSliderComponentMedia();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void SliderModelNG::CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, const bool isShowTips)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "sliderShowTips";
+    auto&& updateFunc = [pattern, key, isShowTips](const RefPtr<ResourceObject>& resObj) {
+        std::string cacheValue = pattern->GetResCacheMapByKey(key);
+        std::string result;
+        if (cacheValue.empty()) {
+            ResourceParseUtils::ParseResString(resObj, result);
+            pattern->AddResCache(key, result);
+        } else {
+            result = cacheValue;
+        }
+        pattern->UpdateSliderComponentString(isShowTips, result);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+std::string SliderModelNG::ColorTypeToString(const SliderColorType sliderColorType)
+{
+    std::string rst;
+    switch (sliderColorType) {
+        case SliderColorType::BLOCK_COLOR:
+            rst = "BlockColor";
+            break;
+        case SliderColorType::TRACK_COLOR:
+            rst = "TrackColor";
+            break;
+        case SliderColorType::SELECT_COLOR:
+            rst = "SelectColor";
+            break;
+        case SliderColorType::BLOCK_BORDER_COLOR:
+            rst = "BlockBorderColor";
+            break;
+        case SliderColorType::STEP_COLOR:
+            rst = "StepColor";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
 }
 
 void SliderModelNG::SetBuilderFunc(FrameNode* frameNode, SliderMakeCallback&& makeFunc)

@@ -1693,4 +1693,34 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
     EXPECT_EQ(times, 0);
 }
+
+/**
+ * @tc.name: NavigationSplitPlaceholderTest001
+ * @tc.desc: Test Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationSplitPlaceholderTest001, TestSize.Level1)
+{
+    auto columnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    NavigationModelNG navigationModelNG;
+    navigationModelNG.Create();
+    navigationModelNG.SetSplitPlaceholder(columnNode);
+    auto rawFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(rawFrameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto placeholderContentNode = navigationGroupNode->GetPlaceholderContentNode();
+    ASSERT_NE(placeholderContentNode, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(placeholderContentNode->GetChildren().size()), 1);
+    navigationModelNG.ResetSplitPlaceholder(rawFrameNode);
+    placeholderContentNode = navigationGroupNode->GetPlaceholderContentNode();
+    ASSERT_EQ(placeholderContentNode, nullptr);
+    navigationModelNG.SetSplitPlaceholder(rawFrameNode, &(*columnNode));
+    placeholderContentNode = navigationGroupNode->GetPlaceholderContentNode();
+    ASSERT_NE(placeholderContentNode, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(placeholderContentNode->GetChildren().size()), 1);
+}
 } // namespace OHOS::Ace::NG

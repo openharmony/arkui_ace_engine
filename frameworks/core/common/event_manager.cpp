@@ -960,6 +960,9 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
 {
     bool isStopTouchEvent = false;
     for (const auto& entry : touchTestResult) {
+        if (touchEvent.passThrough) {
+            entry->SetIsPostEventResult(true);
+        }
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (recognizer) {
             entry->HandleMultiContainerEvent(touchEvent);
@@ -972,6 +975,7 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
         }
+        isStopTouchEventRecored_ = isStopTouchEvent;
     }
 }
 
@@ -1386,18 +1390,20 @@ bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event
 {
     MouseTestResult handledResults;
     bool isStopPropagation = false;
+    PressMouseInfo key{ event.id, event.button };
     if (event.button != MouseButton::NONE_BUTTON) {
-        if (auto mouseTargetIter = pressMouseTestResultsMap_.find(event.button);
+        if (auto mouseTargetIter = pressMouseTestResultsMap_.find(key);
             mouseTargetIter != pressMouseTestResultsMap_.end()) {
             DispatchMouseEventToPressResults(event, mouseTargetIter->second, handledResults, isStopPropagation);
         }
         if (event.action == MouseAction::PRESS) {
-            pressMouseTestResultsMap_[event.button] = currMouseTestResults_;
+            pressMouseTestResultsMap_[key] = currMouseTestResults_;
         }
     }
     auto result = DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
+    isStopPropagationRecored_ = isStopPropagation;
     if (event.action == MouseAction::RELEASE) {
-        DoSingleMouseActionRelease(event.button);
+        DoSingleMouseActionRelease(key);
     }
     return result;
 }
@@ -1435,7 +1441,7 @@ void EventManager::DispatchMouseEventToPressResults(const MouseEvent& event, con
 }
 
 bool EventManager::DispatchMouseEventToCurResults(
-    const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
+    const MouseEvent& event, const MouseTestResult& handledResults, bool& isStopPropagation)
 {
     auto currMouseTestResults = currMouseTestResults_;
     for (const auto& mouseTarget : currMouseTestResults) {
@@ -1446,16 +1452,19 @@ bool EventManager::DispatchMouseEventToCurResults(
             auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
             // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
             if (ret && mouseTarget->HandleMouseEvent(event)) {
+                isStopPropagation = true;
                 return true;
             }
             continue;
         }
-        auto mouseTargetIter = pressMouseTestResultsMap_.find(event.button);
+        PressMouseInfo key{event.id, event.button};
+        auto mouseTargetIter = pressMouseTestResultsMap_.find(key);
         if ((mouseTargetIter != pressMouseTestResultsMap_.end() &&
             std::find(mouseTargetIter->second.begin(), mouseTargetIter->second.end(), mouseTarget) ==
             mouseTargetIter->second.end()) || mouseTargetIter == pressMouseTestResultsMap_.end()) {
             // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
             if (mouseTarget->HandleMouseEvent(event)) {
+                isStopPropagation = true;
                 return true;
             }
         }
@@ -1495,9 +1504,9 @@ void EventManager::DoMouseActionRelease()
     pressMouseTestResults_.clear();
 }
 
-void EventManager::DoSingleMouseActionRelease(MouseButton button)
+void EventManager::DoSingleMouseActionRelease(const PressMouseInfo& pressMouseInfo)
 {
-    pressMouseTestResultsMap_.erase(button);
+    pressMouseTestResultsMap_.erase(pressMouseInfo);
 }
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
@@ -1661,7 +1670,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::AXIS;
     touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
-    frameNode->AxisTest(point, point, point, touchRestrict, axisTestResults_);
+    frameNode->AxisTest(point, point, point, touchRestrict, axisTestResultsMap_[event.id]);
 }
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
@@ -1670,17 +1679,20 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
         if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
             !event.isRotationEvent) {
-            axisTestResults_.clear();
+            axisTestResultsMap_[event.id].clear();
+            axisTestResultsMap_.erase(event.id);
             return false;
         }
     }
-    for (const auto& axisTarget : axisTestResults_) {
+    for (const auto& axisTarget : axisTestResultsMap_[event.id]) {
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
-            axisTestResults_.clear();
+            axisTestResultsMap_[event.id].clear();
+            axisTestResultsMap_.erase(event.id);
             return true;
         }
     }
-    axisTestResults_.clear();
+    axisTestResultsMap_[event.id].clear();
+    axisTestResultsMap_.erase(event.id);
     return true;
 }
 

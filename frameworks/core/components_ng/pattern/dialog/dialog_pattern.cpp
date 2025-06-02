@@ -562,7 +562,9 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    if (IsUIExtensionSubWindow() && props.isModal) {
+    auto needAddMaskNode = props.maskTransitionEffect != nullptr || props.dialogTransitionEffect != nullptr;
+    if ((IsUIExtensionSubWindow() && props.isModal) ||
+        (needAddMaskNode && props.isModal && !props.isShowInSubWindow)) {
         auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(extraMaskNode);
@@ -640,6 +642,12 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     titleRowProps->UpdateMainAxisAlign(
         dialogTheme_->GetTextAlignTitle() == TEXT_ALIGN_TITLE_CENTER ? FlexAlign::CENTER : FlexAlign::FLEX_START);
     titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    if (dialogProperties.type == DialogType::ALERT_DIALOG && dialogProperties.isAlertDialog) {
+        titleProp->UpdateFontWeight(FontWeight::BOLD);
+        titleProp->UpdateTextAlign(TextAlign::CENTER);
+        titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+        titleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    }
     title->MountToParent(titleRow);
     title->MarkModifyDone();
     contentNodeMap_[dialogProperties.title.empty() ? DialogContentNode::SUBTITLE : DialogContentNode::TITLE] = title;
@@ -685,6 +693,11 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     subtitleRowProps->UpdateMainAxisAlign(
         dialogTheme_->GetTextAlignTitle() == TEXT_ALIGN_TITLE_CENTER ? FlexAlign::CENTER : FlexAlign::FLEX_START);
     subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    if (dialogProperties.type == DialogType::ALERT_DIALOG && dialogProperties.isAlertDialog) {
+        titleProp->UpdateTextAlign(TextAlign::CENTER);
+        titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+        subtitleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    }
     subtitle->MountToParent(subtitleRow);
     subtitle->MarkModifyDone();
     contentNodeMap_[DialogContentNode::SUBTITLE] = subtitle;
@@ -739,6 +752,21 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     contentPadding.right = CalcLength(contentPaddingInTheme.Right());
     contentPadding.bottom = CalcLength(contentPaddingInTheme.Bottom());
     contentProp->UpdatePadding(contentPadding);
+    if (props.type == DialogType::ALERT_DIALOG && props.isAlertDialog) {
+        contentProp->UpdateTextAlign(TextAlign::CENTER);
+        auto contentRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(contentRow, nullptr);
+        auto contentRowProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(contentRowProps, nullptr);
+        contentRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+        contentRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        contentNode->MountToParent(contentRow);
+        message_ = props.content;
+        contentNode->MarkModifyDone();
+        contentNodeMap_[DialogContentNode::MESSAGE] = contentNode;
+        return contentRow;
+    }
 
     // XTS inspector value
     message_ = props.content;

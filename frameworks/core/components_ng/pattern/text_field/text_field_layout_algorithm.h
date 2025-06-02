@@ -100,6 +100,8 @@ public:
     void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength, LayoutWrapper* layoutWrapper);
     bool DidExceedMaxLines(const SizeF& maxSize) override;
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
+    void UpdateTextAreaMaxLines(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
+    bool ShouldUseInfiniteMaxLines(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
 
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
@@ -108,6 +110,8 @@ protected:
     void CreateParagraph(const TextStyle& textStyle, const std::vector<std::u16string>& contents,
         const std::u16string& content, bool needObscureText, CreateParagraphData paragraphData);
     void CreateInlineParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
+        int32_t nakedCharPosition, CreateParagraphData paragraphData);
+    void CreateAutoFillParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
         int32_t nakedCharPosition, CreateParagraphData paragraphData);
     void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 

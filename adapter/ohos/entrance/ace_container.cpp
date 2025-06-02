@@ -85,6 +85,7 @@ const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
 constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
+constexpr int32_t DARK_RES_DUMP_MIN_SIZE = 3;
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
@@ -2063,7 +2064,7 @@ bool AceContainer::DumpCommon(const std::vector<std::string>& params, std::vecto
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
     if (IsUIExtensionWindow()) {
-        DumpLog::GetInstance().SetSeparator(";");
+        DumpLog::GetInstance().SetUIExtFlag(true);
     }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
@@ -2100,8 +2101,50 @@ bool AceContainer::DumpInfo(const std::vector<std::string>& params)
     if (DumpRSNodeByStringID(params)) {
         return true;
     }
+
+    if (DumpExistDarkRes(params)) {
+        return true;
+    }
     CHECK_NULL_RETURN(pipelineContext_, false);
     return pipelineContext_->Dump(params);
+}
+
+bool AceContainer::DumpExistDarkRes(const std::vector<std::string>& params)
+{
+    if (!params.empty() && params[0] == "-existdarkresbyid" && (params.size() >= DARK_RES_DUMP_MIN_SIZE)) {
+        DumpLog::GetInstance().Print("------------DumpExistDarkResByID------------");
+        auto bundleName = params[1];
+        auto moduleName = params[2];
+        auto resourceId = params[3];
+        auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId_);
+        if (!resourceAdapter) {
+            DumpLog::GetInstance().Print(1, "Cannot find resourceAdapter with bundleName:" + bundleName +
+                ", moduleName:" + moduleName);
+            return true;
+        }
+        bool existDarkRes = resourceAdapter->ExistDarkResById(resourceId);
+        DumpLog::GetInstance().Print(1, std::string(existDarkRes ? "" : "Doesn't ") +
+            "Exit dark res with resourceId:" + resourceId);
+        return true;
+    }
+    if (!params.empty() && params[0] == "-existdarkresbyname" && (params.size() > DARK_RES_DUMP_MIN_SIZE)) {
+        DumpLog::GetInstance().Print("------------DumpExistDarkResByName------------");
+        auto bundleName = params[1];
+        auto moduleName = params[2];
+        auto resourceName = params[3];
+        auto resourceType = params[4];
+        auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId_);
+        if (!resourceAdapter) {
+            DumpLog::GetInstance().Print(1, "Cannot find resourceAdapter with bundleName:" + bundleName +
+                ", moduleName:" + moduleName);
+            return true;
+        }
+        bool existDarkRes = resourceAdapter->ExistDarkResByName(resourceName, resourceType);
+        DumpLog::GetInstance().Print(1, std::string(existDarkRes ? "" : "Doesn't ") +
+            "Exit dark res with resourceName:" + resourceName + ", resourceType:" + resourceType);
+        return true;
+    }
+    return false;
 }
 
 bool AceContainer::DumpRSNodeByStringID(const std::vector<std::string>& params)
@@ -3019,6 +3062,21 @@ void AceContainer::ProcessColorModeUpdate(
     }
 }
 
+void AceContainer::UpdateColorMode(uint32_t colorMode)
+{
+    ACE_SCOPED_TRACE("AceContainer::UpdateColorMode %u", colorMode);
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = pipelineContext_->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    if (!IsUseCustomBg() && !IsTransparentBg()) {
+        Color color = themeManager->GetBackgroundColor();
+        pipelineContext_->SetAppBgColor(color);
+        ACE_SCOPED_TRACE("AceContainer::UpdateColorMode pipeline bgcolor %s", color.ColorToString().c_str());
+    }
+    pipelineContext_->SetIsSystemColorChange(true);
+    pipelineContext_->NotifyColorModeChange(colorMode);
+}
+
 void AceContainer::UpdateConfiguration(
     const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
 {
@@ -3045,6 +3103,10 @@ void AceContainer::UpdateConfiguration(
         }
     }
     themeManager->LoadResourceThemes();
+    if (SystemProperties::ConfigChangePerform() && configurationChange.OnlyColorModeChange()) {
+        UpdateColorMode(resConfig.GetColorMode() == ColorMode::DARK ? 1 : 0);
+        return;
+    }
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {
@@ -3957,6 +4019,14 @@ void AceContainer::DispatchUIExtDataConsume(
             },
             TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeCallback");
     }
+}
+
+void AceContainer::DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId)
+{
+    CHECK_NULL_VOID(uiWindow_);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "DispatchExtensionDataToHostWindow code=%{public}u, want=%{public}s, persistenId=%{public}d.",
+        code, data.ToString().c_str(), persistenId);
 }
 
 bool AceContainer::FireUIExtDataSendToHost(
