@@ -471,7 +471,7 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest008, TestSize.Level
 
 /**
  * @tc.name: CheckBoxGroupPatternTest009
- * @tc.desc: Test OnDetachFromFrameNode directly.
+ * @tc.desc: Test OnDetachFromFrameNode without eventHub.
  * @tc.type: FUNC
  */
  HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest009, TestSize.Level1)
@@ -490,6 +490,10 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest008, TestSize.Level
      EXPECT_NE(frameNode, nullptr);
      auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
      EXPECT_NE(pattern, nullptr);
+
+     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+     FrameNode& ref = *stageNode;
+     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
  
      /**
       * @tc.steps: step3 Call OnDetachFromFrameNode
