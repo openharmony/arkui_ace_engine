@@ -1071,6 +1071,11 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     if (snapDirection != SnapDirection::NONE) {
         return ScrollToSnapIndex(snapDirection, scrollSnapAlign);
     }
+    if (snapAnimationOptions.fromScrollBar &&
+        ((GreatNotEqual(snapAnimationOptions.animationVelocity, 0.0f) && IsAtTop()) ||
+            (LessNotEqual(snapAnimationOptions.animationVelocity, 0.0f) && IsAtBottom()))) {
+        return false;
+    }
     if (!IsScrolling()) {
         snapTrigOnScrollStart_ = true;
     }
