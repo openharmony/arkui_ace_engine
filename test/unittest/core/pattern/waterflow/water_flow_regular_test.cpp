@@ -1152,7 +1152,7 @@ HWTEST_F(WaterFlowTestNg, CustomNode001, TestSize.Level1)
 
 /**
  * @tc.name: OnAttachAtapter001
- * @tc.desc: Test OnAttachAtapter when have footer.
+ * @tc.desc: Test OnAttachAdapter when have footer.
  * @tc.type: FUNC
  */
 HWTEST_F(WaterFlowTestNg, OnAttachAtapter001, TestSize.Level1)
@@ -1169,7 +1169,7 @@ HWTEST_F(WaterFlowTestNg, OnAttachAtapter001, TestSize.Level1)
     LazyForEachModelNG lazyForEach;
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_EQ(pattern_->OnAttachAtapter(frameNode_, lazyForEachNode), true);
+    EXPECT_EQ(pattern_->OnAttachAdapter(frameNode_, lazyForEachNode), true);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 11);
 }
 } // namespace OHOS::Ace::NG

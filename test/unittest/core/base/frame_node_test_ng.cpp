@@ -2698,7 +2698,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNG310, TestSize.Level1)
 
 /**
  * @tc.name: FrameNodeTestNg311
- * @tc.desc: Test OnAttachAtapter.
+ * @tc.desc: Test OnAttachAdapter.
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeTestNg311, TestSize.Level1)
@@ -2709,7 +2709,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg311, TestSize.Level1)
         FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), false);
     auto pattern_ = frameNode->GetPattern();
     EXPECT_NE(pattern_, nullptr);
-    bool result = pattern_->OnAttachAtapter(frameNode, childNode1);
+    bool result = pattern_->OnAttachAdapter(frameNode, childNode1);
     EXPECT_EQ(result, false);
     pattern_ = nullptr;
 }

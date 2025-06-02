@@ -1072,6 +1072,10 @@ const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonit
     }
     return nodeRenderStatusMonitor_;
 }
+
+void PipelineContext::FlushDirtyPropertyNodes()
+{
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

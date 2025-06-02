@@ -208,7 +208,7 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
-    bool OnAttachAtapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child) override
+    bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child) override
     {
         node->AddChild(child);
         return true;
