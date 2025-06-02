@@ -295,7 +295,7 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
     }
     auto host = GetHost();
     if (host) {
-        host->SuggestOpIncGroup();
+        host->SuggestOpIncGroup(GetAxis());
     }
     return UpdateCurrentOffset(offset, source);
 }
@@ -1740,7 +1740,7 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     mouseOffsetY -= info.GetOffsetY();
     auto host = GetHost();
     if (host) {
-        host->SuggestOpIncGroup();
+        host->SuggestOpIncGroup(GetAxis());
     }
     if (!IsItemSelected(static_cast<float>(info.GetGlobalLocation().GetX()) - info.GetOffsetX(),
         static_cast<float>(info.GetGlobalLocation().GetY()) - info.GetOffsetY())) {
@@ -2748,7 +2748,7 @@ void ScrollablePattern::FireOnScrollStart()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
-    host->SuggestOpIncGroup();
+    host->SuggestOpIncGroup(GetAxis());
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop());
     }

@@ -824,6 +824,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("LayoutRect: ").append(layoutProperty_->GetLayoutRect().value().ToString().c_str()));
     }
+    if (GetSuggestOpIncMarked()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("SuggestOpIncMarked: ").append(std::to_string(static_cast<int32_t>(GetSuggestOpIncMarked()))));
+    }
     DumpExtensionHandlerInfo();
     DumpSafeAreaInfo();
     if (layoutProperty_->GetCalcLayoutConstraint()) {
@@ -5976,9 +5980,9 @@ void FrameNode::MarkAndCheckNewOpIncNode(Axis axis)
     }
 }
 
-void FrameNode::SuggestOpIncGroup()
+void FrameNode::SuggestOpIncGroup(Axis axis)
 {
-    if (!SystemProperties::IsOpIncEnable()) {
+    if (!SystemProperties::IsOpIncEnable() || axis != Axis::VERTICAL) {
         return;
     }
     if (GetSuggestOpIncActivatedOnce()) {
