@@ -581,7 +581,7 @@ namespace Converter {
     template<> ShadowColorStrategy Convert(const Ark_Color& src);
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
-    template<> ShapePoint Convert(const Ark_Point& src);
+    template<> ShapePoint Convert(const Ark_ShapePoint& src);
     template<> StringArray Convert(const Ark_CustomObject& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src);

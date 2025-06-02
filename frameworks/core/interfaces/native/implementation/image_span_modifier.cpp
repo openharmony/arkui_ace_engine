@@ -17,7 +17,7 @@
 #include "core/image/image_source_info.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/image_span_view_static.h"
-#include "core/interfaces/native/implementation/image_common_methods.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "pixel_map_peer.h"
 
@@ -34,7 +34,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ImageSpanModifier
 namespace ImageSpanInterfaceModifier {
 void SetImageSpanOptionsImpl(Ark_NativePointer node,
-                             const Ark_Union_ResourceStr_Image_PixelMap* value)
+                             const Ark_Union_ResourceStr_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -53,11 +53,6 @@ void VerticalAlignImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<VerticalAlign>(*value);
     ImageSpanViewStatic::SetVerticalAlign(frameNode, convValue);
-}
-void ColorFilterImpl(Ark_NativePointer node,
-                     const Opt_Union_ColorFilter_Drawing_ColorFilter* value)
-{
-    ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    const Opt_ImageFit* value)
@@ -121,7 +116,6 @@ const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
         ImageSpanModifier::ConstructImpl,
         ImageSpanInterfaceModifier::SetImageSpanOptionsImpl,
         ImageSpanAttributeModifier::VerticalAlignImpl,
-        ImageSpanAttributeModifier::ColorFilterImpl,
         ImageSpanAttributeModifier::ObjectFitImpl,
         ImageSpanAttributeModifier::OnCompleteImpl,
         ImageSpanAttributeModifier::OnErrorImpl,

@@ -63,29 +63,24 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // ShapeModifier
 namespace ShapeInterfaceModifier {
-void SetShapeOptions0Impl(Ark_NativePointer node,
-                          Ark_image_PixelMap value)
+void SetShapeOptionsImpl(Ark_NativePointer node,
+                         const Opt_image_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     ViewAbstract::SetFocusable(frameNode, true);
     RefPtr<PixelMap> pixelMap;
 #if !defined(PREVIEW) && defined(PIXEL_MAP_SUPPORTED)
-    Media::PixelMapAni* pixelMapAni = reinterpret_cast<Media::PixelMapAni*>(value);
-    CHECK_NULL_VOID(pixelMapAni);
-    auto nativePixelMap = pixelMapAni->nativePixelMap_;
-    CHECK_NULL_VOID(nativePixelMap);
-    pixelMap = PixelMap::CreatePixelMap(&nativePixelMap);
+    auto optValue = Converter::GetOptPtr(value);
+    if (optValue) {
+        Media::PixelMapAni* pixelMapAni = reinterpret_cast<Media::PixelMapAni*>(*optValue);
+        auto nativePixelMap = pixelMapAni ? pixelMapAni->nativePixelMap_ : nullptr;
+        if (nativePixelMap) {
+            pixelMap = PixelMap::CreatePixelMap(&nativePixelMap);
+        }
+    }
 #endif
     ShapeModelNG::InitBox(frameNode, pixelMap);
-}
-void SetShapeOptions1Impl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetFocusable(frameNode, true);
-    ShapeModelNG::InitBox(frameNode, nullptr);
 }
 } // ShapeInterfaceModifier
 namespace ShapeAttributeModifier {
@@ -240,8 +235,7 @@ const GENERATED_ArkUIShapeModifier* GetShapeModifier()
 {
     static const GENERATED_ArkUIShapeModifier ArkUIShapeModifierImpl {
         ShapeModifier::ConstructImpl,
-        ShapeInterfaceModifier::SetShapeOptions0Impl,
-        ShapeInterfaceModifier::SetShapeOptions1Impl,
+        ShapeInterfaceModifier::SetShapeOptionsImpl,
         ShapeAttributeModifier::ViewPortImpl,
         ShapeAttributeModifier::StrokeImpl,
         ShapeAttributeModifier::FillImpl,

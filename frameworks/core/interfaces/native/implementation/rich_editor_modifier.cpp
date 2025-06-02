@@ -443,7 +443,7 @@ void OnPasteImpl(Ark_NativePointer node,
     }
     auto onPaste = [arkCallback = CallbackHelper(*optValue)](NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
-        auto keeper = CallbackKeeper::Claim([&event]() {
+        auto keeper = CallbackKeeper::Claim<Callback_Void>([&event]() {
             event.SetPreventDefault(true);
         });
         Ark_PasteEvent arkEvent = {
@@ -597,7 +597,7 @@ void OnCutImpl(Ark_NativePointer node,
     }
     auto onCut = [arkCallback = CallbackHelper(*optValue)](NG::TextCommonEvent& event) {
         Converter::ConvContext ctx;
-        auto keeper = CallbackKeeper::Claim([&event]() {
+        auto keeper = CallbackKeeper::Claim<Callback_Void>([&event]() {
             event.SetPreventDefault(true);
         });
         Ark_CutEvent arkEvent = {
@@ -619,7 +619,7 @@ void OnCopyImpl(Ark_NativePointer node,
     }
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](NG::TextCommonEvent& event) {
         Converter::ConvContext ctx;
-        auto keeper = CallbackKeeper::Claim([&event]() {
+        auto keeper = CallbackKeeper::Claim<Callback_Void>([&event]() {
             event.SetPreventDefault(true);
         });
         Ark_CopyEvent arkEvent = {

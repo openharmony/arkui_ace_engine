@@ -57,4 +57,8 @@ void* createLazyVGridLayoutNode(ArkUI_Int32 nodeId)
     return nullptr;
 }
 
+void* createCustomLayoutRootNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG::ViewModel

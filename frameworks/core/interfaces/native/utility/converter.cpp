@@ -1413,11 +1413,11 @@ Rect Convert(const Ark_RectResult& src)
 }
 
 template<>
-ShapePoint Convert(const Ark_Point& src)
+ShapePoint Convert(const Ark_ShapePoint& src)
 {
     return ShapePoint(
-        Converter::OptConvert<Dimension>(src.x).value_or(Dimension()),
-        Converter::OptConvert<Dimension>(src.y).value_or(Dimension()));
+        Converter::OptConvert<Dimension>(src.value0).value_or(Dimension()),
+        Converter::OptConvert<Dimension>(src.value1).value_or(Dimension()));
 }
 
 template<>

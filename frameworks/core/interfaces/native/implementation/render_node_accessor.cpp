@@ -666,12 +666,12 @@ void SetRotationImpl(Ark_RenderNode peer,
     renderContext->RequestNextFrame();
 #endif
 }
-Ark_Tuple_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number GetTransformImpl(Ark_RenderNode peer)
+Ark_Matrix4 GetTransformImpl(Ark_RenderNode peer)
 {
     return {};
 }
 void SetTransformImpl(Ark_RenderNode peer,
-                      const Ark_Tuple_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number* transform)
+                      const Ark_Matrix4* transform)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetTransform !");

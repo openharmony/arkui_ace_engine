@@ -200,6 +200,10 @@ Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
     layoutManagerPeer->handler = peer->GetLayoutInfoInterface();
     return layoutManagerPeer;
 }
+Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
+{
+    return {};
+}
 Opt_Callback_PreviewText GetGetPreviewTextImpl(Ark_RichEditorBaseController peer)
 {
 #ifdef WRONG_GEN
@@ -229,6 +233,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::IsEditingImpl,
         RichEditorBaseControllerAccessor::StopEditingImpl,
         RichEditorBaseControllerAccessor::GetLayoutManagerImpl,
+        RichEditorBaseControllerAccessor::GetCaretRectImpl,
         RichEditorBaseControllerAccessor::GetGetPreviewTextImpl,
         RichEditorBaseControllerAccessor::SetGetPreviewTextImpl,
     };

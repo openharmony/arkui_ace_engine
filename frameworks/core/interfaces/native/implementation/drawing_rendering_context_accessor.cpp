@@ -74,23 +74,6 @@ void SetSizeImpl(Ark_DrawingRenderingContext peer,
                  const Ark_Size* size)
 {
 }
-Ark_drawing_Canvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
-{
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    auto pixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
-    CHECK_NULL_RETURN(pixelMap, {});
-    auto drawingCanvas = PeerUtils::CreatePeer<drawing_CanvasPeer>(pixelMap->pixelMap);
-    CHECK_NULL_RETURN(drawingCanvas, {});
-    auto canvas = peerImpl->GetCanvas();
-    drawingCanvas->SetCanvas(canvas);
-    return drawingCanvas;
-}
-void SetCanvasImpl(Ark_DrawingRenderingContext peer,
-                   Ark_drawing_Canvas canvas)
-{
-}
 } // DrawingRenderingContextAccessor
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
 {
@@ -101,8 +84,6 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
         DrawingRenderingContextAccessor::InvalidateImpl,
         DrawingRenderingContextAccessor::GetSizeImpl,
         DrawingRenderingContextAccessor::SetSizeImpl,
-        DrawingRenderingContextAccessor::GetCanvasImpl,
-        DrawingRenderingContextAccessor::SetCanvasImpl,
     };
     return &DrawingRenderingContextAccessorImpl;
 }

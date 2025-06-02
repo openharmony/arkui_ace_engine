@@ -155,12 +155,12 @@ void SetIntentionCodeImpl(Ark_KeyEvent peer,
 {
     LOGW("ARKOALA KeyEventAccessor::SetIntentionCodeImpl doesn't have sense.");
 }
-Opt_Callback_Array_String_Boolean GetGetModifierKeyStateImpl(Ark_KeyEvent peer)
+Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_KeyEvent peer)
 {
     return {};
 }
 void SetGetModifierKeyStateImpl(Ark_KeyEvent peer,
-                                const Callback_Array_String_Boolean* getModifierKeyState)
+                                const ModifierKeyStateGetter* getModifierKeyState)
 {
 }
 Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)

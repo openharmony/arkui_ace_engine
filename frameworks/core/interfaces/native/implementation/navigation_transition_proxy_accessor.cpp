@@ -100,20 +100,20 @@ void SetIsInteractiveImpl(Ark_NavigationTransitionProxy peer,
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->SetInteractive(Converter::Convert<bool>(isInteractive));
 }
-Opt_Callback_Void GetCancelTransitionImpl(Ark_NavigationTransitionProxy peer)
+Opt_VoidCallback GetCancelTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
     return {};
 }
 void SetCancelTransitionImpl(Ark_NavigationTransitionProxy peer,
-                             const Callback_Void* cancelTransition)
+                             const VoidCallback* cancelTransition)
 {
 }
-Opt_Callback_Number_Void GetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer)
+Opt_UpdateTransitionCallback GetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
     return {};
 }
 void SetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
-                             const Callback_Number_Void* updateTransition)
+                             const UpdateTransitionCallback* updateTransition)
 {
 }
 } // NavigationTransitionProxyAccessor

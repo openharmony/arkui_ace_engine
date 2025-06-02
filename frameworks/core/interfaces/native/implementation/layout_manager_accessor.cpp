@@ -73,7 +73,9 @@ void AssignArkValue(Ark_text_TextBox& dst, const ParagraphManager::TextBox& src)
 void AssignArkValue(Ark_PositionWithAffinity& dst, const PositionWithAffinity& src)
 {
     dst.position = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(src.position_));
+#ifdef WRONG_SDK
     dst.affinity = Converter::ArkValue<Ark_text_Affinity>(src.affinity_);
+#endif
 }
 } // namespace NG
 } // namespace OHOS::Ace
@@ -114,38 +116,6 @@ Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer
     );
     return Converter::ArkValue<Ark_PositionWithAffinity>(result);
 }
-Ark_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
-                                        const Ark_Number* lineNumber)
-{
-    CHECK_NULL_RETURN(peer && lineNumber, {});
-    auto handler = peer->handler.Upgrade();
-    CHECK_NULL_RETURN(handler, {});
-    TextLineMetrics result = handler->GetLineMetrics(Converter::Convert<int32_t>(*lineNumber));
-    LOGE("LayoutManagerAccessor::GetLineMetricsImpl Map_Number_RunMetrics not implemented"
-        "because Ark_RunMetrics is not supported");
-    return Converter::ArkValue<Ark_text_LineMetrics>(result);
-}
-Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
-                                        const Ark_TextRange* range,
-                                        Ark_text_RectWidthStyle widthStyle,
-                                        Ark_text_RectHeightStyle heightStyle)
-{
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(range, {});
-    auto handler = peer->handler.Upgrade();
-    CHECK_NULL_RETURN(handler, {});
-    auto start = Converter::Convert<int32_t>(range->start.value);
-    auto end = Converter::Convert<int32_t>(range->end.value);
-    auto heightSt = Converter::OptConvert<RectHeightStyle>(heightStyle);
-    auto widthSt = Converter::OptConvert<RectWidthStyle>(widthStyle);
-    std::vector<ParagraphManager::TextBox> rects;
-    rects = handler->GetRectsForRange(
-        start,
-        end,
-        heightSt.value_or(RectHeightStyle::TIGHT),
-        widthSt.value_or(RectWidthStyle::TIGHT));
-    return Converter::ArkValue<Array_text_TextBox>(rects, Converter::FC);
-}
 } // LayoutManagerAccessor
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
 {
@@ -155,8 +125,6 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
         LayoutManagerAccessor::GetFinalizerImpl,
         LayoutManagerAccessor::GetLineCountImpl,
         LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
-        LayoutManagerAccessor::GetLineMetricsImpl,
-        LayoutManagerAccessor::GetRectsForRangeImpl,
     };
     return &LayoutManagerAccessorImpl;
 }

@@ -24,7 +24,6 @@ common_sources = [
   "implementation/global_scope_accessor.cpp",
   "implementation/global_scope_animation_helper.cpp",
   "implementation/image_bitmap_peer_impl.cpp",
-  "implementation/image_common_methods.cpp",
   "implementation/matrix2d_peer_impl.cpp",
   "implementation/navigation_context.cpp",
   "implementation/offscreen_canvas_peer.cpp",

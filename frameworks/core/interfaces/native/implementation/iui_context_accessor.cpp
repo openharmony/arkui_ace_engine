@@ -18,27 +18,23 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ContentAccessor {
-void DestroyPeerImpl(Ark_Content peer)
+namespace IUIContextAccessor {
+void FreezeUINode0Impl(const Ark_String* id,
+                       Ark_Boolean isFrozen)
 {
 }
-Ark_Content CtorImpl()
+void FreezeUINode1Impl(const Ark_Number* id,
+                       Ark_Boolean isFrozen)
 {
-    return nullptr;
 }
-Ark_NativePointer GetFinalizerImpl()
+} // IUIContextAccessor
+const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-} // ContentAccessor
-const GENERATED_ArkUIContentAccessor* GetContentAccessor()
-{
-    static const GENERATED_ArkUIContentAccessor ContentAccessorImpl {
-        ContentAccessor::DestroyPeerImpl,
-        ContentAccessor::CtorImpl,
-        ContentAccessor::GetFinalizerImpl,
+    static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+        IUIContextAccessor::FreezeUINode0Impl,
+        IUIContextAccessor::FreezeUINode1Impl,
     };
-    return &ContentAccessorImpl;
+    return &IUIContextAccessorImpl;
 }
 
 }

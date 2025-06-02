@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,10 +38,12 @@ Ark_NodeContent CtorImpl()
 
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeerImpl);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean AddFrameNodeImpl(Ark_NodeContent peer, Ark_FrameNode node)
+void AddFrameNodeImpl(Ark_NodeContent peer,
+                      Ark_FrameNode node)
 {
+#ifdef WRONG_GEN
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->content, false);
     CHECK_NULL_RETURN(node, false);
@@ -53,9 +55,12 @@ Ark_Boolean AddFrameNodeImpl(Ark_NodeContent peer, Ark_FrameNode node)
     nodeContent->AddNode(AceType::RawPtr(childNode));
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return true;
+#endif
 }
-Ark_Boolean RemoveFrameNodeImpl(Ark_NodeContent peer, Ark_FrameNode node)
+void RemoveFrameNodeImpl(Ark_NodeContent peer,
+                         Ark_FrameNode node)
 {
+#ifdef WRONG_GEN
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->content, false);
     CHECK_NULL_RETURN(node, false);
@@ -67,8 +72,9 @@ Ark_Boolean RemoveFrameNodeImpl(Ark_NodeContent peer, Ark_FrameNode node)
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     nodeContent->RemoveNode(AceType::RawPtr(childNode));
     return true;
+#endif
 }
-} // namespace NodeContentAccessor
+} // NodeContentAccessor
 const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor()
 {
     static const GENERATED_ArkUINodeContentAccessor NodeContentAccessorImpl {
@@ -80,4 +86,5 @@ const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor()
     };
     return &NodeContentAccessorImpl;
 }
-} // namespace OHOS::Ace::NG::GeneratedModifier
+
+}

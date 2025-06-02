@@ -36,7 +36,9 @@ namespace Converter {
     {
         PluginComponentOptions opt;
         opt.requestPluginInfo = OptConvert<RequestPluginInfo>(options.template_);
+#ifdef WRONG_GEN
         opt.data = Convert<std::string>(options.data);
+#endif
         return opt;
     }
     template<>

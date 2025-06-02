@@ -225,12 +225,12 @@ void SetUseCustomDropAnimationImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer->dragInfo);
     peer->dragInfo->UseCustomAnimation(Convert<bool>(useCustomDropAnimation));
 }
-Opt_Callback_Array_String_Boolean GetGetModifierKeyStateImpl(Ark_DragEvent peer)
+Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_DragEvent peer)
 {
     return {};
 }
 void SetGetModifierKeyStateImpl(Ark_DragEvent peer,
-                                const Callback_Array_String_Boolean* getModifierKeyState)
+                                const ModifierKeyStateGetter* getModifierKeyState)
 {
 }
 } // DragEventAccessor

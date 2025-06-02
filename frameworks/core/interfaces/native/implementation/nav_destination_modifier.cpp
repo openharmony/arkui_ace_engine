@@ -127,7 +127,7 @@ void ModeImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetNavDestinationMode(frameNode, mode);
 }
 void BackButtonIcon0Impl(Ark_NativePointer node,
-                         const Opt_Union_ResourceStr_Image_PixelMap_SymbolGlyphModifier* value)
+                         const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -175,7 +175,7 @@ void BackButtonIcon0Impl(Ark_NativePointer node,
     NavDestinationModelStatic::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap, nameList);
 }
 void BackButtonIcon1Impl(Ark_NativePointer node,
-                         const Opt_Union_ResourceStr_Image_PixelMap_SymbolGlyphModifier* icon,
+                         const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
                          const Opt_ResourceStr* accessibilityText)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);

@@ -69,7 +69,7 @@ void SetPolylineOptionsImpl(Ark_NativePointer node,
 } // PolylineInterfaceModifier
 namespace PolylineAttributeModifier {
 void PointsImpl(Ark_NativePointer node,
-                const Opt_Array_Point* value)
+                const Opt_Array_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

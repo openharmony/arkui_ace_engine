@@ -145,7 +145,8 @@ FrameNode* GetChildNode(RefPtr<FrameNode> nodeRef, int32_t index, int32_t expand
     }
 }
 Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
-                           const Ark_Number* index)
+                           const Ark_Number* index,
+                           const Ark_Number* expandMode)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, nullptr);
@@ -249,7 +250,8 @@ Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
     auto node = NG::Inspector::GetFrameNodeByKey(valueName, true);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
 }
-Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer, Ark_FrameNode node)
+Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer,
+                                Ark_FrameNode node)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(-1);
     auto nodePeerNode = FrameNodePeer::GetFrameNodeByPeer(node);
@@ -259,7 +261,9 @@ Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer, Ark_FrameNode node)
     auto nodeId = currentNode->GetId();
     return Converter::ArkValue<Ark_Number>(nodeId);
 }
-void MoveToImpl(Ark_FrameNode peer, Ark_FrameNode targetParent, const Ark_Number* index)
+void MoveToImpl(Ark_FrameNode peer,
+                Ark_FrameNode targetParent,
+                const Ark_Number* index)
 {
     auto indexInt = Converter::Convert<int32_t>(*index);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -382,6 +386,10 @@ void RecycleImpl(Ark_FrameNode peer)
 
     currentUINodeRef->OnRecycle();
 }
+Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
+{
+    return {};
+}
 Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
 {
     CHECK_NULL_RETURN(peer && peer->node, nullptr);
@@ -409,6 +417,16 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetOpacityImpl,
         FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
         FrameNodeAccessor::GetFrameNodeByKeyImpl,
+        FrameNodeAccessor::GetIdByFrameNodeImpl,
+        FrameNodeAccessor::MoveToImpl,
+        FrameNodeAccessor::GetFirstChildIndexWithoutExpandImpl,
+        FrameNodeAccessor::GetLastChildIndexWithoutExpandImpl,
+        FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
+        FrameNodeAccessor::GetFrameNodeByIdImpl,
+        FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+        FrameNodeAccessor::ReuseImpl,
+        FrameNodeAccessor::RecycleImpl,
+        FrameNodeAccessor::GetFrameNodePtrImpl,
     };
     return &FrameNodeAccessorImpl;
 }

@@ -42,6 +42,7 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createComponentRootNode(Ark_Int32 nodeId);
     Ark_NodeHandle createContainerSpanNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCounterNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createCustomLayoutRootNode(Ark_Int32 nodeId);
     Ark_NodeHandle createDataPanelNode(Ark_Int32 nodeId);
     Ark_NodeHandle createDatePickerNode(Ark_Int32 nodeId);
     Ark_NodeHandle createDividerNode(Ark_Int32 nodeId);
@@ -80,6 +81,7 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createPasteButtonNode(Ark_Int32 nodeId);
     Ark_NodeHandle createPathNode(Ark_Int32 nodeId);
     Ark_NodeHandle createPatternLockNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createPluginComponentNode(Ark_Int32 nodeId);
     Ark_NodeHandle createPolygonNode(Ark_Int32 nodeId);
     Ark_NodeHandle createPolylineNode(Ark_Int32 nodeId);
     Ark_NodeHandle createProgressNode(Ark_Int32 nodeId);
@@ -90,6 +92,7 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createRefreshNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRelativeContainerNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRemoteWindowNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createRichEditorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRichTextNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRootNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRootSceneNode(Ark_Int32 nodeId);
@@ -161,6 +164,7 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_COMPONENT_ROOT: return GeneratedViewModel::createComponentRootNode(id);
             case GENERATED_ARKUI_CONTAINER_SPAN: return GeneratedViewModel::createContainerSpanNode(id);
             case GENERATED_ARKUI_COUNTER: return GeneratedViewModel::createCounterNode(id);
+            case GENERATED_ARKUI_CUSTOM_LAYOUT_ROOT: return GeneratedViewModel::createCustomLayoutRootNode(id);
             case GENERATED_ARKUI_DATA_PANEL: return GeneratedViewModel::createDataPanelNode(id);
             case GENERATED_ARKUI_DATE_PICKER: return GeneratedViewModel::createDatePickerNode(id);
             case GENERATED_ARKUI_DIVIDER: return GeneratedViewModel::createDividerNode(id);
@@ -199,6 +203,7 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_PASTE_BUTTON: return GeneratedViewModel::createPasteButtonNode(id);
             case GENERATED_ARKUI_PATH: return GeneratedViewModel::createPathNode(id);
             case GENERATED_ARKUI_PATTERN_LOCK: return GeneratedViewModel::createPatternLockNode(id);
+            case GENERATED_ARKUI_PLUGIN_COMPONENT: return GeneratedViewModel::createPluginComponentNode(id);
             case GENERATED_ARKUI_POLYGON: return GeneratedViewModel::createPolygonNode(id);
             case GENERATED_ARKUI_POLYLINE: return GeneratedViewModel::createPolylineNode(id);
             case GENERATED_ARKUI_PROGRESS: return GeneratedViewModel::createProgressNode(id);
@@ -209,6 +214,7 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_REFRESH: return GeneratedViewModel::createRefreshNode(id);
             case GENERATED_ARKUI_RELATIVE_CONTAINER: return GeneratedViewModel::createRelativeContainerNode(id);
             case GENERATED_ARKUI_REMOTE_WINDOW: return GeneratedViewModel::createRemoteWindowNode(id);
+            case GENERATED_ARKUI_RICH_EDITOR: return GeneratedViewModel::createRichEditorNode(id);
             case GENERATED_ARKUI_RICH_TEXT: return GeneratedViewModel::createRichTextNode(id);
             case GENERATED_ARKUI_ROOT: return GeneratedViewModel::createRootNode(id);
             case GENERATED_ARKUI_ROOT_SCENE: return GeneratedViewModel::createRootSceneNode(id);

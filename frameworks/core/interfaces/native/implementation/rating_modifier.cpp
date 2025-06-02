@@ -36,10 +36,9 @@ template<>
 StarStyleOptions Convert(const Ark_StarStyleOptions& value)
 {
     StarStyleOptions options;
-    options.backgroundUri = Converter::Convert<std::string>(value.backgroundUri);
-    options.foregroundUri = Converter::Convert<std::string>(value.foregroundUri);
-    auto optStr = Converter::OptConvert<std::string>(value.secondaryUri);
-    options.secondaryUri = optStr.value_or(std::string());
+    options.backgroundUri = Converter::OptConvert<std::string>(value.backgroundUri).value_or(std::string());
+    options.foregroundUri = Converter::OptConvert<std::string>(value.foregroundUri).value_or(std::string());
+    options.secondaryUri = Converter::OptConvert<std::string>(value.secondaryUri).value_or(std::string());
     return options;
 }
 } // namespace Converter

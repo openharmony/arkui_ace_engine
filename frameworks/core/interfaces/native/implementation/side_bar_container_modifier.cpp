@@ -70,7 +70,7 @@ void AssignCast(std::optional<SideBarContainerType>& dst, const Ark_SideBarConta
     }
 }
 
-ControlButtonStyleIcon GetIconStyle(const Ark_Union_String_Image_PixelMap_Resource& src)
+ControlButtonStyleIcon GetIconStyle(const Ark_Union_String_PixelMap_Resource& src)
 {
     ControlButtonStyleIcon ret = {};
     Converter::VisitUnion(src,

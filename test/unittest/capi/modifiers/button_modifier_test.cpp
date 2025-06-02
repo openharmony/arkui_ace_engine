@@ -1345,7 +1345,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestOverflow, TestSize.Level1)
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
 
     // Valid values for attribute 'overflow' of method 'labelStyle'
     static std::vector<std::tuple<std::string, Opt_TextOverflow, std::string>> labelStyleOverflow = {
@@ -1366,7 +1366,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestOverflow, TestSize.Level1)
     // Verifying attribute's 'overflow'  values
     for (auto&& value: labelStyleOverflow) {
         inputValueLabelStyle.overflow = std::get<1>(value);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1387,7 +1387,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxLines, TestSize.Level1)
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
 
     static std::vector<std::tuple<std::string, Opt_Number, std::string>> labelStyleMaxLines = {
         { "20", Converter::ArkValue<Opt_Number>(20), "20" },
@@ -1400,7 +1400,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxLines, TestSize.Level1)
 
     for (auto&& value: labelStyleMaxLines) {
         inputValueLabelStyle.maxLines = std::get<1>(value);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1420,7 +1420,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMinFontSize, TestSize.Level1)
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
 
     // Valid values for attribute 'minFontSize' of method 'labelStyle'
     static std::vector<std::tuple<std::string, Opt_Union_Number_ResourceStr, std::string>> labelStyleMinFontSize = {
@@ -1434,7 +1434,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMinFontSize, TestSize.Level1)
 
     for (auto&& value: labelStyleMinFontSize) {
         inputValueLabelStyle.minFontSize = std::get<1>(value);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1454,7 +1454,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxFontSize, TestSize.Level1)
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
     static std::vector<std::tuple<std::string, Opt_Union_Number_ResourceStr, std::string>> labelStyleMaxFontSize = {
         { "20", Converter::ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(20), "20.00vp" },
         { "0", Converter::ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(0), "0.00vp" },
@@ -1465,7 +1465,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxFontSize, TestSize.Level1)
     };
     for (auto&& value: labelStyleMaxFontSize) {
         inputValueLabelStyle.maxFontSize = std::get<1>(value);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1485,7 +1485,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestHeightAdaptivePolicy, TestSize.Lev
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
 
     using adaptivePolicy = std::tuple<std::string, Opt_TextHeightAdaptivePolicy, std::string>;
     static std::vector<adaptivePolicy> labelStyleHeightAdaptivePolicy = {
@@ -1501,7 +1501,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestHeightAdaptivePolicy, TestSize.Lev
     };
     for (auto&& value: labelStyleHeightAdaptivePolicy) {
         inputValueLabelStyle.heightAdaptivePolicy = std::get<1>(value);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1521,12 +1521,12 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontWeightValidValues, TestSize.Le
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
     for (auto &[value, expectValue]: OPT_FONT_WEIGHT_TEST_PLAN) {
         fontLabel.weight = value;
         inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1548,7 +1548,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontWeightInvalidValues, TestSize.
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
     const std::vector<OptArkFontWeightTest> testPlan = {
         { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(1000)),
@@ -1559,7 +1559,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontWeightInvalidValues, TestSize.
     for (auto &[value, expectValue]: testPlan) {
         fontLabel.weight = value;
         inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1580,12 +1580,12 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleValidValues, TestSize.Lev
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
     for (auto &[value, expectValue]: OPT_FONT_STYLE_TEST_PLAN) {
         fontLabel.style = value;
         inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1606,7 +1606,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleInvalidValues, TestSize.L
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
 
     const std::vector<OptArkFontStyleTest> testPlan = {
@@ -1616,7 +1616,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleInvalidValues, TestSize.L
     for (auto &[value, expectValue]: testPlan) {
         fontLabel.style = value;
         inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1637,7 +1637,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeValidValues, TestSize.Leve
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
     typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlanValid = {
@@ -1654,7 +1654,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeValidValues, TestSize.Leve
     for (const auto &[value, expectValue]: testPlanValid) {
         fontLabel.size = value;
         inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1674,7 +1674,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeInvalidValues, TestSize.Le
     std::unique_ptr<JsonValue> resultLabelStyle;
     std::string resultStr;
     std::string expectedStr;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
     typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlanInvalid = {
@@ -1685,7 +1685,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeInvalidValues, TestSize.Le
     for (const auto &[value, expectValue]: testPlanInvalid) {
         fontLabel.size = value;
         inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-        auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+        auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1703,7 +1703,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    Ark_LabelStyle inputValueLabelStyle;
+    Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
 
     auto inputStringValue = "testFamily";
@@ -1712,7 +1712,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
 
     fontLabel.family = inputValue;
     inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-    auto optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+    auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
     jsonValue = GetJsonValue(node_);
     resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1726,7 +1726,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
 
     fontLabel.family = inputValue;
     inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-    optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+    optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
     jsonValue = GetJsonValue(node_);
     resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1740,7 +1740,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
 
     fontLabel.family = inputValue;
     inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-    optInputValueLabelStyle = Converter::ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
+    optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
     jsonValue = GetJsonValue(node_);
     resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);

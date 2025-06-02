@@ -46,7 +46,7 @@ ButtonOptions Convert(const Ark_ButtonOptions& src)
 }
 
 template<>
-ButtonParameters Convert(const Ark_LabelStyle& src)
+ButtonParameters Convert(const Ark_ButtonLabelStyle& src)
 {
     ButtonParameters parameters;
     parameters.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
@@ -223,7 +223,7 @@ void ContentModifierImpl(Ark_NativePointer node,
             "implemented.");
 }
 void LabelStyleImpl(Ark_NativePointer node,
-                    const Opt_LabelStyle* value)
+                    const Opt_ButtonLabelStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

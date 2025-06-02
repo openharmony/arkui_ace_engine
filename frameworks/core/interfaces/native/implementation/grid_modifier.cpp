@@ -347,7 +347,7 @@ void SupportAnimationImpl(Ark_NativePointer node,
     GridModelNG::SetSupportAnimation(frameNode, *convValue);
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         const Opt_Callback_ItemDragInfo_Number_Union_Callback_Object_Undefined* value)
+                         const Opt_OnItemDragStartCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -362,7 +362,7 @@ void OnItemDragStartImpl(Ark_NativePointer node,
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         auto builder =
-            callback.InvokeWithObtainCallback<CustomNodeBuilder, Callback_Opt_Callback_Object_Void>(
+            callback.InvokeWithObtainCallback<CustomNodeBuilder, Callback_Opt_CustomBuilder_Void>(
                 arkDragInfo, arkItemIndex);
         auto uiNode = builder->BuildSync(node);
         ViewStackProcessor::GetInstance()->Push(uiNode);

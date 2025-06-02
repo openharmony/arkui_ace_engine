@@ -50,28 +50,28 @@ void InvalidateImpl(Ark_DrawModifier peer)
         }
     }
 }
-Opt_Callback_DrawContext_Void GetDrawBehindImpl(Ark_DrawModifier peer)
+Callback_DrawContext_Void GetDrawBehindImpl(Ark_DrawModifier peer)
 {
     return {};
 }
 void SetDrawBehindImpl(Ark_DrawModifier peer,
-                       const Opt_Callback_DrawContext_Void* drawBehind)
+                       const Callback_DrawContext_Void* drawBehind)
 {
 }
-Opt_Callback_DrawContext_Void GetDrawContentImpl(Ark_DrawModifier peer)
+Callback_DrawContext_Void GetDrawContentImpl(Ark_DrawModifier peer)
 {
     return {};
 }
 void SetDrawContentImpl(Ark_DrawModifier peer,
-                        const Opt_Callback_DrawContext_Void* drawContent)
+                        const Callback_DrawContext_Void* drawContent)
 {
 }
-Opt_Callback_DrawContext_Void GetDrawFrontImpl(Ark_DrawModifier peer)
+Callback_DrawContext_Void GetDrawFrontImpl(Ark_DrawModifier peer)
 {
     return {};
 }
 void SetDrawFrontImpl(Ark_DrawModifier peer,
-                      const Opt_Callback_DrawContext_Void* drawFront)
+                      const Callback_DrawContext_Void* drawFront)
 {
 }
 } // DrawModifierAccessor

@@ -128,7 +128,7 @@ void AntiAliasImpl(Ark_NativePointer node,
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);
 }
 void StrokeDashArrayImpl(Ark_NativePointer node,
-                         const Opt_Array_Object* value)
+                         const Opt_Array_Length* value)
 {
 #ifdef WRONG_GEN
     auto frameNode = reinterpret_cast<FrameNode *>(node);

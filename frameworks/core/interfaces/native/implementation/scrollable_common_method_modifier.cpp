@@ -88,36 +88,6 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(convValue);
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
 }
-void EdgeEffectImpl(Ark_NativePointer node,
-                    const Opt_EdgeEffect* edgeEffect,
-                    const Opt_EdgeEffectOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
-    std::optional<bool> convOptions = options ? Converter::OptConvert<bool>(*options) : std::nullopt;
-    ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, convOptions);
-}
-void FadingEdgeImpl(Ark_NativePointer node,
-                    const Opt_Boolean* enabled,
-                    const Opt_FadingEdgeOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    std::optional<bool> fadingEdge;
-    if (enabled) {
-        fadingEdge = Converter::OptConvert<bool>(*enabled);
-    }
-
-    std::optional<Dimension> fadingEdgeLength;
-    if (options) {
-        fadingEdgeLength = Converter::OptConvert<Dimension>(*options);
-    }
-    Validator::ValidateNonNegative(fadingEdgeLength);
-
-    ScrollableModelStatic::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLength);
-}
 void NestedScrollImpl(Ark_NativePointer node,
                       const Opt_NestedScrollOptions* value)
 {
@@ -280,6 +250,33 @@ void BackToTopImpl(Ark_NativePointer node,
     }
     ScrollableModelStatic::SetBackToTop(frameNode, *convValue);
 }
+void EdgeEffectImpl(Ark_NativePointer node,
+                    const Opt_EdgeEffect* edgeEffect,
+                    const Opt_EdgeEffectOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
+    std::optional<bool> convOptions = options ? Converter::OptConvert<bool>(*options) : std::nullopt;
+    ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, convOptions);
+}
+void FadingEdgeImpl(Ark_NativePointer node,
+                    const Opt_Boolean* enabled,
+                    const Opt_FadingEdgeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<bool> fadingEdge;
+    if (enabled) {
+        fadingEdge = Converter::OptConvert<bool>(*enabled);
+    }
+    std::optional<Dimension> fadingEdgeLength;
+    if (options) {
+        fadingEdgeLength = Converter::OptConvert<Dimension>(*options);
+    }
+    Validator::ValidateNonNegative(fadingEdgeLength);
+    ScrollableModelStatic::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLength);
+}
 } // ScrollableCommonMethodModifier
 const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodModifier()
 {
@@ -288,8 +285,6 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::ScrollBarImpl,
         ScrollableCommonMethodModifier::ScrollBarColorImpl,
         ScrollableCommonMethodModifier::ScrollBarWidthImpl,
-        ScrollableCommonMethodModifier::EdgeEffectImpl,
-        ScrollableCommonMethodModifier::FadingEdgeImpl,
         ScrollableCommonMethodModifier::NestedScrollImpl,
         ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
         ScrollableCommonMethodModifier::FrictionImpl,
@@ -301,6 +296,8 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::ClipContentImpl,
         ScrollableCommonMethodModifier::DigitalCrownSensitivityImpl,
         ScrollableCommonMethodModifier::BackToTopImpl,
+        ScrollableCommonMethodModifier::EdgeEffectImpl,
+        ScrollableCommonMethodModifier::FadingEdgeImpl,
     };
     return &ArkUIScrollableCommonMethodModifierImpl;
 }

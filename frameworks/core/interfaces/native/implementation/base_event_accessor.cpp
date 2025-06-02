@@ -195,12 +195,12 @@ void SetSourceToolImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetSourceTool(*value);
     }
 }
-Opt_Callback_Array_String_Boolean GetGetModifierKeyStateImpl(Ark_BaseEvent peer)
+Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_BaseEvent peer)
 {
     return {};
 }
 void SetGetModifierKeyStateImpl(Ark_BaseEvent peer,
-                                const Callback_Array_String_Boolean* getModifierKeyState)
+                                const ModifierKeyStateGetter* getModifierKeyState)
 {
 }
 Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)

@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
-#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
-#include <algorithm>
 
 namespace OHOS::Ace::NG {
 struct RectRadius {
@@ -37,22 +36,33 @@ struct RectOptions {
 };
 } // OHOS::Ace::NG
 namespace {
-    constexpr int32_t MAX_RADIUS_ITEM_COUNT = 4;
+    constexpr size_t MAX_RADIUS_ITEM_COUNT = 4;
 }
 namespace OHOS::Ace::NG::Converter {
+template<>
+RectRadius Convert(const Ark_RadiusItem& src)
+{
+    RectRadius radiusStruct;
+    radiusStruct.radiusWidth = OptConvert<Dimension>(src.value0);
+    radiusStruct.radiusHeight = OptConvert<Dimension>(src.value1);
+    return radiusStruct;
+}
 template<>
 RectOptions Convert(const Ark_RectOptions& src)
 {
     RectOptions rectOptions;
     rectOptions.width = Converter::OptConvert<Dimension>(src.width);
     rectOptions.height = Converter::OptConvert<Dimension>(src.height);
-    auto radius = Converter::OptConvert<RectRadius>(src.radius);
-    if (radius->radiusWidth) {
-        rectOptions.radiusWidth = radius->radiusWidth;
-    }
-    if (radius->radiusHeight) {
-        rectOptions.radiusHeight = radius->radiusHeight;
-    }
+    VisitUnion(src.radius,
+        [&rectOptions](const Ark_Length& src) {
+            auto radius = OptConvert<Dimension>(src);
+            rectOptions.radiusWidth = radius;
+            rectOptions.radiusHeight = radius;
+        },
+        [&rectOptions](const Array_RadiusItem& src) {
+            rectOptions.cornerRadius = Convert<std::vector<RectRadius>>(src);
+        },
+        []() {});
     return rectOptions;
 }
 
@@ -127,11 +137,11 @@ void SetRectOptionsImpl(Ark_NativePointer node,
     }
 
     if (!opt->radiusWidth || !opt->radiusHeight) {
-        size_t length = std::min(opt->cornerRadius.size(), static_cast<size_t>(MAX_RADIUS_ITEM_COUNT));
+        size_t length = std::min(opt->cornerRadius.size(), MAX_RADIUS_ITEM_COUNT);
         for (int32_t i = 0; i < length; ++i) {
             const RectRadius radiusItem = opt->cornerRadius[i];
-            const Dimension rx = radiusItem.radiusWidth.value();
-            const Dimension ry = radiusItem.radiusHeight.value();
+            const Dimension rx = radiusItem.radiusWidth.value_or(Dimension());
+            const Dimension ry = radiusItem.radiusHeight.value_or(Dimension());
             RectModelNG::SetRadiusValue(frameNode, rx, ry, i);
         }
         return;

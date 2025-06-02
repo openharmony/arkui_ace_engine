@@ -23,38 +23,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScopeAccessor {
-Ark_Edges EdgeColorsImpl(const Ark_Number* all)
-{
-    return {};
-}
-Ark_Edges EdgeWidthsImpl(const Ark_Number* all)
-{
-    return {};
-}
-Ark_Edges BorderStylesImpl(Ark_BorderStyle all)
-{
-    return {};
-}
-Ark_BorderRadiuses BorderRadiusesImpl(const Ark_Number* all)
-{
-    return {};
-}
-void SetAppBgColorImpl(const Ark_String* value)
-{
-    CHECK_NULL_VOID(value);
-    auto backgroundColorStr = Converter::Convert<std::string>(*value);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetAppBgColor(Color::ColorFromString(backgroundColorStr));
-}
-void ArkUICompatibleImpl(const Callback_InteropComponent* init,
-                         const Callback_Number_ESObject_Void* update)
-{
-}
-void PostCardActionImpl(const Ark_Object* component,
-                        const Ark_Object* action)
-{
-}
 Ark_Resource $rImpl(const Ark_String* value,
                     const Array_Object* params)
 {
@@ -74,57 +42,28 @@ void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
 {
     AnimateToInner(value, event, true);
 }
-Ark_Number Vp2pxImpl(const Ark_Number* value)
+void ArkUICompatibleImpl(const Callback_InteropComponent* init,
+                         const Callback_Number_ESObject_Void* update)
 {
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    double vpValue = Converter::Convert<double>(*value);
-    double density = PipelineBase::GetCurrentDensity();
-    double pxValue = vpValue * density;
-    return Converter::ArkValue<Ark_Number>(pxValue);
 }
-Ark_Number Px2vpImpl(const Ark_Number* value)
+Ark_BorderRadiuses BorderRadiusesImpl(const Ark_Number* all)
 {
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    double pxValue = Converter::Convert<double>(*value);
-    double density = PipelineBase::GetCurrentDensity();
-    if (NearZero(density) || density == 0) {
-        return Converter::ArkValue<Ark_Number>(0);
+    return {};
+}
+Ark_Edges BorderStylesImpl(Ark_BorderStyle all)
+{
+    return {};
+}
+void CursorControl_restoreDefaultImpl()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext->GetTaskExecutor()) {
+        return;
     }
-    double vpValue = pxValue / density;
-    return Converter::ArkValue<Ark_Number>(vpValue);
-}
-Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
-{
-    return {};
-}
-Ark_uiEffect_VisualEffect UiEffect_createEffectImpl()
-{
-    return {};
-}
-Ark_uiEffect_BrightnessBlender UiEffect_createBrightnessBlenderImpl(const Ark_uiEffect_BrightnessBlenderParam* param)
-{
-    return {};
-}
-void Text_getSystemFontFullNamesByTypeImpl(Ark_VMContext vmContext,
-                                           Ark_AsyncWorkerPtr asyncWorker,
-                                           Ark_text_SystemFontType fontType,
-                                           const Callback_Opt_Array_String_Opt_Array_String_Void* outputArgumentForReturningPromise)
-{
-}
-void Text_getFontDescriptorByFullNameImpl(Ark_VMContext vmContext,
-                                          Ark_AsyncWorkerPtr asyncWorker,
-                                          const Ark_String* fullName,
-                                          Ark_text_SystemFontType fontType,
-                                          const Callback_Opt_FontDescriptor_Opt_Array_String_Void* outputArgumentForReturningPromise)
-{
-}
-void Text_matchFontDescriptorsImpl(Ark_VMContext vmContext,
-                                   Ark_AsyncWorkerPtr asyncWorker,
-                                   const Ark_text_FontDescriptor* desc,
-                                   const Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void* outputArgumentForReturningPromise)
-{
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext]() { pipelineContext->RestoreDefault(); },
+        TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
 }
 void CursorControl_setCursorImpl(Ark_pointer_PointerStyle value)
 {
@@ -138,16 +77,13 @@ void CursorControl_setCursorImpl(Ark_pointer_PointerStyle value)
         [pipelineContext, intValue]() { pipelineContext->SetCursor(intValue); },
         TaskExecutor::TaskType::UI, "ArkUIJsSetCursor");
 }
-void CursorControl_restoreDefaultImpl()
+Ark_Edges EdgeColorsImpl(const Ark_Number* all)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (!pipelineContext->GetTaskExecutor()) {
-        return;
-    }
-    pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext]() { pipelineContext->RestoreDefault(); },
-        TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
+    return {};
+}
+Ark_Edges EdgeWidthsImpl(const Ark_Number* all)
+{
+    return {};
 }
 Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
 {
@@ -163,6 +99,14 @@ Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
         [pipelineContext, inspectorKey, &result]() { result = pipelineContext->RequestFocus(inspectorKey); },
         TaskExecutor::TaskType::UI, "ArkUIJsRequestFocus");
     return Converter::ArkValue<Ark_Boolean>(result);
+}
+Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
+{
+    return {};
+}
+void PostCardActionImpl(const Ark_Object* component,
+                        const Ark_Object* action)
+{
 }
 void Profiler_registerVsyncCallbackImpl(const Profiler_Callback_String_Void* callback_)
 {
@@ -181,34 +125,90 @@ void Profiler_unregisterVsyncCallbackImpl()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->ResetOnVsyncProfiler();
 }
+Ark_Number Px2vpImpl(const Ark_Number* value)
+{
+    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(value, invalid);
+    double pxValue = Converter::Convert<double>(*value);
+    double density = PipelineBase::GetCurrentDensity();
+    if (NearZero(density) || density == 0) {
+        return Converter::ArkValue<Ark_Number>(0);
+    }
+    double vpValue = pxValue / density;
+    return Converter::ArkValue<Ark_Number>(vpValue);
+}
+void SetAppBgColorImpl(const Ark_String* value)
+{
+    CHECK_NULL_VOID(value);
+    auto backgroundColorStr = Converter::Convert<std::string>(*value);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetAppBgColor(Color::ColorFromString(backgroundColorStr));
+}
+void Text_getFontDescriptorByFullNameImpl(Ark_VMContext vmContext,
+                                          Ark_AsyncWorkerPtr asyncWorker,
+                                          const Ark_String* fullName,
+                                          Ark_text_SystemFontType fontType,
+                                          const Callback_Opt_FontDescriptor_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+}
+void Text_getSystemFontFullNamesByTypeImpl(Ark_VMContext vmContext,
+                                           Ark_AsyncWorkerPtr asyncWorker,
+                                           Ark_text_SystemFontType fontType,
+                                           const Callback_Opt_Array_String_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+}
+void Text_matchFontDescriptorsImpl(Ark_VMContext vmContext,
+                                   Ark_AsyncWorkerPtr asyncWorker,
+                                   const Ark_text_FontDescriptor* desc,
+                                   const Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+}
+Ark_uiEffect_BrightnessBlender UiEffect_createBrightnessBlenderImpl(const Ark_uiEffect_BrightnessBlenderParam* param)
+{
+    return {};
+}
+Ark_uiEffect_VisualEffect UiEffect_createEffectImpl()
+{
+    return {};
+}
+Ark_Number Vp2pxImpl(const Ark_Number* value)
+{
+    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(value, invalid);
+    double vpValue = Converter::Convert<double>(*value);
+    double density = PipelineBase::GetCurrentDensity();
+    double pxValue = vpValue * density;
+    return Converter::ArkValue<Ark_Number>(pxValue);
+}
 } // GlobalScopeAccessor
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
 {
     static const GENERATED_ArkUIGlobalScopeAccessor GlobalScopeAccessorImpl {
-        GlobalScopeAccessor::EdgeColorsImpl,
-        GlobalScopeAccessor::EdgeWidthsImpl,
-        GlobalScopeAccessor::BorderStylesImpl,
-        GlobalScopeAccessor::BorderRadiusesImpl,
-        GlobalScopeAccessor::SetAppBgColorImpl,
-        GlobalScopeAccessor::ArkUICompatibleImpl,
-        GlobalScopeAccessor::PostCardActionImpl,
         GlobalScopeAccessor::$rImpl,
         GlobalScopeAccessor::$rawfileImpl,
         GlobalScopeAccessor::AnimateToImpl,
         GlobalScopeAccessor::AnimateToImmediatelyImpl,
-        GlobalScopeAccessor::Vp2pxImpl,
-        GlobalScopeAccessor::Px2vpImpl,
-        GlobalScopeAccessor::GetRectangleByIdImpl,
-        GlobalScopeAccessor::UiEffect_createEffectImpl,
-        GlobalScopeAccessor::UiEffect_createBrightnessBlenderImpl,
-        GlobalScopeAccessor::Text_getSystemFontFullNamesByTypeImpl,
-        GlobalScopeAccessor::Text_getFontDescriptorByFullNameImpl,
-        GlobalScopeAccessor::Text_matchFontDescriptorsImpl,
-        GlobalScopeAccessor::CursorControl_setCursorImpl,
+        GlobalScopeAccessor::ArkUICompatibleImpl,
+        GlobalScopeAccessor::BorderRadiusesImpl,
+        GlobalScopeAccessor::BorderStylesImpl,
         GlobalScopeAccessor::CursorControl_restoreDefaultImpl,
+        GlobalScopeAccessor::CursorControl_setCursorImpl,
+        GlobalScopeAccessor::EdgeColorsImpl,
+        GlobalScopeAccessor::EdgeWidthsImpl,
         GlobalScopeAccessor::FocusControl_requestFocusImpl,
+        GlobalScopeAccessor::GetRectangleByIdImpl,
+        GlobalScopeAccessor::PostCardActionImpl,
         GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,
         GlobalScopeAccessor::Profiler_unregisterVsyncCallbackImpl,
+        GlobalScopeAccessor::Px2vpImpl,
+        GlobalScopeAccessor::SetAppBgColorImpl,
+        GlobalScopeAccessor::Text_getFontDescriptorByFullNameImpl,
+        GlobalScopeAccessor::Text_getSystemFontFullNamesByTypeImpl,
+        GlobalScopeAccessor::Text_matchFontDescriptorsImpl,
+        GlobalScopeAccessor::UiEffect_createBrightnessBlenderImpl,
+        GlobalScopeAccessor::UiEffect_createEffectImpl,
+        GlobalScopeAccessor::Vp2pxImpl,
     };
     return &GlobalScopeAccessorImpl;
 }

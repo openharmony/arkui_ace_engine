@@ -171,7 +171,7 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
         [&popupParam](const Ark_Boolean& mask) {
             popupParam->SetBlockEvent(Convert<bool>(mask));
         },
-        [&popupParam](const Ark_PopupMaskOptions& mask) {
+        [&popupParam](const Ark_PopupMaskType& mask) {
             auto maskColorOpt = OptConvert<Color>(mask.color);
             if (maskColorOpt.has_value()) {
                 popupParam->SetMaskColor(maskColorOpt.value());
@@ -184,7 +184,7 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
             const std::string& param) {
             auto json = JsonUtil::Create(true);
             json->Put("isVisible", param.c_str());
-            Ark_PopupStateEvent event;
+            Ark_PopupStateChangeParam event;
             event.isVisible = Converter::ArkValue<Ark_Boolean>(json->GetBool("isVisible", false));
             arkCallback.Invoke(event);
         };
@@ -1089,7 +1089,7 @@ PositionWithLocalization Convert(const Ark_LocalizedPosition& src)
 }
 
 template<>
-ButtonProperties Convert(const Ark_PopupButtonOptions& src)
+ButtonProperties Convert(const Ark_PopupButton& src)
 {
     ButtonProperties properties;
     properties.value = Converter::Convert<std::string>(src.value);
@@ -3204,7 +3204,7 @@ void OnDisAppearImpl(Ark_NativePointer node,
     ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
 }
 void OnAttachImpl(Ark_NativePointer node,
-                  const Opt_Callback_Void* value)
+                  const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3221,7 +3221,7 @@ void OnAttachImpl(Ark_NativePointer node,
     ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
 }
 void OnDetachImpl(Ark_NativePointer node,
-                  const Opt_Callback_Void* value)
+                  const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

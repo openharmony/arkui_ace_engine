@@ -209,36 +209,6 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 }
 } // TextInterfaceModifier
 namespace TextAttributeModifier {
-static void FontImplInternal(Ark_NativePointer node,
-                             const Opt_Font* value,
-                             std::optional<bool> enableVariableFontWeight = std::nullopt)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Font>(*value);
-    if (convValue.has_value()) {
-        convValue->enableVariableFontWeight = enableVariableFontWeight;
-    }
-    TextModelStatic::SetFont(frameNode, convValue);
-}
-
-void Font0Impl(Ark_NativePointer node,
-               const Opt_Font* value)
-{
-    FontImplInternal(node, value);
-}
-void Font1Impl(Ark_NativePointer node,
-               const Opt_Font* fontValue,
-               const Opt_FontSettingOptions* options)
-{
-    std::optional<bool> enableVariableFontWeight;
-    if (options) {
-        if (auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options); settings) {
-            enableVariableFontWeight = settings->enableVariableFontWeight;
-        }
-    }
-    FontImplInternal(node, fontValue, enableVariableFontWeight);
-}
 void FontColorImpl(Ark_NativePointer node,
                    const Opt_ResourceColor* value)
 {
@@ -634,6 +604,22 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<bool>(*value);
     TextModelStatic::SetEnableHapticFeedback(frameNode, convValue);
 }
+void FontImpl(Ark_NativePointer node,
+              const Opt_Font* fontValue,
+              const Opt_FontSettingOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<bool> enableVariableFontWeight;
+    if (auto settings = Converter::OptConvertPtr<Converter::FontSettingOptions>(options); settings) {
+        enableVariableFontWeight = settings->enableVariableFontWeight;
+    }
+    auto convValue = Converter::OptConvertPtr<Font>(fontValue);
+    if (convValue.has_value()) {
+        convValue->enableVariableFontWeight = enableVariableFontWeight;
+    }
+    TextModelStatic::SetFont(frameNode, convValue);
+}
 void FontWeightImpl(Ark_NativePointer node,
                     const Opt_Union_Number_FontWeight_String* weight,
                     const Opt_FontSettingOptions* options)
@@ -716,8 +702,6 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
     static const GENERATED_ArkUITextModifier ArkUITextModifierImpl {
         TextModifier::ConstructImpl,
         TextInterfaceModifier::SetTextOptionsImpl,
-        TextAttributeModifier::Font0Impl,
-        TextAttributeModifier::Font1Impl,
         TextAttributeModifier::FontColorImpl,
         TextAttributeModifier::FontSizeImpl,
         TextAttributeModifier::MinFontSizeImpl,
@@ -757,6 +741,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::EditMenuOptionsImpl,
         TextAttributeModifier::HalfLeadingImpl,
         TextAttributeModifier::EnableHapticFeedbackImpl,
+        TextAttributeModifier::FontImpl,
         TextAttributeModifier::FontWeightImpl,
         TextAttributeModifier::SelectionImpl,
         TextAttributeModifier::BindSelectionMenuImpl,

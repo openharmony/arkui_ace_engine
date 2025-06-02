@@ -89,7 +89,7 @@ void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
     };
     context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);
 }
-} // namespace SystemOpsAccessor
+} // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
     static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
@@ -98,6 +98,8 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::SyncInstanceIdImpl,
         SystemOpsAccessor::RestoreInstanceIdImpl,
         SystemOpsAccessor::GetResourceIdImpl,
+        SystemOpsAccessor::ResourceManagerResetImpl,
+        SystemOpsAccessor::SetFrameCallbackImpl,
     };
     return &SystemOpsAccessorImpl;
 }

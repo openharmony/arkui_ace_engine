@@ -42,9 +42,10 @@ void BackToTodayImpl(Ark_CalendarController peer)
     peer->controller->BackToToday();
 }
 void GoToImpl(Ark_CalendarController peer,
-              const Ark_DateOptions* value)
+              const Ark_CalendarSelectedDate* date)
 {
     CHECK_NULL_VOID(peer && peer->controller);
+    auto value = date;
     CHECK_NULL_VOID(value);
     peer->controller->GoTo(
         Converter::Convert<int32_t>(value->year),
