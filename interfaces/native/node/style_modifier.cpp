@@ -223,7 +223,6 @@ constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
 constexpr int32_t OUTLINE_TOP_WIDTH_INDEX = 1;
 constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
 constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
-constexpr int32_t DEFAULT_INLINE_MAX_LINE = 3;
 constexpr uint32_t DEFAULT_ANIMATION_MODE = 0;
 constexpr uint32_t CONVERT_CONTENT_TYPE = 5;
 constexpr uint32_t DEFAULT_PICKER_STYLE_COLOR = 0xFF182431;
@@ -5364,10 +5363,7 @@ int32_t SetTextAreaMaxLines(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    int32_t maxLines = item->value[0].i32;
-    maxLines = maxLines > 0 ? maxLines : DEFAULT_INLINE_MAX_LINE;
-    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(
-        node->uiNodeHandle, maxLines, NUM_0);
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(node->uiNodeHandle, item->value[0].i32, NUM_0);
     return ERROR_CODE_NO_ERROR;
 }
 

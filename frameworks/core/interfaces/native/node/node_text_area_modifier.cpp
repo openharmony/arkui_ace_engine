@@ -92,7 +92,9 @@ void SetTextAreaMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine, ArkUI_Uint3
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetMaxViewLines(frameNode, maxLine);
+    int32_t inlineMaxViewLines = maxLine;
+    inlineMaxViewLines = inlineMaxViewLines > 0 ? inlineMaxViewLines : DEFAULT_MAX_VIEW_LINE;
+    TextFieldModelNG::SetMaxViewLines(frameNode, inlineMaxViewLines);
     TextFieldModelNG::SetNormalMaxViewLines(frameNode, maxLine);
     TextFieldModelNG::SetOverflowMode(frameNode, static_cast<OverflowMode>(overflowMode));
 }
