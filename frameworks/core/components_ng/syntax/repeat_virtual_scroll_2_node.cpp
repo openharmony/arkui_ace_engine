@@ -201,7 +201,8 @@ ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
         }
     }
 
-    if (!needRecordFirstFrameChild_ && (minFrameChildIndex_ != nStart || maxFrameChildIndex_ != nEnd)) {
+    if (!needRecordFirstFrameChild_ &&
+        (static_cast<int32_t>(minFrameChildIndex_) != nStart || static_cast<int32_t>(maxFrameChildIndex_) != nEnd)) {
         forceRunDoSetActiveRange_ = true;
     }
     needRecordFirstFrameChild_ = true;
