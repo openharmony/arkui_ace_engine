@@ -85,6 +85,15 @@ void FolderStackModelNG::SetOnFolderStateChange(
     eventHub->SetOnFolderStateChange(std::move(onChange));
 }
 
+void FolderStackModelNG::SetOnFolderStateChange(
+    FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFolderStateChange(std::move(onChange));
+}
+
 void FolderStackModelNG::SetOnHoverStatusChange(
     std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
 {
@@ -94,4 +103,14 @@ void FolderStackModelNG::SetOnHoverStatusChange(
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnHoverStatusChange(std::move(onChange));
 }
+
+void FolderStackModelNG::SetOnHoverStatusChange(
+    FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnHoverStatusChange(std::move(onChange));
+}
+
 } // namespace OHOS::Ace::NG
