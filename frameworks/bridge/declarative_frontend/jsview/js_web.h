@@ -157,11 +157,15 @@ public:
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);
-    static JSRef<JSVal> CreatPermissionRequestHandler(const WebPermissionRequestEvent& eventInfo);
-    static JSRef<JSVal> CreatGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo);
-    static JSRef<JSVal> CreatNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo);
-    static JSRef<JSVal> CreatFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo);
-    static JSRef<JSVal> CreatCommonDialogResultHandler(const WebDialogEvent& eventInfo);
+    static JSRef<JSVal> CreatePermissionRequestHandler(const WebPermissionRequestEvent& eventInfo);
+    static JSRef<JSVal> CreateGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo);
+    static JSRef<JSVal> CreateNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo);
+    static JSRef<JSVal> CreateFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo);
+    static JSRef<JSVal> CreateCommonDialogResultHandler(const WebDialogEvent& eventInfo);
+    static JSRef<JSVal> CreateFileSelectorResultHandler(const FileSelectorEvent& eventInfo);
+    static JSRef<JSVal> CreateFileSelectorParamHandler(const FileSelectorEvent& eventInfo);
+    static JSRef<JSVal> CreateContextMenuParamHandler(const ContextMenuEvent& eventInfo);
+    static JSRef<JSVal> CreateContextMenuResultHandler(const ContextMenuEvent& eventInfo);
 
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;

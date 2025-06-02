@@ -2094,7 +2094,7 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatCommonDialogResultHandler(const WebDialogEvent& eventInfo)
+JSRef<JSVal> JSWeb::CreateCommonDialogResultHandler(const WebDialogEvent& eventInfo)
 {
     JSRef<JSObject> resultObj = JSClass<JSWebDialog>::NewInstance();
     auto jsWebDialog = Referenced::Claim(resultObj->Unwrap<JSWebDialog>());
@@ -2132,7 +2132,7 @@ JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo)
+JSRef<JSVal> JSWeb::CreateFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo)
 {
     JSRef<JSObject> resultObj = JSClass<JSFullScreenExitHandler>::NewInstance();
     auto jsFullScreenExitHandler = Referenced::Claim(resultObj->Unwrap<JSFullScreenExitHandler>());
@@ -2199,7 +2199,7 @@ JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEv
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo)
+JSRef<JSVal> JSWeb::CreateGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo)
 {
     JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
     auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
@@ -3250,6 +3250,22 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateFileSelectorResultHandler(const FileSelectorEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
+    auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
+    fileSelectorResult->SetResult(eventInfo);
+    return resultObj;
+}
+
+JSRef<JSVal> JSWeb::CreateFileSelectorParamHandler(const FileSelectorEvent& eventInfo)
+{
+    JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
+    auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
+    fileSelectorParam->SetParam(eventInfo);
+    return paramObj;
+}
+
 void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -3294,6 +3310,22 @@ JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
     obj->SetPropertyObject("result", resultObj);
     obj->SetPropertyObject("param", paramObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateContextMenuParamHandler(const ContextMenuEvent& eventInfo)
+{
+    JSRef<JSObject> paramObj = JSClass<JSContextMenuParam>::NewInstance();
+    auto contextMenuParam = Referenced::Claim(paramObj->Unwrap<JSContextMenuParam>());
+    contextMenuParam->SetParam(eventInfo);
+    return paramObj;
+}
+
+JSRef<JSVal> JSWeb::CreateContextMenuResultHandler(const ContextMenuEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSContextMenuResult>::NewInstance();
+    auto contextMenuResult = Referenced::Claim(resultObj->Unwrap<JSContextMenuResult>());
+    contextMenuResult->SetResult(eventInfo);
+    return resultObj;
 }
 
 void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
@@ -3902,7 +3934,7 @@ JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& ev
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatPermissionRequestHandler(const WebPermissionRequestEvent& eventInfo)
+JSRef<JSVal> JSWeb::CreatePermissionRequestHandler(const WebPermissionRequestEvent& eventInfo)
 {
     JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
     auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
@@ -5117,7 +5149,7 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo)
+JSRef<JSVal> JSWeb::CreateNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo)
 {
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());

@@ -1988,7 +1988,7 @@ struct CJUIWebModifier {
     void (*setLayoutMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetLayoutMode)(ArkUINodeHandle node);
     void (*setOnNativeEmbedLifecycleChange)(ArkUINodeHandle node, void* callback);
-    void (*resetOnNativeEmbedLifecycleChange)(ArkUINodeHandle node);   
+    void (*resetOnNativeEmbedLifecycleChange)(ArkUINodeHandle node);
     void (*setOnNativeEmbedGestureEvent)(ArkUINodeHandle node, void* callback);
     void (*resetOnNativeEmbedGestureEvent)(ArkUINodeHandle node);
     void (*setRegisterNativeEmbedRule)(ArkUINodeHandle node, ArkUI_CharPtr tag, ArkUI_CharPtr type);
@@ -2065,6 +2065,17 @@ struct CJUIWebModifier {
     void (*resetOnConfirmCallBack)(ArkUINodeHandle node);
     void (*setOnPromptCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnPromptCallBack)(ArkUINodeHandle node);
+    void (*setOnShowFileSelector)(ArkUINodeHandle node, void* callback);
+    void (*resetOnShowFileSelector)(ArkUINodeHandle node);
+    void (*setOnContextMenuShow)(ArkUINodeHandle node, void* callback);
+    void (*resetOnContextMenuShow)(ArkUINodeHandle node);
+    void (*setOnSafeBrowsingCheckResultCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnSafeBrowsingCheckResultCallBack)(ArkUINodeHandle node);
+    void (*setWebNestedScrollExt)(ArkUINodeHandle node, ArkUI_Int32 scrollUp, ArkUI_Int32 scrollDown,
+        ArkUI_Int32 scrollLeft, ArkUI_Int32 scrollRight);
+    void (*resetWebNestedScrollExt)(ArkUINodeHandle node);
+    void (*setOnInterceptKeyEventCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnInterceptKeyEventCallBack)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {

@@ -282,7 +282,7 @@ public:
     static void SetNativeEmbedGestureEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type);
-    static void SetNativeEmbedOptions(FrameNode* frameNode, bool isIntrinsicSizeEnabled);
+    static void SetIntrinsicSizeEnabled(FrameNode* frameNode, bool isIntrinsicSizeEnabled);
     static void SetFirstContentfulPaintId(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId);
     static void SetAudioStateChangedId(
@@ -301,7 +301,8 @@ public:
     static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void SetCopyOptionMode(FrameNode* frameNode, CopyOptions mode);
-	static void SetRenderProcessNotRespondingId(FrameNode* frameNode,  std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetRenderProcessNotRespondingId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnPageVisible(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& pageVisible);
     static void SetOnRenderExited(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
@@ -332,6 +333,14 @@ public:
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
     static void SetOnPrompt(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
+    static void SetOnShowFileSelector(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnContextMenuShow(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnSafeBrowsingCheckResult(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResult);
+    static void SetNestedScrollExt(FrameNode* frameNode, const NestedScrollOptionsExt& nestedOpt);
+    static void SetOnInterceptKeyEvent(
+        FrameNode* frameNode, std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
