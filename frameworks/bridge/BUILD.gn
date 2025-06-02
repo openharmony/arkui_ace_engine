@@ -43,6 +43,10 @@ template("framework_bridge") {
       "plugin_frontend:plugin_frontend_$platform",
     ]
 
+    if (build_ohos_sdk) {
+      deps -= [ "arkts_frontend:arkts_frontend_$platform" ]
+    }
+
     if (defined(config.js_pa_support) && config.js_pa_support) {
       deps += [ "$ace_root/${config.pa_engine_path}:pa_backend_$platform" ]
     }
