@@ -1830,7 +1830,9 @@ void FrameNode::TriggerOnSizeChangeCallback()
                 eventHub_->FireInnerOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             }
             eventHub_->FireJSFrameNodeOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
-            *lastFrameNodeRect_ = currFrameRect;
+            if (lastFrameNodeRect_) {
+                *lastFrameNodeRect_ = currFrameRect;
+            }
         }
     }
 }
