@@ -6234,4 +6234,14 @@ const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonit
     }
     return nodeRenderStatusMonitor_;
 }
+
+void PipelineContext::RemoveNodeFromDirtyRenderNode(int32_t nodeId, int32_t pageId)
+{
+    taskScheduler_->RemoveNodeFromDirtyRender(nodeId, pageId);
+}
+ 
+void PipelineContext::GetRemovedDirtyRenderAndErase(uint32_t id)
+{
+    taskScheduler_->RemoveDirtyRenderNodes(id);
+}
 } // namespace OHOS::Ace::NG

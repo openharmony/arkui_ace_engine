@@ -1372,6 +1372,10 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 }
 
 void NG::PipelineContext::NotifyColorModeChange(uint32_t colorMode) {}
+
+void NG::PipelineContext::RemoveNodeFromDirtyRenderNode(int32_t nodeId, int32_t pageId) {}
+ 
+void NG::PipelineContext::GetRemovedDirtyRenderAndErase(uint32_t id) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
 

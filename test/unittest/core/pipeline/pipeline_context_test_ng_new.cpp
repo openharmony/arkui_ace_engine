@@ -3330,5 +3330,55 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg238, TestSize.Level1)
     context_->UpdateOcclusionCullingStatus();
     EXPECT_TRUE(context_->keyOcclusionNodes_.empty());
 }
+
+/**
+ * @tc.name: UITaskSchedulerTestNg015
+ * @tc.desc: Test FlushRenderTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create dirtyRenderNodes_.
+     */
+    taskScheduler.dirtyRenderNodes_[1].emplace(nullptr);
+
+    /**
+     * @tc.steps3: RemoveNodeFromDirtyRender.
+     */
+    auto result = taskScheduler.RemoveNodeFromDirtyRender(-1, -1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg016
+ * @tc.desc: Test FlushRenderTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create removedDirtyRenderNodes_.
+     */
+    taskScheduler.removedDirtyRenderNodes_.emplace(0);
+
+    /**
+     * @tc.steps3: RemoveDirtyRenderNodes and test.
+     */
+    auto result = taskScheduler.RemoveDirtyRenderNodes(0);
+    EXPECT_EQ(result, 1);
+    result = taskScheduler.RemoveDirtyRenderNodes(1);
+    EXPECT_EQ(result, 0);
+}
 } // namespace NG
 } // namespace OHOS::Ace
