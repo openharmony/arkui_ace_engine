@@ -21197,10 +21197,6 @@ if (globalThis.Scroll !== undefined) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().scroll.setScrollOnScrollFrameBegin(nodePtr, value);
   };
-  globalThis.Scroll.onScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scroll.setScrollOnScroll(nodePtr, value);
-  };
   globalThis.Scroll.onWillScroll = function (value) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().scroll.setScrollOnWillScroll(nodePtr, value);
