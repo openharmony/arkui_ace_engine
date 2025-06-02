@@ -33,7 +33,9 @@ public:
     napi_value ProcessUnRegister(napi_env env, napi_callback_info info);
 private:
     napi_value ProcessNavigationRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavigationRegisterByUniqueId(napi_env env, napi_callback_info info);
     napi_value ProcessNavigationUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavigationUnRegisterByUniqueId(napi_env env, napi_callback_info info);
     napi_value ProcessScrollEventRegister(napi_env env, napi_callback_info info);
     napi_value ProcessScrollEventUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessRouterPageRegister(napi_env env, napi_callback_info info);
