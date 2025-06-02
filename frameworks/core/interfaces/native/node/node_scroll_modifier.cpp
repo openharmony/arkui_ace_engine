@@ -353,7 +353,7 @@ RefPtr<ScrollControllerBase> GetController(ArkUINodeHandle node)
     return nullptr;
 }
 
-void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32 (*values)[8])
+void SetScrollToCJUI(ArkUINodeHandle node, const ArkUI_Float32 (*values)[8])
 {
     RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
     CHECK_NULL_VOID(scrollControllerBase);
@@ -369,6 +369,27 @@ void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32 (*values)[8])
     auto canOverScroll = static_cast<bool>((*values)[7]);
     auto direction = scrollControllerBase->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
+    scrollControllerBase->AnimateTo(position, duration, curve, smooth, canOverScroll);
+}
+
+void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32 (*values)[9])
+{
+    RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
+    CHECK_NULL_VOID(scrollControllerBase);
+    Dimension xOffset((*values)[0], static_cast<OHOS::Ace::DimensionUnit>((*values)[1]));
+    Dimension yOffset((*values)[2], static_cast<OHOS::Ace::DimensionUnit>((*values)[3]));
+    float duration = (*values)[4];
+    RefPtr<Curve> curve = Curves::EASE;
+    if (static_cast<int>((*values)[SCROLL_TO_INDEX_CURVE]) < static_cast<int>(CurvesVector.size())) {
+        curve = CurvesVector[static_cast<int>((*values)[SCROLL_TO_INDEX_CURVE])];
+    }
+    auto smooth = static_cast<bool>((*values)[6]);
+    //index 7 is canOverScroll
+    auto canOverScroll = static_cast<bool>((*values)[7]);
+    auto canStayOverScroll = static_cast<bool>((*values)[8]);
+    auto direction = scrollControllerBase->GetScrollDirection();
+    auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
+    scrollControllerBase->SetCanStayOverScroll(canStayOverScroll);
     scrollControllerBase->AnimateTo(position, duration, curve, smooth, canOverScroll);
 }
 
@@ -392,7 +413,7 @@ void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
 
 void ResetScrollTo(ArkUINodeHandle node)
 {
-    const ArkUI_Float32 values[8] = { DEFAULT_OFFSET_VALUE };
+    const ArkUI_Float32 values[9] = { DEFAULT_OFFSET_VALUE };
     SetScrollTo(node, &values);
 }
 
@@ -687,7 +708,7 @@ const CJUIScrollModifier* GetCJUIScrollModifier()
         .getEnableScrollInteraction = GetEnableScrollInteraction,
         .setEnableScrollInteraction = SetEnableScrollInteraction,
         .resetEnableScrollInteraction = ResetEnableScrollInteraction,
-        .setScrollTo = SetScrollTo,
+        .setScrollTo = SetScrollToCJUI,
         .setScrollEdge = SetScrollEdge,
         .resetScrollTo = ResetScrollTo,
         .resetScrollEdge = ResetScrollEdge,

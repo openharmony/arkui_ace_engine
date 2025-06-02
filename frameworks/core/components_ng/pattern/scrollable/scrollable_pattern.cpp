@@ -954,6 +954,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
     bool isAtTop = IsAtTop();
     bool isAtBottom = IsAtBottom(true);
     bool isNotPositiveScrollableDistance = isAtTop && isAtBottom;
+    CHECK_EQUAL_RETURN(GetCanStayOverScroll() && source == SCROLL_FROM_JUMP, true, true);
     // check edgeEffect is not springEffect
     if (scrollEffect_ && scrollEffect_->IsFadeEffect() &&
         (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION)) { // handle edge effect
@@ -1454,7 +1455,9 @@ void ScrollablePattern::StopAnimate()
 void ScrollablePattern::ScrollTo(float position)
 {
     StopAnimate();
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    SetIsOverScroll(GetCanStayOverScroll());
 }
 
 void ScrollablePattern::AnimateTo(
@@ -1517,6 +1520,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
     isAnimationStop_ = false;
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     useTotalOffset_ = useTotalOffset;
     AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -1551,7 +1555,7 @@ void ScrollablePattern::PlayCurveAnimation(
         CHECK_NULL_VOID(curveOffsetProperty_);
     }
     isAnimationStop_ = false;
-    SetAnimateCanOverScroll(canOverScroll);
+    SetAnimateCanOverScroll(canOverScroll || GetCanStayOverScroll());
     curveOffsetProperty_->Set(GetTotalOffset());
     curveAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -1619,12 +1623,34 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (pattern->isBackToTopRunning_) {
             source = SCROLL_FROM_STATUSBAR;
         }
-        if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation) {
-            pattern->StopAnimation(pattern->springAnimation_);
+        if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation || pattern->isAnimateOverScroll_) {
+            if (pattern->isAnimateOverScroll_ && pattern->GetCanStayOverScroll()) {
+                pattern->isAnimateOverScroll_ = false;
+                pattern->SetIsOverScroll(true);
+            } else {
+                pattern->StopAnimation(pattern->springAnimation_);
+            }
         }
     };
     springOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     renderContext->AttachNodeAnimatableProperty(springOffsetProperty_);
+}
+
+bool ScrollablePattern::HandleCurveOffsetAnimateOverScroll()
+{
+    isAnimateOverScroll_ = false;
+    if (!GetCanStayOverScroll()) {
+        isScrollToOverAnimation_ = true;
+        auto pauseVelocity = -currentVelocity_;
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, false);
+        context->MarkNeedFlushAnimationStartTime();
+        PauseAnimation(curveAnimation_);
+        HandleOverScroll(pauseVelocity);
+    } else {
+        SetIsOverScroll(true);
+    }
+    return true;
 }
 
 void ScrollablePattern::InitCurveOffsetProperty()
@@ -1644,14 +1670,7 @@ void ScrollablePattern::InitCurveOffsetProperty()
         if (!pattern->UpdateCurrentOffset(delta, SCROLL_FROM_ANIMATION_CONTROLLER) ||
             stopAnimation || pattern->isAnimateOverScroll_) {
             if (pattern->isAnimateOverScroll_) {
-                pattern->isAnimateOverScroll_ = false;
-                pattern->isScrollToOverAnimation_  = true;
-                auto pauseVelocity = -pattern->currentVelocity_;
-                auto context = pattern->GetContext();
-                CHECK_NULL_VOID(context);
-                context->MarkNeedFlushAnimationStartTime();
-                pattern->PauseAnimation(pattern->curveAnimation_);
-                pattern->HandleOverScroll(pauseVelocity);
+                CHECK_EQUAL_VOID(pattern->HandleCurveOffsetAnimateOverScroll(), false);
             } else if (stopAnimation ||
                        (pattern->IsAtTop() && LessOrEqual(pattern->finalPosition_, pattern->GetTotalOffset())) ||
                        (pattern->IsAtBottom() && GreatOrEqual(pattern->finalPosition_, pattern->GetTotalOffset()))) {
@@ -2161,6 +2180,25 @@ bool ScrollablePattern::GetCanOverScroll() const
     return true;
 }
 
+void ScrollablePattern::SetIsOverScroll(bool val)
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto&& scrollable = scrollableEvent_->GetScrollable();
+    if (scrollable) {
+        scrollable->SetCanStayOverScroll(val);
+    }
+}
+
+bool ScrollablePattern::GetIsOverScroll() const
+{
+    CHECK_NULL_RETURN(scrollableEvent_, true);
+    auto&& scrollable = scrollableEvent_->GetScrollable();
+    if (scrollable) {
+        return scrollable->CanStayOverScroll();
+    }
+    return true;
+}
+
 EdgeEffect ScrollablePattern::GetEdgeEffect() const
 {
     return edgeEffect_;
@@ -2389,6 +2427,9 @@ bool ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedS
     auto backOverOffset = Negative(offset) ? overOffsets.start : overOffsets.end;
     float selfOffset = 0.0f;
     if (!NearZero(backOverOffset)) {
+        if (NearEqual(offset, backOverOffset)) {
+            SetCanOverScroll(true);
+        }
         selfOffset = backOverOffset;
         offset -= backOverOffset;
         HandleScrollImpl(selfOffset, source);

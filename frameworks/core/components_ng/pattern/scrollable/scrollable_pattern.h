@@ -427,6 +427,14 @@ public:
     {
         return CanOverScroll(source) && GetEffectEdge() != EffectEdge::START;
     }
+    void SetCanStayOverScroll(bool canStayOverScroll)
+    {
+        canStayOverScroll_ = canStayOverScroll;
+    }
+    bool GetCanStayOverScroll() const
+    {
+        return canStayOverScroll_;
+    }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
     void UpdateMouseStart(float offset);
@@ -733,6 +741,9 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+    void SetIsOverScroll(bool val);
+    bool GetIsOverScroll() const;
+
     void SetScrollBarShape(const ScrollBarShape &shape)
     {
         if (shape == ScrollBarShape::ARC) {
@@ -960,6 +971,7 @@ private:
     void ProcessNavBarReactOnEnd();
     void InitSpringOffsetProperty();
     void InitCurveOffsetProperty();
+    bool HandleCurveOffsetAnimateOverScroll();
     void OnAnimateFinish();
     void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
@@ -1105,6 +1117,7 @@ private:
     bool isScrollToSafeAreaHelper_ = true;
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;
+    bool canStayOverScroll_ = false;
 
     float startPercent_ = 0.0f;
     float endPercent_ = 1.0f;
