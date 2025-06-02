@@ -470,6 +470,40 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest008, TestSize.Level
 }
 
 /**
+ * @tc.name: CheckBoxGroupPatternTest009
+ * @tc.desc: Test OnDetachFromFrameNode without eventHub.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest009, TestSize.Level1)
+ {
+     /**
+      * @tc.steps: step1. Init CheckBoxGroup model
+      */
+     CheckBoxGroupModelNG checkBoxModelNG;
+     checkBoxModelNG.Create(CHECKBOXGROUP_NAME);
+ 
+     /**
+      * @tc.steps: step2 Create frameNode and pattern
+      * @tc.expected: Create successfully.
+      */
+     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+     EXPECT_NE(frameNode, nullptr);
+     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+     EXPECT_NE(pattern, nullptr);
+
+     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+     FrameNode& ref = *stageNode;
+     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+ 
+     /**
+      * @tc.steps: step3 Call OnDetachFromFrameNode
+      * @tc.expected: stageNode_ isn't null.
+      */
+     pattern->OnDetachFromFrameNode(&ref);
+     EXPECT_NE(stageManager->stageNode_, nullptr);
+ }
+
+/**
  * @tc.name: OnInjectionEvent001
  * @tc.desc: test OnInjectionEvent
  * @tc.type: FUNC
