@@ -184,7 +184,6 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreenWithPreview(
 )
 {
     auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
-    auto firstMenuItem = parentMenuPattern->GetFirstMenuItem();
     auto parentPlacement = parentMenuPattern->GetLastPlacement().value_or(Placement::NONE);
     auto firstItemBottomPositionY = GetFirstItemBottomPositionY(parentMenu);
     float parentMenuBottomY = GetMenuBottomPositionY(parentMenu);

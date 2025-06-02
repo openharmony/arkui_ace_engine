@@ -981,7 +981,7 @@ bool MenuLayoutAlgorithm::isContainerModal(const RefPtr<FrameNode>& node)
         windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 }
 
-bool MenuLayoutAlgorithm::GetContainerModalOffsetY(const RefPtr<FrameNode>& node)
+float MenuLayoutAlgorithm::GetContainerModalOffsetY(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     auto pipeline = node->GetContext();
@@ -1006,9 +1006,9 @@ float MenuLayoutAlgorithm::CalcSubMenuMaxHeightConstraint(LayoutWrapper* layoutW
     auto parentFirstMenuItemPositionY = GetFirstItemBottomPositionY(parentMenu);
     auto lastMenuItemPositionY = GetLastItemTopPositionY(parentMenu);
     auto parentMenuPositionY = parentMenu->GetPaintRectOffset(false, true).GetY();
-    auto isContainerModal = isContainerModal(parentItem);
+    auto isContainerModalBool = isContainerModal(parentItem);
     auto containerModalOffsetY = GetContainerModalOffsetY(parentItem);
-    if (isContainerModal) {
+    if (isContainerModalBool) {
         parentMenuPositionY -= containerModalOffsetY;
         parentFirstMenuItemPositionY -= containerModalOffsetY;
         lastMenuItemPositionY -= containerModalOffsetY;
@@ -1016,7 +1016,7 @@ float MenuLayoutAlgorithm::CalcSubMenuMaxHeightConstraint(LayoutWrapper* layoutW
 
     if (parentMenuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         auto [previewTopPositionY, previewBottomPositionY] = parentMenuPattern->GetPreviewPositionY();
-        if (isContainerModal) {
+        if (isContainerModalBool) {
             previewTopPositionY -= containerModalOffsetY;
             previewBottomPositionY -= containerModalOffsetY;
         }

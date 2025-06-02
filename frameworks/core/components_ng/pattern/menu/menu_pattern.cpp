@@ -1686,7 +1686,7 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, const Ref
             if (isContainerModal) {
                 menuItemInfo.endOffset -= OffsetF(0.0f,
                     static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx())
-                    + tatic_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
+                    + static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
             }
             menuItemInfo.isFindTargetId = true;
             if (isNeedRestoreNodeId) {
