@@ -648,7 +648,7 @@ int32_t OH_ArkUI_UIInputEvent_GetPressedKeys(
 uint32_t OH_ArkUI_PointerEvent_GetPointerCount(const ArkUI_UIInputEvent* event)
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
-                                                S_NODE_ON_AXIS | S_NODE_ON_CLICK_EVENT | S_GESTURE_TOUCH_EVENT, event);
+        S_NODE_ON_AXIS | S_NODE_ON_CLICK_EVENT | S_GESTURE_TOUCH_EVENT, event);
     if (!event) {
         RETURN_WITH_STATUS(0, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1236,7 +1236,7 @@ float HandleTouchEventDisplayX(const ArkUI_UIInputEvent* event)
 {
     const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
     if (touchEvent) {
-        RETURN_WITH_STATUS(touchEvent->screenX, ARKUI_ERROR_CODE_NO_ERROR);        
+        RETURN_WITH_STATUS(touchEvent->screenX, ARKUI_ERROR_CODE_NO_ERROR);
     }
     RETURN_WITH_STATUS(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
@@ -1435,7 +1435,7 @@ float OH_ArkUI_PointerEvent_GetDisplayYByIndex(const ArkUI_UIInputEvent* event, 
 float OH_ArkUI_PointerEvent_GetPressure(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
-                                                S_GESTURE_TOUCH_EVENT | S_GESTURE_MOUSE_EVENT, event);
+        S_GESTURE_TOUCH_EVENT | S_GESTURE_MOUSE_EVENT, event);
     if (!event) {
         RETURN_WITH_STATUS(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1471,7 +1471,7 @@ float OH_ArkUI_PointerEvent_GetPressure(const ArkUI_UIInputEvent* event, uint32_
 float OH_ArkUI_PointerEvent_GetTiltX(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_CLICK_EVENT |
-                                                S_NODE_ON_HOVER_EVENT | S_GESTURE_TOUCH_EVENT, event);
+        S_NODE_ON_HOVER_EVENT | S_GESTURE_TOUCH_EVENT, event);
     if (!event) {
         RETURN_WITH_STATUS(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1507,7 +1507,7 @@ float OH_ArkUI_PointerEvent_GetTiltX(const ArkUI_UIInputEvent* event, uint32_t p
 float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_CLICK_EVENT |
-                                                S_NODE_ON_HOVER_EVENT | S_GESTURE_TOUCH_EVENT, event);
+        S_NODE_ON_HOVER_EVENT | S_GESTURE_TOUCH_EVENT, event);
     if (!event) {
         RETURN_WITH_STATUS(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -3337,112 +3337,129 @@ int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI
     RETURN_WITH_STATUS(res, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
-ArkUI_ErrorCode CheckIsSupportedScenario(int32_t scenarioExpr, const ArkUI_UIInputEvent* event) {
+ArkUI_ErrorCode IsTouchEventSupportedScenario(int32_t scenarioExpr, const ArkUITouchEvent* touchEvent) {
+    if (!touchEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    bool support = false;
+    if (touchEvent->subKind == ON_TOUCH) {
+        // mouse event registed by NODE_ON_TOUCH
+        support = scenarioExpr & S_NODE_ON_MOUSE;
+    } else if (touchEvent->subKind == ON_TOUCH_INTERCEPT) {
+        // key event registed by NODE_ON_TOUCH_INTERCEPT
+        support = scenarioExpr & S_NODE_ON_TOUCH_INTERCEPT;
+    } else if (touchEvent->subKind == ON_HOVER_MOVE) {
+        // key event registed by NODE_ON_HOVER_MOVE
+        support = scenarioExpr & S_NODE_ON_HOVER_MOVE;
+    } else {
+        // gesture triggered by touch
+        support = scenarioExpr & S_GESTURE_TOUCH_EVENT;
+    }
+    return support ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+}
+
+ArkUI_ErrorCode IsMouseEventSupportedScenario(int32_t scenarioExpr, const ArkUIMouseEvent* mouseEvent) {
+    if (!mouseEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    bool support = false;
+    if (mouseEvent->subKind == ON_MOUSE) {
+        // mouse event registed by NODE_ON_MOUSE
+        support = scenarioExpr & S_NODE_ON_MOUSE;
+    } else {
+        // gesture triggered by mouse
+        support = scenarioExpr & S_GESTURE_MOUSE_EVENT;
+    }
+    return support ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+}
+
+ArkUI_ErrorCode IsAxisEventSupportedScenario(int32_t scenarioExpr, const ArkUIAxisEvent* axisEvent) {
+    if (!axisEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    bool support = false;
+    if (axisEvent->subKind == ON_AXIS) {
+        // axis event registed by NODE_ON_AXIS
+        support = scenarioExpr & S_NODE_ON_AXIS;
+    } else {
+        // gesture triggered by axis
+        support = scenarioExpr & S_GESTURE_AXIS_EVENT;
+    }
+    return support ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+}
+
+
+ArkUI_ErrorCode IsKeyEventSupportedScenario(int32_t scenarioExpr, const ArkUIKeyEvent* keyEvent) {
+    if (!keyEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    bool support = false;
+    if (keyEvent->subKind == ON_KEY_EVENT) {
+        // key event registed by NODE_ON_KEY_EVENT
+        support = scenarioExpr & S_NODE_ON_KEY_EVENT;
+    } else if (keyEvent->subKind == ON_KEY_PREIME) {
+        // key event registed by NODE_ON_KEY_PREIME
+        support = scenarioExpr & S_NODE_ON_KEY_PRE_IME;
+    } else {
+        // key event registed by NODE_NODE_DISPATCH_KEY_EVENT
+        support = scenarioExpr & S_NODE_DISPATCH_KEY_EVENT;
+    }
+    return support ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+}
+
+ArkUI_ErrorCode CheckIsSupportedScenario(int32_t scenarioExpr, const ArkUI_UIInputEvent* event)
+{
     if (!event) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    bool supported = false;
-    switch(event->eventTypeId) {
+    switch (event->eventTypeId) {
         case AXIS_EVENT_ID: {
             // axis event from nativeXComponent
-            supported = g_scenarioSupportCheckResult & S_NXC_DISPATCH_AXIS_EVENT;
-            break;
+            return scenarioExpr & S_NXC_DISPATCH_AXIS_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case TOUCH_EVENT_ID: {
             // touch intercept from nativeXComponent
-            supported = g_scenarioSupportCheckResult & S_NXC_ON_TOUCH_INTERCEPT;
-            break;
+            return scenarioExpr & S_NXC_ON_TOUCH_INTERCEPT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case C_TOUCH_EVENT_ID: {
-            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent) {
-                return ARKUI_ERROR_CODE_PARAM_INVALID;
-            }
-            if (touchEvent->subKind == ON_TOUCH) {
-                // mouse event registed by NODE_ON_TOUCH
-                supported = g_scenarioSupportCheckResult & S_NODE_ON_MOUSE;
-            } else if (touchEvent->subKind == ON_TOUCH_INTERCEPT) {
-                // key event registed by NODE_ON_TOUCH_INTERCEPT
-                supported = g_scenarioSupportCheckResult & S_NODE_ON_TOUCH_INTERCEPT;
-            } else if (touchEvent->subKind == ON_HOVER_MOVE) {
-                // key event registed by NODE_ON_HOVER_MOVE
-                supported = g_scenarioSupportCheckResult & S_NODE_ON_HOVER_MOVE;
-            } else {
-                // gesture triggered by touch
-                supported = g_scenarioSupportCheckResult & S_GESTURE_TOUCH_EVENT;
-            }
-            break;
+            return IsTouchEventSupportedScenario(scenarioExpr, reinterpret_cast<ArkUITouchEvent*>(event->inputEvent));
         }
         case C_MOUSE_EVENT_ID: {
-            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
-            if (!mouseEvent) {
-                return ARKUI_ERROR_CODE_PARAM_INVALID;
-            }
-            if (mouseEvent->subKind == ON_MOUSE) {
-                // mouse event registed by NODE_ON_MOUSE
-                supported = g_scenarioSupportCheckResult & S_NODE_ON_MOUSE;
-            } else {
-                // gesture triggered by mouse
-                supported = g_scenarioSupportCheckResult & S_GESTURE_MOUSE_EVENT;
-            }
-            break;
+            return IsMouseEventSupportedScenario(scenarioExpr, reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent));
         }
         case C_AXIS_EVENT_ID: {
-            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
-            if (!axisEvent) {
-                return ARKUI_ERROR_CODE_PARAM_INVALID;
-            }
-            if (axisEvent->subKind == ON_AXIS) {
-                // axis event registed by NODE_ON_AXIS
-                supported = g_scenarioSupportCheckResult & S_NODE_ON_AXIS;
-            } else {
-                // gesture triggered by axis
-                supported = g_scenarioSupportCheckResult & S_GESTURE_AXIS_EVENT;
-            }
-            break;
+            return IsAxisEventSupportedScenario(scenarioExpr, reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent));
         }
         case C_KEY_EVENT_ID: {
-            const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
-            if (!keyEvent) {
-                return ARKUI_ERROR_CODE_PARAM_INVALID;
-            }
-            if (keyEvent->subKind == ON_KEY_EVENT) {
-                // key event registed by NODE_ON_KEY_EVENT
-                supported = g_scenarioSupportCheckResult & S_NODE_ON_KEY_EVENT;
-            } else if (keyEvent->subKind == ON_KEY_PREIME) {
-                // key event registed by NODE_ON_KEY_PREIME
-                supported = g_scenarioSupportCheckResult & S_NODE_ON_KEY_PRE_IME;
-            } else {
-                // key event registed by NODE_NODE_DISPATCH_KEY_EVENT
-                supported = g_scenarioSupportCheckResult & S_NODE_DISPATCH_KEY_EVENT;
-            }
-            break;
+            return IsKeyEventSupportedScenario(scenarioExpr, reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent));
         }
         case C_FOCUS_AXIS_EVENT_ID: {
             // focus axis event registed by NODE_ON_FOCUS_AXIS
-            supported = g_scenarioSupportCheckResult & S_NODE_ON_FOCUS_AXIS;
-            break;
+            return scenarioExpr & S_NODE_ON_FOCUS_AXIS ? ARKUI_ERROR_CODE_NO_ERROR
+                                                       : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case C_CLICK_EVENT_ID: {
-            if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
+            if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY && scenarioExpr & S_GESTURE_CLICK_EVENT) {
                 // click event from click or tap gesture triggered by keyboard
-                supported = g_scenarioSupportCheckResult & S_GESTURE_CLICK_EVENT;
-            } else {
+                return ARKUI_ERROR_CODE_NO_ERROR;
+            } else if (scenarioExpr & S_NODE_ON_CLICK_EVENT) {
                 // click event registed by NODE_ON_CLICK
-                supported = g_scenarioSupportCheckResult & S_NODE_ON_CLICK_EVENT;
+                return ARKUI_ERROR_CODE_NO_ERROR;
             }
-            break;
+            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case C_HOVER_EVENT_ID: {
             // hover event registed by NODE_ON_HOVER_EVENT
-            supported = g_scenarioSupportCheckResult & S_NODE_ON_HOVER_EVENT;
-            break;
+            return scenarioExpr & S_NODE_ON_HOVER_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                        : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         default:{
             LOGE("received event with unknown eventType");
         }
     }
-    return supported ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+    return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
 }
 
 void CheckSupportedScenarioAndResetEventStatus(int32_t scenarioExpr, const ArkUI_UIInputEvent* event)

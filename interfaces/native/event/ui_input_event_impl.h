@@ -73,19 +73,19 @@ typedef enum {
 
 void CheckSupportedScenarioAndResetEventStatus(int32_t scenarioExpr, const ArkUI_UIInputEvent* event);
 
-#define RETURN_WITH_STATUS(ret, errorCode)                                                                        \
-    do {                                                                                                          \
-        g_latestEventStatus =                                                                                     \
-            g_scenarioSupportCheckResult == ARKUI_ERROR_CODE_NO_ERROR ? errorCode : g_scenarioSupportCheckResult; \
-        return ret;                                                                                               \
-    } while (0);
+#define RETURN_WITH_STATUS(ret, errorCode)                                                                          \
+    do {                                                                                                            \
+        g_latestEventStatus =                                                                                       \
+            g_scenarioSupportCheckResult == ARKUI_ERROR_CODE_NO_ERROR ? (errorCode) : g_scenarioSupportCheckResult; \
+        return ret;                                                                                                 \
+    } while (0)
 
 #define VOID_WITH_STATUS(errorCode)                                            \
-    do {                                                                                                          \
-        g_latestEventStatus =                                                                                     \
-            g_scenarioSupportCheckResult == ARKUI_ERROR_CODE_NO_ERROR ? errorCode : g_scenarioSupportCheckResult; \
-        return;                                                                                                   \
-    } while (0);
+    do {                                                                                                            \
+        g_latestEventStatus =                                                                                       \
+            g_scenarioSupportCheckResult == ARKUI_ERROR_CODE_NO_ERROR ? (errorCode) : g_scenarioSupportCheckResult; \
+        return;                                                                                                     \
+    } while (0)
 
 #ifdef __cplusplus
 };

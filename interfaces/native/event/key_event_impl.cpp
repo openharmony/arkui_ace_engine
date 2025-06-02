@@ -89,6 +89,7 @@ void OH_ArkUI_KeyEvent_StopPropagation(const ArkUI_UIInputEvent *event, bool sto
         VOID_WITH_STATUS(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     keyEvent->stopPropagation = stopPropagation;
+    VOID_WITH_STATUS(ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 ArkUI_KeyIntension OH_ArkUI_KeyEvent_GetKeyIntensionCode(const ArkUI_UIInputEvent *event)
@@ -130,6 +131,7 @@ void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent *event, bool isConsu
         VOID_WITH_STATUS(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     keyEvent->isConsumed = isConsumed;
+    VOID_WITH_STATUS(ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event)
@@ -144,6 +146,7 @@ void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent*
     }
     auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->dispatchKeyEvent(node->uiNodeHandle, keyEvent);
+    VOID_WITH_STATUS(ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsNumLockOn(const ArkUI_UIInputEvent* event, bool* state)
