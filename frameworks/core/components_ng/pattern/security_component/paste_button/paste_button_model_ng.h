@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT PasteButtonModelNG : public SecurityComponentModelNG {
+class ACE_FORCE_EXPORT PasteButtonModelNG : public SecurityComponentModelNG {
 public:
     static PasteButtonModelNG* GetInstance();
     void Create(int32_t text, int32_t icon,
