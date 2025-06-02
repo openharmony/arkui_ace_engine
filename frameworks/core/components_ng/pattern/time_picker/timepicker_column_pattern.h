@@ -105,7 +105,8 @@ public:
     void UpdateScrollDelta(double delta);
 
     void InitHapticController(const RefPtr<FrameNode>& host) override;
-    bool IsStartEndTimeDefined() override;
+    bool IsStartEndTimeDefined();
+    bool IsTossNeedToStop() override;
 
     uint32_t GetEnterIndex() const
     {
