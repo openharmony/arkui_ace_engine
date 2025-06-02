@@ -17793,6 +17793,158 @@ export class Serializer extends SerializerBase {
             const value_message_1  = value_message as Resource
             valueSerializer.writeResource(value_message_1)
         }
+        const value_duration  = value.duration
+        let value_duration_type : int32 = RuntimeType.UNDEFINED
+        value_duration_type = runtimeType(value_duration)
+        valueSerializer.writeInt8(value_duration_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_duration_type)) {
+            const value_duration_value  = value_duration!
+            valueSerializer.writeNumber(value_duration_value)
+        }
+        const value_bottom  = value.bottom
+        let value_bottom_type : int32 = RuntimeType.UNDEFINED
+        value_bottom_type = runtimeType(value_bottom)
+        valueSerializer.writeInt8(value_bottom_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+            const value_bottom_value  = value_bottom!
+            let value_bottom_value_type : int32 = RuntimeType.UNDEFINED
+            value_bottom_value_type = runtimeType(value_bottom_value)
+            if (RuntimeType.STRING == value_bottom_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_bottom_value_0  = value_bottom_value as string
+                valueSerializer.writeString(value_bottom_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_bottom_value_type) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_bottom_value_1  = value_bottom_value as number
+                valueSerializer.writeNumber(value_bottom_value_1)
+            }
+        }
+        const value_showMode = value.showMode
+        let value_showMode_type : int32 = RuntimeType.UNDEFINED
+        value_showMode_type = runtimeType(value_showMode)
+        valueSerializer.writeInt8(value_showMode_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_showMode_type)) {
+            const value_showMode_value  = (value_showMode as promptAction.ToastShowMode)
+            valueSerializer.writeInt32(TypeChecker.ToastShowMode_ToNumeric(value_showMode_value))
+        }
+        const value_alignment  = value.alignment
+        let value_alignment_type : int32 = RuntimeType.UNDEFINED
+        value_alignment_type = runtimeType(value_alignment)
+        valueSerializer.writeInt8(value_alignment_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
+            const value_alignment_value  = (value_alignment as Alignment)
+            valueSerializer.writeInt32(TypeChecker.Alignment_ToNumeric(value_alignment_value))
+        }
+        const value_offset  = value.offset
+        let value_offset_type : int32 = RuntimeType.UNDEFINED
+        value_offset_type = runtimeType(value_offset)
+        valueSerializer.writeInt8(value_offset_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_offset_type)) {
+            const value_offset_value  = value_offset!
+            valueSerializer.writeOffset(value_offset_value)
+        }
+        const value_backgroundColor  = value.backgroundColor
+        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundColor_type = runtimeType(value_backgroundColor)
+        valueSerializer.writeInt8(value_backgroundColor_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_backgroundColor_type)) {
+            const value_backgroundColor_value  = value_backgroundColor!
+            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
+            if (TypeChecker.isColor(value_backgroundColor_value)) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_backgroundColor_value_1  = value_backgroundColor_value as number
+                valueSerializer.writeNumber(value_backgroundColor_value_1)
+            }
+            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8(2 as int32)
+                const value_backgroundColor_value_2  = value_backgroundColor_value as string
+                valueSerializer.writeString(value_backgroundColor_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8(3 as int32)
+                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
+                valueSerializer.writeResource(value_backgroundColor_value_3)
+            }
+        }
+        const value_textColor  = value.textColor
+        let value_textColor_type : int32 = RuntimeType.UNDEFINED
+        value_textColor_type = runtimeType(value_textColor)
+        valueSerializer.writeInt8(value_textColor_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_textColor_type)) {
+            const value_textColor_value  = value_textColor!
+            let value_textColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_textColor_value_type = runtimeType(value_textColor_value)
+            if (TypeChecker.isColor(value_textColor_value)) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_textColor_value_0  = value_textColor_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_textColor_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_textColor_value_type) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_textColor_value_1  = value_textColor_value as number
+                valueSerializer.writeNumber(value_textColor_value_1)
+            }
+            else if (RuntimeType.STRING == value_textColor_value_type) {
+                valueSerializer.writeInt8(2 as int32)
+                const value_textColor_value_2  = value_textColor_value as string
+                valueSerializer.writeString(value_textColor_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_textColor_value_type) {
+                valueSerializer.writeInt8(3 as int32)
+                const value_textColor_value_3  = value_textColor_value as Resource
+                valueSerializer.writeResource(value_textColor_value_3)
+            }
+        }
+        const value_backgroundBlurStyle  = value.backgroundBlurStyle
+        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
+        valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
+            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
+        }
+        const value_shadow  = value.shadow
+        let value_shadow_type : int32 = RuntimeType.UNDEFINED
+        value_shadow_type = runtimeType(value_shadow)
+        valueSerializer.writeInt8(value_shadow_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_shadow_type)) {
+            const value_shadow_value  = value_shadow!
+            let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
+            value_shadow_value_type = runtimeType(value_shadow_value)
+            if (RuntimeType.OBJECT == value_shadow_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_shadow_value_0  = value_shadow_value as ShadowOptions
+                valueSerializer.writeShadowOptions(value_shadow_value_0)
+            }
+            else if (TypeChecker.isShadowStyle(value_shadow_value)) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_shadow_value_1  = value_shadow_value as ShadowStyle
+                valueSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_shadow_value_1))
+            }
+        }
+        const value_enableHoverMode  = value.enableHoverMode
+        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
+        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
+        valueSerializer.writeInt8(value_enableHoverMode_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_enableHoverMode_type)) {
+            const value_enableHoverMode_value  = value_enableHoverMode!
+            valueSerializer.writeBoolean(value_enableHoverMode_value)
+        }
+        const value_hoverModeArea  = value.hoverModeArea
+        let value_hoverModeArea_type : int32 = RuntimeType.UNDEFINED
+        value_hoverModeArea_type = runtimeType(value_hoverModeArea)
+        valueSerializer.writeInt8(value_hoverModeArea_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
+            const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
+            valueSerializer.writeInt32(TypeChecker.HoverModeAreaType_ToNumeric(value_hoverModeArea_value))
+        }
     }
     writeAlertDialogParamWithButtons(value: AlertDialogParamWithButtons): void {
         let valueSerializer : Serializer = this

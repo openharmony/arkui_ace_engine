@@ -77,6 +77,17 @@ void ShowToastCommon(const NG::ToastInfo& toastInfo, std::function<void(int32_t)
 
 namespace OHOS::Ace::NG::Converter {
 template<>
+void AssignCast(std::optional<NG::ToastShowMode>& dst, const Ark_ToastShowMode& src)
+{
+    switch (src) {
+        case ARK_TOAST_SHOW_MODE_DEFAULT: dst = NG::ToastShowMode::DEFAULT; break;
+        case ARK_TOAST_SHOW_MODE_TOP_MOST: dst = NG::ToastShowMode::TOP_MOST; break;
+        case ARK_TOAST_SHOW_MODE_SYSTEM_TOP_MOST: dst = NG::ToastShowMode::SYSTEM_TOP_MOST; break;
+        default: LOGE("Unexpected enum value in Ark_ToastShowMode: %{public}d", src);
+    }
+}
+
+template<>
 ToastInfo Convert(const Ark_ShowToastOptions& options)
 {
     int32_t alignment = -1;
@@ -87,20 +98,47 @@ ToastInfo Convert(const Ark_ShowToastOptions& options)
             alignment = toastTheme->GetAlign();
         }
     }
-    auto toastInfo = NG::ToastInfo { .duration = -1, .showMode = NG::ToastShowMode::DEFAULT, .alignment = alignment };
+    NG::ToastInfo toastInfo;
     Converter::VisitUnion(options.message,
         [&toastInfo](const Ark_String& val) {
             toastInfo.message = Converter::Convert<std::string>(val);
         },
         [&toastInfo](const Ark_Resource& val) {
-            auto msgResourceStr = Converter::OptConvert<std::string>(val);
-            if (msgResourceStr) {
-                toastInfo.message = msgResourceStr.value();
-            }
-        },
-        []() {}
+            auto msgResourceStr = Converter::OptConvert<std::string>(val).value_or("");
+        }, []() {}
     );
-    toastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    toastInfo.duration = std::clamp(Converter::OptConvert<int32_t>(options.duration).value_or(-1),
+        TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    Converter::VisitUnion(options.bottom,
+        [&toastInfo](const Ark_String& val) {
+            toastInfo.bottom = Converter::Convert<std::string>(val);
+        },
+        [&toastInfo](const Ark_Number& val) {
+            toastInfo.bottom = std::to_string(Converter::Convert<int32_t>(val));
+        }, []() {}
+    );
+    toastInfo.showMode = Converter::OptConvert<NG::ToastShowMode>(options.showMode).value_or(
+        NG::ToastShowMode::DEFAULT
+    );
+    toastInfo.alignment = options.alignment.tag == InteropTag::INTEROP_TAG_UNDEFINED ? alignment :
+        static_cast<int32_t>(options.alignment.value);
+    toastInfo.offset = Converter::OptConvert<DimensionOffset>(options.offset);
+    toastInfo.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
+    toastInfo.textColor = Converter::OptConvert<Color>(options.textColor);
+    auto backgroundBlurStyle = Converter::OptConvert<BlurStyle>(options.backgroundBlurStyle);
+    toastInfo.backgroundBlurStyle = backgroundBlurStyle ?
+        std::optional<int32_t>(static_cast<int32_t>(backgroundBlurStyle.value())) : std::nullopt;
+    toastInfo.shadow = Converter::OptConvert<Shadow>(options.shadow);
+    if (options.shadow.tag != INTEROP_TAG_UNDEFINED && options.shadow.value.selector == 0) {
+        toastInfo.isTypeStyleShadow = false;
+    }
+    toastInfo.enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode).value_or(
+        toastInfo.enableHoverMode);
+    auto hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
+    if (hoverModeArea.has_value()) {
+        toastInfo.hoverModeArea = hoverModeArea.value();
+    }
+    toastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     return toastInfo;
 }
 } // OHOS::Ace::NG::Converter

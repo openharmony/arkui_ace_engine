@@ -5351,7 +5351,7 @@ void BindPopupImpl(Ark_NativePointer node,
     //         if (optShow) {
     //             popupParam->SetIsShow(*optShow);
     //         }
-    //        ViewAbstractModelNG::BindPopup(frameNode, popupParam, nullptr);
+    //        ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
     //     },
     //     [frameNode, node, optShow](const Ark_CustomPopupOptions& value) {
     //         auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
@@ -5362,13 +5362,13 @@ void BindPopupImpl(Ark_NativePointer node,
     //                 popupParam->SetIsShow(*optShow);
     //             }
     //             CallbackHelper(value.builder).BuildAsync([frameNode, popupParam](const RefPtr<UINode>& uiNode) {
-    //                 ViewAbstractModelNG::BindPopup(frameNode, popupParam, uiNode);
+    //                 ViewAbstractModelStatic::BindPopup(frameNode, popupParam, uiNode);
     //                 }, node);
     //         } else {
     //             if (optShow) {
     //                 popupParam->SetIsShow(*optShow);
     //             }
-    //             ViewAbstractModelNG::BindPopup(frameNode, popupParam, nullptr);
+    //             ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
     //         }
     //     },
     //     [frameNode, optShow]() {
@@ -5376,7 +5376,7 @@ void BindPopupImpl(Ark_NativePointer node,
     //         if (optShow) {
     //             popupParam->SetIsShow(*optShow);
     //         }
-    //         ViewAbstractModelNG::BindPopup(frameNode, popupParam, nullptr);
+    //         ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
     //     });
 }
 void BindMenuBase(Ark_NativePointer node,
