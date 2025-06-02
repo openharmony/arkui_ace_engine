@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#ifndef GENERATED_FOUNDATION_ACE_CAPI_TEST_SLIDER_H
+#define GENERATED_FOUNDATION_ACE_CAPI_TEST_SLIDER_H
 #include <gtest/gtest.h>
 
 #include "modifier_test_base.h"
@@ -29,7 +31,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {
 const auto ATTRIBUTE_BLOCK_SIZE_NAME = "blockSize";
 const auto ATTRIBUTE_SLIDE_RANGE_NAME = "slideRange";
 const auto ATTRIBUTE_CONSTRUCTOR_NAME = "constructor";
@@ -97,9 +98,8 @@ const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "CrownSensitivity
 #endif
 const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
 const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
-static const std::string EXPECTED_TRUE("true");
-static const std::string EXPECTED_FALSE("false");
-} // namespace
+const std::string EXPECTED_TRUE("true");
+const std::string EXPECTED_FALSE("false");
 
 namespace Fixtures {
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberInitialValuesSlider = {
@@ -253,3 +253,5 @@ public:
     }
 };
 } // namespace OHOS::Ace::NG
+
+#endif //GENERATED_FOUNDATION_ACE_CAPI_TEST_SLIDER_H
