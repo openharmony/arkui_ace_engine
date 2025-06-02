@@ -59,6 +59,7 @@ void PickerColumnPattern::OnAttachToFrameNode()
 
 void PickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    isTossPlaying_ = false;
     if (hapticController_) {
         hapticController_->Stop();
     }
@@ -365,11 +366,10 @@ bool PickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesO
     if (hapticController_ && isEnableHaptic_ && !stopHaptic_) {
         hapticController_->PlayOnce();
     }
-    FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
+    FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties, isTossPlaying_);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
 
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
     return true;
 }
@@ -468,6 +468,7 @@ void PickerColumnPattern::HandleDragEnd()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
+        isTossPlaying_ = true;
         frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
         // AccessibilityEventType::SCROLL_END
         return;
@@ -483,7 +484,7 @@ void PickerColumnPattern::HandleDragEnd()
     auto shiftDistance = (dir == PickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                             : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / MIDDLE_CHILD_INDEX;
-    if (GreatOrEqual(static_cast<double>(std::abs(scrollDelta_)), std::abs(shiftThreshold))) {
+    if (!isTossPlaying_ && GreatOrEqual(static_cast<double>(std::abs(scrollDelta_)), std::abs(shiftThreshold))) {
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == PickerScrollDirection::UP ? -1 : 1);
     }
@@ -710,6 +711,7 @@ void PickerColumnPattern::OnAroundButtonClick(RefPtr<PickerEventParam> param)
 
 void PickerColumnPattern::TossAnimationStoped()
 {
+    isTossPlaying_ = false;
     if (hapticController_) {
         hapticController_->Stop();
     }

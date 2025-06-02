@@ -64,9 +64,9 @@ private:
 
 #ifndef SUPPORT_DIGITAL_CROWN
     bool isHapticCanLoopPlay_ = false;
-#endif
     bool isInHapticLoop_ = false;
     bool isLoopReadyToStop_ = false;
+#endif
     ThreadStatus playThreadStatus_ = ThreadStatus::NONE;
     std::recursive_mutex threadMutex_;
     std::condition_variable_any threadCv_;

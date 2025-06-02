@@ -268,7 +268,7 @@ void DatePickerColumnPattern::InitTextFontFamily()
 }
 
 void DatePickerColumnPattern::FlushCurrentOptions(
-    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties)
+    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties, bool isTossPlaying)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -331,16 +331,20 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if ((NotLoopOptions() || !isLoop_) && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent(u"");
-            textNode->MarkModifyDone();
-            textNode->MarkDirtyNode();
+            if (!isTossPlaying && selectedIndex == index) {
+                textNode->MarkModifyDone();
+                textNode->MarkDirtyNode();
+            }
             continue;
         }
         auto date = datePickerPattern->GetAllOptions(host)[optionIndex];
         auto optionValue = DatePickerPattern::GetFormatString(date);
         textLayoutProperty->UpdateContent(optionValue);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        textNode->MarkModifyDone();
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (!isTossPlaying && selectedIndex == index) {
+            textNode->MarkModifyDone();
+            textNode->MarkDirtyNode();
+        }
     }
     if (isUpateTextContentOnly && isUpdateAnimationProperties) {
         FlushAnimationTextProperties(isDown);

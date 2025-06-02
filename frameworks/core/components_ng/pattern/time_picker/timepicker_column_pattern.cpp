@@ -441,7 +441,7 @@ uint32_t TimePickerColumnPattern::GetOptionCount() const
 }
 
 void TimePickerColumnPattern::FlushCurrentOptions(
-    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties)
+    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties, bool isTossPlaying)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -503,8 +503,10 @@ void TimePickerColumnPattern::FlushCurrentOptions(
             textLayoutProperty->UpdateContent(optionValue);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
-        textNode->MarkModifyDone();
-        textNode->MarkDirtyNode();
+        if (!isTossPlaying && selectedIndex == index) {
+            textNode->MarkModifyDone();
+            textNode->MarkDirtyNode();
+        }
     }
 }
 
