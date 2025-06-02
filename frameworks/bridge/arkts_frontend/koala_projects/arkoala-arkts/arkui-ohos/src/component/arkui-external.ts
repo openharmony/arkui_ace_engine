@@ -18,7 +18,7 @@
 
 import { ResourceColor, Position, Length, SizeOptions, ResourceStr, Font } from "./units"
 import { Color, TextOverflow, BorderStyle, TextHeightAdaptivePolicy } from "./enums"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo, UIFontConfig } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { Resource } from "global/resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
@@ -869,6 +869,9 @@ export class GlobalScope_ohos_font {
         const fontName_casted = fontName as (string)
         return GlobalScope_ohos_font.getFontByName_serialize(fontName_casted)
     }
+    public static getUIFontConfig(): UIFontConfig {
+        return GlobalScope_ohos_font.getUIFontConfig_serialize()
+    }
     private static registerFont_serialize(options: FontOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFontOptions(options)
@@ -890,6 +893,19 @@ export class GlobalScope_ohos_font {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getFontByName(fontName)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : FontInfo = retvalDeserializer.readFontInfo()
+        return returnResult
+    }
+    private static getUIFontConfig_serialize(): UIFontConfig {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getUIFontConfig() as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const returnResult : UIFontConfig = retvalDeserializer.readUIFontConfig()
         return returnResult
     }
 }

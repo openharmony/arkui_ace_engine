@@ -13291,6 +13291,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_UIFontConfig GetUIFontConfigImpl()
+    {
+        return {};
+    }
     } // GlobalScope_ohos_fontAccessor
     namespace GlobalScope_ohos_measure_utilsAccessor {
     Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
@@ -14029,6 +14033,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // RenderNodeAccessor
+    namespace GlobalScopeUicontextFontScaleAccessor {
+    Ark_Boolean IsFollowingSystemFontScaleImpl()
+    {
+        return {};
+    }
+    Ark_Number GetMaxFontScaleImpl()
+    {
+        return {};
+    }
+    } // GlobalScopeUicontextFontScaleAccessor
+    namespace GlobalScopeUicontextTextMenuAccessor {
+    void SetMenuOptionsImpl(const Ark_TextMenuOptions* options)
+    {
+    }
+    } // GlobalScopeUicontextTextMenuAccessor
     namespace TabsOpsAccessor {
     Ark_NativePointer RegisterBarModeImpl(Ark_NativePointer node,
                                           const Opt_BarMode* value,
@@ -21265,6 +21284,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
             GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+            GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
@@ -21556,6 +21576,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct RenderNodePeer {
         virtual ~RenderNodePeer() = default;
     };
+    const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor GlobalScopeUicontextFontScaleAccessorImpl {
+            GlobalScopeUicontextFontScaleAccessor::IsFollowingSystemFontScaleImpl,
+            GlobalScopeUicontextFontScaleAccessor::GetMaxFontScaleImpl,
+        };
+        return &GlobalScopeUicontextFontScaleAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
+            GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
+        };
+        return &GlobalScopeUicontextTextMenuAccessorImpl;
+    }
+
     const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor()
     {
         static const GENERATED_ArkUITabsOpsAccessor TabsOpsAccessorImpl {
@@ -24537,6 +24574,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetNodeContentAccessor,
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
+            GetGlobalScopeUicontextFontScaleAccessor,
+            GetGlobalScopeUicontextTextMenuAccessor,
             GetTabsOpsAccessor,
             GetUIContextImpAccessor,
             GetGridItemOpsAccessor,

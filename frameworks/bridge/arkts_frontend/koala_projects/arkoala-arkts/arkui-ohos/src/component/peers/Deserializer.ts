@@ -29,7 +29,7 @@ import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_on
 import { UIContext } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
-import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, DecorationStyleResult } from "./../textCommon"
+import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
 import { ErrorCallback } from "./../ohos.base"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../waterFlow"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
@@ -61,7 +61,7 @@ import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteI
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { SaveButtonCallback, SaveButtonOnClickResult, SaveDescription, SaveIconStyle, SaveButtonOptions } from "./../saveButton"
 import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchType, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../search"
@@ -1133,6 +1133,27 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return UIExtensionProxyInternal.fromPtr(ptr)
+    }
+    readUIFontAdjustInfo(): UIFontAdjustInfo {
+        let valueDeserializer : Deserializer = this
+        const weight_result : number = (valueDeserializer.readNumber() as number)
+        const to_result : number = (valueDeserializer.readNumber() as number)
+        let value : UIFontAdjustInfo = ({weight: weight_result, to: to_result} as UIFontAdjustInfo)
+        return value
+    }
+    readUIFontAliasInfo(): UIFontAliasInfo {
+        let valueDeserializer : Deserializer = this
+        const name_result : string = (valueDeserializer.readString() as string)
+        const weight_result : number = (valueDeserializer.readNumber() as number)
+        let value : UIFontAliasInfo = ({name: name_result, weight: weight_result} as UIFontAliasInfo)
+        return value
+    }
+    readUIFontFallbackInfo(): UIFontFallbackInfo {
+        let valueDeserializer : Deserializer = this
+        const language_result : string = (valueDeserializer.readString() as string)
+        const family_result : string = (valueDeserializer.readString() as string)
+        let value : UIFontFallbackInfo = ({language: language_result, family: family_result} as UIFontFallbackInfo)
+        return value
     }
     readUIGestureEvent(): UIGestureEvent {
         throw new Error("Interface with functions is not supported")
@@ -11530,6 +11551,18 @@ export class Deserializer extends DeserializerBase {
         let value : TextMarqueeOptions = ({start: start_result, step: step_result, loop: loop_result, fromStart: fromStart_result, delay: delay_result, fadeout: fadeout_result, marqueeStartPolicy: marqueeStartPolicy_result} as TextMarqueeOptions)
         return value
     }
+    readTextMenuOptions(): TextMenuOptions {
+        let valueDeserializer : Deserializer = this
+        const showMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let showMode_buf : TextMenuShowMode | undefined
+        if ((RuntimeType.UNDEFINED) != (showMode_buf_runtimeType))
+        {
+            showMode_buf = TypeChecker.TextMenuShowMode_FromNumeric(valueDeserializer.readInt32())
+        }
+        const showMode_result : TextMenuShowMode | undefined = showMode_buf
+        let value : TextMenuOptions = ({showMode: showMode_result} as TextMenuOptions)
+        return value
+    }
     readTextRange(): TextRange {
         let valueDeserializer : Deserializer = this
         const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -11904,6 +11937,59 @@ export class Deserializer extends DeserializerBase {
         }
         const windowModeFollowStrategy_result : WindowModeFollowStrategy | undefined = windowModeFollowStrategy_buf
         let value : UIExtensionOptions = ({isTransferringCaller: isTransferringCaller_result, placeholder: placeholder_result, areaChangePlaceholder: areaChangePlaceholder_result, dpiFollowStrategy: dpiFollowStrategy_result, windowModeFollowStrategy: windowModeFollowStrategy_result} as UIExtensionOptions)
+        return value
+    }
+    readUIFontConfig(): UIFontConfig {
+        let valueDeserializer : Deserializer = this
+        const fontDir_buf_length : int32 = valueDeserializer.readInt32()
+        let fontDir_buf : Array<string> = new Array<string>(fontDir_buf_length)
+        for (let fontDir_buf_i = 0; fontDir_buf_i < fontDir_buf_length; fontDir_buf_i++) {
+            fontDir_buf[fontDir_buf_i] = (valueDeserializer.readString() as string)
+        }
+        const fontDir_result : Array<string> = fontDir_buf
+        const generic_buf_length : int32 = valueDeserializer.readInt32()
+        let generic_buf : Array<UIFontGenericInfo> = new Array<UIFontGenericInfo>(generic_buf_length)
+        for (let generic_buf_i = 0; generic_buf_i < generic_buf_length; generic_buf_i++) {
+            generic_buf[generic_buf_i] = valueDeserializer.readUIFontGenericInfo()
+        }
+        const generic_result : Array<UIFontGenericInfo> = generic_buf
+        const fallbackGroups_buf_length : int32 = valueDeserializer.readInt32()
+        let fallbackGroups_buf : Array<UIFontFallbackGroupInfo> = new Array<UIFontFallbackGroupInfo>(fallbackGroups_buf_length)
+        for (let fallbackGroups_buf_i = 0; fallbackGroups_buf_i < fallbackGroups_buf_length; fallbackGroups_buf_i++) {
+            fallbackGroups_buf[fallbackGroups_buf_i] = valueDeserializer.readUIFontFallbackGroupInfo()
+        }
+        const fallbackGroups_result : Array<UIFontFallbackGroupInfo> = fallbackGroups_buf
+        let value : UIFontConfig = ({fontDir: fontDir_result, generic: generic_result, fallbackGroups: fallbackGroups_result} as UIFontConfig)
+        return value
+    }
+    readUIFontFallbackGroupInfo(): UIFontFallbackGroupInfo {
+        let valueDeserializer : Deserializer = this
+        const fontSetName_result : string = (valueDeserializer.readString() as string)
+        const fallback_buf_length : int32 = valueDeserializer.readInt32()
+        let fallback_buf : Array<UIFontFallbackInfo> = new Array<UIFontFallbackInfo>(fallback_buf_length)
+        for (let fallback_buf_i = 0; fallback_buf_i < fallback_buf_length; fallback_buf_i++) {
+            fallback_buf[fallback_buf_i] = valueDeserializer.readUIFontFallbackInfo()
+        }
+        const fallback_result : Array<UIFontFallbackInfo> = fallback_buf
+        let value : UIFontFallbackGroupInfo = ({fontSetName: fontSetName_result, fallback: fallback_result} as UIFontFallbackGroupInfo)
+        return value
+    }
+    readUIFontGenericInfo(): UIFontGenericInfo {
+        let valueDeserializer : Deserializer = this
+        const family_result : string = (valueDeserializer.readString() as string)
+        const alias_buf_length : int32 = valueDeserializer.readInt32()
+        let alias_buf : Array<UIFontAliasInfo> = new Array<UIFontAliasInfo>(alias_buf_length)
+        for (let alias_buf_i = 0; alias_buf_i < alias_buf_length; alias_buf_i++) {
+            alias_buf[alias_buf_i] = valueDeserializer.readUIFontAliasInfo()
+        }
+        const alias_result : Array<UIFontAliasInfo> = alias_buf
+        const adjust_buf_length : int32 = valueDeserializer.readInt32()
+        let adjust_buf : Array<UIFontAdjustInfo> = new Array<UIFontAdjustInfo>(adjust_buf_length)
+        for (let adjust_buf_i = 0; adjust_buf_i < adjust_buf_length; adjust_buf_i++) {
+            adjust_buf[adjust_buf_i] = valueDeserializer.readUIFontAdjustInfo()
+        }
+        const adjust_result : Array<UIFontAdjustInfo> = adjust_buf
+        let value : UIFontGenericInfo = ({family: family_result, alias: alias_result, adjust: adjust_result} as UIFontGenericInfo)
         return value
     }
     readViewportRect(): ViewportRect {

@@ -28,7 +28,7 @@ import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_on
 import { UIContext } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
-import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, DecorationStyleResult } from "./../textCommon"
+import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
 import { ErrorCallback } from "./../ohos.base"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../waterFlow"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
@@ -60,7 +60,7 @@ import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteI
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { SaveButtonCallback, SaveButtonOnClickResult, SaveDescription, SaveIconStyle, SaveButtonOptions } from "./../saveButton"
 import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchType, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../search"
@@ -1028,6 +1028,27 @@ export class Serializer extends SerializerBase {
     writeUIExtensionProxy(value: UIExtensionProxy): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeUIFontAdjustInfo(value: UIFontAdjustInfo): void {
+        let valueSerializer : Serializer = this
+        const value_weight  = value.weight
+        valueSerializer.writeNumber(value_weight)
+        const value_to  = value.to
+        valueSerializer.writeNumber(value_to)
+    }
+    writeUIFontAliasInfo(value: UIFontAliasInfo): void {
+        let valueSerializer : Serializer = this
+        const value_name  = value.name
+        valueSerializer.writeString(value_name)
+        const value_weight  = value.weight
+        valueSerializer.writeNumber(value_weight)
+    }
+    writeUIFontFallbackInfo(value: UIFontFallbackInfo): void {
+        let valueSerializer : Serializer = this
+        const value_language  = value.language
+        valueSerializer.writeString(value_language)
+        const value_family  = value.family
+        valueSerializer.writeString(value_family)
     }
     writeUIGestureEvent(value: UIGestureEvent): void {
     }
@@ -6994,6 +7015,17 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeInt32(TypeChecker.MarqueeStartPolicy_ToNumeric(value_marqueeStartPolicy_value))
         }
     }
+    writeTextMenuOptions(value: TextMenuOptions): void {
+        let valueSerializer : Serializer = this
+        const value_showMode  = value.showMode
+        let value_showMode_type : int32 = RuntimeType.UNDEFINED
+        value_showMode_type = runtimeType(value_showMode)
+        valueSerializer.writeInt8(value_showMode_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_showMode_type)) {
+            const value_showMode_value  = (value_showMode as TextMenuShowMode)
+            valueSerializer.writeInt32(TypeChecker.TextMenuShowMode_ToNumeric(value_showMode_value))
+        }
+    }
     writeTextRange(value: TextRange): void {
         let valueSerializer : Serializer = this
         const value_start  = value.start
@@ -7389,6 +7421,55 @@ export class Serializer extends SerializerBase {
         if ((RuntimeType.UNDEFINED) != (value_windowModeFollowStrategy_type)) {
             const value_windowModeFollowStrategy_value  = (value_windowModeFollowStrategy as WindowModeFollowStrategy)
             valueSerializer.writeInt32(TypeChecker.WindowModeFollowStrategy_ToNumeric(value_windowModeFollowStrategy_value))
+        }
+    }
+    writeUIFontConfig(value: UIFontConfig): void {
+        let valueSerializer : Serializer = this
+        const value_fontDir  = value.fontDir
+        valueSerializer.writeInt32(value_fontDir.length as int32)
+        for (let i = 0; i < value_fontDir.length; i++) {
+            const value_fontDir_element : string = value_fontDir[i]
+            valueSerializer.writeString(value_fontDir_element)
+        }
+        const value_generic  = value.generic
+        valueSerializer.writeInt32(value_generic.length as int32)
+        for (let i = 0; i < value_generic.length; i++) {
+            const value_generic_element : UIFontGenericInfo = value_generic[i]
+            valueSerializer.writeUIFontGenericInfo(value_generic_element)
+        }
+        const value_fallbackGroups  = value.fallbackGroups
+        valueSerializer.writeInt32(value_fallbackGroups.length as int32)
+        for (let i = 0; i < value_fallbackGroups.length; i++) {
+            const value_fallbackGroups_element : UIFontFallbackGroupInfo = value_fallbackGroups[i]
+            valueSerializer.writeUIFontFallbackGroupInfo(value_fallbackGroups_element)
+        }
+    }
+    writeUIFontFallbackGroupInfo(value: UIFontFallbackGroupInfo): void {
+        let valueSerializer : Serializer = this
+        const value_fontSetName  = value.fontSetName
+        valueSerializer.writeString(value_fontSetName)
+        const value_fallback  = value.fallback
+        valueSerializer.writeInt32(value_fallback.length as int32)
+        for (let i = 0; i < value_fallback.length; i++) {
+            const value_fallback_element : UIFontFallbackInfo = value_fallback[i]
+            valueSerializer.writeUIFontFallbackInfo(value_fallback_element)
+        }
+    }
+    writeUIFontGenericInfo(value: UIFontGenericInfo): void {
+        let valueSerializer : Serializer = this
+        const value_family  = value.family
+        valueSerializer.writeString(value_family)
+        const value_alias  = value.alias
+        valueSerializer.writeInt32(value_alias.length as int32)
+        for (let i = 0; i < value_alias.length; i++) {
+            const value_alias_element : UIFontAliasInfo = value_alias[i]
+            valueSerializer.writeUIFontAliasInfo(value_alias_element)
+        }
+        const value_adjust  = value.adjust
+        valueSerializer.writeInt32(value_adjust.length as int32)
+        for (let i = 0; i < value_adjust.length; i++) {
+            const value_adjust_element : UIFontAdjustInfo = value_adjust[i]
+            valueSerializer.writeUIFontAdjustInfo(value_adjust_element)
         }
     }
     writeViewportRect(value: ViewportRect): void {

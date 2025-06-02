@@ -27,13 +27,13 @@ import { PixelMap } from "./../arkui-pixelmap"
 import { AnimatedDrawableDescriptor, DrawableDescriptor, AnimationOptions, LayeredDrawableDescriptor, PixelMapDrawableDescriptor } from "./../arkui-drawabledescriptor"
 import { AnimationMode, BarMode, BarPosition, LayoutStyle, TabContentTransitionProxy, TabsAnimationEvent, TabsAttribute, OnTabsAnimationStartCallback, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, DividerStyle, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, ScrollableBarModeOptions, TabsCacheMode, TabsController, CommonModifier, TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabsOptions } from "./../tabs"
 import { ArrowPosition, AvoidanceMode, MenuAlignType, SelectAttribute, Callback_Number_String_Void, OnSelectCallback, MenuOutlineOptions, Callback_Opt_Union_Number_Resource_Void, Callback_Opt_ResourceStr_Void, MenuItemConfiguration, SelectOption } from "./../select"
-import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, CaretStyle, EditableTextOnChangeCallback, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, DecorationStyleResult } from "./../textCommon"
+import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, CaretStyle, EditableTextOnChangeCallback, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMenuItem, ToolbarItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions, NavigationAttribute, Tuple_Dimension_Dimension, NavigationMode, NavigationTitleMode, Callback_NavigationTitleMode_Void, Callback_Boolean_Void, Callback_NavigationMode_Void, Callback_String_Opt_Object_Void, Type_NavigationAttribute_customNavContentTransition_delegate, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavPathInfo, NavPathStack, NavigationOptions, Callback_PopInfo_Void, PopInfo, NavigationInterception, ToolbarItemStatus, Callback_NavigationTransitionProxy_Void, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, MoreButtonOptions } from "./../navigation"
 import { BaseShape, CircleShape, ShapeSize, CommonShape, WebviewController, Summary, EllipseShape, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { ReplaceSymbolEffect, ScaleSymbolEffect, SymbolEffect, EffectDirection, EffectScope } from "../symbolglyph"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { BlendMode, DrawingCanvas, DrawingColorFilter, RectType, DrawingLattice } from "./../arkui-drawing"
 import { BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, EventResult, FileSelectorMode, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, HitTestType, HttpAuthHandler, JsGeolocation, JsResult, Literal_Function_callback__Object_fileSelector, Literal_Function_handler_Object_error, Literal_Object_detail, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, ViewportFit, ScriptItem, ExpandedMenuItemOptions, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, Callback_Literal_Function_handler_Object_error_Void, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Type_WebAttribute_onFileSelectorShow_callback, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, OnContextMenuHideCallback, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, OnSafeBrowsingCheckResultCallback, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebController, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebKeyboardController, WebNavigationType, WebResourceError, Literal_String_plainText, WebKeyboardOptions, WebOptions, Callback_Literal_String_plainText_Void, NativeEmbedInfo } from "./../web"
@@ -3117,6 +3117,9 @@ export class TypeChecker {
     static isTextMenuItemId(value: Object | string | number | undefined): boolean {
         return value instanceof TextMenuItemId
     }
+    static isTextMenuOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof TextMenuOptions
+    }
     static isTextMenuShowMode(value: Object | string | number | undefined): boolean {
         return value instanceof TextMenuShowMode
     }
@@ -3296,6 +3299,24 @@ export class TypeChecker {
     }
     static isUIExtensionProxy(value: Object | string | number | undefined): boolean {
         return value instanceof UIExtensionProxy
+    }
+    static isUIFontAdjustInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof UIFontAdjustInfo
+    }
+    static isUIFontAliasInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof UIFontAliasInfo
+    }
+    static isUIFontConfig(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof UIFontConfig
+    }
+    static isUIFontFallbackGroupInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof UIFontFallbackGroupInfo
+    }
+    static isUIFontFallbackInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof UIFontFallbackInfo
+    }
+    static isUIFontGenericInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof UIFontGenericInfo
     }
     static isUIGestureEvent(value: Object | string | number | undefined): boolean {
         return value instanceof UIGestureEvent
@@ -5546,6 +5567,21 @@ export class TypeChecker {
     }
     static isArray_Union_RichEditorTextSpanResult_RichEditorImageSpanResult(value: Object | string | number | undefined): boolean {
         return value instanceof Array<RichEditorTextSpanResult | RichEditorImageSpanResult>
+    }
+    static isArray_UIFontGenericInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array<UIFontGenericInfo>
+    }
+    static isArray_UIFontFallbackGroupInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array<UIFontFallbackGroupInfo>
+    }
+    static isArray_UIFontFallbackInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array<UIFontFallbackInfo>
+    }
+    static isArray_UIFontAliasInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array<UIFontAliasInfo>
+    }
+    static isArray_UIFontAdjustInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array<UIFontAdjustInfo>
     }
     static isArray_DateRange(value: Object | string | number | undefined): boolean {
         return value instanceof Array<DateRange>
