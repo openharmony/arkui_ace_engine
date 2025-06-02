@@ -71,16 +71,22 @@ typedef enum {
         S_NODE_ON_KEY_EVENT | S_NODE_ON_KEY_PRE_IME | S_NODE_DISPATCH_KEY_EVENT, // 0x00000058 3 scenarios give c key event
 } ArkUIEventScenario;
 
-inline void CheckSupportedScenarioAndResetEventStatus(int32_t scenarioExpr, const ArkUI_UIInputEvent* event);
+ArkUI_ErrorCode CheckIsSupportedScenario(int32_t scenarioExpr, const ArkUI_UIInputEvent* event);
 
-#define RETURN_RET_WITH_STATUS_CHECK(ret, errorCode)                                                                          \
+inline void CheckSupportedScenarioAndResetEventStatus(int32_t scenarioExpr, const ArkUI_UIInputEvent* event)
+{
+    g_scenarioSupportCheckResult = CheckIsSupportedScenario(scenarioExpr, event);
+    g_latestEventStatus = ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+#define RETURN_RET_WITH_STATUS_CHECK(ret, errorCode)                                                                \
     do {                                                                                                            \
         g_latestEventStatus =                                                                                       \
             g_scenarioSupportCheckResult == ARKUI_ERROR_CODE_NO_ERROR ? (errorCode) : g_scenarioSupportCheckResult; \
         return ret;                                                                                                 \
     } while (0)
 
-#define RETURN_WITH_STATUS_CHECK(errorCode)                                            \
+#define RETURN_WITH_STATUS_CHECK(errorCode)                                                                         \
     do {                                                                                                            \
         g_latestEventStatus =                                                                                       \
             g_scenarioSupportCheckResult == ARKUI_ERROR_CODE_NO_ERROR ? (errorCode) : g_scenarioSupportCheckResult; \

@@ -3385,7 +3385,7 @@
     },
     {
         "first_introduced": "20",
-        "name": "OH_ArkUI_GetLastestEventStatus"
+        "name": "OH_ArkUI_UIInputEvent_GetLatestStatus"
     },
     {
         "first_introduced": "20",

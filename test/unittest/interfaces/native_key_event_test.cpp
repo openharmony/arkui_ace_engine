@@ -112,7 +112,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest003, TestSize.Level1)
     auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
     auto type = OH_ArkUI_KeyEvent_GetType(uiInputEvent);
     EXPECT_EQ(type, ArkUI_KeyEventType::ARKUI_KEY_EVENT_UNKNOWN);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
      * @tc.steps: step2.create null KeyEvent, related function is called.
@@ -125,7 +125,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest003, TestSize.Level1)
     uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     type = OH_ArkUI_KeyEvent_GetType(uiInputEvent);
     EXPECT_EQ(type, ArkUI_KeyEventType::ARKUI_KEY_EVENT_UNKNOWN);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -161,21 +161,21 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest004, TestSize.Level1)
      * @tc.steps: step2. call functions.
      */
     auto type = OH_ArkUI_KeyEvent_GetType(inputEvent);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
     auto code = OH_ArkUI_KeyEvent_GetKeyCode(inputEvent);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
     auto keySource = OH_ArkUI_KeyEvent_GetKeySource(inputEvent);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
     auto intensionCode = OH_ArkUI_KeyEvent_GetKeyIntensionCode(inputEvent);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
     auto unicode = OH_ArkUI_KeyEvent_GetUnicode(inputEvent);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
     auto diviceId = OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
     auto time = OH_ArkUI_UIInputEvent_GetEventTime(inputEvent);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
     auto keyText = OH_ArkUI_KeyEvent_GetKeyText(inputEvent);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 
     /**
      * @tc.expected: Return expected results.
@@ -268,7 +268,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest006, TestSize.Level1)
      * @tc.expected: Return expected results.
      */
     EXPECT_EQ(flag, true);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 }
 
 /**
@@ -286,7 +286,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest007, TestSize.Level1)
     auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
     auto type = OH_ArkUI_KeyEvent_GetKeyCode(uiInputEvent);
     EXPECT_EQ(type, -1);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
     * @tc.steps: step2.create null KeyEvent, function will return -1.
@@ -299,7 +299,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest007, TestSize.Level1)
     uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     type = OH_ArkUI_KeyEvent_GetKeyCode(uiInputEvent);
     EXPECT_EQ(type, -1);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -317,7 +317,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest008, TestSize.Level1)
     auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
     auto type = OH_ArkUI_KeyEvent_GetKeyText(uiInputEvent);
     EXPECT_EQ(type, nullptr);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
     * @tc.steps: step2.create null KeyEvent, function will return null.
@@ -330,7 +330,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest008, TestSize.Level1)
     uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     type = OH_ArkUI_KeyEvent_GetKeyText(uiInputEvent);
     EXPECT_EQ(type, nullptr);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -348,7 +348,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest009, TestSize.Level1)
     auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
     auto type = OH_ArkUI_KeyEvent_GetKeySource(uiInputEvent);
     EXPECT_EQ(type, -1);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
     * @tc.steps: step2.create null KeyEvent, function will return -1.
@@ -361,7 +361,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest009, TestSize.Level1)
     uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     type = OH_ArkUI_KeyEvent_GetKeySource(uiInputEvent);
     EXPECT_EQ(type, -1);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -384,7 +384,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0010, TestSize.Level1)
     auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     OH_ArkUI_KeyEvent_StopPropagation(inputEvent, true);
     EXPECT_EQ(event.keyEvent.stopPropagation, true);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 
     /**
     * @tc.steps: step2.create null UIInputEvent, related function is called and stopPropagation is true.
@@ -393,7 +393,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0010, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     OH_ArkUI_KeyEvent_StopPropagation(inputEvent, false);
     EXPECT_EQ(event.keyEvent.stopPropagation, true);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
     * @tc.steps: step2.create null KeyEvent, related function is called and stopPropagation is true.
@@ -403,7 +403,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0010, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     OH_ArkUI_KeyEvent_StopPropagation(inputEvent, false);
     EXPECT_EQ(event.keyEvent.stopPropagation, true);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -421,7 +421,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0011, TestSize.Level1)
     auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
     auto type = OH_ArkUI_KeyEvent_GetKeyIntensionCode(uiInputEvent);
     EXPECT_EQ(type, -1);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
     * @tc.steps: step2.create null KeyEvent, function will return -1.
@@ -434,7 +434,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0011, TestSize.Level1)
     uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     type = OH_ArkUI_KeyEvent_GetKeyIntensionCode(uiInputEvent);
     EXPECT_EQ(type, -1);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -452,7 +452,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0012, TestSize.Level1)
     auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
     auto type = OH_ArkUI_KeyEvent_GetUnicode(uiInputEvent);
     EXPECT_EQ(type, 0);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
     * @tc.steps: step2.create null KeyEvent, function will return 0.
@@ -465,7 +465,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0012, TestSize.Level1)
     uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     type = OH_ArkUI_KeyEvent_GetUnicode(uiInputEvent);
     EXPECT_EQ(type, 0);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -488,7 +488,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0013, TestSize.Level1)
     auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     OH_ArkUI_KeyEvent_SetConsumed(inputEvent, true);
     EXPECT_EQ(event.keyEvent.isConsumed, true);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 
     /**
     * @tc.steps: step2.create null UIInputEvent, related function is called and stopPropagation is true.
@@ -497,7 +497,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0013, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     OH_ArkUI_KeyEvent_SetConsumed(inputEvent, false);
     EXPECT_EQ(event.keyEvent.isConsumed, true);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
     * @tc.steps: step2.create null KeyEvent, related function is called and stopPropagation is true.
@@ -507,7 +507,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0013, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     OH_ArkUI_KeyEvent_SetConsumed(inputEvent, false);
     EXPECT_EQ(event.keyEvent.isConsumed, true);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -546,7 +546,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0014, TestSize.Level1)
     frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
     OH_ArkUI_KeyEvent_Dispatch(node, inputEvent);
     EXPECT_EQ(flag, false);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
     * @tc.steps: step2.create null KeyEvent, flag is false.
@@ -558,7 +558,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0014, TestSize.Level1)
     nodeAPI->unregisterNodeEvent(node, NODE_DISPATCH_KEY_EVENT);
     NodeModel::DisposeNode(node);
     EXPECT_EQ(flag, false);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -591,7 +591,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0015, TestSize.Level1)
     bool isNumLockOnState = false;
     auto returnValue = OH_ArkUI_KeyEvent_IsNumLockOn(inputEvent, &isNumLockOnState);
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
      * @tc.steps: step2.create null KeyEvent, returnValue is ARKUI_ERROR_CODE_PARAM_INVALID.
@@ -601,7 +601,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0015, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     returnValue = OH_ArkUI_KeyEvent_IsNumLockOn(inputEvent, &isNumLockOnState);
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
      * @tc.steps: step3.create inputEvent and KeyEvent, returnValue is ARKUI_ERROR_CODE_NO_ERROR.
@@ -612,7 +612,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0015, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     returnValue = OH_ArkUI_KeyEvent_IsNumLockOn(inputEvent, &isNumLockOnState);
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -645,7 +645,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0016, TestSize.Level1)
     bool isNumLockOnState = false;
     auto returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
      * @tc.steps: step2.create null KeyEvent, returnValue is ARKUI_ERROR_CODE_PARAM_INVALID.
@@ -655,7 +655,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0016, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
      * @tc.steps: step3.create inputEvent and KeyEvent, returnValue is ARKUI_ERROR_CODE_NO_ERROR.
@@ -666,7 +666,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0016, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -699,7 +699,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0017, TestSize.Level1)
     bool isNumLockOnState = false;
     auto returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
      * @tc.steps: step2.create null KeyEvent, returnValue is ARKUI_ERROR_CODE_PARAM_INVALID.
@@ -709,7 +709,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0017, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
      * @tc.steps: step3.create inputEvent and KeyEvent, returnValue is ARKUI_ERROR_CODE_NO_ERROR.
@@ -720,6 +720,6 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0017, TestSize.Level1)
     inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(OH_ArkUI_GetLastestEventStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 } // namespace OHOS::Ace
