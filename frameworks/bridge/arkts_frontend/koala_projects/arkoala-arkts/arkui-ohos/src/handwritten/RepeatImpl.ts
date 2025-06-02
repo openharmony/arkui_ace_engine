@@ -22,6 +22,7 @@ import { RepeatItem, UIRepeatAttribute, RepeatArray, RepeatItemBuilder, Template
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
 import { LazyForEachImpl } from './LazyForEachImpl';
 import { ArkColumnPeer } from '../component/column';
+import { InternalListener } from '../DataChangeListener';
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
     __item: T;
@@ -51,7 +52,7 @@ class RepeatItemImpl<T> implements RepeatItem<T> {
 
 class RepeatDataSource<T> implements IDataSource<T> {
     private arr_: RepeatArray<T>;
-    private listeners = new Set<DataChangeListener>()
+    private listener?: InternalListener
 
     constructor(arr: RepeatArray<T>) {
         this.arr_ = arr;
@@ -69,13 +70,13 @@ class RepeatDataSource<T> implements IDataSource<T> {
         // Shallow compare: check length and each element by reference
         if (this.arr_.length !== newArr.length) {
             this.arr_ = newArr;
-            this.listeners.forEach(listener => listener.onDataReloaded());
+            this.listener?.update(0, Number.POSITIVE_INFINITY, this.arr_.length - newArr.length)
             return;
         }
         for (let i = 0; i < newArr.length; i++) {
             if (this.arr_[i] !== newArr[i]) {
                 this.arr_ = newArr;
-                this.listeners.forEach(listener => listener.onDataReloaded());
+                this.listener?.update(i, Number.POSITIVE_INFINITY, 0)
                 return;
             }
         }
@@ -90,11 +91,15 @@ class RepeatDataSource<T> implements IDataSource<T> {
     }
 
     registerDataChangeListener(listener: DataChangeListener): void {
-        this.listeners.add(listener)
+        if (listener instanceof InternalListener)
+            this.listener = listener as InternalListener
+        else
+            throw Error("Invalid listener registration. Repeat's data source object shouldn't be exposed to other modules")
     }
 
     unregisterDataChangeListener(listener: DataChangeListener): void {
-        this.listeners.delete(listener)
+        if (listener !== this.listener) throw Error("Invalid deregistration")
+        this.listener = undefined
     }
 }
 
