@@ -234,9 +234,9 @@ double ScrollerImpl::GetContentTop(const RefPtr<FrameNode>& node)
     auto scrollPattern = AceType::DynamicCast<NG::ScrollPattern>(scrollablePattern);
     auto waterFlowPattern = AceType::DynamicCast<NG::WaterFlowPattern>(scrollablePattern);
 
-    bool isAtStart = (waterFlowPattern && !waterFlowPattern->GetItemStart()) ||
+    bool isNeedGetScrollableEdge = (waterFlowPattern && !waterFlowPattern->GetItemStart()) ||
         (!waterFlowPattern && !scrollPattern && !IsAtStart());
-    if (isAtStart) {
+    if (isNeedGetScrollableEdge) {
         return GetScrollableEdge<Edge::TOP>(jsScroller_, node);
     }
     return GetContentEdge<Edge::TOP>(jsScroller_, node);
@@ -249,9 +249,9 @@ double ScrollerImpl::GetContentBottom(const RefPtr<FrameNode>& node)
     auto scrollPattern = AceType::DynamicCast<NG::ScrollPattern>(scrollablePattern);
     auto waterFlowPattern = AceType::DynamicCast<NG::WaterFlowPattern>(scrollablePattern);
 
-    bool isAtEnd = (waterFlowPattern && !waterFlowPattern->GetItemEnd()) ||
+    bool isNeedGetScrollableEdge = (waterFlowPattern && !waterFlowPattern->GetItemEnd()) ||
         (!waterFlowPattern && !scrollPattern && !IsAtEnd());
-    if (isAtEnd) {
+    if (isNeedGetScrollableEdge) {
         return GetScrollableEdge<Edge::BOTTOM>(jsScroller_, node);
     }
     return GetContentEdge<Edge::BOTTOM>(jsScroller_, node);
