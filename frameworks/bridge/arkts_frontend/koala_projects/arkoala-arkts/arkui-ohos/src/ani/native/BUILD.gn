@@ -25,6 +25,7 @@ ohos_shared_library("arkoala_native_ani") {
   include_dirs = [
     "./",
     "common/",
+    "custom_node/",
     "web/",
     "content_slot/",
   ]
@@ -33,6 +34,7 @@ ohos_shared_library("arkoala_native_ani") {
     "common/common_module.cpp",
     "load.cpp",
     "module.cpp",
+    "custom_node/custom_node_module.cpp",
     "web/web_module_methods.cpp",
     "utils/convert_utils.cpp",
     "content_slot/content_slot_module.cpp",

@@ -17,6 +17,7 @@
 #include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
 #include "web_ani_modifier.h"
+#include "custom_node_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -26,6 +27,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getImageAniModifier = OHOS::Ace::NG::GetImageAniModifier,
         .getWebAniModifier = OHOS::Ace::NG::GetWebAniModifier,
         .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
+        .getCustomNodeAniModifier = OHOS::Ace::NG::GetCustomNodeAniModifier,
         .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
     };

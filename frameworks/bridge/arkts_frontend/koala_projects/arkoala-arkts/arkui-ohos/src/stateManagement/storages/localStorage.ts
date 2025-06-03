@@ -38,13 +38,13 @@ export class LocalStorage {
     private linkFinalisationRegistrations_: Map<string, Set<StorageLinkPropIdType>> = new Map<string, Set<StorageLinkPropIdType>>();
     // how FinalizationRegistry is used: when creating a link or prop:
     // finalizationRegistry_.register(prop/link object, { propName: propName, id: id })
-    private finalizationRegistry_: FinalizationRegistry<StorageLinkPropRegistration>
-        = new FinalizationRegistry<StorageLinkPropRegistration>(this.__clearLinkInternalByRegistration);
+    private finalizationRegistry_: FinalizationRegistry<StorageLinkPropRegistration> =
+        new FinalizationRegistry<StorageLinkPropRegistration>(this.__clearLinkInternalByRegistration);
 
     // framework internal function, not STK
     public __clearLinkInternalByRegistration(linkPropRegistration: StorageLinkPropRegistration): void {
-        const reg: Set<StorageLinkPropIdType> | undefined
-            = this.linkFinalisationRegistrations_.get(linkPropRegistration.propName)
+        const reg: Set<StorageLinkPropIdType> | undefined =
+            this.linkFinalisationRegistrations_.get(linkPropRegistration.propName);
         if (reg === undefined) {
             return;
         }
@@ -201,7 +201,7 @@ export class LocalStorage {
         const prop = result.prop;
         
         const id = this.nextLinkPropId++;
-        let reg = this.linkFinalisationRegistrations_.get(propName)
+        let reg = this.linkFinalisationRegistrations_.get(propName);
         if (reg === undefined) {
             reg = new Set<StorageLinkPropIdType>();
             this.linkFinalisationRegistrations_.set(propName, reg);
@@ -233,8 +233,8 @@ export class LocalStorage {
     protected clear(): boolean {
         if (this.linkFinalisationRegistrations_.size > 0) {
             for (let propName of this.keys()) {
-                if ((this.linkFinalisationRegistrations_.get(propName) !== undefined)
-                    && (this.linkFinalisationRegistrations_.get(propName)!.size > 0)) {
+                if ((this.linkFinalisationRegistrations_.get(propName) !== undefined) &&
+                    (this.linkFinalisationRegistrations_.get(propName)!.size > 0)) {
                     return false;
                 }
             }

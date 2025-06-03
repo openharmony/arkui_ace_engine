@@ -33,6 +33,7 @@ struct _ArkUINodeContent;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
 typedef struct __ani_env ani_env;
+typedef int32_t ani_int;
 typedef int64_t ani_long;
 typedef class __ani_fn_object *ani_fn_object;
 typedef _ArkUINode* ArkUINodeHandle;
@@ -55,6 +56,9 @@ struct ArkUIAniCommonModifier {
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);
 };
+struct ArkUIAniCustomNodeModifier {
+    ani_long (*constructCustomNode)(ani_int);
+};
 struct ArkUIAniDrawModifier {
     void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_object fnObj);
     void (*invalidate)(ani_env* env, ani_long ptr);
@@ -68,6 +72,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniImageModifier* (*getImageAniModifier)();
     const ArkUIAniWebModifier* (*getWebAniModifier)();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
+    const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
 };

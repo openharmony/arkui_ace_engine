@@ -15,7 +15,7 @@
 
 import { mutableState, MutableState, NodeAttach, rememberDisposable, RunEffect, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode } from "./PeerNode";
-import { ArkComponentRootPeer } from "./component";
+import { ArkComponentRootPeer, ArkCustomComponentRootPeer } from "./component";
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { int32 } from "@koalaui/common"
 import { InteropNativeModule } from "@koalaui/interop"
@@ -40,7 +40,7 @@ export function ArkComponentRoot(
 ) {
     InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot enter`)
     NodeAttach<PeerNode>(
-        () => ArkComponentRootPeer.create(undefined),
+        () => ArkCustomComponentRootPeer.create(component),
         (node: PeerNode) => {
             if (_isNeedCreate) {
                 rememberDisposable(() => {
