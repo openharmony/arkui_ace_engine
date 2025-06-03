@@ -928,6 +928,8 @@ JSRef<JSVal> JSRichEditor::CreateJsOnWillChange(const NG::RichEditorChangeValue&
     SetChangeTextSpans(replacedSymbolSpans, changeValue.GetRichEditorReplacedSymbolSpans());
     OnWillChangeObj->SetPropertyObject("replacedSymbolSpans", replacedSymbolSpans);
 
+    OnWillChangeObj->SetProperty<int32_t>("changeReason", static_cast<int32_t>(changeValue.GetChangeReason()));
+
     return JSRef<JSVal>::Cast(OnWillChangeObj);
 }
 

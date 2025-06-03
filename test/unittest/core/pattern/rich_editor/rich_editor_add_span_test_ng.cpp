@@ -100,7 +100,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan001, TestSize.Level1)
     EXPECT_EQ(index2, 2);
 
     options.offset = std::nullopt;
-    auto index3 = richEditorPattern->AddImageSpan(options, false, 0);
+    auto index3 = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, false, 0);
     EXPECT_EQ(index3, 4);
 
     std::optional<Ace::NG::MarginProperty> marginProp = std::nullopt;
@@ -108,7 +108,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan001, TestSize.Level1)
     imageStyle.marginProp = marginProp;
     imageStyle.borderRadius = borderRadius;
     options.imageAttribute = imageStyle;
-    auto index4 = richEditorPattern->AddImageSpan(options, false, 0);
+    auto index4 = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, false, 0);
     EXPECT_EQ(index4, 5);
 
     marginProp = { CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC };
@@ -116,7 +116,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan001, TestSize.Level1)
     imageStyle.marginProp = marginProp;
     imageStyle.borderRadius = borderRadius;
     options.imageAttribute = imageStyle;
-    auto index5 = richEditorPattern->AddImageSpan(options, false, 0);
+    auto index5 = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, false, 0);
     EXPECT_EQ(index5, 6);
 
     marginProp = { ERROR_CALC_LENGTH_CALC, ERROR_CALC_LENGTH_CALC, ERROR_CALC_LENGTH_CALC, ERROR_CALC_LENGTH_CALC };
@@ -124,7 +124,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan001, TestSize.Level1)
     imageStyle.marginProp = marginProp;
     imageStyle.borderRadius = borderRadius;
     options.imageAttribute = imageStyle;
-    auto index6 = richEditorPattern->AddImageSpan(options, false, -1);
+    auto index6 = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, false, -1);
     EXPECT_EQ(index6, 7);
 }
 
@@ -164,7 +164,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan002, TestSize.Level1)
     options.bundleName = BUNDLE_NAME;
     options.moduleName = MODULE_NAME;
     options.offset = 1;
-    auto index = richEditorPattern->AddImageSpan(options, false, 0, true);
+    auto index = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, false, 0, true);
     EXPECT_EQ(index, 1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 2);
     EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());

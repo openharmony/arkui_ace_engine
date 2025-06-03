@@ -1019,7 +1019,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController021, TestSize.Level1)
     /**
      * @tc.steps: step4. test AddTextSpan
      */
-    auto index = richEditorPattern->AddTextSpan(options, true, 5);
+    auto index = richEditorPattern->AddTextSpan(options, TextChangeReason::UNKNOWN, true, 5);
     EXPECT_EQ(index, 5);
     auto info = richEditorController->GetSpansInfo(5, sizeof(INIT_VALUE_1));
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
