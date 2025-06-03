@@ -811,6 +811,7 @@ public:
     void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
     void SendPipEvent(int delegateId, int childId, int frameRoutingId, int event);
+    void SetDefaultBackgroundColor();
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -1305,6 +1306,7 @@ private:
     int32_t rotationEndCallbackId_ = 0;
 
     WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
+    bool needSetDefaultBackgroundColor_ = false;
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
