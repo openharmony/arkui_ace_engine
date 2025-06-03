@@ -1149,6 +1149,7 @@ HWTEST_F(MenuViewTestNg, SetWordBreak002, TestSize.Level1)
 HWTEST_F(MenuViewTestNg, UpdateMenuProperties001, TestSize.Level1)
 {
     MenuParam menuParam;
+    menuParam.outlineWidth = std::make_optional<BorderWidthProperty>();
     menuParam.outlineWidth->SetBorderWidth(Dimension(10));
     menuParam.enableArrow = true;
     ASSERT_NE(wrapperNode_, nullptr);
