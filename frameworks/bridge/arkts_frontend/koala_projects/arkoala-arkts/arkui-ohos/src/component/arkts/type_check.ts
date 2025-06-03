@@ -5265,6 +5265,12 @@ export class TypeChecker {
     static TitleHeight_FromNumeric(ordinal: int32): TitleHeight {
         return TitleHeight.fromValue(ordinal)
     }
+    static ToastShowMode_ToNumeric(value: promptAction.ToastShowMode): int32 {
+        return value.valueOf()
+    }
+    static ToastShowMode_FromNumeric(ordinal: int32): promptAction.ToastShowMode {
+        return promptAction.ToastShowMode.fromValue(ordinal)
+    }
     static ToggleType_ToNumeric(value: ToggleType): int32 {
         return value.valueOf()
     }

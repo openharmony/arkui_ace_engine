@@ -160,6 +160,7 @@ import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
 import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
+import promptAction from "@ohos/promptAction"
 
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
@@ -21386,6 +21387,12 @@ export class TypeChecker {
     }
     static XComponentType_FromNumeric(ordinal: int32): XComponentType {
         return ordinal as XComponentType
+    }
+    static ToastShowMode_ToNumeric(value: promptAction.ToastShowMode): int32 {
+        return value as int32
+    }
+    static ToastShowMode_FromNumeric(ordinal: int32): promptAction.ToastShowMode {
+        return ordinal as promptAction.ToastShowMode
     }
     static isArray_PixelMap(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)

@@ -21225,7 +21225,140 @@ export class Deserializer extends DeserializerBase {
             throw new Error("One of the branches for message_buf has to be chosen through deserialisation.")
         }
         const message_result : ResourceStr = (message_buf as string | Resource)
-        let value : promptAction.ShowToastOptions = ({message: message_result } as promptAction.ShowToastOptions)
+        const duration_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let duration_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (duration_buf_runtimeType))
+        {
+            duration_buf = (valueDeserializer.readNumber() as number)
+        }
+        const duration_result : number | undefined = duration_buf
+        const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let bottom_buf : string | number | undefined
+        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        {
+            const bottom_buf__selector : int32 = valueDeserializer.readInt8()
+            let bottom_buf_ : string | number | undefined
+            if (bottom_buf__selector == 0) {
+                bottom_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (bottom_buf__selector == 1) {
+                bottom_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else {
+                throw new Error("One of the branches for bottom_buf_ has to be chosen through deserialisation.")
+            }
+            bottom_buf = (bottom_buf_ as string | number)
+        }
+        const bottom_result : string | number | undefined = bottom_buf
+        const showMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let showMode_buf : promptAction.ToastShowMode | undefined
+        if ((RuntimeType.UNDEFINED) != (showMode_buf_runtimeType))
+        {
+            showMode_buf = TypeChecker.ToastShowMode_FromNumeric(valueDeserializer.readInt32())
+        }
+        const showMode_result : promptAction.ToastShowMode | undefined = showMode_buf
+        const alignment_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let alignment_buf : Alignment | undefined
+        if ((RuntimeType.UNDEFINED) != (alignment_buf_runtimeType))
+        {
+            alignment_buf = TypeChecker.Alignment_FromNumeric(valueDeserializer.readInt32())
+        }
+        const alignment_result : Alignment | undefined = alignment_buf
+        const offset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let offset_buf : Offset | undefined
+        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        {
+            offset_buf = valueDeserializer.readOffset()
+        }
+        const offset_result : Offset | undefined = offset_buf
+        const backgroundColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundColor_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundColor_buf_runtimeType))
+        {
+            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundColor_buf_ : Color | number | string | Resource | undefined
+            if (backgroundColor_buf__selector == 0) {
+                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundColor_buf__selector == 1) {
+                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundColor_buf__selector == 2) {
+                backgroundColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundColor_buf__selector == 3) {
+                backgroundColor_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
+        }
+        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
+        const textColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let textColor_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (textColor_buf_runtimeType))
+        {
+            const textColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let textColor_buf_ : Color | number | string | Resource | undefined
+            if (textColor_buf__selector == 0) {
+                textColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (textColor_buf__selector == 1) {
+                textColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (textColor_buf__selector == 2) {
+                textColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (textColor_buf__selector == 3) {
+                textColor_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for textColor_buf_ has to be chosen through deserialisation.")
+            }
+            textColor_buf = (textColor_buf_ as Color | number | string | Resource)
+        }
+        const textColor_result : ResourceColor | undefined = textColor_buf
+        const backgroundBlurStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundBlurStyle_buf : BlurStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyle_buf_runtimeType))
+        {
+            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        }
+        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
+        const shadow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let shadow_buf : ShadowOptions | ShadowStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (shadow_buf_runtimeType))
+        {
+            const shadow_buf__selector : int32 = valueDeserializer.readInt8()
+            let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
+            if (shadow_buf__selector == 0) {
+                shadow_buf_ = valueDeserializer.readShadowOptions()
+            }
+            else if (shadow_buf__selector == 1) {
+                shadow_buf_ = TypeChecker.ShadowStyle_FromNumeric(valueDeserializer.readInt32())
+            }
+            else {
+                throw new Error("One of the branches for shadow_buf_ has to be chosen through deserialisation.")
+            }
+            shadow_buf = (shadow_buf_ as ShadowOptions | ShadowStyle)
+        }
+        const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
+        const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let enableHoverMode_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
+        {
+            enableHoverMode_buf = valueDeserializer.readBoolean()
+        }
+        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
+        const hoverModeArea_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let hoverModeArea_buf : HoverModeAreaType | undefined
+        if ((RuntimeType.UNDEFINED) != (hoverModeArea_buf_runtimeType))
+        {
+            hoverModeArea_buf = TypeChecker.HoverModeAreaType_FromNumeric(valueDeserializer.readInt32())
+        }
+        const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
+        let value : promptAction.ShowToastOptions = ({message: message_result, duration: duration_result, bottom: bottom_result, showMode: showMode_result, alignment: alignment_result, offset: offset_result, backgroundColor: backgroundColor_result, textColor: textColor_result, backgroundBlurStyle: backgroundBlurStyle_result, shadow: shadow_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result} as promptAction.ShowToastOptions)
         return value
     }
     readAlertDialogParamWithButtons(): AlertDialogParamWithButtons {
