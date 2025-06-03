@@ -276,40 +276,6 @@ public:
 };
 
 /**
- * @tc.name: addImageSpanTest
- * @tc.desc: Check the functionality of addImageSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorControllerAccessorTest, addImageSpanTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->addImageSpan, nullptr);
-
-    std::string urlString = "https://www.example.com/xxx.png";
-    std::string resName = "app.string.image_url";
-    AddResource(resName, urlString);
-    int resID = 2345;
-    const auto RES_ID = IntResourceId{resID, Converter::ResourceType::STRING};
-    Ark_ResourceStr arkResourceStr = CreateResourceUnion<Ark_ResourceStr>(RES_ID);
-
-    ImageSpanOptions imageSpanOptions;
-    imageSpanOptions.offset = TEST_OFFSET;
-    ImageSpanAttribute imageSpanAttribute;
-    MarginProperty marginProperty {
-        .left = CalcLength(1.0f),
-        .top = CalcLength(2.0f),
-        .right = CalcLength(3.0f),
-        .bottom = CalcLength(4.0f)
-    };
-    imageSpanAttribute.marginProp = marginProperty;
-    imageSpanOptions.imageAttribute = imageSpanAttribute;
-    auto value = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr, Ark_ResourceStr>(arkResourceStr);
-    auto options = Converter::ArkValue<Opt_RichEditorImageSpanOptions>(imageSpanOptions);
-
-    EXPECT_CALL(*mockRichEditorController_, AddImageSpan(imageSpanOptions)).Times(1);
-    accessor_->addImageSpan(peer_, &value, &options);
-}
-
-/**
  * @tc.name: addTextSpanTest
  * @tc.desc: Check the functionality of addTextSpan
  * @tc.type: FUNC

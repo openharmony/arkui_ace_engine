@@ -21,9 +21,12 @@
 #include <string>
 
 #include "ui/base/ace_type.h"
+#include "ui/base/macros.h"
 #include "ui/base/referenced.h"
 #include "ui/properties/dirty_flag.h"
 #include "ui/view/layout/layout_info.h"
+
+typedef struct _ArkUINode* ArkUINodeHandle;
 
 namespace OHOS::Ace::NG {
 class LayoutProperty;
@@ -38,12 +41,14 @@ class UIContext;
 class Property;
 using NodeHandle = void*;
 
-class FrameNode : public AceType {
+class ACE_FORCE_EXPORT FrameNode : public AceType {
     DECLARE_ACE_TYPE(FrameNode, AceType);
 
 public:
     FrameNode() = default;
     virtual ~FrameNode() = default;
+
+    static RefPtr<FrameNode> GetFrameNode(ArkUINodeHandle node);
 
     virtual void InitializePatternAndContext() = 0;
     virtual void Reset() = 0;

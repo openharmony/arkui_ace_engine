@@ -25,9 +25,20 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Kit {
+RefPtr<FrameNode> FrameNode::GetFrameNode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto kitNode = frameNode->GetKitNode();
+    if (!kitNode) {
+        kitNode = MakeRefPtr<FrameNodeImpl>(Claim(frameNode));
+    }
+    return kitNode;
+}
 
 FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>& pattern)
     : nodeRef_(node), pattern_(pattern)

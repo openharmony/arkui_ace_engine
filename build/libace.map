@@ -458,6 +458,7 @@
       OHOS::Ace::Kit::View::*;
       OHOS::Ace::Kit::Column::*;
       OHOS::Ace::Kit::Text::*;
+      OHOS::Ace::Kit::FrameNode::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::CustomNode::*;
       OHOS::Ace::NG::NavigationGroupNode::*;
