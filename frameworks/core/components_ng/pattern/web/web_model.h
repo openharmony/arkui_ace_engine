@@ -207,6 +207,7 @@ public:
         const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetEnabledHapticFeedback(bool isEnabled) {}
     virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
+    virtual void SetDefaultBackgroundColor() {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

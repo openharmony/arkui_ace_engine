@@ -281,4 +281,26 @@ HWTEST_F(WebModelTestNg, JavaScriptOnHeadReady032, TestSize.Level1)
     EXPECT_NE(webPattern->onHeadReadyScriptItems_, std::nullopt);
 #endif
 }
+
+/**
+ * @tc.name: SetDefaultBackgroundColor001
+ * @tc.desc: Test Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetDefaultBackgroundColor001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetDefaultBackgroundColor();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+#endif
+}
 } // namespace OHOS::Ace::NG

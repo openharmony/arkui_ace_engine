@@ -1991,4 +1991,29 @@ HWTEST_F(WebPatternTestNg, CheckZoomStatus_009, TestSize.Level1)
     webPattern->zoomErrorCount_ = 0;
 #endif
 }
+
+/**
+ * @tc.name: SetDefaultBackgroundColor001
+ * @tc.desc: SetDefaultBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, SetDefaultBackgroundColor001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->SetDefaultBackgroundColor();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+
+    webPattern->OnBackgroundColorUpdate(Color::RED.GetValue());
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+#endif
+}
 } // namespace OHOS::Ace::NG
