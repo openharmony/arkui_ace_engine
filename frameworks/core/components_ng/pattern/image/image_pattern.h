@@ -443,6 +443,7 @@ private:
     void OnCompleteInDataReady();
     void OnImageLoadFail(const std::string& errorMsg, const ImageErrorInfo& errorInfo);
     void OnImageLoadSuccess();
+    bool SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap);
     void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
         const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);

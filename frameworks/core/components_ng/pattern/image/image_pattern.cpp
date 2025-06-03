@@ -477,11 +477,26 @@ void ImagePattern::OnImageLoadSuccess()
     }
     auto context = host->GetRenderContext();
     auto pixelMap = image_->GetPixelMap();
+    if (pixelMap) {
+        SetPixelMapMemoryName(pixelMap);
+    }
     if (context && pixelMap) {
         context->SetIsWideColorGamut(pixelMap->GetIsWideColorGamut());
     }
     ReportPerfData(host, IMAGE_LOAD_SUCCESS);
     host->MarkNeedRenderOnly();
+}
+
+bool ImagePattern::SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto id = host->GetInspectorId();
+    if (id.has_value()) {
+        pixelMap->SetMemoryName(id.value());
+        return true;
+    }
+    return false;
 }
 
 bool ImagePattern::CheckIfNeedLayout()
