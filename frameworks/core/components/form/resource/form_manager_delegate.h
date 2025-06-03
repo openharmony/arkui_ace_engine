@@ -25,7 +25,6 @@
 #include "core/components/form/resource/form_manager_resource.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/pipeline/pipeline_base.h"
-#include "render_service_client/core/ui/rs_ui_context.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_info.h"
@@ -37,6 +36,9 @@
 #include "core/components/form/resource/form_utils.h"
 #endif
 
+namespace OHOS::Rosen {
+    class RSUIContext;
+}
 namespace OHOS::Ace {
 class FormCallbackClient;
 class FormSurfaceCallbackClient;

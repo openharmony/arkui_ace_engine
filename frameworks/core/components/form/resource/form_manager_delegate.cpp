@@ -31,6 +31,7 @@
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/gestures/gesture_info.h"
 #include "frameworks/base/json/json_util.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_callback_client.h"

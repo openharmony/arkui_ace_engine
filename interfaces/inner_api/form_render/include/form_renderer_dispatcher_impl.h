@@ -21,11 +21,13 @@
 #include "base/utils/macros.h"
 #include "ui_content.h"
 #include "event_handler.h"
-#include "render_service_client/core/ui/rs_ui_context.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 class EventHandler;
+}
+namespace Rosen {
+    class RSUIContext;
 }
 namespace Ace {
 class FormRenderer;
