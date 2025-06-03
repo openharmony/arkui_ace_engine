@@ -300,6 +300,11 @@ public:
         return typingParagraphStyle_;
     }
 
+    bool HasTypingParagraphStyle()
+    {
+        return typingParagraphStyle_.has_value();
+    }
+
 private:
     std::optional<struct UpdateSpanStyle> typingFontStyle_;
     std::optional<TextStyle> typingTextStyle_;

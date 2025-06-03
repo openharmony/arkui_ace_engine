@@ -2242,7 +2242,7 @@ void RichEditorPattern::UpdateCaretStyleByTypingStyle()
 {
     bool empty = spans_.empty();
     bool hasPreviewContent = !previewTextRecord_.previewContent.empty();
-    bool lastNewLine = !empty && caretPosition_ == GetTextContentLength() && spans_.back()->content.back() == u'\n';
+    bool lastNewLine = !empty && styleManager_->HasTypingParagraphStyle() && spans_.back()->content.back() == u'\n';
     CHECK_NULL_VOID(empty || hasPreviewContent || lastNewLine);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -6059,7 +6059,7 @@ void RichEditorPattern::InsertValueToSpanNode(
         RichEditorErrorReport(errorInfo);
         return;
     }
-    bool needTypingParaStyle = spanItem == spans_.back() && textTemp.back() == u'\n';
+    bool needTypingParaStyle = styleManager_->NeedTypingParagraphStyle(spans_, caretPosition_);
     textTemp.insert(info.GetOffsetInSpan(), insertValue);
     spanNode->UpdateContent(textTemp);
     UpdateSpanPosition();

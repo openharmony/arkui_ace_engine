@@ -2301,7 +2301,7 @@ bool JSRichEditorBaseController::ParseParagraphStyle(const JSRef<JSObject>& styl
                 style.leadingMargin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
             }
         }
-    } else if (!lm->IsNull()) {
+    } else if (!lm->IsNull() && !lm->IsUndefined()) {
         // [Dimension]
         style.leadingMargin = std::make_optional<NG::LeadingMargin>();
         CalcDimension width;
