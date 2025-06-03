@@ -1395,15 +1395,25 @@ void PipelineContext::SetupRootElement()
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() : stageNode->GetParent()));
 
-    OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
+    auto instanceId = container->GetInstanceId();
+    OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_)),
+                                              instanceId](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
-        overlay->HideAllMenus();
-        SubwindowManager::GetInstance()->HideMenuNG(false);
-        overlay->HideCustomPopups();
+        auto container = Container::GetContainer(instanceId);
+        // In sceneBoard window, popup and menu need be cleared without animation.
+        if (container && container->IsSceneBoardWindow()) {
+            overlay->HideAllMenusWithoutAnimation();
+            overlay->HideAllPopupsWithoutAnimation();
+            SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
+        } else {
+            overlay->HideAllMenus();
+            SubwindowManager::GetInstance()->HideMenuNG(false);
+            overlay->HideCustomPopups();
+        }
         SubwindowManager::GetInstance()->ClearToastInSubwindow();
         SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
         overlay->UpdateCustomKeyboardPosition();
