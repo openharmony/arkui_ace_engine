@@ -1264,4 +1264,68 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval009, TestSize.Level1)
     scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::END);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -1.0f);
 }
+
+/**
+ * @tc.name: CaleSnapOffsetsByInterval010
+ * @tc.desc: Test CaleSnapOffsetsByInterval
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval010, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SizeF viewPort(5.0f, 1.0f);
+    scrollPattern->viewPort_ = viewPort;
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    int32_t number = 0;
+    layoutProperty->UpdateScrollSnapAlign(static_cast<ScrollSnapAlign>(number));
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension intervalSize(2.0f, DimensionUnit::PERCENT);
+    scrollPattern->intervalSize_ = intervalSize;
+    SizeF viewPortExtent(-4.0f, 1.0f);
+    scrollPattern->viewPortExtent_ = viewPortExtent;
+    scrollPattern->scrollableDistance_ = 1.0f;
+    Dimension dimension(2.0f);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
+    ScrollPagingStatus enablePagingStatus = ScrollPagingStatus::VALID;
+    scrollPattern->SetEnablePaging(enablePagingStatus);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::NONE);
+    EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -1.0f);
+}
+
+/**
+ * @tc.name: CaleSnapOffsetsByInterval011
+ * @tc.desc: Test CaleSnapOffsetsByInterval
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval011, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SizeF viewPort(5.0f, 1.0f);
+    scrollPattern->viewPort_ = viewPort;
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    int32_t number = 0;
+    layoutProperty->UpdateScrollSnapAlign(static_cast<ScrollSnapAlign>(number));
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension intervalSize(2.0f, DimensionUnit::PERCENT);
+    scrollPattern->intervalSize_ = intervalSize;
+    SizeF viewPortExtent(-4.0f, 1.0f);
+    scrollPattern->viewPortExtent_ = viewPortExtent;
+    scrollPattern->scrollableDistance_ = 0.0f;
+    Dimension dimension(2.0f);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
+    ScrollPagingStatus enablePagingStatus = ScrollPagingStatus::VALID;
+    scrollPattern->SetEnablePaging(enablePagingStatus);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::NONE);
+    EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), 0.0f);
+}
 } // namespace OHOS::Ace::NG
