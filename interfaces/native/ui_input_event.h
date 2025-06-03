@@ -1166,7 +1166,6 @@ int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI
  * The system automatically clears the previous status before each API call related to an <b>ArkUI_UIInputEvent</b>
  * object, ensuring that this API always returns the latest execution status.
  *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
  * @return Result code of the most recent API call related to the <b>ArkUI_UIInputEvent</b> object.
  * @since 20
  */
