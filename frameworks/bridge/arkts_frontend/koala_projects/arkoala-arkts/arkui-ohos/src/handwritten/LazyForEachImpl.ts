@@ -22,6 +22,7 @@ import { int32, KoalaCallsiteKey } from "@koalaui/common";
 import { IDataSource } from "../component/lazyForEach";
 import { LazyForEachOps } from "../component";
 import { LazyItemNode } from "./LazyItemNode";
+import { CustomComponent } from "../component/customComponent";
 
 let globalLazyItems: Set<ComputableState<LazyItemNode>> = new Set<ComputableState<LazyItemNode>>()
 export function updateLazyItems() {
@@ -37,7 +38,7 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     keyGenerator?: (item: T, index: number) => string,
 ) {
     const parent = contextNode<PeerNode>()
-    let pool = rememberDisposable(() => new LazyItemPool(parent), (pool?: LazyItemPool) => {
+    let pool = rememberDisposable(() => new LazyItemPool(parent, CustomComponent.current), (pool?: LazyItemPool) => {
         pool?.dispose()
     })
     let changeCounter = rememberMutableState(0)
@@ -98,13 +99,41 @@ function getOffset(parent: PeerNode, id: KoalaCallsiteKey): int32 {
     return offset // DataNode not found, maybe throw error?
 }
 
+class LazyItemCompositionContext {
+    private prevFrozen: boolean
+    private prevNeedCreate: boolean
+    private prevCurrent?: Object
+
+    constructor(parentComponent?: Object) {
+        const manager = GlobalStateManager.instance
+        this.prevFrozen = manager.frozen
+        manager.frozen = true
+        this.prevNeedCreate = setNeedCreate(true) // ensure synchronous creation of all inner CustomComponent
+        this.prevCurrent = CustomComponent.current
+        CustomComponent.current = parentComponent // setup CustomComponent context to link with @Provide variables
+    }
+
+    exit(): void {
+        CustomComponent.current = this.prevCurrent
+        setNeedCreate(this.prevNeedCreate)
+        GlobalStateManager.instance.frozen = this.prevFrozen
+    }
+}
+
 class LazyItemPool implements Disposable {
     private _activeItems = new Map<int32, ComputableState<LazyItemNode>>()
     private _parent: PeerNode
+    private _componentRoot?: Object
     disposed: boolean = false
 
-    constructor(parent: PeerNode) {
+    /**
+     * 
+     * @param parent direct parent node (should be the scroll container node)
+     * @param root root object of the current CustomComponent
+     */
+    constructor(parent: PeerNode, root?: Object) {
         this._parent = parent
+        this._componentRoot = root
     }
 
     dispose(): void {
@@ -135,9 +164,7 @@ class LazyItemPool implements Disposable {
         const manager = GlobalStateManager.instance
         const node = manager.updatableNode<LazyItemNode>(new LazyItemNode(this._parent),
             (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
-                setNeedCreate(true) // ensure synchronous creation of CustomComponent
+                let scope = new LazyItemCompositionContext(this._componentRoot)
                 memoEntry2<T, number, void>(
                     context,
                     index, // using index to simplify reuse process
@@ -145,8 +172,7 @@ class LazyItemPool implements Disposable {
                     data,
                     index
                 )
-                setNeedCreate(false)
-                manager.frozen = frozen
+                scope.exit()
             }
         )
 
