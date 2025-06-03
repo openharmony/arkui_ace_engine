@@ -858,6 +858,7 @@ void JsiDeclarativeEngineInstance::InitGroupJsBridge()
     }
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
     JsUINodeRegisterCleanUp(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
+    JsUpdateDirty2ForAnimateTo(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
 }
 
 void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef> value)

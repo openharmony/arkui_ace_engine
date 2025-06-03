@@ -341,6 +341,19 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     }
 }
 
+void JsUpdateDirty2ForAnimateTo(BindingTarget globalObj)
+{
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> updateDirty2ForAnimateToFunc = globalObject->GetProperty("updateDirty2ForAnimateTo");
+    if (updateDirty2ForAnimateToFunc->IsFunction()) {
+        const auto globalFunc = JSRef<JSFunc>::Cast(updateDirty2ForAnimateToFunc);
+        const auto callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
+        };
+        ElementRegister::GetInstance()->RegisterJSUpdateDirty2ForAnimateTo(callback);
+    }
+}
+
 void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 {
     JSViewAbstract::JSBind(globalObj);
