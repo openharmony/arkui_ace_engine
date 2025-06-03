@@ -125,7 +125,7 @@ void SetAxisVerticalImpl(Ark_BaseEvent peer,
 Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(peer->GetBaseInfo()->GetForce()));
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetBaseInfo()->GetForce()));
 }
 void SetPressureImpl(Ark_BaseEvent peer,
                      const Ark_Number* pressure)
