@@ -901,4 +901,26 @@ HWTEST_F(ScrollPatternTestNg, GetScrollSnapAlignDumpInfo005, TestSize.Level1)
     scrollPattern->GetScrollSnapAlignDumpInfo(json);
     EXPECT_EQ(json->GetString("snapAlign"), "");
 }
+
+/**
+ * @tc.name: DoJump001
+ * @tc.desc: Test DoJump
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, DoJump001, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
+    scrollPattern->currentOffset_ = 0.0f;
+    scrollPattern->scrollableDistance_ = 1.0f;
+    scrollPattern->canStayOverScroll_ = false;
+    scrollPattern->DoJump(0.0f, SCROLL_FROM_JUMP);
+    EXPECT_FALSE(scrollPattern->GetCanStayOverScroll());
+    scrollPattern->canStayOverScroll_ = true;
+    scrollPattern->DoJump(0.0f, SCROLL_FROM_JUMP);
+    EXPECT_TRUE(scrollPattern->GetCanStayOverScroll());
+    scrollPattern->DoJump(10.0f, SCROLL_FROM_JUMP);
+}
 } // namespace OHOS::Ace::NG
