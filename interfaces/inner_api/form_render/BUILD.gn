@@ -18,7 +18,6 @@ config("form_render_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "$ace_root/frameworks",
-    "$ace_graphic/rosen/modules/render_service_client/core/ui",
     "include/",
   ]
   cflags = []
