@@ -546,7 +546,7 @@ public:
     }
 
     using GetProgressImpl = std::function<int()>;
-    int GetgProgress()
+    int GetProgress()
     {
         if (getProgressImpl_) {
             return getProgressImpl_();
