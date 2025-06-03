@@ -33,7 +33,7 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"

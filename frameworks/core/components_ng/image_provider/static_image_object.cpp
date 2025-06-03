@@ -15,7 +15,7 @@
 
 #include "core/components_ng/image_provider/static_image_object.h"
 
-#include "core/components_ng/image_provider/adapter/image_decoder.h"
+#include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/drawing_image.h"

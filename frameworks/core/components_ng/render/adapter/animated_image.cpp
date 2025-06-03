@@ -18,7 +18,7 @@
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/image/image_cache.h"
