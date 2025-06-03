@@ -97,5 +97,6 @@ state_mgmt_release_files_to_watch = [
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/ui_utils.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/gesture_span.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/gesture_span_native.d.ts",
+  "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop.ts",  
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/index.ts",
 ]

@@ -106,6 +106,9 @@
     "src/lib/common/gesture_span.ts",
     "src/lib/common/gesture_span_native.d.ts",
 
+    // interop
+    "src/lib/interop/interop.ts",
+    
     // init
     "src/index.ts",
   ],
