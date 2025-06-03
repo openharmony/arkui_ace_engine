@@ -454,6 +454,11 @@ TextRange RichEditorChangeValue::GetRangeAfter() const
     return rangeAfter_;
 }
 
+TextChangeReason RichEditorChangeValue::GetChangeReason() const
+{
+    return changeReason_;
+}
+
 void StyledStringChangeValue::SetRangeBefore(const TextRange& range)
 {
     rangeBefore_ = range;

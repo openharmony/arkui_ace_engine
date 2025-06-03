@@ -133,12 +133,22 @@ HWTEST_F(RichEditorUndoRedoTest, RedoDrag002, TestSize.Level1)
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::REDO);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    eventHub->SetOnWillChange(onWillChange);
 
     RichEditorPattern::OperationRecord record;
     record.deleteCaretPostion = 0;
     record.addText = u"test123";
     richEditorPattern->RedoDrag(record);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    EXPECT_EQ(changeReason, TextChangeReason::REDO);
 }
 
 
@@ -187,12 +197,25 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction001, TestSize.Level2)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::REDO);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    eventHub->SetOnWillChange(onWillChange);
+
     richEditorPattern->HandleOnRedoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::UNKNOWN);
     RichEditorPattern::OperationRecord firstRecord;
     firstRecord.addText = u"first Record helloWorld";
     firstRecord.deleteCaretPostion = 3;
     richEditorPattern->redoOperationRecords_.emplace_back(firstRecord);
+    changeReason = TextChangeReason::UNKNOWN;
     richEditorPattern->HandleOnRedoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::REDO);
     EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
 
     RichEditorPattern::OperationRecord secondRecord;
@@ -200,7 +223,9 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction001, TestSize.Level2)
     secondRecord.deleteText = u"helloWorld";
     richEditorPattern->redoOperationRecords_.clear();
     richEditorPattern->redoOperationRecords_.emplace_back(secondRecord);
+    changeReason = TextChangeReason::UNKNOWN;
     richEditorPattern->HandleOnRedoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::REDO);
     EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
 
     RichEditorPattern::OperationRecord thridRecord;
@@ -209,7 +234,9 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction001, TestSize.Level2)
     thridRecord.afterCaretPosition = 15;
     richEditorPattern->redoOperationRecords_.clear();
     richEditorPattern->redoOperationRecords_.emplace_back(thridRecord);
+    changeReason = TextChangeReason::UNKNOWN;
     richEditorPattern->HandleOnRedoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::REDO);
     EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
 }
 
@@ -247,6 +274,16 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction001, TestSize.Level2)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::UNDO);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    eventHub->SetOnWillChange(onWillChange);
+
     RichEditorPattern::OperationRecord firstRecord;
     firstRecord.addText = u"first Record helloWorld";
     firstRecord.deleteText = u"helloWorld";
@@ -257,6 +294,7 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction001, TestSize.Level2)
         richEditorPattern->redoOperationRecords_.emplace_back(emptyRecord);
     }
     richEditorPattern->HandleOnUndoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::UNDO);
     EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
 
     RichEditorPattern::OperationRecord secondRecord;
@@ -264,7 +302,9 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction001, TestSize.Level2)
     secondRecord.deleteCaretPostion = 3;
     richEditorPattern->operationRecords_.clear();
     richEditorPattern->operationRecords_.emplace_back(secondRecord);
+    changeReason = TextChangeReason::UNKNOWN;
     richEditorPattern->HandleOnExtendUndoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::UNDO);
     EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
 }
 
@@ -278,6 +318,16 @@ HWTEST_F(RichEditorUndoRedoTest, InsertValueOperation, TestSize.Level2)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::UNDO);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    eventHub->SetOnWillChange(onWillChange);
+
     RichEditorPattern::OperationRecord firstRecord;
     firstRecord.addText = u"first Record helloWorld";
     firstRecord.deleteText = u"helloWorld";
@@ -288,6 +338,7 @@ HWTEST_F(RichEditorUndoRedoTest, InsertValueOperation, TestSize.Level2)
         richEditorPattern->redoOperationRecords_.emplace_back(emptyRecord);
     }
     richEditorPattern->HandleOnUndoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::UNDO);
     EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
 
     struct UpdateSpanStyle typingStyle;
@@ -299,7 +350,9 @@ HWTEST_F(RichEditorUndoRedoTest, InsertValueOperation, TestSize.Level2)
     secondRecord.deleteCaretPostion = 3;
     richEditorPattern->operationRecords_.clear();
     richEditorPattern->operationRecords_.emplace_back(secondRecord);
+    changeReason = TextChangeReason::UNKNOWN;
     richEditorPattern->HandleOnUndoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::UNDO);
     EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
 }
 
