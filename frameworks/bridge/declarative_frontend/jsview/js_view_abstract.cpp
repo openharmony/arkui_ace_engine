@@ -2444,9 +2444,6 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
     }
     DimensionOffset offset;
     ParseMaskRectOffset(x, y, offset);
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    Dimension offsetX = isRtl ? offset.GetX() * (-1) : offset.GetX();
-    offset.SetX(offsetX);
     result.SetOffset(offset);
     ParseMarkRectWidth(width, result);
     ParseMarkRectHeight(height, result);
@@ -5441,8 +5438,8 @@ void JSViewAbstract::GetBorderRadius(const char* key, JSRef<JSObject>& object, C
     ParseJsDimensionVp(object->GetProperty(key), radius);
 }
 
-void JSViewAbstract::GetBorderRadiusResObj(const char* key, JSRef<JSObject>& object, CalcDimension& radius, 
-    RefPtr<ResourceObject>& resObj)
+void JSViewAbstract::GetBorderRadiusResObj(
+    const char* key, JSRef<JSObject>& object, CalcDimension& radius, RefPtr<ResourceObject>& resObj)
 {
     ParseJsDimensionVp(object->GetProperty(key), radius, resObj);
 }
@@ -8932,7 +8929,7 @@ void JSViewAbstract::JsIgnoreLayoutSafeArea(const JSCallbackInfo& info)
                 layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
                 break;
             }
-            layoutSafeAreaEdge |= 
+            layoutSafeAreaEdge |=
                 NG::IgnoreLayoutSafeAreaOpts::EdgeToMask(paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
         opts.rawEdges = layoutSafeAreaEdge;
@@ -11316,7 +11313,7 @@ void JSViewAbstract::GetBorderColors(const JSRef<JSObject>& object, NG::BorderCo
     borderColors.multiValued = true;
 }
 
-bool JSViewAbstract::GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProps)
+void JSViewAbstract::GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProps)
 {
     Color borderColor;
     RefPtr<ResourceObject> resObj = nullptr;
@@ -11331,14 +11328,11 @@ bool JSViewAbstract::GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::B
             colorProps.SetColor(target);
         };
         colorProps.AddResource("dialog.borderColor", resObj, std::move(updateFunc));
-        return true;
     }
     if (args->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
         GetBorderColors(obj, colorProps);
-        return true;
     }
-    return false;
 }
 
 bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty)
@@ -11347,7 +11341,8 @@ bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderC
         return false;
     }
     if (SystemProperties::ConfigChangePerform()) {
-        return GetBorderColorsFromResource(args, colorProperty);
+        GetBorderColorsFromResource(args, colorProperty);
+        return true;
     }
     Color borderColor;
     if (ParseJsColor(args, borderColor)) {
@@ -11378,7 +11373,8 @@ bool JSViewAbstract::ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderW
         return false;
     }
     if (SystemProperties::ConfigChangePerform()) {
-        return GetBorderWidthFromResource(args, borderWidthProperty);
+        GetBorderWidthFromResource(args, borderWidthProperty);
+        return true;
     }
     CalcDimension borderWidth;
     if (ParseJsDimensionVpNG(args, borderWidth, true)) {
@@ -11518,7 +11514,7 @@ void JSViewAbstract::ParseCommonBorderRadiusProps(
     ParseBorderRadiusProps(object, radius);
 }
 
-bool JSViewAbstract::GetBorderRadiusFromResource(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props)
+void JSViewAbstract::GetBorderRadiusUpdate(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props)
 {
     CalcDimension borderRadius;
     RefPtr<ResourceObject> resObj;
@@ -11526,17 +11522,13 @@ bool JSViewAbstract::GetBorderRadiusFromResource(const JSRef<JSVal>& args, NG::B
         props = NG::BorderRadiusProperty(borderRadius);
         props.multiValued = false;
     }
-    if (resObj) {
-        return false;
-    }
     auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
         CalcDimension radiusValue;
         ResourceParseUtils::ParseResDimensionVpNG(resObj, radiusValue);
         props = NG::BorderRadiusProperty(radiusValue);
+        props.multiValued = false;
     };
-
     props.AddResource("dialog.borderRadius", resObj, std::move(updateFunc));
-    return true;
 }
 
 void JSViewAbstract::SetBorderRadiusProps(
@@ -11545,6 +11537,7 @@ void JSViewAbstract::SetBorderRadiusProps(
     if (dim.IsNegative() || propName == nullptr) {
         return;
     }
+
     auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (propName == BOTTOM_LEFT_PROPERTY) {
         props.radiusBottomLeft = dim;
@@ -11570,30 +11563,70 @@ void JSViewAbstract::SetBorderRadiusProps(
     }
 }
 
-void JSViewAbstract::GetBorderRadiusProps(
-    const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative, const char* propName)
+void JSViewAbstract::ParseBorderRadiusPropsUpdate(
+    const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props)
 {
-    if (!object->HasProperty(propName) || propName == nullptr) {
+    CHECK_NULL_VOID(key);
+    if (!object->HasProperty(key)) {
         return;
     }
+    CalcDimension radius;
     RefPtr<ResourceObject> resObj;
-    CalcDimension dim;
-    if (ParseJsDimensionVp(object->GetProperty(propName), dim, resObj)) {
-        SetBorderRadiusProps(dim, props, propName);
+    if (ParseJsDimensionVpNG(object->GetProperty(key), radius, resObj)) {
+        SetBorderRadiusProps(radius, props, key);
     }
-    ParseCommonBorderRadiusProps(object, props, notNegative);
+    auto&& updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
+        CalcDimension value;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, value)) {
+            SetBorderRadiusProps(value, props, key);
+        }
+    };
+    props.AddResource("dialog.borderRadius." + std::string(key), resObj, std::move(updateFunc));
+}
+
+void JSViewAbstract::GetBorderRadiusByLengthMetricsUpdate(
+    const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative)
+{
+    CHECK_NULL_VOID(key);
+    if (!object->HasProperty(key) && !object->GetProperty(key)->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> radiusObj = JSRef<JSObject>::Cast(object->GetProperty(key));
+    CalcDimension radius;
+    RefPtr<ResourceObject> resObj = nullptr;
+    if (ParseJsLengthMetricsVpWithResObj(radiusObj, radius, resObj)) {
+        CheckDimensionUnit(radius, false, notNegative);
+        SetBorderRadiusProps(radius, props, key);
+    }
     if (!resObj) {
         return;
     }
-    auto&& updateFunc = [object, notNegative, propName](
+    auto unit = radius.Unit();
+    auto&& updateFunc = [unit, key, notNegative](
                             const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
-        CalcDimension radiusValue;
-        if (ResourceParseUtils::ParseResDimensionVp(resObj, radiusValue)) {
-            SetBorderRadiusProps(radiusValue, props, propName);
+        CalcDimension value;
+        if (ResourceParseUtils::ParseResDimension(resObj, value, unit)) {
+            CheckDimensionUnit(value, false, notNegative);
+            SetBorderRadiusProps(value, props, key);
         }
-        ParseCommonBorderRadiusProps(object, props, notNegative);
     };
-    props.AddResource("dialog.borderRadius." + std::string(propName), resObj, std::move(updateFunc));
+    props.AddResource("dialog.borderRadius." + std::string(key), resObj, std::move(updateFunc));
+}
+
+void JSViewAbstract::GetBorderRadiusObject(
+    const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative)
+{
+    if (CheckLengthMetrics(object)) {
+        GetBorderRadiusByLengthMetricsUpdate(BOTTOM_START_PROPERTY, object, props, notNegative);
+        GetBorderRadiusByLengthMetricsUpdate(BOTTOM_END_PROPERTY, object, props, notNegative);
+        GetBorderRadiusByLengthMetricsUpdate(TOP_START_PROPERTY, object, props, notNegative);
+        GetBorderRadiusByLengthMetricsUpdate(TOP_END_PROPERTY, object, props, notNegative);
+        return;
+    }
+    ParseBorderRadiusPropsUpdate(TOP_LEFT_PROPERTY, object, props);
+    ParseBorderRadiusPropsUpdate(TOP_RIGHT_PROPERTY, object, props);
+    ParseBorderRadiusPropsUpdate(BOTTOM_LEFT_PROPERTY, object, props);
+    ParseBorderRadiusPropsUpdate(BOTTOM_RIGHT_PROPERTY, object, props);
 }
 
 bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius, bool notNegative)
@@ -11602,23 +11635,14 @@ bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiu
         return false;
     }
     if (SystemProperties::ConfigChangePerform()) {
-        if (GetBorderRadiusFromResource(args, radius)) {
-            return true;
-        }
         if (args->IsObject()) {
             JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-            GetBorderRadiusProps(object, radius, notNegative, BOTTOM_START_PROPERTY);
-            GetBorderRadiusProps(object, radius, notNegative, BOTTOM_END_PROPERTY);
-            GetBorderRadiusProps(object, radius, notNegative, BOTTOM_LEFT_PROPERTY);
-            GetBorderRadiusProps(object, radius, notNegative, BOTTOM_RIGHT_PROPERTY);
-            GetBorderRadiusProps(object, radius, notNegative, TOP_START_PROPERTY);
-            GetBorderRadiusProps(object, radius, notNegative, TOP_END_PROPERTY);
-            GetBorderRadiusProps(object, radius, notNegative, TOP_RIGHT_PROPERTY);
-            GetBorderRadiusProps(object, radius, notNegative, TOP_LEFT_PROPERTY);
+            GetBorderRadiusObject(object, radius, notNegative);
             radius.multiValued = true;
             return true;
         }
-        return false;
+        GetBorderRadiusUpdate(args, radius);
+        return true;
     }
     CalcDimension borderRadius;
     if (ParseJsDimensionVpNG(args, borderRadius, true)) {
@@ -11699,8 +11723,8 @@ void JSViewAbstract::ParseDialogWidthAndHeight(DialogProperties& properties, con
     CalcDimension width;
     CalcDimension height;
     if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resWidthObj = nullptr;
-        RefPtr<ResourceObject> resHeightObj = nullptr;
+        RefPtr<ResourceObject> resWidthObj;
+        RefPtr<ResourceObject> resHeightObj;
         if (ParseJsDimensionVpNG(obj->GetProperty("width"), width, resWidthObj)) {
             properties.width = width;
         }
@@ -12824,7 +12848,7 @@ void JSViewAbstract::GetBorderTopWidth(const JSRef<JSObject>& object, NG::Border
     }
     CommonCalcDimension commonCalcDimension;
     ParseCommonEdgeWidthsProps(object, commonCalcDimension);
-    borderWidthProperty.topDimen =  commonCalcDimension.top;
+    borderWidthProperty.topDimen = commonCalcDimension.top;
     if (!resObj) {
         return;
     }
@@ -13008,7 +13032,7 @@ void JSViewAbstract::GetBorderEndWidth(const JSRef<JSObject>& object, NG::Border
         CommonCalcDimension commonCalcDimension;
         ParseCommonEdgeWidthsProps(object, commonCalcDimension);
         borderWidthProperty.leftDimen = commonCalcDimension.left;
-        borderWidthProperty.rightDimen =  commonCalcDimension.right;
+        borderWidthProperty.rightDimen = commonCalcDimension.right;
     };
     borderWidthProperty.AddResource("dialog.borderWidth.endDimen", resObj, std::move(updateFunc));
 }
@@ -13024,11 +13048,11 @@ void JSViewAbstract::GetBorderWidth(const JSRef<JSObject>& object, NG::BorderWid
     borderWidthProperty.multiValued = true;
 }
 
-bool JSViewAbstract::GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty)
+void JSViewAbstract::GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty)
 {
     CalcDimension borderWidth;
     RefPtr<ResourceObject> resObj = nullptr;
-    if (ParseJsDimensionVp(args, borderWidth, resObj)) {
+    if (ParseJsDimensionVpNG(args, borderWidth, resObj)) {
         if (borderWidth.IsNegative()) {
             borderWidth.Reset();
         }
@@ -13038,7 +13062,7 @@ bool JSViewAbstract::GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::Bo
     if (resObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidthProperty) {
             CalcDimension widthValue;
-            ResourceParseUtils::ParseResDimensionVp(resObj, widthValue);
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, widthValue);
             if (widthValue.IsNegative()) {
                 widthValue.Reset();
             }
@@ -13046,13 +13070,10 @@ bool JSViewAbstract::GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::Bo
                 NG::BorderWidthProperty({ widthValue, widthValue, widthValue, widthValue, std::nullopt, std::nullopt });
         };
         borderWidthProperty.AddResource("dialog.borderWidth", resObj, std::move(updateFunc));
-        return true;
     }
     if (args->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
         GetBorderWidth(obj, borderWidthProperty);
-        return true;
     }
-    return false;
 }
 } // namespace OHOS::Ace::Framework

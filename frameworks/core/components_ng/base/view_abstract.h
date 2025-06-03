@@ -1041,7 +1041,7 @@ public:
         FrameNode* frameNode, const std::vector<AnimationPropertyType>& properties);
     // Get property value from rsNode
     static std::vector<float> GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property);
-    static void UpdatePopupParamRescource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode);
+    static void UpdatePopupParamResource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode);
 private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,

@@ -340,6 +340,7 @@ HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition, TestSize.Level1)
     layoutAlgorithm->InitTargetSizeAndPosition(showInSubwindow, AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
 }
+
 /**
  * @tc.name: AdjustAvoidPosition001
  * @tc.desc: Test AdjustAvoidPosition
@@ -1625,5 +1626,55 @@ HWTEST_F(BubbleTestTwoNg, AvoidOrCoverParent002, TestSize.Level1)
     result = algorithm.AvoidOrCoverParent(childSize, bubbleLayoutProperty, layoutWrapper, originPlacement, ArrowOffset);
     EXPECT_FLOAT_EQ(result.GetX(), RESULT_FIFTY);
     EXPECT_FLOAT_EQ(result.GetY(), RESULT_ONE_HUNDRED_FIFTY);
+}
+
+/**
+ * @tc.name: BubblePatternUpdateBubbleBackGroundColorTest001
+ * @tc.desc: Test BubblePattern::UpdateBubbleBackGroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateBubbleBackGroundColorTest001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto host = bubblePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    Color testColor = Color::RED;
+
+    bubblePattern->UpdateBubbleBackGroundColor(testColor);
+
+    auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(popupPaintProp, nullptr);
+
+    EXPECT_EQ(popupPaintProp->GetBackgroundColor().value(), testColor);
+}
+
+/**
+ * @tc.name: BubblePatternUpdateMaskColorTest001
+ * @tc.desc: Test BubblePattern::UpdateMaskColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateMaskColorTest001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto host = bubblePattern->GetHost();
+    ASSERT_EQ(host, frameNode);
+
+    Color testColor = Color::GREEN;
+
+    bubblePattern->UpdateMaskColor(testColor);
+
+    auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(popupPaintProp, nullptr);
+
+    EXPECT_EQ(popupPaintProp->GetMaskColor().value(), testColor);
 }
 } // namespace OHOS::Ace::NG

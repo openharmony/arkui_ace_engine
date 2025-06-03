@@ -1585,7 +1585,7 @@ void ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(FrameNode* frameNod
     accessibilityManager->AddHoverTransparentCallback(AceType::Claim(frameNode));
 }
 
-std::string ViewAbstractModelNG::PopupTypeStr(PopupType& type)
+std::string ViewAbstractModelNG::PopupTypeStr(const PopupType& type)
 {
     switch (type) {
         case PopupType::POPUPTYPE_TEXTCOLOR:
@@ -1599,10 +1599,8 @@ std::string ViewAbstractModelNG::PopupTypeStr(PopupType& type)
     }
 }
 
-void ViewAbstractModelNG::UpdateColor(PopupType& type, const Color& color)
+void ViewAbstractModelNG::UpdateColor(const RefPtr<NG::FrameNode>& frameNode, const PopupType& type, const Color& color)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
     switch (type) {
@@ -1621,27 +1619,28 @@ void ViewAbstractModelNG::UpdateColor(PopupType& type, const Color& color)
 }
 
 void ViewAbstractModelNG::CreateWithColorResourceObj(
-    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type)
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, const PopupType& type)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
-    if (ColorResObj) {
-        std::string key = "popup" + PopupTypeStr(type);
-        auto&& updateFunc = [&](const RefPtr<ResourceObject>& ColorResObj) {
-            std::string color = pattern->GetResCacheMapByKey(key);
-            Color result;
-            if (color.empty()) {
-                ResourceParseUtils::ParseResColor(ColorResObj, result);
-                pattern->AddResCache(key, result.ColorToString());
-            } else {
-                result = Color::FromString(color);
-            }
-            UpdateColor(type, result);
-        };
-        updateFunc(ColorResObj);
-        pattern->AddResObj(key, ColorResObj, std::move(updateFunc));
-    }
+    std::string key = "popup" + PopupTypeStr(type);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(ColorResObj);
+    auto&& updateFunc = [pattern, key, type](const RefPtr<ResourceObject>& ColorResObj) {
+        std::string color = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (color.empty()) {
+            ResourceParseUtils::ParseResColor(ColorResObj, result);
+            pattern->AddResCache(key, result.ColorToString());
+        } else {
+            result = Color::FromString(color);
+        }
+        auto node = pattern->GetHost();
+        ViewAbstractModelNG::UpdateColor(node, type, result);
+    };
+    updateFunc(ColorResObj);
+    pattern->AddResObj(key, ColorResObj, std::move(updateFunc));
 }
 
 void ViewAbstractModelNG::CreateWithBoolResourceObj(
@@ -1650,27 +1649,113 @@ void ViewAbstractModelNG::CreateWithBoolResourceObj(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
-    if (maskResObj) {
-        std::string key = "popupMask";
-        auto&& updateFunc = [&](const RefPtr<ResourceObject>& maskResObj) {
-            std::string mask = pattern->GetResCacheMapByKey(key);
-            bool result;
-            if (mask.empty()) {
-                ResourceParseUtils::ParseResBool(maskResObj, result);
-                std::string maskValue = result ? "true" : "false";
-                pattern->AddResCache(key, maskValue);
-            } else {
-                result = mask == "true";
-            }
-            pattern->UpdateMask(result);
-        };
-        updateFunc(maskResObj);
-        pattern->AddResObj(key, maskResObj, std::move(updateFunc));
+    std::string key = "popupMask";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(maskResObj);
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& maskResObj) {
+        std::string mask = pattern->GetResCacheMapByKey(key);
+        bool result;
+        if (mask.empty()) {
+            ResourceParseUtils::ParseResBool(maskResObj, result);
+            std::string maskValue = result ? "true" : "false";
+            pattern->AddResCache(key, maskValue);
+        } else {
+            result = mask == "true";
+        }
+        pattern->UpdateMask(result);
+    };
+    updateFunc(maskResObj);
+    pattern->AddResObj(key, maskResObj, std::move(updateFunc));
+}
+
+std::string ViewAbstractModelNG::PopupOptionTypeStr(const PopupOptionsType& type)
+{
+    switch (type) {
+        case POPUP_OPTIONTYPE_WIDTH:
+            return "width";
+        case POPUP_OPTIONTYPE_ARROWWIDTH:
+            return "arrowWidth";
+        case POPUP_OPTIONTYPE_ARROWHEIGHT:
+            return "arrowHeight";
+        case POPUP_OPTIONTYPE_RADIUS:
+            return "radius";
+        case POPUP_OPTIONTYPE_OUTLINEWIDTH:
+            return "outlineWidth";
+        case POPUP_OPTIONTYPE_BORDERWIDTH:
+            return "borderWidth";
+        default:
+            return "";
     }
 }
 
+void ViewAbstractModelNG::ParseOptionsDimension(const RefPtr<NG::FrameNode>& frameNode,
+    const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type, CalcDimension& dimension)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    switch (type) {
+        case POPUP_OPTIONTYPE_ARROWWIDTH:
+            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
+                pattern->UpdateArrowWidth(dimension);
+            }
+            return;
+        case POPUP_OPTIONTYPE_ARROWHEIGHT:
+            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
+                pattern->UpdateArrowHeight(dimension);
+            }
+            return;
+        case POPUP_OPTIONTYPE_OUTLINEWIDTH:
+            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
+                pattern->SetOutlineWidth(dimension);
+                frameNode->MarkModifyDone();
+                frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            }
+            return;
+        case POPUP_OPTIONTYPE_BORDERWIDTH:
+            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
+                pattern->SetInnerBorderWidth(dimension);
+                frameNode->MarkModifyDone();
+                frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            }
+            return;
+        case POPUP_OPTIONTYPE_WIDTH:
+            if (ResourceParseUtils::ParseResDimensionVpNG(dimensionResObj, dimension)) {
+                pattern->UpdateWidth(dimension);
+            }
+            return;
+        case POPUP_OPTIONTYPE_RADIUS:
+            if (ResourceParseUtils::ParseResDimensionVpNG(dimensionResObj, dimension)) {
+                pattern->UpdateRadius(dimension);
+            }
+            return;
+        default:
+            return;
+    }
+    return;
+}
+
+void ViewAbstractModelNG::CreateWithDimensionResourceObj(
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "popupOptions" + PopupOptionTypeStr(type);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(dimensionResObj);
+    auto&& updateFunc = [pattern, key, type](const RefPtr<ResourceObject>& dimensionResObj) {
+        CalcDimension dimension;
+        auto node = pattern->GetHost();
+        CHECK_NULL_VOID(node);
+        ViewAbstractModelNG::ParseOptionsDimension(node, dimensionResObj, type, dimension);
+    };
+    updateFunc(dimensionResObj);
+    pattern->AddResObj(key, dimensionResObj, std::move(updateFunc));
+}
+
 void ViewAbstractModelNG::CreateWithResourceObj(
-    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type)
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, const PopupType& type)
 {
     CHECK_NULL_VOID(frameNode);
     CreateWithColorResourceObj(frameNode, resourceObj, type);
@@ -1692,4 +1777,12 @@ void ViewAbstractModelNG::RemoveResObj(FrameNode* frameNode, const std::string& 
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
 }
+
+void ViewAbstractModelNG::CreateWithResourceObj(
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    CreateWithDimensionResourceObj(frameNode, resourceObj, type);
+}
+
 } // namespace OHOS::Ace::NG

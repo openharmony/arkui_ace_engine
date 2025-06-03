@@ -95,8 +95,10 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (JSViewAbstract::ParseJsColor(colorValue, textColor, resObj)) {
-            popupParam->SetTextColorResourceObject(resObj);
-            popupParam->SetTextColor(textColor);
+            if (popupParam) {
+                popupParam->SetTextColorResourceObject(resObj);
+                popupParam->SetTextColor(textColor);
+            }
         }
     } else {
         if (JSViewAbstract::ParseJsColor(colorValue, textColor)) {
@@ -232,23 +234,33 @@ void SetBorderLinearGradientColors(const JSRef<JSObject>& obj,
     }
 }
 
-void SetPopupBorderWidthInfo(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam,
-    const int32_t& borderWidthParamFlag)
+void SetPopupBorderWidthInfo(
+    const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam, const int32_t& borderWidthParamFlag)
 {
     auto popupBorderWidthVal = popupObj->GetProperty(BORDER_WIDTH_TYPE[borderWidthParamFlag].c_str());
     if (popupBorderWidthVal->IsNull()) {
         return;
     }
     CalcDimension popupBorderWidth;
-    if (!JSViewAbstract::ParseJsDimensionVp(popupBorderWidthVal, popupBorderWidth)) {
-        return;
+    RefPtr<ResourceObject> widthResObj = nullptr;
+    if (SystemProperties::ConfigChangePerform()) {
+        if (!JSViewAbstract::ParseJsDimensionVp(popupBorderWidthVal, popupBorderWidth, widthResObj)) {
+            return;
+        }
+    } else {
+        if (!JSViewAbstract::ParseJsDimensionVp(popupBorderWidthVal, popupBorderWidth)) {
+            return;
+        }
     }
+
     if (popupBorderWidth.Value() < 0) {
         return;
     }
     if (OUTER_BORDER_WIDTH == borderWidthParamFlag) {
+        popupParam->SetOutlineWidthObject(widthResObj);
         popupParam->SetOutlineWidth(popupBorderWidth);
     } else {
+        popupParam->SetBorderWidthObject(widthResObj);
         popupParam->SetInnerBorderWidth(popupBorderWidth);
     }
 }
@@ -268,6 +280,123 @@ void SetPopupBorderLinearGradientInfo(const JSRef<JSObject>& popupObj, const Ref
             popupParam->SetInnerBorderLinearGradient(popupBorderLinearGradient);
         }
     }
+}
+
+void ParsePopupMask(const RefPtr<PopupParam>& popupParam, bool maskValueBool, JSRef<JSVal>& maskValue)
+{
+    if (!popupParam) {
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsBool(maskValue, maskValueBool, resObj)) {
+            popupParam->SetMaskResourceObject(resObj);
+            popupParam->SetBlockEvent(maskValueBool);
+        }
+    } else {
+        if (maskValue->IsBoolean()) {
+            popupParam->SetBlockEvent(maskValue->ToBoolean());
+        }
+    }
+}
+
+void ParsePopupChildWidth(const RefPtr<PopupParam>& popupParam, JSRef<JSVal>& childWidthVal)
+{
+    if (!popupParam) {
+        return;
+    }
+
+    CalcDimension width;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> widthResObj = nullptr;
+        if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width, widthResObj)) {
+            popupParam->SetWidthResourceObject(widthResObj);
+            if (width.Value() > 0) {
+                popupParam->SetChildWidth(width);
+            }
+        }
+    } else {
+        if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
+            if (width.Value() > 0) {
+                popupParam->SetChildWidth(width);
+            }
+        }
+    }
+}
+
+void ParseArrowWidth(const RefPtr<PopupParam>& popupParam, JSRef<JSVal>& arrowWidthVal)
+{
+    bool setError = true;
+    CalcDimension arrowWidth;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> arrowWidthhResObj = nullptr;
+        if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth, arrowWidthhResObj)) {
+            popupParam->SetArrowWidthResourceObject(arrowWidthhResObj);
+            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
+                popupParam->SetArrowWidth(arrowWidth);
+                setError = false;
+            }
+        }
+    } else {
+        if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth)) {
+            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
+                popupParam->SetArrowWidth(arrowWidth);
+                setError = false;
+            }
+        }
+    }
+
+    popupParam->SetErrorArrowWidth(setError);
+}
+
+void ParseArrowHeight(const RefPtr<PopupParam>& popupParam, JSRef<JSVal>& arrowHeightVal)
+{
+    bool setError = true;
+    CalcDimension arrowHeight;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> arrowHeighthResObj = nullptr;
+        if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight, arrowHeighthResObj)) {
+            popupParam->SetArrowHeightResourceObject(arrowHeighthResObj);
+            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
+                popupParam->SetArrowHeight(arrowHeight);
+                setError = false;
+            }
+        }
+    } else {
+        if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight)) {
+            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
+                popupParam->SetArrowHeight(arrowHeight);
+                setError = false;
+            }
+        }
+    }
+
+    popupParam->SetErrorArrowHeight(setError);
+}
+
+void ParseRadius(const RefPtr<PopupParam>& popupParam, JSRef<JSVal>& radiusVal)
+{
+    bool setError = true;
+    CalcDimension radius;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> radiusResObj = nullptr;
+        if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius, radiusResObj)) {
+            popupParam->SetRadiusResourceObject(radiusResObj);
+            if (radius.Value() >= 0) {
+                popupParam->SetRadius(radius);
+                setError = false;
+            }
+        }
+    } else {
+        if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius)) {
+            if (radius.Value() >= 0) {
+                popupParam->SetRadius(radius);
+                setError = false;
+            }
+        }
+    }
+
+    popupParam->SetErrorRadius(setError);
 }
 
 void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj,
@@ -354,19 +483,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
     bool maskValueBool = false;
-    if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resObj;
-        if (JSViewAbstract::ParseJsBool(maskValue, maskValueBool, resObj)) {
-            popupParam->SetMasResourceObject(resObj);
-            popupParam->SetBlockEvent(maskValueBool);
-        }
-    } else {
-        if (maskValue->IsBoolean()) {
-            if (popupParam) {
-                popupParam->SetBlockEvent(maskValue->ToBoolean());
-            }
-        }
-    }
+    ParsePopupMask(popupParam, maskValueBool, maskValue);
 
     if (maskValue->IsObject()) {
         auto maskObj = JSRef<JSObject>::Cast(maskValue);
@@ -376,7 +493,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             RefPtr<ResourceObject> resObj;
             if (JSViewAbstract::ParseJsColor(colorValue, maskColor, resObj)) {
                 popupParam->SetMaskColorResourceObject(resObj);
-                popupParam->SetTextColor(maskColor);
+                popupParam->SetMaskColor(maskColor);
             }
         } else {
             if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
@@ -448,51 +565,22 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
 
     auto childWidthVal = popupObj->GetProperty("width");
     if (!childWidthVal->IsNull()) {
-        CalcDimension width;
-        if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
-            if (width.Value() > 0) {
-                popupParam->SetChildWidth(width);
-            }
-        }
+        ParsePopupChildWidth(popupParam, childWidthVal);
     }
 
     auto arrowWidthVal = popupObj->GetProperty("arrowWidth");
     if (!arrowWidthVal->IsNull()) {
-        bool setError = true;
-        CalcDimension arrowWidth;
-        if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth)) {
-            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
-                popupParam->SetArrowWidth(arrowWidth);
-                setError = false;
-            }
-        }
-        popupParam->SetErrorArrowWidth(setError);
+        ParseArrowWidth(popupParam, arrowWidthVal);
     }
 
     auto arrowHeightVal = popupObj->GetProperty("arrowHeight");
     if (!arrowHeightVal->IsNull()) {
-        bool setError = true;
-        CalcDimension arrowHeight;
-        if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight)) {
-            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
-                popupParam->SetArrowHeight(arrowHeight);
-                setError = false;
-            }
-        }
-        popupParam->SetErrorArrowHeight(setError);
+        ParseArrowHeight(popupParam, arrowHeightVal);
     }
 
     auto radiusVal = popupObj->GetProperty("radius");
     if (!radiusVal->IsNull()) {
-        bool setError = true;
-        CalcDimension radius;
-        if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius)) {
-            if (radius.Value() >= 0) {
-                popupParam->SetRadius(radius);
-                setError = false;
-            }
-        }
-        popupParam->SetErrorRadius(setError);
+        ParseRadius(popupParam, radiusVal);
     }
 
     auto defaultShadowStyle = GetPopupDefaultShadowStyle();
@@ -2108,7 +2196,7 @@ void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::S
     }
     sheetStyle.detentSelection = sheetStruct;
 }
- 
+
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
 {
     if (!args->IsArray()) {

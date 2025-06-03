@@ -902,29 +902,13 @@ void BubblePattern::UpdateAgingTextSize()
 
 void BubblePattern::UpdateBubbleText(const Color& value)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto popupTheme = context->GetTheme<PopupTheme>();
-    CHECK_NULL_VOID(popupTheme);
-    auto textNode = DynamicCast<FrameNode>(host);
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto parentNode = host->GetParent();
-    if (parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG &&
-        !(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-        textLayoutProperty->UpdateTextColor(value);
-    } else if (!isSetMessageColor_) {
-        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());
-        } else {
-            textLayoutProperty->UpdateTextColor(popupTheme->GetFontPrimaryColor());
-        }
-    }
-    textNode->MarkModifyDone();
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto messagenode = GetMessageNode();
+    CHECK_NULL_VOID(messagenode);
+    auto textLayoutProps = messagenode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProps);
+    textLayoutProps->UpdateTextColor(value);
+    messagenode->MarkModifyDone();
+    messagenode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void BubblePattern::UpdateBubbleBackGroundColor(const Color& value)
@@ -959,4 +943,60 @@ void BubblePattern::UpdateMask(bool maskValue)
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
+
+void BubblePattern::UpdateArrowWidth(const CalcDimension& dimension)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupLayoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(popupLayoutProp);
+    if (dimension.Value() > 0 && dimension.Unit() != DimensionUnit::PERCENT) {
+        popupLayoutProp->UpdateArrowWidth(dimension);
+    }
+
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void BubblePattern::UpdateArrowHeight(const CalcDimension& dimension)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupLayoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(popupLayoutProp);
+    if (dimension.Value() > 0 && dimension.Unit() != DimensionUnit::PERCENT) {
+        popupLayoutProp->UpdateArrowHeight(dimension);
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void BubblePattern::UpdateWidth(const CalcDimension& dimension)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    if (dimension.Value() > 0) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dimension), std::nullopt));
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void BubblePattern::UpdateRadius(const CalcDimension& dimension)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProps = host->GetLayoutProperty<BubbleLayoutProperty>();
+    if (dimension.Value() >= 0) {
+        layoutProps->UpdateRadius(dimension);
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+
 } // namespace OHOS::Ace::NG

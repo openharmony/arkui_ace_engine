@@ -905,13 +905,15 @@ private:
     static void ParseBorderColorProps(
         const JSRef<JSObject>& object, NG::BorderColorProperty& props, const char* propName);
     static void GetBorderColors(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColor);
-    static bool GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
+    static void GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static void SetBorderRadiusProps(const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName);
-    static void GetBorderRadiusProps(
-        const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative, const char* propName);
-    static bool GetBorderRadiusFromResource(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
-    static void ParseBorderWidthFromResource(const JSRef<JSVal>& jsVal, NG::BorderWidthProperty& props);
-    static bool GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderRadiusUpdate(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
+    static void ParseBorderRadiusPropsUpdate(
+        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
+    static void GetBorderRadiusByLengthMetricsUpdate(
+        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative);
+    static void GetBorderRadiusObject(const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative);
+    static void GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static void GetBorderWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
     static void GetBorderEndWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
     static void GetBorderStartWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);

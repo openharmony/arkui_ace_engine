@@ -2366,23 +2366,24 @@ void DialogPattern::UpdateContentValue(std::string& text, const DialogResourceTy
     if (pipelineContext->IsSystmColorChange()) {
         switch (type) {
             case DialogResourceType::TITLE: {
-                title_ = text;
+                dialogProperties_.title = text;
                 UpdateNodeContent(contentNodeMap_[DialogContentNode::TITLE], text);
                 break;
             }
             case DialogResourceType::SUBTITLE: {
-                subtitle_ = text;
+                dialogProperties_.subtitle = text;
                 UpdateNodeContent(contentNodeMap_[DialogContentNode::SUBTITLE], text);
                 break;
             }
             case DialogResourceType::MESSAGE: {
-                message_ = text;
+                dialogProperties_.content = text;
                 UpdateNodeContent(contentNodeMap_[DialogContentNode::MESSAGE], text);
                 break;
             }
             default:
                 break;
         }
+        UpdateTitleAndContentColor();
     }
     if (host->GetRerenderable()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2564,23 +2565,24 @@ void DialogPattern::UpdateContent(std::string& text, ActionSheetType type)
     if (pipelineContext->IsSystmColorChange()) {
         switch (type) {
             case ActionSheetType::ACTIONSHEET_TITLE: {
-                title_ = text;
+                dialogProperties_.title = text;
                 UpdateNodeContent(contentNodeMap_[DialogContentNode::TITLE], text);
                 break;
             }
             case ActionSheetType::ACTIONSHEET_SUBTITLE: {
-                subtitle_ = text;
+                dialogProperties_.subtitle = text;
                 UpdateNodeContent(contentNodeMap_[DialogContentNode::SUBTITLE], text);
                 break;
             }
             case ActionSheetType::ACTIONSHEET_MESSAGE: {
-                message_ = text;
+                dialogProperties_.content = text;
                 UpdateNodeContent(contentNodeMap_[DialogContentNode::MESSAGE], text);
                 break;
             }
             default:
                 break;
         }
+        UpdateTitleAndContentColor();
     }
     if (host->GetRerenderable()) {
         host->MarkModifyDone();
@@ -2631,7 +2633,6 @@ void DialogPattern::UpdateBorderWidth(const NG::BorderWidthProperty& width)
         if (layoutProps) {
             layoutProps->UpdateBorderWidth(width);
         }
-
         CHECK_NULL_VOID(contentRenderContext_);
         contentRenderContext_->UpdateBorderWidth(width);
     }
@@ -2655,7 +2656,7 @@ void DialogPattern::UpdateBorderColor(const NG::BorderColorProperty& color)
     }
 }
 
-void DialogPattern::UpdateCornerRadius(const NG::BorderRadiusProperty& radius)
+void DialogPattern::UpdateCornerRadius(BorderRadiusProperty& radius)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2663,7 +2664,12 @@ void DialogPattern::UpdateCornerRadius(const NG::BorderRadiusProperty& radius)
     CHECK_NULL_VOID(pipelineContext);
     if (pipelineContext->IsSystmColorChange()) {
         CHECK_NULL_VOID(contentRenderContext_);
-        contentRenderContext_->UpdateBorderRadius(radius);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            ParseBorderRadius(radius);
+            contentRenderContext_->UpdateBorderRadius(radius);
+        } else {
+            contentRenderContext_->UpdateBorderRadius(radius);
+        }
     }
     if (host->GetRerenderable()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

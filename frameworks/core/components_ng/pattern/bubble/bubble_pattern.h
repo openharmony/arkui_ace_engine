@@ -176,6 +176,11 @@ public:
     void UpdateBubbleBackGroundColor(const Color& value);
     void UpdateMaskColor(const Color& value);
     void UpdateMask(bool maskValue);
+    void UpdateArrowWidth(const CalcDimension& dimension);
+    void UpdateArrowHeight(const CalcDimension& dimension);
+    void UpdateWidth(const CalcDimension& dimension);
+    void UpdateRadius(const CalcDimension& dimension);
+
     void SetMessageColor(bool isSetMessageColor)
     {
         isSetMessageColor_ = isSetMessageColor;
