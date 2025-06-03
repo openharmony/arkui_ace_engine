@@ -1219,6 +1219,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/axis/axis_animator.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/axis/axis_scroll_motion.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/lazy_compose_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/lazy_compose_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/lazy_container.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/refresh_coordination.cpp",
