@@ -146,6 +146,7 @@ void XComponentPattern::InitXComponent()
     if (isTypedNode_) {
         InitNativeXComponent();
         if (isNativeXComponent_) {
+            InitializeAccessibility();
             LoadNative();
         }
     }
@@ -253,8 +254,9 @@ void XComponentPattern::Initialize()
             InitNativeNodeCallbacks();
         }
     }
-
-    InitializeAccessibility();
+    if (!isTypedNode_) {
+        InitializeAccessibility();
+    }
 }
 
 void XComponentPattern::OnAttachToMainTree()
