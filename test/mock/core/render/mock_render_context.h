@@ -125,6 +125,7 @@ public:
         // see ./components_ng/render/adapter/rosen_render_context.cpp
         // RosenRenderContext::UpdateBackBlur
         backdropBlurOption = blurOption;
+        sysOptions_ = sysOptions;
     }
 
     void UpdateBackgroundEffect(
@@ -208,6 +209,11 @@ public:
         actualForegroundColor_ = value;
     }
 
+    const std::optional<SysOptions>& GetSysOptions() const
+    {
+        return sysOptions_;
+    }
+
     bool isVisible_ = true;
     bool hasDisappearTransition_ = false;
     RectF rect_;
@@ -221,6 +227,7 @@ public:
     BlurOption foregroundBlurOption;
     RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
     TransitionFinishCallback transitionUserCallback_;
+    std::optional<SysOptions> sysOptions_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

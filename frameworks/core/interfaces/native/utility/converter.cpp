@@ -643,6 +643,14 @@ SheetHeight Convert(const Ark_Length& src)
 }
 
 template<>
+SysOptions Convert(const Ark_SystemAdaptiveOptions& src)
+{
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = OptConvert<bool>(src.disableSystemAdaptation).value_or(true);
+    return sysOptions;
+}
+
+template<>
 std::u16string Convert(const Ark_String& src)
 {
     auto str8 =  Converter::Convert<std::string>(src);

@@ -75,6 +75,7 @@ const auto ATTRIBUTE_FOCUS_ARROW_STEP_OUT_NAME = "arrowStepOut";
 const auto ATTRIBUTE_FOCUS_ARROW_STEP_OUT_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_FOCUS_SCOPE_PRIORITY_NAME = "focusScopePriority";
 const auto ATTRIBUTE_FOCUS_SCOPE_PRIORITY_DEFAULT_VALUE = "FocusPriority.AUTO";
+const auto ATTRIBUTE_SYS_OPTIONS_DISABLE_ADAPTATION_DEFAULT_VALUE = true;
 
 static const float VALID_VAL = 123.4567f;
 static const Opt_Length OPT_LEN_EMPTY = Converter::ArkValue<Opt_Length>(Ark_Empty());
@@ -1734,11 +1735,11 @@ HWTEST_F(CommonMethodModifierTest2, setSweepGradient, TestSize.Level1)
 }
 
 /*
- * @tc.name: backdropBlur_setValues
+ * @tc.name: backdropBlur0_setValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setValues, TestSize.Level1)
 {
     // see ./components_ng/render/adapter/rosen_render_context.cpp for details or possible operation
     double blurRadiusBefore = 3.1415;
@@ -1764,11 +1765,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: backdropBlur_setNullRadiusValue
+ * @tc.name: backdropBlur0_setNullRadiusValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullRadiusValue, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullRadiusValue, TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1785,11 +1786,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullRadiusValue, TestSize.Le
 }
 
 /*
- * @tc.name: backdropBlur_setBadRadiusValue
+ * @tc.name: backdropBlur0_setBadRadiusValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setBadRadiusValue, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setBadRadiusValue, TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1808,11 +1809,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setBadRadiusValue, TestSize.Lev
 }
 
 /*
- * @tc.name: backdropBlur_setNullOption
+ * @tc.name: backdropBlur0_setNullOption
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullOption, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1829,11 +1830,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullOption, TestSize.Level1)
 }
 
 /*
- * @tc.name: backdropBlur_setValues
+ * @tc.name: backdropBlur0_setValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setShortOption, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1884,6 +1885,219 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
     ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
     ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
     ASSERT_EQ(goodNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+}
+
+/*
+ * @tc.name: backdropBlur1_setValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setValues, TestSize.Level1)
+{
+    // see ./components_ng/render/adapter/rosen_render_context.cpp for details or possible operation
+    double blurRadiusBefore = 3.1415;
+    double grayCoeff1 = 2;
+    double grayCoeff2 = 5;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    auto grayscale =
+        Converter::ArkValue(Converter::ArkValue<Ark_Number>(grayCoeff1), Converter::ArkValue<Ark_Number>(grayCoeff2));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->backdropBlurOption.grayscale.size(), 2);
+    ASSERT_NEAR(renderMock->backdropBlurOption.grayscale[0], grayCoeff1, 0.0001);
+    ASSERT_NEAR(renderMock->backdropBlurOption.grayscale[1], grayCoeff2, 0.0001);
+}
+
+/*
+ * @tc.name: backdropBlur1_setNullRadiusValue
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullRadiusValue, TestSize.Level1)
+{
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusBefore = GetAttrValue<double>(json, "backdropBlur");
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, nullptr, &options, &sysOptions);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+}
+
+/*
+ * @tc.name: backdropBlur1_setBadRadiusValue
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setBadRadiusValue, TestSize.Level1)
+{
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusBefore = GetAttrValue<double>(json, "backdropBlur");
+
+    auto radius = Converter::ArkValue<Opt_Number>(0);
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+}
+
+/*
+ * @tc.name: backdropBlur1_setNullOption
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, nullptr, &sysOptions);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_TRUE(renderMock->backdropBlurOption.grayscale.empty());
+}
+
+/*
+ * @tc.name: backdropBlur1_setShortOption
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setShortOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    float emptyNumberFloat = 0.0;
+    float goodNumberFloat = 123.0;
+    renderMock->backdropBlurOption.grayscale.clear();
+
+    Ark_Number faultyNumber = Converter::ArkValue<Ark_Number>(0);
+    auto grayscale = Converter::ArkValue(faultyNumber, faultyNumber);
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+
+    renderMock->backdropBlurOption.grayscale.clear();
+    auto goodNumber = Converter::ArkValue<Ark_Number>(goodNumberFloat);
+    grayscale = Converter::ArkValue(goodNumber, faultyNumber);
+    options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
+    ASSERT_EQ(goodNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+
+    renderMock->backdropBlurOption.grayscale.clear();
+    grayscale = Converter::ArkValue(faultyNumber, goodNumber);
+    options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
+    ASSERT_EQ(goodNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+}
+
+/*
+ * @tc.name: backdropBlur1_setNullSysOption
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullSysOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    modifier_->setBackdropBlur1(node_, &radius, &options, nullptr);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_TRUE(renderMock->GetSysOptions().has_value());
+    EXPECT_EQ(renderMock->GetSysOptions().value().disableSystemAdaptation,
+        ATTRIBUTE_SYS_OPTIONS_DISABLE_ADAPTATION_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: backdropBlur1_setSysOption
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setSysOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_TRUE(renderMock->GetSysOptions().has_value());
+    EXPECT_EQ(renderMock->GetSysOptions().value().disableSystemAdaptation, false);
 }
 
 /*
