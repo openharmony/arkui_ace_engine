@@ -973,6 +973,32 @@ HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PaintMethod006
+ * @tc.desc: Test List paint method about UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PaintMethod006, TestSize.Level1)
+{
+    auto itemDivider = ITEM_DIVIDER;
+    ListModelNG model = CreateList();
+    model.SetDivider(itemDivider);
+    model.SetLanes(2);
+    model.SetStackFromEnd(true);
+    model.SetCachedCount(2);
+    model.SetInitialIndex(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    EXPECT_EQ(pattern_->laneIdx4Divider_, 0);
+}
+
+/**
  * @tc.name: OnModifyDone001
  * @tc.desc: Test list_pattern OnModifyDone
  * @tc.type: FUNC

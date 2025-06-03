@@ -641,6 +641,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
             pos.second.endPos = startPos + mainLen;
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
+        if (isStackFromEnd_) {
+            SetLaneIdx4Divider(cnt - 1);
+        }
         startPos = startPos + mainLen + GetSpaceWidth();
         curIndex += cnt;
     }
@@ -694,7 +697,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             pos.second.startPos = endPos - mainLen;
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
-        SetLaneIdx4Divider(curIndex - startIndex + 1 - cnt);
+        if (!isStackFromEnd_) {
+            SetLaneIdx4Divider(curIndex - startIndex + 1 - cnt);
+        }
         endPos = endPos - mainLen - GetSpaceWidth();
         curIndex -= cnt;
     }
