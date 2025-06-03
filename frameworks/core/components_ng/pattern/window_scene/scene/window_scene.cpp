@@ -158,11 +158,7 @@ void WindowScene::OnAttachToMainTree()
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
         "OnAttachToMainTree id:%{public}d, nodeId:%{public}d, type:%{public}d, name:%{public}s",
         session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), windowName.c_str());
-    if (IsMainSessionRecent()) {
-        surfaceNode->SetVisible(false);
-    } else {
-        surfaceNode->SetVisible(true);
-    }
+    surfaceNode->SetVisible(IsMainSessionRecent());
 }
 
 RefPtr<RosenRenderContext> WindowScene::GetContextByDisableDelegator(bool isAbilityHook, bool isBufferAvailable)
