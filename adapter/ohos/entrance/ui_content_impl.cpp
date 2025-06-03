@@ -3226,13 +3226,18 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 
     if (cachedAnimateFlag_.load()) {
         const uint32_t delay = 50;
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
         auto task = [cachedConfig = cachedConfig_, cachedReason = cachedReason_,
             cachedRsTransaction = cachedRsTransaction_, cachedAvoidAreas = cachedAvoidAreas_,
-            UICONTENT_IMPL_HELPER(content)] () {
+            weak = WeakPtr<NG::PipelineContext>(pipeline), UICONTENT_IMPL_HELPER(content)] () {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
             UICONTENT_IMPL_HELPER_GUARD(content, return);
             TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache");
             UICONTENT_IMPL_PTR(content)->UpdateViewportConfig(cachedConfig, cachedReason,
                 cachedRsTransaction, cachedAvoidAreas);
+            pipeline->RequestFrame();
         };
         taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay,
             "ArkUIExecKeyFrameCachedAnimateTask", PriorityType::HIGH);
