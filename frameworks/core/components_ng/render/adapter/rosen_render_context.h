@@ -456,6 +456,8 @@ public:
     void UpdateWindowBlur() override;
     void MarkUiFirstNode(bool isUiFirstNode) override;
 
+    void SetRSUIContext(PipelineContext* context) override;
+
     void SetDrawNode() override;
     bool AddNodeToRsTree() override;
     static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
@@ -616,7 +618,7 @@ protected:
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
-    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext();
+    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(PipelineContext* pipeline);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);
@@ -667,6 +669,8 @@ protected:
     RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
     void ClickEffectPlayAnimation(const TouchType& touchType);
 
+    void SetSkipCheckInMultiInstance();
+
     // helper function to check if paint rect is valid
     bool RectIsNull();
 
@@ -693,6 +697,8 @@ protected:
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void BdImagePaintTask(RSCanvas& canvas);
+
+    void FlushImplicitTransaction();
 
     void RegisterDensityChangedCallback();
 
@@ -838,6 +844,7 @@ protected:
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
     bool isDraggingFlag_ = false;
     bool reDraggingFlag_ = false;
+    PipelineContext* pipeline_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

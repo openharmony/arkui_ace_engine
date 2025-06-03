@@ -3425,4 +3425,38 @@ HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo005, TestSize.Level1)
     EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
     EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
 }
+
+/**
+ * @tc.name: UINodeTestNg049
+ * @tc.desc: Test ui node method of instanceid
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ASSERT_NE(testNode, nullptr);
+
+    int32_t testId = 0;
+    testNode->RegisterUpdateJSInstanceCallback([&testId](int32_t newId) { testId = newId; });
+
+    /**
+     * @tc.steps: step2. attach context
+     */
+    SystemProperties::multiInstanceEnabled_ = true;
+    testNode->AttachContext(AceType::RawPtr(context), true);
+    EXPECT_EQ(testNode->context_, AceType::RawPtr(context));
+    EXPECT_EQ(testNode->instanceId_, context->GetInstanceId());
+    EXPECT_EQ(testId, context->GetInstanceId());
+
+    /**
+     * @tc.steps: step3. detach context
+     */
+    testNode->DetachContext(true);
+    EXPECT_EQ(testNode->context_, nullptr);
+}
 } // namespace OHOS::Ace::NG

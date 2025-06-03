@@ -45,6 +45,11 @@ namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 }
 
+namespace OHOS::Rosen {
+class RSSyncTransactionController;
+class RSSyncTransactionHandler;
+} // namespace OHOS::Rosen
+
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
@@ -484,6 +489,11 @@ private:
     void SetDeviceProperties();
     RefPtr<Platform::AceContainer> CreateContainer(
         std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info, FrontendType frontendType, bool useNewPipe);
+    void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
+        std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
+        const RefPtr<NG::PipelineContext>& context);
+    void CloseSyncTransaction(OHOS::Rosen::RSSyncTransactionController* transactionController,
+        std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;

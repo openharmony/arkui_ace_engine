@@ -61,6 +61,7 @@
 #include "adapter/ohos/entrance/rs_adapter.h"
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
+#include "render_service_client/core/transaction/rs_sync_transaction_handler.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
@@ -3223,25 +3224,62 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
     cachedAnimateFlag_.store(false);
 }
 
+void UIContentImpl::SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
+    std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler, const RefPtr<NG::PipelineContext>& context)
+{
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        CHECK_NULL_VOID(context);
+        auto window = context->GetWindow();
+        CHECK_NULL_VOID(window);
+        auto rsUIDirector = window->GetRSUIDirector();
+        CHECK_NULL_VOID(rsUIDirector);
+        auto rsUIContext = rsUIDirector->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        transactionHandler = rsUIContext->GetSyncTransactionHandler();
+    } else {
+        auto rsSyncTransactionController = Rosen::RSSyncTransactionController::GetInstance();
+        *transactionController = rsSyncTransactionController;
+    }
+}
+
+void UIContentImpl::CloseSyncTransaction(OHOS::Rosen::RSSyncTransactionController* transactionController,
+    std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler)
+{
+    if (transactionController) {
+        transactionController->CloseSyncTransaction();
+    } else if (transactionHandler) {
+        transactionHandler->CloseSyncTransaction();
+    }
+}
+
 void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
 {
     if (!context) {
         TAG_LOGE(AceLogTag::ACE_WINDOW, "context is null.");
         return;
     }
-
-    auto transactionController =  Rosen::RSSyncTransactionController::GetInstance();
-    CHECK_NULL_VOID(transactionController);
-    transactionController->OpenSyncTransaction();
-    auto rsTransaction = transactionController->GetRSTransaction();
+    OHOS::Rosen::RSSyncTransactionController* transactionController = nullptr;
+    std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionHandler;
+    SetRSSyncTransaction(&transactionController, transactionHandler, context);
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction;
+    if (transactionController) {
+        transactionController->OpenSyncTransaction();
+        rsTransaction = transactionController->GetRSTransaction();
+    } else if (transactionHandler) {
+        transactionHandler->OpenSyncTransaction();
+        rsTransaction = transactionHandler->GetRSTransaction();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WINDOW, "transactionController and handler invalid");
+        return;
+    }
     auto rootElement = context->GetRootElement();
     if (!rootElement) {
-        transactionController->CloseSyncTransaction();
+        CloseSyncTransaction(transactionController, transactionHandler);
         return;
     }
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
     if (!rosenRenderContext) {
-        transactionController->CloseSyncTransaction();
+        CloseSyncTransaction(transactionController, transactionHandler);
         return;
     }
     rosenRenderContext->CreateCanvasNode();
@@ -3250,8 +3288,7 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
         addNodeCallback_(canvasNode_, rsTransaction);
     }
-    transactionController->CloseSyncTransaction();
-
+    CloseSyncTransaction(transactionController, transactionHandler);
     std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
     CHECK_NULL_VOID(callbackCachedAnimation);
     rosenRenderContext->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);

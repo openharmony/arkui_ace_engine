@@ -5686,6 +5686,12 @@ void FrameNode::ChangeSensitiveStyle(bool isSensitive)
 
 void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto renderContext = GetRenderContext();
+        if (renderContext) {
+            renderContext->SetRSUIContext(context);
+        }
+    }
     UINode::AttachContext(context, recursive);
     if (eventHub_) {
         eventHub_->OnAttachContext(context);

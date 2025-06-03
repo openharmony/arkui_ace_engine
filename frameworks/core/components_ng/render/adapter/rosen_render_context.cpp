@@ -424,9 +424,11 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
     frameNode->AddExtraCustomProperty("RS_NODE", rsNode_.get());
 }
 
-std::shared_ptr<Rosen::RSUIContext> RosenRenderContext::GetRSUIContext()
+std::shared_ptr<Rosen::RSUIContext> RosenRenderContext::GetRSUIContext(PipelineContext* pipeline)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        return nullptr;
+    }
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto window = pipeline->GetWindow();
     CHECK_NULL_RETURN(window, nullptr);
@@ -447,20 +449,20 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 {
     // skip if node already created
     CHECK_NULL_VOID(!rsNode_);
-    auto rsContext = GetRSUIContext();
+    std::shared_ptr<Rosen::RSUIContext> rsContext;
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto pipeline = GetPipelineContext();
+        rsContext = GetRSUIContext(pipeline);
+    }
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
     if (isRoot) {
         rsNode_ = Rosen::RSRootNode::Create(false, isTextureExportNode, rsContext);
-        if (SystemProperties::GetMultiInstanceEnabled() && rsNode_) {
-            rsNode_->SetSkipCheckInMultiInstance(true);
-        }
+        SetSkipCheckInMultiInstance();
         AddFrameNodeInfoToRsNode();
         return;
     } else if (!param.has_value()) {
         rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode, rsContext);
-        if (SystemProperties::GetMultiInstanceEnabled() && rsNode_) {
-            rsNode_->SetSkipCheckInMultiInstance(true);
-        }
+        SetSkipCheckInMultiInstance();
         AddFrameNodeInfoToRsNode();
         return;
     }
@@ -510,10 +512,15 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         default:
             break;
     }
+    SetSkipCheckInMultiInstance();
+    AddFrameNodeInfoToRsNode();
+}
+
+void RosenRenderContext::SetSkipCheckInMultiInstance()
+{
     if (SystemProperties::GetMultiInstanceEnabled() && rsNode_) {
         rsNode_->SetSkipCheckInMultiInstance(true);
     }
-    AddFrameNodeInfoToRsNode();
 }
 
 std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(const std::optional<ContextParam>& param,
@@ -1909,6 +1916,20 @@ void RosenRenderContext::SetAnimatableProperty(std::shared_ptr<ModifierName>& mo
         modifier = std::make_shared<ModifierName>(property);
         rsNode_->AddModifier(modifier);
     }
+}
+
+void RosenRenderContext::SetRSUIContext(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    auto window = context->GetWindow();
+    CHECK_NULL_VOID(window);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_VOID(rsUIDirector);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    CHECK_NULL_VOID(rsUIContext);
+    auto rsNode = GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetRSUIContext(rsUIContext);
 }
 
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
@@ -7304,7 +7325,7 @@ bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t
 
     FreezeCanvasNode(true);
     canvasNode_->SetAlpha(1.0f);
-    Rosen::RSTransaction::FlushImplicitTransaction();
+    FlushImplicitTransaction();
 
     CheckAnimationParametersValid(duration);
     CheckAnimationParametersValid(delay);
@@ -7330,13 +7351,30 @@ bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t
             if (callbackAnimateEnd_) {
                 callbackAnimateEnd_();
             }
-            Rosen::RSTransaction::FlushImplicitTransaction();
+            FlushImplicitTransaction();
             animationFlag = false;
             if (callbackCachedAnimateAction_) {
                 callbackCachedAnimateAction_();
             }
         });
     return true;
+}
+
+void RosenRenderContext::FlushImplicitTransaction()
+{
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        return Rosen::RSTransaction::FlushImplicitTransaction();
+    }
+    auto pipeline = GetPipelineContext();
+    auto rsUIContext = GetRSUIContext(pipeline);
+    if (rsUIContext) {
+        auto rsTransaction = rsUIContext->GetRSTransaction();
+        if (rsTransaction) {
+            rsTransaction->FlushImplicitTransaction();
+            return;
+        }
+    }
+    Rosen::RSTransaction::FlushImplicitTransaction();
 }
 
 void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode)
@@ -7346,7 +7384,7 @@ void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootN
         auto renderContext = rootNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         canvasNode_->SetLinkedRootNodeId(renderContext->GetNodeId());
-        Rosen::RSTransaction::FlushImplicitTransaction();
+        FlushImplicitTransaction();
     }
 }
 
@@ -7354,8 +7392,15 @@ void RosenRenderContext::CreateCanvasNode()
 {
     if (!canvasNode_) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSCanvasNode.");
-        canvasNode_ = Rosen::RSCanvasNode::Create();
-        Rosen::RSTransaction::FlushImplicitTransaction();
+        if (!SystemProperties::GetMultiInstanceEnabled()) {
+            canvasNode_ = Rosen::RSCanvasNode::Create();
+            Rosen::RSTransaction::FlushImplicitTransaction();
+        } else {
+            auto pipeline = GetPipelineContext();
+            auto rsUIContext = GetRSUIContext(pipeline);
+            canvasNode_ = Rosen::RSCanvasNode::Create(false, false, rsUIContext);
+            FlushImplicitTransaction();
+        }
     }
 }
 

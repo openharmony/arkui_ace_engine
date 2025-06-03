@@ -45,6 +45,8 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
+#include "render_service_client/core/transaction/rs_sync_transaction_handler.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
 
@@ -1503,6 +1505,26 @@ void DragDropManager::ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event,
     });
 }
 
+void DragDropManager::SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
+    std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler, const RefPtr<NG::PipelineContext>& pipeline)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        CHECK_NULL_VOID(pipeline);
+        auto window = pipeline->GetWindow();
+        CHECK_NULL_VOID(window);
+        auto rsUIDirector = window->GetRSUIDirector();
+        CHECK_NULL_VOID(rsUIDirector);
+        auto rsUIContext = rsUIDirector->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        transactionHandler = rsUIContext->GetSyncTransactionHandler();
+    } else {
+        auto rsSyncTransactionController = Rosen::RSSyncTransactionController::GetInstance();
+        *transactionController = rsSyncTransactionController;
+    }
+#endif
+}
+
 void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEvent>& event, DragDropRet dragDropRet)
 {
     CHECK_NULL_VOID(event);
@@ -1510,9 +1532,16 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
     CHECK_NULL_VOID(pipeline);
 
 #ifdef ENABLE_ROSEN_BACKEND
-    auto transactionController =  Rosen::RSSyncTransactionController::GetInstance();
+    OHOS::Rosen::RSSyncTransactionController* transactionController = nullptr;
+    std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionHandler;
+    SetRSSyncTransaction(&transactionController, transactionHandler, pipeline);
     if (transactionController) {
         transactionController->OpenSyncTransaction();
+    } else if (transactionHandler) {
+        transactionHandler->OpenSyncTransaction();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "transactionController and handler invalid");
+        return;
     }
     event->ExecuteDropAnimation();
     auto overlayManager = GetDragAnimationOverlayManager(pipeline->GetInstanceId());
@@ -1527,6 +1556,11 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
         InteractionInterface::GetInstance()->SetDragWindowVisible(false, transaction);
         pipeline->FlushUITasks();
         transactionController->CloseSyncTransaction();
+    } else if (transactionHandler) {
+        auto transaction = transactionHandler->GetRSTransaction();
+        InteractionInterface::GetInstance()->SetDragWindowVisible(false, transaction);
+        pipeline->FlushUITasks();
+        transactionHandler->CloseSyncTransaction();
     } else {
         InteractionInterface::GetInstance()->SetDragWindowVisible(false);
         pipeline->FlushMessages();
