@@ -8345,18 +8345,15 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto selectStart = textSelector_.GetTextStart();
+    auto selectEnd = textSelector_.GetTextEnd();
+    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
+    auto copyResultObjects = textSelectInfo.GetSelection().resultObjects;
+    CHECK_NULL_VOID(!copyResultObjects.empty());
     taskExecutor->PostTask(
-        [weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+        [weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor)), copyResultObjects]() {
             auto richEditor = weak.Upgrade();
             RefPtr<PasteDataMix> pasteData = richEditor->clipboard_->CreatePasteDataMix();
-            auto selectStart = richEditor->textSelector_.GetTextStart();
-            auto selectEnd = richEditor->textSelector_.GetTextEnd();
-            auto textSelectInfo = richEditor->GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-            auto copyResultObjects = textSelectInfo.GetSelection().resultObjects;
-            
-            if (copyResultObjects.empty()) {
-                return;
-            }
             for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
                 richEditor->ProcessResultObject(pasteData, *resultObj);
             }
