@@ -13492,6 +13492,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
     } // FrameNodeAccessor
     namespace LengthMetricsAccessor {
     void DestroyPeerImpl(Ark_LengthMetrics peer)
@@ -21352,6 +21356,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+            FrameNodeAccessor::GetCommonEventImpl,
             FrameNodeAccessor::ReuseImpl,
             FrameNodeAccessor::RecycleImpl,
             FrameNodeAccessor::GetFrameNodePtrImpl,

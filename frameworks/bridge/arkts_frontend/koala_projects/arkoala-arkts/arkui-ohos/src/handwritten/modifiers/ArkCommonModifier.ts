@@ -934,7 +934,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       }
       return this;
    }
-   onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+   onClick(event: ((event: ClickEvent) => void) | undefined): this {
       if (event) {
          modifierWithKey(this._modifiersWithKeys, OnClickModifier.identity, OnClickModifier.factory, event);
       } else {

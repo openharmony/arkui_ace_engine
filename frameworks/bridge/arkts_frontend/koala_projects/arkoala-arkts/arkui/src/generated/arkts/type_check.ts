@@ -1412,7 +1412,7 @@ export class TypeChecker {
     static isFormShape(value: object|string|number|undefined|null): boolean {
         return value instanceof FormShape
     }
-    static isFrameNode(value: object|string|number|undefined|null): boolean {
+    static isFrameNode(value: object|string|number|undefined|null, arg0: boolean): boolean {
         return value instanceof FrameNode
     }
     static isFrictionMotion(value: object|string|number|undefined|null): boolean {

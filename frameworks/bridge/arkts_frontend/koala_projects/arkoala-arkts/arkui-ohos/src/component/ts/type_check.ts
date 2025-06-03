@@ -5714,7 +5714,7 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof Frame")
         }
     }
-    static isFrameNode(value: Object | string | number | undefined | boolean): boolean {
+    static isFrameNode(value: Object | string | number | undefined | boolean, arg0: boolean): boolean {
         throw new Error("Can not discriminate value typeof FrameNode")
     }
     static isFrictionMotion(value: Object | string | number | undefined | boolean): boolean {

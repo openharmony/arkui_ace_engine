@@ -33888,6 +33888,11 @@ Ark_NativePointer impl_FrameNode_getFrameNodeByKey(const KStringPtr& name) {
         return GetAccessors()->getFrameNodeAccessor()->getFrameNodeByKey((const Ark_String*) (&name));
 }
 KOALA_INTEROP_1(FrameNode_getFrameNodeByKey, Ark_NativePointer, KStringPtr)
+Ark_NativePointer impl_FrameNode_getCommonEvent(Ark_NativePointer thisPtr) {
+    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+    return GetAccessors()->getFrameNodeAccessor()->getCommonEvent(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getCommonEvent, Ark_NativePointer, Ark_NativePointer)
 Ark_Number impl_FrameNode_getIdByFrameNode(Ark_NativePointer thisPtr, Ark_NativePointer node){
     Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
     return GetAccessors()->getFrameNodeAccessor()->getIdByFrameNode(self, static_cast<Ark_FrameNode>(node));

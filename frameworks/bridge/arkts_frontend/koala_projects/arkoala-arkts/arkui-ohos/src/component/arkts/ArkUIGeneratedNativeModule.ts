@@ -4202,6 +4202,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _FrameNode_getFrameNodeByKey(name: KStringPtr): KPointer
     @ani.unsafe.Direct
+    native static _FrameNode_getCommonEvent(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
     native static _FrameNode_getIdByFrameNode(ptr: KPointer, node: KPointer): number
     @ani.unsafe.Direct
     native static _FrameNode_moveTo(ptr: KPointer, targetParent: KPointer, index: number): void

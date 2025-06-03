@@ -616,7 +616,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         }
         return this;
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined): this {
         this.getPeer().onClick0Attribute(event);
         return this;
     }
