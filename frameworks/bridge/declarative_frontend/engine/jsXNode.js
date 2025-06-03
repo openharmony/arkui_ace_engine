@@ -80,14 +80,25 @@ class BaseNode extends ViewBuildNodeBase {
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
-class BuilderNode {
+class Disposable {
+    constructor() {
+        this.isDisposed_  = false;
+    }
+    dispose() {
+        this.isDisposed_  = true;
+    }
+    isDisposed() {
+        return this.isDisposed_ ;
+    }
+}
+class BuilderNode extends Disposable {
     constructor(uiContext, options) {
+        super();
         let jsBuilderNode = new JSBuilderNode(uiContext, options);
         this._JSBuilderNode = jsBuilderNode;
         let id = Symbol('BuilderRootFrameNode');
         BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
         BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
-        this._isDisposed = false;
     }
     update(params) {
         this._JSBuilderNode.update(params);
@@ -112,11 +123,11 @@ class BuilderNode {
         return ret;
     }
     dispose() {
-        this._isDisposed = true;
+        super.dispose();
         this._JSBuilderNode.dispose();
     }
     isDisposed() {
-        return this._isDisposed && (this._JSBuilderNode?.isDisposed() ?? true);
+        return super.isDisposed() && (this._JSBuilderNode?.isDisposed() ?? true);
     }
     reuse(param) {
         this._JSBuilderNode.reuse(param);
@@ -140,7 +151,7 @@ class JSBuilderNode extends BaseNode {
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this._supportNestingBuilder = false;
-        this._isDisposed = false;
+        this.disposable_ = new Disposable();
     }
     reuse(param) {
         this.updateStart();
@@ -421,11 +432,11 @@ class JSBuilderNode extends BaseNode {
         return this._nativeRef?.getNativeHandle();
     }
     dispose() {
-        this._isDisposed = true;
+        this.disposable_.dispose();
         this.frameNode_?.dispose();
     }
     isDisposed() {
-        return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null);
+        return this.disposable_.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
     }
     disposeNode() {
         super.disposeNode();
@@ -476,17 +487,17 @@ class JSBuilderNode extends BaseNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class NodeAdapter {
+class NodeAdapter extends Disposable {
     constructor() {
+        super();
         this.nodeRefs_ = new Array();
         this.count_ = 0;
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
         getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
-        this._isDisposed = false;
     }
     dispose() {
-        this._isDisposed = true;
+        super.dispose();
         let hostNode = this.attachedNodeRef_.deref();
         if (hostNode !== undefined) {
             NodeAdapter.detachNodeAdapter(hostNode);
@@ -495,7 +506,7 @@ class NodeAdapter {
         this.nativePtr_ = null;
     }
     isDisposed() {
-        return this._isDisposed && (this.nativePtr_ === undefined || this.nativePtr_ === null);
+        return super.isDisposed() && (this.nativePtr_ === undefined || this.nativePtr_ === null);
     }
     set totalNodeCount(count) {
         if (count < 0) {
@@ -764,8 +775,9 @@ var UIState;
     UIState[UIState["DISABLED"] = 1 << 2] = "DISABLED";
     UIState[UIState["SELECTED"] = 1 << 3] = "SELECTED";
 })(UIState || (UIState = {}));
-class FrameNode {
+class FrameNode extends Disposable {
     constructor(uiContext, type, options) {
+        super();
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -777,7 +789,6 @@ class FrameNode {
         this.instanceId_ = uiContext.instanceId_;
         this.uiContext_ = uiContext;
         this._nodeId = -1;
-        this._isDisposed = false;
         this._childList = new Map();
         if (type === 'BuilderRootFrameNode') {
             this.renderNode_ = new RenderNode(type);
@@ -867,7 +878,7 @@ class FrameNode {
         }
     }
     dispose() {
-        this._isDisposed = true;
+        super.dispose();
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
@@ -875,7 +886,7 @@ class FrameNode {
         this.nodePtr_ = null;
     }
     isDisposed() {
-        return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null || this._nativeRef.invalid());
+        return super.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null || this._nativeRef.invalid());
     }
     static disposeTreeRecursively(node) {
         if (node === null) {
@@ -1423,7 +1434,7 @@ class ProxyFrameNode extends ImmutableFrameNode {
         return this.nodePtr_;
     }
     dispose() {
-        this._isDisposed = true;
+        this.isDisposed_  = true;
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
@@ -2092,9 +2103,9 @@ class ShapeMask extends BaseShape {
         this.strokeWidth = 0;
     }
 }
-class RenderNode {
+class RenderNode extends Disposable {
     constructor(type) {
-        this._isDisposed = false;
+        super();
         this.nodePtr = null;
         this.childrenList = [];
         this.parentRenderNode = null;
@@ -2458,7 +2469,7 @@ class RenderNode {
         this._nativeRef = null;
     }
     dispose() {
-        this._isDisposed = true;
+        super.dispose();
         this._nativeRef?.dispose();
         this.baseNode_?.disposeNode();
         this._frameNode?.deref()?.resetNodePtr();
@@ -2466,7 +2477,7 @@ class RenderNode {
         this.nodePtr = null;
     }
     isDisposed() {
-        return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null);
+        return super.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
     }
     getNodePtr() {
         return this.nodePtr;
@@ -2683,7 +2694,7 @@ class ComponentContent extends Content {
         let builderNode = new BuilderNode(uiContext, {});
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params ?? undefined, options);
-        this._isDisposed = false;
+        this.disposable_ = new Disposable();
     }
     update(params) {
         this.builderNode_.update(params);
@@ -2713,13 +2724,13 @@ class ComponentContent extends Content {
         this.builderNode_.onRecycleWithBindObject();
     }
     dispose() {
-        this._isDisposed = true;
+        this.disposable_.dispose();
         this.detachFromParent();
         this.attachNodeRef_?.dispose();
         this.builderNode_?.dispose();
     }
     isDisposed() {
-        return this._isDisposed && (this.builderNode_?.isDisposed() ?? true);
+        return this.disposable_.isDisposed() && (this.builderNode_?.isDisposed() ?? true);
     }
     detachFromParent() {
         if (this.parentWeak_ === undefined) {
