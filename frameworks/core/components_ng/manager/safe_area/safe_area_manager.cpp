@@ -118,6 +118,25 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional
     return true;
 }
 
+bool SafeAreaManager::UpdateKeyboardWebSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
+{
+    uint32_t bottom;
+    auto container = Container::Current();
+    if (container && systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
+        bottom = systemSafeArea_.bottom_.start;
+        ACE_SCOPED_TRACE("calc keyboardWebRect use systemSafeArea_.bottom_");
+    } else {
+        bottom = rootHeight.has_value() ? rootHeight.value() : PipelineContext::GetCurrentRootHeight();
+    }
+    SafeAreaInsets::Inset inset = { .start = bottom - keyboardHeight, .end = bottom };
+    if (inset == keyboardWebInset_) {
+        return false;
+    }
+    keyboardWebInset_ = inset;
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateKeyboardWebSafeArea %s", inset.ToString().c_str());
+    return true;
+}
+
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
