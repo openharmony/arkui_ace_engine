@@ -1655,7 +1655,7 @@ ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeC
     
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (centerArg->IsArray(vm) && radiusArg->IsNumber()) {
+    if (centerArg->IsArray(vm) && (radiusArg->IsNumber() || radiusArg->IsString(vm))) {
         std::vector<ArkUIInt32orFloat32> values;
         ArkTSUtils::ParseGradientCenter(vm, centerArg, values);
         CalcDimension radius;
@@ -1669,7 +1669,7 @@ ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeC
         values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
         GetArkUINodeModifiers()->getTextModifier()->setRadialGradient(
             nativeNode, values.data(), values.size(), colors.data(), colors.size());
-    } else if (angleArg->IsNumber() || directionArg->IsNumber()) {
+    } else if ((angleArg->IsNumber() || angleArg->IsString(vm)) || directionArg->IsNumber()) {
         std::vector<ArkUIInt32orFloat32> values;
         ArkTSUtils::ParseGradientAngle(vm, angleArg, values);
         int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
