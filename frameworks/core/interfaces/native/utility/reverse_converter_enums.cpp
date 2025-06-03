@@ -20,6 +20,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 
+#include "arkoala_api_generated.h"
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -406,6 +407,7 @@ void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
         case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
         case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
         case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
+        case MouseAction::CANCEL: dst = ARK_MOUSE_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_MouseAction>(-1);
             LOGE("Unexpected enum value in MouseAction: %{public}d", src);
@@ -425,6 +427,20 @@ void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src)
         default: {
             dst = static_cast<Ark_MouseButton>(-1);
             LOGE("Unexpected enum value in MouseButton: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src)
+{
+    switch (src) {
+        case AxisAction::NONE: dst = ARK_AXIS_ACTION_NONE; break;
+        case AxisAction::BEGIN: dst = ARK_AXIS_ACTION_BEGIN; break;
+        case AxisAction::UPDATE: dst = ARK_AXIS_ACTION_UPDATE; break;
+        case AxisAction::END: dst = ARK_AXIS_ACTION_END; break;
+        default: {
+            dst = static_cast<Ark_AxisAction>(-1);
+            LOGE("Unexpected enum value in AxisAction: %{public}d", src);
         }
     }
 }
