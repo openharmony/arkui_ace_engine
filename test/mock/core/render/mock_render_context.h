@@ -134,6 +134,16 @@ public:
         groupProperty->propEffectOption = effectOption;
     }
 
+    void SetOuterBorderWidth(const BorderWidthProperty& value) override
+    {
+        GetOrCreateOuterBorder()->propOuterBorderWidth = value;
+    };
+
+    void SetOuterBorderColor(const BorderColorProperty& value) override
+    {
+        GetOrCreateOuterBorder()->propOuterBorderColor = value;
+    }
+
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override
     {
         const auto& groupProperty = GetOrCreateForeground();

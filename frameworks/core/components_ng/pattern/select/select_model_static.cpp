@@ -228,4 +228,30 @@ NG::SelectDivider SelectModelStatic::GetDefaultDivider(FrameNode* frameNode)
     defaultDivider.endMargin = defaultMargin;
     return defaultDivider;
 }
+
+void SelectModelStatic::SetDividerStyle(
+    FrameNode* frameNode, const std::optional<NG::SelectDivider>& divider, const std::optional<DividerMode>& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
+    pattern->SetDividerMode(mode);
+}
+
+void SelectModelStatic::SetAvoidance(FrameNode* frameNode, const std::optional<Avoidance>& avoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAvoidance(avoidance.value_or(Avoidance()));
+}
+
+void SelectModelStatic::SetMenuOutline(FrameNode* frameNode, const std::optional<MenuParam>& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuOutline(menuParam.value_or(MenuParam()));
+}
 } // namespace OHOS::Ace::NG

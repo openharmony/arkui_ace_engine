@@ -2199,6 +2199,22 @@ BorderWidthProperty Convert(const Ark_Length& src)
 }
 
 template<>
+BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
+{
+    BorderWidthProperty dst;
+    dst.leftDimen = OptConvert<Dimension>(src.left);
+    Validator::ValidateNonNegative(dst.leftDimen);
+    dst.topDimen = OptConvert<Dimension>(src.top);
+    Validator::ValidateNonNegative(dst.topDimen);
+    dst.rightDimen = OptConvert<Dimension>(src.right);
+    Validator::ValidateNonNegative(dst.rightDimen);
+    dst.bottomDimen = OptConvert<Dimension>(src.bottom);
+    Validator::ValidateNonNegative(dst.bottomDimen);
+    dst.multiValued = true;
+    return dst;
+}
+
+template<>
 BorderWidthProperty Convert(const Ark_EdgeWidths& src)
 {
     BorderWidthProperty widthProperty;

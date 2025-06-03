@@ -49,6 +49,10 @@ public:
     static void SetSelectChangeEvent(FrameNode* frameNode, NG::SelectChangeEvent&& selectChangeEvent);
     static void SetValueChangeEvent(FrameNode* frameNode, NG::ValueChangeEvent&& valueChangeEvent);
     static NG::SelectDivider GetDefaultDivider(FrameNode* frameNode);
+    static void SetDividerStyle(FrameNode* frameNode,
+        const std::optional<NG::SelectDivider>& divider, const std::optional<DividerMode>& mode);
+    static void SetAvoidance(FrameNode* frameNode, const std::optional<Avoidance>& avoidance);
+    static void SetMenuOutline(FrameNode* frameNode, const std::optional<MenuParam>& menuParam);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_STATIC_H
