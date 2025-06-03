@@ -1415,6 +1415,27 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest089, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BaseUtilsTest090
+ * @tc.desc: Check string is a float
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest090, TestSize.Level1)
+{
+    std::string testStr = "0.125";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), true);
+    testStr = "0.0.1";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), false);
+    testStr = "0.A5";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), false);
+    testStr = "0.%5";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), false);
+    testStr = ".123";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), true);
+    testStr = "123.";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), true);
+}
+
+/**
  * @tc.name: StringExpressionTest001
  * @tc.desc: InitMapping()
  * @tc.type: FUNC
