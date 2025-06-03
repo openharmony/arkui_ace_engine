@@ -255,6 +255,34 @@ HWTEST_F(RichEditorPatternTestSixNg, MouseRightFocus002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MouseRightFocus003
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, MouseRightFocus003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = PREVIEW_TEXT_VALUE2;
+    spanItem->spanItemType = SpanItemType::NORMAL;
+    spanItem->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    MouseInfo info;
+    info.SetGlobalLocation({ 0, 0 });
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    richEditorPattern->previewLongPress_ = true;
+    focusHub->RequestFocusImmediately();
+    EXPECT_EQ(richEditorPattern->isEditing_, false);
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_EQ(richEditorPattern->isEditing_, true);
+}
+
+/**
  * @tc.name: FromStyledString002
  * @tc.desc: test FromStyledString
  * @tc.type: FUNC
