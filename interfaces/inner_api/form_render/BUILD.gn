@@ -19,7 +19,6 @@ config("form_render_config") {
   include_dirs = [
     "$ace_root/frameworks",
     "include/",
-    "render_service_client/core/ui/"
   ]
   cflags = []
   if (target_cpu == "arm") {
