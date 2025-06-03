@@ -82,6 +82,8 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // only use accurate counting method when cached items need to be shown
         cachedItemCnt.first = cachedItemCnt.second = cacheLines * info.crossCount_;
     }
+    LostChildFocusToSelf(layoutWrapper, std::min(info.startIndex_, info.endIndex_) - cachedItemCnt.first,
+        info.endIndex_ + cachedItemCnt.second);
     wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cachedItemCnt.first,
         cachedItemCnt.second, props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cachedItemCnt.first);
