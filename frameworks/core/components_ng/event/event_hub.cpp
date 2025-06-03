@@ -26,6 +26,7 @@ void EventHub::AttachHost(const WeakPtr<FrameNode>& host)
 
 void EventHub::OnAttachContext(PipelineContext *context)
 {
+    CHECK_NULL_VOID(context);
     auto host = host_.Upgrade();
     CHECK_NULL_VOID(host);
     if (HasOnAreaChanged() || HasInnerOnAreaChanged()) {
