@@ -400,8 +400,8 @@ void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
 void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
 {
     Ark_Area area;
-    area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth());
-    area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight());
+    area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth().ConvertToVp());
+    area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight().ConvertToVp());
     Ark_Position position;
     position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX());
     position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY());
@@ -615,7 +615,7 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
 
     dst.id.tag = Ark_Tag::INTEROP_TAG_INT32;
-    dst.id.i32 = static_cast<int32_t>(src.GetTouchDeviceId());
+    dst.id.i32 = static_cast<int32_t>(src.GetFingerId());
 
     dst.screenX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     dst.screenX.f32 = static_cast<float>(
