@@ -442,17 +442,7 @@ void RichEditorLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* l
     CHECK_NULL_VOID(layoutConstraint.has_value());
     const auto& percentReference = layoutConstraint->percentReference;
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-    CHECK_NULL_VOID(layoutPolicy.has_value());
-    if (layoutPolicy->IsMatch()) {
-        auto matchParentSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(frameSize), calcLayoutConstraint,
-            percentReference);
-        bool matchWidth = layoutPolicy->IsWidthMatch() && matchParentSize.Width().has_value();
-        bool matchHeight = layoutPolicy->IsHeightMatch() && matchParentSize.Height().has_value();
-        IF_TRUE(matchWidth, frameSize.SetWidth(matchParentSize.Width().value()));
-        IF_TRUE(matchHeight, frameSize.SetHeight(matchParentSize.Height().value()));
-    }
- 
-    CHECK_NULL_VOID(layoutPolicy->IsAdaptive());
+    CHECK_NULL_VOID(layoutPolicy.has_value() && layoutPolicy->IsAdaptive());
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentSize = content->GetRect().GetSize();
