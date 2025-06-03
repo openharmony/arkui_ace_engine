@@ -16,11 +16,10 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 #include "base/log/ace_trace.h"
-
+#include "base/utils/system_properties.h"
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
 #include "wm_common.h"
-#include "base/utils/system_properties.h"
 
 namespace OHOS {
 namespace Ace {

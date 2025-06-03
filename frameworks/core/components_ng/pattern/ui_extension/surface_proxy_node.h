@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SURFACE_PROXY_NODE_H
 
 #include "core/components_ng/pattern/pattern.h"
-#include "transaction/rs_interfaces.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "transaction/rs_interfaces.h"
 
 namespace OHOS::Ace::NG {
 class SurfaceProxyNode : public AceType {

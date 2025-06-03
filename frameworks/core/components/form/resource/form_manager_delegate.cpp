@@ -25,12 +25,12 @@
 #include "transaction/rs_transaction.h"
 
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/gestures/gesture_info.h"
 #include "frameworks/base/json/json_util.h"
-#include "base/utils/system_properties.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_callback_client.h"
