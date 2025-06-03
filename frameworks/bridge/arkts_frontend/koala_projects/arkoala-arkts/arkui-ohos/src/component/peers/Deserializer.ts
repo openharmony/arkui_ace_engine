@@ -8322,6 +8322,9 @@ export class Deserializer extends DeserializerBase {
         }
         const unit_result : LengthUnit | undefined = unit_buf
 
+        if (!value_result) {
+            return new LengthMetrics(0, unit_result)
+        }
         return new LengthMetrics(value_result!, unit_result)
     }
     readLetterSpacingStyle(): LetterSpacingStyle {
