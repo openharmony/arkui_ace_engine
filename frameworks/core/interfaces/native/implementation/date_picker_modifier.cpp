@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -222,7 +223,7 @@ void OnChangeImpl(Ark_NativePointer node,
         auto result = Converter::ArkValue<Ark_DatePickerResult>(selectedStr);
         arkCallback.Invoke(result);
     };
-    DatePickerModelNG::SetOnChange(frameNode, std::move(onChange));
+    DatePickerModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
 void OnDateChange0Impl(Ark_NativePointer node,
                        const Opt_Callback_Date_Void* value)
@@ -296,7 +297,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(result);
     };
-    DatePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
+    DatePickerModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // DatePickerAttributeModifier
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
