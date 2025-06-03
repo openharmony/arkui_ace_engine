@@ -32,5 +32,5 @@ export * from "./component/peers/CallbacksChecker"
 // export * from "./ArkTestComponent"
 // export * from "./component/peers/ArkButtonPeer"
 export * from './stateManagement'
-export { LengthMetrics, LengthMetricsInternal } from './Graphics'
+export { LengthMetrics } from './Graphics'
 export * from "../ohos.promptAction"

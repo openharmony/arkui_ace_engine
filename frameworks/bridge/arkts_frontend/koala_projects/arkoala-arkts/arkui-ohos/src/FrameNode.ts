@@ -17,10 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { UIContext } from "@ohos/arkui/UIContext"
-import { Position as Position } from "./Graphics"
+import { Position, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer,
-    MaterializedBase, NativeBuffer, nullptr, pointer } from "@koalaui/interop"
+    MaterializedBase, NativeBuffer, nullptr, pointer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
@@ -57,6 +57,20 @@ export class FrameNodeInternal {
         return obj
     }
 }
+
+// @ts-ignore
+function GetExactRetValue(data: KSerializerBuffer | KUint8ArrayPtr): Array<byte> {
+    // @ts-ignore
+    const retval = data as FixedArray<byte>;
+    // @ts-ignore
+    let exactRetValue: byte[] = new Array<byte>();
+    for (let i = 0; i < retval.length; i++) {
+        // @ts-ignore
+        exactRetValue.push(new Byte(retval[i]));
+    }
+    return exactRetValue;
+}
+
 export class FrameNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
     uiContext: UIContext | undefined = undefined
@@ -258,6 +272,39 @@ export class FrameNode implements MaterializedBase {
         const name_casted = name as (string);
         return FrameNode.getFrameNodeByKey_serialize(name_casted);
     }
+    public getPositionToParent(): Position {
+        return this.getPositionToParent_serialize()
+    }
+    public getPositionToScreen(): Position {
+        return this.getPositionToScreen_serialize()
+    }
+    public getPositionToWindow(): Position {
+        return this.getPositionToWindow_serialize()
+    }
+    public getPositionToParentWithTransform(): Position {
+        return this.getPositionToParentWithTransform_serialize()
+    }
+    public getPositionToScreenWithTransform(): Position {
+        return this.getPositionToScreenWithTransform_serialize()
+    }
+    public getMeasuredSize(): Size {
+        return this.getMeasuredSize_serialize()
+    }
+    public getLayoutPosition(): Position {
+        return this.getLayoutPosition_serialize()
+    }
+    public getUserConfigBorderWidth(): Edges<LengthMetrics> {
+        return this.getUserConfigBorderWidth_serialize()
+    }
+    public getUserConfigPadding(): Edges<LengthMetrics> {
+        return this.getUserConfigPadding_serialize()
+    }
+    public getUserConfigMargin(): Edges<LengthMetrics> {
+        return this.getUserConfigMargin_serialize()
+    }
+    public getUserConfigSize(): SizeT<LengthMetrics> {
+        return this.getUserConfigSize_serialize()
+    }
     private isModifiable_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_isModifiable(this.peer!.ptr)
         return retval
@@ -422,6 +469,90 @@ export class FrameNode implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByUniqueId(id);
         const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
         return obj;
+    }
+    private getPositionToParent_serialize(): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToParent(this.peer!.ptr);
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition();
+        return returnResult;
+    }
+    private getPositionToScreen_serialize(): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToScreen(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        return returnResult
+    }
+    private getPositionToWindow_serialize(): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindow(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        return returnResult
+    }
+    private getPositionToParentWithTransform_serialize(): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToParentWithTransform(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        return returnResult
+    }
+    private getPositionToScreenWithTransform_serialize(): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToScreenWithTransform(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        return returnResult
+    }
+    private getPositionToWindowWithTransform1_serialize(): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform1(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        return returnResult
+    }
+    private getMeasuredSize_serialize(): Size {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getMeasuredSize(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Size = retvalDeserializer.readSize()
+        return returnResult
+    }
+    private getLayoutPosition_serialize(): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getLayoutPosition(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        return returnResult
+    }
+    private getUserConfigBorderWidth_serialize(): Edges<LengthMetrics> {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigBorderWidth(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
+        return returnResult
+    }
+    private getUserConfigPadding_serialize(): Edges<LengthMetrics> {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigPadding(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
+        return returnResult
+    }
+    private getUserConfigMargin_serialize(): Edges<LengthMetrics> {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigMargin(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
+        return returnResult
+    }
+    private getUserConfigSize_serialize(): SizeT<LengthMetrics> {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigSize(this.peer!.ptr)
+        const exactRetValue = GetExactRetValue(retval);
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : SizeT<LengthMetrics> = retvalDeserializer.readSizeLengthMetrics()
+        return returnResult
     }
     public reuse(): void {
         this.reuse_serialize()

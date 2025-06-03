@@ -87,7 +87,7 @@ import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
 import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions } from "./../customDialogController"
-import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMetricsInternal, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, Corners, CornerRadius, Edges as EdgesT, Frame, Matrix4, LengthMetrics, LengthMetricsInternal, Position as GraphicsPosition } from "./../../Graphics"
+import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMetricsInternal, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, Corners, CornerRadius, Edges as EdgesT, Frame, Matrix4, LengthMetrics, Position as GraphicsPosition, SizeT } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
@@ -7359,6 +7359,12 @@ export class Deserializer extends DeserializerBase {
         let value : EdgesT<number> = ({top: top_result, left: left_result, bottom: bottom_result, right: right_result} as EdgesT<number>)
         return value
     }
+    readEdgesLengthMetrics(): EdgesT<LengthMetrics> {
+        return { top: this.readLengthMetrics(), left: this.readLengthMetrics(), bottom: this.readLengthMetrics(), right: this.readLengthMetrics() }
+    }
+    readSizeLengthMetrics(): SizeT<LengthMetrics> {
+        return { width: this.readLengthMetrics(), height: this.readLengthMetrics() }
+    }
     readEdgeStyles(): EdgeStyles {
         let valueDeserializer : Deserializer = this
         const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -8301,8 +8307,25 @@ export class Deserializer extends DeserializerBase {
     }
     readLengthMetrics(): LengthMetrics {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LengthMetricsInternal.fromPtr(ptr)
+
+        const value_runtimeType = (valueDeserializer.readInt8() as int32)
+        let value_buf: number | undefined
+        if ((RuntimeType.UNDEFINED) != (value_runtimeType)) {
+            value_buf = (valueDeserializer.readNumber() as number)
+        }
+        const value_result : number | undefined = value_buf
+
+        const unit_runtimeType = (valueDeserializer.readInt8() as int32)
+        let unit_buf: LengthUnit | undefined
+        if ((RuntimeType.UNDEFINED) != (unit_runtimeType)) {
+            unit_buf = (valueDeserializer.readInt32() as LengthUnit)
+        }
+        const unit_result : LengthUnit | undefined = unit_buf
+
+        if (!value_result) {
+            return new LengthMetrics(0, unit_result)
+        }
+        return new LengthMetrics(value_result!, unit_result)
     }
     readLetterSpacingStyle(): LetterSpacingStyle {
         let valueDeserializer : Deserializer = this
