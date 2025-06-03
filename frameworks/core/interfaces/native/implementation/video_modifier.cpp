@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#include "core/components_ng/pattern/video/video_model_static.h"
 #include "core/interfaces/native/implementation/video_controller_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -84,11 +85,10 @@ namespace VideoModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = VideoModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = VideoModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // VideoModifier
 namespace VideoInterfaceModifier {
@@ -99,11 +99,11 @@ void SetVideoOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto options = Converter::Convert<VideoOptions>(*value);
-    // VideoModelNG::SetSrc(frameNode, options.src, options.bundleNameSrc, options.moduleNameSrc);
-    // VideoModelNG::SetProgressRate(frameNode, options.currentProgressRate);
-    // VideoModelNG::SetPosterSourceInfo(frameNode, options.previewSourceInfo);
+    VideoModelStatic::SetSrc(frameNode, options.src, options.bundleNameSrc, options.moduleNameSrc);
+    VideoModelStatic::SetProgressRate(frameNode, options.currentProgressRate);
+    VideoModelStatic::SetPosterSourceInfo(frameNode, options.previewSourceInfo);
     if (options.videoController) {
-        // VideoModelNG::SetVideoController(frameNode, options.videoController);
+        VideoModelStatic::SetVideoController(frameNode, options.videoController);
     }
     LOGE("ARKOALA VideoInterface::SetVideoOptionsImpl -> imageAIOptions is not supported.");
 }
@@ -119,7 +119,7 @@ void MutedImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // VideoModelNG::SetMuted(frameNode, *convValue);
+    VideoModelNG::SetMuted(frameNode, *convValue);
 }
 void AutoPlayImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)
@@ -131,7 +131,7 @@ void AutoPlayImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // VideoModelNG::SetAutoPlay(frameNode, *convValue);
+    VideoModelNG::SetAutoPlay(frameNode, *convValue);
 }
 void ControlsImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)
@@ -143,7 +143,7 @@ void ControlsImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // VideoModelNG::SetControls(frameNode, *convValue);
+    VideoModelNG::SetControls(frameNode, *convValue);
 }
 void LoopImpl(Ark_NativePointer node,
               const Opt_Boolean* value)
@@ -155,14 +155,15 @@ void LoopImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // VideoModelNG::SetLoop(frameNode, *convValue);
+    VideoModelNG::SetLoop(frameNode, *convValue);
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    const Opt_ImageFit* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // VideoModelNG::SetObjectFit(frameNode, Converter::OptConvert<ImageFit>(*value));
+    CHECK_NULL_VOID(value);
+    VideoModelStatic::SetObjectFit(frameNode, Converter::OptConvert<ImageFit>(*value));
 }
 void OnStartImpl(Ark_NativePointer node,
                  const Opt_VoidCallback* value)
@@ -177,7 +178,7 @@ void OnStartImpl(Ark_NativePointer node,
     auto onStart = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         arkCallback.Invoke();
     };
-    // VideoModelNG::SetOnStart(frameNode, onStart);
+    VideoModelStatic::SetOnStart(frameNode, onStart);
 }
 void OnPauseImpl(Ark_NativePointer node,
                  const Opt_VoidCallback* value)
@@ -192,7 +193,7 @@ void OnPauseImpl(Ark_NativePointer node,
     auto onPause = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         arkCallback.Invoke();
     };
-    // VideoModelNG::SetOnPause(frameNode, onPause);
+    VideoModelStatic::SetOnPause(frameNode, onPause);
 }
 void OnFinishImpl(Ark_NativePointer node,
                   const Opt_VoidCallback* value)
@@ -207,7 +208,7 @@ void OnFinishImpl(Ark_NativePointer node,
     auto onFinish = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         arkCallback.Invoke();
     };
-    // VideoModelNG::SetOnFinish(frameNode, onFinish);
+    VideoModelStatic::SetOnFinish(frameNode, onFinish);
 }
 void OnFullscreenChangeImpl(Ark_NativePointer node,
                             const Opt_Callback_FullscreenInfo_Void* value)
@@ -227,7 +228,7 @@ void OnFullscreenChangeImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(event);
     };
-    // VideoModelNG::SetOnFullScreenChange(frameNode, onFullscreenChange);
+    VideoModelStatic::SetOnFullScreenChange(frameNode, onFullscreenChange);
 }
 void OnPreparedImpl(Ark_NativePointer node,
                     const Opt_Callback_PreparedInfo_Void* value)
@@ -247,7 +248,7 @@ void OnPreparedImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(event);
     };
-    // VideoModelNG::SetOnPrepared(frameNode, onPrepared);
+    VideoModelStatic::SetOnPrepared(frameNode, onPrepared);
 }
 void OnSeekingImpl(Ark_NativePointer node,
                    const Opt_Callback_PlaybackInfo_Void* value)
@@ -267,7 +268,7 @@ void OnSeekingImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(event);
     };
-    // VideoModelNG::SetOnSeeking(frameNode, onSeeking);
+    VideoModelStatic::SetOnSeeking(frameNode, onSeeking);
 }
 void OnSeekedImpl(Ark_NativePointer node,
                   const Opt_Callback_PlaybackInfo_Void* value)
@@ -287,7 +288,7 @@ void OnSeekedImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(event);
     };
-    // VideoModelNG::SetOnSeeked(frameNode, onSeeked);
+    VideoModelStatic::SetOnSeeked(frameNode, onSeeked);
 }
 void OnUpdateImpl(Ark_NativePointer node,
                   const Opt_Callback_PlaybackInfo_Void* value)
@@ -307,7 +308,7 @@ void OnUpdateImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(event);
     };
-    // VideoModelNG::SetOnUpdate(frameNode, onUpdate);
+    VideoModelStatic::SetOnUpdate(frameNode, onUpdate);
 }
 void OnErrorImpl(Ark_NativePointer node,
                  const Opt_Callback_Void* value)
@@ -322,7 +323,7 @@ void OnErrorImpl(Ark_NativePointer node,
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         arkCallback.Invoke();
     };
-    // VideoModelNG::SetOnError(frameNode, onError);
+    VideoModelStatic::SetOnError(frameNode, onError);
 }
 void OnStopImpl(Ark_NativePointer node,
                 const Opt_Callback_Void* value)
@@ -337,7 +338,7 @@ void OnStopImpl(Ark_NativePointer node,
     auto onStop = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         arkCallback.Invoke();
     };
-    // VideoModelNG::SetOnStop(frameNode, onStop);
+    VideoModelStatic::SetOnStop(frameNode, onStop);
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -349,7 +350,7 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // VideoModelNG::EnableAnalyzer(frameNode, *convValue);
+    VideoModelStatic::EnableAnalyzer(frameNode, *convValue);
 }
 void AnalyzerConfigImpl(Ark_NativePointer node,
                         const Opt_ImageAnalyzerConfig* value)
@@ -373,7 +374,7 @@ void SurfaceBackgroundColorImpl(Ark_NativePointer node,
     auto peer = *optValue;
     Color backgroundColor = Color::BLACK;
     backgroundColor.SetValue(peer->colorValue.value);
-    // VideoModelNG::SetSurfaceBackgroundColor(frameNode, backgroundColor);
+    VideoModelStatic::SetSurfaceBackgroundColor(frameNode, backgroundColor);
 }
 void EnableShortcutKeyImpl(Ark_NativePointer node,
                            const Opt_Boolean* value)
@@ -385,7 +386,7 @@ void EnableShortcutKeyImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // VideoModelNG::SetShortcutKeyEnabled(frameNode, *convValue);
+    VideoModelNG::SetShortcutKeyEnabled(frameNode, *convValue);
 }
 } // VideoAttributeModifier
 const GENERATED_ArkUIVideoModifier* GetVideoModifier()

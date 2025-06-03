@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
+#include "core/components_ng/pattern/shape/path_model_static.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 
@@ -48,11 +49,10 @@ namespace PathModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = PathModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = PathModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // PathModifier
 namespace PathInterfaceModifier {

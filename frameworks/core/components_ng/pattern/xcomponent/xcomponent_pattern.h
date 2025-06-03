@@ -295,6 +295,12 @@ public:
         return false;
     }
 
+    void SetXComponentController(std::shared_ptr<InnerXComponentController> controlller)
+    {
+        xcomponentController_ = controlller;
+        InitController();
+    }
+
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
