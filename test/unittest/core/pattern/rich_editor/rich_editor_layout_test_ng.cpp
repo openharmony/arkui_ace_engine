@@ -363,8 +363,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy001, TestSize.Le
     layoutProperty->calcLayoutConstraint_->minSize = CalcSize{ CalcLength(MIN_WIDTH), CalcLength(MIN_HEIGHT) };
     layoutProperty->calcLayoutConstraint_->maxSize = CalcSize{ CalcLength(MAX_WIDTH), CalcLength(MAX_HEIGHT) };
     layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
-    EXPECT_EQ(frameSize.Width(), static_cast<float>(MAX_WIDTH.ConvertToPx()));
-    EXPECT_EQ(frameSize.Height(), static_cast<float>(MAX_HEIGHT.ConvertToPx()));
+    EXPECT_EQ(frameSize, CONTAINER_SIZE);
 }
 
 /**
