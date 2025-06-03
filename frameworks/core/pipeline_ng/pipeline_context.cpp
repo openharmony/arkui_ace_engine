@@ -5845,12 +5845,29 @@ void PipelineContext::NotifyColorModeChange(uint32_t colorMode)
     option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(
         option,
-        [weak = AceType::WeakClaim(AceType::RawPtr(rootNode_)), colorMode, rootColorMode = GetColorMode()]() {
+        [weakPipelineContext = WeakClaim(this), weak = WeakPtr<FrameNode>(rootNode_),
+            colorMode, rootColorMode = GetColorMode()]() {
+            auto pipeline = weakPipelineContext.Upgrade();
+            CHECK_NULL_VOID(pipeline);
             auto rootNode = weak.Upgrade();
             CHECK_NULL_VOID(rootNode);
+            pipeline->SetIsReloading(true);
             rootNode->SetDarkMode(rootColorMode == ColorMode::DARK);
             rootNode->NotifyColorModeChange(colorMode);
+            pipeline->SetIsReloading(false);
+            pipeline->FlushUITasks();
+        },
+        [weak = WeakClaim(this)]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->OnFlushReloadFinish();
         });
+    CHECK_NULL_VOID(stageManager_);
+    auto stage = stageManager_->GetStageNode();
+    CHECK_NULL_VOID(stage);
+    auto renderContext = stage->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateWindowBlur();
 }
 
 void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)

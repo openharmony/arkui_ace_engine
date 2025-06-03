@@ -23,6 +23,7 @@ extern bool g_isSuperFoldDisplayDevice;
 extern bool g_irregularGrid;
 extern bool g_segmentedWaterflow;
 extern bool g_isNeedSymbol;
+extern bool g_isResourceDecoupling;
 
 class APIVersionGuard final {
 public:

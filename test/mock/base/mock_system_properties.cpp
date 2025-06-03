@@ -96,6 +96,7 @@ int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_I
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
+bool g_isResourceDecoupling = true;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
@@ -283,7 +284,7 @@ bool SystemProperties::IsNeedSymbol()
 
 bool SystemProperties::GetResourceDecoupling()
 {
-    return true;
+    return g_isResourceDecoupling;
 }
 
 bool SystemProperties::ConfigChangePerform()
