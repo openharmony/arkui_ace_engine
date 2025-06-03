@@ -8353,6 +8353,7 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
     taskExecutor->PostTask(
         [weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor)), copyResultObjects]() {
             auto richEditor = weak.Upgrade();
+            CHECK_NULL_VOID(richEditor);
             RefPtr<PasteDataMix> pasteData = richEditor->clipboard_->CreatePasteDataMix();
             for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
                 richEditor->ProcessResultObject(pasteData, *resultObj);
