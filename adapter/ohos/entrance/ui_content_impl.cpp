@@ -2101,6 +2101,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
 #endif
     SetDeviceProperties();
+    bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";
+    });
+    if (configChangePerform) {
+        SystemProperties::SetConfigChangePerform();
+    }
     // Initialize performance check parameters
     AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
