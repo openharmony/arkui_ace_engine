@@ -13,6 +13,16 @@
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/distRelease/stateMgmt.d.ts" />
+let LogTag;
+(function (LogTag) {
+  LogTag[LogTag['STATE_MGMT'] = 0] = 'STATE_MGMT';
+  LogTag[LogTag['ARK_COMPONENT'] = 1] = 'ARK_COMPONENT';
+})(LogTag || (LogTag = {}));
+class JSXNodeLogConsole {
+  static warn(...args) {
+      aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
+  }
+}
 var NodeRenderType;
 (function (NodeRenderType) {
     NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
@@ -1378,11 +1388,11 @@ class ImmutableFrameNode extends FrameNode {
         return this._commonAttribute;
     }
     createAnimation(property, startValue, endValue, param) {
-        console.warn("can't create animation on unmodifiable frameNode");
+        JSXNodeLogConsole.warn("can't create animation on unmodifiable frameNode");
         return false;
     }
     cancelAnimations(properties) {
-        console.warn("can't cancel animation on unmodifiable frameNode");
+        JSXNodeLogConsole.warn("can't cancel animation on unmodifiable frameNode");
         return false;
     }
 }

@@ -662,19 +662,19 @@ class FrameNode {
     this.uiContext_ = uiContext;
     this.instanceId_ = uiContext.instanceId_;
   }
-  createAnimation(property, startValue, endValue, param): boolean {
+  createAnimation(property: AnimationPropertyType, startValue: number[] | undefined, endValue: number[], param: AnimateParam): boolean {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     let result = getUINativeModule().frameNode.createAnimation(this.getNodePtr(), property, startValue, endValue, param);
     __JSScopeUtil__.restoreInstanceId();
     return result;
   }
-  cancelAnimations(properties): boolean {
+  cancelAnimations(properties: AnimationPropertyType[]): boolean {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     let result = getUINativeModule().frameNode.cancelAnimations(this.getNodePtr(), properties);
     __JSScopeUtil__.restoreInstanceId();
     return result;
   }
-  getNodePropertyValue(property): number[] {
+  getNodePropertyValue(property: AnimationPropertyType): number[] {
     return getUINativeModule().frameNode.getNodePropertyValue(this.getNodePtr(), property);
   }
   triggerOnReuse(): void {
@@ -729,10 +729,10 @@ class ImmutableFrameNode extends FrameNode {
     this._commonAttribute.setNodePtr(undefined);
     return this._commonAttribute;
   }
-  createAnimation(property, startValue, endValue, param): boolean {
+  createAnimation(property: AnimationPropertyType, startValue: number[] | undefined, endValue: number[], param: AnimateParam): boolean {
     return false;
   }
-  cancelAnimations(properties): boolean {
+  cancelAnimations(properties: AnimationPropertyType[]): boolean {
     return false;
   }
 }
