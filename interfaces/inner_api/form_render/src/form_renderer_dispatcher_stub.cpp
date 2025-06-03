@@ -194,7 +194,9 @@ int32_t FormRendererDispatcherStub::HandleSetMultiInstanceEnabled(MessageParcel 
 {
     bool isMultiInstanceEnabled = data.ReadBool();
     SetMultiInstanceEnabled(isMultiInstanceEnabled);
-    reply.WriteInt32(ERR_OK);
+    if (!reply.WriteInt32(ERR_OK)) {
+        HILOG_ERROR("Write result failed");
+    }
     return ERR_OK;
 }
 }  // namespace Ace
