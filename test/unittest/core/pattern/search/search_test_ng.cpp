@@ -1309,8 +1309,9 @@ HWTEST_F(SearchTestNg, Create003, TestSize.Level1)
     std::function<bool(const DeleteValueInfo&)> onWillDelete;
     std::function<bool(const DeleteValueInfo&)> onDidDelete;
     std::function<void(const std::u16string&)> onChangeEvent;
-    NG::OnCreateMenuCallback onCreateMenuCallback;
-    NG::OnMenuItemClickCallback onMenuItemClickCallback;
+    NG::OnCreateMenuCallback onCreate;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    NG::OnPrepareMenuCallback onPrepare;
     searchModelInstance.SetOnEditChanged(std::move(onEditChangefunc));
     searchModelInstance.SetOnChange(std::move(onChange));
     searchModelInstance.SetOnCut(std::move(onCut));
@@ -1321,7 +1322,7 @@ HWTEST_F(SearchTestNg, Create003, TestSize.Level1)
     searchModelInstance.SetOnWillDeleteEvent(std::move(onWillDelete));
     searchModelInstance.SetOnDidDeleteEvent(std::move(onDidDelete));
     searchModelInstance.SetOnChangeEvent(std::move(onChangeEvent));
-    searchModelInstance.SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClickCallback));
+    searchModelInstance.SetSelectionMenuOptions(std::move(onCreate), std::move(onMenuItemClick), std::move(onPrepare));
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto eventHub = searchTextField->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);

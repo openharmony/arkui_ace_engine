@@ -867,8 +867,8 @@ void SearchModelNG::SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo
     eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
-void SearchModelNG::SetSelectionMenuOptions(
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void SearchModelNG::SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -876,7 +876,8 @@ void SearchModelNG::SetSelectionMenuOptions(
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    textFieldPattern->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void SearchModelNG::SetEnablePreviewText(bool enablePreviewText)
@@ -2230,6 +2231,17 @@ void SearchModelNG::OnMenuItemClickCallbackUpdate(
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+}
+
+void SearchModelNG::OnPrepareMenuCallbackUpdate(
+    FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
 }
 
 void SearchModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText)

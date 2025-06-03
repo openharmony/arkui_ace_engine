@@ -1450,7 +1450,9 @@ void JSText::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
-    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
+    TextModel::GetInstance()->SetSelectionMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 } // namespace OHOS::Ace::Framework

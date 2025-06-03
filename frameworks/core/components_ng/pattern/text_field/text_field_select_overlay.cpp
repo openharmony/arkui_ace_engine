@@ -266,6 +266,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    menuInfo.hasOnPrepareMenuCallback = onPrepareMenuCallback_ ? true : false;
     auto hasText = pattern->HasText();
     if ((dirtyFlag & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM) {
         menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();

@@ -2779,7 +2779,7 @@ struct ArkUITextModifier {
     void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number, void* maxFontScaleRawPtr);
     void (*resetTextMaxFontScale)(ArkUINodeHandle node);
     void (*setTextSelectionMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback);
     void (*resetTextSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextHalfLeading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextHalfLeading)(ArkUINodeHandle node);
@@ -4294,7 +4294,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaEnablePreviewText)(ArkUINodeHandle node);
     void (*getTextAreaPadding)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setTextAreaSelectionMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback);
     void (*resetTextAreaSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextAreaWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextAreaWidth)(ArkUINodeHandle node);
@@ -4523,7 +4523,7 @@ struct ArkUITextInputModifier {
     void (*setTextInputEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextInputEnablePreviewText)(ArkUINodeHandle node);
     void (*setTextInputSelectionMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback);
     void (*resetTextInputSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextInputWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextInputWidth)(ArkUINodeHandle node);
@@ -5470,7 +5470,7 @@ struct ArkUISearchModifier {
     void (*setSearchEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetSearchEnablePreviewText)(ArkUINodeHandle node);
     void (*setSearchSelectionMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback);
     void (*resetSearchSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setSearchEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetSearchEnableHapticFeedback)(ArkUINodeHandle node);

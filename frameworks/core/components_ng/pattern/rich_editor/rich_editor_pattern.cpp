@@ -12201,7 +12201,7 @@ void RichEditorPattern::HideMenu()
 void RichEditorPattern::OnSelectionMenuOptionsUpdate(
     const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
-    selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 
 bool RichEditorPattern::CheckTripClickEvent(GestureEvent& info)

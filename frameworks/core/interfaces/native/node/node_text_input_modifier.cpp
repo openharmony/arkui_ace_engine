@@ -1883,7 +1883,8 @@ ArkUI_Bool GetTextInputEnablePreviewText(ArkUINodeHandle node)
     return static_cast<int>(TextFieldModelNG::GetEnablePreviewText(frameNode));
 }
 
-void SetTextInputSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+void SetTextInputSelectionMenuOptions(
+    ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1900,6 +1901,13 @@ void SetTextInputSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCa
     } else {
         TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
+    if (onPrepareMenuCallback) {
+        NG::OnPrepareMenuCallback onPrepareMenu =
+            *(reinterpret_cast<NG::OnPrepareMenuCallback*>(onPrepareMenuCallback));
+        TextFieldModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenu));
+    } else {
+        TextFieldModelNG::OnPrepareMenuCallbackUpdate(frameNode, nullptr);
+    }
 }
 
 void ResetTextInputSelectionMenuOptions(ArkUINodeHandle node)
@@ -1908,8 +1916,10 @@ void ResetTextInputSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
     TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
     TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+    TextFieldModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
 }
 
 void SetTextInputWidth(ArkUINodeHandle node, ArkUI_CharPtr value)

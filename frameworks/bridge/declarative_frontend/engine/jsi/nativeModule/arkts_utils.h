@@ -284,15 +284,18 @@ public:
     static RefPtr<PixelMap> CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
 #endif
     static bool ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm,
-        NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClickCallback);
+        NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
+        NG::OnPrepareMenuCallback& onPrepareMenuCallback);
     static void ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode,
         const Local<JSValueRef>& jsValueOnCreateMenu, NG::OnCreateMenuCallback& onCreateMenuCallback);
+    static void ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
+        const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback);
     static Local<panda::ArrayRef> CreateJsSystemMenuItems(
         const EcmaVM* vm, const std::vector<NG::MenuItemParam>& systemMenuItems);
     static Local<panda::ObjectRef> CreateJsTextMenuItem(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextMenuId(const EcmaVM* vm, const std::string& id);
-    static void WrapMenuParams(
-        const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams, const Local<JSValueRef>& menuItems);
+    static void WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
+        const Local<JSValueRef>& menuItems, bool enableLabelInfo);
     static void ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
         const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback);
     static Local<panda::ArrayRef> CreateJsOnMenuItemClick(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);

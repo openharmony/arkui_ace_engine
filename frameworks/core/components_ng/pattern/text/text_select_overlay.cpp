@@ -339,6 +339,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     menuInfo.menuIsShow = IsShowMenu();
     menuInfo.showCut = false;
     menuInfo.showPaste = false;
+    menuInfo.hasOnPrepareMenuCallback = onPrepareMenuCallback_ ? true : false;
 }
 
 void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)

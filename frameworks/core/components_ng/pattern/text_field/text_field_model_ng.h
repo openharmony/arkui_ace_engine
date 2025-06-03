@@ -134,7 +134,8 @@ public:
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetStopBackPress(bool isStopBackPress) override;
@@ -317,6 +318,8 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void OnPrepareMenuCallbackUpdate(
+        FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
