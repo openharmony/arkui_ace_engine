@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/property/measure_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -574,10 +575,51 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
     */
     DatePickerModelNG::SetCanLoop(frameNode, false);
 
-
     /**
     * @tc.steps: step3. GetCanLoopFromLayoutProperty.
     */
     EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutProperty());
+}
+
+/**
+ * @tc.name: DatePickerFocusRectWithPadding
+ * @tc.desc: Test datePicker focus rect normal when padding is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerFocusRectWithPadding, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pickerPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get default focus rect.
+     */
+    RoundRect rect;
+    pickerPattern->GetInnerFocusPaintRect(rect);
+    EXPECT_EQ(rect.GetRect().GetX(), 3.5f);
+
+    /**
+     * @tc.steps: step3. Set padding.
+     */
+    PaddingPropertyF testPadding;
+    testPadding.left = 10.0f;
+    testPadding.right = 10.0f;
+    testPadding.top = 10.0f;
+    testPadding.bottom = 10.0f;
+    auto host = pickerPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->UpdatePaddingWithBorder(testPadding);
+    pickerPattern->GetInnerFocusPaintRect(rect);
+    EXPECT_EQ(rect.GetRect().GetX(), 13.5f);
 }
 } // namespace OHOS::Ace::NG
