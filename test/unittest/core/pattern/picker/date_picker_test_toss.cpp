@@ -372,6 +372,17 @@ HWTEST_F(DatePickerTestToss, TestFlushCurrentOptionsNormalCase, TestSize.Level1)
     columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
     optionProperties = columnPattern->optionProperties_;
     EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
+
+    /*
+    @tc.steps: step4. FlushCurrentOptions with parameters3.
+    */
+    isDown = true;
+    isUpateTextContentOnly = false;
+    isUpdateAnimationProperties = false;
+    isTossPlaying = false;
+    columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
+    optionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
 }
 
 } // namespace OHOS::Ace::NG
