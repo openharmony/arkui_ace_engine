@@ -187,6 +187,9 @@ void DragDropInitiatingStateIdle::StartPreDragStatusCallback(const TouchEvent& t
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         if (!gestureHub->GetTextDraggable()) {
+            auto dragdropEvent = gestureHub->GetDragEventActuator();
+            CHECK_NULL_VOID(dragdropEvent);
+            dragdropEvent->SetExecTimerCallback(true);
             DragEventActuator::ExecutePreDragAction(PreDragStatus::PREPARING_FOR_DRAG_DETECTION, frameNode);
         }
     };
