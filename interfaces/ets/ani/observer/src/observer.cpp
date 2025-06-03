@@ -80,6 +80,233 @@ public:
             holder.end());
     }
 
+    void RegisterBeforePanStartCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedBeforePanStartCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedBeforePanStartCbMap_.end()) {
+            specifiedBeforePanStartCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterBeforePanStartCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedBeforePanStartCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedBeforePanStartCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void RegisterAfterPanStartCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedAfterPanStartCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedAfterPanStartCbMap_.end()) {
+            specifiedAfterPanStartCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterAfterPanStartCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedAfterPanStartCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedAfterPanStartCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void RegisterBeforePanEndCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedBeforePanEndCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedBeforePanEndCbMap_.end()) {
+            specifiedBeforePanEndCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterBeforePanEndCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedBeforePanEndCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedBeforePanEndCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void RegisterAfterPanEndCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedAfterPanEndCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedAfterPanEndCbMap_.end()) {
+            specifiedAfterPanEndCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterAfterPanEndCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedAfterPanEndCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedAfterPanEndCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void RegisterWillClickCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWillClickCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedWillClickCbMap_.end()) {
+            specifiedWillClickCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterWillClickCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWillClickCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedWillClickCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void RegisterDidClickCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedDidClickCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedDidClickCbMap_.end()) {
+            specifiedDidClickCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterDidClickCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedDidClickCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedDidClickCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
     void HandleDensityChange(ani_env* env, double density)
     {
         auto currentId = Container::CurrentId();
@@ -99,6 +326,71 @@ public:
                                        callbackParams.data(),
                                        &fnReturnVal);
         }
+    }
+
+    void HandleBeforePanStart(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedBeforePanStartCbMap_.find(currentId);
+        if (iter == specifiedBeforePanStartCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleAfterPanStart(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedAfterPanStartCbMap_.find(currentId);
+        if (iter == specifiedAfterPanStartCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleBeforePanEnd(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedBeforePanEndCbMap_.find(currentId);
+        if (iter == specifiedBeforePanEndCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleAfterPanEnd(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedAfterPanEndCbMap_.find(currentId);
+        if (iter == specifiedAfterPanEndCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleWillClick(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedWillClickCbMap_.find(currentId);
+        if (iter == specifiedWillClickCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+    void HandleDidClick(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedDidClickCbMap_.find(currentId);
+        if (iter == specifiedDidClickCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
     }
 
     ani_boolean AniEqual(ani_env* env, ani_ref cb, ani_ref cb1)
@@ -122,6 +414,14 @@ public:
 private:
     int32_t id_;
     std::unordered_map<int32_t, std::list<ani_ref>> densityCbMap_;
+
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedBeforePanStartCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedAfterPanStartCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedBeforePanEndCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedAfterPanEndCbMap_;
+
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedWillClickCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidClickCbMap_;
 };
 
 static UiObserver* Unwrapp(ani_env* env, ani_object object)
@@ -163,7 +463,23 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object
     }
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
-    observer->RegisterDensityCallback(100000, fnObjGlobalRef);
+    
+    const int idMs = 100000;
+    if (typeStr == "densityUpdate") {
+        observer->RegisterDensityCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "beforePanStart") {
+        observer->RegisterBeforePanStartCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "afterPanStart") {
+        observer->RegisterAfterPanStartCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "beforePanEnd") {
+        observer->RegisterBeforePanEndCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "afterPanEnd") {
+        observer->RegisterAfterPanEndCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "willClick") {
+        observer->RegisterWillClickCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "didClick") {
+        observer->RegisterDidClickCallback(idMs, fnObjGlobalRef);
+    }
 }
 
 static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_string type, ani_fn_object fnObj)
@@ -174,9 +490,26 @@ static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object objec
         LOGE("observer-ani context is null.");
         return;
     }
+    std::string typeStr = ANIUtils_ANIStringToStdString(env, type);
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
-    observer->UnRegisterDensityCallback(env, 100000, fnObjGlobalRef);
+
+    const int idMs = 100000;
+    if (typeStr == "densityUpdate") {
+        observer->UnRegisterDensityCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "beforePanStart") {
+        observer->UnRegisterBeforePanStartCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "afterPanStart") {
+        observer->UnRegisterAfterPanStartCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "beforePanEnd") {
+        observer->UnRegisterBeforePanEndCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "afterPanEnd") {
+        observer->UnRegisterAfterPanEndCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "willClick") {
+        observer->UnRegisterWillClickCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "didClick") {
+        observer->UnRegisterDidClickCallback(env, idMs, fnObjGlobalRef);
+    }
 }
 
 static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
@@ -198,6 +531,36 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleDensityChange(env, density);
     };
     NG::UIObserverHandler::GetInstance().SetHandleDensityChangeFuncForAni(densityChangeCallback);
+
+    auto beforePanStartCallback = [observer, env]() {
+        observer->HandleBeforePanStart(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetBeforePanStartHandleFuncForAni(beforePanStartCallback);
+
+    auto afterPanStartCallback = [observer, env]() {
+        observer->HandleAfterPanStart(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetAfterPanStartHandleFuncForAni(afterPanStartCallback);
+
+    auto beforePanEndCallback = [observer, env]() {
+        observer->HandleBeforePanEnd(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetBeforePanEndHandleFuncForAni(beforePanEndCallback);
+
+    auto afterPanEndCallback = [observer, env]() {
+        observer->HandleAfterPanEnd(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetAfterPanEndHandleFuncForAni(afterPanEndCallback);
+
+    auto willClickCallback = [observer, env]() {
+        observer->HandleWillClick(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetWillClickHandleFuncForAni(willClickCallback);
+    auto didClickCallback = [observer, env]() {
+        observer->HandleDidClick(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetDidClickHandleFuncForAni(didClickCallback);
+
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         LOGE("observer-ani Can not new object.");
