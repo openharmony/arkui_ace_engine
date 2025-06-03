@@ -32,9 +32,9 @@ public:
     void CreateSurfaceProxyNode();
     virtual void OnAddSurfaceNode();
     RefPtr<FrameNode> GetSurfaceProxyNode();
-    void GetRSUIContext();
 
 private:
+    void GetRSUIContext();
     RefPtr<FrameNode> surfaceProxyNode_;
     WeakPtr<FrameNode> host_;
     AceLogTag aceLogTag_ = AceLogTag::ACE_DEFAULT_DOMAIN;

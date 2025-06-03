@@ -86,17 +86,17 @@ void SurfaceProxyNode::GetRSUIContext()
     CHECK_NULL_VOID(host);
     NG::PipelineContext* pipeline = host->GetContext();
     if (!pipeline) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "pipeline is nullptr");
+        TAG_LOGE(aceLogTag_, "pipeline is nullptr");
         return;
     }
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector = pipeline->GetRSUIDirector();
     if (!rsUIDirector) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "rsUIDirector is nullptr");
+        TAG_LOGE(aceLogTag_, "rsUIDirector is nullptr");
         return;
     }
     rsUIContext_ = rsUIDirector->GetRSUIContext();
     if (!rsUIContext_) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "rsUIContext_ is nullptr");
+        TAG_LOGE(aceLogTag_, "rsUIContext_ is nullptr");
     }
 }
 } // namespace OHOS::Ace::NG

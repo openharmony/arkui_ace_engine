@@ -164,7 +164,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 #endif
 }
 
-void FormManagerDelegate::SetRSUIContext(std::shared_ptr<Rosen::RSUIContext> &rsUIContext)
+void FormManagerDelegate::SetRSUIContext(std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
 {
     if (rsUIContext == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "FormManagerDelegate: rsUIContext is nullptr");

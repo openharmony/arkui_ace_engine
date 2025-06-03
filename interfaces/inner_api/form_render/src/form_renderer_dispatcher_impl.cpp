@@ -164,7 +164,7 @@ void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<
     std::shared_ptr<Rosen::RSUIContext> rsUIContext = nullptr;
     if (isMultiInstanceEnabled_) {
         rsUIContext = GetRSUIContext(uiContent);
-        if (rsUIContext == nullptr) {
+        if (rsUIContext == nullptr || rsUIContext->GetRSTransaction() == nullptr) {
             HILOG_ERROR("rsUIContext is nullptr");
             return;
         }
