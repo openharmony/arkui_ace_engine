@@ -68,5 +68,10 @@ void Matrix2D::Rotate(TransformParam& param, double degree, double rx, double ry
     param.skewX *= degree * rx;
     param.skewY *= degree * ry;
 }
+
+Matrix4 SetMatrixPolyToPoly(const Matrix4& matrix, const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint)
+{
+    return Matrix4();
+}
 } // namespace OHOS::Ace::NG
 
