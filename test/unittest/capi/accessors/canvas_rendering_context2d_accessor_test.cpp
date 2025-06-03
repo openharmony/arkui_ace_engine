@@ -61,8 +61,8 @@ const std::vector<ImageAnalyzerType> IMAGE_TYPE_TEST_PLAN {
 };
 
 const std::vector<Ark_ImageAnalyzerType> ARK_IMAGE_TYPE_TEST_PLAN {
-    Ark_ImageAnalyzerType::ARK_IMAGE_ANALYZER_TYPE_TEXT,
-    Ark_ImageAnalyzerType::ARK_IMAGE_ANALYZER_TYPE_SUBJECT,
+    ARK_IMAGE_ANALYZER_TYPE_TEXT,
+    ARK_IMAGE_ANALYZER_TYPE_SUBJECT,
     static_cast<Ark_ImageAnalyzerType>(100),
     static_cast<Ark_ImageAnalyzerType>(-100)
 };
