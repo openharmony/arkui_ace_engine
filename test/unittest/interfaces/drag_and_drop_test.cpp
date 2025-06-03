@@ -1282,9 +1282,9 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0045, TestSize.Level1)
     /**
      * @tc.steps: step3.set isRemote not null, related function is called.
      */
-    dragEvent.isRemoteDev = new bool(true);
+    dragEvent.isRemoteDev = true;
     auto ret3 = OH_ArkUI_DragEvent_IsRemote(drag_Event, isRemote);
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(*isRemote, *dragEvent.isRemoteDev);
+    EXPECT_EQ(*isRemote, dragEvent.isRemoteDev);
 }
 } // namespace OHOS::Ace

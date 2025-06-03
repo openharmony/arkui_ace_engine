@@ -87,7 +87,7 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_IsRemote(ArkUI_DragEvent* event, bool* isRemo
     if (!event || !isRemote || !dragEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    *isRemote = *dragEvent->isRemoteDev;
+    *isRemote = dragEvent->isRemoteDev;
 
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

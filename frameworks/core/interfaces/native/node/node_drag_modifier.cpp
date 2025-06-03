@@ -140,7 +140,7 @@ void SetOnDragStart(ArkUINodeHandle node, void* extraParam)
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         event.dragEvent.bundleName = strdup(info->GetDragSource().c_str());
-        event.dragEvent.isRemoteDev = new bool(info->isRemoteDev());
+        event.dragEvent.isRemoteDev = info->isRemoteDev();
         SendArkUISyncEvent(&event);
         RefPtr<UnifiedData> udData =
             UdmfClient::GetInstance()->TransformUnifiedDataForNative(event.dragEvent.unifiedData);
