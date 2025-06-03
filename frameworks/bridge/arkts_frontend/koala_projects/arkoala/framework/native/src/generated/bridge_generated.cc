@@ -35689,13 +35689,16 @@ void impl_ClickEvent_setHand(Ark_NativePointer thisPtr, Ark_Int32 hand) {
         GetAccessors()->getClickEventAccessor()->setHand(self, static_cast<Ark_InteractionHand>(hand));
 }
 KOALA_INTEROP_DIRECT_V2(ClickEvent_setHand, Ark_NativePointer, Ark_Int32)
-Ark_NativePointer impl_ClickEvent_getPreventDefault(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_ClickEvent_getPreventDefault(Ark_NativePointer thisPtr) {
         Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getClickEventAccessor()->getPreventDefault(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getClickEventAccessor()->getPreventDefault(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(ClickEvent_getPreventDefault, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(ClickEvent_getPreventDefault, KInteropReturnBuffer, Ark_NativePointer)
 void impl_ClickEvent_setPreventDefault(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -36329,13 +36332,16 @@ void impl_AxisEvent_setScrollStep(Ark_NativePointer thisPtr, KInteropNumber scro
         GetAccessors()->getAxisEventAccessor()->setScrollStep(self, (const Ark_Number*) (&scrollStep));
 }
 KOALA_INTEROP_DIRECT_V2(AxisEvent_setScrollStep, Ark_NativePointer, KInteropNumber)
-Ark_NativePointer impl_AxisEvent_getPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_AxisEvent_getPropagation(Ark_NativePointer thisPtr) {
         Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getAxisEventAccessor()->getPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getAxisEventAccessor()->getPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(AxisEvent_getPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(AxisEvent_getPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_AxisEvent_setPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);

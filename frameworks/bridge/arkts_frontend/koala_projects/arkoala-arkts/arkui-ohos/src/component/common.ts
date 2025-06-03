@@ -7403,9 +7403,9 @@ export enum SourceTool {
     Finger = 1,
     PEN = 2,
     Pen = 2,
-    MOUSE = 3,
-    TOUCHPAD = 4,
-    JOYSTICK = 5
+    MOUSE = 7,
+    TOUCHPAD = 9,
+    JOYSTICK = 10
 }
 export enum RepeatMode {
     REPEAT = 0,
@@ -12595,7 +12595,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         this.setHand(hand_NonNull)
     }
     get preventDefault(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getPreventDefault();
     }
     set preventDefault(preventDefault: (() => void)) {
         this.setPreventDefault(preventDefault)
@@ -12756,8 +12756,17 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._ClickEvent_setHand(this.peer!.ptr, TypeChecker.InteractionHand_ToNumeric(hand))
     }
     private getPreventDefault_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getPreventDefault(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getPreventDefault(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult;
     }
     private setPreventDefault_serialize(preventDefault: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -13683,7 +13692,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         return obj
     }
 }
-export interface AxisEvent {
+export interface AxisEvent extends BaseEvent {
     action: AxisAction
     displayX: number
     displayY: number
@@ -13747,7 +13756,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setScrollStep(scrollStep_NonNull)
     }
     get propagation(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getPropagation()
     }
     set propagation(propagation: (() => void)) {
         this.setPropagation(propagation)
@@ -13900,15 +13909,39 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         ArkUIGeneratedNativeModule._AxisEvent_setY(this.peer!.ptr, y)
     }
     private getScrollStep_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getScrollStep(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getScrollStep(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setScrollStep_serialize(scrollStep: number): void {
         ArkUIGeneratedNativeModule._AxisEvent_setScrollStep(this.peer!.ptr, scrollStep)
     }
     private getPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult;
     }
     private setPropagation_serialize(propagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()

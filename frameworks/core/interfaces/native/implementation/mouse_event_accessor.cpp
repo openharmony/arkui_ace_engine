@@ -44,6 +44,7 @@ namespace OHOS::Ace::NG::Converter {
             case ARK_MOUSE_ACTION_MOVE: dst = MouseAction::MOVE; break;
             case ARK_MOUSE_ACTION_PRESS: dst = MouseAction::PRESS; break;
             case ARK_MOUSE_ACTION_RELEASE: dst = MouseAction::RELEASE; break;
+            case ARK_MOUSE_ACTION_CANCEL: dst = MouseAction::CANCEL; break;
             default: LOGE("Unexpected enum value in Ark_MouseAction: %{public}d", src);
         }
     }
