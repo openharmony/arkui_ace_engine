@@ -2114,4 +2114,25 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage074, TestSi
     ret = dragDropManager->IsDropAllowed(frameNode);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage075
+ * @tc.desc: Test GetGatherPixelMap
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage075, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    dragDropManager->PushGatherPixelMap(mockPixelMap);
+    dragDropManager->PushGatherPixelMap(nullptr);
+    DragDataCore dragData;
+    EXPECT_CALL(*mockPixelMap, GetWidth()).Times(1).WillOnce(testing::Return(0.0f));
+    EXPECT_CALL(*mockPixelMap, GetHeight()).Times(1).WillOnce(testing::Return(0.0f));
+    dragDropManager->GetGatherPixelMap(dragData, 2.0f, 1.0f, 1.0f);
+    EXPECT_EQ(dragData.shadowInfos.size(), 1);
+}
 } // namespace OHOS::Ace::NG
