@@ -1197,6 +1197,23 @@ void JSViewPopups::ParseMenuParam(
     auto outlineColorValue = menuOptions->GetProperty("outlineColor");
     JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
     JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
+
+    auto anchorPositionVal = menuOptions->GetProperty("anchorPosition");
+    if (anchorPositionVal->IsObject()) {
+        auto anchorPositionObj = JSRef<JSObject>::Cast(anchorPositionVal);
+        JSRef<JSVal> xVal = anchorPositionObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X));
+        JSRef<JSVal> yVal = anchorPositionObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
+        CalcDimension dx;
+        CalcDimension dy;
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx)) {
+            menuParam.anchorPosition.SetX(dx.ConvertToPx());
+        }
+        if (JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
+            menuParam.anchorPosition.SetY(dy.ConvertToPx());
+        }
+        menuParam.anchorPositionFlag = true;
+        menuParam.placement.reset();
+    }
 }
 
 void JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
