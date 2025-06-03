@@ -323,7 +323,7 @@ void FormRendererDispatcherProxy::SetMultiInstanceEnabled(bool isMultiInstanceEn
     }
  
     if (!data.WriteBool(isMultiInstanceEnabled)) {
-        HILOG_ERROR("write allowUpdate fail, action error");
+        HILOG_ERROR("write multi instance enabled flag fail, action error");
         return;
     }
  

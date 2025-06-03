@@ -783,11 +783,11 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
     if (FormManager::GetInstance().IsSizeChangeByRotate()) {
         sizeChangeReason = WindowSizeChangeReason::ROTATION;
     }
-
+    bool isMultiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled();
     std::shared_ptr<Rosen::RSTransaction> transaction = nullptr;
     std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionControllerHandler = nullptr;
     Rosen::RSSyncTransactionController* transactionController = nullptr;
-    if (SystemProperties::GetMultiInstanceEnabled()) {
+    if (isMultiInstanceEnabled) {
         if (rsUIContext_ == nullptr) {
             TAG_LOGE(AceLogTag::ACE_FORM, "NotifySurfaceChange: rsUIContext_ is nullptr");
             return;
@@ -806,7 +806,7 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
     }
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
         static_cast<uint32_t>(sizeChangeReason), transaction, borderWidth);
-    formRendererDispatcher_->SetMultiInstanceEnabled(SystemProperties::GetMultiInstanceEnabled());
+    formRendererDispatcher_->SetMultiInstanceEnabled(isMultiInstanceEnabled);
 }
 
 void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)
