@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -366,4 +366,9 @@ globalThis.Toggle.contentModifier = function (modifier): void {
   });
   component.setNodePtr(nativeNode);
   component.setContentModifier(modifier);
+};
+
+globalThis.Toggle.onChange = function (value: (selected: boolean) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().toggle.setOnChange(nodePtr, value);
 };
