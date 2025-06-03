@@ -3926,7 +3926,9 @@ void RosenRenderContext::ResetBlendBgColor()
     blendColor_ = Color::TRANSPARENT;
     auto blendColor =
         GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColor_).BlendColor(hoveredColor_);
-    rsNode_->SetBackgroundColor(blendColor.GetValue());
+    OHOS::Rosen::RSColor rsColor;
+    ColorToRSColor(blendColor, rsColor);
+    rsNode_->SetBackgroundColor(rsColor);
     RequestNextFrame();
 }
 
@@ -3936,7 +3938,9 @@ void RosenRenderContext::BlendBgColor(const Color& color)
     blendColor_ = color;
     auto blendColor =
         GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColor_).BlendColor(hoveredColor_);
-    rsNode_->SetBackgroundColor(blendColor.GetValue());
+    OHOS::Rosen::RSColor rsColor;
+    ColorToRSColor(blendColor, rsColor);
+    rsNode_->SetBackgroundColor(rsColor);
     RequestNextFrame();
 }
 
