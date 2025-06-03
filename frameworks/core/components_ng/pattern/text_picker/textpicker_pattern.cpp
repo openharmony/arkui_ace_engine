@@ -1653,7 +1653,6 @@ void TextPickerPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());

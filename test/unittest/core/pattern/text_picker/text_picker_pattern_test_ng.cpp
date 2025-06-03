@@ -457,7 +457,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest002, TestSize.Level1)
      */
     KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventUp));
- 
+
      /**
       * @tc.cases: case4. down KeyEvent.
       */
@@ -469,7 +469,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest002, TestSize.Level1)
      */
     KeyEvent keyEventMoveHome(KeyCode::KEY_MOVE_HOME, KeyAction::DOWN);
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventMoveHome));
- 
+
      /**
       * @tc.cases: case6. move end KeyEvent.
       */
@@ -2115,6 +2115,7 @@ HWTEST_F(TextPickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1
     context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
     ASSERT_NE(textPickerPattern_, nullptr);
 
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -2125,9 +2126,10 @@ HWTEST_F(TextPickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1
     auto contentRowNode = textPickerPattern_->contentRowNode_.Upgrade();
     ASSERT_NE(contentRowNode, nullptr);
 
+    EXPECT_TRUE(frameNode_->needCallChildrenUpdate_);
     textPickerPattern_->OnColorConfigurationUpdate();
+    EXPECT_TRUE(frameNode_->needCallChildrenUpdate_);
     context->SetMinPlatformVersion(minApiVersion);
-    ASSERT_NE(frameNode_, nullptr);
     auto pickerProperty = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_EQ(pickerProperty->GetColor(), Color::BLACK);
