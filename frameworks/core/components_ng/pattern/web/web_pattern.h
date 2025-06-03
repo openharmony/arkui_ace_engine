@@ -766,6 +766,7 @@ public:
 
     void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
+    void SetDefaultBackgroundColor();
 
 private:
     friend class WebContextSelectOverlay;
@@ -1228,7 +1229,7 @@ private:
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
     bool isRegisterJsObject_ = false;
-
+    bool needSetDefaultBackgroundColor_ = false;
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
