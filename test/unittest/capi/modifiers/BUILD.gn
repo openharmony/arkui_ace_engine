@@ -90,7 +90,7 @@ ace_unittest("capi_all_modifiers_test") {
     # "nav_destination_modifier_test.cpp",
     # "nav_router_modifier_test.cpp",
     # "navigator_modifier_test.cpp",
-    #"panel_modifier_test.cpp",
+    "panel_modifier_test.cpp",
     #"paste_button_modifier_test.cpp",
     #"path_modifier_test.cpp",
     # "pattern_lock_modifier_test.cpp",
