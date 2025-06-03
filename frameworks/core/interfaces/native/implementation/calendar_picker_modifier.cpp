@@ -19,6 +19,7 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
@@ -69,12 +70,13 @@ void SetCalendarPickerOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto data = Converter::OptConvert<CalendarSettingData>(*options);
-    CalendarPickerModelNG::SetCalendarData(frameNode, data);
+    CalendarPickerModelStatic::SetCalendarData(frameNode, data);
 }
 } // CalendarPickerInterfaceModifier
 namespace CalendarPickerAttributeModifier {
 void TextStyle1Impl(Ark_NativePointer node, const Opt_PickerTextStyle* value);
 void OnChange1Impl(Ark_NativePointer node, const Opt_Callback_Date_Void* value);
+void EdgeAlign1Impl(Ark_NativePointer node, const Opt_CalendarAlign* alignType, const Opt_Offset* offset);
 
 void TextStyle0Impl(Ark_NativePointer node,
                     const Opt_PickerTextStyle* value)
@@ -86,7 +88,7 @@ void TextStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CalendarPickerModelNG::SetTextStyle(frameNode,
+    CalendarPickerModelStatic::SetTextStyle(frameNode,
         value ? Converter::OptConvert<PickerTextStyle>(*value) : std::nullopt);
 }
 void OnChange0Impl(Ark_NativePointer node,
@@ -120,14 +122,7 @@ void EdgeAlign0Impl(Ark_NativePointer node,
                     const Opt_CalendarAlign* alignType,
                     const Opt_Offset* offset)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<DimensionOffset> convOffset;
-    if (offset) {
-        convOffset = Converter::OptConvert<DimensionOffset>(*offset);
-    }
-    auto convAlignType = Converter::OptConvert<CalendarEdgeAlign>(*alignType);
-    CalendarPickerModelNG::SetEdgeAlign(frameNode, convAlignType, convOffset);
+    EdgeAlign1Impl(node, alignType, offset);
 }
 void EdgeAlign1Impl(Ark_NativePointer node,
                     const Opt_CalendarAlign* alignType,
@@ -140,7 +135,7 @@ void EdgeAlign1Impl(Ark_NativePointer node,
         convOffset = Converter::OptConvert<DimensionOffset>(*offset);
     }
     auto align = alignType ? Converter::OptConvert<CalendarEdgeAlign>(*alignType) : std::nullopt;
-    CalendarPickerModelNG::SetEdgeAlign(frameNode, align, convOffset);
+    CalendarPickerModelStatic::SetEdgeAlign(frameNode, align, convOffset);
 }
 } // CalendarPickerAttributeModifier
 const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()
