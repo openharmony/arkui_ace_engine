@@ -76,6 +76,7 @@ private:
     WeakPtr<FocusHub> SearchBigItemFocusableChildInCross(
         int32_t tarMainIndex, int32_t tarCrossIndex, FocusStep step = FocusStep::NONE, bool isMainSkip = false);
     bool CheckIsCrossDirectionFocus(FocusStep step);
+    FocusStep HandleDirectionStep(FocusStep step);
     bool CheckStepDirection(FocusStep step, bool isNext);
     WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t maxCrossCount,
         int32_t curMainIndex = -1, int32_t curCrossIndex = -1);
