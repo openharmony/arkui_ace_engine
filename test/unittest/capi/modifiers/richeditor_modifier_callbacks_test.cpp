@@ -130,7 +130,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnReadyCallbackTest, TestSize.Level1)
         };
     };
     auto arkCallback = Converter::ArkValue<Callback_Void>(onChange, frameNode->GetId());
-    modifier_->setOnReady(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnReady(node_, &optCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
@@ -168,7 +169,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackTest, TestSize.Level1)
         };
     };
     auto arkCallback = Converter::ArkValue<Callback_RichEditorSelection_Void>(onChange, frameNode->GetId());
-    modifier_->setOnSelect(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_RichEditorSelection_Void>(arkCallback);
+    modifier_->setOnSelect(node_, &optCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
@@ -215,7 +217,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackWithTextSpanTest, Test
     };
 
     auto arkCallback = Converter::ArkValue<Callback_RichEditorSelection_Void>(onChange, frameNode->GetId());
-    modifier_->setOnSelect(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_RichEditorSelection_Void>(arkCallback);
+    modifier_->setOnSelect(node_, &optCallback);
 
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
@@ -264,9 +267,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackWithImageSpanTest, Tes
         bool hasPixelMap = false;
 
         Converter::VisitUnion(data.spans.array[0],
-            [&hasText](const Ark_RichEditorTextSpanResult& value) {
-                hasText = true;
-            },
+            [&hasText](const Ark_RichEditorTextSpanResult& value) { hasText = true; },
             [&hasPixelMap](const Ark_RichEditorImageSpanResult& value) {
                 PixelMapPeer* pixelMapPeer = value.valuePixelMap.value;
                 hasPixelMap = pixelMapPeer && pixelMapPeer->pixelMap;
@@ -281,7 +282,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackWithImageSpanTest, Tes
     };
 
     auto arkCallback = Converter::ArkValue<Callback_RichEditorSelection_Void>(onChange, frameNode->GetId());
-    modifier_->setOnSelect(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_RichEditorSelection_Void>(arkCallback);
+    modifier_->setOnSelect(node_, &optCallback);
 
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
@@ -341,7 +343,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectionChange, TestSize.Level1)
         };
     };
     auto arkCallback = Converter::ArkValue<Callback_RichEditorRange_Void>(onSelect, frameNode->GetId());
-    modifier_->setOnSelectionChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_RichEditorRange_Void>(arkCallback);
+    modifier_->setOnSelectionChange(node_, &optCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
@@ -385,7 +388,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, AboutToIMEInputTest, TestSize.Level1)
         CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto func = Converter::ArkValue<Callback_RichEditorInsertValue_Boolean>(nullptr, inputCallback, expectedResId);
-    modifier_->setAboutToIMEInput(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_RichEditorInsertValue_Boolean>(func);
+    modifier_->setAboutToIMEInput(node_, &optFunc);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorInsertValue info;
@@ -442,7 +446,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level
         };
     };
     auto arkCallback = Converter::ArkValue<Callback_RichEditorTextSpanResult_Void>(onIMEIcomplete, frameNode->GetId());
-    modifier_->setOnIMEInputComplete(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_RichEditorTextSpanResult_Void>(arkCallback);
+    modifier_->setOnIMEInputComplete(node_, &optCallback);
     EXPECT_FALSE(checkEvent);
     eventHub->FireOnIMEInputComplete(info);
     ASSERT_TRUE(checkEvent);
@@ -482,7 +487,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidIMEInputTest, TestSize.Level1)
     TextRange range;
     range.start = TEST_START;
     range.end = TEST_END;
-    modifier_->setOnDidIMEInput(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_TextRange_Void>(arkCallback);
+    modifier_->setOnDidIMEInput(node_, &optCallback);
     eventHub->FireOnDidIMEInput(range);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
@@ -518,7 +524,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSetAboutToDeleteTest, TestSize.Level
         CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto func = Converter::ArkValue<Callback_RichEditorDeleteValue_Boolean>(nullptr, inputCallback, expectedResId);
-    modifier_->setAboutToDelete(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_RichEditorDeleteValue_Boolean>(func);
+    modifier_->setAboutToDelete(node_, &optFunc);
     RichEditorDeleteValue value;
     value.SetLength(TEST_LENGTH);
     value.SetOffset(TEST_OFFSET);
@@ -551,7 +558,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSetDeleteCompleteTest, TestSize.Leve
         };
     };
     auto arkCallback = Converter::ArkValue<Callback_Void>(onChange, frameNode->GetId());
-    modifier_->setOnDeleteComplete(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnDeleteComplete(node_, &optCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
@@ -586,7 +594,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
     auto arkCallback = Converter::ArkValue<PasteEventCallback>(testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    modifier_->setOnPaste(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_PasteEventCallback>(arkCallback);
+    modifier_->setOnPaste(node_, &optCallback);
     EXPECT_FALSE(checkEvent);
     NG::TextCommonEvent value;
     EXPECT_FALSE(value.IsPreventDefault());
@@ -616,7 +625,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnEditingChangeTest, TestSize.Level1)
         };
     };
     auto arkCallback = Converter::ArkValue<Callback_Boolean_Void>(onChange, frameNode->GetId());
-    modifier_->setOnEditingChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Boolean_Void>(arkCallback);
+    modifier_->setOnEditingChange(node_, &optCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
@@ -653,7 +663,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
     };
 
     auto func = Converter::ArkValue<SubmitCallback>(onSubmitFunc, expectedResId);
-    modifier_->setOnSubmit(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_SubmitCallback>(func);
+    modifier_->setOnSubmit(node_, &optFunc);
     TextFieldCommonEvent event;
     event.SetText(testValue);
     eventHub->FireOnSubmit(111, event);
@@ -709,7 +720,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnWillChangeTest, TestSize.Level1)
         CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto func = Converter::ArkValue<Callback_RichEditorChangeValue_Boolean>(nullptr, inputCallback, frameNode->GetId());
-    modifier_->setOnWillChange(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_RichEditorChangeValue_Boolean>(func);
+    modifier_->setOnWillChange(node_, &optFunc);
     RichEditorChangeValue value;
     TextRange rangeBefore = {.start = TEST_RANGE_START, .end = TEST_RANGE_END};
     value.SetRangeBefore(rangeBefore);
@@ -755,7 +767,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnWillChange2Test, TestSize.Level1)
         CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto func = Converter::ArkValue<Callback_RichEditorChangeValue_Boolean>(nullptr, inputCallback, frameNode->GetId());
-    modifier_->setOnWillChange(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_RichEditorChangeValue_Boolean>(func);
+    modifier_->setOnWillChange(node_, &optFunc);
     RichEditorChangeValue value;
     RichEditorAbstractSpanResult span;
     span.SetSpanIndex(TEST_OFFSET);
@@ -806,7 +819,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidChangeTest, TestSize.Level1)
         };
     };
     auto func = Converter::ArkValue<OnDidChangeCallback>(inputCallback, frameNode->GetId());
-    modifier_->setOnDidChange(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_OnDidChangeCallback>(func);
+    modifier_->setOnDidChange(node_, &optFunc);
     RichEditorChangeValue changeValue;
     changeValue.SetRangeBefore({.start = TEST_RANGE_START, .end = TEST_RANGE_END});
     changeValue.SetRangeAfter({.start = TEST_RANGE_START_TWO, .end = TEST_RANGE_END_TWO});
@@ -846,7 +860,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
     auto arkCallback = Converter::ArkValue<Callback_CopyEvent_Void>(nullptr, testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    modifier_->setOnCopy(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_CopyEvent_Void>(arkCallback);
+    modifier_->setOnCopy(node_, &optCallback);
     EXPECT_FALSE(checkEvent);
     NG::TextCommonEvent event;
     EXPECT_FALSE(event.IsPreventDefault());
@@ -881,7 +896,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
     auto arkCallback = Converter::ArkValue<Callback_CutEvent_Void>(testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    modifier_->setOnCut(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_CutEvent_Void>(arkCallback);
+    modifier_->setOnCut(node_, &optCallback);
     EXPECT_FALSE(checkEvent);
     NG::TextCommonEvent event;
     EXPECT_FALSE(event.IsPreventDefault());
@@ -937,7 +953,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, setEditMenuOptionsTest, TestSize.Level
     auto params = GetMenuItemParams();
     FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback == nullptr);
-    modifier_->setEditMenuOptions(node_, &options);
+    auto optOptions = Converter::ArkValue<Opt_EditMenuOptions>(options);
+    modifier_->setEditMenuOptions(node_, &optOptions);
     FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
     ASSERT_NE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback, nullptr);
     selectOverlayInfo.onCreateCallback.onCreateMenuCallback(params);
