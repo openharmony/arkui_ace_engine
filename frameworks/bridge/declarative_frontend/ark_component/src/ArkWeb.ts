@@ -1178,6 +1178,120 @@ class WebOnInterceptKeyEventModifier extends ModifierWithKey<(result: { event: K
   }
 }
 
+class WebOnErrorReceiveModifier extends ModifierWithKey<(event?: { request: WebResourceRequest, error: WebResourceError } | undefined) => void> {
+  constructor(value: (event?: { request: WebResourceRequest, error: WebResourceError } | undefined) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnErrorReceiveModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnErrorReceive(node);
+    } else {
+      getUINativeModule().web.setOnErrorReceive(node, this.value);
+    }
+  }
+}
+
+class WebOnLoadInterceptModifier extends ModifierWithKey<(event: { data: WebResourceRequest }) => boolean> {
+  constructor(value: (event: { data: WebResourceRequest }) => boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnLoadInterceptModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnLoadIntercept(node);
+    } else {
+      getUINativeModule().web.setOnLoadIntercept(node, this.value);
+    }
+  }
+}
+
+class WebOnHttpErrorReceiveModifier extends ModifierWithKey<(event?: { request: WebResourceRequest, response: WebResourceResponse } | undefined) => void> {
+  constructor(value: (event?: { request: WebResourceRequest, response: WebResourceResponse } | undefined) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnHttpErrorReceiveModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnHttpErrorReceive(node);
+    } else {
+      getUINativeModule().web.setOnHttpErrorReceive(node, this.value);
+    }
+  }
+}
+
+class WebOnOverrideUrlLoadingModifier extends ModifierWithKey<OnOverrideUrlLoadingCallback> {
+  constructor(value: OnOverrideUrlLoadingCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnOverrideUrlLoadingModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnOverrideUrlLoading(node);
+    } else {
+      getUINativeModule().web.setOnOverrideUrlLoading(node, this.value);
+    }
+  }
+}
+
+class WebOnHttpAuthRequestModifier extends ModifierWithKey<(event?: { handler: HttpAuthHandler, host: string, realm: string } | undefined) => boolean> {
+  constructor(value: (event?: { handler: HttpAuthHandler, host: string, realm: string } | undefined) => boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnHttpAuthRequestModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnHttpAuthRequest(node);
+    } else {
+      getUINativeModule().web.setOnHttpAuthRequest(node, this.value);
+    }
+  }
+}
+
+class WebOnConsoleModifier extends ModifierWithKey<(event?: { message: ConsoleMessage; } | undefined) => boolean> {
+  constructor(value: (event?: { message: ConsoleMessage; } | undefined) => boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnConsoleModifier')
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnConsole(node);
+    } else {
+      getUINativeModule().web.setOnConsole(node, this.value);
+    }
+  }
+}
+
+class WebOnSslErrorEventModifier extends ModifierWithKey<(event: { handler: SslErrorHandler; error: SslError; url: string;
+    originalUrl: string; referrer: string; isFatalError: boolean; isMainFrame: boolean; }) => void > {
+  constructor(value: (event: { handler: SslErrorHandler; error: SslError; url: string;
+    originalUrl: string; referrer: string; isFatalError: boolean; isMainFrame: boolean; }) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnSslErrorEventModifier')
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetnSslErrorEvent(node);
+    } else {
+      getUINativeModule().web.setnSslErrorEvent(node, this.value);
+    }
+  }
+}
+
+class WebOnDataResubmittedModifier extends ModifierWithKey<(event: { handler: DataResubmissionHandler }) => void > {
+  constructor(value: (event: { handler: DataResubmissionHandler }) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('WebOnDataResubmittedModifier')
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnDataResubmitted(node);
+    } else {
+      getUINativeModule().web.setOnDataResubmitted(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1311,13 +1425,16 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   onConsole(callback: (event?: { message: ConsoleMessage; } | undefined) => boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnConsoleModifier.identity, WebOnConsoleModifier, callback);
+    return this;
   }
   onErrorReceive(callback: (event?: { request: WebResourceRequest; error: WebResourceError; } | undefined) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnErrorReceiveModifier.identity, WebOnErrorReceiveModifier, callback);
+    return this;
   }
   onHttpErrorReceive(callback: (event?: { request: WebResourceRequest; response: WebResourceResponse; } | undefined) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnHttpErrorReceiveModifier.identity, WebOnHttpErrorReceiveModifier, callback);
+    return this;
   }
   onDownloadStart(callback: (event?: {
     url: string;
@@ -1369,7 +1486,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   onHttpAuthRequest(callback: (event?: { handler: HttpAuthHandler; host: string; realm: string; } | undefined) => boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnHttpAuthRequestModifier.identity, WebOnHttpAuthRequestModifier, callback);
+    return this;
   }
   onInterceptRequest(callback: (event?: { request: WebResourceRequest; } | undefined) => WebResourceResponse): this {
     throw new Error('Method not implemented.');
@@ -1403,7 +1521,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onSslErrorEvent(callback: (event: { handler: SslErrorHandler; error: SslError; url: string;
     originalUrl: string; referrer: string; isFatalError: boolean; isMainFrame: boolean; }) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnSslErrorEventModifier.identity, WebOnSslErrorEventModifier, callback);
+    return this;
   }
   onClientAuthenticationRequest(callback: (event: {
     handler: ClientAuthenticationHandler;
@@ -1491,7 +1610,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   onDataResubmitted(callback: (event: { handler: DataResubmissionHandler; }) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnDataResubmittedModifier.identity, WebOnDataResubmittedModifier, callback);
+    return this;
   }
   pinchSmooth(isEnabled: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebPinchSmoothModifier.identity, WebPinchSmoothModifier, isEnabled);
@@ -1526,7 +1646,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   onLoadIntercept(callback: (event: { data: WebResourceRequest; }) => boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnLoadInterceptModifier.identity, WebOnLoadInterceptModifier, callback);
+    return this;
   }
   onControllerAttached(callback: () => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnControllerAttachedModifier.identity, WebOnControllerAttachedModifier, callback);
@@ -1538,15 +1659,15 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   javaScriptOnDocumentStart(scripts: ScriptItem[]): this {
     let scriptInfo = new ArkWebScriptItem();
-    scriptInfo.scripts = scripts.map(item => { return item.id; });
-    scriptInfo.scriptRules = scripts.map(item => { return item.referencedId; });
+    scriptInfo.scripts = scripts.map(item => { return item.script; });
+    scriptInfo.scriptRules = scripts.map(item => { return item.scriptRules; });
     modifierWithKey(this._modifiersWithKeys, WebJavaScriptOnDocumentStartModifier.identity, WebJavaScriptOnDocumentStartModifier, scriptInfo);
     return this;
   }
   javaScriptOnDocumentEnd(scripts: ScriptItem[]): this {
     let scriptInfo = new ArkWebScriptItem();
-    scriptInfo.scripts = scripts.map(item => { return item.id; });
-    scriptInfo.scriptRules = scripts.map(item => { return item.referencedId; });
+    scriptInfo.scripts = scripts.map(item => { return item.script; });
+    scriptInfo.scriptRules = scripts.map(item => { return item.scriptRules; });
     modifierWithKey(this._modifiersWithKeys, WebJavaScriptOnDocumentEndModifier.identity, WebJavaScriptOnDocumentEndModifier, scriptInfo);
     return this;
   }
@@ -1598,7 +1719,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   onOverrideUrlLoading(callback: OnOverrideUrlLoadingCallback): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnOverrideUrlLoadingModifier.identity, WebOnOverrideUrlLoadingModifier, callback);
+    return this;
   }
   enableNativeMediaPlayer(config: NativeMediaPlayerConfig): this {
     throw new Error('Method not implemented.');
