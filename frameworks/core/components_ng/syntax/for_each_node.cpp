@@ -308,7 +308,10 @@ void ForEachNode::InitDragManager(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(onMoveEvent_);
     CHECK_NULL_VOID(child);
-    auto childNode = AceType::DynamicCast<FrameNode>(child->GetFrameChildByIndex(0, false));
+    if (child->GetChildren().size() != 1) {
+        return;
+    }
+    auto childNode = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
     CHECK_NULL_VOID(childNode);
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);

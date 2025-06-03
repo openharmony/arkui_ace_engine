@@ -406,6 +406,11 @@ public:
 
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
 
+    void SetDraggingIndex(int32_t index)
+    {
+        draggingIndex_ = index;
+    }
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -608,6 +613,7 @@ private:
     int32_t repeatDifference_ = 0;
 
     bool prevMeasureBreak_ = false;
+    int32_t draggingIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 
