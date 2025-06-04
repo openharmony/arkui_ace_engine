@@ -1689,6 +1689,52 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest010, TestSize.Level1
 }
 
 /**
+ * @tc.name: SliderPatternAccessibilityTest011
+ * @tc.desc: Test slider_pattern GetOffsetStepIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    if (!sliderPattern->parentAccessibilityNode_) {
+        sliderPattern->parentAccessibilityNode_ = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    }
+    auto parent = sliderPattern->parentAccessibilityNode_;
+    ASSERT_NE(parent, nullptr);
+    if (!sliderPattern->sliderContentModifier_) {
+        sliderPattern->sliderContentModifier_ =
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+    }
+    auto contentModifier = sliderPattern->sliderContentModifier_;
+    ASSERT_NE(contentModifier, nullptr);
+    contentModifier->stepPointVec_ = HORIZONTAL_STEP_POINTS;
+    /**
+     * @tc.steps: step2. Add Slider virtual node.
+     */
+    sliderPattern->AddStepPointsAccessibilityVirtualNode();
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPaintProperty->UpdateValue(4.1f);
+    sliderPaintProperty->UpdateMin(3.0f);
+    sliderPaintProperty->UpdateMax(8.0f);
+    sliderPaintProperty->UpdateStep(1.5f);
+    ASSERT_EQ(sliderPattern->GetOffsetStepIndex(2), 2);
+    ASSERT_EQ(sliderPattern->GetOffsetStepIndex(3), 3);
+    ASSERT_EQ(sliderPattern->GetOffsetStepIndex(4), 4);
+    ASSERT_EQ(sliderPattern->GetOffsetStepIndex(0), -1);
+    sliderPaintProperty->UpdateStep(0.0f);
+    ASSERT_EQ(sliderPattern->GetOffsetStepIndex(4), 0);
+}
+
+/**
  * @tc.name: SliderPatternTest023
  * @tc.desc: Test slider_pattern HandleHoverEvent
  * @tc.type: FUNC

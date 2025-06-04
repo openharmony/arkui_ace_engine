@@ -689,7 +689,7 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireChangeEvent(SliderChangeMode::Begin);
-            auto offsetStep = index - pattern->GetCurrentStepIndex();
+            auto offsetStep = pattern->GetOffsetStepIndex(index);
             pattern->MoveStep(offsetStep);
             pattern->FireChangeEvent(SliderChangeMode::End);
             if (pattern->showTips_) {
@@ -719,6 +719,28 @@ uint32_t SliderPattern::GetCurrentStepIndex()
         return 0;
     }
     return static_cast<uint32_t>(std::ceil((currentValue - min) / step));
+}
+
+int32_t SliderPattern::GetOffsetStepIndex(uint32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, 0);
+    const float step = sliderPaintProperty->GetStep().value_or(1.0f);
+    const float currentValue = sliderPaintProperty->GetValueValue(value_);
+    const double min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    if (NearZero(step)) {
+        return 0;
+    }
+    auto stepIndex = static_cast<uint32_t>(std::ceil((currentValue - min) / step));
+    auto diffValue = stepIndex * step + min - currentValue;
+    int32_t offsetStepIndex = index - stepIndex;
+    if (NearZero(diffValue) || offsetStepIndex <= 0) {
+        return offsetStepIndex;
+    } else {
+        return offsetStepIndex + 1;
+    }
 }
 
 SizeF SliderPattern::GetStepPointAccessibilityVirtualNodeSize()
