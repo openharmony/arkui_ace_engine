@@ -1707,10 +1707,7 @@ void WebDelegate::GetHitTestValue(HitTestResult& result)
 
 int WebDelegate::GetProgress()
 {
-    if (nweb_) {
-        return nweb_->PageLoadProgress();
-    }
-    return 0;
+    return nweb_ ? nweb_->PageLoadProgress() : 0;
 }
 
 int WebDelegate::GetPageHeight()
