@@ -725,7 +725,7 @@ private:
     bool isTimeLimited(const DragPointerEvent& pointerEvent, const Point& point);
     bool ReachMoveLimit(const DragPointerEvent& pointerEvent, const Point& point);
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
-    bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
+    bool IsUIExtensionOrDynamicComponent(const RefPtr<NG::UINode>& node);
     void HandleUIExtensionDragEvent(
         const RefPtr<FrameNode>& frameNode, const DragPointerEvent& pointerEvent, DragEventType type);
     int32_t GetWindowId();

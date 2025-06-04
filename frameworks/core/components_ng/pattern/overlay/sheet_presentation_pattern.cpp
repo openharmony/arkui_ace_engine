@@ -1406,10 +1406,9 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
                 CalcSize(std::nullopt, CalcLength(operationAreaHeight)));
             if (sheetStyle.sheetSubtitle.has_value()) {
                 layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
-                    CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAreaMargin())));
-                titleLayoutProps->UpdateUserDefinedIdealSize(
-                    CalcSize(std::nullopt,
-                        CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
+                    CalcLength(sheetTheme->GetOperationAreaHeightDouble() - sheetTheme->GetSheetTitleAreaMargin())));
+                titleLayoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
+                    CalcLength(sheetTheme->GetOperationAreaHeightDouble() - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
         }
         UpdateSheetTitle();

@@ -263,7 +263,7 @@ void AuthResultOhos::Cancel() {}
 void SslErrorResultOhos::HandleConfirm() {}
 void SslErrorResultOhos::HandleCancel() {}
 void AllSslErrorResultOhos::HandleConfirm() {}
-void AllSslErrorResultOhos::HandleCancel() {}
+void AllSslErrorResultOhos::HandleCancel(bool abortLoading) {}
 void SslSelectCertResultOhos::HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) {}
 void SslSelectCertResultOhos::HandleCancel() {}
 void SslSelectCertResultOhos::HandleIgnore() {}
@@ -490,6 +490,10 @@ int WebDelegate::GetHitTestResult()
     return false;
 }
 void WebDelegate::GetHitTestValue(HitTestResult& result) {}
+int WebDelegate::GetProgress()
+{
+    return false;
+}
 int WebDelegate::GetPageHeight()
 {
     return false;

@@ -32,23 +32,23 @@ enum class SplitType {
     COLUMN_SPLIT,
 };
 
-struct ItemDivider final {
+struct ColumnSplitDivider final {
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;
     struct resourceUpdater {
         RefPtr<ResourceObject> resObj;
-        std::function<void(const RefPtr<ResourceObject>&, NG::ItemDivider&)> updateFunc;
+        std::function<void(const RefPtr<ResourceObject>&, NG::ColumnSplitDivider&)> updateFunc;
     };
     std::unordered_map<std::string, resourceUpdater> resMap_;
-    bool operator==(const ItemDivider& itemDivider) const
+    bool operator==(const ColumnSplitDivider& columnSplitDivider) const
     {
-        return (startMargin == itemDivider.startMargin) && (endMargin == itemDivider.endMargin);
+        return (startMargin == columnSplitDivider.startMargin) && (endMargin == columnSplitDivider.endMargin);
     }
 
     void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
-        std::function<void(const RefPtr<ResourceObject>&, NG::ItemDivider&)>&& updateFunc)
+        std::function<void(const RefPtr<ResourceObject>&, NG::ColumnSplitDivider&)>&& updateFunc)
     {
         if (resObj == nullptr || !updateFunc) {
             return;
@@ -75,7 +75,7 @@ public:
 
     virtual void Create(NG::SplitType splitType) = 0;
     virtual void SetResizable(NG::SplitType splitType, bool resizable) = 0;
-    virtual void SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider) = 0;
+    virtual void SetDivider(NG::SplitType splitType, const NG::ColumnSplitDivider& divider) = 0;
 
 private:
     static std::unique_ptr<LinearSplitModel> instance_;

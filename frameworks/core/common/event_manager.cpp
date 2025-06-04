@@ -947,7 +947,7 @@ void EventManager::DispatchTouchEventAndCheck(const TouchEvent& event, bool send
     DispatchTouchEventToTouchTestResult(point, iter->second, sendOnTouch);
     if (!allDone && point.type == TouchType::DOWN && !hasFailRecognizer &&
         refereeNG_->HasFailRecognizer(point.id) && downFingerIds_.size() <= 1) {
-            refereeNG_->ForceCleanGestureReferee();
+            refereeNG_->ForceCleanGestureRefereeState();
             DispatchTouchEventToTouchTestResult(point, iter->second, false);
         }
 }

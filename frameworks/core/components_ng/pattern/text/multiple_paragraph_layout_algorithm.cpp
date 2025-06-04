@@ -127,6 +127,8 @@ void MultipleParagraphLayoutAlgorithm::UpdateShaderStyle(
         auto gradients = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
         auto gradient = ToGradient(gradients);
         textStyle.SetGradient(gradient);
+    } else {
+        textStyle.SetGradient(std::nullopt);
     }
 }
 
@@ -135,6 +137,7 @@ std::optional<OHOS::Ace::Gradient> MultipleParagraphLayoutAlgorithm::ToGradient(
     OHOS::Ace::Gradient retGradient;
     retGradient.SetType(static_cast<OHOS::Ace::GradientType>(gradient.GetType()));
     if (retGradient.GetType() == OHOS::Ace::GradientType::LINEAR) {
+        CHECK_NULL_RETURN(gradient.GetLinearGradient(), std::nullopt);
         auto angle = gradient.GetLinearGradient()->angle;
         if (angle.has_value()) {
             retGradient.GetLinearGradient().angle = ToAnimatableDimension(angle.value());
@@ -149,6 +152,7 @@ std::optional<OHOS::Ace::Gradient> MultipleParagraphLayoutAlgorithm::ToGradient(
         }
     }
     if (retGradient.GetType() == OHOS::Ace::GradientType::RADIAL) {
+        CHECK_NULL_RETURN(gradient.GetRadialGradient(), std::nullopt);
         auto radialCenterX = gradient.GetRadialGradient()->radialCenterX;
         if (radialCenterX.has_value()) {
             retGradient.GetRadialGradient().radialCenterX = ToAnimatableDimension(radialCenterX.value());

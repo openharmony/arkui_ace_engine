@@ -1198,7 +1198,8 @@ void ResetTextOnTextSelectionChange(ArkUINodeHandle node)
     TextModelNG::SetOnTextSelectionChange(frameNode, nullptr);
 }
 
-void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+void SetTextSelectionMenuOptions(
+    ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1215,6 +1216,18 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
     } else {
         TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
+    if (onPrepareMenuCallback) {
+        NG::OnPrepareMenuCallback onPrepareMenu =
+            *(reinterpret_cast<NG::OnPrepareMenuCallback*>(onPrepareMenuCallback));
+        TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenu));
+    } else {
+        TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, nullptr);
+    }
+}
+
+void SetTextSelectionMenuOptionsForCJ(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+{
+    SetTextSelectionMenuOptions(node, onCreateMenuCallback, onMenuItemClickCallback, nullptr);
 }
 
 void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
@@ -1223,8 +1236,10 @@ void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
     TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
     TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+    TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
 }
 
 void SetTextHalfLeading(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1901,7 +1916,7 @@ const CJUITextModifier* GetCJUITextModifier()
         .resetTextMinFontScale = ResetTextMinFontScale,
         .setTextMaxFontScale = SetTextMaxFontScale,
         .resetTextMaxFontScale = ResetTextMaxFontScale,
-        .setTextSelectionMenuOptions = SetTextSelectionMenuOptions,
+        .setTextSelectionMenuOptions = SetTextSelectionMenuOptionsForCJ,
         .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
         .setTextHalfLeading = SetTextHalfLeading,
         .resetTextHalfLeading = ResetTextHalfLeading,

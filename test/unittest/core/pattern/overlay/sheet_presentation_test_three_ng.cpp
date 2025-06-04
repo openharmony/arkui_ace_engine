@@ -1555,10 +1555,10 @@ HWTEST_F(SheetPresentationTestThreeNg, CalculateSheetOffsetInOtherScenes001, Tes
         SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() + (2000.0f - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() - 300.0f) / 2;
     EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, sheetOffsetY);
 
-    sheetLayoutAlgorithm->sheetMaxHeight_ = 3000.0f;
+    sheetLayoutAlgorithm->sheetMaxHeight_ = 2800.0f;
     sheetLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
     sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(Referenced::RawPtr(layoutWrapper));
-    sheetOffsetY = 2200.0f + (3000.0f - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - 2200.0f - 300.0f) / 2;
+    sheetOffsetY = 2200.0f + (2800.0f - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - 2200.0f - 300.0f) / 2;
     EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, sheetOffsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }

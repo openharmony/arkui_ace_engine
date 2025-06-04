@@ -666,8 +666,7 @@ void BubbleView::GetPopupMaxWidthAndHeight(
         if (isExpandDisplay) {
             maxHeight = SystemProperties::GetDeviceHeight();
         } else if (container->IsUIExtensionWindow()) {
-            auto focusWindowId = pipelineContext->GetFocusWindowId();
-            auto rect = container->GetUIExtensionHostWindowRect(focusWindowId);
+            auto rect = container->GetUIExtensionHostWindowRect();
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup GetUIExtensionHostWindowRect: %{public}s",
                 rect.ToString().c_str());
             maxHeight = rect.Height();

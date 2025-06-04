@@ -339,6 +339,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     menuInfo.menuIsShow = IsShowMenu();
     menuInfo.showCut = false;
     menuInfo.showPaste = false;
+    menuInfo.hasOnPrepareMenuCallback = onPrepareMenuCallback_ ? true : false;
 }
 
 void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
@@ -648,5 +649,20 @@ bool TextSelectOverlay::GetRenderClipValue() const
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, defaultClipValue);
     return renderContext->GetClipEdge().value_or(defaultClipValue);
+}
+
+bool TextSelectOverlay::CheckTouchInHostNode(const PointF& touchPoint)
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
+    auto geo = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geo, false);
+    auto rect = RectF(OffsetF(0.0f, 0.0f), geo->GetFrameSize());
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+
+    auto selectedArea = GetSelectArea();
+    selectedArea.SetOffset(selectedArea.GetOffset() - textPattern->GetParentGlobalOffset());
+    return rect.IsInRegion(touchPoint) || selectedArea.IsInRegion(touchPoint);
 }
 } // namespace OHOS::Ace::NG

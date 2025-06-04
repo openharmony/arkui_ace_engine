@@ -228,8 +228,17 @@ private:
 
 class ACE_FORCE_EXPORT RichEditorChangeValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorChangeValue, BaseEventInfo)
+#ifndef ACE_UNITTEST
+private:
+#else
 public:
+#endif
     RichEditorChangeValue() : BaseEventInfo("RichEditorChangeValue") {}
+public:
+    RichEditorChangeValue(TextChangeReason reason) : RichEditorChangeValue()
+    {
+        changeReason_ = reason;
+    }
     ~RichEditorChangeValue() = default;
 
     void SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span);
@@ -250,6 +259,8 @@ public:
     void SetRangeAfter(const TextRange& rangeAfter);
     TextRange GetRangeAfter() const;
 
+    TextChangeReason GetChangeReason() const;
+
     void reset()
     {
         originalSpans_.clear();
@@ -258,6 +269,7 @@ public:
         replacedSymbolSpans_.clear();
         rangeBefore_ = TextRange();
         rangeAfter_ = TextRange();
+        changeReason_ = TextChangeReason::UNKNOWN;
     }
 
 private:
@@ -267,6 +279,7 @@ private:
     std::vector<RichEditorAbstractSpanResult> replacedSymbolSpans_;
     TextRange rangeBefore_;
     TextRange rangeAfter_;
+    TextChangeReason changeReason_;
 };
 
 class StyledStringChangeValue : public BaseEventInfo {

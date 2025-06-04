@@ -150,5 +150,18 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_004, Tes
     EXPECT_TRUE(data.ReadInt32(type));
     EXPECT_TRUE(data.ReadInt64(time));
 }
+
+/**
+ * @tc.number: FormRendererDispatcherStubTest_005
+ * @tc.name: HandleOnNotifyDumpInfo
+ * @tc.desc:
+ */
+HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_005, TestSize.Level1)
+{
+    sptr<AppExecFwk::MockFormRendererDispatherStub> renderDispather = new AppExecFwk::MockFormRendererDispatherStub();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(renderDispather->HandleOnNotifyDumpInfo(data, reply), ERR_OK);
+}
 }
 }

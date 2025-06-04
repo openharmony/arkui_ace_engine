@@ -1835,7 +1835,7 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset000, TestSize.Level1)
     EXPECT_EQ(info.lineHeightMap_, cmp);
     EXPECT_EQ(info.startMainLineIndex_, 9);
     EXPECT_EQ(info.endMainLineIndex_, 9);
-    EXPECT_LT(info.currentOffset_, -15000.0f);
+    EXPECT_LT(info.currentOffset_, -10000.0f);
 }
 
 /**
@@ -2062,5 +2062,64 @@ HWTEST_F(GridIrregularLayoutTest, SkipLargeOffset001, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->info_.startIndex_, 15);
     EXPECT_EQ(pattern_->info_.endIndex_, 26);
+}
+
+
+/**
+ * @tc.name: KeepFocus
+ * @tc.desc: Test Grid focus keep when focused item is removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, KeepFocus, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        0, // [1 x 3]
+        2, // [2 x 3]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 0) {
+            return { .rows = 1, .columns = 3 };
+        }
+        return { .rows = 2, .columns = 3 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridModelNG model = CreateRepeatGrid(30, [](uint32_t idx) {
+        if (idx == 2) {
+            return ITEM_MAIN_SIZE * 2;
+        }
+        return ITEM_MAIN_SIZE;
+    });
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, true);
+    model.SetLayoutOptions(option);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step1. When focus grid from the outside
+     * @tc.expected: Will focus first child
+     */
+    auto gridFocusNode = frameNode_->GetOrCreateFocusHub();
+    gridFocusNode->RequestFocusImmediately();
+    FlushUITasks();
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Scroll to sixth row
+     * @tc.expected: item 0 scrolls out of viewport, lost focus to grid
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 6, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetFocusedIndex(), 0);
+    EXPECT_FALSE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step3. Scroll to first row
+     * @tc.expected: item 0 scrolls into viewport, keep focus
+     */
+    ScrollTo(0);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
 } // namespace OHOS::Ace::NG

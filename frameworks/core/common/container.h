@@ -698,7 +698,7 @@ public:
         return false;
     }
 
-    virtual Rect GetUIExtensionHostWindowRect(int32_t instanceId)
+    virtual Rect GetUIExtensionHostWindowRect()
     {
         return Rect();
     }

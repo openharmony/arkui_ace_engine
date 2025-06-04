@@ -558,6 +558,12 @@ public:
     // intent framework
     virtual void SetIntentParam(const std::string& intentInfoSerialized,
         const std::function<void()>&& loadPageCallback, bool isColdStart) {}
+
+    virtual std::string GetTopNavDestinationInfo(bool onlyFullScreen = false)
+    {
+        return "";
+    }
+    virtual void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) {}
 };
 
 } // namespace OHOS::Ace

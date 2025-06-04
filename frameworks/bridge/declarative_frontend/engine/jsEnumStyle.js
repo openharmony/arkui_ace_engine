@@ -1203,6 +1203,30 @@ let HapticFeedbackMode;
   HapticFeedbackMode[HapticFeedbackMode.AUTO = 2] = 'AUTO';
 })(HapticFeedbackMode || (HapticFeedbackMode = {}));
 
+let ModalMode;
+(function (ModalMode) {
+  ModalMode[ModalMode.AUTO = 0] = 'AUTO';
+  ModalMode[ModalMode.NONE = 1] = 'NONE';
+  ModalMode[ModalMode.TARGET_WINDOW = 2] = 'TARGET_WINDOW';
+})(ModalMode || (ModalMode = {}));
+
+let TextChangeReason;
+(function (TextChangeReason) {
+  TextChangeReason[TextChangeReason.UNKNOWN = 0] = 'UNKNOWN';
+  TextChangeReason[TextChangeReason.INPUT = 1] = 'INPUT';
+  TextChangeReason[TextChangeReason.PASTE = 2] = 'PASTE';
+  TextChangeReason[TextChangeReason.CUT = 3] = 'CUT';
+  TextChangeReason[TextChangeReason.DRAG = 4] = 'DRAG';
+  TextChangeReason[TextChangeReason.AUTO_FILL = 5] = 'AUTO_FILL';
+  TextChangeReason[TextChangeReason.AI_WRITE = 6] = 'AI_WRITE';
+  TextChangeReason[TextChangeReason.REDO = 7] = 'REDO';
+  TextChangeReason[TextChangeReason.UNDO = 8] = 'UNDO';
+  TextChangeReason[TextChangeReason.CONTROLLER = 9] = 'CONTROLLER';
+  TextChangeReason[TextChangeReason.ACCESSIBILITY = 10] = 'ACCESSIBILITY';
+  TextChangeReason[TextChangeReason.COLLABORATION = 11] = 'COLLABORATION';
+  TextChangeReason[TextChangeReason.STYLUS = 12] = 'STYLUS';
+})(TextChangeReason || (TextChangeReason = {}));
+
 let DismissReason;
 (function (DismissReason) {
   DismissReason[DismissReason.PRESS_BACK = 0] = 'PRESS_BACK';

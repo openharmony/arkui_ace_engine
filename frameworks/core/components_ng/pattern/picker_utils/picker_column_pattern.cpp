@@ -192,7 +192,11 @@ RefPtr<TouchEventImpl> PickerColumnPattern::CreateItemTouchEventListener()
     auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->stopHaptic_ = false;
+        if (info.GetSourceTool() == SourceTool::MOUSE) {
+            pattern->stopHaptic_ = true;
+        } else {
+            pattern->stopHaptic_ = false;
+        }
         auto isToss = pattern->GetTossStatus();
         if (info.GetTouches().empty()) {
             return;

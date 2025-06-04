@@ -408,7 +408,7 @@ HWTEST_F(RichEditorPatternTestOneNg, AddTextSpan001, TestSize.Level1)
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     EXPECT_EQ(richEditorPattern->previewTextRecord_.IsValid(), true);
-    int32_t res = richEditorPattern->AddTextSpan(options, true, 0);
+    int32_t res = richEditorPattern->AddTextSpan(options, TextChangeReason::UNKNOWN, true, 0);
     EXPECT_EQ(res, 0);
 }
 

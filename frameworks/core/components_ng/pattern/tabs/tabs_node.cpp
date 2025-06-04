@@ -141,8 +141,8 @@ const RefPtr<Curve> TabsNode::GetAnimationCurve(const RefPtr<Curve>& defaultCurv
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, defaultCurve);
     auto curve = swiperPaintProperty->GetCurve().value_or(nullptr);
-    CHECK_NULL_RETURN(!curve, curve);
-    return defaultCurve;
+    CHECK_NULL_RETURN(curve, defaultCurve);
+    return curve;
 }
 
 std::string TabsNode::GetAnimationCurveStr(const RefPtr<Curve>& defaultCurve) const

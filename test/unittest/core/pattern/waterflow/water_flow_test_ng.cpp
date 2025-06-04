@@ -381,6 +381,40 @@ HWTEST_F(WaterFlowTestNg, Layout001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowGetItemStartTest001
+ * @tc.desc: Test GetItemStart func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemStartTest001, TestSize.Level1)
+{
+    int32_t colNumber = 4;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * colNumber);
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->GetItemStart());
+    EXPECT_FALSE(pattern_->GetItemEnd());
+}
+
+/**
+ * @tc.name: WaterFlowGetItemStartTest002
+ * @tc.desc: Test GetItemStart func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemStartTest002, TestSize.Level1)
+{
+    int32_t colNumber = 1;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(colNumber);
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->GetItemStart());
+    EXPECT_TRUE(pattern_->GetItemEnd());
+}
+
+/**
  * @tc.name: Property001
  * @tc.desc: Test all the properties of WaterFlow.
  * @tc.type: FUNC

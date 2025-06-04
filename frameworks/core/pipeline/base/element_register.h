@@ -124,6 +124,16 @@ public:
         }
     }
 
+    void RegisterJSUpdateDirty2ForAnimateTo(const std::function<void(void)>& jsCallback) {
+        jsUpdateDirty2ForAnimateTo_ = std::move(jsCallback);
+    }
+
+    void CallJSUpdateDirty2ForAnimateTo() {
+        if (jsUpdateDirty2ForAnimateTo_) {
+            jsUpdateDirty2ForAnimateTo_();
+        }
+    }
+
     uint32_t GetNodeNum() const
     {
         return itemMap_.size();
@@ -179,6 +189,8 @@ private:
     std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
 
     std::function<void(int64_t)> jsCleanUpIdleTaskCallback_;
+
+    std::function<void(void)> jsUpdateDirty2ForAnimateTo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 

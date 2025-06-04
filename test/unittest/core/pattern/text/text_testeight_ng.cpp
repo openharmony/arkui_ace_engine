@@ -755,7 +755,9 @@ HWTEST_F(TextTestEightNg, OnSelectionMenuOptionsUpdate001, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
-    pattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    OnPrepareMenuCallback onPrepareMenuCallback;
+    pattern->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 
     /**
      * @tc.steps: step2. call ShowSelectOverlay function

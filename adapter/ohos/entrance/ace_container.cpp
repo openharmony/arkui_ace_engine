@@ -1380,12 +1380,14 @@ void AceContainer::InitializeCallback()
 
 void AceContainer::InitDragEventCallback()
 {
-    if (!isFormRender_) {
+    // Ensure drag callbacks are registered for dynamic components
+    if (!isFormRender_ || isDynamicRender_) {
         auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const DragPointerEvent& pointerEvent,
                                        const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(context);
-            auto callback = [context, pointerEvent, action, node]() {
+            auto callback = [context, pointerEvent, action, node, id]() {
+                ContainerScope scope(id);
                 context->OnDragEvent(pointerEvent, action, node);
             };
             auto taskExecutor = context->GetTaskExecutor();
@@ -2993,7 +2995,7 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(
     }
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
-        TAG_LOGD(ACE_LAYOUT, "SafeArea get success, type :%{public}d, insets :%{public}s",
+        TAG_LOGD(ACE_SAFE_AREA, "SafeArea get success, type :%{public}d, insets :%{public}s",
             static_cast<int32_t>(type), safeAreaInsets.ToString().c_str());
         return safeAreaInsets;
     }
@@ -3777,10 +3779,17 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
         return false;
     }
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
-    dragPointerEvent.displayX = pointerItem.GetDisplayX();
-    dragPointerEvent.displayY = pointerItem.GetDisplayY();
-    dragPointerEvent.windowX = pointerItem.GetWindowX();
-    dragPointerEvent.windowY = pointerItem.GetWindowY();
+    if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+    } else {
+        dragPointerEvent.displayX = pointerItem.GetDisplayX();
+        dragPointerEvent.displayY = pointerItem.GetDisplayY();
+        dragPointerEvent.windowX = pointerItem.GetWindowX();
+        dragPointerEvent.windowY = pointerItem.GetWindowY();
+    }
     dragPointerEvent.deviceId = pointerItem.GetDeviceId();
     dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
@@ -3825,10 +3834,17 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
         !pointerItem.IsPressed()) {
         return false;
     }
-    dragPointerEvent.displayX = pointerItem.GetDisplayX();
-    dragPointerEvent.displayY = pointerItem.GetDisplayY();
-    dragPointerEvent.windowX = pointerItem.GetWindowX();
-    dragPointerEvent.windowY = pointerItem.GetWindowY();
+    if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+    } else {
+        dragPointerEvent.displayX = pointerItem.GetDisplayX();
+        dragPointerEvent.displayY = pointerItem.GetDisplayY();
+        dragPointerEvent.windowX = pointerItem.GetWindowX();
+        dragPointerEvent.windowY = pointerItem.GetWindowY();
+    }
     return true;
 }
 
@@ -4438,7 +4454,7 @@ void AceContainer::RegisterAvoidInfoDataProcessCallback()
     CHECK_NULL_VOID(avoidInfoMgr);
     auto parseCallback = [](const AAFwk::Want& want, NG::ContainerModalAvoidInfo& info) {
         if (!want.HasParameter("needAvoid")) {
-            TAG_LOGW(AceLogTag::ACE_LAYOUT, "Invalid want for ContainerModalAvoidInfo");
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Invalid want for ContainerModalAvoidInfo");
             return false;
         }
         bool needAvoid = want.GetBoolParam("needAvoid", false);

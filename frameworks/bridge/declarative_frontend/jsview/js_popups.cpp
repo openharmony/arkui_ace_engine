@@ -1041,6 +1041,22 @@ void JSViewPopups::ParseMenuHapticFeedbackMode(const JSRef<JSObject>& menuOption
     }
 }
 
+void JSViewPopups::ParseMenuModalMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto modalModeProperty = menuOptions->GetProperty("modalMode");
+    if (!modalModeProperty->IsNumber()) {
+        return;
+    }
+    auto modalMode = modalModeProperty->ToNumber<int32_t>();
+    if (modalMode == static_cast<int32_t>(ModalMode::TARGET_WINDOW)) {
+        menuParam.modalMode = ModalMode::TARGET_WINDOW;
+    } else if (modalMode == static_cast<int32_t>(ModalMode::NONE)) {
+        menuParam.modalMode = ModalMode::NONE;
+    } else if (modalMode == static_cast<int32_t>(ModalMode::AUTO)) {
+        menuParam.modalMode = ModalMode::AUTO;
+    }
+}
+
 void JSViewPopups::GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
@@ -1192,6 +1208,7 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuBlurStyleOption(menuOptions, menuParam);
     JSViewPopups::ParseMenuEffectOption(menuOptions, menuParam);
     JSViewPopups::ParseMenuHapticFeedbackMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuModalMode(menuOptions, menuParam);
     auto outlineWidthValue = menuOptions->GetProperty("outlineWidth");
     JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
     auto outlineColorValue = menuOptions->GetProperty("outlineColor");

@@ -208,7 +208,7 @@ void PickerHapticController::PlayOnce()
     if (needNotify) {
         threadCv_.notify_one();
     }
-#ifdef SUPPORT_DIGITAL_CROWN
+#ifndef SUPPORT_DIGITAL_CROWN
     isHapticCanLoopPlay_ = true;
 #endif
 }

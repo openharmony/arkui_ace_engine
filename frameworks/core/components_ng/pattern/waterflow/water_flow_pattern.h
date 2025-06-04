@@ -84,6 +84,16 @@ public:
 
     void ResetLayoutInfo();
 
+    bool GetItemStart() const
+    {
+        return layoutInfo_->itemStart_;
+    }
+
+    bool GetItemEnd() const
+    {
+        return layoutInfo_->itemEnd_;
+    }
+
     int32_t GetBeginIndex() const
     {
         return layoutInfo_->startIndex_;

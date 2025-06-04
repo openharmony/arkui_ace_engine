@@ -2068,30 +2068,18 @@ void FrameNode::ThrottledVisibleTask()
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto visibleAreaRealTime = pipeline->GetVisibleAreaRealTime();
     auto visibleResult = GetCacheVisibleRect(pipeline->GetVsyncTime());
     RectF frameRect = visibleResult.frameRect;
     RectF visibleRect = visibleResult.visibleRect;
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
                                           VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
-    if (visibleAreaRealTime) {
-        if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
-            throttledCallbackOnTheWay_ = false;
-            return;
-        }
+    if (!NearEqual(ratio, lastThrottledVisibleRatio_)) {
         ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
         lastThrottledVisibleRatio_ = ratio;
-        throttledCallbackOnTheWay_ = false;
-        lastThrottledTriggerTime_ = GetCurrentTimestamp();
-    } else {
-        if (!NearEqual(ratio, lastThrottledVisibleRatio_)) {
-            ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
-            lastThrottledVisibleRatio_ = ratio;
-        }
-        throttledCallbackOnTheWay_ = false;
-        lastThrottledTriggerTime_ = GetCurrentTimestamp();
     }
+    throttledCallbackOnTheWay_ = false;
+    lastThrottledTriggerTime_ = GetCurrentTimestamp();
 }
 
 void FrameNode::ProcessThrottledVisibleCallback(bool forceDisappear)

@@ -57,6 +57,7 @@ public:
     std::vector<RefPtr<FrameNode>> GetListItemOrListItemGroupInList();
     void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove,
         Axis axis = Axis::VERTICAL);
+    void CreateForEach(int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove, bool multiItem);
     void CreateRepeatList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
     void MapEventInForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
         int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo);
@@ -326,6 +327,12 @@ void ListCommonTestNg::CreateForEachList(
     ListModelNG model = CreateList();
     model.SetLanes(lanes);
     model.SetListDirection(axis);
+    CreateForEach(itemNumber, onMove, false);
+}
+
+void ListCommonTestNg::CreateForEach(
+    int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove, bool multiItem)
+{
     auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
@@ -340,13 +347,16 @@ void ListCommonTestNg::CreateForEachList(
     std::list<int32_t> removedElmtId;
     forEachModelNG.SetNewIds(std::move(newIds));
     forEachModelNG.SetRemovedElmtIds(removedElmtId);
-    forEachModelNG.OnMove(std::move(onMove));
     for (int32_t index = 0; index < itemNumber; index++) {
         // key is 0,1,2,3...
         forEachModelNG.CreateNewChildStart(std::to_string(index));
         CreateListItems(1);
+        if (multiItem) {
+            CreateListItems(1);
+        }
         forEachModelNG.CreateNewChildFinish(std::to_string(index));
     }
+    forEachModelNG.OnMove(std::move(onMove));
 }
 
 void ListCommonTestNg::CreateRepeatList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
@@ -1855,6 +1865,156 @@ HWTEST_F(ListCommonTestNg, ForEachDrag009, TestSize.Level1)
     EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "2", "1" }));
 }
 
+/**
+* @tc.name: ForEachDrag010
+* @tc.desc: ForEach generates two items per iteration.
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag010, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    ListModelNG model = CreateList();
+    CreateForEach(3, onMoveEvent, true); // 1 lanes and 3 items
+    CreateDone();
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto syntaxItem = forEachNode->GetChildAtIndex(0);
+    forEachNode->InitDragManager(syntaxItem);
+    auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    EXPECT_EQ(pattern->dragManager_, nullptr);
+}
+
+/**
+* @tc.name: ForEachDrag011
+* @tc.desc: List drag sort in center snap mode, Items has varying heights.
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag011, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
+    CreateForEach(5, onMoveEvent, false);
+    CreateDone();
+    auto item1 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(0));
+    item1->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(150)));
+    FlushUITasks();
+
+    /**
+    * @tc.steps: step1. Drag item(index:0)
+    */
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.f);
+    info.SetGlobalPoint(Point(0, 100.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(GetChildY(frameNode_, 0), 125);
+
+    /**
+     * @tc.steps: step3. hold drag position
+     * @tc.expected: not change of order
+     */
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(GetChildY(frameNode_, 0), 125);
+}
+
+/**
+* @tc.name: ForEachDrag012
+* @tc.desc: Drag to reachStart, will scroll(rtl mode)
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag012, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(TOTAL_ITEM_NUMBER, 1, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. scroll List to index 0, delta 10
+    * @tc.expected: List to index 0, delta 10
+    */
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    pattern_->ScrollBy(10.f);
+    FlushUITasks();
+    const auto& itemPosition = pattern_->GetItemPosition();
+    EXPECT_TRUE(IsEqual(pattern_->GetStartIndex(), 0));
+    EXPECT_TRUE(IsEqual(itemPosition.begin()->second.startPos, -10.f));
+
+    /**
+    * @tc.steps: step2. Drag to the starts of view
+    * @tc.expected: Will scroll with animation
+    */
+    auto dragManager = GetForEachItemDragManager(1);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(20.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(230.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
+    FlushUITasks();
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_FALSE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
+}
+
+/**
+* @tc.name: ForEachDrag013
+* @tc.desc: Drag to reachEnd, will scroll(rtl mode)
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag013, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(TOTAL_ITEM_NUMBER, 1, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. scroll List to end, delta -10
+    * @tc.expected: List to tail index, delta -10
+    */
+    pattern_->ScrollToIndex(TOTAL_ITEM_NUMBER - 1, false, ScrollAlign::END);
+    pattern_->ScrollBy(-10.f);
+    FlushUITasks();
+    const auto& itemPosition = pattern_->GetItemPosition();
+    EXPECT_TRUE(IsEqual(pattern_->GetEndIndex(), TOTAL_ITEM_NUMBER - 1));
+    EXPECT_TRUE(IsEqual(itemPosition.rbegin()->second.endPos, 250.f));
+
+    /**
+    * @tc.steps: step2. Drag to the end of view
+    * @tc.expected: Will scroll with animation
+    */
+    auto dragManager = GetForEachItemDragManager(TOTAL_ITEM_NUMBER - 2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(-20.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(10.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
+    FlushUITasks();
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_FALSE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
+}
 
 /**
  * @tc.name: LazyForEachDrag001

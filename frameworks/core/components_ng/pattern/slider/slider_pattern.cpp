@@ -186,7 +186,6 @@ void SliderPattern::OnModifyDone()
     AccessibilityVirtualNodeRenderTask();
     InitSliderAccessibilityEnabledRegister();
     InitOrRefreshSlipFactor();
-    InitHapticController();
 }
 
 void SliderPattern::InitSliderEnds()
@@ -303,21 +302,13 @@ void SliderPattern::RemoveTipFromRoot()
     sliderTipNode_ = nullptr;
 }
 
-void SliderPattern::PlayHapticFeedback(bool isShowSteps, float step, float oldValue)
+void SliderPattern::PlayHapticFeedback(bool isShowSteps)
 {
-    if (!isEnableHaptic_ || !hapticApiEnabled) {
+    if (!isEnableHaptic_) {
         return;
     }
-    if (isShowSteps || NearEqual(valueRatio_, 1) || NearEqual(valueRatio_, 0)) {
+    if (isShowSteps) {
         VibratorUtils::StartViratorDirectly(SLIDER_EFFECT_ID_NAME);
-    }
-}
-void SliderPattern::InitHapticController()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        hapticApiEnabled = true;
     }
 }
 
@@ -1279,7 +1270,7 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     valueChangeFlag_ = !NearEqual(oldValue, value_);
     bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
     if (valueChangeFlag_) {
-        PlayHapticFeedback(isShowSteps, step, oldValue);
+        PlayHapticFeedback(isShowSteps);
     }
     UpdateCircleCenterOffset();
 }
@@ -2405,7 +2396,6 @@ void SliderPattern::UpdateValue(float value)
 void SliderPattern::OnAttachToFrameNode()
 {
     RegisterVisibleAreaChange();
-    InitHapticController();
 }
 
 void SliderPattern::StartAnimation()

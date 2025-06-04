@@ -2101,6 +2101,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
 #endif
     SetDeviceProperties();
+    bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";
+    });
+    if (configChangePerform) {
+        SystemProperties::SetConfigChangePerform();
+    }
     // Initialize performance check parameters
     AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
@@ -2446,12 +2452,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // Use metadata to control the center-alignment of text at line height.
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
-    bool visibleAreaRealTime =
-        std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-            return metaDataItem.name == "ArkTSVisibleAreaRealTime" && metaDataItem.value == "true";
-        });
     pipeline->SetHalfLeading(halfLeading);
-    pipeline->SetVisibleAreaRealTime(visibleAreaRealTime);
     bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(),
         [pipelineWeak = AceType::WeakClaim(AceType::RawPtr(pipeline))](const auto& metaDataItem) {
                 if (metaDataItem.name == "can_preview_text") {
@@ -2570,7 +2571,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
             pipeline->UpdateSystemSafeAreaWithoutAnimation(systemInsets);
             pipeline->UpdateCutoutSafeAreaWithoutAnimation(cutoutInsets);
             pipeline->UpdateNavSafeAreaWithoutAnimation(navInsets);
-            TAG_LOGI(ACE_LAYOUT,
+            TAG_LOGI(ACE_SAFE_AREA,
                 "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s",
                 systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
         }
@@ -3626,7 +3627,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
-        TAG_LOGI(ACE_LAYOUT, "UpdateViewportConfig return in advance");
+        TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
         taskExecutor->PostTask([this, context, config, avoidAreas, reason, instanceId = instanceId_,
             pipelineContext, info, container, rsTransaction] {
                 if (avoidAreas.empty() && !info) {
@@ -3637,7 +3638,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 }
                 AvoidAreasUpdateOnUIExtension(context, avoidAreas);
                 if (pipelineContext) {
-                    TAG_LOGI(ACE_KEYBOARD, "KeyboardAvoid in advance");
+                    TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in advance");
                     KeyboardAvoid(reason, instanceId, pipelineContext, info, container, rsTransaction);
                 }
             },
@@ -3692,7 +3693,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             static_cast<WindowSizeChangeReason>(reason));
         viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
         if (pipelineContext) {
-            TAG_LOGI(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
+            TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
             KeyboardAvoid(reason, instanceId_, pipelineContext, info, container, rsTransaction);
         }
     };
@@ -3757,7 +3758,7 @@ void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config
 
 void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
 {
-    TAG_LOGI(ACE_LAYOUT, "[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u",
+    TAG_LOGI(ACE_SAFE_AREA, "[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, ignoreViewSafeArea);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);

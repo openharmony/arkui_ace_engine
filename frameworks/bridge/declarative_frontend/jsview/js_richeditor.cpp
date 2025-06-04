@@ -650,7 +650,8 @@ void JSRichEditor::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
     RichEditorModel::GetInstance()->SetSelectionMenuOptions(
         std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
@@ -927,6 +928,8 @@ JSRef<JSVal> JSRichEditor::CreateJsOnWillChange(const NG::RichEditorChangeValue&
     JSRef<JSArray> replacedSymbolSpans = JSRef<JSArray>::New();
     SetChangeTextSpans(replacedSymbolSpans, changeValue.GetRichEditorReplacedSymbolSpans());
     OnWillChangeObj->SetPropertyObject("replacedSymbolSpans", replacedSymbolSpans);
+
+    OnWillChangeObj->SetProperty<int32_t>("changeReason", static_cast<int32_t>(changeValue.GetChangeReason()));
 
     return JSRef<JSVal>::Cast(OnWillChangeObj);
 }

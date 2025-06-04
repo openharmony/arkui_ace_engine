@@ -846,6 +846,7 @@ private:
         const VisibleType visibleType, const int32_t weight);
     void ClearFocus();
     void SetDefaultFocus();
+    void AdjustFocusBoxOffset(double& centerX);
     bool IsCircle();
     bool CurrentIsLunar();
 #ifdef SUPPORT_DIGITAL_CROWN

@@ -860,7 +860,7 @@ void ProgressPattern::ReportProgressEvent()
     auto maxValue = progressPaintProperty->GetMaxValue().value();
     if (value >= maxValue) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress");
-        TAG_LOGI(AceLogTag::ACE_PROGRESS, "nodeId:[%{public}d] Progress reportComponentChangeEvent onProgress",
+        TAG_LOGD(AceLogTag::ACE_PROGRESS, "nodeId:[%{public}d] Progress reportComponentChangeEvent onProgress",
             GetHost()->GetId());
     }
 }
