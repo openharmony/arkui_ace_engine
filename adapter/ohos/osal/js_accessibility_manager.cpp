@@ -3124,7 +3124,7 @@ void JsAccessibilityManager::RegisterUIExtBusinessConsumeCallback()
         info.rotateTransform = rotateTransform;
         info.isChanged = true;
         jsAccessibilityManager->UpdateUECAccessibilityParentRectInfo(info);
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
             "Update UIExt Accessiblity [scaleX:%{public}f, scaleY:%{public}f].", info.scaleX, info.scaleY);
         // go on transfer info to next uiextension
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(jsAccessibilityManager->context_.Upgrade());
@@ -6651,7 +6651,7 @@ void JsAccessibilityManager::NotifyChildTreeOnRegister(int32_t treeId)
 
 void JsAccessibilityManager::NotifyChildTreeOnDeregister()
 {
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "NotifyChildTreeOnDeregister size: %{public}zu",
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "NotifyChildTreeOnDeregister size: %{public}zu",
         childTreeCallbackMap_.size());
     std::lock_guard<std::mutex> lock(childTreeCallbackMapMutex_);
     for (auto &item : childTreeCallbackMap_) {
@@ -6769,7 +6769,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
                                            "parentTreeId: %{public}d, %{public}" PRId64,
                                            windowId, parentWindowId, parentTreeId, parentElementId);
     Accessibility::RetError retReg = instance->RegisterElementOperator(registration, interactionOperation);
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "RegisterElementOperator result: %{public}d", retReg);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "RegisterElementOperator result: %{public}d", retReg);
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
     parentElementId_ = parentElementId;
@@ -6865,7 +6865,7 @@ void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
 
 void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32_t treeId)
 {
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "SetBelongTreeId treeId: %{public}d", treeId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "SetBelongTreeId treeId: %{public}d", treeId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     jsAccessibilityManager->treeId_ = treeId;

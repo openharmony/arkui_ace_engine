@@ -428,7 +428,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
     UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
     usage_ = uIExtensionUsage;
-    UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
+    UIEXT_LOGD("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
         isKeyAsync_, uIExtensionUsage);
     MountPlaceholderNode(PlaceholderType::INITIAL);
     SessionConfig config;
@@ -951,7 +951,7 @@ void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
+            TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
             pattern->HandleFocusEvent();
         }
     });
@@ -973,7 +973,7 @@ void UIExtensionPattern::InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& f
     focusHub->SetOnClearFocusStateInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
+            TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
             pattern->DispatchFocusActiveEvent(false);
         }
     });
@@ -1801,7 +1801,7 @@ const char* UIExtensionPattern::ToString(AbilityState state)
 void UIExtensionPattern::DumpInfo()
 {
     CHECK_NULL_VOID(sessionWrapper_);
-    UIEXT_LOGI("Dump UIE Info In String Format");
+    UIEXT_LOGD("Dump UIE Info In String Format");
     DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("want: ").append(want_));
@@ -2026,7 +2026,7 @@ void UIExtensionPattern::OnUIExtBusinessReceive(
 void UIExtensionPattern::RegisterUIExtBusinessConsumeReplyCallback(
     UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback)
 {
-    UIEXT_LOGI("RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
+    UIEXT_LOGD("RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
     businessDataUECConsumeReplyCallbacks_.try_emplace(code, callback);
 }
 
@@ -2060,7 +2060,7 @@ void UIExtensionPattern::NotifyHostWindowMode()
 
 void UIExtensionPattern::NotifyHostWindowMode(Rosen::WindowMode mode)
 {
-    UIEXT_LOGI("NotifyHostWindowMode: instanceId = %{public}d, followStrategy = %{public}d, mode = %{public}d",
+    UIEXT_LOGD("NotifyHostWindowMode: instanceId = %{public}d, followStrategy = %{public}d, mode = %{public}d",
         instanceId_, isWindowModeFollowHost_, static_cast<int32_t>(mode));
     CHECK_NULL_VOID(sessionWrapper_);
     if (isWindowModeFollowHost_ && mode != Rosen::WindowMode::WINDOW_MODE_UNDEFINED) {
@@ -2129,7 +2129,7 @@ void UIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
     data.SetParam("innerCenterX", parentRectInfo.rotateTransform.innerCenterX);
     data.SetParam("innerCenterY", parentRectInfo.rotateTransform.innerCenterY);
     data.SetParam("rotateDegree", parentRectInfo.rotateTransform.rotateDegree);
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f], rotateDegree: %{public}d.",
         parentRectInfo.scaleX, parentRectInfo.scaleY, parentRectInfo.rotateTransform.rotateDegree);
     SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);
