@@ -1070,7 +1070,6 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, OnLanguageConfigurationUpdateTest00
      */
     auto pattern = CreateSecurityUEC();
     pattern->sessionWrapper_ = nullptr;
-    ASSERT_EQ(pattern->sessionWrapper_, nullptr);
 
     /**
      * @tc.steps: step2. sessionWrapper_ is nullptr
@@ -1109,7 +1108,6 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, DumpInfoTest001, TestSize.Level1)
      * @tc.steps: step2. test DumpInfo
      */
     pattern->platformEventProxy_ = nullptr;
-    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
     pattern->DumpInfo();
 
     pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
@@ -1123,7 +1121,6 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, DumpInfoTest001, TestSize.Level1)
     std::unique_ptr<JsonValue> testValue = JsonUtil::ParseJsonString(testJson);
 
     pattern->platformEventProxy_ = nullptr;
-    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
     pattern->DumpInfo(testValue);
 
     pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
