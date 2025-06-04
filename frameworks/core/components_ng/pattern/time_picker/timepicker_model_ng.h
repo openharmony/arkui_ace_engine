@@ -47,9 +47,6 @@ public:
     void SetChangeEvent(TimeChangeEvent&& onChange) override;
     void HasUserDefinedOpacity() override;
     void UpdateUserSetSelectColor() override;
-    void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
-    void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
-    void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 
@@ -88,8 +85,11 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
         std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
+    static void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
 };
 
 class ACE_EXPORT TimePickerDialogModelNG : public TimePickerDialogModel {
