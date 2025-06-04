@@ -548,10 +548,7 @@ public:
     using GetProgressImpl = std::function<int()>;
     int GetProgress()
     {
-        if (getProgressImpl_) {
-            return getProgressImpl_();
-        }
-        return 0;
+        return getProgressImpl_ ? getProgressImpl_() : 0;
     }
     void SetGetProgressImpl(GetProgressImpl&& getProgressImpl)
     {
