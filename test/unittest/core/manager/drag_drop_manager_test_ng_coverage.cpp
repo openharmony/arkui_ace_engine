@@ -2152,6 +2152,6 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage076, TestSi
     EXPECT_CALL(*mockPixelMap, GetWidth()).Times(1).WillOnce(testing::Return(0.0f));
     EXPECT_CALL(*mockPixelMap, GetHeight()).Times(1).WillOnce(testing::Return(0.0f));
     dragDropManager->GetGatherPixelMap(dragData, 2.0f, 1.0f, 1.0f);
-    EXPECT_EQ(dragData.shadowInfos.size(), 1); 
+    EXPECT_EQ(dragData.shadowInfos.size(), 1);
 }
 } // namespace OHOS::Ace::NG
