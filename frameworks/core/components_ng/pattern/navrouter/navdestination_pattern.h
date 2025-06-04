@@ -124,6 +124,7 @@ public:
     {
         navDestinationContext_ = context;
         if (navDestinationContext_) {
+            navDestinationContext_->SetNavDestinationPattern(WeakClaim(this));
             navDestinationContext_->SetNavDestinationId(navDestinationId_);
         }
     }
@@ -340,6 +341,8 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void CheckIfStatusBarConfigChanged();
     void CheckIfNavigationIndicatorConfigChagned();
+    void InitOnTouchEvent(const RefPtr<FrameNode>& hostNode);
+    void RemoveOnTouchEvent();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -363,6 +366,7 @@ private:
     bool isFirstTimeCheckOrientation_ = true;
     bool isFirstTimeCheckStatusBarConfig_ = true;
     bool isFirstTimeCheckNavigationIndicatorConfig_ = true;
+    RefPtr<TouchEventImpl> touchListener_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

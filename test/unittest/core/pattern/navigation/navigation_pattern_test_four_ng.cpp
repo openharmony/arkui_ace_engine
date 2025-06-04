@@ -22,6 +22,7 @@
 #define protected public
 #define private public
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -1569,6 +1570,123 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageLevelConfigForSizeChanged006, Te
     navBarNode->SetStatusBarConfig(std::make_pair(true, true));
     navBarNode->SetNavigationIndicatorConfig(true);
     navigationPattern->UpdatePageLevelConfigForSizeChanged();
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePrimaryContentIfNeeded001
+ * @tc.desc: Branch: property->UpdateVisibility(primaryNodes_.empty() ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+ *                   => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePrimaryContentIfNeeded001, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationNode, nullptr);
+        auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto primaryContentNode = FrameNode::CreateFrameNode(
+        V2::PRIMARY_CONTENT_NODE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NavigationContentPattern>());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto property = primaryContentNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+    navigationPattern->primaryNodes_.clear();
+    std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes;
+    navigationPattern->UpdatePrimaryContentIfNeeded(primaryContentNode, prePrimaryNodes);
+
+    EXPECT_EQ(property->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePrimaryContentIfNeeded002
+ * @tc.desc: Branch: property->UpdateVisibility(primaryNodes_.empty() ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+ *                   => false
+ *                   if (prePrimaryNodes.size() != primaryNodes_.size()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePrimaryContentIfNeeded002, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationNode, nullptr);
+        auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto primaryContentNode = FrameNode::CreateFrameNode(
+        V2::PRIMARY_CONTENT_NODE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NavigationContentPattern>());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto property = primaryContentNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes;
+    navigationPattern->primaryNodes_.clear();
+    navigationPattern->primaryNodes_.push_back(WeakPtr(dest1));
+    navigationPattern->primaryNodes_.push_back(WeakPtr(dest2));
+    primaryContentNode->needSyncRenderTree_ = false;
+    navigationPattern->UpdatePrimaryContentIfNeeded(primaryContentNode, prePrimaryNodes);
+
+    EXPECT_EQ(property->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    EXPECT_TRUE(primaryContentNode->needSyncRenderTree_);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePrimaryContentIfNeeded003
+ * @tc.desc: Branch: property->UpdateVisibility(primaryNodes_.empty() ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+ *                   => false
+ *                   if (prePrimaryNodes.size() != primaryNodes_.size()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePrimaryContentIfNeeded003, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationNode, nullptr);
+        auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto primaryContentNode = FrameNode::CreateFrameNode(
+        V2::PRIMARY_CONTENT_NODE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NavigationContentPattern>());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto property = primaryContentNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes{ WeakPtr(dest1), WeakPtr(dest2) };
+    navigationPattern->primaryNodes_ = prePrimaryNodes;
+    primaryContentNode->needSyncRenderTree_ = false;
+    navigationPattern->UpdatePrimaryContentIfNeeded(primaryContentNode, prePrimaryNodes);
+
+    EXPECT_EQ(property->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    EXPECT_FALSE(primaryContentNode->needSyncRenderTree_);
     NavigationPatternTestFourNg::TearDownTestSuite();
 }
 } // namespace OHOS::Ace::NG

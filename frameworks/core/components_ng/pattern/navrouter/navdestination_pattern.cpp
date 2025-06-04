@@ -330,6 +330,7 @@ bool NavDestinationPattern::GetBackButtonState()
     auto index = stack->FindIndex(name_, customNode_, true);
     bool showBackButton = true;
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, false);
     if (navDestinationLayoutProperty->GetHideBackButtonValue(false)) {
         showBackButton = false;
     }
@@ -361,6 +362,42 @@ bool NavDestinationPattern::GetBackButtonState()
     return showBackButton;
 }
 
+void NavDestinationPattern::InitOnTouchEvent(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    if (touchListener_) {
+        return;
+    }
+    auto gesture = hostNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+        CHECK_NULL_VOID(host);
+        auto navNode = AceType::DynamicCast<NavigationGroupNode>(pattern->GetNavigationNode());
+        CHECK_NULL_VOID(navNode);
+        auto navPattern = navNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(navPattern);
+        navPattern->SetIsHomeNodeTouched(host->GetNavDestinationType() == NavDestinationType::HOME);
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void NavDestinationPattern::RemoveOnTouchEvent()
+{
+    if (!touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->RemoveTouchEvent(touchListener_);
+    touchListener_ = nullptr;
+}
+
 void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -378,6 +415,11 @@ void NavDestinationPattern::OnAttachToFrameNode()
     pipeline->AddWindowStateChangedCallback(id);
     pipeline->AddWindowSizeChangeCallback(id);
     pipeline->GetMemoryManager()->AddRecyclePageNode(host);
+    auto navManager = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    if (navManager->IsForceSplitSupported()) {
+        InitOnTouchEvent(host);
+    }
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -386,6 +428,11 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto id = frameNode->GetId();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto navManager = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    if (navManager->IsForceSplitSupported()) {
+        RemoveOnTouchEvent();
+    }
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
