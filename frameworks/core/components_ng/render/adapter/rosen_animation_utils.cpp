@@ -46,6 +46,7 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
     timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
     timingProtocol.SetFinishCallbackType(ToAnimationFinishCallbackType(option.GetFinishCallbackType()));
+    timingProtocol.SetInterfaceName(option.GetAnimationInterfaceString());
     auto rateRange = option.GetFrameRateRange();
     if (rateRange) {
         timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_, 0,

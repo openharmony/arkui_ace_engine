@@ -91,6 +91,7 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
             controller->SetFillMode(FillMode::FORWARDS);
             controller->SetAllowRunningAsynchronously(true);
             controller->AttachScheduler(pipeline);
+            controller->SetAnimationType(AnimationInterface::SHARED_TRANSITION);
             controller->Forward();
         }
     }
