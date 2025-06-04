@@ -18,6 +18,7 @@
 
 #include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
 #include "interfaces/inner_api/ace/constants.h"
+#include "ui/base/utils/utils.h"
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
@@ -144,6 +145,17 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 }
 } // namespace
 
+ArktsFrontend::ArktsFrontend(void* runtime)
+{
+    auto* env = reinterpret_cast<ani_env*>(runtime);
+    if (!env) {
+        LOGW("ArktsFrontend AniEnv is invalid!");
+        return;
+    }
+    type_ = FrontendType::ARK_TS;
+    env->GetVM(&vm_);
+}
+
 ani_object LegacyLoadPage(ani_env* env)
 {
     do {
@@ -208,65 +220,67 @@ ani_object LegacyLoadPage(ani_env* env)
 
 UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::string& params)
 {
-    ani_class appClass;
-    EntryLoader entryLoader(url, env_);
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, UIContentErrorCode::INVALID_URL);
 
-    if (env_->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+    ani_class appClass;
+    EntryLoader entryLoader(url, env);
+
+    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
         LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
         return UIContentErrorCode::INVALID_URL;
     }
 
     ani_static_method create;
-    if (env_->Class_FindStaticMethod(
+    if (env->Class_FindStaticMethod(
             appClass, KOALA_APP_INFO.createMethodName, KOALA_APP_INFO.createMethodSig, &create) != ANI_OK) {
         LOGE("Cannot find create method %{public}s", KOALA_APP_INFO.createMethodName);
-        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
     std::string appUrl = "ComExampleTrivialApplication"; // TODO: use passed in url and params
     std::string appParams = "ArkTSLoaderParam";
     ani_string aniUrl;
-    env_->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
+    env->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
     ani_string aniParams;
-    env_->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
+    env->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
 
     ani_ref appLocal;
     ani_ref optionalEntry;
-    env_->GetUndefined(&optionalEntry);
+    env->GetUndefined(&optionalEntry);
     auto entryPointObj = entryLoader.GetPageEntryObj();
-    auto legacyEntryPointObj = LegacyLoadPage(env_);
+    auto legacyEntryPointObj = LegacyLoadPage(env);
     std::string moduleName = Container::Current()->GetModuleName();
     ani_string module;
-    env_->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
-    if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,
+    env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
+    if (env->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,
             legacyEntryPointObj ? legacyEntryPointObj : optionalEntry,
             entryPointObj ? entryPointObj : optionalEntry) != ANI_OK) {
         LOGE("createApplication returned null");
-        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
-    env_->GlobalReference_Create(appLocal, &app_);
+    env->GlobalReference_Create(appLocal, &app_);
 
     ani_method start;
-    if (env_->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
+    if (env->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
         ANI_OK) {
         LOGE("find start method returned null");
-        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
     ani_long result;
-    if (env_->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result) != ANI_OK) {
+    if (env->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result) != ANI_OK) {
         LOGE("call start method returned null");
-        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
     // TODO: init event loop
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
-    pipeline_->SetVsyncListener([env = env_, app = app_]() { RunArkoalaEventLoop(env, app); });
+    pipeline_->SetVsyncListener([vm = vm_, app = app_]() {
+        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        RunArkoalaEventLoop(env, app);
+    });
 
     return UIContentErrorCode::NO_ERRORS;
 }
@@ -296,8 +310,11 @@ void* ArktsFrontend::GetShared(int32_t id)
 
 void ArktsFrontend::Destroy()
 {
-    CHECK_NULL_VOID(env_);
-    env_->GlobalReference_Delete(app_);
+    CHECK_NULL_VOID(vm_);
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_VOID(env);
+    env->GlobalReference_Delete(app_);
+    app_ = nullptr;
 }
 
 ani_object ArktsFrontend::CallGetUIContextFunc()
@@ -305,18 +322,21 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
     ani_object result = nullptr;
     ani_status status;
 
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, result);
+
     ani_class uiContextClass;
-    if ((status = env_->FindClass("L@ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("L@ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
     ani_method uiContextClassCtor;
-    if ((status = env_->Class_FindMethod(uiContextClass, "<ctor>", "I:V", &uiContextClassCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(uiContextClass, "<ctor>", "I:V", &uiContextClassCtor)) != ANI_OK) {
         LOGE("Class_FindMethod UIContext ctor failed, %{public}d", status);
         return result;
     }
     ani_int instanceId = 100000;
-    if ((status = env_->Object_New(uiContextClass, uiContextClassCtor, &result, instanceId)) != ANI_OK) {
+    if ((status = env->Object_New(uiContextClass, uiContextClassCtor, &result, instanceId)) != ANI_OK) {
         LOGE("New UIContext object failed, %{public}d", status);
         return result;
     }
