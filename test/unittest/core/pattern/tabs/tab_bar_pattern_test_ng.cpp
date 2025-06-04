@@ -2322,12 +2322,7 @@ HWTEST_F(TabBarPatternTestNg, GetNextFocusNode001, TestSize.Level1)
 }
 /**
  * @tc.name: AddTabBarItemCallBack
- * @tc.desc: test currentIndicatorOffset
- * @tc.type: FUNC
- */
-/**
- * @tc.name: AddTabBarItemCallBack
- * @tc.desc: test currentIndicatorOffset
+ * @tc.desc: test AddTabBarItemCallBack
  * @tc.type: FUNC
  */
 HWTEST_F(TabBarPatternTestNg, AddTabBarItemCallBack, TestSize.Level1)
@@ -2337,11 +2332,17 @@ HWTEST_F(TabBarPatternTestNg, AddTabBarItemCallBack, TestSize.Level1)
     CreateTabsDone(model);
     MockPaintRect(tabBarNode_);
     auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    EXPECT_NE(tabBarItemNode, nullptr);
+    auto columnProperty = tabBarItemNode->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(columnProperty, nullptr);
     tabBarPattern_->AddTabBarItemCallBack(tabBarItemNode);
 
     auto columnNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    EXPECT_NE(columnNode, nullptr);
+    auto columnProperty1 = columnNode->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(columnProperty1, nullptr);
     tabBarPattern_->AddTabBarItemCallBack(columnNode);
 }
 /**
@@ -2376,10 +2377,10 @@ HWTEST_F(TabBarPatternTestNg, HandleMouseEvent, TestSize.Level1)
 
     int32_t nodeId = 1;
     for (int i = 0; i <= 2; i++) {
-            auto frameNode_ = TabsModelNG::GetOrCreateTabsNode(
-                V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
-            tabBarNode_->AddChild(frameNode_);
-        }
+        auto frameNode_ = TabsModelNG::GetOrCreateTabsNode(
+        V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+        tabBarNode_->AddChild(frameNode_);
+    }
     MouseInfo mouseInfo;
     mouseInfo.SetAction(MouseAction::WINDOW_LEAVE);
     tabBarPattern_->hoverIndex_.emplace(1);
@@ -2505,12 +2506,16 @@ HWTEST_F(TabBarPatternTestNg, UpdatePaintIndicator, TestSize.Level1)
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
-    tabBarPattern_->UpdatePaintIndicator(3, true);
+    tabBarPattern_->visibleItemPosition_[2] = { 1.0f, 2.0f };
+    tabBarPattern_->UpdatePaintIndicator(2,true);
+    EXPECT_NE(tabBarPattern_->visibleItemPosition_.find(2), tabBarPattern_->visibleItemPosition_.end());
+    
 
     tabBarPattern_->isTouchingSwiper_ = true;
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
-    tabBarPattern_->UpdatePaintIndicator(0, true);
+    tabBarPattern_->UpdatePaintIndicator(0,true);
+    EXPECT_NE(tabBarPattern_->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
 }
 /**
  * @tc.name: OnDirtyLayoutWrapperSwap
@@ -2574,8 +2579,8 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange001, TestSize.Level1)
 
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
-    EXPECT_NE(tabBarPattern_->indicator_, -1);
     tabBarPattern_->HandleBottomTabBarChange(-1);
+    EXPECT_NE(tabBarPattern_->indicator_, -1);
 }
 /**
  * @tc.name: HandleBottomTabBarChange002
@@ -2901,5 +2906,7 @@ HWTEST_F(TabBarPatternTestNg, DumpAdvanceInfo, TestSize.Level1)
     CreateTabsDone(model);
 
     tabBarPattern_->DumpAdvanceInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_[0], "isRTL:false\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[10],"scrollMargin:0.000000\n");
 }
 } // namespace OHOS::Ace::NG
