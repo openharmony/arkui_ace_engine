@@ -315,6 +315,48 @@ HWTEST_F(DatePickerTestTwoNg, CreateDatePicker002, TestSize.Level1)
 }
 
 /**
+* @tc.name: ParseDirectionKey001
+* @tc.desc: Test DatePickerTest ParseDirectionKey
+* @tc.type: FUNC
+*/
+HWTEST_F(DatePickerTestTwoNg, ParseDirectionKey001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    auto totalOptionCount = columnPattern_->GetOptionCount();
+
+    KeyCode code = KeyCode::KEY_UNKNOWN;
+
+    code = KeyCode::KEY_DPAD_UP;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(columnPattern_, code, totalOptionCount, 0);
+    EXPECT_TRUE(columnPattern_->stopHaptic_);
+
+    code = KeyCode::KEY_DPAD_DOWN;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(columnPattern_, code, totalOptionCount, 0);
+    EXPECT_TRUE(columnPattern_->stopHaptic_);
+
+    code = KeyCode::KEY_DPAD_LEFT;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(columnPattern_, code, totalOptionCount, 0);
+    EXPECT_FALSE(columnPattern_->stopHaptic_);
+
+    code = KeyCode::KEY_DPAD_RIGHT;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(columnPattern_, code, totalOptionCount, 0);
+    EXPECT_FALSE(columnPattern_->stopHaptic_);
+}
+
+/**
  * @tc.name: DatePickerCanLoopTest001
  * @tc.desc: Test SetCanLoop.
  * @tc.type: FUNC

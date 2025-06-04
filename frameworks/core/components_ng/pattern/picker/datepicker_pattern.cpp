@@ -887,10 +887,12 @@ bool DatePickerPattern::ParseDirectionKey(
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (code == KeyCode::KEY_DPAD_UP) {
+        pattern->StopHaptic();
         pattern->InnerHandleScroll(false, false);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_DOWN) {
+        pattern->StopHaptic();
         pattern->InnerHandleScroll(true, false);
         return true;
     }
