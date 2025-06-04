@@ -25,6 +25,12 @@
 #include <utility>
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#ifdef ANDROID_PLATFORM
+#include "adapter/android/capability/java/jni/editing/text_input_client_handler.h"
+#endif
+#ifdef IOS_PLATFORM
+#include "adapter/ios/capability/editing/text_input_client_handler.h"
+#endif
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
@@ -162,6 +168,12 @@ RichEditorPattern::~RichEditorPattern()
     if (isCustomKeyboardAttached_) {
         CloseCustomKeyboard();
     }
+#ifdef CROSS_PLATFORM
+    if (HasConnection()) {
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
+    }
+#endif
 }
 
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
@@ -3580,6 +3592,12 @@ void RichEditorPattern::HandleBlurEvent()
         ResetSelection();
         CloseKeyboard(false);
     }
+#ifdef ANDROID_PLATFORM
+    if (HasConnection()) {
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
+    }
+#endif
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -3587,7 +3605,12 @@ void RichEditorPattern::HandleBlurEvent()
         CloseSelectOverlay();
         ResetSelection();
     } else if (IsSelected()) {
+#ifdef ANDROID_PLATFORM
+        CloseSelectOverlay();
+        ResetSelection();
+#else
         selectOverlay_->HideMenu(true);
+#endif
     } else {
         CloseSelectOverlay();
     }
@@ -4920,7 +4943,20 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
     if (value->isDelete) {
         HandleOnDelete(true);
     } else {
+#ifdef CROSS_PLATFORM
+#ifdef IOS_PLATFORM
+        compose_ = value->compose;
+        unmarkText_ = value->unmarkText;
+#endif
+#ifdef ANDROID_PLATFORM
+        if (value->appendText.empty()) {
+            return;
+        }
+#endif
+        InsertValue(UtfUtils::Str8ToStr16(value->appendText), true);
+#else
         InsertValue(UtfUtils::Str8ToStr16(value->appendText));
+#endif
     }
 #endif
 }
@@ -5181,6 +5217,7 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
+#ifndef CROSS_PLATFORM
     if (HasConnection()) {
         connection_->Show(isFocusViewChanged, GetInstanceId());
         return true;
@@ -5189,6 +5226,12 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
     config.type = TextInputType::UNSPECIFIED;
     config.action = TextInputAction::DONE;
     config.obscureText = false;
+#else
+    TextInputConfiguration config;
+    if (UnableStandardInputCrossPlatform(config, isFocusViewChanged)) {
+        return true;
+    }
+#endif
     connection_ =
         TextInputProxy::GetInstance().Attach(WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
     if (!HasConnection()) {
@@ -5210,6 +5253,32 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
     connection_->SetEditingState(value, GetInstanceId());
     connection_->Show(isFocusViewChanged, GetInstanceId());
     return true;
+}
+#endif
+#ifdef CROSS_PLATFORM
+bool RichEditorPattern::UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged)
+{
+#ifdef ANDROID_PLATFORM
+    if (HasConnection()) {
+        auto isCurrentClient = Platform::TextInputClientHandler::GetInstance().ConnectionIsCurrent(GetInstanceId(),
+            AceType::RawPtr(connection_));
+        if (!isCurrentClient) {
+            connection_ = nullptr;
+        }
+    }
+#endif
+    if (HasConnection()) {
+#ifdef IOS_PLATFORM
+        Platform::TextInputClientHandler::GetInstance().SetCurrentConnection(connection_);
+#endif
+        connection_->Show(isFocusViewChanged, GetInstanceId());
+        return true;
+    }
+    config.type = TextInputType::UNSPECIFIED;
+    config.action = GetTextInputActionValue(GetDefaultTextInputAction());
+    config.maxLength = maxLength_.value_or(INT_MAX);
+    config.obscureText = false;
+    return false;
 }
 #endif
 
@@ -5687,6 +5756,14 @@ void RichEditorPattern::InsertValueByOperationType(const std::u16string& insertV
 
 bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, bool shouldCommitInput)
 {
+#if defined(IOS_PLATFORM)
+    if (compose_.IsValid()) {
+        return true;
+    }
+    if (GetTextContentLength() - text.length() < maxLength_.value_or(INT_MAX) && text.length() == 1 && !unmarkText_) {
+        return true;
+    }
+#endif
     bool needTruncationInsertValue = shouldCommitInput || !previewTextRecord_.needReplacePreviewText;
     int32_t selectLength =
         textSelector_.SelectNothing() ? 0 : textSelector_.GetTextEnd() - textSelector_.GetTextStart();
@@ -5738,6 +5815,11 @@ void RichEditorPattern::ProcessInsertValueMore(const std::u16string& text, Opera
         return;
     }
     ClearRedoOperationRecords();
+#if defined(IOS_PLATFORM)
+    if (compose_.IsValid() && (record.addText.value_or(u"").length() > 0 || unmarkText_)) {
+        DeleteByRange(&record, compose_.GetStart(), compose_.GetEnd());
+    }
+#endif
     UndoRedoRecord styledRecord;
     auto rangeStart = textSelector_.IsValid() ? TextRange { textSelector_.GetTextStart(), textSelector_.GetTextEnd() }
         : TextRange { caretPosition_, caretPosition_};
@@ -5805,6 +5887,11 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
     bool isAllowInsert = (allowContentChange && allowImeInput) || allowPreviewText;
     if (!isAllowInsert) {
         undoManager_->ClearPreviewInputRecord();
+#if defined(IOS_PLATFORM)
+        if (compose_.IsValid() && (record.addText.value_or(u"").length() > 0 || unmarkText_)) {
+            DeleteByRange(&record, compose_.GetStart(), compose_.GetEnd());
+        }
+#endif
         return;
     }
     ProcessInsertValueMore(text, record, operationType, changeValue, preRecord, shouldCommitInput);
@@ -10589,6 +10676,9 @@ void RichEditorPattern::StopEditing()
 
     // The selection status disappears, the cursor is hidden, and the soft keyboard is exited
     HandleBlurEvent();
+#ifdef IOS_PLATFORM
+    CloseKeyboard(false);
+#endif
     // In order to avoid the physical keyboard being able to type, you need to make sure that you lose focus
     FocusHub::LostFocusToViewRoot();
 }
@@ -12567,4 +12657,32 @@ float RichEditorPattern::GetCaretWidth()
 {
     return static_cast<float>(CARET_WIDTH.ConvertToPx());
 }
+
+#if defined(IOS_PLATFORM)
+const TextEditingValue& RichEditorPattern::GetInputEditingValue() const
+{
+    static TextEditingValue value;
+    value.text.clear();
+    if (!spans_.empty()) {
+        std::string text;
+        for (const auto& span : spans_) {
+            if (!span) {
+                continue;
+            }
+            if (span->spanItemType == SpanItemType::NORMAL) {
+                text.append(UtfUtils::Str16ToStr8(span->content));
+            } else {
+                text.append(" ");
+            }
+        }
+        value.text = text;
+    }
+    if (textSelector_.IsValid()) {
+        value.selection.Update(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    } else {
+        value.MoveToPosition(caretPosition_);
+    }
+    return value;
+}
+#endif
 } // namespace OHOS::Ace::NG
