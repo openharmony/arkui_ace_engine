@@ -164,15 +164,14 @@ Opt_Number GetRollAngleImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    if (peer->GetBaseInfo()->GetRollAngle() == std::nullopt) {
-        return invalid;
-    }
-    float value = peer->GetBaseInfo()->GetRollAngle().value_or(0.0f);
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Number>(peer->GetBaseInfo()->GetRollAngle());
 }
 void SetRollAngleImpl(Ark_BaseEvent peer,
                       const Ark_Number* rollAngle)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(rollAngle);
+    peer->GetBaseInfo()->SetRollAngle(Converter::Convert<float>(*rollAngle));
 }
 Ark_SourceTool GetSourceToolImpl(Ark_BaseEvent peer)
 {
