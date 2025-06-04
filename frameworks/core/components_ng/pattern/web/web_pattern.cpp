@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -102,6 +103,8 @@ const std::string WEB_INFO_PC = "8";
 const std::string WEB_INFO_TABLET = "4";
 const std::string WEB_INFO_PHONE = "2";
 const std::string WEB_INFO_DEFAULT = "1";
+const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
+const std::string WEB_SNAPSHOT_PATH_SUFFIX = ".png";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
@@ -448,6 +451,28 @@ std::string GetWebDebugBackGroundColor()
 {
     return OHOS::system::GetParameter("web.debug.surfaceNodeBackgroundColor", "");
 }
+
+bool IsSnapshotPathValid(const std::string& snapshotPath)
+{
+    std::error_code ec;
+    std::filesystem::path canonicalPath = std::filesystem::canonical(snapshotPath, ec);
+    if (ec) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "canonical failed:%{public}s", ec.message().c_str());
+        return false;
+    }
+    // 4为后缀".png"的长度
+    if (snapshotPath.rfind(WEB_SNAPSHOT_PATH_PREFIX, 0) != 0 ||
+        snapshotPath.length() <= 4 || snapshotPath.rfind(WEB_SNAPSHOT_PATH_SUFFIX) != snapshotPath.length() - 4) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "the path or the format is wrong:%{public}s", snapshotPath.c_str());
+        return false;
+    }
+    if (!std::filesystem::exists(canonicalPath, ec)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "canonical path:%{public}s does not exist:%{public}s",
+                 snapshotPath.c_str(), ec.message().c_str());
+        return false;
+    }
+    return true;
+}
 } // namespace
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
@@ -766,6 +791,10 @@ RefPtr<FrameNode> WebPattern::CreatePreviewImageFrameNode(bool isImage)
 void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CreateSnapshotImageFrameNode");
+    if (!IsSnapshotPathValid(snapshotPath)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot path is invalid!");
+        return;
+    }
     RemoveSnapshotFrameNode();
     snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto snapshotNode = FrameNode::GetOrCreateFrameNode(
