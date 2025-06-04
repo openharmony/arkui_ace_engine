@@ -545,6 +545,16 @@ public:
         return cookieManager_;
     }
 
+    using GetProgressImpl = std::function<int()>;
+    int GetProgress()
+    {
+        return getProgressImpl_ ? getProgressImpl_() : 0;
+    }
+    void SetGetProgressImpl(GetProgressImpl&& getProgressImpl)
+    {
+        getProgressImpl_ = getProgressImpl;
+    }
+
     using GetPageHeightImpl = std::function<int()>;
     int GetPageHeight()
     {
@@ -813,6 +823,7 @@ private:
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;
     GetHitTestValueImpl getHitTestValueImpl_;
+    GetProgressImpl getProgressImpl_;
     GetPageHeightImpl getPageHeightImpl_;
     GetWebIdImpl getWebIdImpl_;
     GetTitleImpl getTitleImpl_;
