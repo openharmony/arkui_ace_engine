@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -56,16 +56,12 @@ export interface FormLinkOptions {
 export type FormLinkInterface = (options: FormLinkOptions) => FormLinkAttribute;
 export interface FormLinkAttribute extends CommonMethod {
 }
-export interface UIFormLinkAttribute extends UICommonMethod {
-}
 export class ArkFormLinkStyle extends ArkCommonMethodStyle implements FormLinkAttribute {
 }
-/** @memo:stable */
-export class ArkFormLinkComponent extends ArkCommonMethodComponent implements UIFormLinkAttribute {
+export class ArkFormLinkComponent extends ArkCommonMethodComponent implements FormLinkAttribute {
     getPeer(): ArkFormLinkPeer {
         return (this.peer as ArkFormLinkPeer)
     }
-    /** @memo */
     public setFormLinkOptions(options: FormLinkOptions): this {
         if (this.checkPriority("setFormLinkOptions")) {
             const options_casted = options as (FormLinkOptions)
@@ -83,7 +79,7 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function FormLink(
     /** @memo */
-    style: ((attributes: UIFormLinkAttribute) => void) | undefined,
+    style: ((attributes: FormLinkAttribute) => void) | undefined,
     options: FormLinkOptions,
     /** @memo */
     content_?: (() => void) | undefined,

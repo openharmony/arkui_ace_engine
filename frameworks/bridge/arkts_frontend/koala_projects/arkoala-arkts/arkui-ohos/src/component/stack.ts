@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Alignment } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -84,13 +84,6 @@ export interface StackAttribute extends CommonMethod {
     alignContent(value: Alignment | undefined): this
     pointLight(value: PointLightStyle | undefined): this
 }
-export interface UIStackAttribute extends UICommonMethod {
-    /** @memo */
-    alignContent(value: Alignment | undefined): this
-    /** @memo */
-    pointLight(value: PointLightStyle | undefined): this
-    /** @memo */
-}
 export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribute {
     alignContent_value?: Alignment | undefined
     pointLight_value?: PointLightStyle | undefined
@@ -101,12 +94,10 @@ export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribut
         return this
         }
 }
-/** @memo:stable */
-export class ArkStackComponent extends ArkCommonMethodComponent implements UIStackAttribute {
+export class ArkStackComponent extends ArkCommonMethodComponent implements StackAttribute {
     getPeer(): ArkStackPeer {
         return (this.peer as ArkStackPeer)
     }
-    /** @memo */
     public setStackOptions(options?: StackOptions): this {
         if (this.checkPriority("setStackOptions")) {
             const options_casted = options as (StackOptions | undefined)
@@ -115,7 +106,6 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements UISta
         }
         return this
     }
-    /** @memo */
     public alignContent(value: Alignment | undefined): this {
         if (this.checkPriority("alignContent")) {
             const value_casted = value as (Alignment | undefined)
@@ -124,7 +114,6 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements UISta
         }
         return this
     }
-    /** @memo */
     public pointLight(value: PointLightStyle | undefined): this {
         if (this.checkPriority("pointLight")) {
             const value_casted = value as (PointLightStyle | undefined)
@@ -142,7 +131,7 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements UISta
 /** @memo */
 export function Stack(
     /** @memo */
-    style: ((attributes: UIStackAttribute) => void) | undefined,
+    style: ((attributes: StackAttribute) => void) | undefined,
     options?: StackOptions,
     /** @memo */
     content_?: (() => void) | undefined,

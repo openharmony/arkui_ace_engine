@@ -25,7 +25,6 @@ import { Context, BaseContext, Context_getGroupDir_Callback, ContextInternal } f
 import { Resource } from "global/resource"
 import { AnimateParam, ICurve, FinishCallbackType, ExpectedFrameRateRange } from "./common"
 import { Curve, PlayMode } from "./enums"
-import { Callback_Void } from "./abilityComponent"
 import { Profiler } from "./inspector"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, toPeerPtr, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"

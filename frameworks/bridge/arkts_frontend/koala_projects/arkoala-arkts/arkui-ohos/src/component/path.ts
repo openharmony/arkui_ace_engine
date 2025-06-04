@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, UICommonShapeMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -72,23 +72,16 @@ export type PathInterface = (options?: PathOptions) => PathAttribute;
 export interface PathAttribute extends CommonShapeMethod {
     commands(value: string | undefined): this
 }
-export interface UIPathAttribute extends UICommonShapeMethod {
-    /** @memo */
-    commands(value: string | undefined): this
-    /** @memo */
-}
 export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
     commands_value?: string | undefined
     public commands(value: string | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkPathComponent extends ArkCommonShapeMethodComponent implements UIPathAttribute {
+export class ArkPathComponent extends ArkCommonShapeMethodComponent implements PathAttribute {
     getPeer(): ArkPathPeer {
         return (this.peer as ArkPathPeer)
     }
-    /** @memo */
     public setPathOptions(options?: PathOptions): this {
         if (this.checkPriority("setPathOptions")) {
             const options_casted = options as (PathOptions | undefined)
@@ -97,7 +90,6 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public commands(value: string | undefined): this {
         if (this.checkPriority("commands")) {
             const value_casted = value as (string | undefined)
@@ -115,7 +107,7 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements U
 /** @memo */
 export function Path(
     /** @memo */
-    style: ((attributes: UIPathAttribute) => void) | undefined,
+    style: ((attributes: PathAttribute) => void) | undefined,
     options?: PathOptions,
     /** @memo */
     content_?: (() => void) | undefined,

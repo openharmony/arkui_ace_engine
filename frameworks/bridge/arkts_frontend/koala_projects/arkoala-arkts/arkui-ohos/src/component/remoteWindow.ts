@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -61,17 +61,13 @@ export interface WindowAnimationTarget {
 export type RemoteWindowInterface = (target: WindowAnimationTarget) => RemoteWindowAttribute;
 export interface RemoteWindowAttribute extends CommonMethod {
 }
-export interface UIRemoteWindowAttribute extends UICommonMethod {
-}
 export class ArkRemoteWindowStyle extends ArkCommonMethodStyle implements RemoteWindowAttribute {
     
 }
-/** @memo:stable */
-export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implements UIRemoteWindowAttribute {
+export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implements RemoteWindowAttribute {
     getPeer(): ArkRemoteWindowPeer {
         return (this.peer as ArkRemoteWindowPeer)
     }
-    /** @memo */
     public setRemoteWindowOptions(target: WindowAnimationTarget): this {
         if (this.checkPriority("setRemoteWindowOptions")) {
             const target_casted = target as (WindowAnimationTarget)
@@ -89,7 +85,7 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
 /** @memo */
 export function RemoteWindow(
     /** @memo */
-    style: ((attributes: UIRemoteWindowAttribute) => void) | undefined,
+    style: ((attributes: RemoteWindowAttribute) => void) | undefined,
     target: WindowAnimationTarget,
     /** @memo */
     content_?: (() => void) | undefined,

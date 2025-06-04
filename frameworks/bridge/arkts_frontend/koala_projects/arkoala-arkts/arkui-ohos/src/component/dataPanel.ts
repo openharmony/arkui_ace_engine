@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, MultiShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, MultiShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor, Length } from "./units"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Color } from "./enums"
@@ -244,21 +244,6 @@ export interface DataPanelAttribute extends CommonMethod {
     trackShadow(value: DataPanelShadowOptions | undefined): this
     contentModifier(value: ContentModifier | undefined): this
 }
-export interface UIDataPanelAttribute extends UICommonMethod {
-    /** @memo */
-    closeEffect(value: boolean | undefined): this
-    /** @memo */
-    valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this
-    /** @memo */
-    trackBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    strokeWidth(value: Length | undefined): this
-    /** @memo */
-    trackShadow(value: DataPanelShadowOptions | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-}
 export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanelAttribute {
     closeEffect_value?: boolean | undefined
     valueColors_value?: Array<ResourceColor | LinearGradient> | undefined
@@ -285,12 +270,10 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
         return this
         }
 }
-/** @memo:stable */
-export class ArkDataPanelComponent extends ArkCommonMethodComponent implements UIDataPanelAttribute {
+export class ArkDataPanelComponent extends ArkCommonMethodComponent implements DataPanelAttribute {
     getPeer(): ArkDataPanelPeer {
         return (this.peer as ArkDataPanelPeer)
     }
-    /** @memo */
     public setDataPanelOptions(options: DataPanelOptions): this {
         if (this.checkPriority("setDataPanelOptions")) {
             const options_casted = options as (DataPanelOptions)
@@ -299,7 +282,6 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public closeEffect(value: boolean | undefined): this {
         if (this.checkPriority("closeEffect")) {
             const value_casted = value as (boolean | undefined)
@@ -308,7 +290,6 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this {
         if (this.checkPriority("valueColors")) {
             const value_casted = value as (Array<ResourceColor | LinearGradient> | undefined)
@@ -317,7 +298,6 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public trackBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("trackBackgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -326,7 +306,6 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public strokeWidth(value: Length | undefined): this {
         if (this.checkPriority("strokeWidth")) {
             const value_casted = value as (Length | undefined)
@@ -335,7 +314,6 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public trackShadow(value: DataPanelShadowOptions | undefined): this {
         if (this.checkPriority("trackShadow")) {
             const value_casted = value as (DataPanelShadowOptions | undefined)
@@ -344,7 +322,6 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_casted = value as (ContentModifier | undefined)
@@ -362,7 +339,7 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements U
 /** @memo */
 export function DataPanel(
     /** @memo */
-    style: ((attributes: UIDataPanelAttribute) => void) | undefined,
+    style: ((attributes: DataPanelAttribute) => void) | undefined,
     options: DataPanelOptions,
     /** @memo */
     content_?: (() => void) | undefined,

@@ -1506,9 +1506,6 @@ export class TypeChecker {
     static isListScroller(value: Object | string | number | undefined): boolean {
         return value instanceof ListScroller
     }
-    static isLiteral__want(value: Object | string | number | undefined, arg0: boolean): boolean {
-        return value instanceof Literal__want
-    }
     static isLiteral_Alignment_align(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof Literal_Alignment_align
     }

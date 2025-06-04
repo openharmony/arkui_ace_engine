@@ -28,7 +28,6 @@ import { LengthMetrics } from "../Graphics"
 import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Summary, IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
-import { Callback_Void } from "./abilityComponent"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global/resource"
@@ -8964,6 +8963,52 @@ export interface CommonShapeMethod extends CommonMethod {
     antiAlias(value: boolean | undefined): this
     strokeDashArray(value: Array<Length> | undefined): this
 }
+export class ArkCommonShapeMethodStyle extends ArkCommonMethodStyle implements CommonShapeMethod {
+    stroke_value?: ResourceColor | undefined
+    fill_value?: ResourceColor | undefined
+    strokeDashOffset_value?: number | string | undefined
+    strokeLineCap_value?: LineCapStyle | undefined
+    strokeLineJoin_value?: LineJoinStyle | undefined
+    strokeMiterLimit_value?: number | string | undefined
+    strokeOpacity_value?: number | string | Resource | undefined
+    fillOpacity_value?: number | string | Resource | undefined
+    strokeWidth_value?: Length | undefined
+    antiAlias_value?: boolean | undefined
+    strokeDashArray_value?: Array<Length> | undefined
+    public stroke(value: ResourceColor | undefined): this {
+        return this
+    }
+    public fill(value: ResourceColor | undefined): this {
+        return this
+    }
+    public strokeDashOffset(value: number | string | undefined): this {
+        return this
+    }
+    public strokeLineCap(value: LineCapStyle | undefined): this {
+        return this
+    }
+    public strokeLineJoin(value: LineJoinStyle | undefined): this {
+        return this
+    }
+    public strokeMiterLimit(value: number | string | undefined): this {
+        return this
+    }
+    public strokeOpacity(value: number | string | Resource | undefined): this {
+        return this
+    }
+    public fillOpacity(value: number | string | Resource | undefined): this {
+        return this
+    }
+    public strokeWidth(value: Length | undefined): this {
+        return this
+    }
+    public antiAlias(value: boolean | undefined): this {
+        return this
+    }
+    public strokeDashArray(value: Array<Length> | undefined): this {
+        return this
+    }
+}
 export interface LinearGradient_common {
     angle?: number | string;
     direction?: GradientDirection;
@@ -9068,6 +9113,59 @@ export interface ScrollableCommonMethod extends CommonMethod {
     backToTop(value: boolean | undefined): this
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
+}
+export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
+    public scrollBar(value: BarState | undefined): this {
+        return this
+    }
+    public scrollBarColor(value: Color | number | string | undefined): this {
+        return this
+    }
+    public scrollBarWidth(value: number | string | undefined): this {
+        return this
+    }
+    public nestedScroll(value: NestedScrollOptions | undefined): this {
+        return this
+    }
+    public enableScrollInteraction(value: boolean | undefined): this {
+        return this
+    }
+    public friction(value: number | Resource | undefined): this {
+        return this
+    }
+    public onScroll(value: ((first: number,last: number) => void) | undefined): this {
+        return this
+    }
+    public onReachStart(value: (() => void) | undefined): this {
+        return this
+    }
+    public onReachEnd(value: (() => void) | undefined): this {
+        return this
+    }
+    public onScrollStart(value: (() => void) | undefined): this {
+        return this
+    }
+    public onScrollStop(value: (() => void) | undefined): this {
+        return this
+    }
+    public flingSpeedLimit(value: number | undefined): this {
+        return this
+    }
+    public clipContent(value: ContentClipMode | RectShape | undefined): this {
+        return this
+    }
+    public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        return this
+    }
+    public backToTop(value: boolean | undefined): this {
+        return this
+    }
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        return this
+    }
+    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+        return this
+    }
 }
 export interface ScrollResult {
     offsetRemain: number;

@@ -22,7 +22,6 @@ import { ArkCommonMethodPeer, StateStyles, CommonMethod, StateStylesOps } from '
 import { InteropNativeModule } from "@koalaui/interop"
 import { ArkCommonAttributeSet } from "./modifiers/ArkCommonModifier";
 
-/** @memo */
 export function hookStateStyleImpl(node: ArkCommonMethodPeer, stateStyle: StateStyles | undefined): void {
 
     let currentState = rememberMutableState<int32>(0)

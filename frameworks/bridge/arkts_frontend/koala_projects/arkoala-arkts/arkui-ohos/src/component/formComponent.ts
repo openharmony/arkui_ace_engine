@@ -22,10 +22,9 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { SizeOptions } from "./units"
 import { Visibility } from "./enums"
-import { Callback_Void } from "./abilityComponent"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -230,29 +229,6 @@ export interface FormComponentAttribute extends CommonMethod {
     onUninstall(value: ((parameter: FormCallbackInfo) => void) | undefined): this
     onLoad(value: (() => void) | undefined): this
 }
-export interface UIFormComponentAttribute extends UICommonMethod {
-    /** @memo */
-    size(value: SizeOptions | undefined): this
-    /** @memo */
-    moduleName(value: string | undefined): this
-    /** @memo */
-    dimension(value: FormDimension | undefined): this
-    /** @memo */
-    allowUpdate(value: boolean | undefined): this
-    /** @memo */
-    visibility(value: Visibility | undefined): this
-    /** @memo */
-    onAcquired(value: ((parameter: FormCallbackInfo) => void) | undefined): this
-    /** @memo */
-    onError(value: ((info: Literal_Number_errcode_String_msg) => void) | undefined): this
-    /** @memo */
-    onRouter(value: ((info: object) => void) | undefined): this
-    /** @memo */
-    onUninstall(value: ((parameter: FormCallbackInfo) => void) | undefined): this
-    /** @memo */
-    onLoad(value: (() => void) | undefined): this
-    /** @memo */
-}
 export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormComponentAttribute {
     size_value?: SizeOptions | undefined
     moduleName_value?: string | undefined
@@ -295,12 +271,10 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
         return this
         }
 }
-/** @memo:stable */
-export class ArkFormComponentComponent extends ArkCommonMethodComponent implements UIFormComponentAttribute {
+export class ArkFormComponentComponent extends ArkCommonMethodComponent implements FormComponentAttribute {
     getPeer(): ArkFormComponentPeer {
         return (this.peer as ArkFormComponentPeer)
     }
-    /** @memo */
     public setFormComponentOptions(value: FormInfo): this {
         if (this.checkPriority("setFormComponentOptions")) {
             const value_casted = value as (FormInfo)
@@ -309,7 +283,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public size(value: SizeOptions | undefined): this {
         if (this.checkPriority("size")) {
             const value_casted = value as (SizeOptions | undefined)
@@ -318,7 +291,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public moduleName(value: string | undefined): this {
         if (this.checkPriority("moduleName")) {
             const value_casted = value as (string | undefined)
@@ -327,7 +299,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public dimension(value: FormDimension | undefined): this {
         if (this.checkPriority("dimension")) {
             const value_casted = value as (FormDimension | undefined)
@@ -336,7 +307,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public allowUpdate(value: boolean | undefined): this {
         if (this.checkPriority("allowUpdate")) {
             const value_casted = value as (boolean | undefined)
@@ -345,7 +315,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public visibility(value: Visibility | undefined): this {
         if (this.checkPriority("visibility")) {
             const value_casted = value as (Visibility | undefined)
@@ -354,7 +323,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onAcquired(value: ((parameter: FormCallbackInfo) => void) | undefined): this {
         if (this.checkPriority("onAcquired")) {
             const value_casted = value as (((parameter: FormCallbackInfo) => void) | undefined)
@@ -363,7 +331,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onError(value: ((info: Literal_Number_errcode_String_msg) => void) | undefined): this {
         if (this.checkPriority("onError")) {
             const value_casted = value as (((info: Literal_Number_errcode_String_msg) => void) | undefined)
@@ -372,7 +339,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onRouter(value: ((info: object) => void) | undefined): this {
         if (this.checkPriority("onRouter")) {
             const value_casted = value as (((info: object) => void) | undefined)
@@ -381,7 +347,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onUninstall(value: ((parameter: FormCallbackInfo) => void) | undefined): this {
         if (this.checkPriority("onUninstall")) {
             const value_casted = value as (((parameter: FormCallbackInfo) => void) | undefined)
@@ -390,7 +355,6 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onLoad(value: (() => void) | undefined): this {
         if (this.checkPriority("onLoad")) {
             const value_casted = value as ((() => void) | undefined)
@@ -408,7 +372,7 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
 /** @memo */
 export function FormComponent(
     /** @memo */
-    style: ((attributes: UIFormComponentAttribute) => void) | undefined,
+    style: ((attributes: FormComponentAttribute) => void) | undefined,
     value: FormInfo,
     /** @memo */
     content_?: (() => void) | undefined,

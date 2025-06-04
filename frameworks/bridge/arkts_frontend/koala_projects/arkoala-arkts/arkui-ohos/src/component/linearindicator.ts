@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
 import { ColorMetrics } from "../Graphics"
@@ -178,15 +178,6 @@ export interface LinearIndicatorAttribute extends CommonMethod {
     indicatorLoop(value: boolean | undefined): this
     onChange(value: OnLinearIndicatorChangeCallback | undefined): this
 }
-export interface UILinearIndicatorAttribute extends UICommonMethod {
-    /** @memo */
-    indicatorStyle(value: LinearIndicatorStyle | undefined): this
-    /** @memo */
-    indicatorLoop(value: boolean | undefined): this
-    /** @memo */
-    onChange(value: OnLinearIndicatorChangeCallback | undefined): this
-    /** @memo */
-}
 export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements LinearIndicatorAttribute {
     indicatorStyle_value?: LinearIndicatorStyle | undefined
     indicatorLoop_value?: boolean | undefined
@@ -202,12 +193,10 @@ export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements Lin
         }
 }
 export type OnLinearIndicatorChangeCallback = (index: number, progress: number) => void;
-/** @memo:stable */
-export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implements UILinearIndicatorAttribute {
+export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implements LinearIndicatorAttribute {
     getPeer(): ArkLinearIndicatorPeer {
         return (this.peer as ArkLinearIndicatorPeer)
     }
-    /** @memo */
     public setLinearIndicatorOptions(count?: number, controller?: LinearIndicatorController): this {
         if (this.checkPriority("setLinearIndicatorOptions")) {
             const count_casted = count as (number | undefined)
@@ -217,7 +206,6 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
     public indicatorStyle(value: LinearIndicatorStyle | undefined): this {
         if (this.checkPriority("indicatorStyle")) {
             const value_casted = value as (LinearIndicatorStyle | undefined)
@@ -226,7 +214,6 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
     public indicatorLoop(value: boolean | undefined): this {
         if (this.checkPriority("indicatorLoop")) {
             const value_casted = value as (boolean | undefined)
@@ -235,7 +222,6 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
     public onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (OnLinearIndicatorChangeCallback | undefined)
@@ -253,7 +239,7 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
 /** @memo */
 export function LinearIndicator(
     /** @memo */
-    style: ((attributes: UILinearIndicatorAttribute) => void) | undefined,
+    style: ((attributes: LinearIndicatorAttribute) => void) | undefined,
     count?: number, controller?: LinearIndicatorController,
     /** @memo */
     content_?: (() => void) | undefined,

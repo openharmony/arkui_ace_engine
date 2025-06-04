@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { ResourceColor, Length, ResourceStr } from "./units"
 import { FontStyle, FontWeight, Color } from "./enums"
@@ -316,31 +316,6 @@ export interface TextClockAttribute extends CommonMethod {
     contentModifier(value: ContentModifier | undefined): this
     dateTimeOptions(value: DateTimeOptions | undefined): this
 }
-export interface UITextClockAttribute extends UICommonMethod {
-    /** @memo */
-    format(value: string | undefined): this
-    /** @memo */
-    onDateChange(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    fontSize(value: Length | undefined): this
-    /** @memo */
-    fontStyle(value: FontStyle | undefined): this
-    /** @memo */
-    fontWeight(value: number | FontWeight | string | undefined): this
-    /** @memo */
-    fontFamily(value: ResourceStr | undefined): this
-    /** @memo */
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    /** @memo */
-    fontFeature(value: string | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-    dateTimeOptions(value: DateTimeOptions | undefined): this
-    /** @memo */
-}
 export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClockAttribute {
     format_value?: string | undefined
     onDateChange_value?: ((index: number) => void) | undefined
@@ -387,12 +362,10 @@ export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClock
         return this
     }
 }
-/** @memo:stable */
-export class ArkTextClockComponent extends ArkCommonMethodComponent implements UITextClockAttribute {
+export class ArkTextClockComponent extends ArkCommonMethodComponent implements TextClockAttribute {
     getPeer(): ArkTextClockPeer {
         return (this.peer as ArkTextClockPeer)
     }
-    /** @memo */
     public setTextClockOptions(options?: TextClockOptions): this {
         if (this.checkPriority("setTextClockOptions")) {
             const options_casted = options as (TextClockOptions | undefined)
@@ -401,7 +374,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public format(value: string | undefined): this {
         if (this.checkPriority("format")) {
             const value_casted = value as (string | undefined)
@@ -410,7 +382,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public onDateChange(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onDateChange")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -419,7 +390,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -428,7 +398,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontSize(value: Length | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (Length | undefined)
@@ -437,7 +406,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontStyle(value: FontStyle | undefined): this {
         if (this.checkPriority("fontStyle")) {
             const value_casted = value as (FontStyle | undefined)
@@ -446,7 +414,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
             const value_casted = value as (number | FontWeight | string | undefined)
@@ -455,7 +422,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontFamily(value: ResourceStr | undefined): this {
         if (this.checkPriority("fontFamily")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -464,7 +430,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         if (this.checkPriority("textShadow")) {
             const value_casted = value as (ShadowOptions | Array<ShadowOptions> | undefined)
@@ -473,7 +438,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontFeature(value: string | undefined): this {
         if (this.checkPriority("fontFeature")) {
             const value_casted = value as (string | undefined)
@@ -482,7 +446,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_casted = value as (ContentModifier | undefined)
@@ -491,7 +454,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public dateTimeOptions(value: DateTimeOptions | undefined): this {
         if (this.checkPriority("dateTimeOptions")) {
             const value_casted = value as (DateTimeOptions | undefined)
@@ -509,7 +471,7 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
 /** @memo */
 export function TextClock(
     /** @memo */
-    style: ((attributes: UITextClockAttribute) => void) | undefined,
+    style: ((attributes: TextClockAttribute) => void) | undefined,
     options?: TextClockOptions,
     /** @memo */
     content_?: (() => void) | undefined,

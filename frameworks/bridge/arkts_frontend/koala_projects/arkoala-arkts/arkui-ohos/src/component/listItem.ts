@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -30,7 +30,6 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
 import { Length } from "./units"
-import { Callback_Void } from "./abilityComponent"
 import { Callback_Number_Void } from "./alphabetIndexer"
 
 export class ArkListItemPeer extends ArkCommonMethodPeer {
@@ -217,23 +216,6 @@ export interface ListItemAttribute extends CommonMethod {
     onSelect(value: ((isVisible: boolean) => void) | undefined): this
     _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
 }
-export interface UIListItemAttribute extends UICommonMethod {
-    /** @memo */
-    sticky(value: Sticky | undefined): this
-    /** @memo */
-    editable(value: boolean | EditMode | undefined): this
-    /** @memo */
-    selectable(value: boolean | undefined): this
-    /** @memo */
-    selected(value: boolean | undefined): this
-    /** @memo */
-    swipeAction(value: SwipeActionOptions | undefined): this
-    /** @memo */
-    onSelect(value: ((isVisible: boolean) => void) | undefined): this
-    /** @memo */
-    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
-    /** @memo */
-}
 export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAttribute {
     sticky_value?: Sticky | undefined
     editable_value?: boolean | EditMode | undefined
@@ -263,12 +245,10 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkListItemComponent extends ArkCommonMethodComponent implements UIListItemAttribute {
+export class ArkListItemComponent extends ArkCommonMethodComponent implements ListItemAttribute {
     getPeer(): ArkListItemPeer {
         return (this.peer as ArkListItemPeer)
     }
-    /** @memo */
     public setListItemOptions(value?: ListItemOptions | string): this {
         if (this.checkPriority("setListItemOptions")) {
             const value_type = runtimeType(value)
@@ -286,7 +266,6 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public sticky(value: Sticky | undefined): this {
         if (this.checkPriority("sticky")) {
             const value_casted = value as (Sticky | undefined)
@@ -295,7 +274,6 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public editable(value: boolean | EditMode | undefined): this {
         if (this.checkPriority("editable")) {
             const value_casted = value as (boolean | EditMode | undefined)
@@ -304,7 +282,6 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public selectable(value: boolean | undefined): this {
         if (this.checkPriority("selectable")) {
             const value_casted = value as (boolean | undefined)
@@ -313,7 +290,6 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public selected(value: boolean | undefined): this {
         if (this.checkPriority("selected")) {
             const value_casted = value as (boolean | undefined)
@@ -322,7 +298,6 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public swipeAction(value: SwipeActionOptions | undefined): this {
         if (this.checkPriority("swipeAction")) {
             const value_casted = value as (SwipeActionOptions | undefined)
@@ -331,7 +306,6 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onSelect(value: ((isVisible: boolean) => void) | undefined): this {
         if (this.checkPriority("onSelect")) {
             const value_casted = value as (((isVisible: boolean) => void) | undefined)
@@ -340,7 +314,6 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_selected")) {
             const callback_casted = callback as (((select: boolean | undefined) => void))
@@ -358,7 +331,7 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function ListItem(
     /** @memo */
-    style: ((attributes: UIListItemAttribute) => void) | undefined,
+    style: ((attributes: ListItemAttribute) => void) | undefined,
     value?: ListItemOptions | undefined,
     /** @memo */
     content_?: (() => void) | undefined,

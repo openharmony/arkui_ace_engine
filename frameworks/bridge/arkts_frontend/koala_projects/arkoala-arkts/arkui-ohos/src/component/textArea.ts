@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, InputCounterOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, InputCounterOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { ResourceColor, Font, Length, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage } from "./units"
 import { EnterKeyType, SubmitEvent, ContentType } from "./textInput"
 import { TextAlign, FontStyle, FontWeight, TextOverflow, CopyOptions, TextContentStyle, BarState, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, Color } from "./enums"
@@ -1111,131 +1111,6 @@ export interface TextAreaAttribute extends CommonMethod {
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     _onChangeEvent_text(callback: ((text: ResourceStr) => void)): void
 }
-export interface UITextAreaAttribute extends UICommonMethod {
-    /** @memo */
-    placeholderColor(value: ResourceColor | undefined): this
-    /** @memo */
-    placeholderFont(value: Font | undefined): this
-    /** @memo */
-    enterKeyType(value: EnterKeyType | undefined): this
-    /** @memo */
-    textAlign(value: TextAlign | undefined): this
-    /** @memo */
-    caretColor(value: ResourceColor | undefined): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    fontSize(value: Length | undefined): this
-    /** @memo */
-    fontStyle(value: FontStyle | undefined): this
-    /** @memo */
-    fontWeight(value: number | FontWeight | string | undefined): this
-    /** @memo */
-    fontFamily(value: ResourceStr | undefined): this
-    /** @memo */
-    textOverflow(value: TextOverflow | undefined): this
-    /** @memo */
-    textIndent(value: Dimension | undefined): this
-    /** @memo */
-    caretStyle(value: CaretStyle | undefined): this
-    /** @memo */
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    onSubmit(value: ((enterKey: EnterKeyType) => void) | undefined | TextAreaSubmitCallback | undefined): this
-    /** @memo */
-    onChange(value: EditableTextOnChangeCallback | undefined): this
-    /** @memo */
-    onTextSelectionChange(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onContentScroll(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onEditChange(value: ((isVisible: boolean) => void) | undefined): this
-    /** @memo */
-    onCopy(value: ((breakpoints: string) => void) | undefined): this
-    /** @memo */
-    onCut(value: ((breakpoints: string) => void) | undefined): this
-    /** @memo */
-    onPaste(value: ((value: string,event: PasteEvent) => void) | undefined): this
-    /** @memo */
-    copyOption(value: CopyOptions | undefined): this
-    /** @memo */
-    enableKeyboardOnFocus(value: boolean | undefined): this
-    /** @memo */
-    maxLength(value: number | undefined): this
-    /** @memo */
-    style(value: TextContentStyle | undefined): this
-    /** @memo */
-    barState(value: BarState | undefined): this
-    /** @memo */
-    selectionMenuHidden(value: boolean | undefined): this
-    /** @memo */
-    minFontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    maxFontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    minFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    maxFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this
-    /** @memo */
-    maxLines(value: number | undefined): this
-    /** @memo */
-    wordBreak(value: WordBreak | undefined): this
-    /** @memo */
-    lineBreakStrategy(value: LineBreakStrategy | undefined): this
-    /** @memo */
-    decoration(value: TextDecorationOptions | undefined): this
-    /** @memo */
-    letterSpacing(value: number | string | Resource | undefined): this
-    /** @memo */
-    lineSpacing(value: LengthMetrics | undefined): this
-    /** @memo */
-    lineHeight(value: number | string | Resource | undefined): this
-    /** @memo */
-    type(value: TextAreaType | undefined): this
-    /** @memo */
-    enableAutoFill(value: boolean | undefined): this
-    /** @memo */
-    contentType(value: ContentType | undefined): this
-    /** @memo */
-    fontFeature(value: string | undefined): this
-    /** @memo */
-    onWillInsert(value: ((parameter: InsertValue) => boolean) | undefined): this
-    /** @memo */
-    onDidInsert(value: ((parameter: InsertValue) => void) | undefined): this
-    /** @memo */
-    onWillDelete(value: ((parameter: DeleteValue) => boolean) | undefined): this
-    /** @memo */
-    onDidDelete(value: ((parameter: DeleteValue) => void) | undefined): this
-    /** @memo */
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    /** @memo */
-    enablePreviewText(value: boolean | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this
-    /** @memo */
-    halfLeading(value: boolean | undefined): this
-    /** @memo */
-    ellipsisMode(value: EllipsisMode | undefined): this
-    /** @memo */
-    stopBackPress(value: boolean | undefined): this
-    /** @memo */
-    onWillChange(value: ((parameter: EditableTextChangeValue) => boolean) | undefined): this
-    /** @memo */
-    keyboardAppearance(value: KeyboardAppearance | undefined): this
-    /** @memo */
-    inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this
-    /** @memo */
-    showCounter(value: boolean | undefined, options?: InputCounterOptions): this
-    /** @memo */
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
-    /** @memo */
-    _onChangeEvent_text(callback: ((text: ResourceStr) => void)): void
-    /** @memo */
-}
 export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAttribute {
     placeholderColor_value?: ResourceColor | undefined
     placeholderFont_value?: Font | undefined
@@ -1478,12 +1353,10 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UITextAreaAttribute {
+export class ArkTextAreaComponent extends ArkCommonMethodComponent implements TextAreaAttribute {
     getPeer(): ArkTextAreaPeer {
         return (this.peer as ArkTextAreaPeer)
     }
-    /** @memo */
     public setTextAreaOptions(value?: TextAreaOptions): this {
         if (this.checkPriority("setTextAreaOptions")) {
             const value_casted = value as (TextAreaOptions | undefined)
@@ -1492,7 +1365,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public placeholderColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("placeholderColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1501,7 +1373,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public placeholderFont(value: Font | undefined): this {
         if (this.checkPriority("placeholderFont")) {
             const value_casted = value as (Font | undefined)
@@ -1510,7 +1381,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public enterKeyType(value: EnterKeyType | undefined): this {
         if (this.checkPriority("enterKeyType")) {
             const value_casted = value as (EnterKeyType | undefined)
@@ -1519,7 +1389,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public textAlign(value: TextAlign | undefined): this {
         if (this.checkPriority("textAlign")) {
             const value_casted = value as (TextAlign | undefined)
@@ -1528,7 +1397,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public caretColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("caretColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1537,7 +1405,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1546,7 +1413,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public fontSize(value: Length | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (Length | undefined)
@@ -1555,7 +1421,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public fontStyle(value: FontStyle | undefined): this {
         if (this.checkPriority("fontStyle")) {
             const value_casted = value as (FontStyle | undefined)
@@ -1564,7 +1429,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
             const value_casted = value as (number | FontWeight | string | undefined)
@@ -1573,7 +1437,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public fontFamily(value: ResourceStr | undefined): this {
         if (this.checkPriority("fontFamily")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -1582,7 +1445,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public textOverflow(value: TextOverflow | undefined): this {
         if (this.checkPriority("textOverflow")) {
             const value_casted = value as (TextOverflow | undefined)
@@ -1591,7 +1453,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public textIndent(value: Dimension | undefined): this {
         if (this.checkPriority("textIndent")) {
             const value_casted = value as (Dimension | undefined)
@@ -1600,7 +1461,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public caretStyle(value: CaretStyle | undefined): this {
         if (this.checkPriority("caretStyle")) {
             const value_casted = value as (CaretStyle | undefined)
@@ -1609,7 +1469,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public selectedBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedBackgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1618,7 +1477,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onSubmit(value: ((enterKey: EnterKeyType) => void) | undefined | TextAreaSubmitCallback | undefined): this {
         if (this.checkPriority("onSubmit")) {
             const value_type = runtimeType(value)
@@ -1636,7 +1494,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onChange(value: EditableTextOnChangeCallback | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (EditableTextOnChangeCallback | undefined)
@@ -1645,7 +1502,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onTextSelectionChange(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onTextSelectionChange")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -1654,7 +1510,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onContentScroll(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onContentScroll")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -1663,7 +1518,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onEditChange(value: ((isVisible: boolean) => void) | undefined): this {
         if (this.checkPriority("onEditChange")) {
             const value_casted = value as (((isVisible: boolean) => void) | undefined)
@@ -1672,7 +1526,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onCopy(value: ((breakpoints: string) => void) | undefined): this {
         if (this.checkPriority("onCopy")) {
             const value_casted = value as (((breakpoints: string) => void) | undefined)
@@ -1681,7 +1534,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onCut(value: ((breakpoints: string) => void) | undefined): this {
         if (this.checkPriority("onCut")) {
             const value_casted = value as (((breakpoints: string) => void) | undefined)
@@ -1690,7 +1542,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onPaste(value: ((value: string,event: PasteEvent) => void) | undefined): this {
         if (this.checkPriority("onPaste")) {
             const value_casted = value as (((value: string,event: PasteEvent) => void) | undefined)
@@ -1699,7 +1550,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public copyOption(value: CopyOptions | undefined): this {
         if (this.checkPriority("copyOption")) {
             const value_casted = value as (CopyOptions | undefined)
@@ -1708,7 +1558,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public enableKeyboardOnFocus(value: boolean | undefined): this {
         if (this.checkPriority("enableKeyboardOnFocus")) {
             const value_casted = value as (boolean | undefined)
@@ -1717,7 +1566,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public maxLength(value: number | undefined): this {
         if (this.checkPriority("maxLength")) {
             const value_casted = value as (number | undefined)
@@ -1726,7 +1574,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public style(value: TextContentStyle | undefined): this {
         if (this.checkPriority("style")) {
             const value_casted = value as (TextContentStyle | undefined)
@@ -1735,7 +1582,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public barState(value: BarState | undefined): this {
         if (this.checkPriority("barState")) {
             const value_casted = value as (BarState | undefined)
@@ -1744,7 +1590,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public selectionMenuHidden(value: boolean | undefined): this {
         if (this.checkPriority("selectionMenuHidden")) {
             const value_casted = value as (boolean | undefined)
@@ -1753,7 +1598,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public minFontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("minFontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1762,7 +1606,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public maxFontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("maxFontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1771,7 +1614,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public minFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -1780,7 +1622,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public maxFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -1789,7 +1630,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
         if (this.checkPriority("heightAdaptivePolicy")) {
             const value_casted = value as (TextHeightAdaptivePolicy | undefined)
@@ -1798,7 +1638,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public maxLines(value: number | undefined): this {
         if (this.checkPriority("maxLines")) {
             const value_casted = value as (number | undefined)
@@ -1807,7 +1646,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public wordBreak(value: WordBreak | undefined): this {
         if (this.checkPriority("wordBreak")) {
             const value_casted = value as (WordBreak | undefined)
@@ -1816,7 +1654,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public lineBreakStrategy(value: LineBreakStrategy | undefined): this {
         if (this.checkPriority("lineBreakStrategy")) {
             const value_casted = value as (LineBreakStrategy | undefined)
@@ -1825,7 +1662,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public decoration(value: TextDecorationOptions | undefined): this {
         if (this.checkPriority("decoration")) {
             const value_casted = value as (TextDecorationOptions | undefined)
@@ -1834,7 +1670,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public letterSpacing(value: number | string | Resource | undefined): this {
         if (this.checkPriority("letterSpacing")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1843,7 +1678,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public lineSpacing(value: LengthMetrics | undefined): this {
         if (this.checkPriority("lineSpacing")) {
             const value_casted = value as (LengthMetrics | undefined)
@@ -1852,7 +1686,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public lineHeight(value: number | string | Resource | undefined): this {
         if (this.checkPriority("lineHeight")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1861,7 +1694,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public type(value: TextAreaType | undefined): this {
         if (this.checkPriority("type")) {
             const value_casted = value as (TextAreaType | undefined)
@@ -1870,7 +1702,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public enableAutoFill(value: boolean | undefined): this {
         if (this.checkPriority("enableAutoFill")) {
             const value_casted = value as (boolean | undefined)
@@ -1879,7 +1710,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public contentType(value: ContentType | undefined): this {
         if (this.checkPriority("contentType")) {
             const value_casted = value as (ContentType | undefined)
@@ -1888,7 +1718,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public fontFeature(value: string | undefined): this {
         if (this.checkPriority("fontFeature")) {
             const value_casted = value as (string | undefined)
@@ -1897,7 +1726,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onWillInsert(value: ((parameter: InsertValue) => boolean) | undefined): this {
         if (this.checkPriority("onWillInsert")) {
             const value_casted = value as (((parameter: InsertValue) => boolean) | undefined)
@@ -1906,7 +1734,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onDidInsert(value: ((parameter: InsertValue) => void) | undefined): this {
         if (this.checkPriority("onDidInsert")) {
             const value_casted = value as (((parameter: InsertValue) => void) | undefined)
@@ -1915,7 +1742,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onWillDelete(value: ((parameter: DeleteValue) => boolean) | undefined): this {
         if (this.checkPriority("onWillDelete")) {
             const value_casted = value as (((parameter: DeleteValue) => boolean) | undefined)
@@ -1924,7 +1750,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onDidDelete(value: ((parameter: DeleteValue) => void) | undefined): this {
         if (this.checkPriority("onDidDelete")) {
             const value_casted = value as (((parameter: DeleteValue) => void) | undefined)
@@ -1933,7 +1758,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public editMenuOptions(value: EditMenuOptions | undefined): this {
         if (this.checkPriority("editMenuOptions")) {
             const value_casted = value as (EditMenuOptions | undefined)
@@ -1942,7 +1766,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public enablePreviewText(value: boolean | undefined): this {
         if (this.checkPriority("enablePreviewText")) {
             const value_casted = value as (boolean | undefined)
@@ -1951,7 +1774,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
@@ -1960,7 +1782,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
         if (this.checkPriority("autoCapitalizationMode")) {
             const value_casted = value as (AutoCapitalizationMode | undefined)
@@ -1969,7 +1790,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public halfLeading(value: boolean | undefined): this {
         if (this.checkPriority("halfLeading")) {
             const value_casted = value as (boolean | undefined)
@@ -1978,7 +1798,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public ellipsisMode(value: EllipsisMode | undefined): this {
         if (this.checkPriority("ellipsisMode")) {
             const value_casted = value as (EllipsisMode | undefined)
@@ -1987,7 +1806,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public stopBackPress(value: boolean | undefined): this {
         if (this.checkPriority("stopBackPress")) {
             const value_casted = value as (boolean | undefined)
@@ -1996,7 +1814,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onWillChange(value: ((parameter: EditableTextChangeValue) => boolean) | undefined): this {
         if (this.checkPriority("onWillChange")) {
             const value_casted = value as (((parameter: EditableTextChangeValue) => boolean) | undefined)
@@ -2005,7 +1822,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public keyboardAppearance(value: KeyboardAppearance | undefined): this {
         if (this.checkPriority("keyboardAppearance")) {
             const value_casted = value as (KeyboardAppearance | undefined)
@@ -2014,7 +1830,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {
         if (this.checkPriority("inputFilter")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -2024,7 +1839,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
         if (this.checkPriority("showCounter")) {
             const value_casted = value as (boolean | undefined)
@@ -2034,7 +1848,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
             const value_casted = value as (CustomBuilder | undefined)
@@ -2044,7 +1857,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_text(callback: ((text: ResourceStr) => void)): void {
         if (this.checkPriority("_onChangeEvent_text")) {
             const callback_casted = callback as (((text: ResourceStr) => void))
@@ -2062,7 +1874,7 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function TextArea(
     /** @memo */
-    style: ((attributes: UITextAreaAttribute) => void) | undefined,
+    style: ((attributes: TextAreaAttribute) => void) | undefined,
     value?: TextAreaOptions,
     /** @memo */
     content_?: (() => void) | undefined,

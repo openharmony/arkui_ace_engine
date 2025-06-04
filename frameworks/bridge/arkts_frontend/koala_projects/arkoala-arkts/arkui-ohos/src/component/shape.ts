@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor, Length } from "./units"
 import { LineCapStyle, LineJoinStyle, Color } from "./enums"
 import { Resource } from "global/resource"
@@ -338,35 +338,6 @@ export interface ShapeAttribute extends CommonMethod {
     antiAlias(value: boolean | undefined): this
     mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this
 }
-export interface UIShapeAttribute extends UICommonMethod {
-    /** @memo */
-    viewPort(value: ViewportRect | undefined): this
-    /** @memo */
-    stroke(value: ResourceColor | undefined): this
-    /** @memo */
-    fill(value: ResourceColor | undefined): this
-    /** @memo */
-    strokeDashOffset(value: number | string | undefined): this
-    /** @memo */
-    strokeDashArray(value: Array<Length> | undefined): this
-    /** @memo */
-    strokeLineCap(value: LineCapStyle | undefined): this
-    /** @memo */
-    strokeLineJoin(value: LineJoinStyle | undefined): this
-    /** @memo */
-    strokeMiterLimit(value: number | string | undefined): this
-    /** @memo */
-    strokeOpacity(value: number | string | Resource | undefined): this
-    /** @memo */
-    fillOpacity(value: number | string | Resource | undefined): this
-    /** @memo */
-    strokeWidth(value: number | string | undefined): this
-    /** @memo */
-    antiAlias(value: boolean | undefined): this
-    /** @memo */
-    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this
-    /** @memo */
-}
 export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribute {
     viewPort_value?: ViewportRect | undefined
     stroke_value?: ResourceColor | undefined
@@ -420,12 +391,10 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
         return this
         }
 }
-/** @memo:stable */
-export class ArkShapeComponent extends ArkCommonMethodComponent implements UIShapeAttribute {
+export class ArkShapeComponent extends ArkCommonMethodComponent implements ShapeAttribute {
     getPeer(): ArkShapePeer {
         return (this.peer as ArkShapePeer)
     }
-    /** @memo */
     public setShapeOptions(value?: PixelMap): this {
         if (this.checkPriority("setShapeOptions")) {
             const value_casted = value as (PixelMap | undefined);
@@ -440,7 +409,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public viewPort(value: ViewportRect | undefined): this {
         if (this.checkPriority("viewPort")) {
             const value_casted = value as (ViewportRect | undefined)
@@ -449,7 +417,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public stroke(value: ResourceColor | undefined): this {
         if (this.checkPriority("stroke")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -458,7 +425,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public fill(value: ResourceColor | undefined): this {
         if (this.checkPriority("fill")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -467,7 +433,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public strokeDashOffset(value: number | string | undefined): this {
         if (this.checkPriority("strokeDashOffset")) {
             const value_casted = value as (number | string | undefined)
@@ -476,7 +441,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public strokeDashArray(value: Array<Length> | undefined): this {
         if (this.checkPriority("strokeDashArray")) {
             const value_casted = value as (Array<Length> | undefined)
@@ -485,7 +449,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public strokeLineCap(value: LineCapStyle | undefined): this {
         if (this.checkPriority("strokeLineCap")) {
             const value_casted = value as (LineCapStyle | undefined)
@@ -494,7 +457,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public strokeLineJoin(value: LineJoinStyle | undefined): this {
         if (this.checkPriority("strokeLineJoin")) {
             const value_casted = value as (LineJoinStyle | undefined)
@@ -503,7 +465,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public strokeMiterLimit(value: number | string | undefined): this {
         if (this.checkPriority("strokeMiterLimit")) {
             const value_casted = value as (number | string | undefined)
@@ -512,7 +473,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public strokeOpacity(value: number | string | Resource | undefined): this {
         if (this.checkPriority("strokeOpacity")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -521,7 +481,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public fillOpacity(value: number | string | Resource | undefined): this {
         if (this.checkPriority("fillOpacity")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -530,7 +489,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public strokeWidth(value: number | string | undefined): this {
         if (this.checkPriority("strokeWidth")) {
             const value_casted = value as (number | string | undefined)
@@ -539,7 +497,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public antiAlias(value: boolean | undefined): this {
         if (this.checkPriority("antiAlias")) {
             const value_casted = value as (boolean | undefined)
@@ -548,7 +505,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
     public mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
         if (value == undefined || column == undefined || row == undefined) {
             return this;
@@ -571,7 +527,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
 /** @memo */
 export function Shape(
     /** @memo */
-    style: ((attributes: UIShapeAttribute) => void) | undefined,
+    style: ((attributes: ShapeAttribute) => void) | undefined,
     value?: PixelMap,
     /** @memo */
     content_?: (() => void) | undefined,

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { LengthMetrics } from "../Graphics"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -327,13 +327,6 @@ export interface BaseSpan extends CommonMethod {
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this
     baselineOffset(value: LengthMetrics | undefined): this
 }
-export interface UIBaseSpan extends UICommonMethod {
-    /** @memo */
-    textBackgroundStyle(value: TextBackgroundStyle | undefined): this
-    /** @memo */
-    baselineOffset(value: LengthMetrics | undefined): this
-    /** @memo */
-}
 export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
     baselineOffset_value?: LengthMetrics | undefined
@@ -357,31 +350,6 @@ export interface SpanAttribute extends BaseSpan {
     textCase(value: TextCase | undefined): this
     lineHeight(value: Length | undefined): this
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-}
-export interface UISpanAttribute extends UIBaseSpan {
-    /** @memo */
-    font(value: Font | undefined): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    fontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    fontStyle(value: FontStyle | undefined): this
-    /** @memo */
-    fontWeight(value: number | FontWeight | string | undefined): this
-    /** @memo */
-    fontFamily(value: string | Resource | undefined): this
-    /** @memo */
-    decoration(value: DecorationStyleInterface | undefined): this
-    /** @memo */
-    letterSpacing(value: number | string | undefined): this
-    /** @memo */
-    textCase(value: TextCase | undefined): this
-    /** @memo */
-    lineHeight(value: Length | undefined): this
-    /** @memo */
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    /** @memo */
 }
 export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     font_value?: Font | undefined
@@ -429,12 +397,10 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
         return this
         }
 }
-/** @memo:stable */
-export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements UIBaseSpan {
+export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements BaseSpan {
     getPeer(): ArkBaseSpanPeer {
         return (this.peer as ArkBaseSpanPeer)
     }
-    /** @memo */
     public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         if (this.checkPriority("textBackgroundStyle")) {
             const value_casted = value as (TextBackgroundStyle | undefined)
@@ -443,7 +409,6 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public baselineOffset(value: LengthMetrics | undefined): this {
         if (this.checkPriority("baselineOffset")) {
             const value_casted = value as (LengthMetrics | undefined)
@@ -458,12 +423,10 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements UI
         super.applyAttributesFinish()
     }
 }
-/** @memo:stable */
-export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttribute {
+export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttribute {
     getPeer(): ArkSpanPeer {
         return (this.peer as ArkSpanPeer)
     }
-    /** @memo */
     public setSpanOptions(value: string | Resource): this {
         if (this.checkPriority("setSpanOptions")) {
             const value_casted = value as (string | Resource)
@@ -472,7 +435,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public font(value: Font | undefined): this {
         if (this.checkPriority("font")) {
             const value_casted = value as (Font | undefined)
@@ -481,7 +443,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -490,7 +451,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public fontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -499,7 +459,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public fontStyle(value: FontStyle | undefined): this {
         if (this.checkPriority("fontStyle")) {
             const value_casted = value as (FontStyle | undefined)
@@ -508,7 +467,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
             const value_casted = value as (number | FontWeight | string | undefined)
@@ -517,7 +475,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public fontFamily(value: string | Resource | undefined): this {
         if (this.checkPriority("fontFamily")) {
             const value_casted = value as (string | Resource | undefined)
@@ -526,7 +483,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public decoration(value: DecorationStyleInterface | undefined): this {
         if (this.checkPriority("decoration")) {
             const value_casted = value as (DecorationStyleInterface | undefined)
@@ -535,7 +491,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public letterSpacing(value: number | string | undefined): this {
         if (this.checkPriority("letterSpacing")) {
             const value_casted = value as (number | string | undefined)
@@ -544,7 +499,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public textCase(value: TextCase | undefined): this {
         if (this.checkPriority("textCase")) {
             const value_casted = value as (TextCase | undefined)
@@ -553,7 +507,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public lineHeight(value: Length | undefined): this {
         if (this.checkPriority("lineHeight")) {
             const value_casted = value as (Length | undefined)
@@ -562,7 +515,6 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
     public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         if (this.checkPriority("textShadow")) {
             const value_casted = value as (ShadowOptions | Array<ShadowOptions> | undefined)
@@ -580,7 +532,7 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
 /** @memo */
 export function Span(
     /** @memo */
-    style: ((attributes: UISpanAttribute) => void) | undefined,
+    style: ((attributes: SpanAttribute) => void) | undefined,
     value: string | Resource,
     /** @memo */
     content_?: (() => void) | undefined,

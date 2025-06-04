@@ -16,7 +16,6 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-export * from "./abilityComponent"
 export * from "./actionSheet"
 export * from "./alertDialog"
 export * from "./alphabetIndexer"

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor } from "./units"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Color } from "./enums"
@@ -117,15 +117,6 @@ export interface LoadingProgressAttribute extends CommonMethod {
     enableLoading(value: boolean | undefined): this
     contentModifier(value: ContentModifier | undefined): this
 }
-export interface UILoadingProgressAttribute extends UICommonMethod {
-    /** @memo */
-    color(value: ResourceColor | undefined): this
-    /** @memo */
-    enableLoading(value: boolean | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-}
 export class ArkLoadingProgressStyle extends ArkCommonMethodStyle implements LoadingProgressAttribute {
     color_value?: ResourceColor | undefined
     enableLoading_value?: boolean | undefined
@@ -143,12 +134,10 @@ export class ArkLoadingProgressStyle extends ArkCommonMethodStyle implements Loa
 export interface LoadingProgressConfiguration extends CommonConfiguration {
     enableLoading: boolean;
 }
-/** @memo:stable */
-export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implements UILoadingProgressAttribute {
+export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implements LoadingProgressAttribute {
     getPeer(): ArkLoadingProgressPeer {
         return (this.peer as ArkLoadingProgressPeer)
     }
-    /** @memo */
     public setLoadingProgressOptions(): this {
         if (this.checkPriority("setLoadingProgressOptions")) {
             this.getPeer()?.setLoadingProgressOptionsAttribute()
@@ -156,7 +145,6 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
     public color(value: ResourceColor | undefined): this {
         if (this.checkPriority("color")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -165,7 +153,6 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
     public enableLoading(value: boolean | undefined): this {
         if (this.checkPriority("enableLoading")) {
             const value_casted = value as (boolean | undefined)
@@ -174,7 +161,6 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_casted = value as (ContentModifier | undefined)
@@ -192,7 +178,7 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
 /** @memo */
 export function LoadingProgress(
     /** @memo */
-    style: ((attributes: UILoadingProgressAttribute) => void) | undefined,
+    style: ((attributes: LoadingProgressAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

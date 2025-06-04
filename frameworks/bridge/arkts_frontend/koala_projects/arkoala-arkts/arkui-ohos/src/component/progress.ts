@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor, Length, PX, VP, LPX, Font } from "./units"
 import { LinearGradient } from "./dataPanel"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
@@ -244,19 +244,6 @@ export interface ProgressAttribute extends CommonMethod {
     privacySensitive(value: boolean | undefined): this
     contentModifier(value: ContentModifier | undefined): this
 }
-export interface UIProgressAttribute extends UICommonMethod {
-    /** @memo */
-    value(value: number | undefined): this
-    /** @memo */
-    color(value: ResourceColor | LinearGradient | undefined): this
-    /** @memo */
-    style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this
-    /** @memo */
-    privacySensitive(value: boolean | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-}
 export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAttribute {
     value_value?: number | undefined
     color_value?: ResourceColor | LinearGradient | undefined
@@ -283,12 +270,10 @@ export interface ProgressConfiguration extends CommonConfiguration {
     value: number;
     total: number;
 }
-/** @memo:stable */
-export class ArkProgressComponent extends ArkCommonMethodComponent implements UIProgressAttribute {
+export class ArkProgressComponent extends ArkCommonMethodComponent implements ProgressAttribute {
     getPeer(): ArkProgressPeer {
         return (this.peer as ArkProgressPeer)
     }
-    /** @memo */
     public setProgressOptions(options: ProgressOptions): this {
         if (this.checkPriority("setProgressOptions")) {
             const options_casted = options as (ProgressOptions)
@@ -297,7 +282,6 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public value(value: number | undefined): this {
         if (this.checkPriority("value")) {
             const value_casted = value as (number | undefined)
@@ -306,7 +290,6 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public color(value: ResourceColor | LinearGradient | undefined): this {
         if (this.checkPriority("color")) {
             const value_casted = value as (ResourceColor | LinearGradient | undefined)
@@ -315,7 +298,6 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this {
         if (this.checkPriority("style")) {
             const value_casted = value as (LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined)
@@ -324,7 +306,6 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public privacySensitive(value: boolean | undefined): this {
         if (this.checkPriority("privacySensitive")) {
             const value_casted = value as (boolean | undefined)
@@ -333,7 +314,6 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_casted = value as (ContentModifier | undefined)
@@ -351,7 +331,7 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function Progress(
     /** @memo */
-    style: ((attributes: UIProgressAttribute) => void) | undefined,
+    style: ((attributes: ProgressAttribute) => void) | undefined,
     options: ProgressOptions,
     /** @memo */
     content_?: (() => void) | undefined,

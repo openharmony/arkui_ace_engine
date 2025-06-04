@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -74,23 +74,16 @@ export type ScrollBarInterface = (value: ScrollBarOptions) => ScrollBarAttribute
 export interface ScrollBarAttribute extends CommonMethod {
     enableNestedScroll(value: boolean | undefined): this
 }
-export interface UIScrollBarAttribute extends UICommonMethod {
-    /** @memo */
-    enableNestedScroll(value: boolean | undefined): this
-    /** @memo */
-}
 export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBarAttribute {
     enableNestedScroll_value?: boolean | undefined
     public enableNestedScroll(value: boolean | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkScrollBarComponent extends ArkCommonMethodComponent implements UIScrollBarAttribute {
+export class ArkScrollBarComponent extends ArkCommonMethodComponent implements ScrollBarAttribute {
     getPeer(): ArkScrollBarPeer {
         return (this.peer as ArkScrollBarPeer)
     }
-    /** @memo */
     public setScrollBarOptions(value: ScrollBarOptions): this {
         if (this.checkPriority("setScrollBarOptions")) {
             const value_casted = value as (ScrollBarOptions)
@@ -99,7 +92,6 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public enableNestedScroll(value: boolean | undefined): this {
         if (this.checkPriority("enableNestedScroll")) {
             const value_casted = value as (boolean | undefined)
@@ -117,7 +109,7 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements U
 /** @memo */
 export function ScrollBar(
     /** @memo */
-    style: ((attributes: UIScrollBarAttribute) => void) | undefined,
+    style: ((attributes: ScrollBarAttribute) => void) | undefined,
     value: ScrollBarOptions,
     /** @memo */
     content_?: (() => void) | undefined,

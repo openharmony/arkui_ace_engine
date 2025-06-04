@@ -26,8 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, Callback } from "./common"
-import { Callback_Void } from "./abilityComponent"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback } from "./common"
 import { ResourceStr, Length } from "./units"
 import { PixelMap } from "./arkui-pixelmap"
 import { SymbolGlyphModifier } from "./arkui-external"
@@ -842,69 +841,6 @@ export interface NavDestinationAttribute extends CommonMethod {
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
     enableStatusBar(enabled: boolean | undefined, animated?: boolean): this
 }
-export interface UINavDestinationAttribute extends UICommonMethod {
-    /** @memo */
-    hideTitleBar(hide: boolean | undefined, animated?: boolean): this
-    /** @memo */
-    hideBackButton(value: boolean | undefined): this
-    /** @memo */
-    onShown(value: (() => void) | undefined): this
-    /** @memo */
-    onHidden(value: (() => void) | undefined): this
-    /** @memo */
-    onBackPressed(value: (() => boolean) | undefined): this
-    /** @memo */
-    onResult(value: ((parameter: Object) => void) | undefined): this
-    /** @memo */
-    mode(value: NavDestinationMode | undefined): this
-    /** @memo */
-    backButtonIcon(icon: ResourceStr | PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this
-    /** @memo */
-    menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this
-    /** @memo */
-    onReady(value: Callback<NavDestinationContext> | undefined): this
-    /** @memo */
-    onWillAppear(value: Callback<void> | undefined): this
-    /** @memo */
-    onWillDisappear(value: Callback<void> | undefined): this
-    /** @memo */
-    onWillShow(value: Callback<void> | undefined): this
-    /** @memo */
-    onWillHide(value: Callback<void> | undefined): this
-    /** @memo */
-    systemBarStyle(value: SystemBarStyle | undefined): this
-    /** @memo */
-    recoverable(value: boolean | undefined): this
-    /** @memo */
-    systemTransition(value: NavigationSystemTransitionType | undefined): this
-    /** @memo */
-    bindToScrollable(value: Array<Scroller> | undefined): this
-    /** @memo */
-    bindToNestedScrollable(value: Array<NestedScrollInfo> | undefined): this
-    /** @memo */
-    onActive(value: ((parameter: NavDestinationActiveReason) => void) | undefined): this
-    /** @memo */
-    onInactive(value: ((parameter: NavDestinationActiveReason) => void) | undefined): this
-    /** @memo */
-    customTransition(value: NavDestinationTransitionDelegate | undefined): this
-    /** @memo */
-    onNewParam(value: ((parameter: Object | null | undefined) => void) | undefined): this
-    /** @memo */
-    preferredOrientation(value: Orientation | undefined): this
-    /** @memo */
-    enableNavigationIndicator(value: boolean | undefined): this
-    /** @memo */
-    title(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined, options?: NavigationTitleOptions): this
-    /** @memo */
-    toolbarConfiguration(toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this
-    /** @memo */
-    hideToolBar(hide: boolean | undefined, animated?: boolean): this
-    /** @memo */
-    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
-    /** @memo */
-    enableStatusBar(enabled: boolean | undefined, animated?: boolean): this
-    /** @memo */
-}
 export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavDestinationAttribute {
     hideTitleBar_value?: boolean | undefined
     hideBackButton_value?: boolean | undefined
@@ -1024,12 +960,10 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
 }
 export type NavDestinationTransitionDelegate = (operation: NavigationOperation, isEnter: boolean) => Array<NavDestinationTransition> | undefined;
 export type Callback_NavDestinationContext_Void = (parameter: NavDestinationContext) => void;
-/** @memo:stable */
-export class ArkNavDestinationComponent extends ArkCommonMethodComponent implements UINavDestinationAttribute {
+export class ArkNavDestinationComponent extends ArkCommonMethodComponent implements NavDestinationAttribute {
     getPeer(): ArkNavDestinationPeer {
         return (this.peer as ArkNavDestinationPeer)
     }
-    /** @memo */
     public setNavDestinationOptions(): this {
         if (this.checkPriority("setNavDestinationOptions")) {
             this.getPeer()?.setNavDestinationOptionsAttribute()
@@ -1037,7 +971,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
         if (this.checkPriority("hideTitleBar")) {
             const hide_type = runtimeType(hide)
@@ -1057,7 +990,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public hideBackButton(value: boolean | undefined): this {
         if (this.checkPriority("hideBackButton")) {
             const value_casted = value as (boolean | undefined)
@@ -1066,7 +998,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onShown(value: (() => void) | undefined): this {
         if (this.checkPriority("onShown")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1075,7 +1006,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onHidden(value: (() => void) | undefined): this {
         if (this.checkPriority("onHidden")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1084,7 +1014,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onBackPressed(value: (() => boolean) | undefined): this {
         if (this.checkPriority("onBackPressed")) {
             const value_casted = value as ((() => boolean) | undefined)
@@ -1093,7 +1022,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onResult(value: ((parameter: Object) => void) | undefined): this {
         if (this.checkPriority("onResult")) {
             const value_casted = value as (((parameter: Object) => void) | undefined)
@@ -1102,7 +1030,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public mode(value: NavDestinationMode | undefined): this {
         if (this.checkPriority("mode")) {
             const value_casted = value as (NavDestinationMode | undefined)
@@ -1111,7 +1038,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public backButtonIcon(icon: ResourceStr | PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
         if (this.checkPriority("backButtonIcon")) {
             const icon_type = runtimeType(icon)
@@ -1134,7 +1060,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
         if (this.checkPriority("menus")) {
             const items_type = runtimeType(items)
@@ -1154,7 +1079,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onReady(value: Callback<NavDestinationContext> | undefined): this {
         if (this.checkPriority("onReady")) {
             const value_casted = value as (Callback<NavDestinationContext> | undefined)
@@ -1163,7 +1087,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onWillAppear(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillAppear")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1172,7 +1095,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onWillDisappear(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillDisappear")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1181,7 +1103,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onWillShow(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillShow")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1190,7 +1111,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onWillHide(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillHide")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1199,7 +1119,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public systemBarStyle(value: SystemBarStyle | undefined): this {
         if (this.checkPriority("systemBarStyle")) {
             const value_casted = value as (SystemBarStyle | undefined)
@@ -1208,7 +1127,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public recoverable(value: boolean | undefined): this {
         if (this.checkPriority("recoverable")) {
             const value_casted = value as (boolean | undefined)
@@ -1217,7 +1135,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public systemTransition(value: NavigationSystemTransitionType | undefined): this {
         if (this.checkPriority("systemTransition")) {
             const value_casted = value as (NavigationSystemTransitionType | undefined)
@@ -1226,7 +1143,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public bindToScrollable(value: Array<Scroller> | undefined): this {
         if (this.checkPriority("bindToScrollable")) {
             const value_casted = value as (Array<Scroller> | undefined)
@@ -1235,7 +1151,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public bindToNestedScrollable(value: Array<NestedScrollInfo> | undefined): this {
         if (this.checkPriority("bindToNestedScrollable")) {
             const value_casted = value as (Array<NestedScrollInfo> | undefined)
@@ -1244,7 +1159,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onActive(value: ((parameter: NavDestinationActiveReason) => void) | undefined): this {
         if (this.checkPriority("onActive")) {
             const value_casted = value as (((parameter: NavDestinationActiveReason) => void) | undefined)
@@ -1253,7 +1167,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onInactive(value: ((parameter: NavDestinationActiveReason) => void) | undefined): this {
         if (this.checkPriority("onInactive")) {
             const value_casted = value as (((parameter: NavDestinationActiveReason) => void) | undefined)
@@ -1262,7 +1175,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public customTransition(value: NavDestinationTransitionDelegate | undefined): this {
         if (this.checkPriority("customTransition")) {
             const value_casted = value as (NavDestinationTransitionDelegate | undefined)
@@ -1271,7 +1183,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onNewParam(value: ((parameter: Object | null | undefined) => void) | undefined): this {
         if (this.checkPriority("onNewParam")) {
             const value_casted = value as (((parameter: Object | null | undefined) => void) | undefined)
@@ -1280,7 +1191,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public preferredOrientation(value: Orientation | undefined): this {
         if (this.checkPriority("preferredOrientation")) {
             const value_casted = value as (Orientation | undefined)
@@ -1289,7 +1199,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public enableNavigationIndicator(value: boolean | undefined): this {
         if (this.checkPriority("enableNavigationIndicator")) {
             const value_casted = value as (boolean | undefined)
@@ -1298,7 +1207,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public title(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined, options?: NavigationTitleOptions): this {
         if (this.checkPriority("title")) {
             const value_casted = value as (string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined)
@@ -1308,7 +1216,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public toolbarConfiguration(toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
         if (this.checkPriority("toolbarConfiguration")) {
             const toolbarParam_casted = toolbarParam as (Array<ToolbarItem> | CustomBuilder | undefined)
@@ -1318,7 +1225,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public hideToolBar(hide: boolean | undefined, animated?: boolean): this {
         if (this.checkPriority("hideToolBar")) {
             const hide_casted = hide as (boolean | undefined)
@@ -1328,7 +1234,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         if (this.checkPriority("ignoreLayoutSafeArea")) {
             const types_casted = types as (Array<LayoutSafeAreaType>)
@@ -1338,7 +1243,6 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public enableStatusBar(enabled: boolean | undefined, animated?: boolean): this {
         if (this.checkPriority("enableStatusBar")) {
             const enabled_casted = enabled as (boolean | undefined)
@@ -1357,7 +1261,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
 /** @memo */
 export function NavDestination(
     /** @memo */
-    style: ((attributes: UINavDestinationAttribute) => void) | undefined,
+    style: ((attributes: NavDestinationAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

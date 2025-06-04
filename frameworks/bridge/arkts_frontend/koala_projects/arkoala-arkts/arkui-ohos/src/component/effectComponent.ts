@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -45,16 +45,12 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
 export type EffectComponentInterface = () => EffectComponentAttribute;
 export interface EffectComponentAttribute extends CommonMethod {
 }
-export interface UIEffectComponentAttribute extends UICommonMethod {
-}
 export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements EffectComponentAttribute {
 }
-/** @memo:stable */
-export class ArkEffectComponentComponent extends ArkCommonMethodComponent implements UIEffectComponentAttribute {
+export class ArkEffectComponentComponent extends ArkCommonMethodComponent implements EffectComponentAttribute {
     getPeer(): ArkEffectComponentPeer {
         return (this.peer as ArkEffectComponentPeer)
     }
-    /** @memo */
     public setEffectComponentOptions(): this {
         if (this.checkPriority("setEffectComponentOptions")) {
             this.getPeer()?.setEffectComponentOptionsAttribute()
@@ -71,7 +67,7 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
 /** @memo */
 export function EffectComponent(
     /** @memo */
-    style: ((attributes: UIEffectComponentAttribute) => void) | undefined,
+    style: ((attributes: EffectComponentAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,
