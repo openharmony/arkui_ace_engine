@@ -227,6 +227,10 @@ const segmentButtonTheme = {
 function nearEqual(first, second) {
   return Math.abs(first - second) < 0.001;
 }
+function validateLengthMetrics(value, defaultValue) {
+  const actualValue = value ?? defaultValue;
+  return actualValue.value < 0 ? defaultValue : actualValue;
+}
 export var BorderRadiusMode;
 (function (BorderRadiusMode) {
   /**
@@ -362,10 +366,14 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
     if (this.borderRadiusMode !== BorderRadiusMode.DEFAULT && this.borderRadiusMode !== BorderRadiusMode.CUSTOM) {
       this.borderRadiusMode = BorderRadiusMode.DEFAULT;
     }
-    this.backgroundBorderRadius =
-      options.backgroundBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE);
-    this.itemBorderRadius =
-      options.itemBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE);
+    this.backgroundBorderRadius = validateLengthMetrics(
+      options.backgroundBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE)
+    );
+    this.itemBorderRadius = validateLengthMetrics(
+      options.itemBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE)
+    );
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons);
     if (this.type === 'capsule') {
       this.multiply = options.multiply ?? false;
@@ -3147,16 +3155,13 @@ function getBackgroundBorderRadius(options, defaultRadius) {
   }
   return options.iconTextBackgroundRadius ?? defaultRadius;
 }
-
 class FocusStyleButtonModifier {
   constructor(stateStyleAction) {
     this.stateStyleAction = stateStyleAction;
   }
-
   applyNormalAttribute(instance) {
     this.stateStyleAction && this.stateStyleAction(false);
   }
-
   applyFocusedAttribute(instance) {
     this.stateStyleAction && this.stateStyleAction(true);
   }

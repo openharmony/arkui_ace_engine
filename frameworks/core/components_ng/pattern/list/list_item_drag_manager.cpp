@@ -501,6 +501,9 @@ void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
             pipeline->FlushUITasks();
         }
     }
+    auto pattern = list->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDraggingIndex(to);
     isSwapAnimationStopped_ = false;
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 400, 38); /* 400:stiffness, 38:damping */
@@ -585,6 +588,7 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetDraggingIndex(-1);
     pattern->SetHotZoneScrollCallback(nullptr);
     if (scrolling_) {
         pattern->HandleLeaveHotzoneEvent();
@@ -604,15 +608,16 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
 
 void ListItemDragManager::HandleOnItemDragCancel()
 {
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDraggingIndex(-1);
     HandleDragEndAnimation();
     dragState_ = ListItemDragState::IDLE;
     if (isSwapAnimationStopped_) {
         SetIsNeedDividerAnimation(true);
     }
-    auto parent = listNode_.Upgrade();
-    CHECK_NULL_VOID(parent);
-    auto pattern = parent->GetPattern<ListPattern>();
-    CHECK_NULL_VOID(pattern);
     pattern->HandleLeaveHotzoneEvent();
     pattern->SetHotZoneScrollCallback(nullptr);
 }

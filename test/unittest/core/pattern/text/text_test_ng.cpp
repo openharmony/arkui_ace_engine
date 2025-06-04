@@ -212,6 +212,41 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetTextContentWithStyledString001
+ * @tc.desc: Test SetTextContentWithStyledString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextContentWithStyledString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(textPattern->pManager_, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetTextContentWithStyledString with parameter "value" is nullptr.
+     * @tc.expected: pManager's paragraphs will be reseted
+     */
+    EXPECT_TRUE(textPattern->pManager_->GetParagraphs().empty());
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph });
+    EXPECT_FALSE(textPattern->pManager_->GetParagraphs().empty());
+
+    textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
+    EXPECT_TRUE(textPattern->pManager_->GetParagraphs().empty());
+}
+
+/**
  * @tc.name: SetTextDetectConfig001
  * @tc.desc: Test SetTextDetectConfig.
  * @tc.type: FUNC

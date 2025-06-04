@@ -1784,6 +1784,7 @@ HWTEST_F(ViewAbstractModelTestNg, BindContextMenuTest2, TestSize.Level1)
     MenuParam menuParam;
     menuParam.contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     menuParam.anchorPosition = {10, 20};
+    menuParam.isAnchorPosition = true;
     viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
     EXPECT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
 
@@ -1804,6 +1805,7 @@ HWTEST_F(ViewAbstractModelTestNg, BindMenuTest, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
     theme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     auto container = Container::Current();
@@ -1817,6 +1819,7 @@ HWTEST_F(ViewAbstractModelTestNg, BindMenuTest, TestSize.Level1)
     MenuParam menuParam;
     menuParam.setShow = true;
     menuParam.anchorPosition = {10, 20};
+    menuParam.isAnchorPosition = true;
     menuParam.isShow = true;
     menuParam.isShowInSubWindow = true;
     buildFunc = []() { flag++; };

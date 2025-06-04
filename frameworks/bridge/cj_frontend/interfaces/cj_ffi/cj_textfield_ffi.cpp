@@ -754,6 +754,7 @@ void FfiOHOSAceFrameworkTextFieldEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, 
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
     ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
-    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 }

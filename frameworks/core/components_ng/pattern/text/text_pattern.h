@@ -698,9 +698,9 @@ public:
         RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
-    void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
-    
+    void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
+
     void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
     {
         selectOverlay_->OnCreateMenuCallbackUpdate(std::move(onCreateMenuCallback));
@@ -709,6 +709,11 @@ public:
     void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
     {
         selectOverlay_->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+    }
+
+    void OnPrepareMenuCallbackUpdate(const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+    {
+        selectOverlay_->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
     }
     
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;

@@ -1972,22 +1972,30 @@ HWTEST_F(TextPickerPatternTestNg, ParseDirectionKey001, TestSize.Level1)
     KeyCode code = KeyCode::KEY_UNKNOWN;
 
     code = KeyCode::KEY_DPAD_UP;
+    textPickerColumnPattern->stopHaptic_ = false;
     textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_FALSE(textPickerColumnPattern->InnerHandleScroll(0, false));
+    EXPECT_TRUE(textPickerColumnPattern->stopHaptic_);
 
     code = KeyCode::KEY_DPAD_DOWN;
+    textPickerColumnPattern->stopHaptic_ = false;
     textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_FALSE(textPickerColumnPattern->InnerHandleScroll(1, false));
+    EXPECT_TRUE(textPickerColumnPattern->stopHaptic_);
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
 
     code = KeyCode::KEY_DPAD_LEFT;
+    textPickerColumnPattern->stopHaptic_ = false;
     textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_EQ(textPickerPattern_->focusKeyID_, -1);
+    EXPECT_FALSE(textPickerColumnPattern->stopHaptic_);
 
     code = KeyCode::KEY_DPAD_RIGHT;
+    textPickerColumnPattern->stopHaptic_ = false;
     textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_EQ(textPickerPattern_->focusKeyID_, 0);
+    EXPECT_FALSE(textPickerColumnPattern->stopHaptic_);
 }
 
 /**

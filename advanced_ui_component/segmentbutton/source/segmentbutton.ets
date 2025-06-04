@@ -95,6 +95,11 @@ function nearEqual(first: number, second: number): boolean {
   return Math.abs(first - second) < 0.001
 }
 
+function validateLengthMetrics(value: LengthMetrics | undefined, defaultValue: LengthMetrics): LengthMetrics {
+  const actualValue = value ?? defaultValue;
+  return actualValue.value < 0 ? defaultValue : actualValue;
+}
+
 interface SegmentButtonTextItem {
   text: ResourceStr
   accessibilityLevel?: string
@@ -366,10 +371,14 @@ export class SegmentButtonOptions {
       this.borderRadiusMode !== BorderRadiusMode.CUSTOM) {
       this.borderRadiusMode = BorderRadiusMode.DEFAULT;
     }
-    this.backgroundBorderRadius =
-      options.backgroundBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE);
-    this.itemBorderRadius =
-      options.itemBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE);
+    this.backgroundBorderRadius = validateLengthMetrics(
+      options.backgroundBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE)
+    );
+    this.itemBorderRadius = validateLengthMetrics(
+      options.itemBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE)
+    );
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons)
     if (this.type === 'capsule') {
       this.multiply = (options as CapsuleSegmentButtonOptions).multiply ?? false
@@ -1019,7 +1028,7 @@ struct SegmentButtonItemArrayComponent {
       return value as string;
     }
     const isSingleSelect = this.options.type === 'tab' || !this.options.multiply;
-    
+
     if (isSingleSelect && index !== undefined && this.selectedIndexes.includes(index)) {
       return ACCESSIBILITY_SELECTED_DESCRIPTION;
     }

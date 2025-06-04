@@ -48,6 +48,11 @@ public:
     static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncByUniqueId(int32_t uniqueId,
         const SnapshotOptions& options);
 
+    static void GetWithRange(const NodeIdentity& startID, const NodeIdentity& endID, const bool& isStartRect,
+        JsCallback&& callback, const SnapshotOptions& options);
+    static std::string GetRangeIDStr(const NodeIdentity& ID);
+    static RefPtr<FrameNode> GetRangeIDNode(const NodeIdentity& ID);
+
     // create pixelMap in sync, this method only for drag.
     static std::shared_ptr<Media::PixelMap> CreateSync(
         const RefPtr<AceType>& customNode, const SnapshotParam& param);

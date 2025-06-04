@@ -95,8 +95,9 @@ struct MenuParam {
     std::optional<NG::BorderColorProperty> outlineColor;
     std::optional<bool> maskEnable;
     std::optional<MenuMaskType> maskType;
+    std::optional<ModalMode> modalMode;
     OffsetF anchorPosition;
-    bool anchorPositionFlag = false;
+    bool isAnchorPosition = false;
 };
 
 } // namespace OHOS::Ace::NG

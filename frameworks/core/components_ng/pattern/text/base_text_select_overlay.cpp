@@ -1015,11 +1015,12 @@ bool BaseTextSelectOverlay::CheckSwitchToMode(HandleLevelMode mode)
     return true;
 }
 
-void BaseTextSelectOverlay::OnSelectionMenuOptionsUpdate(
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void BaseTextSelectOverlay::OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     onCreateMenuCallback_ = onCreateMenuCallback;
     onMenuItemClick_ = onMenuItemClick;
+    onPrepareMenuCallback_ = onPrepareMenuCallback;
 }
 
 void BaseTextSelectOverlay::RegisterScrollingListener(const RefPtr<FrameNode> scrollableNode)

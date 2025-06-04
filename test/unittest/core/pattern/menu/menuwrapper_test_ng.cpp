@@ -19,12 +19,14 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -66,6 +68,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
+constexpr int32_t WRAPPER_ID = 4;
 constexpr MenuType TYPE = MenuType::MENU;
 const std::string EMPTY_TEXT = "";
 const std::string TEXT_TAG = "text";
@@ -112,9 +115,15 @@ public:
     RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
 };
 
-void MenuWrapperTestNg::SetUpTestCase() {}
+void MenuWrapperTestNg::SetUpTestCase()
+{
+    MockContainer::SetUp();
+}
 
-void MenuWrapperTestNg::TearDownTestCase() {}
+void MenuWrapperTestNg::TearDownTestCase()
+{
+    MockContainer::TearDown();
+}
 
 void MenuWrapperTestNg::SetUp()
 {
@@ -803,7 +812,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg016, TestSize.Level1)
         FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
-
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     MenuModelNG model;
     model.Create();
     auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -2109,5 +2118,86 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg002, TestSize.Level1)
         menuPattern->UpdateMenuPathParams(params);
         paintMethod->PaintDoubleBorder(canvas, paintWrapper);
     }
+}
+
+/**
+ * @tc.name: MenuWrapperHotArea001
+ * @tc.desc: test Menu hot area
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperHotArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode
+     * @tc.expected: Use targetTag and targetId will find the targetNode
+     */
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<TextPattern>());
+    auto findNode = FrameNode::GetFrameNode(V2::TEXT_ETS_TAG, TARGET_ID);
+    EXPECT_EQ(targetNode, findNode);
+    /**
+     * @tc.steps: step2. create wrapperNode and call AddTargetWindowHotArea
+     * @tc.expected: cannot add window hotArea
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    std::vector<Rect> rects;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    EXPECT_EQ(rects.size(), 0);
+    auto context = wrapperNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    /**
+     * @tc.steps: step3. config the container and set targetWindow mode
+     * @tc.expected: can add hot area to the rects
+     */
+    auto mockContainer = MockContainer::Current();
+    auto instanceId = context->GetInstanceId();
+    AceEngine::Get().containerMap_.emplace(instanceId, mockContainer);
+    wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    EXPECT_EQ(rects.size(), 1);
+    /**
+     * @tc.steps: step4. set isSubContainer_ true, call AddTargetWindowHotArea
+     * @tc.expected: can not add hot area to the rects
+     */
+    mockContainer->isSubContainer_ = true;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    EXPECT_EQ(rects.size(), 1);
+}
+
+/**
+ * @tc.name: MenuWrapperHotArea002
+ * @tc.desc: test Menu hot area
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperHotArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode
+     */
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<TextPattern>());
+    /**
+     * @tc.steps: step2. create wrapperNode and menu, call add hot area
+     * @tc.expected: the hot area size meetings expectations.
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto mockContainer = MockContainer::Current();
+    mockContainer->isSubContainer_ = false;
+    auto context = wrapperNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+    AceEngine::Get().containerMap_.emplace(instanceId, mockContainer);
+    wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
+    std::vector<Rect> rects;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    wrapperPattern->AddWrapperChildHotArea(rects, wrapperNode);
+    wrapperPattern->AddFilterHotArea(rects);
+    EXPECT_EQ(rects.size(), 2);
 }
 } // namespace OHOS::Ace::NG

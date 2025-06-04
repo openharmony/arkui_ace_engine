@@ -331,7 +331,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if ((NotLoopOptions() || !isLoop_) && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent(u"");
-            if (!isTossPlaying && selectedIndex == index) {
+            if (!isTossPlaying) {
                 textNode->MarkModifyDone();
                 textNode->MarkDirtyNode();
             }
@@ -341,7 +341,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         auto optionValue = DatePickerPattern::GetFormatString(date);
         textLayoutProperty->UpdateContent(optionValue);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        if (!isTossPlaying && selectedIndex == index) {
+        if (!isTossPlaying) {
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode();
         }

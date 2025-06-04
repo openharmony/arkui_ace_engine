@@ -96,6 +96,8 @@ int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_I
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
+WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
+HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
 float SystemProperties::GetFontWeightScale()
 {

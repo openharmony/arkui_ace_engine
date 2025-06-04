@@ -1644,4 +1644,37 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, GetOrRefreshMatrixFromCacheNGTest
     EXPECT_EQ(node->isTransformNotChanged_, true);
     MockPipelineContext::TearDown();
 }
+
+/**
+ * @tc.name: DispatchTouchEventAndCheck
+ * @tc.desc: Test DispatchTouchEventAndCheck func
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, DispatchTouchEventAndCheckTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto resultId = ElementRegister::GetInstance()->MakeUniqueId();
+    TouchTestResult touchTestResults;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::NONE }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panRecognizer->OnPending();
+    touchTestResults.push_back(panRecognizer);
+    eventManager->touchTestResults_.emplace(resultId, touchTestResults);
+    TouchEvent event;
+    event.id = resultId;
+    event.type = TouchType::DOWN;
+    RefPtr<GestureScope> scope = AceType::MakeRefPtr<GestureScope>(resultId);
+    ASSERT_NE(scope, nullptr);
+    ASSERT_NE(eventManager->refereeNG_, nullptr);
+    scope->AddMember(panRecognizer);
+    eventManager->refereeNG_->gestureScopes_.insert(std::make_pair(resultId, scope));
+    eventManager->DispatchTouchEventAndCheck(event, false);
+    EXPECT_EQ(panRecognizer->GetRefereeState(), RefereeState::FAIL);
+}
 } // namespace OHOS::Ace::NG

@@ -1418,8 +1418,8 @@ public:
         return showKeyBoardOnFocus_;
     }
 
-    void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
 
     void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
     {
@@ -1429,6 +1429,11 @@ public:
     void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
     {
         selectOverlay_->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+    }
+
+    void OnPrepareMenuCallbackUpdate(const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+    {
+        selectOverlay_->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
     }
 
     void SetSupportPreviewText(bool isSupported)

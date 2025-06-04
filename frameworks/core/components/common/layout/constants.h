@@ -546,6 +546,22 @@ enum class KeyboardAppearance {
     DARK_IMMERSIVE = 3
 };
 
+enum class TextChangeReason {
+    UNKNOWN = 0,
+    INPUT = 1,
+    PASTE = 2,
+    CUT = 3,
+    DRAG = 4,
+    AUTO_FILL = 5,
+    AI_WRITE = 6,
+    REDO = 7,
+    UNDO = 8,
+    CONTROLLER = 9,
+    ACCESSIBILITY = 10,
+    COLLABORATION = 11,
+    STYLUS = 12
+};
+
 namespace StringUtils {
 inline std::string ToString(const ImageFit& imageFit)
 {

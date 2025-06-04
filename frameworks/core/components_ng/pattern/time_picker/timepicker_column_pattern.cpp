@@ -503,7 +503,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(
             textLayoutProperty->UpdateContent(optionValue);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
-        if (!isTossPlaying && selectedIndex == index) {
+        if (!isTossPlaying) {
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode();
         }

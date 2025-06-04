@@ -1405,12 +1405,14 @@ bool TextPickerPattern::ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textP
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     switch (code) {
         case KeyCode::KEY_DPAD_UP:
+            textPickerColumnPattern->StopHaptic();
             if (textPickerColumnPattern->InnerHandleScroll(false, false)) {
                 textPickerColumnPattern->HandleScrollStopEventCallback(true);
             }
             break;
 
         case KeyCode::KEY_DPAD_DOWN:
+            textPickerColumnPattern->StopHaptic();
             if (textPickerColumnPattern->InnerHandleScroll(true, false)) {
                 textPickerColumnPattern->HandleScrollStopEventCallback(true);
             }
