@@ -14,6 +14,7 @@
  */
 
 #include "image_base.h"
+#include "test/mock/base/mock_image_perf.h"
 
 #include "base/image/image_defines.h"
 
@@ -2259,5 +2260,21 @@ HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap003, TestSize.Level1)
      */
     bool result = sourceInfo.IsSurportCachePixelmap();
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: TestReportPerfData001
+ * @tc.desc: Test ReportPerfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestReportPerfData001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto mockImagePerf = reinterpret_cast<MockImagePerf*>(MockImagePerf::GetPerfMonitor());
+    EXPECT_CALL(*mockImagePerf, EndRecordImageLoadStat(_, _, _, _)).Times(AtLeast(1));
+    imagePattern->ReportPerfData(frameNode, 1);
 }
 } // namespace OHOS::Ace::NG

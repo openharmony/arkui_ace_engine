@@ -167,6 +167,8 @@ public:
 
     std::string GetImageColorFilterStr(const std::vector<float>& colorFilter);
 
+    std::string GetSrcTypeToString(SrcType srcType);
+
     void SetSyncLoad(bool value)
     {
         syncLoad_ = value;
@@ -478,6 +480,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
+    void ReportPerfData(const RefPtr<NG::FrameNode>& host, int state);
     void LoadImage(const ImageSourceInfo& src, bool needLayout);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 

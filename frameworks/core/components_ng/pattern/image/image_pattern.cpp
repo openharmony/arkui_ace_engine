@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 
+#include "base/image/image_perf.h"
 #include "base/log/dump_log.h"
 #include "base/network/download_manager.h"
 #include "core/common/ace_engine_ext.h"
@@ -103,6 +104,8 @@ constexpr float IMAGE_SENSITIVE_RADIUS = 80.0f;
 constexpr double IMAGE_SENSITIVE_SATURATION = 1.0;
 constexpr double IMAGE_SENSITIVE_BRIGHTNESS = 1.08;
 constexpr uint32_t MAX_SRC_LENGTH = 120; // prevent the Base64 image format from too long.
+constexpr int IMAGE_LOAD_FAIL = 0;
+constexpr int IMAGE_LOAD_SUCCESS = 1;
 
 ImagePattern::ImagePattern()
 {
@@ -416,6 +419,17 @@ void ImagePattern::ApplyAIModificationsToImage()
     }
 }
 
+void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int state)
+{
+    auto accessibilityId = host->GetAccessibilityId();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto type = loadingCtx_->GetSourceInfo().GetSrcType();
+    std::string srcType = GetSrcTypeToString(type);
+    std::pair<int, int> size(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    ImagePerf::GetPerfMonitor()->EndRecordImageLoadStat(accessibilityId, srcType, size, state);
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
@@ -466,6 +480,7 @@ void ImagePattern::OnImageLoadSuccess()
     if (context && pixelMap) {
         context->SetIsWideColorGamut(pixelMap->GetIsWideColorGamut());
     }
+    ReportPerfData(host, IMAGE_LOAD_SUCCESS);
     host->MarkNeedRenderOnly();
 }
 
@@ -540,6 +555,7 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg, const ImageError
     CHECK_NULL_VOID(imageEventHub);
     LoadImageFailEvent event(
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg, errorInfo);
+    ReportPerfData(host, IMAGE_LOAD_FAIL);
     imageEventHub->FireErrorEvent(event);
 }
 
@@ -788,6 +804,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     renderedImageInfo_.renderSuccess = false;
     // Reset the reload flag before loading the image to ensure a fresh state.
     isImageReloadNeeded_ = false;
+    ImagePerf::GetPerfMonitor()->StartRecordImageLoadStat(imageDfxConfig_.GetAccessibilityId());
     loadingCtx_->LoadImageData();
 }
 
@@ -1999,6 +2016,23 @@ std::string ImagePattern::GetImageColorFilterStr(const std::vector<float>& color
         result += ", " + std::to_string(colorFilter[idx]);
     }
     return result + "]";
+}
+
+std::string ImagePattern::GetSrcTypeToString(SrcType srcType)
+{
+    static const std::unordered_map<SrcType, std::string> typeMap = { { SrcType::UNSUPPORTED, "unsupported" },
+        { SrcType::FILE, "file" }, { SrcType::ASSET, "asset" }, { SrcType::NETWORK, "network" },
+        { SrcType::MEMORY, "memory" }, { SrcType::BASE64, "base64" }, { SrcType::INTERNAL, "internal" },
+        { SrcType::RESOURCE, "resource" }, { SrcType::DATA_ABILITY, "dataAbility" },
+        { SrcType::DATA_ABILITY_DECODED, "dataAbilityDecoded" }, { SrcType::RESOURCE_ID, "resourceId" },
+        { SrcType::PIXMAP, "pixmap" }, { SrcType::ASTC, "astc" } };
+
+    auto iter = typeMap.find(srcType);
+    if (iter != typeMap.end()) {
+        return iter->second;
+    }
+
+    return "";
 }
 
 void ImagePattern::EnableAnalyzer(bool value)
