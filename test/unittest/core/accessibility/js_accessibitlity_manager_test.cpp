@@ -2135,34 +2135,159 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest001, TestSize.L
     /**
      * @tc.steps: step1. construct jsAccessibilityManager, test node
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<Pattern>(), false);
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    ASSERT_NE(context, nullptr);
     auto root = context->GetRootElement();
-    CHECK_NULL_VOID(root);
+    ASSERT_NE(root, nullptr);
 
     jsAccessibilityManager->SetPipelineContext(context);
     auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
-    CHECK_NULL_VOID(container);
+    ASSERT_NE(container, nullptr);
 
     AccessibilityEvent accessibilityEvent {
         .nodeId = root->GetAccessibilityId(),
         .type = AccessibilityEventType::PAGE_CHANGE
     };
 
-    auto IsUIExtensionWindowBackup = container->IsUIExtensionWindow();
+    // mock conntainer will return isUIexentionwindow by SetUIExtensionSubWindow
     container->SetUIExtensionSubWindow(true);
     jsAccessibilityManager->AddToPageEventController(root);
     /**
      * @tc.steps: step2. save pages when in UIExtensionWindow
      */
+    AccessibilityWorkMode accessibilityWorkMode { .isTouchExplorationEnabled = true };
+    EXPECT_CALL(*jsAccessibilityManager,
+        GenerateAccessibilityWorkMode()).WillOnce(::testing::Return(accessibilityWorkMode));
     auto result = jsAccessibilityManager->IsSendAccessibilityEvent(accessibilityEvent);
     EXPECT_EQ(result, false);
 
-    container->SetUIExtensionSubWindow(IsUIExtensionWindowBackup);
+    container->SetUIExtensionSubWindow(false);
+}
+
+/**
+* @tc.name: IsSendAccessibilityEventTest002
+* @tc.desc: IsSendAccessibilityEvent in UIExtensionWindow
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+
+    jsAccessibilityManager->SetPipelineContext(context);
+    auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+
+    AccessibilityEvent accessibilityEvent {
+        .nodeId = root->GetAccessibilityId(),
+        .type = AccessibilityEventType::PAGE_CHANGE
+    };
+
+    // mock conntainer will return isUIexentionwindow by SetUIExtensionSubWindow
+    container->SetUIExtensionSubWindow(true);
+    jsAccessibilityManager->AddToPageEventController(root);
+    /**
+     * @tc.steps: step2. save pages when in UIExtensionWindow
+     */
+    AccessibilityWorkMode accessibilityWorkMode { .isTouchExplorationEnabled = false };
+    EXPECT_CALL(*jsAccessibilityManager,
+        GenerateAccessibilityWorkMode()).WillOnce(::testing::Return(accessibilityWorkMode));
+    auto result = jsAccessibilityManager->IsSendAccessibilityEvent(accessibilityEvent);
+    EXPECT_EQ(result, true);
+
+    container->SetUIExtensionSubWindow(false);
+}
+
+/**
+* @tc.name: IsSendAccessibilityEventTest003
+* @tc.desc: IsSendAccessibilityEvent
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+
+    jsAccessibilityManager->SetPipelineContext(context);
+    auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+
+    AccessibilityEvent accessibilityEvent {
+        .nodeId = root->GetAccessibilityId(),
+        .type = AccessibilityEventType::PAGE_CHANGE
+    };
+
+    jsAccessibilityManager->AddToPageEventController(root);
+    /**
+     * @tc.steps: step2. save pages when in UIExtensionWindow
+     */
+    AccessibilityWorkMode accessibilityWorkMode { .isTouchExplorationEnabled = true };
+    EXPECT_CALL(*jsAccessibilityManager,
+        GenerateAccessibilityWorkMode()).WillOnce(::testing::Return(accessibilityWorkMode));
+    auto result = jsAccessibilityManager->IsSendAccessibilityEvent(accessibilityEvent);
+    EXPECT_EQ(result, false);
+}
+
+/**
+* @tc.name: IsSendAccessibilityEventForHostTest001
+* @tc.desc: IsSendAccessibilityEventForHost
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventForHostTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto accessibilityProperty = root->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilitySamePage("FULL_SILENT");
+
+    jsAccessibilityManager->SetPipelineContext(context);
+    auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+    jsAccessibilityManager->AddDefaultFocusNode(root);
+    jsAccessibilityManager->AddFrameNodeToUecStatusVec(root);
+
+    AccessibilityEvent accessibilityEvent {
+        .nodeId = root->GetAccessibilityId(),
+        .type = AccessibilityEventType::PAGE_CHANGE
+    };
+    /**
+     * @tc.steps: step2. save events when UIExtension not ready
+     */
+    auto result =
+        jsAccessibilityManager->IsSendAccessibilityEventForHost(accessibilityEvent, "test", root->GetPageId());
+    EXPECT_EQ(result, false);
 }
 
 /**

@@ -3289,6 +3289,27 @@ namespace {
     }
 }
 
+bool JsAccessibilityManager::CachePageEventByController(
+    const AccessibilityEvent& accessibilityEvent,
+    const std::string& componentType,
+    int32_t pageId,
+    int32_t containerId)
+{
+    auto accessibilityWorkMode = GenerateAccessibilityWorkMode();
+    if (!accessibilityWorkMode.isTouchExplorationEnabled) {
+        return false;
+    }
+
+    AccessibilityEvent event = accessibilityEvent;
+    event.componentType = componentType;
+    auto eventType = GetEventTypeByAccessibilityEvent(event);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "cache page event from pageEventController, componentType:%{public}s event:%{public}d nodeId:%{public}"
+        PRId64, event.componentType.c_str(), eventType, event.nodeId);
+    pageController_.AddAccessibilityEvent(containerId, pageId, event);
+    return true;
+}
+
 bool JsAccessibilityManager::IsSendAccessibilityEvent(const AccessibilityEvent& accessibilityEvent)
 {
     if (!IsPageEvent(GetEventTypeByAccessibilityEvent(accessibilityEvent))) {
@@ -3309,10 +3330,9 @@ bool JsAccessibilityManager::IsSendAccessibilityEvent(const AccessibilityEvent& 
         pageController_.Update();
         if (!pageController_.CheckEmpty(infoOfNode.nodeInstanceId)) {
             UpdatePageId(pipelineContext, infoOfNode.pageId);
-            AccessibilityEvent event = accessibilityEvent;
-            event.componentType = infoOfNode.componentType;
-            pageIdEventMap_[infoOfNode.pageId] = event;
-            return false;
+            auto cached = CachePageEventByController(
+                accessibilityEvent, infoOfNode.componentType, infoOfNode.pageId, infoOfNode.nodeInstanceId);
+            return !cached;
         }
     }
     UpdatePageId(pipelineContext, infoOfNode.pageId);
@@ -3361,7 +3381,7 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
             pageIdEventMap_[nodePageId] = std::nullopt;
         }
     }
-    if (!CheckExtensionComponentReadyByPageId(pageId, extensionComponentStatusVec_) || (!isPageEventControllerEmpty)) {
+    if (!CheckExtensionComponentReadyByPageId(pageId, extensionComponentStatusVec_)) {
         if (pageIdEventMap_.count(pageId) && pageIdEventMap_[pageId].has_value()) {
             auto event = pageIdEventMap_[pageId].value();
             auto eventType = GetEventTypeByAccessibilityEvent(event);
@@ -3373,6 +3393,10 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
         event.componentType = componentType;
         pageIdEventMap_[pageId] = event;
         return false;
+    } else if (!isPageEventControllerEmpty) {
+        auto containerId = ngPipeline ? ngPipeline->GetInstanceId() : 0;
+        auto cached = CachePageEventByController(accessibilityEvent, componentType, pageId, containerId);
+        return !cached;
     }
     return true;
 }
@@ -3427,66 +3451,58 @@ void JsAccessibilityManager::SendCacheAccessibilityEventForHost(const int32_t pa
     }
 }
 
-bool JsAccessibilityManager::CheckPageEventValidInCache()
+bool JsAccessibilityManager::CheckPageEventValidInCache(int32_t containerId)
 {
-    for (auto it = pageIdEventMap_.begin(); it !=  pageIdEventMap_.end();) {
-        if (it->second.has_value()) {
-            return true;
-        } else {
-            ++it;
-        }
-    }
-    return false;
+    return pageController_.HasAnyAccessibilityEvent(containerId);
 }
 
-bool JsAccessibilityManager::CheckPageEventByPageInCache(int32_t pageId)
+bool JsAccessibilityManager::CheckPageEventByPageInCache(int32_t containerId, int32_t pageId)
 {
-    for (auto it = pageIdEventMap_.begin(); it !=  pageIdEventMap_.end();++it) {
-        if (it->second.has_value()) {
-            if (it->first == pageId) {
-                return true;
-            }
-        }
-    }
-    return false;
+    return pageController_.HasAccessibilityEvent(containerId, pageId);
 }
 
-void JsAccessibilityManager::ReleaseAllCacheAccessibilityEvent()
+void JsAccessibilityManager::ReleaseAccessibilityEventList(
+    const std::list<std::pair<int32_t, AccessibilityEvent>>& eventList)
 {
-    for (auto it = pageIdEventMap_.begin(); it !=  pageIdEventMap_.end();) {
-        if (it->second.has_value()) {
-            auto event = it->second.value();
-            SendAccessibilityAsyncEventInner(event);
-            it = pageIdEventMap_.erase(it);
-        } else {
-            ++it;
-        }
+    for (auto& pair : eventList) {
+        auto eventType = GetEventTypeByAccessibilityEvent(pair.second);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "release page event from pageEventController, componentType:%{public}s event:%{public}d nodeId:%{public}"
+            PRId64, pair.second.componentType.c_str(), eventType, pair.second.nodeId);
+        SendAccessibilityAsyncEventInner(pair.second);
     }
 }
 
-void JsAccessibilityManager::ReleaseCacheAccessibilityEvent(const int32_t pageId)
+void JsAccessibilityManager::ReleaseAllCacheAccessibilityEvent(int32_t containerId)
 {
-    auto it = pageIdEventMap_.find(pageId);
-    if (it != pageIdEventMap_.end() && it->second.has_value()) {
-        auto event = it->second.value();
-        SendAccessibilityAsyncEventInner(event);
-        pageIdEventMap_.erase(it);
-    }
+    std::list<std::pair<int32_t, AccessibilityEvent>> eventList;
+    pageController_.ReleaseAllAccessibilityEvent(containerId, eventList);
+    ReleaseAccessibilityEventList(eventList);
+}
 
+void JsAccessibilityManager::ReleaseCacheAccessibilityEvent(int32_t containerId, int32_t pageId)
+{
+    std::list<std::pair<int32_t, AccessibilityEvent>> eventList;
+    pageController_.ReleaseAccessibilityEvent(containerId, pageId, eventList);
+    ReleaseAccessibilityEventList(eventList);
     if ((pageId == 0) || (pageId == -1)) {
-        ReleaseAllCacheAccessibilityEvent();
+        ReleaseAllCacheAccessibilityEvent(containerId);
     }
 }
 
 void JsAccessibilityManager::ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController, bool releaseAll)
 {
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
     if (pageController_.CheckNode(node, deleteController)) {
-        ReleaseCacheAccessibilityEvent(node->GetPageId());
+        ReleaseCacheAccessibilityEvent(containerId, node->GetPageId());
     }
 
     if (releaseAll) {
         pageController_.DeleteInstanceNodeAll(node);
-        ReleaseAllCacheAccessibilityEvent();
+        ReleaseAllCacheAccessibilityEvent(containerId);
     }
 }
 
@@ -3497,16 +3513,32 @@ void JsAccessibilityManager::AddToPageEventController(const RefPtr<NG::FrameNode
 
 bool JsAccessibilityManager::CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage)
 {
-    if (onlyCurrentPage == false) {
-        return CheckPageEventValidInCache();
-    }
     CHECK_NULL_RETURN(node, false);
+    auto pipeline = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto containerId = pipeline->GetInstanceId();
+
+    if (onlyCurrentPage == false) {
+        auto ret = CheckPageEventValidInCache(containerId);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "CheckPageEventCached not onlyCurrentPage return %{public}d containerId %{public}d control Id :%{public}"
+            PRId64, ret, containerId, node->GetAccessibilityId());
+        return ret;
+    }
 
     auto pageId = node->GetPageId();
     if ((pageId == 0) || (pageId == -1)) {
-        return CheckPageEventValidInCache();
+        auto ret = CheckPageEventValidInCache(containerId);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "CheckPageEventCached pageId %{public}d return %{public}d containerId %{public}d control Id :%{public}"
+            PRId64, pageId, ret, containerId, node->GetAccessibilityId());
+        return ret;
     }
-    return CheckPageEventByPageInCache(pageId);
+    auto ret = CheckPageEventByPageInCache(containerId, pageId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "CheckPageEventCached pageId %{public}d return %{public}d containerId %{public}d control Id :%{public}"
+        PRId64, pageId, ret, containerId, node->GetAccessibilityId());
+    return ret;
 }
 
 
