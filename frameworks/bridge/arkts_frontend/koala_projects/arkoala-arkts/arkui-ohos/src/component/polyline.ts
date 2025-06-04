@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, UICommonShapeMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 import { Length } from "./units"
 import { Point } from "./point"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -81,23 +81,16 @@ export type PolylineInterface = (options?: PolylineOptions) => PolylineAttribute
 export interface PolylineAttribute extends CommonShapeMethod {
     points(value: Array<ShapePoint> | undefined): this
 }
-export interface UIPolylineAttribute extends UICommonShapeMethod {
-    /** @memo */
-    points(value: Array<ShapePoint> | undefined): this
-    /** @memo */
-}
 export class ArkPolylineStyle extends ArkCommonShapeMethodStyle implements PolylineAttribute {
     points_value?: Array<ShapePoint> | undefined
     public points(value: Array<ShapePoint> | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implements UIPolylineAttribute {
+export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implements PolylineAttribute {
     getPeer(): ArkPolylinePeer {
         return (this.peer as ArkPolylinePeer)
     }
-    /** @memo */
     public setPolylineOptions(options?: PolylineOptions): this {
         if (this.checkPriority("setPolylineOptions")) {
             const options_casted = options as (PolylineOptions | undefined)
@@ -106,7 +99,6 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public points(value: Array<ShapePoint> | undefined): this {
         if (this.checkPriority("points")) {
             const value_casted = value as (Array<ShapePoint> | undefined)
@@ -124,7 +116,7 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
 /** @memo */
 export function Polyline(
     /** @memo */
-    style: ((attributes: UIPolylineAttribute) => void) | undefined,
+    style: ((attributes: PolylineAttribute) => void) | undefined,
     options?: PolylineOptions,
     /** @memo */
     content_?: (() => void) | undefined,

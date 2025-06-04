@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -82,16 +82,12 @@ export interface BadgeParamWithString extends BadgeParam {
 }
 export interface BadgeAttribute extends CommonMethod {
 }
-export interface UIBadgeAttribute extends UICommonMethod {
-}
 export class ArkBadgeStyle extends ArkCommonMethodStyle implements BadgeAttribute {
 }
-/** @memo:stable */
-export class ArkBadgeComponent extends ArkCommonMethodComponent implements UIBadgeAttribute {
+export class ArkBadgeComponent extends ArkCommonMethodComponent implements BadgeAttribute {
     getPeer(): ArkBadgePeer {
         return (this.peer as ArkBadgePeer)
     }
-    /** @memo */
     public setBadgeOptions(value: BadgeParamWithNumber | BadgeParamWithString): this {
         if (this.checkPriority("setBadgeOptions")) {
             const value_type = runtimeType(value)
@@ -117,7 +113,7 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements UIBad
 /** @memo */
 export function Badge(
     /** @memo */
-    style: ((attributes: UIBadgeAttribute) => void) | undefined,
+    style: ((attributes: BadgeAttribute) => void) | undefined,
     value: BadgeParamWithNumber | BadgeParamWithString,
     /** @memo */
     content_?: (() => void) | undefined,

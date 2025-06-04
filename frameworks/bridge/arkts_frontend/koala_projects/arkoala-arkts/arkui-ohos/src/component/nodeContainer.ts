@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, TouchEvent } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, TouchEvent } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -101,17 +101,13 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
 export type NodeContainerInterface = (controller: NodeController) => NodeContainerAttribute;
 export interface NodeContainerAttribute extends CommonMethod {
 }
-export interface UINodeContainerAttribute extends UICommonMethod {
-}
 export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeContainerAttribute {
 }
-/** @memo:stable */
-export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements UINodeContainerAttribute {
+export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements NodeContainerAttribute {
     private controller: NodeController | null = null;
     getPeer(): ArkNodeContainerPeer {
         return (this.peer as ArkNodeContainerPeer)
     }
-    /** @memo */
     public setNodeContainerOptions(controller: NodeController): this {
         if (this.checkPriority("setNodeContainerOptions")) {
             if (this.controller) {
@@ -166,7 +162,7 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
 /** @memo */
 export function NodeContainer(
     /** @memo */
-    style: ((attributes: UINodeContainerAttribute) => void) | undefined,
+    style: ((attributes: NodeContainerAttribute) => void) | undefined,
     controller: NodeController,
     /** @memo */
     content_?: (() => void) | undefined,

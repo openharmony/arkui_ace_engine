@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor, MarkStyle } from "./units"
 import { CheckBoxShape, Color } from "./enums"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
@@ -337,24 +337,6 @@ export interface CheckboxAttribute extends CommonMethod {
     contentModifier(value: ContentModifier | undefined): this
     _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void
 }
-export interface UICheckboxAttribute extends UICommonMethod {
-    /** @memo */
-    select(value: boolean | undefined): this
-    /** @memo */
-    selectedColor(value: ResourceColor | undefined): this
-    /** @memo */
-    shape(value: CheckBoxShape | undefined): this
-    /** @memo */
-    unselectedColor(value: ResourceColor | undefined): this
-    /** @memo */
-    mark(value: MarkStyle | undefined): this
-    /** @memo */
-    onChange(value: OnCheckboxChangeCallback | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-    _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void
-}
 export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAttribute {
     select_value?: boolean | undefined
     selectedColor_value?: ResourceColor | undefined
@@ -388,12 +370,10 @@ export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAt
         throw new Error("Unimplmented")
     }
 }
-/** @memo:stable */
-export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UICheckboxAttribute {
+export class ArkCheckboxComponent extends ArkCommonMethodComponent implements CheckboxAttribute {
     getPeer(): ArkCheckboxPeer {
         return (this.peer as ArkCheckboxPeer)
     }
-    /** @memo */
     public setCheckboxOptions(options?: CheckboxOptions): this {
         if (this.checkPriority("setCheckboxOptions")) {
             const options_casted = options as (CheckboxOptions | undefined)
@@ -402,7 +382,6 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public select(value: boolean | undefined): this {
         if (this.checkPriority("select")) {
             const value_type = runtimeType(value)
@@ -420,7 +399,6 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public selectedColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedColor")) {
             const value_type = runtimeType(value)
@@ -438,7 +416,6 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public shape(value: CheckBoxShape | undefined): this {
         if (this.checkPriority("shape")) {
             const value_type = runtimeType(value)
@@ -451,7 +428,6 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public unselectedColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("unselectedColor")) {
             const value_type = runtimeType(value)
@@ -469,7 +445,6 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public mark(value: MarkStyle | undefined): this {
         if (this.checkPriority("mark")) {
             const value_type = runtimeType(value)
@@ -487,7 +462,6 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onChange(value: OnCheckboxChangeCallback | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_type = runtimeType(value)
@@ -505,7 +479,6 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_type = runtimeType(value)
@@ -523,7 +496,6 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_select")) {
             const callback_casted = callback as (((select: boolean | undefined) => void))
@@ -540,7 +512,7 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function Checkbox(
     /** @memo */
-    style: ((attributes: UICheckboxAttribute) => void) | undefined,
+    style: ((attributes: CheckboxAttribute) => void) | undefined,
     options?: CheckboxOptions,
     /** @memo */
     content_?: (() => void) | undefined,

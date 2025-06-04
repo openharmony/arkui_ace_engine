@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -76,13 +76,6 @@ export interface ColumnSplitAttribute extends CommonMethod {
     resizeable(value: boolean | undefined): this
     divider(value: ColumnSplitDividerStyle | undefined): this
 }
-export interface UIColumnSplitAttribute extends UICommonMethod {
-    /** @memo */
-    resizeable(value: boolean | undefined): this
-    /** @memo */
-    divider(value: ColumnSplitDividerStyle | undefined): this
-    /** @memo */
-}
 export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnSplitAttribute {
     resizeable_value?: boolean | undefined
     divider_value?: ColumnSplitDividerStyle | undefined
@@ -93,12 +86,10 @@ export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnS
         return this
         }
 }
-/** @memo:stable */
-export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements UIColumnSplitAttribute {
+export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements ColumnSplitAttribute {
     getPeer(): ArkColumnSplitPeer {
         return (this.peer as ArkColumnSplitPeer)
     }
-    /** @memo */
     public setColumnSplitOptions(): this {
         if (this.checkPriority("setColumnSplitOptions")) {
             this.getPeer()?.setColumnSplitOptionsAttribute()
@@ -106,7 +97,6 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public resizeable(value: boolean | undefined): this {
         if (this.checkPriority("resizeable")) {
             const value_casted = value as (boolean | undefined)
@@ -115,7 +105,6 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public divider(value: ColumnSplitDividerStyle | undefined): this {
         if (this.checkPriority("divider")) {
             const value_casted = value as (ColumnSplitDividerStyle | undefined)
@@ -133,7 +122,7 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
 /** @memo */
 export function ColumnSplit(
     /** @memo */
-    style: ((attributes: UIColumnSplitAttribute) => void) | undefined,
+    style: ((attributes: ColumnSplitAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

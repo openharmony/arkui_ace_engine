@@ -69,7 +69,6 @@ import { Callback_SwiperContentTransitionProxy_Void, SwiperContentTransitionProx
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
 import { Callback_TimePickerResult_Void, TimePickerResult, OnTimePickerChangeCallback } from "./../timePicker"
 import { Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageErrorCallback, ImageError } from "./../image"
-import { Callback_Void } from "./../abilityComponent"
 import { WithThemeAttribute, WithThemeInterface, WithThemeOptions } from "./../withTheme"
 import { Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./../arkui-wrapper-builder"
 import { CustomNodeBuilder } from "./../customBuilder"

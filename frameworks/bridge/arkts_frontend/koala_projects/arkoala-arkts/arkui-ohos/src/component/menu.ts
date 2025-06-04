@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Length, Font, ResourceColor, Dimension, BorderRadiuses, DividerStyleOptions, PX, VP, FP, LPX, Percentage } from "./units"
 import { Resource } from "global/resource"
 import { Color } from "./enums"
@@ -176,23 +176,6 @@ export interface MenuAttribute extends CommonMethod {
     menuItemGroupDivider(value: DividerStyleOptions | undefined): this
     subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this
 }
-export interface UIMenuAttribute extends UICommonMethod {
-    /** @memo */
-    fontSize(value: Length | undefined): this
-    /** @memo */
-    font(value: Font | undefined): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    radius(value: Dimension | BorderRadiuses | undefined): this
-    /** @memo */
-    menuItemDivider(value: DividerStyleOptions | undefined): this
-    /** @memo */
-    menuItemGroupDivider(value: DividerStyleOptions | undefined): this
-    /** @memo */
-    subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this
-    /** @memo */
-}
 export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute {
     fontSize_value?: Length | undefined
     font_value?: Font | undefined
@@ -223,12 +206,10 @@ export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute 
         return this
         }
 }
-/** @memo:stable */
-export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenuAttribute {
+export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAttribute {
     getPeer(): ArkMenuPeer {
         return (this.peer as ArkMenuPeer)
     }
-    /** @memo */
     public setMenuOptions(): this {
         if (this.checkPriority("setMenuOptions")) {
             this.getPeer()?.setMenuOptionsAttribute()
@@ -236,7 +217,6 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenu
         }
         return this
     }
-    /** @memo */
     public fontSize(value: Length | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (Length | undefined)
@@ -245,7 +225,6 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenu
         }
         return this
     }
-    /** @memo */
     public font(value: Font | undefined): this {
         if (this.checkPriority("font")) {
             const value_casted = value as (Font | undefined)
@@ -254,7 +233,6 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenu
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -263,7 +241,6 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenu
         }
         return this
     }
-    /** @memo */
     public radius(value: Dimension | BorderRadiuses | undefined): this {
         if (this.checkPriority("radius")) {
             const value_casted = value as (Dimension | BorderRadiuses | undefined)
@@ -272,7 +249,6 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenu
         }
         return this
     }
-    /** @memo */
     public menuItemDivider(value: DividerStyleOptions | undefined): this {
         if (this.checkPriority("menuItemDivider")) {
             const value_casted = value as (DividerStyleOptions | undefined)
@@ -281,7 +257,6 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenu
         }
         return this
     }
-    /** @memo */
     public menuItemGroupDivider(value: DividerStyleOptions | undefined): this {
         if (this.checkPriority("menuItemGroupDivider")) {
             const value_casted = value as (DividerStyleOptions | undefined)
@@ -290,7 +265,6 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenu
         }
         return this
     }
-    /** @memo */
     public subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
         if (this.checkPriority("subMenuExpandingMode")) {
             const value_casted = value as (SubMenuExpandingMode | undefined)
@@ -308,7 +282,7 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenu
 /** @memo */
 export function Menu(
     /** @memo */
-    style: ((attributes: UIMenuAttribute) => void) | undefined,
+    style: ((attributes: MenuAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

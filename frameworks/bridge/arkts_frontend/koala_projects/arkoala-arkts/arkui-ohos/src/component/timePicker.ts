@@ -25,14 +25,13 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { DateTimeOptions } from "./arkui-intl"
 import { CrownSensitivity } from "./enums"
 import { Callback_Date_Void } from "./calendarPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { DialogAlignment } from "./alertDialog"
 import { Offset, ResourceColor } from "./units"
-import { Callback_Void } from "./abilityComponent"
 
 export class TimePickerDialog {
     public static show(options?: TimePickerDialogOptions): undefined {
@@ -343,33 +342,6 @@ export interface TimePickerAttribute extends CommonMethod {
     enableCascade(value: boolean | undefined): this
     _onChangeEvent_selected(callback: ((parameter: Date) => void)): void
 }
-export interface UITimePickerAttribute extends UICommonMethod {
-    /** @memo */
-    useMilitaryTime(value: boolean | undefined): this
-    /** @memo */
-    loop(value: boolean | undefined): this
-    /** @memo */
-    disappearTextStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    textStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    selectedTextStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    dateTimeOptions(value: DateTimeOptions | undefined): this
-    /** @memo */
-    onChange(value: ((value: TimePickerResult) => void) | undefined | OnTimePickerChangeCallback | undefined): this
-    /** @memo */
-    onEnterSelectedArea(value: ((value: TimePickerResult) => void) | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    /** @memo */
-    enableCascade(value: boolean | undefined): this
-    /** @memo */
-    _onChangeEvent_selected(callback: ((parameter: Date) => void)): void
-    /** @memo */
-}
 export class ArkTimePickerStyle extends ArkCommonMethodStyle implements TimePickerAttribute {
     useMilitaryTime_value?: boolean | undefined
     loop_value?: boolean | undefined
@@ -448,12 +420,10 @@ export interface TimePickerDialogOptions extends TimePickerOptions {
     hoverModeArea?: HoverModeAreaType;
     enableHapticFeedback?: boolean;
 }
-/** @memo:stable */
-export class ArkTimePickerComponent extends ArkCommonMethodComponent implements UITimePickerAttribute {
+export class ArkTimePickerComponent extends ArkCommonMethodComponent implements TimePickerAttribute {
     getPeer(): ArkTimePickerPeer {
         return (this.peer as ArkTimePickerPeer)
     }
-    /** @memo */
     public setTimePickerOptions(options?: TimePickerOptions): this {
         if (this.checkPriority("setTimePickerOptions")) {
             const options_casted = options as (TimePickerOptions | undefined)
@@ -462,7 +432,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public useMilitaryTime(value: boolean | undefined): this {
         if (this.checkPriority("useMilitaryTime")) {
             const value_type = runtimeType(value)
@@ -480,7 +449,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public loop(value: boolean | undefined): this {
         if (this.checkPriority("loop")) {
             const value_type = runtimeType(value)
@@ -498,7 +466,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public disappearTextStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("disappearTextStyle")) {
             const value_type = runtimeType(value)
@@ -516,7 +483,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public textStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("textStyle")) {
             const value_type = runtimeType(value)
@@ -534,7 +500,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public selectedTextStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("selectedTextStyle")) {
             const value_type = runtimeType(value)
@@ -552,7 +517,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public dateTimeOptions(value: DateTimeOptions | undefined): this {
         if (this.checkPriority("dateTimeOptions")) {
             const value_type = runtimeType(value)
@@ -570,7 +534,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((value: TimePickerResult) => void) | undefined | OnTimePickerChangeCallback | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_type = runtimeType(value)
@@ -588,7 +551,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onEnterSelectedArea(value: ((value: TimePickerResult) => void) | undefined): this {
         if (this.checkPriority("onEnterSelectedArea")) {
             const value_casted = value as (((value: TimePickerResult) => void) | undefined)
@@ -597,7 +559,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_type = runtimeType(value)
@@ -615,7 +576,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         if (this.checkPriority("digitalCrownSensitivity")) {
             const value_casted = value as (CrownSensitivity | undefined)
@@ -624,7 +584,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableCascade(value: boolean | undefined): this {
         if (this.checkPriority("enableCascade")) {
             const value_casted = value as (boolean | undefined)
@@ -633,7 +592,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_selected(callback: ((parameter: Date) => void)): void {
         if (this.checkPriority("_onChangeEvent_selected")) {
             const callback_casted = callback as (((parameter: Date) => void))
@@ -651,7 +609,7 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
 /** @memo */
 export function TimePicker(
     /** @memo */
-    style: ((attributes: UITimePickerAttribute) => void) | undefined,
+    style: ((attributes: TimePickerAttribute) => void) | undefined,
     options?: TimePickerOptions,
     /** @memo */
     content_?: (() => void) | undefined,

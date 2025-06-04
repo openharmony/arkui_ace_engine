@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TranslateOptions, ArkCommonMethodPeer, CommonMethod, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, DividerStyle } from "./common"
+import { TranslateOptions, ArkCommonMethodPeer, CommonMethod, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, DividerStyle } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -704,67 +704,6 @@ export interface TabsAttribute extends CommonMethod {
     cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this
     _onChangeEvent_index(callback: ((index: number) => void)): void
 }
-export interface UITabsAttribute extends UICommonMethod {
-    /** @memo */
-    vertical(value: boolean | undefined): this
-    /** @memo */
-    barPosition(value: BarPosition | undefined): this
-    /** @memo */
-    scrollable(value: boolean | undefined): this
-    /** @memo */
-    barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this
-    /** @memo */
-    barWidth(value: Length | undefined): this
-    /** @memo */
-    barHeight(value: Length | undefined): this
-    /** @memo */
-    animationDuration(value: number | undefined): this
-    /** @memo */
-    animationMode(value: AnimationMode | undefined): this
-    /** @memo */
-    edgeEffect(value: EdgeEffect | undefined): this
-    /** @memo */
-    onChange(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    onSelected(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    onTabBarClick(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    onUnselected(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this
-    /** @memo */
-    onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this
-    /** @memo */
-    onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this
-    /** @memo */
-    fadingEdge(value: boolean | undefined): this
-    /** @memo */
-    divider(value: DividerStyle | null | undefined): this
-    /** @memo */
-    barOverlap(value: boolean | undefined): this
-    /** @memo */
-    barBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    barGridAlign(value: BarGridColumnOptions | undefined): this
-    /** @memo */
-    customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this
-    /** @memo */
-    barBackgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions): this
-    /** @memo */
-    barBackgroundEffect(value: BackgroundEffectOptions | undefined): this
-    /** @memo */
-    pageFlipMode(value: PageFlipMode | undefined): this
-    /** @memo */
-    onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this
-    /** @memo */
-    barModeScrollable(options: ScrollableBarModeOptions | undefined): this
-    /** @memo */
-    cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this
-    /** @memo */
-    _onChangeEvent_index(callback: ((index: number) => void)): void
-    /** @memo */
-}
 export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute {
     vertical_value?: boolean | undefined
     barPosition_value?: BarPosition | undefined
@@ -885,12 +824,10 @@ export interface TabContentAnimatedTransition {
     timeout?: number;
     transition: ((parameter: TabContentTransitionProxy) => void);
 }
-/** @memo:stable */
-export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabsAttribute {
+export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAttribute {
     getPeer(): ArkTabsPeer {
         return (this.peer as ArkTabsPeer)
     }
-    /** @memo */
     public setTabsOptions(options?: TabsOptions): this {
         if (this.checkPriority("setTabsOptions")) {
             const options_casted = options as (TabsOptions | undefined)
@@ -899,7 +836,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public vertical(value: boolean | undefined): this {
         if (this.checkPriority("vertical")) {
             const value_casted = value as (boolean | undefined)
@@ -908,7 +844,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barPosition(value: BarPosition | undefined): this {
         if (this.checkPriority("barPosition")) {
             const value_casted = value as (BarPosition | undefined)
@@ -917,7 +852,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public scrollable(value: boolean | undefined): this {
         if (this.checkPriority("scrollable")) {
             const value_casted = value as (boolean | undefined)
@@ -926,7 +860,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
         if (this.checkPriority("barMode")) {
             TabsOpsHandWritten.hookTabsAttributeBarModeImpl(this.getPeer().peer.ptr,
@@ -934,7 +867,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barWidth(value: Length | undefined): this {
         if (this.checkPriority("barWidth")) {
             const value_casted = value as (Length | undefined)
@@ -943,7 +875,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barHeight(value: Length | undefined): this {
         if (this.checkPriority("barHeight")) {
             const value_casted = value as (Length | undefined)
@@ -952,7 +883,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public animationDuration(value: number | undefined): this {
         if (this.checkPriority("animationDuration")) {
             const value_casted = value as (number | undefined)
@@ -961,7 +891,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public animationMode(value: AnimationMode | undefined): this {
         if (this.checkPriority("animationMode")) {
             const value_casted = value as (AnimationMode | undefined)
@@ -970,7 +899,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public edgeEffect(value: EdgeEffect | undefined): this {
         if (this.checkPriority("edgeEffect")) {
             const value_casted = value as (EdgeEffect | undefined)
@@ -979,7 +907,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -988,7 +915,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public onSelected(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onSelected")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -997,7 +923,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public onTabBarClick(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onTabBarClick")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -1006,7 +931,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public onUnselected(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onUnselected")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -1015,7 +939,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
         if (this.checkPriority("onAnimationStart")) {
             const value_casted = value as (OnTabsAnimationStartCallback | undefined)
@@ -1024,7 +947,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this {
         if (this.checkPriority("onAnimationEnd")) {
             const value_casted = value as (OnTabsAnimationEndCallback | undefined)
@@ -1033,7 +955,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this {
         if (this.checkPriority("onGestureSwipe")) {
             const value_casted = value as (OnTabsGestureSwipeCallback | undefined)
@@ -1042,7 +963,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public fadingEdge(value: boolean | undefined): this {
         if (this.checkPriority("fadingEdge")) {
             const value_casted = value as (boolean | undefined)
@@ -1051,7 +971,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public divider(value: DividerStyle | null | undefined): this {
         if (this.checkPriority("divider")) {
             const value_casted = value as (DividerStyle | undefined)
@@ -1060,7 +979,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barOverlap(value: boolean | undefined): this {
         if (this.checkPriority("barOverlap")) {
             const value_casted = value as (boolean | undefined)
@@ -1069,7 +987,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("barBackgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1078,7 +995,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barGridAlign(value: BarGridColumnOptions | undefined): this {
         if (this.checkPriority("barGridAlign")) {
             const value_casted = value as (BarGridColumnOptions | undefined)
@@ -1087,7 +1003,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this {
         if (this.checkPriority("customContentTransition")) {
             const value_casted = value as (TabsCustomContentTransitionCallback | undefined)
@@ -1096,7 +1011,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barBackgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions): this {
         if (this.checkPriority("barBackgroundBlurStyle")) {
             TabsOpsHandWritten.hookTabsAttributeBarBackgroundBlurStyleImpl(this.getPeer().peer.ptr,
@@ -1104,7 +1018,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
         if (this.checkPriority("barBackgroundEffect")) {
             const value_casted = value as (BackgroundEffectOptions | undefined)
@@ -1113,7 +1026,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public pageFlipMode(value: PageFlipMode | undefined): this {
         if (this.checkPriority("pageFlipMode")) {
             const value_casted = value as (PageFlipMode | undefined)
@@ -1122,7 +1034,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
         if (this.checkPriority("onContentWillChange")) {
             const value_casted = value as (OnTabsContentWillChangeCallback | undefined)
@@ -1131,7 +1042,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public barModeScrollable(options: ScrollableBarModeOptions | undefined): this {
         if (this.checkPriority("barModeScrollable")) {
             const options_casted = options as (ScrollableBarModeOptions | undefined)
@@ -1140,7 +1050,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
         if (this.checkPriority("cachedMaxCount")) {
             const count_casted = count as (number | undefined)
@@ -1150,7 +1059,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_index(callback: ((index: number) => void)): void {
         if (this.checkPriority("_onChangeEvent_index")) {
             const callback_casted = callback as (((index: number) => void))
@@ -1168,7 +1076,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
 /** @memo */
 export function Tabs(
     /** @memo */
-    style: ((attributes: UITabsAttribute) => void) | undefined,
+    style: ((attributes: TabsAttribute) => void) | undefined,
     options?: TabsOptions,
     /** @memo */
     content_?: (() => void) | undefined,

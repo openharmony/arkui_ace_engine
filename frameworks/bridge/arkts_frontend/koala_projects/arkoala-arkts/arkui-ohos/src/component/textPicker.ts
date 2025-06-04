@@ -25,8 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
-import { Callback_Void } from "./abilityComponent"
+import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, Offset } from "./units"
 import { CrownSensitivity, TextOverflow } from "./enums"
 import { Resource } from "global/resource"
@@ -519,47 +518,6 @@ export interface TextPickerAttribute extends CommonMethod {
     _onChangeEvent_selected(callback: ((selected: number | Array<number>) => void)): void
     _onChangeEvent_value(callback: ((value: string | Array<string>) => void)): void
 }
-export interface UITextPickerAttribute extends UICommonMethod {
-    /** @memo */
-    defaultPickerItemHeight(value: number | string | undefined): this
-    /** @memo */
-    canLoop(value: boolean | undefined): this
-    /** @memo */
-    disappearTextStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    textStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    selectedTextStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    disableTextStyleAnimation(value: boolean | undefined): this
-    /** @memo */
-    defaultTextStyle(value: TextPickerTextStyle | undefined): this
-    /** @memo */
-    onAccept(value: ((value: string,index: number) => void) | undefined): this
-    /** @memo */
-    onCancel(value: (() => void) | undefined): this
-    /** @memo */
-    onChange(value: ((value: string | Array<string>,index: number | Array<number>) => void) | undefined | OnTextPickerChangeCallback | undefined): this
-    /** @memo */
-    onScrollStop(value: TextPickerScrollStopCallback | undefined): this
-    /** @memo */
-    onEnterSelectedArea(value: TextPickerEnterSelectedAreaCallback | undefined): this
-    /** @memo */
-    selectedIndex(value: number | Array<number> | undefined): this
-    /** @memo */
-    divider(value: DividerOptions | undefined): this
-    /** @memo */
-    gradientHeight(value: Dimension | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    /** @memo */
-    _onChangeEvent_selected(callback: ((selected: number | Array<number>) => void)): void
-    /** @memo */
-    _onChangeEvent_value(callback: ((value: string | Array<string>) => void)): void
-    /** @memo */
-}
 export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPickerAttribute {
     defaultPickerItemHeight_value?: number | string | undefined
     canLoop_value?: boolean | undefined
@@ -672,12 +630,10 @@ export interface TextPickerDialogOptions extends TextPickerOptions {
     hoverModeArea?: HoverModeAreaType;
     enableHapticFeedback?: boolean;
 }
-/** @memo:stable */
-export class ArkTextPickerComponent extends ArkCommonMethodComponent implements UITextPickerAttribute {
+export class ArkTextPickerComponent extends ArkCommonMethodComponent implements TextPickerAttribute {
     getPeer(): ArkTextPickerPeer {
         return (this.peer as ArkTextPickerPeer)
     }
-    /** @memo */
     public setTextPickerOptions(options?: TextPickerOptions): this {
         if (this.checkPriority("setTextPickerOptions")) {
             const options_casted = options as (TextPickerOptions | undefined)
@@ -686,7 +642,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public defaultPickerItemHeight(value: number | string | undefined): this {
         if (this.checkPriority("defaultPickerItemHeight")) {
             const value_type = runtimeType(value)
@@ -704,7 +659,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public canLoop(value: boolean | undefined): this {
         if (this.checkPriority("canLoop")) {
             const value_type = runtimeType(value)
@@ -722,7 +676,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public disappearTextStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("disappearTextStyle")) {
             const value_type = runtimeType(value)
@@ -740,7 +693,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public textStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("textStyle")) {
             const value_type = runtimeType(value)
@@ -758,7 +710,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public selectedTextStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("selectedTextStyle")) {
             const value_type = runtimeType(value)
@@ -776,7 +727,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public disableTextStyleAnimation(value: boolean | undefined): this {
         if (this.checkPriority("disableTextStyleAnimation")) {
             const value_casted = value as (boolean | undefined)
@@ -785,7 +735,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public defaultTextStyle(value: TextPickerTextStyle | undefined): this {
         if (this.checkPriority("defaultTextStyle")) {
             const value_casted = value as (TextPickerTextStyle | undefined)
@@ -794,7 +743,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onAccept(value: ((value: string,index: number) => void) | undefined): this {
         if (this.checkPriority("onAccept")) {
             const value_casted = value as (((value: string,index: number) => void) | undefined)
@@ -803,7 +751,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onCancel(value: (() => void) | undefined): this {
         if (this.checkPriority("onCancel")) {
             const value_casted = value as ((() => void) | undefined)
@@ -812,7 +759,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((value: string | Array<string>,index: number | Array<number>) => void) | undefined | OnTextPickerChangeCallback | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_type = runtimeType(value)
@@ -830,7 +776,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onScrollStop(value: TextPickerScrollStopCallback | undefined): this {
         if (this.checkPriority("onScrollStop")) {
             const value_type = runtimeType(value)
@@ -848,7 +793,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onEnterSelectedArea(value: TextPickerEnterSelectedAreaCallback | undefined): this {
         if (this.checkPriority("onEnterSelectedArea")) {
             const value_casted = value as (TextPickerEnterSelectedAreaCallback | undefined)
@@ -857,7 +801,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public selectedIndex(value: number | Array<number> | undefined): this {
         if (this.checkPriority("selectedIndex")) {
             const value_type = runtimeType(value)
@@ -875,7 +818,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public divider(value: DividerOptions | undefined): this {
         if (this.checkPriority("divider")) {
             const value_type = runtimeType(value)
@@ -893,7 +835,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public gradientHeight(value: Dimension | undefined): this {
         if (this.checkPriority("gradientHeight")) {
             const value_type = runtimeType(value)
@@ -911,7 +852,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
@@ -920,7 +860,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         if (this.checkPriority("digitalCrownSensitivity")) {
             const value_casted = value as (CrownSensitivity | undefined)
@@ -929,7 +868,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_selected(callback: ((selected: number | Array<number>) => void)): void {
         if (this.checkPriority("_onChangeEvent_selected")) {
             const callback_casted = callback as (((selected: number | Array<number>) => void))
@@ -938,7 +876,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return
     }
-    /** @memo */
     public _onChangeEvent_value(callback: ((value: string | Array<string>) => void)): void {
         if (this.checkPriority("_onChangeEvent_value")) {
             const callback_casted = callback as (((value: string | Array<string>) => void))
@@ -956,7 +893,7 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
 /** @memo */
 export function TextPicker(
     /** @memo */
-    style: ((attributes: UITextPickerAttribute) => void) | undefined,
+    style: ((attributes: TextPickerAttribute) => void) | undefined,
     options?: TextPickerOptions,
     /** @memo */
     content_?: (() => void) | undefined,

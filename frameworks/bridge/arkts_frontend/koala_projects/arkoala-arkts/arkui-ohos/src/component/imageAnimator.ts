@@ -22,9 +22,8 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AnimationStatus, FillMode } from "./enums"
-import { Callback_Void } from "./abilityComponent"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -243,37 +242,6 @@ export interface ImageAnimatorAttribute extends CommonMethod {
     onCancel(value: (() => void) | undefined): this
     onFinish(value: (() => void) | undefined): this
 }
-export interface UIImageAnimatorAttribute extends UICommonMethod {
-    /** @memo */
-    images(value: Array<ImageFrameInfo> | undefined): this
-    /** @memo */
-    state(value: AnimationStatus | undefined): this
-    /** @memo */
-    duration(value: number | undefined): this
-    /** @memo */
-    reverse(value: boolean | undefined): this
-    /** @memo */
-    fixedSize(value: boolean | undefined): this
-    /** @memo */
-    preDecode(value: number | undefined): this
-    /** @memo */
-    fillMode(value: FillMode | undefined): this
-    /** @memo */
-    iterations(value: number | undefined): this
-    /** @memo */
-    monitorInvisibleArea(value: boolean | undefined): this
-    /** @memo */
-    onStart(value: (() => void) | undefined): this
-    /** @memo */
-    onPause(value: (() => void) | undefined): this
-    /** @memo */
-    onRepeat(value: (() => void) | undefined): this
-    /** @memo */
-    onCancel(value: (() => void) | undefined): this
-    /** @memo */
-    onFinish(value: (() => void) | undefined): this
-    /** @memo */
-}
 export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements ImageAnimatorAttribute {
     images_value?: Array<ImageFrameInfo> | undefined
     state_value?: AnimationStatus | undefined
@@ -332,12 +300,10 @@ export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements Image
         return this
         }
 }
-/** @memo:stable */
-export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implements UIImageAnimatorAttribute {
+export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implements ImageAnimatorAttribute {
     getPeer(): ArkImageAnimatorPeer {
         return (this.peer as ArkImageAnimatorPeer)
     }
-    /** @memo */
     public setImageAnimatorOptions(): this {
         if (this.checkPriority("setImageAnimatorOptions")) {
             this.getPeer()?.setImageAnimatorOptionsAttribute()
@@ -345,7 +311,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public images(value: Array<ImageFrameInfo> | undefined): this {
         if (this.checkPriority("images")) {
             const value_casted = value as (Array<ImageFrameInfo> | undefined)
@@ -354,7 +319,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public state(value: AnimationStatus | undefined): this {
         if (this.checkPriority("state")) {
             const value_casted = value as (AnimationStatus | undefined)
@@ -363,7 +327,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public duration(value: number | undefined): this {
         if (this.checkPriority("duration")) {
             const value_casted = value as (number | undefined)
@@ -372,7 +335,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public reverse(value: boolean | undefined): this {
         if (this.checkPriority("reverse")) {
             const value_casted = value as (boolean | undefined)
@@ -381,7 +343,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public fixedSize(value: boolean | undefined): this {
         if (this.checkPriority("fixedSize")) {
             const value_casted = value as (boolean | undefined)
@@ -390,7 +351,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public preDecode(value: number | undefined): this {
         if (this.checkPriority("preDecode")) {
             const value_casted = value as (number | undefined)
@@ -399,7 +359,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public fillMode(value: FillMode | undefined): this {
         if (this.checkPriority("fillMode")) {
             const value_casted = value as (FillMode | undefined)
@@ -408,7 +367,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public iterations(value: number | undefined): this {
         if (this.checkPriority("iterations")) {
             const value_casted = value as (number | undefined)
@@ -417,7 +375,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public monitorInvisibleArea(value: boolean | undefined): this {
         if (this.checkPriority("monitorInvisibleArea")) {
             const value_casted = value as (boolean | undefined)
@@ -426,7 +383,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -435,7 +391,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onPause(value: (() => void) | undefined): this {
         if (this.checkPriority("onPause")) {
             const value_casted = value as ((() => void) | undefined)
@@ -444,7 +399,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onRepeat(value: (() => void) | undefined): this {
         if (this.checkPriority("onRepeat")) {
             const value_casted = value as ((() => void) | undefined)
@@ -453,7 +407,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onCancel(value: (() => void) | undefined): this {
         if (this.checkPriority("onCancel")) {
             const value_casted = value as ((() => void) | undefined)
@@ -462,7 +415,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onFinish(value: (() => void) | undefined): this {
         if (this.checkPriority("onFinish")) {
             const value_casted = value as ((() => void) | undefined)
@@ -480,7 +432,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
 /** @memo */
 export function ImageAnimator(
     /** @memo */
-    style: ((attributes: UIImageAnimatorAttribute) => void) | undefined,
+    style: ((attributes: ImageAnimatorAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

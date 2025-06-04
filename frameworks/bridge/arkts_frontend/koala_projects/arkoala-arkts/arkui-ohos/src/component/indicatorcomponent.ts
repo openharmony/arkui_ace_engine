@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { DotIndicator, DigitIndicator } from "./swiper"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -202,21 +202,6 @@ export interface IndicatorComponentAttribute extends CommonMethod {
     vertical(value: boolean | undefined): this
     onChange(value: ((index: number) => void) | undefined): this
 }
-export interface UIIndicatorComponentAttribute extends UICommonMethod {
-    /** @memo */
-    initialIndex(value: number | undefined): this
-    /** @memo */
-    count(value: number | undefined): this
-    /** @memo */
-    style(value: DotIndicator | DigitIndicator | undefined): this
-    /** @memo */
-    loop(value: boolean | undefined): this
-    /** @memo */
-    vertical(value: boolean | undefined): this
-    /** @memo */
-    onChange(value: ((index: number) => void) | undefined): this
-    /** @memo */
-}
 export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements IndicatorComponentAttribute {
     initialIndex_value?: number | undefined
     count_value?: number | undefined
@@ -243,12 +228,10 @@ export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements 
         return this
         }
 }
-/** @memo:stable */
-export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent implements UIIndicatorComponentAttribute {
+export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent implements IndicatorComponentAttribute {
     getPeer(): ArkIndicatorComponentPeer {
         return (this.peer as ArkIndicatorComponentPeer)
     }
-    /** @memo */
     public setIndicatorComponentOptions(controller?: IndicatorComponentController): this {
         if (this.checkPriority("setIndicatorComponentOptions")) {
             const controller_casted = controller as (IndicatorComponentController | undefined)
@@ -257,7 +240,6 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         }
         return this
     }
-    /** @memo */
     public initialIndex(value: number | undefined): this {
         if (this.checkPriority("initialIndex")) {
             const value_casted = value as (number | undefined)
@@ -266,7 +248,6 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         }
         return this
     }
-    /** @memo */
     public count(value: number | undefined): this {
         if (this.checkPriority("count")) {
             const value_casted = value as (number | undefined)
@@ -275,7 +256,6 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         }
         return this
     }
-    /** @memo */
     public style(value: DotIndicator | DigitIndicator | undefined): this {
         if (this.checkPriority("style")) {
             const value_casted = value as (DotIndicator | DigitIndicator | undefined)
@@ -284,7 +264,6 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         }
         return this
     }
-    /** @memo */
     public loop(value: boolean | undefined): this {
         if (this.checkPriority("loop")) {
             const value_casted = value as (boolean | undefined)
@@ -293,7 +272,6 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         }
         return this
     }
-    /** @memo */
     public vertical(value: boolean | undefined): this {
         if (this.checkPriority("vertical")) {
             const value_casted = value as (boolean | undefined)
@@ -302,7 +280,6 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -320,7 +297,7 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
 /** @memo */
 export function IndicatorComponent(
     /** @memo */
-    style: ((attributes: UIIndicatorComponentAttribute) => void) | undefined,
+    style: ((attributes: IndicatorComponentAttribute) => void) | undefined,
     controller?: IndicatorComponentController,
     /** @memo */
     content_?: (() => void) | undefined,

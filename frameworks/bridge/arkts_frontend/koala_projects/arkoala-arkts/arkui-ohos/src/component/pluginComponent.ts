@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -88,13 +88,6 @@ export interface PluginComponentAttribute extends CommonMethod {
     onComplete(value: VoidCallback | undefined): this
     onError(value: PluginErrorCallback | undefined): this
 }
-export interface UIPluginComponentAttribute extends UICommonMethod {
-    /** @memo */
-    onComplete(value: VoidCallback | undefined): this
-    /** @memo */
-    onError(value: PluginErrorCallback | undefined): this
-    /** @memo */
-}
 export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements PluginComponentAttribute {
     onComplete_value?: VoidCallback | undefined
     onError_value?: PluginErrorCallback | undefined
@@ -105,12 +98,10 @@ export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements Plu
         return this
         }
 }
-/** @memo:stable */
-export class ArkPluginComponentComponent extends ArkCommonMethodComponent implements UIPluginComponentAttribute {
+export class ArkPluginComponentComponent extends ArkCommonMethodComponent implements PluginComponentAttribute {
     getPeer(): ArkPluginComponentPeer {
         return (this.peer as ArkPluginComponentPeer)
     }
-    /** @memo */
     public setPluginComponentOptions(options: PluginComponentOptions): this {
         if (this.checkPriority("setPluginComponentOptions")) {
             const options_casted = options as (PluginComponentOptions)
@@ -119,7 +110,6 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
     public onComplete(value: VoidCallback | undefined): this {
         if (this.checkPriority("onComplete")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -128,7 +118,6 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
     public onError(value: PluginErrorCallback | undefined): this {
         if (this.checkPriority("onError")) {
             const value_casted = value as (PluginErrorCallback | undefined)
@@ -146,7 +135,7 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
 /** @memo */
 export function PluginComponent(
     /** @memo */
-    style: ((attributes: UIPluginComponentAttribute) => void) | undefined,
+    style: ((attributes: PluginComponentAttribute) => void) | undefined,
     options: PluginComponentOptions,
     /** @memo */
     content_?: (() => void) | undefined,

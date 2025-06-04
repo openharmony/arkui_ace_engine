@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor, Length, ResourceStr } from "./units"
 import { FontStyle, FontWeight, Color } from "./enums"
 import { TextTimerAttribute_onTimer_event_type } from "./type-replacements"
@@ -299,27 +299,6 @@ export interface TextTimerAttribute extends CommonMethod {
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
     contentModifier(value: ContentModifier | undefined): this
 }
-export interface UITextTimerAttribute extends UICommonMethod {
-    /** @memo */
-    format(value: string | undefined): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    fontSize(value: Length | undefined): this
-    /** @memo */
-    fontStyle(value: FontStyle | undefined): this
-    /** @memo */
-    fontWeight(value: number | FontWeight | string | undefined): this
-    /** @memo */
-    fontFamily(value: ResourceStr | undefined): this
-    /** @memo */
-    onTimer(value: ((utc: int64,elapsedTime: int64) => void) | undefined): this
-    /** @memo */
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-}
 export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimerAttribute {
     format_value?: string | undefined
     fontColor_value?: ResourceColor | undefined
@@ -358,12 +337,10 @@ export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimer
         return this
         }
 }
-/** @memo:stable */
-export class ArkTextTimerComponent extends ArkCommonMethodComponent implements UITextTimerAttribute {
+export class ArkTextTimerComponent extends ArkCommonMethodComponent implements TextTimerAttribute {
     getPeer(): ArkTextTimerPeer {
         return (this.peer as ArkTextTimerPeer)
     }
-    /** @memo */
     public setTextTimerOptions(options?: TextTimerOptions): this {
         if (this.checkPriority("setTextTimerOptions")) {
             const options_casted = options as (TextTimerOptions | undefined)
@@ -372,7 +349,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public format(value: string | undefined): this {
         if (this.checkPriority("format")) {
             const value_casted = value as (string | undefined)
@@ -381,7 +357,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -390,7 +365,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontSize(value: Length | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (Length | undefined)
@@ -399,7 +373,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontStyle(value: FontStyle | undefined): this {
         if (this.checkPriority("fontStyle")) {
             const value_casted = value as (FontStyle | undefined)
@@ -408,7 +381,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
             const value_casted = value as (number | FontWeight | string | undefined)
@@ -417,7 +389,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public fontFamily(value: ResourceStr | undefined): this {
         if (this.checkPriority("fontFamily")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -426,7 +397,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public onTimer(value: ((utc: int64,elapsedTime: int64) => void) | undefined): this {
         if (this.checkPriority("onTimer")) {
             const value_casted = value as (((utc: int64,elapsedTime: int64) => void) | undefined)
@@ -435,7 +405,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         if (this.checkPriority("textShadow")) {
             const value_casted = value as (ShadowOptions | Array<ShadowOptions> | undefined)
@@ -444,7 +413,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_casted = value as (ContentModifier | undefined)
@@ -462,7 +430,7 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
 /** @memo */
 export function TextTimer(
     /** @memo */
-    style: ((attributes: UITextTimerAttribute) => void) | undefined,
+    style: ((attributes: TextTimerAttribute) => void) | undefined,
     options?: TextTimerOptions,
     /** @memo */
     content_?: (() => void) | undefined,

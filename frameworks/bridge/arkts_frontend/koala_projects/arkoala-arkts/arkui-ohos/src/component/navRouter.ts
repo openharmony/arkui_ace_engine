@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -86,13 +86,6 @@ export interface NavRouterAttribute extends CommonMethod {
     onStateChange(value: ((isVisible: boolean) => void) | undefined): this
     mode(value: NavRouteMode | undefined): this
 }
-export interface UINavRouterAttribute extends UICommonMethod {
-    /** @memo */
-    onStateChange(value: ((isVisible: boolean) => void) | undefined): this
-    /** @memo */
-    mode(value: NavRouteMode | undefined): this
-    /** @memo */
-}
 export class ArkNavRouterStyle extends ArkCommonMethodStyle implements NavRouterAttribute {
     onStateChange_value?: ((isVisible: boolean) => void) | undefined
     mode_value?: NavRouteMode | undefined
@@ -103,12 +96,10 @@ export class ArkNavRouterStyle extends ArkCommonMethodStyle implements NavRouter
         return this
         }
 }
-/** @memo:stable */
-export class ArkNavRouterComponent extends ArkCommonMethodComponent implements UINavRouterAttribute {
+export class ArkNavRouterComponent extends ArkCommonMethodComponent implements NavRouterAttribute {
     getPeer(): ArkNavRouterPeer {
         return (this.peer as ArkNavRouterPeer)
     }
-    /** @memo */
     public setNavRouterOptions(value?: RouteInfo): this {
         if (this.checkPriority("setNavRouterOptions")) {
             const value_type = runtimeType(value)
@@ -117,7 +108,6 @@ export class ArkNavRouterComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public onStateChange(value: ((isVisible: boolean) => void) | undefined): this {
         if (this.checkPriority("onStateChange")) {
             const value_casted = value as (((isVisible: boolean) => void) | undefined)
@@ -126,7 +116,6 @@ export class ArkNavRouterComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public mode(value: NavRouteMode | undefined): this {
         if (this.checkPriority("mode")) {
             const value_casted = value as (NavRouteMode | undefined)
@@ -144,7 +133,7 @@ export class ArkNavRouterComponent extends ArkCommonMethodComponent implements U
 /** @memo */
 export function NavRouter(
     /** @memo */
-    style: ((attributes: UINavRouterAttribute) => void) | undefined,
+    style: ((attributes: NavRouterAttribute) => void) | undefined,
     value?: RouteInfo,
     /** @memo */
     content_?: (() => void) | undefined,

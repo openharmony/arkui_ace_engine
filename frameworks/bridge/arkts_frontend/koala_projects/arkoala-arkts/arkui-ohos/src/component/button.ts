@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor, Length, ResourceStr } from "./units"
 import { FontWeight, FontStyle, Color } from "./enums"
 import { Resource } from "global/resource"
@@ -365,36 +365,6 @@ export interface ButtonAttribute extends CommonMethod {
     minFontScale(value: number | Resource | undefined): this
     maxFontScale(value: number | Resource | undefined): this
 }
-export interface UIButtonAttribute extends UICommonMethod {
-    /** @memo */
-    type(value: ButtonType | undefined): this
-    /** @memo */
-    stateEffect(value: boolean | undefined): this
-    /** @memo */
-    buttonStyle(value: ButtonStyleMode | undefined): this
-    /** @memo */
-    controlSize(value: ControlSize | undefined): this
-    /** @memo */
-    role(value: ButtonRole | undefined): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    fontSize(value: Length | undefined): this
-    /** @memo */
-    fontWeight(value: number | FontWeight | string | undefined): this
-    /** @memo */
-    fontStyle(value: FontStyle | undefined): this
-    /** @memo */
-    fontFamily(value: string | Resource | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-    labelStyle(value: LabelStyle | undefined): this
-    /** @memo */
-    minFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    maxFontScale(value: number | Resource | undefined): this
-}
 export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttribute {
     type_value?: ButtonType | undefined
     stateEffect_value?: boolean | undefined
@@ -453,12 +423,10 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
         return this
     }
 }
-/** @memo:stable */
-export class ArkButtonComponent extends ArkCommonMethodComponent implements UIButtonAttribute {
+export class ArkButtonComponent extends ArkCommonMethodComponent implements ButtonAttribute {
     getPeer(): ArkButtonPeer {
         return (this.peer as ArkButtonPeer)
     }
-    /** @memo */
     public setButtonOptions(label?: ButtonOptions | ResourceStr, options?: ButtonOptions): this {
         if (this.checkPriority("setButtonOptions")) {
             const label_type = runtimeType(label)
@@ -482,7 +450,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public type(value: ButtonType | undefined): this {
         if (this.checkPriority("type")) {
             const value_casted = value as (ButtonType | undefined)
@@ -491,7 +458,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public stateEffect(value: boolean | undefined): this {
         if (this.checkPriority("stateEffect")) {
             const value_casted = value as (boolean | undefined)
@@ -500,7 +466,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public buttonStyle(value: ButtonStyleMode | undefined): this {
         if (this.checkPriority("buttonStyle")) {
             const value_casted = value as (ButtonStyleMode | undefined)
@@ -509,7 +474,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public controlSize(value: ControlSize | undefined): this {
         if (this.checkPriority("controlSize")) {
             const value_casted = value as (ControlSize | undefined)
@@ -518,7 +482,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public role(value: ButtonRole | undefined): this {
         if (this.checkPriority("role")) {
             const value_casted = value as (ButtonRole | undefined)
@@ -527,7 +490,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -536,7 +498,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public fontSize(value: Length | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (Length | undefined)
@@ -545,7 +506,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
             const value_casted = value as (number | FontWeight | string | undefined)
@@ -554,7 +514,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public fontStyle(value: FontStyle | undefined): this {
         if (this.checkPriority("fontStyle")) {
             const value_casted = value as (FontStyle | undefined)
@@ -563,7 +522,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public fontFamily(value: string | Resource | undefined): this {
         if (this.checkPriority("fontFamily")) {
             const value_casted = value as (string | Resource | undefined)
@@ -572,7 +530,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_casted = value as (ContentModifier | undefined)
@@ -581,7 +538,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public labelStyle(value: LabelStyle | undefined): this {
         if (this.checkPriority("labelStyle")) {
             const value_casted = value as (LabelStyle | undefined)
@@ -590,7 +546,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public minFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -599,7 +554,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
         }
         return this
     }
-    /** @memo */
     public maxFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -616,7 +570,7 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
 /** @memo */
 export function Button(
     /** @memo */
-    style: ((attributes: UIButtonAttribute) => void) | undefined,
+    style: ((attributes: ButtonAttribute) => void) | undefined,
     label?: ButtonOptions | ResourceStr, options?: ButtonOptions,
     /** @memo */
     content_?: (() => void) | undefined,

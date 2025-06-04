@@ -25,11 +25,10 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CustomBuilder, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod, OnWillScrollCallback, OnScrollCallback } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CustomBuilder, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, OnWillScrollCallback, OnScrollCallback } from "./common"
 import { ConstraintSizeOptions, Length, Dimension, Padding } from "./units"
 import { FlexDirection } from "./enums"
 import { Resource } from "global/resource"
-import { Callback_Void } from "./abilityComponent"
 import { Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Callback_Number_Number_Void } from "./grid"
 import { ScrollState } from "./list"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -419,41 +418,6 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     onWillScroll(value: OnWillScrollCallback | undefined): this
     onDidScroll(value: OnScrollCallback | undefined): this
 }
-export interface UIWaterFlowAttribute extends UIScrollableCommonMethod {
-    /** @memo */
-    columnsTemplate(value: string | undefined): this
-    /** @memo */
-    itemConstraintSize(value: ConstraintSizeOptions | undefined): this
-    /** @memo */
-    rowsTemplate(value: string | undefined): this
-    /** @memo */
-    columnsGap(value: Length | undefined): this
-    /** @memo */
-    rowsGap(value: Length | undefined): this
-    /** @memo */
-    layoutDirection(value: FlexDirection | undefined): this
-    /** @memo */
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    /** @memo */
-    enableScrollInteraction(value: boolean | undefined): this
-    /** @memo */
-    friction(value: number | Resource | undefined): this
-    /** @memo */
-    cachedCount(count: number | undefined, show?: boolean): this
-    /** @memo */
-    onReachStart(value: (() => void) | undefined): this
-    /** @memo */
-    onReachEnd(value: (() => void) | undefined): this
-    /** @memo */
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
-    /** @memo */
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onWillScroll(value: OnWillScrollCallback | undefined): this
-    /** @memo */
-    onDidScroll(value: OnScrollCallback | undefined): this
-    /** @memo */
-}
 export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements WaterFlowAttribute {
     columnsTemplate_value?: string | undefined
     itemConstraintSize_value?: ConstraintSizeOptions | undefined
@@ -520,12 +484,10 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
         return this
     }
 }
-/** @memo:stable */
-export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent implements UIWaterFlowAttribute {
+export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent implements WaterFlowAttribute {
     getPeer(): ArkWaterFlowPeer {
         return (this.peer as ArkWaterFlowPeer)
     }
-    /** @memo */
     public setWaterFlowOptions(options?: WaterFlowOptions): this {
         if (this.checkPriority("setWaterFlowOptions")) {
             const options_casted = options as (WaterFlowOptions | undefined)
@@ -534,7 +496,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public columnsTemplate(value: string | undefined): this {
         if (this.checkPriority("columnsTemplate")) {
             const value_casted = value as (string | undefined)
@@ -543,7 +504,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
         if (this.checkPriority("itemConstraintSize")) {
             const value_casted = value as (ConstraintSizeOptions | undefined)
@@ -552,7 +512,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public rowsTemplate(value: string | undefined): this {
         if (this.checkPriority("rowsTemplate")) {
             const value_casted = value as (string | undefined)
@@ -561,7 +520,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public columnsGap(value: Length | undefined): this {
         if (this.checkPriority("columnsGap")) {
             const value_casted = value as (Length | undefined)
@@ -570,7 +528,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public rowsGap(value: Length | undefined): this {
         if (this.checkPriority("rowsGap")) {
             const value_casted = value as (Length | undefined)
@@ -579,7 +536,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public layoutDirection(value: FlexDirection | undefined): this {
         if (this.checkPriority("layoutDirection")) {
             const value_casted = value as (FlexDirection | undefined)
@@ -588,7 +544,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public nestedScroll(value: NestedScrollOptions | undefined): this {
         if (this.checkPriority("nestedScroll")) {
             const value_casted = value as (NestedScrollOptions | undefined)
@@ -597,7 +552,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public enableScrollInteraction(value: boolean | undefined): this {
         if (this.checkPriority("enableScrollInteraction")) {
             const value_casted = value as (boolean | undefined)
@@ -606,7 +560,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public friction(value: number | Resource | undefined): this {
         if (this.checkPriority("friction")) {
             const value_casted = value as (number | Resource | undefined)
@@ -615,7 +568,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public cachedCount(count: number | undefined, show?: boolean): this {
         if (this.checkPriority("cachedCount")) {
             const count_type = runtimeType(count)
@@ -635,7 +587,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onReachStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onReachStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -644,7 +595,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onReachEnd(value: (() => void) | undefined): this {
         if (this.checkPriority("onReachEnd")) {
             const value_casted = value as ((() => void) | undefined)
@@ -653,7 +603,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         if (this.checkPriority("onScrollFrameBegin")) {
             const value_casted = value as (OnScrollFrameBeginCallback | undefined)
@@ -662,7 +611,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onScrollIndex")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -671,7 +619,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onWillScroll(value?: OnWillScrollCallback | undefined): this {
         if (this.checkPriority("onWillScroll")) {
             const value_casted = value as (OnWillScrollCallback | undefined)
@@ -680,7 +627,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onDidScroll(value?: OnScrollCallback | undefined): this {
         if (this.checkPriority("onDidScroll")) {
             const value_casted = value as (OnScrollCallback | undefined)
@@ -698,7 +644,7 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
 /** @memo */
 export function WaterFlow(
     /** @memo */
-    style: ((attributes: UIWaterFlowAttribute) => void) | undefined,
+    style: ((attributes: WaterFlowAttribute) => void) | undefined,
     options?: WaterFlowOptions,
     /** @memo */
     content_?: (() => void) | undefined,
