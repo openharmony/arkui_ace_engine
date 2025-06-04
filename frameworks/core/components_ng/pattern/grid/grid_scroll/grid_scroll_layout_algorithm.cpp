@@ -346,6 +346,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             cacheStart = cache.first;
             cacheEnd = cache.second; // only use counting method when last line not completely filled
         }
+        LostChildFocusToSelf(layoutWrapper, startIndex - cacheStart, endIndex + cacheEnd);
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
         info_.times_ = (info_.times_ + 1) % GRID_CHECK_INTERVAL;
         if (info_.times_ == 0) {
