@@ -3160,11 +3160,14 @@ void RosenRenderContext::OnBuilderBackgroundFlagUpdate(bool isBuilderBackground)
     transitionModifier->SetIsBuilderBackground(isBuilderBackground);
 }
 
-void RosenRenderContext::UpdateCustomBackground()
+void RosenRenderContext::OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges)
 {
     CHECK_NULL_VOID(rsNode_);
-    ModifyCustomBackground();
-    RequestNextFrame();
+    // Builder background will be updated while pixel map is ready.
+    if (!GetBuilderBackgroundFlagValue(false)) {
+        ModifyCustomBackground();
+        RequestNextFrame();
+    }
 }
 
 void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)

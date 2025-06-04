@@ -384,7 +384,7 @@ public:
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
     void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) override {}
     void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) override;
-    void UpdateCustomBackground() override;
+    void OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges) override;
 
     void ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor);
     void OnBackgroundColorUpdate(const Color& value) override;

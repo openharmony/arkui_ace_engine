@@ -1653,8 +1653,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
-    } else {
-        renderContext_->UpdateCustomBackground();
     }
 
     // update focus state
@@ -4956,8 +4954,6 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
-    } else {
-        renderContext_->UpdateCustomBackground();
     }
 
     // update focus state
