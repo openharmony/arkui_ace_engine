@@ -213,7 +213,7 @@ void ImagePattern::OnCompleteInDataReady()
 
 void ImagePattern::TriggerFirstVisibleAreaChange()
 {
-    if (isComponentSnapshotNode_) {
+    if (isComponentSnapshotNode_ || isImageAnimator_) {
         OnVisibleAreaChange(true);
         return;
     }
