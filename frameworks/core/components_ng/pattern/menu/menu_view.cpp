@@ -890,11 +890,8 @@ static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNod
         CHECK_NULL_VOID(columnNode);
         // set filter
         menuWrapperPattern->SetFilterColumnNode(columnNode);
-        auto menuNode = menuWrapperPattern->GetMenu();
-        auto menuPattern = menuNode ? menuNode->GetPattern<MenuPattern>() : nullptr;
-        auto layoutProperty = menuPattern ? menuPattern->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
-        CHECK_NULL_VOID(layoutProperty);
-        auto isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
+        auto isShowInSubWindow =
+            menuWrapperPattern->GetMenuParam().isShowInSubWindow || menuWrapperPattern->IsContextMenu();
         if (container->IsSceneBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);

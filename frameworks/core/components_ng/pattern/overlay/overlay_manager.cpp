@@ -8130,7 +8130,7 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, co
     auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
     auto maskColor = maskEnable ? menuWrapperPattern->GetMenuMaskColor() : menuTheme->GetPreviewMenuMaskColor();
     BlurStyleOption styleOption;
-    styleOption.blurStyle = maskEnable ? menuWrapperPattern->GetMenuMaskblurStyle() : BlurStyle::BACKGROUND_THIN;
+    styleOption.blurStyle = maskEnable ? menuWrapperPattern->GetMenuMaskBlurStyle() : BlurStyle::BACKGROUND_THIN;
     styleOption.colorMode = ThemeColorMode::SYSTEM;
 
     AnimationOption option;
