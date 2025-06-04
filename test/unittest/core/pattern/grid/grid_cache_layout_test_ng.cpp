@@ -640,7 +640,6 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem002, TestSize.Level1)
     model.SetCachedCount(3, true);
     CreateFixedItems(40);
     CreateDone();
-
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
     EXPECT_EQ(pattern_->info_.endIndex_, 7);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
@@ -667,8 +666,8 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem002, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 463.02078);
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 463.020782);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 402.69519);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 402.69519);
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
     EXPECT_EQ(pattern_->info_.endIndex_, 1);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 0);

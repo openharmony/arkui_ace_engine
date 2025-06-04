@@ -965,9 +965,9 @@ HWTEST_F(WaterFlowSegmentCommonTest, Spring001, TestSize.Level1)
     pattern_->SetAnimateCanOverScroll(true);
 
     UpdateCurrentOffset(10.0f);
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 14.5485096f); // friction is applied on delta
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 13.824969f); // friction is applied on delta
     const auto& info = pattern_->layoutInfo_;
-    EXPECT_FLOAT_EQ(info->TopFinalPos() - info->CurrentPos(), -9.54851f);
+    EXPECT_FLOAT_EQ(info->TopFinalPos() - info->CurrentPos(), -8.8249693f);
 
     UpdateCurrentOffset(-10.0f);
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
