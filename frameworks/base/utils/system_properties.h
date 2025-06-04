@@ -616,6 +616,8 @@ public:
 
     static bool ConfigChangePerform();
 
+    static void SetConfigChangePerform();
+
     static int32_t GetJankFrameThreshold();
 
     static bool GetTitleStyleEnabled();
