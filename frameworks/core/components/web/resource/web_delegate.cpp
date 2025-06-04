@@ -2513,14 +2513,14 @@ void WebDelegate::SetWebCallBack()
         });
         webController->SetGetProgressImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
-            if (delegate) {
-                return delegate->GetProgress();
-            }
-            return 0;
+            return delegate ? delegate->GetProgress() : 0;
         });
         webController->SetGetPageHeightImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
-            return delegate ? delegate->GetProgress() : 0;
+            if (delegate) {
+                return delegate->GetPageHeight();
+            }
+            return 0;
         });
         webController->SetGetWebIdImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
