@@ -504,8 +504,17 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
-    auto gradient = textStyle.GetGradient();
-    spanTextStyle.SetGradient(gradient);
+    UpdateReLayoutGradient(spanTextStyle, textStyle);
+}
+
+void SpanItem::UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle)
+{
+    if (textStyle.GetGradient().has_value()) {
+        auto gradient = textStyle.GetGradient();
+        spanTextStyle.SetGradient(gradient);
+    } else {
+        spanTextStyle.SetGradient(std::nullopt);
+    }
 }
 
 bool SpanItem::UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle)
