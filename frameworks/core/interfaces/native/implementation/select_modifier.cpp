@@ -68,9 +68,14 @@ template<>
 void AssignCast(std::optional<AvoidanceMode>& dst, const Ark_AvoidanceMode& src)
 {
     switch (src) {
-        case ARK_AVOIDANCE_MODE_COVER_TARGET: dst = AvoidanceMode::COVER_TARGET; break;
-        case ARK_AVOIDANCE_MODE_AVOID_AROUND_TARGET: dst = AvoidanceMode::AVOID_AROUND_TARGET; break;
-        default: LOGE("Unexpected enum value in Ark_AvoidanceMode: %{public}d", src);
+        case ARK_AVOIDANCE_MODE_COVER_TARGET:
+            dst = AvoidanceMode::COVER_TARGET;
+            break;
+        case ARK_AVOIDANCE_MODE_AVOID_AROUND_TARGET:
+            dst = AvoidanceMode::AVOID_AROUND_TARGET;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_AvoidanceMode: %{public}d", src);
     }
 }
 
@@ -78,9 +83,14 @@ template<>
 void AssignCast(std::optional<OHOS::Ace::DividerMode>& dst, const Ark_DividerMode& src)
 {
     switch (src) {
-        case ARK_DIVIDER_MODE_FLOATING_ABOVE_MENU: dst = DividerMode::FLOATING_ABOVE_MENU; break;
-        case ARK_DIVIDER_MODE_EMBEDDED_IN_MENU: dst = DividerMode::EMBEDDED_IN_MENU; break;
-        default: LOGE("Unexpected enum value in Ark_DevideMode: %{public}d", src);
+        case ARK_DIVIDER_MODE_FLOATING_ABOVE_MENU:
+            dst = DividerMode::FLOATING_ABOVE_MENU;
+            break;
+        case ARK_DIVIDER_MODE_EMBEDDED_IN_MENU:
+            dst = DividerMode::EMBEDDED_IN_MENU;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_DeviderMode: %{public}d", src);
     }
 }
 
