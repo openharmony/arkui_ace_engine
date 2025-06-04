@@ -9145,6 +9145,8 @@ void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY();
         event.touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
         event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
+        event.touchEvent.actionTouchPoint.tiltX = info.GetTiltX().value_or(0.0f);
+        event.touchEvent.actionTouchPoint.tiltY = info.GetTiltY().value_or(0.0f);
         event.touchEvent.actionTouchPoint.rollAngle = info.GetRollAngle().value_or(0.0f);
         event.touchEvent.deviceId = info.GetDeviceId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;

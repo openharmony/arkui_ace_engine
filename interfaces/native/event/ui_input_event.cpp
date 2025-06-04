@@ -1524,6 +1524,9 @@ float OH_ArkUI_PointerEvent_GetTiltX(const ArkUI_UIInputEvent* event, uint32_t p
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (touchEvent && touchEvent->subKind == ON_HOVER_MOVE) {
+                RETURN_RET_WITH_STATUS_CHECK(touchEvent->actionTouchPoint.tiltX, ARKUI_ERROR_CODE_NO_ERROR);
+            }
             if (!touchEvent || touchEvent->touchPointSize <= 0) {
                 RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
@@ -1560,6 +1563,9 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (touchEvent && touchEvent->subKind == ON_HOVER_MOVE) {
+                RETURN_RET_WITH_STATUS_CHECK(touchEvent->actionTouchPoint.tiltY, ARKUI_ERROR_CODE_NO_ERROR);
+            }
             if (!touchEvent || touchEvent->touchPointSize <= 0) {
                 RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
