@@ -975,10 +975,7 @@ bool MenuLayoutAlgorithm::isContainerModal(const RefPtr<FrameNode>& node)
     CHECK_NULL_RETURN(node, false);
     auto pipeline = node->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, false);
-    return (!canExpandCurrentWindow_) && pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
-        windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    return (!canExpandCurrentWindow_) && pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL;
 }
 
 float MenuLayoutAlgorithm::GetContainerModalOffsetY(const RefPtr<FrameNode>& node)

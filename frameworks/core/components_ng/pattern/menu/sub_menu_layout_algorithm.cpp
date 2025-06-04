@@ -60,9 +60,7 @@ void SubMenuLayoutAlgorithm::UpdateHoverRegion(
     auto bottomRightPoint = position + OffsetF(size.Width(), size.Height());
     auto pipelineContext = parentMenuItem->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
-    auto windowManager = pipelineContext->GetWindowManager();
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
-                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
     OffsetF wrapperOffset;
     if ((!canExpandCurrentWindow_) && isContainerModal) {
         auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
@@ -148,10 +146,7 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(
 
     auto pipelineContext = parentMenuItem->GetContextWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
-    auto windowManager = pipelineContext->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, OffsetF());
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
-                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
     if ((!canExpandCurrentWindow_) && isContainerModal) {
         auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
         auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
