@@ -2357,10 +2357,10 @@ HWTEST_F(TabBarPatternTestNg, GetOverScrollInfo, TestSize.Level1)
     MockPaintRect(tabBarNode_);
 
     tabBarPattern_->visibleItemPosition_.clear();
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.empty(),true);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.empty(), true);
     auto result = tabBarPattern_->GetOverScrollInfo(tabBarPattern_->GetContentSize());
-    EXPECT_EQ(result.first,0.0f);
-    EXPECT_EQ(result.second,0.0f);
+    EXPECT_EQ(result.first, 0.0f);
+    EXPECT_EQ(result.second, 0.0f);
 }
 /**
  * @tc.name: HandleMouseEvent
@@ -2411,7 +2411,7 @@ HWTEST_F(TabBarPatternTestNg, ResetOnForceMeasure001, TestSize.Level1)
     EXPECT_EQ(tabBarPattern_->jumpIndex_, 0);
 
     tabBarPattern_->visibleItemPosition_.clear();
-    tabBarPattern_->visibleItemPosition_[0] = {5,0.0f};
+    tabBarPattern_->visibleItemPosition_[0] = { 5, 0.0f };
     tabBarPattern_->ResetOnForceMeasure(6);
     EXPECT_EQ(tabBarPattern_->jumpIndex_, 6);
 }
@@ -2505,12 +2505,12 @@ HWTEST_F(TabBarPatternTestNg, UpdatePaintIndicator, TestSize.Level1)
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
-    tabBarPattern_->UpdatePaintIndicator(3,true);
+    tabBarPattern_->UpdatePaintIndicator(3, true);
 
     tabBarPattern_->isTouchingSwiper_ = true;
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
-    tabBarPattern_->UpdatePaintIndicator(0,true);
+    tabBarPattern_->UpdatePaintIndicator(0, true);
 }
 /**
  * @tc.name: OnDirtyLayoutWrapperSwap
@@ -2522,7 +2522,6 @@ HWTEST_F(TabBarPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    //MockPaintRect(tabBarNode_);
 
     DirtySwapConfig config;
     config.skipMeasure = true;
@@ -2666,10 +2665,11 @@ HWTEST_F(TabBarPatternTestNg, PlayPressAnimation, TestSize.Level1)
     EXPECT_EQ(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE), true);
     tabBarPattern_->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);
 
-    tabBarPattern_->PlayPressAnimation(0, Color::BLACK, AnimationType:: HOVER);
+    tabBarPattern_->PlayPressAnimation(0, Color::BLACK, AnimationType::HOVER);
 
     tabBarPattern_->tabBarStyles_.clear();
-    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE, 
+    TabBarStyle::BOTTOMTABBATSTYLE };
     tabBarPattern_->selectedModes_ = { SelectedMode::BOARD };
     tabBarPattern_->PlayPressAnimation(1, Color::BLACK, AnimationType:: HOVER);
     EXPECT_EQ(tabBarPattern_->tabBarStyles_.size(), 3);
@@ -2678,7 +2678,7 @@ HWTEST_F(TabBarPatternTestNg, PlayPressAnimation, TestSize.Level1)
     IndicatorStyle indicatorStyle;
     indicatorStyle.color = Color::BLACK;
     tabBarPattern_->indicatorStyles_ = { indicatorStyle };
-    tabBarPattern_->PlayPressAnimation(1, Color::BLACK, AnimationType:: HOVER);
+    tabBarPattern_->PlayPressAnimation(1, Color::BLACK, AnimationType::HOVER);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_.size(), 1);
 }
 /**
@@ -2734,7 +2734,7 @@ HWTEST_F(TabBarPatternTestNg, CalculateTargetOffset, TestSize.Level1)
     tabBarPattern_->CalculateTargetOffset(1);
     auto backChildrenMainSize = tabBarPattern_->CalculateBackChildrenMainSize(1);
     auto space = tabBarPattern_->GetSpace(1);
-    EXPECT_EQ(LessOrEqual(backChildrenMainSize, space),false);
+    EXPECT_EQ(LessOrEqual(backChildrenMainSize, space), false);
 }
 /**
  * @tc.name: GetIndicatorStyle
@@ -2789,10 +2789,11 @@ HWTEST_F(TabBarPatternTestNg, OnRestoreInfo, TestSize.Level1)
     auto info = JsonUtil::ParseJsonString(restoreInfo_);
     tabBarPattern_->indicator_ = 2;
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE };
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_.size(),2);
+    EXPECT_EQ(tabBarPattern_->tabBarStyles_.size(), 2);
     tabBarPattern_->OnRestoreInfo(restoreInfo_);
 
-    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE, 
+    TabBarStyle::BOTTOMTABBATSTYLE };
     pattern_->SetAnimateMode(TabAnimateMode::NO_ANIMATION);
     tabBarPattern_->OnRestoreInfo(restoreInfo_);
     EXPECT_EQ(tabBarPattern_->GetAnimationDuration().has_value(), true);
@@ -2880,7 +2881,7 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarAnimation, TestSize.Level1)
     tabBarPattern_->indicator_ = 0;
     tabBarPattern_->HandleBottomTabBarAnimation(-1);
 
-    tabBarPattern_->tabBarStyles_ = {TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::NOSTYLE };
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::NOSTYLE };
     tabBarPattern_->indicator_ = 1;
     tabBarPattern_->HandleBottomTabBarAnimation(1);
     EXPECT_NE(tabBarPattern_->tabBarStyles_[1], TabBarStyle::BOTTOMTABBATSTYLE);
