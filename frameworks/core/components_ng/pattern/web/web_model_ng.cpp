@@ -1116,6 +1116,7 @@ void WebModelNG::SetAudioExclusive(bool audioExclusive)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateAudioExclusive(audioExclusive);
 }
+
 void WebModelNG::SetAudioSessionType(WebAudioSessionType audioSessionType)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
