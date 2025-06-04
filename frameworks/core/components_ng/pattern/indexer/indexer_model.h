@@ -69,6 +69,7 @@ public:
     virtual void SetSelectedBackgroundColor(const std::optional<Color>& color) = 0;
     virtual void SetSelectedBGColorByUser(bool isByUser) {};
     virtual void SetPopupBackground(const std::optional<Color>& color) = 0;
+    virtual void SetPopupBackgroundColorByUser(bool isByUser) {};
     virtual void SetUsingPopup(bool state) = 0;
     virtual void SetSelectedFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
         std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) = 0;
@@ -81,7 +82,9 @@ public:
     virtual void SetAlignStyle(int32_t value) = 0;
     virtual void SetSelected(int32_t selected) {};
     virtual void SetPopupItemBackground(const std::optional<Color>& color) {};
+    virtual void SetPopupItemBackgroundColorByUser(bool isByUser) {};
     virtual void SetPopupSelectedColor(const std::optional<Color>& color) {};
+    virtual void SetPopupSelectedColorByUser(bool isByUser) {};
     virtual void SetPopupUnselectedColor(const std::optional<Color>& color) {};
     virtual void SetPopupUnselectedColorByUser(bool isByUser) {};
     virtual void SetFontSize(const Dimension& fontSize) {};

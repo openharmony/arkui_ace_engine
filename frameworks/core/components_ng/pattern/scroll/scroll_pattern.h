@@ -240,6 +240,15 @@ public:
             scrollSnapUpdate_ = true;
         }
     }
+    void SetKeepSnapPaginations(const std::vector<Dimension>& snapPaginations)
+    {
+        keepSnapPaginations_ = snapPaginations;
+    }
+
+    std::vector<Dimension> GetKeepSnapPaginations()
+    {
+        return keepSnapPaginations_;
+    }
 
     std::vector<Dimension> GetSnapPaginations() const
     {
@@ -434,6 +443,7 @@ private:
     // scrollSnap
     std::vector<float> snapOffsets_;
     std::vector<Dimension> snapPaginations_;
+    std::vector<Dimension> keepSnapPaginations_;
     std::pair<bool, bool> enableSnapToSide_ = { true, true };
     Dimension intervalSize_;
     bool scrollSnapUpdate_ = false;

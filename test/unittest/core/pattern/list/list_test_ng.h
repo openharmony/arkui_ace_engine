@@ -27,6 +27,8 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/base/mock_system_properties.h"
 #undef private
 #undef protected
 

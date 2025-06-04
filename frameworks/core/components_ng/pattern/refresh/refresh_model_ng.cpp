@@ -119,9 +119,10 @@ void RefreshModelNG::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj)
         CHECK_NULL_VOID(node);
         std::string result;
         if (!ResourceParseUtils::ParseResString(resObj, result)) {
-            return;
+            ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, AceType::RawPtr(node));
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, result, AceType::RawPtr(node));
         }
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, result, AceType::RawPtr(node));
     };
     pattern->AddResObj("refresh.promptText", resObj, std::move(updateFunc));
 }
