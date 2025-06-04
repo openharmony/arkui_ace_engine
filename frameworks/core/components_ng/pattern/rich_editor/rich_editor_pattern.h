@@ -1293,6 +1293,9 @@ public:
 
     float GetCaretWidth();
 
+#if defined(IOS_PLATFORM)
+    const TextEditingValue& GetInputEditingValue() const override;
+#endif
 protected:
     bool CanStartAITask() const override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
@@ -1658,6 +1661,9 @@ private:
     void SetIsEnableSubWindowMenu();
     void OnReportRichEditorEvent(const std::string& event);
 
+#ifdef CROSS_PLATFORM
+    bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
+#endif   
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -1804,6 +1810,10 @@ private:
     bool firstClickAfterWindowFocus_ = false;
     CancelableCallback<void()> firstClickResetTask_;
     RefPtr<RichEditorContentPattern> contentPattern_;
+#if defined(IOS_PLATFORM)
+    TextCompose compose_;
+    bool unmarkText_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 
