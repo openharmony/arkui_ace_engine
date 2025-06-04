@@ -7775,6 +7775,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     ToJsonValueForOption(json, filter);
     ToJsonValueForFontFeature(json, filter);
     ToJsonValueSelectOverlay(json, filter);
+    ToJsonValueForStroke(json, filter);
 }
 
 void TextFieldPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -7882,6 +7883,41 @@ void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json
     for (auto menuItme : selectOverlayInfo->menuOptionItems) {
         json->PutExtAttr("MenuItme", menuItme.content.value_or("").c_str(), filter);
     }
+}
+
+std::string TextFieldPattern::GetStrokeWidth() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return (layoutProperty->GetStrokeWidth().value_or(Dimension())).ToString();
+}
+
+std::string TextFieldPattern::GetStrokeColor() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, "");
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+
+    if (layoutProperty->HasStrokeColor() && layoutProperty->GetStrokeColor().has_value()) {
+        auto strokeColor = layoutProperty->GetStrokeColor().value().ColorToString();
+        if (!strokeColor.empty()) {
+            return strokeColor;
+        }
+    }
+
+    auto textColor = layoutProperty->GetTextColor();
+    if (textColor.has_value()) {
+        return textColor.value().ColorToString();
+    }
+
+    return theme->GetTextColor().ColorToString();
+}
+
+void TextFieldPattern::ToJsonValueForStroke(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("strokeWidth", GetStrokeWidth().c_str(), filter);
+    json->PutExtAttr("strokeColor", GetStrokeColor().c_str(), filter);
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
