@@ -1344,6 +1344,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
+void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
+
 RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 {
     return nullptr;

@@ -1286,6 +1286,7 @@ private:
     {
         isEventsPassThrough_ = isEnable;
     }
+    void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) override;
 
     void FlushTouchEvents();
     void FlushWindowPatternInfo();
@@ -1446,6 +1447,7 @@ private:
     uint64_t resampleTimeStamp_ = 0;
     bool touchAccelarate_ = false;
     bool isEventsPassThrough_ = false;
+    bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;

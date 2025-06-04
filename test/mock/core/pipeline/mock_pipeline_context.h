@@ -78,6 +78,8 @@ public:
     }
     void SetEnableSwipeBack(bool isEnable) {}
 
+    void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
+
     bool ReachResponseDeadline() const override
     {
         if (responseTime_ > 0) {
