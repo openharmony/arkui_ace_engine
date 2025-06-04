@@ -2325,6 +2325,11 @@ HWTEST_F(TabBarPatternTestNg, GetNextFocusNode001, TestSize.Level1)
  * @tc.desc: test currentIndicatorOffset
  * @tc.type: FUNC
  */
+/**
+ * @tc.name: AddTabBarItemCallBack
+ * @tc.desc: test currentIndicatorOffset
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarPatternTestNg, AddTabBarItemCallBack, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -2353,7 +2358,9 @@ HWTEST_F(TabBarPatternTestNg, GetOverScrollInfo, TestSize.Level1)
 
     tabBarPattern_->visibleItemPosition_.clear();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.empty(),true);
-    tabBarPattern_->GetOverScrollInfo(tabBarPattern_->GetContentSize());
+    auto result = tabBarPattern_->GetOverScrollInfo(tabBarPattern_->GetContentSize());
+    EXPECT_EQ(result.first,0.0f);
+    EXPECT_EQ(result.second,0.0f);
 }
 /**
  * @tc.name: HandleMouseEvent
@@ -2366,6 +2373,7 @@ HWTEST_F(TabBarPatternTestNg, HandleMouseEvent, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     MockPaintRect(tabBarNode_);
+
     int32_t nodeId = 1;
     for (int i = 0; i <= 2; i++) {
             auto frameNode_ = TabsModelNG::GetOrCreateTabsNode(
@@ -2376,6 +2384,7 @@ HWTEST_F(TabBarPatternTestNg, HandleMouseEvent, TestSize.Level1)
     mouseInfo.SetAction(MouseAction::WINDOW_LEAVE);
     tabBarPattern_->hoverIndex_.emplace(1);
     tabBarPattern_->HandleMouseEvent(mouseInfo);
+    EXPECT_EQ(tabBarPattern_->indicator_, 0);
 }
 /**
  * @tc.name: ResetOnForceMeasure001
@@ -2391,6 +2400,7 @@ HWTEST_F(TabBarPatternTestNg, ResetOnForceMeasure001, TestSize.Level1)
 
     tabBarPattern_->ResetOnForceMeasure(5);
     tabBarPattern_->ResetOnForceMeasure(6);
+    EXPECT_EQ(tabBarPattern_->jumpIndex_, 6);
 
     tabBarPattern_->indicatorStyles_.clear();
     IndicatorStyle indicatorStyle1;
@@ -2398,10 +2408,12 @@ HWTEST_F(TabBarPatternTestNg, ResetOnForceMeasure001, TestSize.Level1)
     indicatorStyle1.color = Color::BLACK;
     tabBarPattern_->selectedModes_.clear();
     tabBarPattern_->ResetOnForceMeasure(0);
+    EXPECT_EQ(tabBarPattern_->jumpIndex_, 0);
 
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarPattern_->visibleItemPosition_[0] = {5,0.0f};
     tabBarPattern_->ResetOnForceMeasure(6);
+    EXPECT_EQ(tabBarPattern_->jumpIndex_, 6);
 }
 /**
  * @tc.name: ResetOnForceMeasure002
@@ -2424,6 +2436,7 @@ HWTEST_F(TabBarPatternTestNg, ResetOnForceMeasure002, TestSize.Level1)
     auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
     tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     tabBarPattern_->ResetOnForceMeasure(6);
+    EXPECT_EQ(tabBarPattern_->jumpIndex_, 6);
 }
 /**
  * @tc.name: UpdateBackBlurStyle
@@ -2440,10 +2453,13 @@ HWTEST_F(TabBarPatternTestNg, UpdateBackBlurStyle, TestSize.Level1)
     auto container = Container::Current();
     container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     auto pipeline = frameNode_->GetContext();
+    EXPECT_NE(pipeline, nullptr);
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     tabBarPattern_->UpdateBackBlurStyle(tabTheme);
 
     tabTheme->bottomTabBackgroundBlurStyle_=11;
+    auto defaultBlurStyle = static_cast<BlurStyle>(tabTheme->GetBottomTabBackgroundBlurStyle());
+    EXPECT_NE(defaultBlurStyle, BlurStyle::NO_MATERIAL);
     auto renderContext = tabBarNode_->GetRenderContext();
     renderContext ->UpdateBackBlurStyle(std::nullopt);
     renderContext ->UpdateBackBlurRadius(Dimension());
@@ -2455,12 +2471,14 @@ HWTEST_F(TabBarPatternTestNg, UpdateBackBlurStyle, TestSize.Level1)
 
     tabTheme->bottomTabBackgroundBlurStyle_=11;
     model.SetBarOverlap(AceType::RawPtr(frameNode_), true);
+    EXPECT_EQ(renderContext->GetBackBlurStyle().has_value(), true);
     tabBarPattern_->UpdateBackBlurStyle(tabTheme);
 
     tabTheme->bottomTabBackgroundBlurStyle_=11;
     renderContext->UpdateBackBlurStyle(std::nullopt);
     auto radius = Dimension(10.0f);
     renderContext->UpdateBackBlurRadius(radius);
+    EXPECT_EQ(renderContext->GetBackBlurRadius().has_value(), false);
     tabBarPattern_->UpdateBackBlurStyle(tabTheme);
 
     tabTheme->bottomTabBackgroundBlurStyle_=11;
@@ -2469,6 +2487,7 @@ HWTEST_F(TabBarPatternTestNg, UpdateBackBlurStyle, TestSize.Level1)
     EffectOption effectOption;
     effectOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
     renderContext->UpdateBackgroundEffect(effectOption);
+    EXPECT_EQ(renderContext->GetBackgroundEffect().has_value(), true);
     tabBarPattern_->UpdateBackBlurStyle(tabTheme);
 }
 /**
@@ -2492,8 +2511,12 @@ HWTEST_F(TabBarPatternTestNg, UpdatePaintIndicator, TestSize.Level1)
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
     tabBarPattern_->UpdatePaintIndicator(0,true);
-
 }
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -2506,8 +2529,13 @@ HWTEST_F(TabBarPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
     config.skipLayout = true;
     auto layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode_, tabBarNode_->GetGeometryNode(), tabBarLayoutProperty_);
-    tabBarPattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(tabBarPattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config), false);
 }
+/**
+ * @tc.name: HandleClick
+ * @tc.desc: test HandleClick
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarPatternTestNg, HandleClick, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -2519,6 +2547,8 @@ HWTEST_F(TabBarPatternTestNg, HandleClick, TestSize.Level1)
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     scrollable->GetSpringProperty();
     scrollable->state_ = Scrollable::AnimationState::SPRING;
+    EXPECT_NE(tabBarPattern_->scrollableEvent_->GetScrollable(), nullptr);
+    EXPECT_NE(tabBarPattern_->IsOutOfBoundary(), true);
     HandleClick(1); // click second tabBarItem
 
     tabBarPattern_->visibleItemPosition_.clear();
@@ -2530,7 +2560,11 @@ HWTEST_F(TabBarPatternTestNg, HandleClick, TestSize.Level1)
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
     HandleClick(5);
 }
-
+/**
+ * @tc.name: HandleBottomTabBarChange001
+ * @tc.desc: test HandleBottomTabBarChange
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -2541,8 +2575,14 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange001, TestSize.Level1)
 
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
+    EXPECT_NE(tabBarPattern_->indicator_, -1);
     tabBarPattern_->HandleBottomTabBarChange(-1);
 }
+/**
+ * @tc.name: HandleBottomTabBarChange002
+ * @tc.desc: test HandleBottomTabBarChange
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange002, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -2564,15 +2604,25 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange002, TestSize.Level1)
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE };
 
+    tabBarPattern_->indicator_ = 1;
     tabBarPattern_->ResetOnForceMeasure(1);
     tabBarPattern_->HandleBottomTabBarChange(0);
+    EXPECT_EQ(tabBarPattern_->indicator_, 1);
+
 
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
 
+    tabBarPattern_->indicator_ = 1;
     tabBarPattern_->ResetOnForceMeasure(1);
     tabBarPattern_->HandleBottomTabBarChange(0);
+    EXPECT_EQ(tabBarPattern_->indicator_, 1);
 }
+/**
+ * @tc.name: HandleBottomTabBarChange003
+ * @tc.desc: test HandleBottomTabBarChange
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange003, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -2594,9 +2644,16 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange003, TestSize.Level1)
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
 
+    tabBarPattern_->indicator_ = 1;
     tabBarPattern_->ResetOnForceMeasure(1);
     tabBarPattern_->HandleBottomTabBarChange(2);
+    EXPECT_EQ(tabBarPattern_->indicator_, 1);
 }
+/**
+ * @tc.name: PlayPressAnimation
+ * @tc.desc: test PlayPressAnimation
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarPatternTestNg, PlayPressAnimation, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -2607,6 +2664,7 @@ HWTEST_F(TabBarPatternTestNg, PlayPressAnimation, TestSize.Level1)
 
     frameNode_->GetContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
+    EXPECT_EQ(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE), true);
     tabBarPattern_->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);
 
     tabBarPattern_->PlayPressAnimation(0, Color::BLACK, AnimationType:: HOVER);
@@ -2615,14 +2673,21 @@ HWTEST_F(TabBarPatternTestNg, PlayPressAnimation, TestSize.Level1)
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
     tabBarPattern_->selectedModes_ = { SelectedMode::BOARD };
     tabBarPattern_->PlayPressAnimation(1, Color::BLACK, AnimationType:: HOVER);
+    EXPECT_EQ(tabBarPattern_->tabBarStyles_.size(), 3);
 
     tabBarPattern_->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR };
     IndicatorStyle indicatorStyle;
     indicatorStyle.color = Color::BLACK;
     tabBarPattern_->indicatorStyles_ = { indicatorStyle };
     tabBarPattern_->PlayPressAnimation(1, Color::BLACK, AnimationType:: HOVER);
+    EXPECT_EQ(tabBarPattern_->indicatorStyles_.size(), 1);
 }
-HWTEST_F(TabBarPatternTestNg,UpdateSubTabBoard, TestSize.Level1)
+/**
+ * @tc.name: UpdateSubTabBoard
+ * @tc.desc: test UpdateSubTabBoard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, UpdateSubTabBoard, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
@@ -2633,6 +2698,7 @@ HWTEST_F(TabBarPatternTestNg,UpdateSubTabBoard, TestSize.Level1)
     tabBarPattern_->indicatorStyles_.clear();
     tabBarPattern_->selectedModes_ = { SelectedMode::BOARD };
     tabBarPattern_->UpdateSubTabBoard(1);
+    EXPECT_EQ(tabBarPattern_->selectedModes_.size(), 1);
 
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
@@ -2643,8 +2709,14 @@ HWTEST_F(TabBarPatternTestNg,UpdateSubTabBoard, TestSize.Level1)
     indicatorStyle.color = Color::BLACK;
     tabBarPattern_->indicatorStyles_ = { indicatorStyle };
     tabBarPattern_->UpdateSubTabBoard(0);
+    EXPECT_EQ(tabBarPattern_->indicatorStyles_.size(), 1);
 }
-HWTEST_F(TabBarPatternTestNg,CalculateTargetOffset, TestSize.Level1)
+/**
+ * @tc.name: CalculateTargetOffset
+ * @tc.desc: test CalculateTargetOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, CalculateTargetOffset, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
@@ -2656,12 +2728,21 @@ HWTEST_F(TabBarPatternTestNg,CalculateTargetOffset, TestSize.Level1)
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     tabBarPattern_->CalculateTargetOffset(0);
+    EXPECT_NE(tabBarPattern_->visibleItemPosition_.find(0), tabBarPattern_->visibleItemPosition_.end());
 
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarPattern_->scrollMargin_ = 365.0f;
     tabBarPattern_->CalculateTargetOffset(1);
+    auto backChildrenMainSize = tabBarPattern_->CalculateBackChildrenMainSize(1);
+    auto space = tabBarPattern_->GetSpace(1);
+    EXPECT_EQ(LessOrEqual(backChildrenMainSize, space),false);
 }
-HWTEST_F(TabBarPatternTestNg,GetIndicatorStyle, TestSize.Level1)
+/**
+ * @tc.name: GetIndicatorStyle
+ * @tc.desc: test GetIndicatorStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, GetIndicatorStyle, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
@@ -2681,17 +2762,23 @@ HWTEST_F(TabBarPatternTestNg,GetIndicatorStyle, TestSize.Level1)
     tabBarPattern_->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR };
     IndicatorStyle indicator;
     OffsetF indicatorOffset;
+    EXPECT_EQ(tabBarPattern_->IsValidIndex(tabBarPattern_->swiperStartIndex_), true);
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset, firstRect);
 
-    
     IndicatorStyle indicatorStyle1;
     indicatorStyle1.color = Color::BLACK;
     IndicatorStyle indicatorStyle2;
     indicatorStyle1.color = Color::BLACK;
     tabBarPattern_->indicatorStyles_ = { indicatorStyle, indicatorStyle1, indicatorStyle2 };
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset, firstRect);
+    EXPECT_EQ(tabBarPattern_->indicatorStyles_.size() >= 2, true);
 }
-HWTEST_F(TabBarPatternTestNg,OnRestoreInfo, TestSize.Level1)
+/**
+ * @tc.name: OnRestoreInfo
+ * @tc.desc: test OnRestoreInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, OnRestoreInfo, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
@@ -2706,12 +2793,17 @@ HWTEST_F(TabBarPatternTestNg,OnRestoreInfo, TestSize.Level1)
     EXPECT_EQ(tabBarPattern_->tabBarStyles_.size(),2);
     tabBarPattern_->OnRestoreInfo(restoreInfo_);
 
-    tabBarPattern_->animationDuration_ = std::nullopt;
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
     pattern_->SetAnimateMode(TabAnimateMode::NO_ANIMATION);
     tabBarPattern_->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(tabBarPattern_->GetAnimationDuration().has_value(), true);
 }
-HWTEST_F(TabBarPatternTestNg,FromJson, TestSize.Level1)
+/**
+ * @tc.name: FromJson
+ * @tc.desc: test FromJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, FromJson, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
@@ -2731,8 +2823,15 @@ HWTEST_F(TabBarPatternTestNg,FromJson, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     tabBarPattern_->ToJsonValue(json, filter);
     tabBarPattern_->FromJson(json);
+    auto tabBarStyles = JsonUtil::ParseJsonString(json->GetString("tabBarStyles"));
+    EXPECT_EQ(tabBarStyles->GetArraySize(), 2);
 }
-HWTEST_F(TabBarPatternTestNg,ApplyTurnPageRateToIndicator, TestSize.Level1)
+/**
+ * @tc.name: ApplyTurnPageRateToIndicator
+ * @tc.desc: test ApplyTurnPageRateToIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, ApplyTurnPageRateToIndicator, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
@@ -2745,6 +2844,7 @@ HWTEST_F(TabBarPatternTestNg,ApplyTurnPageRateToIndicator, TestSize.Level1)
     tabBarPattern_->ApplyTurnPageRateToIndicator(0.9f);
 
     tabBarPattern_->turnPageRate_ = 0.5f;
+    EXPECT_EQ(tabBarPattern_->turnPageRate_ <= 0.673f, true);
     tabBarPattern_->ApplyTurnPageRateToIndicator(0.9f);
 
     tabBarPattern_->turnPageRate_ = 0.9f;
@@ -2752,8 +2852,14 @@ HWTEST_F(TabBarPatternTestNg,ApplyTurnPageRateToIndicator, TestSize.Level1)
 
     tabBarPattern_->isRTL_ = true;
     tabBarPattern_->ApplyTurnPageRateToIndicator(0.3f);
+    EXPECT_EQ(tabBarPattern_->currentIndicatorOffset_, 360);
 }
-HWTEST_F(TabBarPatternTestNg,HandleBottomTabBarAnimation, TestSize.Level1)
+/**
+ * @tc.name: HandleBottomTabBarAnimation
+ * @tc.desc: test HandleBottomTabBarAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarAnimation, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
@@ -2764,6 +2870,7 @@ HWTEST_F(TabBarPatternTestNg,HandleBottomTabBarAnimation, TestSize.Level1)
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE };
     tabBarPattern_->indicator_ = 1;
     tabBarPattern_->HandleBottomTabBarAnimation(1);
+    EXPECT_EQ(tabBarPattern_->indicator_, tabBarPattern_->tabBarStyles_.size());
 
     tabBarPattern_->indicator_ = 0;
     tabBarPattern_->HandleBottomTabBarAnimation(1);
@@ -2777,8 +2884,14 @@ HWTEST_F(TabBarPatternTestNg,HandleBottomTabBarAnimation, TestSize.Level1)
     tabBarPattern_->tabBarStyles_ = {TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::NOSTYLE };
     tabBarPattern_->indicator_ = 1;
     tabBarPattern_->HandleBottomTabBarAnimation(1);
+    EXPECT_NE(tabBarPattern_->tabBarStyles_[1], TabBarStyle::BOTTOMTABBATSTYLE);
 }
-HWTEST_F(TabBarPatternTestNg,DumpAdvanceInfo, TestSize.Level1)
+/**
+ * @tc.name: DumpAdvanceInfo
+ * @tc.desc: test DumpAdvanceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, DumpAdvanceInfo, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
