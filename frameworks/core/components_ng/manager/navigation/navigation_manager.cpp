@@ -79,6 +79,13 @@ void NavigationManager::OnDumpInfo()
             CHECK_NULL_VOID(navDestination);
             DumpLog::GetInstance().Print(space + navDestination->ToDumpString());
             depth++;
+            if (!stack.empty() && curNode->GetParent()->GetTag() == V2::PRIMARY_CONTENT_NODE_ETS_TAG &&
+                stack.top().first->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+                DumpLog::GetInstance().Print("----------------------------------------------------------");
+            }
+        } else if (curNode->GetTag() == V2::NAVBAR_ETS_TAG) {
+            DumpLog::GetInstance().Print(space + "| [/]{ NavBar }");
+            DumpLog::GetInstance().Print("----------------------------------------------------------");
         }
         const auto& children = curNode->GetChildren();
         for (auto it = children.rbegin(); it != children.rend(); it++) {

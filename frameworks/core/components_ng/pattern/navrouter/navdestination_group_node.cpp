@@ -693,6 +693,21 @@ std::string NavDestinationGroupNode::ToDumpString()
     std::string dumpString;
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(navDestinationPattern, dumpString);
+    std::string navDestinationType;
+    switch (destType_) {
+        case NavDestinationType::DETAIL:
+            navDestinationType = "DETAIL";
+            break;
+        case NavDestinationType::HOME:
+            navDestinationType = "HOME";
+            break;
+        case NavDestinationType::PLACE_HOLDER:
+            navDestinationType = "PLACE_HOLDER";
+            break;
+        default:
+            navDestinationType = "INVALID";
+            break;
+    }
     dumpString.append("| [");
     dumpString.append(std::to_string(index_));
     dumpString.append("]{ ID: ");
@@ -703,6 +718,8 @@ std::string NavDestinationGroupNode::ToDumpString()
     dumpString.append(mode_ == NavDestinationMode::STANDARD ? "STANDARD" : "DIALOG");
     dumpString.append("\", IsOnShow: \"");
     dumpString.append(navDestinationPattern->GetIsOnShow() ? "TRUE" : "FALSE");
+    dumpString.append("\", navDestinationType: \"");
+    dumpString.append(navDestinationType);
     dumpString.append("\" }");
     return dumpString;
 }
