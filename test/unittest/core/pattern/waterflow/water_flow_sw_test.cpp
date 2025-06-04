@@ -178,6 +178,80 @@ HWTEST_F(WaterFlowSWTest, Scroll001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Layout003
+ * @tc.desc: Test layout position when have precision error in floating-point arithmetic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Layout003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    pattern_->SetAnimateCanOverScroll(true);
+    for (int i = 0; i < 41; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(info_->startIndex_, 18);
+    EXPECT_EQ(info_->endIndex_, 40);
+
+    // precision error in floating-point arithmetic.
+    info_->lanes_[0][2].endPos -= 0.0099f;
+    /* Add 5 items at 41 */
+    AddItemsAtSlot(5, 100.0f, 41);
+    info_->NotifyDataChange(41, 5);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(info_->startIndex_, 24);
+    EXPECT_EQ(info_->endIndex_, 45);
+
+    // new Items should be put in order.
+    EXPECT_EQ(
+        info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 800.000000 Items [24 27 30 33 36 39 42 45 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 700.000000 Items [25 28 31 34 37 40 43 ] }");
+    EXPECT_EQ(info_->lanes_[0][2].ToString(), "{StartPos: 0.000000 EndPos: 699.990112 Items [26 29 32 35 38 41 44 ] }");
+}
+
+/**
+ * @tc.name: Layout004
+ * @tc.desc: Test layout position when have precision error in floating-point arithmetic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Layout004, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    pattern_->SetAnimateCanOverScroll(true);
+    for (int i = 0; i < 41; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(info_->startIndex_, 18);
+    EXPECT_EQ(info_->endIndex_, 40);
+
+    info_->NotifyDataChange(0, 0);
+    // precision error in floating-point arithmetic.
+    info_->lanes_[0][0].startPos += 0.0099f;
+
+    UpdateCurrentOffset(150.0f);
+    EXPECT_EQ(info_->startIndex_, 12);
+    EXPECT_EQ(info_->endIndex_, 38);
+
+    // new Items should be put in order.
+    EXPECT_EQ(info_->lanes_[0][0].ToString(),
+        "{StartPos: -93.916275 EndPos: 806.073853 Items [12 15 18 21 24 27 30 33 36 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(),
+        "{StartPos: -93.926178 EndPos: 806.073853 Items [13 16 19 22 25 28 31 34 37 ] }");
+    EXPECT_EQ(info_->lanes_[0][2].ToString(),
+        "{StartPos: -93.926178 EndPos: 806.073853 Items [14 17 20 23 26 29 32 35 38 ] }");
+}
+
+/**
  * @tc.name: Layout001
  * @tc.desc: Test layout position when have .
  * @tc.type: FUNC
