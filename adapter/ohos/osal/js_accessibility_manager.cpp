@@ -1493,8 +1493,13 @@ bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const Ref
     if (parentFrameNode->GetTag() == V2::SCROLL_ETS_TAG) {
         return false;
     }
-    auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
-        scrollAbility.contentStartOffset, scrollAbility.contentEndOffset);
+    NG::MoveOffsetParam param {
+        scrollAxis == Axis::VERTICAL,
+        scrollAbility.contentStartOffset,
+        scrollAbility.contentEndOffset,
+        true
+    };
+    auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
