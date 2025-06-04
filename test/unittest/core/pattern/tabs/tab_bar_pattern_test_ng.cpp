@@ -2640,7 +2640,8 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange003, TestSize.Level1)
     CreateTabsDone(model);
 
     tabBarPattern_->tabBarStyles_.clear();
-    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE,
+    TabBarStyle::BOTTOMTABBATSTYLE };
 
     tabBarPattern_->indicator_ = 1;
     tabBarPattern_->ResetOnForceMeasure(1);
@@ -2668,10 +2669,10 @@ HWTEST_F(TabBarPatternTestNg, PlayPressAnimation, TestSize.Level1)
     tabBarPattern_->PlayPressAnimation(0, Color::BLACK, AnimationType::HOVER);
 
     tabBarPattern_->tabBarStyles_.clear();
-    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE, 
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE,
     TabBarStyle::BOTTOMTABBATSTYLE };
     tabBarPattern_->selectedModes_ = { SelectedMode::BOARD };
-    tabBarPattern_->PlayPressAnimation(1, Color::BLACK, AnimationType:: HOVER);
+    tabBarPattern_->PlayPressAnimation(1, Color::BLACK, AnimationType::HOVER);
     EXPECT_EQ(tabBarPattern_->tabBarStyles_.size(), 3);
 
     tabBarPattern_->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR };
@@ -2792,7 +2793,7 @@ HWTEST_F(TabBarPatternTestNg, OnRestoreInfo, TestSize.Level1)
     EXPECT_EQ(tabBarPattern_->tabBarStyles_.size(), 2);
     tabBarPattern_->OnRestoreInfo(restoreInfo_);
 
-    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE, 
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE,
     TabBarStyle::BOTTOMTABBATSTYLE };
     pattern_->SetAnimateMode(TabAnimateMode::NO_ANIMATION);
     tabBarPattern_->OnRestoreInfo(restoreInfo_);
