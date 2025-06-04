@@ -3623,6 +3623,12 @@ void RichEditorPattern::HandleBlurEvent()
         ResetSelection();
         CloseKeyboard(false);
     }
+#ifdef ANDROID_PLATFORM
+    if (HasConnection()) {
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
+    }
+#endif
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -4971,8 +4977,13 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
 #ifdef CROSS_PLATFORM
 #ifdef IOS_PLATFORM
         compose_ = value->compose;
+        unmarkText_ = value->unmarkText;
 #endif
-        CHECK_NULL_VOID(!value->appendText.empty());
+#ifdef ANDROID_PLATFORM
+        if (value->appendText.empty()) {
+            return;
+        }
+#endif
         InsertValue(UtfUtils::Str8ToStr16(value->appendText), true);
 #else
         InsertValue(UtfUtils::Str8ToStr16(value->appendText));
@@ -5805,6 +5816,14 @@ void RichEditorPattern::InsertValueByOperationType(const std::u16string& insertV
 
 bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, bool shouldCommitInput)
 {
+#if defined(IOS_PLATFORM)
+    if (compose_.IsValid()) {
+        return true;
+    }
+    if (GetTextContentLength() - text.length() < maxLength_.value_or(INT_MAX) && text.length() == 1 && !unmarkText_) {
+        return true;
+    }
+#endif
     bool needTruncationInsertValue = shouldCommitInput || !previewTextRecord_.needReplacePreviewText;
     int32_t selectLength =
         textSelector_.SelectNothing() ? 0 : textSelector_.GetTextEnd() - textSelector_.GetTextStart();
@@ -5857,7 +5876,7 @@ void RichEditorPattern::ProcessInsertValueMore(const std::u16string& text, Opera
     }
     ClearRedoOperationRecords();
 #if defined(IOS_PLATFORM)
-    if (compose_.IsValid() && record.addText.value_or(u"").length() > 0) {
+    if (compose_.IsValid() && (record.addText.value_or(u"").length() > 0 || unmarkText_)) {
         DeleteByRange(&record, compose_.GetStart(), compose_.GetEnd());
     }
 #endif
@@ -5916,6 +5935,11 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
     bool isAllowInsert = (allowContentChange && allowImeInput) || allowPreviewText;
     if (!isAllowInsert) {
         undoManager_->ClearPreviewInputRecord();
+#if defined(IOS_PLATFORM)
+        if (compose_.IsValid() && (record.addText.value_or(u"").length() > 0 || unmarkText_)) {
+            DeleteByRange(&record, compose_.GetStart(), compose_.GetEnd());
+        }
+#endif
         return;
     }
     ProcessInsertValueMore(text, record, operationType, changeValue, preRecord, shouldCommitInput);
@@ -10789,7 +10813,7 @@ void RichEditorPattern::StopEditing()
 
     // The selection status disappears, the cursor is hidden, and the soft keyboard is exited
     HandleBlurEvent();
-#ifdef CROSS_PLATFORM
+#ifdef IOS_PLATFORM
     CloseKeyboard(false);
 #endif
     // In order to avoid the physical keyboard being able to type, you need to make sure that you lose focus
@@ -12757,18 +12781,25 @@ float RichEditorPattern::GetCaretWidth()
 const TextEditingValue& RichEditorPattern::GetInputEditingValue() const
 {
     static TextEditingValue value;
-    value.MoveToPosition(caretPosition_);
+    value.text.clear();
     if (!spans_.empty()) {
+        std::string text;
         for (const auto& span : spans_) {
             if (!span) {
                 continue;
             }
             if (span->spanItemType == SpanItemType::NORMAL) {
-                value.text.append(UtfUtils::Str16ToStr8(span->content));
+                text.append(UtfUtils::Str16ToStr8(span->content));
             } else {
-                value.text.append(" ");
+                text.append(" ");
             }
         }
+        value.text = text;
+    }
+    if (textSelector_.IsValid()) {
+        value.selection.Update(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    } else {
+        value.MoveToPosition(caretPosition_);
     }
     return value;
 }
