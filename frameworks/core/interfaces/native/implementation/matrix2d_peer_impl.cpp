@@ -57,7 +57,7 @@ void Matrix2DPeer::Translate(const std::optional<float>& optX, const std::option
 void Matrix2DPeer::Scale(const std::optional<float>& optX, const std::optional<float>& optY)
 {
     double sx = optX.value_or(1.0);
-    double sy = optX.value_or(1.0);
+    double sy = optY.value_or(1.0);
     OHOS::Ace::NG::Matrix2D::Scale(transform_, sx, sy);
 }
 double Matrix2DPeer::GetScaleX()
