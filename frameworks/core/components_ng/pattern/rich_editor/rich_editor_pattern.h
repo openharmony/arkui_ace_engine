@@ -1835,6 +1835,7 @@ private:
     std::unique_ptr<StyleManager> styleManager_;
 #if defined(IOS_PLATFORM)
     TextCompose compose_;
+    bool unmarkText_;
 #endif    
 };
 } // namespace OHOS::Ace::NG
