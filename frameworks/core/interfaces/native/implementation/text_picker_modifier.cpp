@@ -16,13 +16,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/picker/picker_text_component.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model_static.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
-#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
 
@@ -300,7 +300,7 @@ namespace TextPickerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = TextPickerModelNG::CreateFrameNode(id);
+    auto frameNode = TextPickerModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -310,26 +310,27 @@ namespace TextPickerInterfaceModifier {
 void SetSingleRange(FrameNode* frameNode, const Opt_Union_Number_Array_Number* value)
 {
     std::vector<OHOS::Ace::NG::RangeContent> rangeResult;
-    TextPickerModelNG::GetSingleRange(frameNode, rangeResult);
+    TextPickerModelStatic::GetSingleRange(frameNode, rangeResult);
     auto indexOpt = Converter::OptConvert<uint32_t>(*value);
     uint32_t index = indexOpt.value_or(0);
     if (GreatOrEqual(index, static_cast<int32_t>(rangeResult.size())) || LessNotEqual(index, 0)) {
         index = 0;
     }
-    TextPickerModelNG::SetSelected(frameNode, index);
+    TextPickerModelStatic::SetSelected(frameNode, index);
 }
 void SetMultiRange(FrameNode* frameNode, const Opt_Union_Number_Array_Number* value)
 {
     std::vector<OHOS::Ace::NG::TextCascadePickerOptions> options;
-    TextPickerModelNG::GetMultiOptions(frameNode, options);
-    auto count = TextPickerModelNG::IsCascade(frameNode) ? TextPickerModelNG::GetMaxCount(frameNode) : options.size();
+    TextPickerModelStatic::GetMultiOptions(frameNode, options);
+    auto count = TextPickerModelStatic::IsCascade(frameNode) ? TextPickerModelStatic::GetMaxCount(frameNode)
+                                                             : options.size();
 
     auto indexesOpt = Converter::OptConvert<std::vector<uint32_t>>(*value);
     std::vector<uint32_t> indexes = indexesOpt.value_or(std::vector<uint32_t>());
-    if (TextPickerModelNG::IsCascade(frameNode)) {
-        TextPickerModelNG::SetHasSelectAttr(frameNode, true);
+    if (TextPickerModelStatic::IsCascade(frameNode)) {
+        TextPickerModelStatic::SetHasSelectAttr(frameNode, true);
         ProcessCascadeSelected(options, 0, indexes);
-        uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
+        uint32_t maxCount = TextPickerModelStatic::GetMaxCount(frameNode);
         auto indexesSize = static_cast<int32_t>(indexes.size());
         if (LessNotEqual(indexesSize, maxCount)) {
             auto diff = maxCount - indexesSize;
@@ -346,7 +347,7 @@ void SetMultiRange(FrameNode* frameNode, const Opt_Union_Number_Array_Number* va
             }
         }
     }
-    TextPickerModelNG::SetSelecteds(frameNode, indexes);
+    TextPickerModelStatic::SetSelecteds(frameNode, indexes);
 }
 void SetTextPickerOptionsImpl(Ark_NativePointer node,
                               const Opt_TextPickerOptions* options)
@@ -361,21 +362,21 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
         if (!textPickerOptions.range.empty()) {
             ValidateSingleTextPickerOptions(textPickerOptions);
             //do not change the order of calls
-            TextPickerModelNG::SetTextPickerSingeRange(true);
-            TextPickerModelNG::InitialSetupSinglePicker(frameNode, textPickerOptions.kind);
-            TextPickerModelNG::SetRange(frameNode, textPickerOptions.range);
-            TextPickerModelNG::SetValue(frameNode, textPickerOptions.value);
-            TextPickerModelNG::SetSelected(frameNode, textPickerOptions.selected);
+            TextPickerModelStatic::SetTextPickerSingeRange(true);
+            TextPickerModelStatic::InitialSetupSinglePicker(frameNode, textPickerOptions.kind);
+            TextPickerModelStatic::SetRange(frameNode, textPickerOptions.range);
+            TextPickerModelStatic::SetValue(frameNode, textPickerOptions.value);
+            TextPickerModelStatic::SetSelected(frameNode, textPickerOptions.selected);
         } else if (!textPickerOptions.options.empty()) {
             ValidateMultiTextPickerOptions(textPickerOptions);
             //do not change the order of calls
-            TextPickerModelNG::SetTextPickerSingeRange(false);
-            TextPickerModelNG::SetIsCascade(frameNode, textPickerOptions.isCascade);
-            TextPickerModelNG::SetHasSelectAttr(frameNode, textPickerOptions.hasSelected);
-            TextPickerModelNG::SetColumns(frameNode, textPickerOptions.options);
-            TextPickerModelNG::SetValues(frameNode, textPickerOptions.values);
+            TextPickerModelStatic::SetTextPickerSingeRange(false);
+            TextPickerModelStatic::SetIsCascade(frameNode, textPickerOptions.isCascade);
+            TextPickerModelStatic::SetHasSelectAttr(frameNode, textPickerOptions.hasSelected);
+            TextPickerModelStatic::SetColumns(frameNode, textPickerOptions.options);
+            TextPickerModelStatic::SetValues(frameNode, textPickerOptions.values);
             if (textPickerOptions.isCascade || textPickerOptions.hasSelected) {
-                TextPickerModelNG::SetSelecteds(frameNode, textPickerOptions.selecteds);
+                TextPickerModelStatic::SetSelecteds(frameNode, textPickerOptions.selecteds);
             }
         }
     }
@@ -388,7 +389,7 @@ void DefaultPickerItemHeight0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto height = Converter::OptConvert<Dimension>(*value);
-    TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, height);
+    TextPickerModelStatic::SetDefaultPickerItemHeight(frameNode, height);
 }
 void DefaultPickerItemHeight1Impl(Ark_NativePointer node,
                                   const Opt_Union_Number_String* value)
@@ -408,7 +409,7 @@ void CanLoop0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    TextPickerModelNG::SetCanLoop(frameNode, *convValue);
+    TextPickerModelStatic::SetCanLoop(frameNode, *convValue);
 }
 void CanLoop1Impl(Ark_NativePointer node,
                   const Opt_Boolean* value)
@@ -432,7 +433,7 @@ void DisappearTextStyle0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, *convValue);
+    TextPickerModelStatic::SetDisappearTextStyle(frameNode, theme, *convValue);
 }
 void DisappearTextStyle1Impl(Ark_NativePointer node,
                              const Opt_PickerTextStyle* value)
@@ -456,7 +457,7 @@ void TextStyle0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    TextPickerModelNG::SetNormalTextStyle(frameNode, theme, *convValue);
+    TextPickerModelStatic::SetNormalTextStyle(frameNode, theme, *convValue);
 }
 void TextStyle1Impl(Ark_NativePointer node,
                     const Opt_PickerTextStyle* value)
@@ -480,7 +481,7 @@ void SelectedTextStyle0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, *convValue);
+    TextPickerModelStatic::SetSelectedTextStyle(frameNode, theme, *convValue);
 }
 void SelectedTextStyle1Impl(Ark_NativePointer node,
                             const Opt_PickerTextStyle* value)
@@ -500,7 +501,7 @@ void DisableTextStyleAnimationImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    TextPickerModelNG::SetDisableTextStyleAnimation(frameNode, *convValue);
+    TextPickerModelStatic::SetDisableTextStyleAnimation(frameNode, *convValue);
 }
 void DefaultTextStyleImpl(Ark_NativePointer node,
                           const Opt_TextPickerTextStyle* value)
@@ -512,7 +513,7 @@ void DefaultTextStyleImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    TextPickerModelNG::SetDefaultTextStyle(frameNode, *convValue);
+    TextPickerModelStatic::SetDefaultTextStyle(frameNode, *convValue);
 }
 void OnAcceptImpl(Ark_NativePointer node,
                   const Opt_Callback_String_Number_Void* value)
@@ -556,7 +557,7 @@ void OnChange0Impl(Ark_NativePointer node,
         auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
         arkCallback.Invoke(value, index);
     };
-    TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onChange));
+    TextPickerModelStatic::SetOnCascadeChange(frameNode, std::move(onChange));
 }
 void OnChange1Impl(Ark_NativePointer node,
                    const Opt_OnTextPickerChangeCallback* value)
@@ -588,7 +589,7 @@ void OnScrollStop0Impl(Ark_NativePointer node,
         auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
         arkCallback.Invoke(value, index);
     };
-    TextPickerModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
+    TextPickerModelStatic::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
 void OnScrollStop1Impl(Ark_NativePointer node,
                        const Opt_TextPickerScrollStopCallback* value)
@@ -620,14 +621,14 @@ void OnEnterSelectedAreaImpl(Ark_NativePointer node,
         auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
         arkCallback.Invoke(value, index);
     };
-    TextPickerModelNG::SetOnEnterSelectedArea(frameNode, std::move(onEnterSelectedArea));
+    TextPickerModelStatic::SetOnEnterSelectedArea(frameNode, std::move(onEnterSelectedArea));
 }
 void SelectedIndex0Impl(Ark_NativePointer node,
                         const Opt_Union_Number_Array_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (TextPickerModelNG::IsSingle(frameNode)) {
+    if (TextPickerModelStatic::IsSingle(frameNode)) {
         TextPickerInterfaceModifier::SetSingleRange(frameNode, value);
     } else {
         TextPickerInterfaceModifier::SetMultiRange(frameNode, value);
@@ -668,7 +669,7 @@ void Divider0Impl(Ark_NativePointer node,
         ? dividerParams->endMargin
         : divider.endMargin;
 
-    TextPickerModelNG::SetDivider(frameNode, divider);
+    TextPickerModelStatic::SetDivider(frameNode, divider);
 }
 void Divider1Impl(Ark_NativePointer node,
                   const Opt_DividerOptions* value)
@@ -685,7 +686,7 @@ void GradientHeight0Impl(Ark_NativePointer node,
     if (heightDimension && heightDimension->ConvertToVp() > 1.0f) {
         heightDimension.reset();
     }
-    TextPickerModelNG::SetGradientHeight(frameNode, heightDimension);
+    TextPickerModelStatic::SetGradientHeight(frameNode, heightDimension);
 }
 void GradientHeight1Impl(Ark_NativePointer node,
                          const Opt_Length* value)
@@ -698,7 +699,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
-    TextPickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
+    TextPickerModelStatic::SetEnableHapticFeedback(frameNode, convValue);
 }
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)
@@ -706,7 +707,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
-    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+    TextPickerModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
 }
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Union_Number_Array_Number_Void* callback)
@@ -728,7 +729,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
             arkCallback.Invoke(result);
         }
     };
-    TextPickerModelNG::SetOnSelectedChangeEvent(frameNode, std::move(onEvent));
+    TextPickerModelStatic::SetOnSelectedChangeEvent(frameNode, std::move(onEvent));
 }
 void _onChangeEvent_valueImpl(Ark_NativePointer node,
                               const Callback_Union_String_Array_String_Void* callback)
@@ -750,7 +751,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
             arkCallback.Invoke(result);
         }
     };
-    TextPickerModelNG::SetOnValueChangeEvent(frameNode, std::move(onEvent));
+    TextPickerModelStatic::SetOnValueChangeEvent(frameNode, std::move(onEvent));
 }
 } // TextPickerAttributeModifier
 const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
