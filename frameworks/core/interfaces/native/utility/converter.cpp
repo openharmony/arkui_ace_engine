@@ -1981,7 +1981,10 @@ EffectOption Convert(const Ark_BackgroundEffectOptions& src)
     dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
     dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
     dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    if (auto color = OptConvert<Color>(src.inactiveColor); color.has_value()) {
+        dst.inactiveColor = color.value();
+        dst.isValidColor = true;
+    }
     LOGE("OHOS::Ace::NG::Converter::Convert -> EffectOption::BlurType is not supported");
     return dst;
 }
@@ -2099,11 +2102,15 @@ BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
     dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
     dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
     if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
-        dst.scale = static_cast<double>(*scaleOpt);
+        auto scale = static_cast<double>(*scaleOpt);
+        dst.scale = std::clamp(scale, 0.0, 1.0);
     }
     dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
     dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    if (auto color = OptConvert<Color>(src.inactiveColor); color.has_value()) {
+        dst.inactiveColor = color.value();
+        dst.isValidColor = true;
+    }
     return dst;
 }
 

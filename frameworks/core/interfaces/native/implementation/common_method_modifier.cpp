@@ -396,6 +396,17 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_
 
 namespace GeneratedModifier {
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
+
+namespace CommonMethodModifier {
+void BackgroundEffect1Impl(
+    Ark_NativePointer node, const Opt_BackgroundEffectOptions* options, const Opt_SystemAdaptiveOptions* sysOptions);
+void ForegroundBlurStyle1Impl(Ark_NativePointer node, const Opt_BlurStyle* style,
+    const Opt_ForegroundBlurStyleOptions* options, const Opt_SystemAdaptiveOptions* sysOptions);
+void Blur1Impl(Ark_NativePointer node,
+    const Opt_Number* blurRadius,
+    const Opt_BlurOptions* options,
+    const Opt_SystemAdaptiveOptions* sysOptions);
+} // namespace CommonMethodModifier
 }
 
 auto g_bindSheetCallbacks1 = [](SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions) {
@@ -2131,14 +2142,7 @@ void BackgroundImagePositionImpl(Ark_NativePointer node,
 void BackgroundEffect0Impl(Ark_NativePointer node,
                            const Opt_BackgroundEffectOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<EffectOption>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    // ViewAbstract::SetBackgroundEffect(frameNode, *convValue);
+    BackgroundEffect1Impl(node, value, nullptr);
 }
 void BackgroundEffect1Impl(Ark_NativePointer node,
                            const Opt_BackgroundEffectOptions* options,
@@ -2146,9 +2150,9 @@ void BackgroundEffect1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(options);
-    //auto convValue = Converter::OptConvert<type>(options); // for enums
-    //CommonMethodModelNG::SetBackgroundEffect1(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<EffectOption>(options);
+    auto sysAdaptiveOptions = Converter::OptConvertPtr<SysOptions>(sysOptions);
+    ViewAbstractModelStatic::SetBackgroundEffect(frameNode, convValue, sysAdaptiveOptions);
 }
 void BackgroundImageResizableImpl(Ark_NativePointer node,
                                   const Opt_ResizableOptions* value)
@@ -5013,16 +5017,7 @@ void ForegroundBlurStyle0Impl(Ark_NativePointer node,
                               const Opt_BlurStyle* value,
                               const Opt_ForegroundBlurStyleOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    BlurStyleOption convValue;
-    if (auto opt = Converter::OptConvertPtr<BlurStyleOption>(options); opt) {
-        convValue = *opt;
-    }
-    if (auto style = Converter::OptConvertPtr<BlurStyle>(value); style) {
-        convValue.blurStyle = *style;
-    }
-    // ViewAbstract::SetForegroundBlurStyle(frameNode, convValue);
+    ForegroundBlurStyle1Impl(node, value, options, nullptr);
 }
 void ForegroundBlurStyle1Impl(Ark_NativePointer node,
                               const Opt_BlurStyle* style,
@@ -5031,9 +5026,13 @@ void ForegroundBlurStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(style);
-    //auto convValue = Converter::OptConvert<type>(style); // for enums
-    //CommonMethodModelNG::SetForegroundBlurStyle1(frameNode, convValue);
+    auto blurStyleOptions = Converter::OptConvertPtr<BlurStyleOption>(options);
+    auto blurStyle = Converter::OptConvertPtr<BlurStyle>(style);
+    if (blurStyleOptions && blurStyle) {
+        blurStyleOptions->blurStyle = *blurStyle;
+    }
+    auto sysAdaptiveOptions = Converter::OptConvertPtr<SysOptions>(sysOptions);
+    ViewAbstractModelStatic::SetForegroundBlurStyle(frameNode, blurStyleOptions, sysAdaptiveOptions);
 }
 void FocusScopeId0Impl(Ark_NativePointer node,
                        const Opt_String* id,
@@ -5122,20 +5121,7 @@ void Blur0Impl(Ark_NativePointer node,
                const Opt_Number* value,
                const Opt_BlurOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto blur = Converter::OptConvertPtr<float>(value);
-    if (!blur) {
-        // TODO: Reset value
-        return;
-    }
-    BlurOption blurOptions;
-    auto optionsOpt = Converter::OptConvertPtr<BlurOption>(options);
-    if (optionsOpt.has_value()) {
-        blurOptions = optionsOpt.value();
-    }
-    CalcDimension dimensionBlur(*blur, DimensionUnit::PX);
-    // ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
+    Blur1Impl(node, value, options, nullptr);
 }
 void Blur1Impl(Ark_NativePointer node,
                const Opt_Number* blurRadius,
@@ -5145,13 +5131,10 @@ void Blur1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto blur = Converter::OptConvertPtr<float>(blurRadius).value_or(0.f);
-    BlurOption blurOptions;
     auto optionsOpt = Converter::OptConvertPtr<BlurOption>(options);
-    if (optionsOpt.has_value()) {
-        blurOptions = optionsOpt.value();
-    }
+    auto sysOptionsOpt = Converter::OptConvertPtr<SysOptions>(sysOptions);
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    // ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
+    ViewAbstractModelStatic::SetFrontBlur(frameNode, dimensionBlur, optionsOpt, sysOptionsOpt);
 }
 void LinearGradientBlur0Impl(Ark_NativePointer node,
                              const Opt_Number* value,

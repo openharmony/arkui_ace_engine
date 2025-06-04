@@ -140,6 +140,27 @@ public:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack);
 
+    static void SetForegroundBlurStyle(FrameNode* frameNode,
+        const std::optional<BlurStyleOption>& fgBlurStyle, const std::optional<SysOptions>& sysOptions)
+    {
+        ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle.value_or(BlurStyleOption()),
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
+    static void SetBackgroundEffect(FrameNode* frameNode,
+        const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions)
+    {
+        ViewAbstract::SetBackgroundEffect(frameNode, effectOption.value_or(EffectOption()),
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
+    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius,
+        const std::optional<BlurOption>& blurOption, const std::optional<SysOptions>& sysOptions)
+    {
+        ViewAbstract::SetFrontBlur(frameNode, radius, blurOption.value_or(BlurOption()),
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
     static void BindBackground(FrameNode* frameNode,
         std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);
     static void SetFlexGrow(FrameNode* frameNode, float value);
@@ -218,6 +239,9 @@ private:
     static void BindContextMenuSingle(FrameNode* targetNode,
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 
+    static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
+        .disableSystemAdaptation = false
+    };
 };
 } // namespace OHOS::Ace::NG
 
