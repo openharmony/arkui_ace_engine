@@ -3623,6 +3623,12 @@ void RichEditorPattern::HandleBlurEvent()
         ResetSelection();
         CloseKeyboard(false);
     }
+#ifdef ANDROID_PLATFORM
+    if (HasConnection()) {
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
+    }
+#endif
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -10807,7 +10813,7 @@ void RichEditorPattern::StopEditing()
 
     // The selection status disappears, the cursor is hidden, and the soft keyboard is exited
     HandleBlurEvent();
-#ifdef CROSS_PLATFORM
+#ifdef IOS_PLATFORM
     CloseKeyboard(false);
 #endif
     // In order to avoid the physical keyboard being able to type, you need to make sure that you lose focus
