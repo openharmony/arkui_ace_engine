@@ -4561,9 +4561,6 @@ void PipelineContext::Destroy()
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
     dirtyRequestFocusNode_.Reset();
-    if (textFieldManager_ && textFieldManager_->GetImeShow()) {
-        InputMethodManager::GetInstance()->CloseKeyboardInPipelineDestroy();
-    }
     auto formEventMgr = this->GetFormEventManager();
     if (formEventMgr) {
         formEventMgr->ClearEtsCardTouchEventCallback();
