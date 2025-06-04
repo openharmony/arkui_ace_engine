@@ -646,7 +646,7 @@ void UIExtensionManager::RegisterListenerIfNeeded()
             CHECK_NULL_VOID(mgr);
             mgr->NotifyUECProviderIfNeedded();
         };
-    TAG_LOGI(AceLogTag::ACE_LAYOUT, "UIExtensionManager register listener");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtensionManager register listener");
     containerModalListenerId_ = ContainerModalViewEnhance::AddButtonsRectChangeListener(
         AceType::RawPtr(pipeline), std::move(containerModalListener));
     hasRegisterListener_ = true;
@@ -668,7 +668,7 @@ void UIExtensionManager::UnregisterListenerIfNeeded()
 
     auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
-    TAG_LOGI(AceLogTag::ACE_LAYOUT, "UIExtensionManager unregister listener");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtensionManager unregister listener");
     ContainerModalViewEnhance::RemoveButtonsRectChangeListener(
         AceType::RawPtr(pipeline), containerModalListenerId_);
     hasRegisterListener_ = false;
@@ -697,7 +697,8 @@ void UIExtensionManager::NotifyUECProviderIfNeedded()
         if (needNotify) {
             AAFwk::Want avoidInfoWant;
             avoidInfoMgr->BuildAvoidInfo(newAvoidInfo, avoidInfoWant);
-            TAG_LOGI(AceLogTag::ACE_LAYOUT, "UECManager send AvoidInfo: %{public}s", newAvoidInfo.ToString().c_str());
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UECManager send AvoidInfo: %{public}s",
+                newAvoidInfo.ToString().c_str());
             uecPattern->SendBusinessData(UIContentBusinessCode::NOTIFY_AVOID_INFO_CHANGE,
                 std::move(avoidInfoWant), BusinessDataSendType::ASYNC);
         }

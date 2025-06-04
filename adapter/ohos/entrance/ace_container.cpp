@@ -2995,7 +2995,7 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(
     }
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
-        TAG_LOGD(ACE_LAYOUT, "SafeArea get success, type :%{public}d, insets :%{public}s",
+        TAG_LOGD(ACE_SAFE_AREA, "SafeArea get success, type :%{public}d, insets :%{public}s",
             static_cast<int32_t>(type), safeAreaInsets.ToString().c_str());
         return safeAreaInsets;
     }
@@ -4454,7 +4454,7 @@ void AceContainer::RegisterAvoidInfoDataProcessCallback()
     CHECK_NULL_VOID(avoidInfoMgr);
     auto parseCallback = [](const AAFwk::Want& want, NG::ContainerModalAvoidInfo& info) {
         if (!want.HasParameter("needAvoid")) {
-            TAG_LOGW(AceLogTag::ACE_LAYOUT, "Invalid want for ContainerModalAvoidInfo");
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Invalid want for ContainerModalAvoidInfo");
             return false;
         }
         bool needAvoid = want.GetBoolParam("needAvoid", false);
