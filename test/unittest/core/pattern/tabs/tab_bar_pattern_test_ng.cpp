@@ -2905,6 +2905,7 @@ HWTEST_F(TabBarPatternTestNg, DumpAdvanceInfo, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
+    DumpLog::GetInstance().description_.clear();
     tabBarPattern_->DumpAdvanceInfo();
     EXPECT_EQ(DumpLog::GetInstance().description_[0], "isRTL:false\n");
     EXPECT_EQ(DumpLog::GetInstance().description_[10],"scrollMargin:0.000000\n");
