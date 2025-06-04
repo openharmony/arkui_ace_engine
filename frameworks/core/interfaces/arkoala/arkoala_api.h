@@ -397,7 +397,7 @@ struct ArkUIDragEvent {
     ArkUI_Int32 requestId;
     bool isDragEndPending;
     char* bundleName;
-    bool* isRemoteDev;
+    bool isRemoteDev;
     ArkUI_Int32 displayId;
 };
 

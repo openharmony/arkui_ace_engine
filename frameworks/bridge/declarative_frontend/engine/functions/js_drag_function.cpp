@@ -170,12 +170,14 @@ void JsDragEvent::GetScreenY(const JSCallbackInfo& args)
 
 void JsDragEvent::GetDragSource(const JSCallbackInfo& args)
 {
+    CHECK_NULL_VOID(dragEvent_);
     JSRef<JSVal> dragSource = JSRef<JSVal>::Make(ToJSValue(dragEvent_->GetDragSource()));
     args.SetReturnValue(dragSource);
 }
 
 void JsDragEvent::IsRemote(const JSCallbackInfo& args)
 {
+    CHECK_NULL_VOID(dragEvent_);
     JSRef<JSVal> isRemoteDev = JSRef<JSVal>::Make(ToJSValue(dragEvent_->isRemoteDev()));
     args.SetReturnValue(isRemoteDev);
 }
