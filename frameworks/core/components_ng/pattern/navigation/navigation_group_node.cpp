@@ -1556,6 +1556,7 @@ void NavigationGroupNode::RemoveDialogDestination(bool isReplace, bool isTrigger
         }
         navDestination->CleanContent();
         parent->RemoveChild(navDestination);
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     hideNodes_.clear();
 }
