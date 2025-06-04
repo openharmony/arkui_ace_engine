@@ -172,7 +172,8 @@ public:
             if (attribute == ATTRIBUTE_CONTROL_BUTTON_HEIGHT_NAME) {
                 inputValue.height = checkVal;
             }
-            modifier_->setControlButton(node_, &inputValue);
+            auto valueOpt = Converter::ArkValue<Opt_ButtonStyle>(inputValue);
+            modifier_->setControlButton(node_, &valueOpt);
             jsonValue = GetJsonValue(node_);
             cbJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
             resultStr = GetAttrValue<std::string>(cbJson, attribute);
@@ -269,9 +270,9 @@ HWTEST_F(SideBarContainerModifierTest, setShowSideBarTestDefaultValues, TestSize
     EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_SIDE_BAR_DEFAULT_VALUE);
 }
 
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> showSideBarValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> showSideBarValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -284,10 +285,10 @@ HWTEST_F(SideBarContainerModifierTest, setShowSideBarTestValidValues, TestSize.L
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Boolean inputValueShowSideBar;
+    Opt_Boolean inputValueShowSideBar;
     for (auto [passed, checkVal, expected]: showSideBarValidValues) {
         inputValueShowSideBar = checkVal;
-        modifier_->setShowSideBar(node_, inputValueShowSideBar);
+        modifier_->setShowSideBar(node_, &inputValueShowSideBar);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_SIDE_BAR_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -404,7 +405,8 @@ HWTEST_F(SideBarContainerModifierTest, setControlButtonTestIconsStringValidValue
         WriteTo(inputStyle.icons).shown = value;
         WriteTo(inputStyle.icons).hidden = value;
         WriteTo(inputStyle.icons).switching = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(value);
-        modifier_->setControlButton(node_, &inputStyle);
+        auto style = Converter::ArkValue<Opt_ButtonStyle>(inputStyle);
+        modifier_->setControlButton(node_, &style);
         auto jsonValue = GetJsonValue(node_);
         auto resultControlButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
         auto resultIcons =
@@ -448,7 +450,8 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setControlButtonTestIconsPixelMa
         WriteTo(inputStyle.icons).shown = value;
         WriteTo(inputStyle.icons).hidden = value;
         WriteTo(inputStyle.icons).switching = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(value);
-        modifier_->setControlButton(node_, &inputStyle);
+        auto style = Converter::ArkValue<Opt_ButtonStyle>(inputStyle);
+        modifier_->setControlButton(node_, &style);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
         ASSERT_NE(layoutProperty, nullptr);
@@ -483,9 +486,9 @@ HWTEST_F(SideBarContainerModifierTest, setShowControlButtonTestDefaultValues, Te
     EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_CONTROL_BUTTON_DEFAULT_VALUE);
 }
 
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> showControlButtonValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> showControlButtonValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -497,10 +500,10 @@ HWTEST_F(SideBarContainerModifierTest, setShowControlButtonTestValidValues, Test
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Ark_Boolean inputValue;
+    Opt_Boolean inputValue;
     for (auto [passed, checkVal, expected]: showControlButtonValidValues) {
         inputValue = checkVal;
-        modifier_->setShowControlButton(node_, inputValue);
+        modifier_->setShowControlButton(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_CONTROL_BUTTON_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -529,7 +532,8 @@ HWTEST_F(SideBarContainerModifierTest, setOnChangeTest, TestSize.Level1)
             };
         }
     };
-    modifier_->setOnChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Boolean_Void>(arkCallback);
+    modifier_->setOnChange(node_, &optCallback);
     auto eventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
     eventHub->FireChangeEvent(true);
     EXPECT_TRUE(checkEvent.has_value());
@@ -573,7 +577,8 @@ HWTEST_F(SideBarContainerModifierTest, setSideBarWidth0TestValidValues, TestSize
     Ark_Number inputValueSideBarWidth;
     for (auto [passed, checkVal, expected]: mSideBarWidthValidValues1) {
         inputValueSideBarWidth = checkVal;
-        modifier_->setSideBarWidth0(node_, &inputValueSideBarWidth);
+        auto width = Converter::ArkValue<Opt_Number>(inputValueSideBarWidth);
+        modifier_->setSideBarWidth0(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_BAR_WIDTH_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -614,7 +619,8 @@ HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidth0TestValidValues, TestS
     Ark_Number inputValueMinSideBarWidth;
     for (auto [passed, checkVal, expected]: mMinSideBarWidthValidValues1) {
         inputValueMinSideBarWidth = checkVal;
-        modifier_->setMinSideBarWidth0(node_, &inputValueMinSideBarWidth);
+        auto width = Converter::ArkValue<Opt_Number>(inputValueMinSideBarWidth);
+        modifier_->setMinSideBarWidth0(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_SIDE_BAR_WIDTH_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -655,7 +661,8 @@ HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidth0TestValidValues, TestS
     Ark_Number inputValueMaxSideBarWidth;
     for (auto [passed, checkVal, expected]: maxSideBarWidthValidValues1) {
         inputValueMaxSideBarWidth = checkVal;
-        modifier_->setMaxSideBarWidth0(node_, &inputValueMaxSideBarWidth);
+        auto width = Converter::ArkValue<Opt_Number>(inputValueMaxSideBarWidth);
+        modifier_->setMaxSideBarWidth0(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_SIDE_BAR_WIDTH_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -682,7 +689,8 @@ HWTEST_F(SideBarContainerModifierTest, setSideBarWidth1TestValidValues, TestSize
     Ark_Length inputValueSideBarWidth;
     for (auto [passed, checkVal, expected]: sideBarWidthValidValues2) {
         inputValueSideBarWidth = checkVal;
-        modifier_->setSideBarWidth1(node_, &inputValueSideBarWidth);
+        auto width = Converter::ArkValue<Opt_Length>(inputValueSideBarWidth);
+        modifier_->setSideBarWidth1(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_BAR_WIDTH_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -710,7 +718,8 @@ HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidth1TestValidValues, TestS
     Ark_Length inputValueMinSideBarWidth;
     for (auto [passed, checkVal, expected]: mMinSideBarWidthValidValues2) {
         inputValueMinSideBarWidth = checkVal;
-        modifier_->setMinSideBarWidth1(node_, &inputValueMinSideBarWidth);
+        auto width = Converter::ArkValue<Opt_Length>(inputValueMinSideBarWidth);
+        modifier_->setMinSideBarWidth1(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_SIDE_BAR_WIDTH_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -737,7 +746,8 @@ HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidth1TestValidValues, TestS
     Ark_Length inputValue;
     for (auto [passed, checkVal, expected]: mMaxSideBarWidthValidValues2) {
         inputValue = checkVal;
-        modifier_->setMaxSideBarWidth1(node_, &inputValue);
+        auto width = Converter::ArkValue<Opt_Length>(inputValue);
+        modifier_->setMaxSideBarWidth1(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_SIDE_BAR_WIDTH_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -759,9 +769,9 @@ HWTEST_F(SideBarContainerModifierTest, setAutoHideTestDefaultValues, TestSize.Le
 }
 
 // Valid values for attribute 'autoHide' of method 'autoHide'
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> autoHideValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> autoHideValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -773,10 +783,10 @@ HWTEST_F(SideBarContainerModifierTest, setAutoHideTestValidValues, TestSize.Leve
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Ark_Boolean inputValueAutoHide;
+    Opt_Boolean inputValueAutoHide;
     for (auto [passed, checkVal, expected]: autoHideValidValues) {
         inputValueAutoHide = checkVal;
-        modifier_->setAutoHide(node_, inputValueAutoHide);
+        modifier_->setAutoHide(node_, &inputValueAutoHide);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_HIDE_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -815,7 +825,8 @@ HWTEST_F(SideBarContainerModifierTest, setSideBarPositionTestValidValues, TestSi
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     for (auto [passed, checkVal, expected]: sbPositionValidValues) {
-        modifier_->setSideBarPosition(node_, checkVal);
+        auto position = Converter::ArkValue<Opt_SideBarPosition>(checkVal);
+        modifier_->setSideBarPosition(node_, &position);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_BAR_POSITION_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -856,7 +867,8 @@ HWTEST_F(SideBarContainerModifierTest, setMinContentWidthTestValidValues, TestSi
     Ark_Length inputValue;
     for (auto [passed, checkVal, expected]: minContentWidthValidValues) {
         inputValue = checkVal;
-        modifier_->setMinContentWidth(node_, &inputValue);
+        auto width = Converter::ArkValue<Opt_Length>(inputValue);
+        modifier_->setMinContentWidth(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_CONTENT_WIDTH_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -952,20 +964,19 @@ HWTEST_F(SideBarContainerModifierTest, setOnChangeEventSelectImpl, TestSize.Leve
 
     struct CheckEvent {
         int32_t nodeId;
-        bool value;
+        std::optional<bool> value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Boolean parameter) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Opt_Boolean parameter) {
         checkEvent = {
             .nodeId = resourceId,
-            .value = Converter::Convert<bool>(parameter)
+            .value = Converter::OptConvert<bool>(parameter)
         };
     };
 
-    Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
-
+    auto arkCallback = Converter::ArkValue<Callback_Opt_Boolean_Void>(checkCallback, contextId);
     modifier_->set_onChangeEvent_showSideBar(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);

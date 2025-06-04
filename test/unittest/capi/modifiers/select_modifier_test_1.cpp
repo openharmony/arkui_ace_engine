@@ -158,16 +158,16 @@ HWTEST_F(SelectModifierTest, setValue0TestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SelectModifierTest, setValue0TestValueInvalidValues, TestSize.Level1)
 {
-    Ark_ResourceStr initValueValue;
+    Opt_ResourceStr initValueValue;
 
     // Initial setup
-    initValueValue = ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    initValueValue = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueValue](const std::string& input, const Ark_ResourceStr& value) {
-        Ark_ResourceStr inputValueValue = initValueValue;
+        Opt_ResourceStr inputValueValue = initValueValue;
 
         modifier_->setValue0(node_, &inputValueValue);
-        inputValueValue = value;
+        inputValueValue = Converter::ArkValue<Opt_ResourceStr>(value);
         modifier_->setValue0(node_, &inputValueValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);

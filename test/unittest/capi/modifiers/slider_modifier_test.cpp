@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "slider_modifier_test.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "test/unittest/capi/modifiers/generated/test_fixtures.h"
@@ -29,229 +30,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {
-const auto ATTRIBUTE_BLOCK_SIZE_NAME = "blockSize";
-const auto ATTRIBUTE_SLIDE_RANGE_NAME = "slideRange";
-const auto ATTRIBUTE_CONSTRUCTOR_NAME = "constructor";
-const auto ATTRIBUTE_VALUE_NAME = "value";
-const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "0.000000";
-const auto ATTRIBUTE_MIN_NAME = "min";
-const auto ATTRIBUTE_MIN_DEFAULT_VALUE = "0.000000";
-const auto ATTRIBUTE_MAX_NAME = "max";
-const auto ATTRIBUTE_MAX_DEFAULT_VALUE = "100.000000";
-const auto ATTRIBUTE_STEP_NAME = "step";
-const auto ATTRIBUTE_STEP_DEFAULT_VALUE = "1.000000";
-const auto ATTRIBUTE_STYLE_NAME = "style";
-const auto ATTRIBUTE_STYLE_DEFAULT_VALUE = "SliderStyle.OutSet";
-const auto ATTRIBUTE_DIRECTION_NAME = "direction";
-const auto ATTRIBUTE_DIRECTION_DEFAULT_VALUE = "Axis.Horizontal";
-const auto ATTRIBUTE_REVERSE_NAME = "reverse";
-const auto ATTRIBUTE_REVERSE_DEFAULT_VALUE = "false";
-const auto ATTRIBUTE_BLOCK_COLOR_NAME = "blockColor";
-const auto ATTRIBUTE_BLOCK_COLOR_DEFAULT_VALUE = "#FFFFFFFF";
-const auto ATTRIBUTE_TRACK_COLOR_NAME = "trackColor";
-const auto ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE = "#FFFF0000";
-const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
-const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "#FFFF0000";
-const auto ATTRIBUTE_MIN_LABEL_NAME = "min";
-const auto ATTRIBUTE_MAX_LABEL_NAME = "max";
-const auto ATTRIBUTE_SHOW_STEPS_NAME = "showSteps";
-const auto ATTRIBUTE_SHOW_STEPS_DEFAULT_VALUE = "false";
-const auto ATTRIBUTE_SHOW_TIPS_NAME = "showTips";
-const auto ATTRIBUTE_SHOW_TIPS_DEFAULT_VALUE = "false";
-const auto ATTRIBUTE_CONTENT_NAME = "content";
-const auto ATTRIBUTE_CONTENT_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_TRACK_THICKNESS_NAME = "trackThickness";
-const auto ATTRIBUTE_TRACK_THICKNESS_DEFAULT_VALUE = "4.00vp";
-const auto ATTRIBUTE_BLOCK_BORDER_COLOR_NAME = "blockBorderColor";
-const auto ATTRIBUTE_BLOCK_BORDER_COLOR_DEFAULT_VALUE = "#00000000";
-const auto ATTRIBUTE_BLOCK_BORDER_WIDTH_NAME = "blockBorderWidth";
-const auto ATTRIBUTE_BLOCK_BORDER_WIDTH_DEFAULT_VALUE = "0.00px";
-const auto ATTRIBUTE_STEP_COLOR_NAME = "stepColor";
-const auto ATTRIBUTE_STEP_COLOR_DEFAULT_VALUE = "#19FF0000";
-const auto ATTRIBUTE_TRACK_BORDER_RADIUS_NAME = "trackBorderRadius";
-const auto ATTRIBUTE_TRACK_BORDER_RADIUS_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME = "selectedBorderRadius";
-const auto ATTRIBUTE_SELECTED_BORDER_RADIUS_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_BLOCK_SIZE_WIDTH_NAME = "width";
-const auto ATTRIBUTE_BLOCK_SIZE_WIDTH_DEFAULT_VALUE = "16.00vp";
-const auto ATTRIBUTE_BLOCK_SIZE_HEIGHT_NAME = "height";
-const auto ATTRIBUTE_BLOCK_SIZE_HEIGHT_DEFAULT_VALUE = "16.00vp";
-const auto ATTRIBUTE_BLOCK_STYLE_TYPE_NAME = "blockType";
-const auto ATTRIBUTE_BLOCK_STYLE_TYPE_DEFAULT_VALUE = "BlockStyleType.DEFAULT";
-const auto ATTRIBUTE_STEP_SIZE_NAME = "stepSize";
-const auto ATTRIBUTE_STEP_SIZE_DEFAULT_VALUE = "4.00vp";
-const auto ATTRIBUTE_SLIDER_INTERACTION_MODE_NAME = "sliderInteractionMode";
-const auto ATTRIBUTE_SLIDER_INTERACTION_MODE_DEFAULT_VALUE = "SliderInteraction.SLIDE_AND_CLICK";
-const auto ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_NAME = "minResponsiveDistance";
-const auto ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_DEFAULT_VALUE = "0.000000";
-const auto ATTRIBUTE_SLIDE_RANGE_FROM_NAME = "from";
-const auto ATTRIBUTE_SLIDE_RANGE_FROM_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_SLIDE_RANGE_TO_NAME = "to";
-const auto ATTRIBUTE_SLIDE_RANGE_TO_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_TRACK_COLOR_GRADIENT_COLOR_NAME = "color";
-const auto ATTRIBUTE_TRACK_COLOR_GRADIENT_OFFSET_NAME = "offset";
-#ifdef SUPPORT_DIGITAL_CROWN
-const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
-const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "CrownSensitivity.MEDIUM";
-#endif
-const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
-const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
-static const std::string EXPECTED_TRUE("true");
-static const std::string EXPECTED_FALSE("false");
-} // namespace
-
-namespace Fixtures {
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberInitialValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberValueValidValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "2.2", Converter::ArkValue<Ark_Number>(2.2), "2.200000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberValueInvalidValuesSlider = {
-    { "-100", Converter::ArkValue<Ark_Number>(-100), ATTRIBUTE_MIN_DEFAULT_VALUE },
-    { "200", Converter::ArkValue<Ark_Number>(200), ATTRIBUTE_MAX_DEFAULT_VALUE },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberMinValidValuesSlider = {
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "2.2", Converter::ArkValue<Ark_Number>(2.2), "2.200000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-    { "-100", Converter::ArkValue<Ark_Number>(-100), "-100.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberMinInvalidValuesSlider = {
-    { "100", Converter::ArkValue<Ark_Number>(100), ATTRIBUTE_MIN_DEFAULT_VALUE },
-    { "200", Converter::ArkValue<Ark_Number>(200), ATTRIBUTE_MIN_DEFAULT_VALUE },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberMaxValidValuesSlider = {
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "2.2", Converter::ArkValue<Ark_Number>(2.2), "2.200000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-    { "200", Converter::ArkValue<Ark_Number>(200), "200.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberMaxInvalidValuesSlider = {
-    { "-100", Converter::ArkValue<Ark_Number>(-100), ATTRIBUTE_MIN_DEFAULT_VALUE },
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberStepValidValuesSlider = {
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "0.5", Converter::ArkValue<Ark_Number>(0.5), "0.500000" },
-    { "10", Converter::ArkValue<Ark_Number>(10), "10.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberStepInvalidValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), ATTRIBUTE_STEP_DEFAULT_VALUE },
-    { "-1", Converter::ArkValue<Ark_Number>(-1), ATTRIBUTE_STEP_DEFAULT_VALUE },
-    { "200", Converter::ArkValue<Ark_Number>(200), ATTRIBUTE_STEP_DEFAULT_VALUE },
-};
-
-std::vector<std::tuple<std::string, Ark_SliderStyle,
-    std::string>> testFixtureEnumSliderStyleValidValuesSlider = {
-    { "ARK_SLIDER_STYLE_OUT_SET", ARK_SLIDER_STYLE_OUT_SET, "SliderStyle.OutSet" },
-    { "ARK_SLIDER_STYLE_IN_SET", ARK_SLIDER_STYLE_IN_SET, "SliderStyle.InSet" },
-    { "ARK_SLIDER_STYLE_NONE", ARK_SLIDER_STYLE_NONE, "SliderStyle.NONE" },
-};
-
-std::vector<std::tuple<std::string, Ark_Axis, std::string>> testFixtureEnumAxisValidValuesSlider = {
-    { "ARK_AXIS_VERTICAL", ARK_AXIS_VERTICAL, "Axis.Vertical" },
-    { "ARK_AXIS_HORIZONTAL", ARK_AXIS_HORIZONTAL, "Axis.Horizontal" },
-};
-
-std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureNumberMinLabelValidValuesSlider = {
-    { "1", Converter::ArkValue<Ark_String>("1"), "1.000000" },
-    { "2.2", Converter::ArkValue<Ark_String>("2.2"), "2.200000" },
-    { "99", Converter::ArkValue<Ark_String>("99"), "99.000000" },
-    { "-100", Converter::ArkValue<Ark_String>("-100"), "-100.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureNumberMaxLabelValidValuesSlider = {
-    { "1", Converter::ArkValue<Ark_String>("1"), "1.000000" },
-    { "2.2", Converter::ArkValue<Ark_String>("2.2"), "2.200000" },
-    { "99", Converter::ArkValue<Ark_String>("99"), "99.000000" },
-    { "200", Converter::ArkValue<Ark_String>("200"), "200.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNumNonNegValidValuesThicknessSlider = {
-    { "123", Converter::ArkValue<Ark_Length>(123._px), "123.00px" },
-    { "0", Converter::ArkValue<Ark_Length>(0._px), "4.00vp" },
-    { "1.23f", Converter::ArkValue<Ark_Length>(1.23f), "1.23vp" },
-};
-std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNumNonNegValidValuesSlider = {
-    { "123", Converter::ArkValue<Ark_Length>(123._px), "123.00px" },
-    { "0", Converter::ArkValue<Ark_Length>(0._px), "0.00px" },
-    { "1.23f", Converter::ArkValue<Ark_Length>(1.23f), "1.23vp" },
-};
-
-std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNumNonNegValidValuesBlockSizeSlider = {
-    { "123", Converter::ArkValue<Ark_Length>(123._px), "123.00px" },
-    { "0", Converter::ArkValue<Ark_Length>(0._px), ATTRIBUTE_BLOCK_SIZE_WIDTH_DEFAULT_VALUE },
-    { "1.23f", Converter::ArkValue<Ark_Length>(1.23f), "1.23vp" },
-};
-
-std::vector<std::tuple<std::string, Ark_SliderBlockType,
-    std::string>> testFixtureEnumSliderBlockTypeValidValuesSlider = {
-    { "ARK_SLIDER_BLOCK_TYPE_DEFAULT", ARK_SLIDER_BLOCK_TYPE_DEFAULT, "BlockStyleType.DEFAULT" },
-    { "ARK_SLIDER_BLOCK_TYPE_IMAGE", ARK_SLIDER_BLOCK_TYPE_IMAGE, "BlockStyleType.IMAGE" },
-    { "ARK_SLIDER_BLOCK_TYPE_SHAPE", ARK_SLIDER_BLOCK_TYPE_SHAPE, "BlockStyleType.SHAPE" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberResponsiveDistanceValidValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberRangeFromValidValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberRangeFromInvalidValuesSlider = {
-    { "-1", Converter::ArkValue<Ark_Number>(-1), "-1.000000" },
-    { "200", Converter::ArkValue<Ark_Number>(200), "200.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberRangeToValidValuesSlider = {
-    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberRangeToInvalidValuesSlider = {
-    { "-1", Converter::ArkValue<Ark_Number>(-1), "-1.000000" },
-    { "200", Converter::ArkValue<Ark_Number>(200), "200.000000" },
-};
-
-} // Fixtures
-
-class SliderModifierTest : public ModifierTestBase<GENERATED_ArkUISliderModifier,
-                               &GENERATED_ArkUINodeModifiers::getSliderModifier, GENERATED_ARKUI_SLIDER> {
-public:
-    static void SetUpTestCase()
-    {
-        ModifierTestBase::SetUpTestCase();
-        auto theme = SetupThemeStyle(THEME_PATTERN_SLIDER);
-        SetupTheme<SliderTheme>();
-        for (auto&& res : Fixtures::resourceInitTable) {
-            AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
-            AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
-        }
-    }
-};
 
 /*
  * @tc.name: setSliderOptionsTestDefaultValues
@@ -980,7 +758,8 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
         Ark_ResourceColor inputValueBlockColor = initValueBlockColor;
 
         inputValueBlockColor = value;
-        modifier_->setBlockColor(node_, &inputValueBlockColor);
+        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueBlockColor);
+        modifier_->setBlockColor(node_, &color);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -1020,10 +799,11 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
 
     auto checkValue = [this, &initValueBlockColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueBlockColor = initValueBlockColor;
-
-        modifier_->setBlockColor(node_, &inputValueBlockColor);
+        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueBlockColor);
+        modifier_->setBlockColor(node_, &color);
         inputValueBlockColor = value;
-        modifier_->setBlockColor(node_, &inputValueBlockColor);
+        color = Converter::ArkValue<Opt_ResourceColor>(inputValueBlockColor);
+        modifier_->setBlockColor(node_, &color);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_COLOR_DEFAULT_VALUE)
@@ -1071,7 +851,7 @@ HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestValidValues, TestSize
         inputValueTrackColor = value;
 
         auto colorGradientUnion =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+            Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
 
         modifier_->setTrackColor(node_, &colorGradientUnion);
         auto jsonValue = GetJsonValue(node_);
@@ -1115,12 +895,12 @@ HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestInvalidValues, TestSi
         Ark_ResourceColor inputValueTrackColor = initValueTrackColor;
 
         auto colorGradientUnion =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+            Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
 
         modifier_->setTrackColor(node_, &colorGradientUnion);
         inputValueTrackColor = value;
         colorGradientUnion =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+            Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
         modifier_->setTrackColor(node_, &colorGradientUnion);
 
         auto jsonValue = GetJsonValue(node_);
@@ -1155,7 +935,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorLinearGradientTestValidValues
 
     Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
     auto colorGradientUnion =
-        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+        Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
     modifier_->setTrackColor(node_, &colorGradientUnion);
     auto jsonValue = GetJsonValue(node_);
@@ -1186,7 +966,7 @@ HWTEST_F(SliderModifierTest, setTrackColorLinearGradientTestInvalidValues, TestS
 
     Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
     auto colorGradientUnion =
-        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+        Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
     modifier_->setTrackColor(node_, &colorGradientUnion);
     auto jsonValue = GetJsonValue(node_);
@@ -1224,7 +1004,8 @@ HWTEST_F(SliderModifierTest, setSelectedColor0TestSelectedColorValidValues, Test
         Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
 
         inputValueSelectedColor = value;
-        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
+        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueSelectedColor);
+        modifier_->setSelectedColor0(node_, &color);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -1264,10 +1045,11 @@ HWTEST_F(SliderModifierTest, setSelectedColor0TestSelectedColorInvalidValues, Te
 
     auto checkValue = [this, &initValueSelectedColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
-
-        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
+        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueSelectedColor);
+        modifier_->setSelectedColor0(node_, &color);
         inputValueSelectedColor = value;
-        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
+        color = Converter::ArkValue<Opt_ResourceColor>(inputValueSelectedColor);
+        modifier_->setSelectedColor0(node_, &color);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE)
@@ -1303,7 +1085,7 @@ HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestValidValues, Test
         inputValueTrackColor = value;
 
         auto colorGradientUnion =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+            Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
 
         modifier_->setSelectedColor1(node_, &colorGradientUnion);
         auto jsonValue = GetJsonValue(node_);
@@ -1347,12 +1129,12 @@ HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestInvalidValues, Te
         Ark_ResourceColor inputValueTrackColor = initValueTrackColor;
 
         auto colorGradientUnion =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+            Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
 
         modifier_->setSelectedColor1(node_, &colorGradientUnion);
         inputValueTrackColor = value;
         colorGradientUnion =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+            Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
         modifier_->setSelectedColor1(node_, &colorGradientUnion);
 
         auto jsonValue = GetJsonValue(node_);
@@ -1385,7 +1167,7 @@ HWTEST_F(SliderModifierTest, setSelectedColor1LinearGradientTestValidValues, Tes
 
     Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
     auto colorGradientUnion =
-        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+        Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
     modifier_->setSelectedColor1(node_, &colorGradientUnion);
     auto jsonValue = GetJsonValue(node_);
@@ -1416,7 +1198,7 @@ HWTEST_F(SliderModifierTest, setTrackColor1LinearGradientTestInvalidValues, Test
 
     Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
     auto colorGradientUnion =
-        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+        Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
     modifier_->setSelectedColor1(node_, &colorGradientUnion);
     auto jsonValue = GetJsonValue(node_);
@@ -1454,7 +1236,8 @@ HWTEST_F(SliderModifierTest, setMinLabelTestMinLabelValidValues, TestSize.Level1
         Ark_String inputValueMinLabel = initValueMinLabel;
 
         inputValueMinLabel = value;
-        modifier_->setMinLabel(node_, &inputValueMinLabel);
+        auto minLabel = Converter::ArkValue<Opt_String>(inputValueMinLabel);
+        modifier_->setMinLabel(node_, &minLabel);
         auto jsonValueFull = GetJsonValue(node_);
         auto jsonValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValueFull, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_LABEL_NAME);
@@ -1497,7 +1280,8 @@ HWTEST_F(SliderModifierTest, setMaxLabelTestMaxLabelValidValues, TestSize.Level1
         Ark_String inputValueMaxLabel = initValueMaxLabel;
 
         inputValueMaxLabel = value;
-        modifier_->setMaxLabel(node_, &inputValueMaxLabel);
+        auto maxLabel = Converter::ArkValue<Opt_String>(inputValueMaxLabel);
+        modifier_->setMaxLabel(node_, &maxLabel);
         auto jsonValueFull = GetJsonValue(node_);
         auto jsonValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValueFull, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LABEL_NAME);
@@ -1539,7 +1323,8 @@ HWTEST_F(SliderModifierTest, setShowStepsTestShowStepsValidValues, TestSize.Leve
         Ark_Boolean inputValueShowSteps = initValueShowSteps;
 
         inputValueShowSteps = value;
-        modifier_->setShowSteps(node_, inputValueShowSteps);
+        auto showSteps = Converter::ArkValue<Opt_Boolean>(inputValueShowSteps);
+        modifier_->setShowSteps(node_, &showSteps);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_STEPS_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -1587,7 +1372,8 @@ HWTEST_F(SliderModifierTest, setShowTipsTestShowTipsValidValues, TestSize.Level1
         Opt_ResourceStr realInputValue1 = Converter::ArkValue<Opt_ResourceStr>(initValueContent);
 
         inputValueShowTips = value;
-        modifier_->setShowTips(node_, inputValueShowTips, &realInputValue1);
+        auto showTips = Converter::ArkValue<Opt_Boolean>(inputValueShowTips);
+        modifier_->setShowTips(node_, &showTips, &realInputValue1);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_TIPS_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -1621,7 +1407,8 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentValidValues, TestSize.Level1)
         Opt_ResourceStr& inputValueContent = realInputValue1;
 
         inputValueContent = value;
-        modifier_->setShowTips(node_, inputValueShowTips, &realInputValue1);
+        auto showTips = Converter::ArkValue<Opt_Boolean>(inputValueShowTips);
+        modifier_->setShowTips(node_, &showTips, &realInputValue1);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -1654,10 +1441,10 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentInvalidValues, TestSize.Level
         Ark_Boolean inputValueShowTips = initValueShowTips;
         Opt_ResourceStr realInputValue1;
         Opt_ResourceStr& inputValueContent = realInputValue1;
-
-        modifier_->setShowTips(node_, inputValueShowTips, &realInputValue1);
+        auto showTips = Converter::ArkValue<Opt_Boolean>(inputValueShowTips);
+        modifier_->setShowTips(node_, &showTips, &realInputValue1);
         inputValueContent = value;
-        modifier_->setShowTips(node_, inputValueShowTips, &realInputValue1);
+        modifier_->setShowTips(node_, &showTips, &realInputValue1);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE)
@@ -1699,7 +1486,8 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessValidValues, Tes
         Ark_Length inputValueTrackThickness = initValueTrackThickness;
 
         inputValueTrackThickness = value;
-        modifier_->setTrackThickness(node_, &inputValueTrackThickness);
+        auto valueOpt = Converter::ArkValue<Opt_Length>(inputValueTrackThickness);
+        modifier_->setTrackThickness(node_, &valueOpt);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_THICKNESS_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -1725,10 +1513,11 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessInvalidValues, T
 
     auto checkValue = [this, &initValueTrackThickness](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueTrackThickness = initValueTrackThickness;
-
-        modifier_->setTrackThickness(node_, &inputValueTrackThickness);
+        auto length = Converter::ArkValue<Opt_Length>(inputValueTrackThickness);
+        modifier_->setTrackThickness(node_, &length);
         inputValueTrackThickness = value;
-        modifier_->setTrackThickness(node_, &inputValueTrackThickness);
+        length = Converter::ArkValue<Opt_Length>(inputValueTrackThickness);
+        modifier_->setTrackThickness(node_, &length);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_THICKNESS_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_THICKNESS_DEFAULT_VALUE)
@@ -1770,7 +1559,8 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
         Ark_ResourceColor inputValueBlockBorderColor = initValueBlockBorderColor;
 
         inputValueBlockBorderColor = value;
-        modifier_->setBlockBorderColor(node_, &inputValueBlockBorderColor);
+        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueBlockBorderColor);
+        modifier_->setBlockBorderColor(node_, &color);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -1810,10 +1600,11 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
 
     auto checkValue = [this, &initValueBlockBorderColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueBlockBorderColor = initValueBlockBorderColor;
-
-        modifier_->setBlockBorderColor(node_, &inputValueBlockBorderColor);
+        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueBlockBorderColor);
+        modifier_->setBlockBorderColor(node_, &color);
         inputValueBlockBorderColor = value;
-        modifier_->setBlockBorderColor(node_, &inputValueBlockBorderColor);
+        color = Converter::ArkValue<Opt_ResourceColor>(inputValueBlockBorderColor);
+        modifier_->setBlockBorderColor(node_, &color);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_BORDER_COLOR_DEFAULT_VALUE)
@@ -1859,7 +1650,8 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthValidValues,
         Ark_Length inputValueBlockBorderWidth = initValueBlockBorderWidth;
 
         inputValueBlockBorderWidth = value;
-        modifier_->setBlockBorderWidth(node_, &inputValueBlockBorderWidth);
+        auto length = Converter::ArkValue<Opt_Length>(inputValueBlockBorderWidth);
+        modifier_->setBlockBorderWidth(node_, &length);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_WIDTH_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -1885,10 +1677,11 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthInvalidValue
 
     auto checkValue = [this, &initValueBlockBorderWidth](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueBlockBorderWidth = initValueBlockBorderWidth;
-
-        modifier_->setBlockBorderWidth(node_, &inputValueBlockBorderWidth);
+        auto length = Converter::ArkValue<Opt_Length>(inputValueBlockBorderWidth);
+        modifier_->setBlockBorderWidth(node_, &length);
         inputValueBlockBorderWidth = value;
-        modifier_->setBlockBorderWidth(node_, &inputValueBlockBorderWidth);
+        length = Converter::ArkValue<Opt_Length>(inputValueBlockBorderWidth);
+        modifier_->setBlockBorderWidth(node_, &length);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_WIDTH_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_BORDER_WIDTH_DEFAULT_VALUE)
@@ -1930,7 +1723,8 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
         Ark_ResourceColor inputValueStepColor = initValueStepColor;
 
         inputValueStepColor = value;
-        modifier_->setStepColor(node_, &inputValueStepColor);
+        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueStepColor);
+        modifier_->setStepColor(node_, &color);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -1970,10 +1764,11 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
 
     auto checkValue = [this, &initValueStepColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueStepColor = initValueStepColor;
-
-        modifier_->setStepColor(node_, &inputValueStepColor);
+        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueStepColor);
+        modifier_->setStepColor(node_, &color);
         inputValueStepColor = value;
-        modifier_->setStepColor(node_, &inputValueStepColor);
+        color = Converter::ArkValue<Opt_ResourceColor>(inputValueStepColor);
+        modifier_->setStepColor(node_, &color);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_STEP_COLOR_DEFAULT_VALUE)
@@ -2019,7 +1814,8 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusValidValue
         Ark_Length inputValueTrackBorderRadius = initValueTrackBorderRadius;
 
         inputValueTrackBorderRadius = value;
-        modifier_->setTrackBorderRadius(node_, &inputValueTrackBorderRadius);
+        auto length = Converter::ArkValue<Opt_Length>(inputValueTrackBorderRadius);
+        modifier_->setTrackBorderRadius(node_, &length);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BORDER_RADIUS_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -2045,10 +1841,11 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
 
     auto checkValue = [this, &initValueTrackBorderRadius](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueTrackBorderRadius = initValueTrackBorderRadius;
-
-        modifier_->setTrackBorderRadius(node_, &inputValueTrackBorderRadius);
+        auto lengh = Converter::ArkValue<Opt_Length>(inputValueTrackBorderRadius);
+        modifier_->setTrackBorderRadius(node_, &lengh);
         inputValueTrackBorderRadius = value;
-        modifier_->setTrackBorderRadius(node_, &inputValueTrackBorderRadius);
+        lengh = Converter::ArkValue<Opt_Length>(inputValueTrackBorderRadius);
+        modifier_->setTrackBorderRadius(node_, &lengh);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BORDER_RADIUS_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_BORDER_RADIUS_DEFAULT_VALUE)
@@ -2089,7 +1886,8 @@ HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusVali
         Ark_Length inputValueSelectedBorderRadius = initValueSelectedBorderRadius;
 
         inputValueSelectedBorderRadius = value;
-        modifier_->setSelectedBorderRadius(node_, &inputValueSelectedBorderRadius);
+        auto length = Converter::ArkValue<Opt_Length>(inputValueSelectedBorderRadius);
+        modifier_->setSelectedBorderRadius(node_, &length);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -2115,10 +1913,11 @@ HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusInva
 
     auto checkValue = [this, &initValueSelectedBorderRadius](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueSelectedBorderRadius = initValueSelectedBorderRadius;
-
-        modifier_->setSelectedBorderRadius(node_, &inputValueSelectedBorderRadius);
+        auto length = Converter::ArkValue<Opt_Length>(inputValueSelectedBorderRadius);
+        modifier_->setSelectedBorderRadius(node_, &length);
         inputValueSelectedBorderRadius = value;
-        modifier_->setSelectedBorderRadius(node_, &inputValueSelectedBorderRadius);
+        length = Converter::ArkValue<Opt_Length>(inputValueSelectedBorderRadius);
+        modifier_->setSelectedBorderRadius(node_, &length);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BORDER_RADIUS_DEFAULT_VALUE)
@@ -2167,7 +1966,8 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthValidValues, TestSize
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
 
         inputValueBlockSize.width = value;
-        modifier_->setBlockSize(node_, &inputValueBlockSize);
+        auto size = Converter::ArkValue<Opt_SizeOptions>(inputValueBlockSize);
+        modifier_->setBlockSize(node_, &size);
         auto jsonValue = GetJsonValue(node_);
         auto resultBlockSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_WIDTH_NAME);
@@ -2197,10 +1997,11 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
-
-        modifier_->setBlockSize(node_, &inputValueBlockSize);
+        auto size = Converter::ArkValue<Opt_SizeOptions>(inputValueBlockSize);
+        modifier_->setBlockSize(node_, &size);
         inputValueBlockSize.width = value;
-        modifier_->setBlockSize(node_, &inputValueBlockSize);
+        size = Converter::ArkValue<Opt_SizeOptions>(inputValueBlockSize);
+        modifier_->setBlockSize(node_, &size);
         auto jsonValue = GetJsonValue(node_);
         auto resultBlockSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_WIDTH_NAME);
@@ -2235,7 +2036,8 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightValidValues, TestSiz
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
 
         inputValueBlockSize.height = value;
-        modifier_->setBlockSize(node_, &inputValueBlockSize);
+        auto options = Converter::ArkValue<Opt_SizeOptions>(inputValueBlockSize);
+        modifier_->setBlockSize(node_, &options);
         auto jsonValue = GetJsonValue(node_);
         auto resultBlockSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_HEIGHT_NAME);
@@ -2265,10 +2067,11 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
-
-        modifier_->setBlockSize(node_, &inputValueBlockSize);
+        auto options = Converter::ArkValue<Opt_SizeOptions>(inputValueBlockSize);
+        modifier_->setBlockSize(node_, &options);
         inputValueBlockSize.height = value;
-        modifier_->setBlockSize(node_, &inputValueBlockSize);
+        options = Converter::ArkValue<Opt_SizeOptions>(inputValueBlockSize);
+        modifier_->setBlockSize(node_, &options);
         auto jsonValue = GetJsonValue(node_);
         auto resultBlockSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_HEIGHT_NAME);
@@ -2315,7 +2118,8 @@ HWTEST_F(SliderModifierTest, setBlockStyleTestValidValues, TestSize.Level1)
         Ark_SliderBlockStyle inputValueBlockStyle = initValueBlockStyle;
 
         inputValueBlockStyle.type = value;
-        modifier_->setBlockStyle(node_, &inputValueBlockStyle);
+        auto style = Converter::ArkValue<Opt_SliderBlockStyle>(inputValueBlockStyle);
+        modifier_->setBlockStyle(node_, &style);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_STYLE_TYPE_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -2356,7 +2160,8 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeValidValues, TestSize.Level1
         Ark_Length inputValueStepSize = initValueStepSize;
 
         inputValueStepSize = value;
-        modifier_->setStepSize(node_, &inputValueStepSize);
+        auto stepSize = Converter::ArkValue<Opt_Length>(inputValueStepSize);
+        modifier_->setStepSize(node_, &stepSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_SIZE_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -2382,10 +2187,11 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeInvalidValues, TestSize.Leve
 
     auto checkValue = [this, &initValueStepSize](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueStepSize = initValueStepSize;
-
-        modifier_->setStepSize(node_, &inputValueStepSize);
+        auto stepSize = Converter::ArkValue<Opt_Length>(inputValueStepSize);
+        modifier_->setStepSize(node_, &stepSize);
         inputValueStepSize = value;
-        modifier_->setStepSize(node_, &inputValueStepSize);
+        stepSize = Converter::ArkValue<Opt_Length>(inputValueStepSize);
+        modifier_->setStepSize(node_, &stepSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_SIZE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_STEP_SIZE_DEFAULT_VALUE)
@@ -2426,7 +2232,8 @@ HWTEST_F(SliderModifierTest, setSliderInteractionModeTestSliderInteractionModeVa
         Ark_SliderInteraction inputValueSliderInteractionMode = initValueSliderInteractionMode;
 
         inputValueSliderInteractionMode = value;
-        modifier_->setSliderInteractionMode(node_, inputValueSliderInteractionMode);
+        auto sliderInteractionMode = Converter::ArkValue<Opt_SliderInteraction>(inputValueSliderInteractionMode);
+        modifier_->setSliderInteractionMode(node_, &sliderInteractionMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SLIDER_INTERACTION_MODE_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -2453,10 +2260,11 @@ HWTEST_F(SliderModifierTest, setSliderInteractionModeTestSliderInteractionModeIn
     auto checkValue = [this, &initValueSliderInteractionMode](
                           const std::string& input, const enum Ark_SliderInteraction& value) {
         Ark_SliderInteraction inputValueSliderInteractionMode = initValueSliderInteractionMode;
-
-        modifier_->setSliderInteractionMode(node_, inputValueSliderInteractionMode);
+        auto sliderInteractionMode = Converter::ArkValue<Opt_SliderInteraction>(inputValueSliderInteractionMode);
+        modifier_->setSliderInteractionMode(node_, &sliderInteractionMode);
         inputValueSliderInteractionMode = value;
-        modifier_->setSliderInteractionMode(node_, inputValueSliderInteractionMode);
+        sliderInteractionMode = Converter::ArkValue<Opt_SliderInteraction>(inputValueSliderInteractionMode);
+        modifier_->setSliderInteractionMode(node_, &sliderInteractionMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SLIDER_INTERACTION_MODE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SLIDER_INTERACTION_MODE_DEFAULT_VALUE)
@@ -2497,7 +2305,8 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceValidValues, TestSize.Level
         Ark_Number inputValueMinResponsiveDistance = initValueMinResponsiveDistance;
 
         inputValueMinResponsiveDistance = value;
-        modifier_->setMinResponsiveDistance(node_, &inputValueMinResponsiveDistance);
+        auto minResponsiveDistance = Converter::ArkValue<Opt_Number>(inputValueMinResponsiveDistance);
+        modifier_->setMinResponsiveDistance(node_, &minResponsiveDistance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -2526,7 +2335,8 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceInvalidValues, TestSize.Lev
         Ark_Number inputValueMinResponsiveDistance = initValueMinResponsiveDistance;
 
         inputValueMinResponsiveDistance = value;
-        modifier_->setMinResponsiveDistance(node_, &inputValueMinResponsiveDistance);
+        auto minResponsiveDistance = Converter::ArkValue<Opt_Number>(inputValueMinResponsiveDistance);
+        modifier_->setMinResponsiveDistance(node_, &minResponsiveDistance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_DEFAULT_VALUE)
@@ -2576,7 +2386,8 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeFromValidValues, TestSiz
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
 
         inputValueSlideRange.from = value;
-        modifier_->setSlideRange(node_, &inputValueSlideRange);
+        auto slideRange = Converter::ArkValue<Opt_SlideRange>(inputValueSlideRange);
+        modifier_->setSlideRange(node_, &slideRange);
         auto jsonValue = GetJsonValue(node_);
         auto resultSlideRange = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_FROM_NAME);
@@ -2606,10 +2417,11 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeFromInvalidValues, TestS
 
     auto checkValue = [this, &initValueSlideRange](const std::string& input, const Opt_Number& value) {
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
-
-        modifier_->setSlideRange(node_, &inputValueSlideRange);
+        auto slideRange = Converter::ArkValue<Opt_SlideRange>(inputValueSlideRange);
+        modifier_->setSlideRange(node_, &slideRange);
         inputValueSlideRange.from = value;
-        modifier_->setSlideRange(node_, &inputValueSlideRange);
+        slideRange = Converter::ArkValue<Opt_SlideRange>(inputValueSlideRange);
+        modifier_->setSlideRange(node_, &slideRange);
         auto jsonValue = GetJsonValue(node_);
         auto resultSlideRange = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_FROM_NAME);
@@ -2645,7 +2457,8 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToValidValues, TestSize.
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
 
         inputValueSlideRange.to = value;
-        modifier_->setSlideRange(node_, &inputValueSlideRange);
+        auto slideRange = Converter::ArkValue<Opt_SlideRange>(inputValueSlideRange);
+        modifier_->setSlideRange(node_, &slideRange);
         auto jsonValue = GetJsonValue(node_);
         auto resultSlideRange = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_TO_NAME);
@@ -2675,10 +2488,11 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
 
     auto checkValue = [this, &initValueSlideRange](const std::string& input, const Opt_Number& value) {
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
-
-        modifier_->setSlideRange(node_, &inputValueSlideRange);
+        auto slideRange = Converter::ArkValue<Opt_SlideRange>(inputValueSlideRange);
+        modifier_->setSlideRange(node_, &slideRange);
         inputValueSlideRange.to = value;
-        modifier_->setSlideRange(node_, &inputValueSlideRange);
+        slideRange = Converter::ArkValue<Opt_SlideRange>(inputValueSlideRange);
+        modifier_->setSlideRange(node_, &slideRange);
         auto jsonValue = GetJsonValue(node_);
         auto resultSlideRange = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_TO_NAME);
@@ -2722,8 +2536,8 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
             };
         }
     };
-
-    modifier_->setOnChange(node_, &onChangeCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Number_SliderChangeMode_Void>(onChangeCallback);
+    modifier_->setOnChange(node_, &optCallback);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(10, 0);
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -2844,11 +2658,13 @@ HWTEST_F(SliderModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
     std::string resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
-    modifier_->setEnableHapticFeedback(node_, false);
+    auto enableHapticFeedback = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setEnableHapticFeedback(node_, &enableHapticFeedback);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
     EXPECT_EQ(resultStr, EXPECTED_FALSE);
-    modifier_->setEnableHapticFeedback(node_, true);
+    enableHapticFeedback = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnableHapticFeedback(node_, &enableHapticFeedback);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
     EXPECT_EQ(resultStr, EXPECTED_TRUE);
