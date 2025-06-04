@@ -1407,7 +1407,9 @@ export interface NavigationAttribute extends CommonMethod {
     onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this
     onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this
     onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this
-    navDestination(value: ((name: string,param: Object | null | undefined) => void) | undefined): this
+    navDestination(
+        /** @memo */
+        value: ((name: string,param: Object | null | undefined) => void) | undefined): this
     customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this
     systemBarStyle(value: SystemBarStyle | undefined): this
     recoverable(value: boolean | undefined): this
@@ -1497,8 +1499,10 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this {
         return this
     }
-    public navDestination(value: ((name: string,param: Object | null | undefined) => void) | undefined): this {
-        return this
+    navDestination(
+        /** @memo */
+        value: ((name: string,param: Object | null | undefined) => void) | undefined): this {
+            return this
     }
     public customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this {
         return this

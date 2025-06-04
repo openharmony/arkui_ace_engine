@@ -8080,7 +8080,7 @@ export interface CommonMethod {
     outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
     outlineRadius(value: Dimension | OutlineRadiuses | undefined): this
     foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold?: number): this
+    onClick(event: ((event: ClickEvent) => void) | undefined): this
     onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this
     onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this
     onAccessibilityHover(value: AccessibilityCallback | undefined): this
@@ -8510,7 +8510,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
         return this
     }
-    public onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold?: number): this {
+    public onClick(event: ((event: ClickEvent) => void) | undefined): this {
         return this
     }
     public onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {
@@ -11558,21 +11558,21 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return this;
     }
     public applyModifierByState<T>(isAttributeUpdater: boolean, modifier: AttributeModifier<T>): void {
-        let currentState = rememberMutableState<int32>(0);
-        let peerNode = this.getPeer()
-        let isInit =  rememberMutableState<boolean>(true);
-        remember(() => {
-            StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
-                currentState.value = state;
-                isInit.value = false;
-            })
-        })
-        if (isAttributeUpdater) {
-            applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
-        } else {
-            applyUIAttributes(modifier!, peerNode, currentState.value);
-        }
-        this.getAttributeSet().applyModifierPatch(peerNode);
+        // let currentState = rememberMutableState<int32>(0);
+        // let peerNode = this.getPeer()
+        // let isInit =  rememberMutableState<boolean>(true);
+        // remember(() => {
+        //     StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
+        //         currentState.value = state;
+        //         isInit.value = false;
+        //     })
+        // })
+        // if (isAttributeUpdater) {
+        //     applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
+        // } else {
+        //     applyUIAttributes(modifier!, peerNode, currentState.value);
+        // }
+        // this.getAttributeSet().applyModifierPatch(peerNode);
     }
 
     public applyAttributesFinish(): void {
