@@ -29,8 +29,8 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ArkDividerNode } from "../handwritten/modifiers/ArkDividerNode"
-import { ArkDividerAttributeSet, DividerModifier } from "../DividerModifier"
+import { ArkDividerNode } from '../handwritten/modifiers/ArkDividerNode';
+import { ArkDividerAttributeSet, DividerModifier } from '../DividerModifier';
 
 export class ArkDividerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -166,14 +166,14 @@ export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttr
 /** @memo:stable */
 export class ArkDividerComponent extends ArkCommonMethodComponent implements UIDividerAttribute {
 
-    protected _modifierHost: ArkDividerNode | undefined
+    protected _modifierHost: ArkDividerNode | undefined;
     setModifierHost(value: ArkDividerNode): void {
         this._modifierHost = value;
     }
     getModifierHost(): ArkDividerNode {
         if (this._modifierHost === undefined || this._modifierHost === null) {
             this._modifierHost = new ArkDividerNode();
-            this._modifierHost!.setPeer(this.getPeer())
+            this._modifierHost!.setPeer(this.getPeer());
         }
         return this._modifierHost!;
     }
