@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import { InteropNativeModule } from "@koalaui/interop";
-import { ArkBaseNode } from "./ArkBaseNode";
-import { DividerAttribute, ArkDividerPeer, LineCapStyle, ResourceColor } from "../../component";
+import { InteropNativeModule } from '@koalaui/interop';
+import { ArkBaseNode } from './ArkBaseNode';
+import { DividerAttribute, ArkDividerPeer, LineCapStyle, ResourceColor } from '../../component';
 
 export class ArkDividerNode extends ArkBaseNode implements DividerAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog("column constructParam enter");
+        InteropNativeModule._NativeLog('column constructParam enter');
         return this;
     }
 

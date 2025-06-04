@@ -19,9 +19,9 @@ export { AttributeUpdater } from './AttributeUpdater'
 
 export { CommonModifier } from './CommonModifier'
 
-export { DividerModifier } from "./DividerModifier"
+export { DividerModifier } from './DividerModifier';
 
-export { BlankModifier } from "./BlankModifier"
+export { BlankModifier } from './BlankModifier';
 
 // export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
 

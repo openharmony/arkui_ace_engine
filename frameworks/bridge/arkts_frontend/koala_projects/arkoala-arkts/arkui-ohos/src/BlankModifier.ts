@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { ArkBlankPeer, ArkCommonMethodPeer, AttributeModifier, ResourceColor, BlankAttribute, TextShadowStyleInternal } from "./component";
-import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from "./handwritten/modifiers/ArkCommonModifier";
+import { ArkBlankPeer, ArkCommonMethodPeer, AttributeModifier, ResourceColor, BlankAttribute, TextShadowStyleInternal } from './component';
+import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from './handwritten/modifiers/ArkCommonModifier';
 
 class ColorModifier extends ModifierWithKey<ResourceColor | undefined> {
     static identity: string = 'color';
@@ -28,7 +28,7 @@ class ColorModifier extends ModifierWithKey<ResourceColor | undefined> {
         if (reset) {
             // now do nothing
         } else {
-            if (this.value != undefined) {
+            if (this.value !== undefined) {
                 colorPeerNode.colorAttribute(this.value as ResourceColor);
             }
         }
@@ -59,7 +59,7 @@ export class BlankModifier implements AttributeModifier<BlankAttribute> {
     applyDisabledAttribute(instance: BlankAttribute): void {}
     applySelectedAttribute(instance: BlankAttribute): void {}
 
-    color(value: ResourceColor | undefined) {
+    color(value: ResourceColor | undefined): this {
         this.attributeSet.color(value);
         return this;
     }

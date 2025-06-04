@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { ArkDividerPeer, ArkCommonMethodPeer, AttributeModifier, ResourceColor, DividerAttribute, LineCapStyle } from "./component";
-import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from "./handwritten/modifiers/ArkCommonModifier";
+import { ArkDividerPeer, ArkCommonMethodPeer, AttributeModifier, ResourceColor, DividerAttribute, LineCapStyle } from './component';
+import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from './handwritten/modifiers/ArkCommonModifier';
 
 class ColorModifier extends ModifierWithKey<ResourceColor | undefined> {
     static identity: string = 'color';
@@ -28,7 +28,7 @@ class ColorModifier extends ModifierWithKey<ResourceColor | undefined> {
         if (reset) {
             // now do nothing
         } else {
-            if (this.value != undefined) {
+            if (this.value !== undefined) {
                 colorPeerNode.colorAttribute(this.value as ResourceColor);
             }
         }
@@ -55,7 +55,7 @@ class StrokeWidthModifier extends ModifierWithKey<string | number | undefined> {
         if (reset) {
             // now do nothing
         } else {
-            if (this.value != undefined) {
+            if (this.value !== undefined) {
                 strokeWidthPeerNode.strokeWidthAttribute(this.value as string | number);
             }
         }
@@ -82,7 +82,7 @@ class VerticalModifier extends ModifierWithKey<boolean | undefined> {
         if (reset) {
             // now do nothing
         } else {
-            if (this.value != undefined) {
+            if (this.value !== undefined) {
                 verticalPeerNode.verticalAttribute(this.value as boolean);
             }
         }
