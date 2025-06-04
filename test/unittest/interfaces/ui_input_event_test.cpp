@@ -1048,6 +1048,22 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId006, TestSize
 }
 
 /**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetTargetDisplayId007
+ * @tc.desc: test OH_ArkUI_UIInputEvent_GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId007, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_AXIS_EVENT_ID;
+    auto axisEvent = std::make_unique<ArkUIAxisEvent>();
+    axisEvent->targetDisplayId = 0;
+    event->inputEvent = axisEvent.get();
+    auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(event.get());
+    EXPECT_EQ(result, 0);
+}
+
+/**
  * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX001
  * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
  * @tc.type: FUNC
