@@ -2258,11 +2258,11 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
 
 void TextFieldPattern::OnDragNodeDetachFromMainTree()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (dragStatus_ == DragStatus::NONE) {
-        selectController_->UpdateCaretIndex(
-            std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
-        CloseSelectOverlay();
-        StartTwinkling();
+        selectOverlay_->ProcessOverlay( { .menuIsShow = false } );
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
