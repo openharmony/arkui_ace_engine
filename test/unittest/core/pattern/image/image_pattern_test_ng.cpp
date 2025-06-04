@@ -498,6 +498,22 @@ HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TriggerFirstVisibleAreaChange002
+ * @tc.desc: call TriggerFirstVisibleAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange002, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->isImageAnimator_ = true;
+    imagePattern->TriggerFirstVisibleAreaChange();
+    EXPECT_TRUE(imagePattern->isFormAnimationStart_);
+}
+
+/**
  * @tc.name: OnAreaChangedInner001
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
