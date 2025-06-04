@@ -317,8 +317,8 @@ using lanePos = std::pair<float, size_t>;
 struct LanePosLess {
     bool operator()(const lanePos& a, const lanePos& b) const
     {
-        if (!NearEqual(a.first, b.first)) {
-            return LessNotEqual(a.first, b.first);
+        if (!NearEqual(a.first, b.first, 0.01f)) {
+            return LessNotEqualCustomPrecision(a.first, b.first, -0.01f);
         } else {
             return a.second < b.second;
         }
@@ -327,8 +327,8 @@ struct LanePosLess {
 struct LanePosGreater {
     bool operator()(const lanePos& a, const lanePos& b) const
     {
-        if (!NearEqual(a.first, b.first)) {
-            return GreatNotEqual(a.first, b.first);
+        if (!NearEqual(a.first, b.first, 0.01f)) {
+            return GreatNotEqualCustomPrecision(a.first, b.first, 0.01f);
         } else {
             return a.second > b.second;
         }
