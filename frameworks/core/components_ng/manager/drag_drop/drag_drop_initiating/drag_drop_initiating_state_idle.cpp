@@ -53,6 +53,7 @@ void DragDropInitiatingStateIdle::Init(int32_t currentState)
     ResetBorderRadiusAnimation();
     UnRegisterDragListener();
     if (params.isNeedGather) {
+        HideGatherNode();
         DragDropFuncWrapper::ResetNode(frameNode);
     }
     if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::READY)) {
@@ -288,5 +289,23 @@ void DragDropInitiatingStateIdle::AsyncDragEnd()
     if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
         FireCustomerOnDragEnd();
     }
+}
+
+void DragDropInitiatingStateIdle::HideGatherNode()
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto& params = machine->GetDragDropInitiatingParams();
+    if (!params.hasGatherNode) {
+        return;
+    }
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->RemovePreviewBadgeNode();
+    manager->RemoveGatherNodeWithAnimation();
 }
 } // namespace OHOS::Ace::NG
