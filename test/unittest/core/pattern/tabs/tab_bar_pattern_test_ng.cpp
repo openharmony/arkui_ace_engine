@@ -2609,7 +2609,6 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange002, TestSize.Level1)
     tabBarPattern_->HandleBottomTabBarChange(0);
     EXPECT_EQ(tabBarPattern_->indicator_, 1);
 
-
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
 
@@ -2837,7 +2836,7 @@ HWTEST_F(TabBarPatternTestNg, ApplyTurnPageRateToIndicator, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     model.SetIsVertical(false);
     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
