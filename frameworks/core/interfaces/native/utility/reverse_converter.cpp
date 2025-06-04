@@ -697,6 +697,9 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     dst.height.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     dst.height.value.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
+
+    dst.hand.tag = Ark_Tag::INTEROP_TAG_OBJECT;
+    dst.hand.value = static_cast<Ark_InteractionHand>(src.GetOperatingHand());
 }
 
 void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)

@@ -12907,43 +12907,121 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         return
     }
     private getX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setX_serialize(x: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setX(this.peer!.ptr, x)
     }
     private getY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setY_serialize(y: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setY(this.peer!.ptr, y)
     }
     private getWindowX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setWindowX_serialize(windowX: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setWindowX(this.peer!.ptr, windowX)
     }
     private getWindowY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setWindowY_serialize(windowY: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setWindowY(this.peer!.ptr, windowY)
     }
     private getDisplayX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setDisplayX_serialize(displayX: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayX(this.peer!.ptr, displayX)
     }
     private getDisplayY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setDisplayY_serialize(displayY: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayY(this.peer!.ptr, displayY)
