@@ -1013,4 +1013,13 @@ void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src)
         default: dst = static_cast<Ark_SelectStatus>(-1);
     }
 }
+
+void AssignArkValue(Ark_LengthMetricsUnit& dst, const OHOS::Ace::CanvasUnit& src)
+{
+    switch (src) {
+        case OHOS::Ace::CanvasUnit::DEFAULT: dst = ARK_LENGTH_METRICS_UNIT_DEFAULT; break;
+        case OHOS::Ace::CanvasUnit::PX: dst = ARK_LENGTH_METRICS_UNIT_PX; break;
+        default: dst = static_cast<Ark_LengthMetricsUnit>(-1);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
