@@ -1390,4 +1390,29 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest031, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), Pause()).Times(1);
     videoPattern->OnKeyEvent(keyEvent6);
 }
+
+/**
+ * @tc.name: VideoPatternTest032
+ * @tc.desc: IsEnableMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<VideoNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps2: Check Function IsEnableMatchParent's return value.
+     * @tc.expected: Function IsEnableMatchParent returns true.
+     */
+    EXPECT_TRUE(videoPattern->IsEnableMatchParent());
+}
 } // namespace OHOS::Ace::NG

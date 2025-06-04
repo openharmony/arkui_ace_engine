@@ -37,6 +37,11 @@ public:
     ShapeContainerPattern() = default;
     ~ShapeContainerPattern() override = default;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<ShapeContainerLayoutAlgorithm>();

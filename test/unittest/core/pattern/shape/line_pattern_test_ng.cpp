@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-#include "base_shape_pattern_test_ng.h"
 #include "gtest/gtest.h"
+
+#define protected public
+#define private public
+#include "base_shape_pattern_test_ng.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
@@ -319,5 +322,143 @@ HWTEST_F(LinePatternTestNg, MeasureContent005, TestSize.Level1)
     auto startPoint = ShapePoint(Dimension(START_ZERO), Dimension(START_ZERO));
     auto endPoint = ShapePoint(Dimension(END_ZERO), Dimension(END_ZERO));
     MeasureContentTest(&startPoint, &endPoint, false, true);
+}
+
+/**
+ * @tc.name: MeasureContent006
+ * @tc.desc: LineLayoutAlgorithm::MeasureContent
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(LinePatternTestNg, MeasureContent006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<LinePattern>();
+    ASSERT_TRUE(pattern);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    auto layoutAlgorithm = AceType::DynamicCast<LineLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithm);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutConstraintF contentConstraint;
+    auto layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+
+    /**
+     * @tc.steps2: contentConstraint.selfIdealSize is (100, 200)
+     * @tc.expected: the return value of MeasureContent is (100, 200)
+     */
+    contentConstraint.selfIdealSize = OptionalSizeF(100, 200);
+    auto size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value(), SizeF(100, 200));
+
+    /**
+     * @tc.steps3: Width is Zero and StrokeWidth is 5
+     * @tc.expected: the return value of MeasureContent is (5, 100)
+     */
+    contentConstraint.selfIdealSize.Reset();
+    auto paintProperty = frameNode->GetPaintProperty<LinePaintProperty>();
+    ASSERT_TRUE(paintProperty);
+    paintProperty->UpdateStrokeWidth(Dimension(5));
+    paintProperty->UpdateStartPoint(ShapePoint(0, 0));
+    paintProperty->UpdateEndPoint(ShapePoint(0, 100));
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value(), SizeF(5, 100));
+
+    /**
+     * @tc.steps4: Height is Zero and StrokeWidth is 5
+     * @tc.expected: the return value of MeasureContent is (100, 5)
+     */
+    contentConstraint.selfIdealSize.Reset();
+    paintProperty->UpdateStrokeWidth(Dimension(5));
+    paintProperty->UpdateStartPoint(ShapePoint(0, 0));
+    paintProperty->UpdateEndPoint(ShapePoint(100, 0));
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value(), SizeF(100, 5));
+}
+
+/**
+ * @tc.name: MeasureContent007
+ * @tc.desc: LineLayoutAlgorithm::MeasureContent
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(LinePatternTestNg, MeasureContent007, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<LinePattern>();
+    ASSERT_TRUE(pattern);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    auto layoutAlgorithm = AceType::DynamicCast<LineLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithm);
+    auto paintProperty = frameNode->GetPaintProperty<LinePaintProperty>();
+    ASSERT_TRUE(paintProperty);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutConstraintF contentConstraint;
+    auto layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+
+    /**
+     * @tc.steps2: Width is matchParent
+     * @tc.expected: the return value of MeasureContent is (300, 100)
+     */
+    contentConstraint.selfIdealSize.Reset();
+    paintProperty->UpdateStartPoint(ShapePoint(0, 0));
+    paintProperty->UpdateEndPoint(ShapePoint(100, 100));
+    contentConstraint.parentIdealSize = OptionalSizeF(300, 400);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    auto size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value(), SizeF(300, 100));
+
+    /**
+     * @tc.steps3: Height is matchParent
+     * @tc.expected: the return value of MeasureContent is (100, 400)
+     */
+    contentConstraint.selfIdealSize.Reset();
+    paintProperty->UpdateStartPoint(ShapePoint(0, 0));
+    paintProperty->UpdateEndPoint(ShapePoint(100, 100));
+    contentConstraint.parentIdealSize = OptionalSizeF(300, 400);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value(), SizeF(100, 400));
+
+    /**
+     * @tc.steps4: Width and Height is not matchParent
+     * @tc.expected: the return value of MeasureContent is (100, 100)
+     */
+    contentConstraint.selfIdealSize.Reset();
+    paintProperty->UpdateStartPoint(ShapePoint(0, 0));
+    paintProperty->UpdateEndPoint(ShapePoint(100, 100));
+    contentConstraint.parentIdealSize = OptionalSizeF(300, 400);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value(), SizeF(100, 100));
+
+    /**
+     * @tc.steps5: layoutPolicy has no value
+     * @tc.expected: the return value of MeasureContent is (100, 100)
+     */
+    layoutProperty->layoutPolicy_ = std::nullopt;
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value(), SizeF(100, 100));
 }
 } // namespace OHOS::Ace::NG

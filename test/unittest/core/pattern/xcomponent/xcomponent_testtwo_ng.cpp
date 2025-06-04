@@ -1793,4 +1793,28 @@ HWTEST_F(XComponentTestTwoNg, UnlockCanvasAndPostTest, TestSize.Level1)
     delete reinterpret_cast<int*>(pattern->nativeWindow_);
     pattern->nativeWindow_ = nullptr;
 }
+
+/**
+ * @tc.name: IsEnableMatchParentTest
+ * @tc.desc: Test IsEnableMatchParent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, IsEnableMatchParentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Check Function IsEnableMatchParent's return value.
+     * @tc.expected: Function IsEnableMatchParent returns true.
+     */
+    EXPECT_TRUE(pattern->IsEnableMatchParent());
+}
 } // namespace OHOS::Ace::NG
