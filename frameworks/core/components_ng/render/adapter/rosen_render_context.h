@@ -513,7 +513,6 @@ public:
     void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) override;
     void CancelPropertyAnimation(AnimationPropertyType property) override;
     std::vector<float> GetRenderNodePropertyValue(AnimationPropertyType property) override;
-    void SyncRSPropertyToRenderContext(AnimationPropertyType property) override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -736,7 +735,6 @@ protected:
         const std::optional<ContextParam>& param, bool isTextureExportNode);
 #endif
     void DetachModifiers();
-    void MarkNeedDrawNode(bool condition);
 
     void OnEmitterPropertyUpdate();
 

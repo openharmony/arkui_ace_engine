@@ -820,8 +820,6 @@ public:
         return {};
     }
 
-    virtual void SyncRSPropertyToRenderContext(AnimationPropertyType property) {}
-
     virtual void UpdateCustomBackground() {}
 
 protected:

@@ -8295,7 +8295,6 @@ bool ViewAbstract::CreatePropertyAnimation(FrameNode* frameNode, AnimationProper
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), finishCallback);
     renderContext->SetAnimationPropertyValue(property, endValue);
     auto result = AnimationUtils::CloseImplicitAnimation();
-    renderContext->SyncRSPropertyToRenderContext(property);
     if (!result) {
         if (hasAnimation) {
             *hasAnimation = false;
@@ -8317,28 +8316,19 @@ bool ViewAbstract::CancelPropertyAnimations(
         // no need to cancel
         return true;
     }
-    auto propertyStr = PropertyVectorToString(properties);
-    ACE_SCOPED_TRACE("CancelPropertyAnimations %s", propertyStr.c_str());
+    ACE_SCOPED_TRACE("CancelPropertyAnimations");
     // use duration 0 animation param to cancel animation.
     AnimationOption option { Curves::LINEAR, 0 };
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr);
-    for (auto property : properties) {
-        renderContext->CancelPropertyAnimation(property);
+    for (auto AnimationPropertyType : properties) {
+        renderContext->CancelPropertyAnimation(AnimationPropertyType);
     }
-    auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus();
-    if (status == CancelAnimationStatus::SUCCESS) {
-        // restore the rs property to property saved in renderContext.
-        for (auto property : properties) {
-            renderContext->SyncRSPropertyToRenderContext(property);
-        }
-        return true;
-    } else if (status == CancelAnimationStatus::EMPTY_PENDING_SYNC_LIST) {
-        return true;
+    bool result = AnimationUtils::CloseImplicitCancelAnimation();
+    if (!result) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "cancel animation error, property:%{public}s, node tag:%{public}s",
+            PropertyVectorToString(properties).c_str(), frameNode->GetTag().c_str());
     }
-    TAG_LOGW(AceLogTag::ACE_ANIMATION,
-        "cancel animation error, property:%{public}s, node tag:%{public}s, error:%{public}d", propertyStr.c_str(),
-        frameNode->GetTag().c_str(), static_cast<int32_t>(status));
-    return false;
+    return result;
 }
 
 std::vector<float> ViewAbstract::GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property)
