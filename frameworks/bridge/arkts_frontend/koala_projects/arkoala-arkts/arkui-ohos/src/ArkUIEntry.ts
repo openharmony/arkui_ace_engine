@@ -307,7 +307,7 @@ export class Application {
         } else {
             try {
                 this.timer!.value = Date.now() as int64
-                this.loopIteration(arg0, arg1)
+                this.loopIteration2(arg0, arg1) // loop iteration without callbacks execution
                 if (this.enableDumpTree) dumpTree(this.rootState!.value)
             } catch (error) {
                 if (error instanceof Error) {
@@ -341,6 +341,19 @@ export class Application {
         this.checkEvents(arg0)
         this.updateState()
         this.render()
+    }
+
+    // loop iteration without callbacks execution, callbacks execution will be done at the tail of vsync
+    loopIteration2(arg0: int32, arg1: int32) {
+        if (this.withLog) InteropNativeModule._NativeLog("ARKTS: loopIteration2")
+        this.updateState()
+        this.render()
+    }
+
+    // called at the tail of vsync
+    checkCallbacks(): void {
+        if (this.withLog) InteropNativeModule._NativeLog("ARKTS: checkCallbacks")
+        checkEvents()
     }
 
     // TODO: make [emitEvent] suitable to get string argument
