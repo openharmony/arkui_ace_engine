@@ -142,6 +142,44 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
+void AssignArkValue(Ark_UIFontFallbackInfo& dst, const FallbackInfo& src, ConvContext* ctx)
+{
+    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.language = Converter::ArkValue<Ark_String>(src.font, ctx);
+}
+
+void AssignArkValue(Ark_UIFontFallbackGroupInfo& dst, const FallbackGroup& src, ConvContext* ctx)
+{
+    dst.fontSetName = Converter::ArkValue<Ark_String>(src.groupName, ctx);
+    dst.fallback = Converter::ArkValue<Array_UIFontFallbackInfo>(src.fallbackInfoSet, ctx);
+}
+
+void AssignArkValue(Ark_UIFontAdjustInfo& dst, const AdjustInfo& src)
+{
+    dst.weight = Converter::ArkValue<Ark_Number>(src.origValue);
+    dst.to = Converter::ArkValue<Ark_Number>(src.newValue);
+}
+
+void AssignArkValue(Ark_UIFontAliasInfo& dst, const AliasInfo& src, ConvContext* ctx)
+{
+    dst.name = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.weight = Converter::ArkValue<Ark_Number>(src.weight);
+}
+
+void AssignArkValue(Ark_UIFontGenericInfo& dst, const FontGenericInfo& src, ConvContext* ctx)
+{
+    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.alias = Converter::ArkValue<Array_UIFontAliasInfo>(src.aliasSet, ctx);
+    dst.adjust = Converter::ArkValue<Array_UIFontAdjustInfo>(src.adjustSet, ctx);
+}
+
+void AssignArkValue(Ark_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvContext* ctx)
+{
+    dst.fontDir = Converter::ArkValue<Array_String>(src.fontDirSet, ctx);
+    dst.generic = Converter::ArkValue<Array_UIFontGenericInfo>(src.genericSet, ctx);
+    dst.fallbackGroups = Converter::ArkValue<Array_UIFontFallbackGroupInfo>(src.fallbackGroupSet, ctx);
+}
+
 void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src)
 {
     if (src.menuOptionsParam.content.has_value()) {

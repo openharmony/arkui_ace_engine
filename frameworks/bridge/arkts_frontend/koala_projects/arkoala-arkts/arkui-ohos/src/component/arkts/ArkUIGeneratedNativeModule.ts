@@ -4137,6 +4137,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_ohos_font_getSystemFontList(): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _GlobalScope_ohos_font_getFontByName(fontName: KStringPtr): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _GlobalScope_ohos_font_getUIFontConfig(): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GlobalScope_ohos_measure_utils_measureText(thisArray: KSerializerBuffer, thisLength: int32): number
     @ani.unsafe.Quick
@@ -4503,6 +4505,12 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderNode_getLengthMetricsUnit(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _RenderNode_setLengthMetricsUnit(ptr: KPointer, lengthMetricsUnit: KInt): void
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextFontScale_isFollowingSystemFontScale(): boolean
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextFontScale_getMaxFontScale(): number
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextTextMenu_setMenuOptions(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _UIContextImp_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
     @ani.unsafe.Direct

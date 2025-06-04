@@ -33675,6 +33675,13 @@ KInteropReturnBuffer impl_GlobalScope_ohos_font_getFontByName(const KStringPtr& 
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(GlobalScope_ohos_font_getFontByName, KInteropReturnBuffer, KStringPtr)
+KInteropReturnBuffer impl_GlobalScope_ohos_font_getUIFontConfig() {
+        const auto &retValue = GetAccessors()->getGlobalScope_ohos_fontAccessor()->getUIFontConfig();
+        Serializer _retSerializer {};
+        _retSerializer.writeUIFontConfig(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_0(GlobalScope_ohos_font_getUIFontConfig, KInteropReturnBuffer)
 Ark_Number impl_GlobalScope_ohos_measure_utils_measureText(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         Ark_MeasureOptions options_value = thisDeserializer.readMeasureOptions();;
@@ -34915,6 +34922,20 @@ void impl_RenderNode_setLengthMetricsUnit(Ark_NativePointer thisPtr, Ark_Int32 l
         GetAccessors()->getRenderNodeAccessor()->setLengthMetricsUnit(self, static_cast<Ark_LengthMetricsUnit>(lengthMetricsUnit));
 }
 KOALA_INTEROP_DIRECT_V2(RenderNode_setLengthMetricsUnit, Ark_NativePointer, Ark_Int32)
+Ark_Boolean impl_GlobalScopeUicontextFontScale_isFollowingSystemFontScale() {
+        return GetAccessors()->getGlobalScopeUicontextFontScaleAccessor()->isFollowingSystemFontScale();
+}
+KOALA_INTEROP_DIRECT_0(GlobalScopeUicontextFontScale_isFollowingSystemFontScale, Ark_Boolean)
+Ark_Number impl_GlobalScopeUicontextFontScale_getMaxFontScale() {
+        return GetAccessors()->getGlobalScopeUicontextFontScaleAccessor()->getMaxFontScale();
+}
+KOALA_INTEROP_DIRECT_0(GlobalScopeUicontextFontScale_getMaxFontScale, KInteropNumber)
+void impl_GlobalScopeUicontextTextMenu_setMenuOptions(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_TextMenuOptions options_value = thisDeserializer.readTextMenuOptions();;
+        GetAccessors()->getGlobalScopeUicontextTextMenuAccessor()->setMenuOptions((const Ark_TextMenuOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_V2(GlobalScopeUicontextTextMenu_setMenuOptions, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_TabsOps_registerBarMode(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());

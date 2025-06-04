@@ -61,7 +61,7 @@
             "@ohos/measure": [
                 "./ohos.measure.ts"
             ],
-            "@ohos/font/font": [
+            "@ohos/font": [
                 "./ohos.font.ts"
             ],
             "global/resource": [
