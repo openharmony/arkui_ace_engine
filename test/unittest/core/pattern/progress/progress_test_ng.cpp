@@ -14,6 +14,7 @@
  */
 #include "progress_test_ng.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pattern/mock_ui_session_manage.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1734,5 +1735,42 @@ HWTEST_F(ProgressTestNg, ProgressPatternUpdateGradientColorTest001, TestSize.Lev
     auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
     EXPECT_EQ(paintProperty->GetGradientColorValue(), gradient);
+}
+
+/**
+ * @tc.name: ReportProgressEventTest001
+ * @tc.desc: Test ReportProgressEvent fuction of progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ReportProgressEventTest001, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+    RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ProgressPaintProperty> progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    pattern->ReportProgressEvent();
+    auto mockUiSessionManage = reinterpret_cast<MockUiSessionManage*>(MockUiSessionManage::GetInstance());
+    EXPECT_CALL(*mockUiSessionManage, ReportComponentChangeEvent(_, _)).Times(0);
+}
+
+/**
+ * @tc.name: ReportProgressEventTest002
+ * @tc.desc: Test ReportProgressEvent fuction of progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ReportProgressEventTest002, TestSize.Level1)
+{
+    float progressDefaultValue = 100.0f;
+    float progressMaxValue = 100.0f;
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+    RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ProgressPaintProperty> progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    progressPaintProperty->UpdateValue(progressDefaultValue);
+    progressPaintProperty->UpdateMaxValue(progressMaxValue);
+    pattern->ReportProgressEvent();
+    auto mockUiSessionManage = reinterpret_cast<MockUiSessionManage*>(MockUiSessionManage::GetInstance());
+    EXPECT_CALL(*mockUiSessionManage, ReportComponentChangeEvent(_, _)).Times(1);
 }
 } // namespace OHOS::Ace::NG
