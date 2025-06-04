@@ -183,7 +183,7 @@ public:
 
      /*
      * Get int value from platform constants.
-     * NOTE: false will be returned if not found or value is not uint32_t.
+     * NOTE: 0 will be returned if not found or value is not uint32_t.
      * @param[in] key Target key.
      * @return uint32_t value corresponding to the name.
      */
