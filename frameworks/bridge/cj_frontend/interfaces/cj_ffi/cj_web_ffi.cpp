@@ -824,22 +824,10 @@ void FfiWebAllowWindowOpenMethod(bool flag)
     WebModel::GetInstance()->SetAllowWindowOpenMethod(flag);
 }
 
-void FfiWebMediaOptions(int32_t resumeInterval, bool audioExclusive, int32_t audioSessionTypeNum)
+void FfiWebMediaOptions(int32_t resumeInterval, bool audioExclusive)
 {
     WebModel::GetInstance()->SetAudioResumeInterval(resumeInterval);
     WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
-    auto audioSessionType = WebAudioSessionType::AUTO;
-    switch (audioSessionTypeNum) {
-        case 0:
-            audioSessionType = WebAudioSessionType::AUTO;
-            break;
-        case 3:
-            audioSessionType = WebAudioSessionType::AMBIENT;
-            break;
-        default:
-            audioSessionType = WebAudioSessionType::AUTO;
-    }
-    WebModel::GetInstance()->SetAudioSessionType(audioSessionType);
 }
 
 void FfiWebJavaScriptOnDocumentStart(VectorScriptItemHandle handle)
