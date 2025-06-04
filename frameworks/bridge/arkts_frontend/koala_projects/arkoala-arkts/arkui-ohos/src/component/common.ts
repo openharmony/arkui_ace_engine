@@ -11523,21 +11523,21 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return this;
     }
     public applyModifierByState<T>(isAttributeUpdater: boolean, modifier: AttributeModifier<T>): void {
-        let currentState = rememberMutableState<int32>(0);
-        let peerNode = this.getPeer()
-        let isInit =  rememberMutableState<boolean>(true);
-        remember(() => {
-            StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
-                currentState.value = state;
-                isInit.value = false;
-            })
-        })
-        if (isAttributeUpdater) {
-            applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
-        } else {
-            applyUIAttributes(modifier!, peerNode, currentState.value);
-        }
-        this.getAttributeSet().applyModifierPatch(peerNode);
+        // let currentState = rememberMutableState<int32>(0);
+        // let peerNode = this.getPeer()
+        // let isInit =  rememberMutableState<boolean>(true);
+        // remember(() => {
+        //     StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
+        //         currentState.value = state;
+        //         isInit.value = false;
+        //     })
+        // })
+        // if (isAttributeUpdater) {
+        //     applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
+        // } else {
+        //     applyUIAttributes(modifier!, peerNode, currentState.value);
+        // }
+        // this.getAttributeSet().applyModifierPatch(peerNode);
     }
 
     public applyAttributesFinish(): void {
