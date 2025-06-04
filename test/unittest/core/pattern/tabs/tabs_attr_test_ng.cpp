@@ -1852,5 +1852,19 @@ HWTEST_F(TabsAttrTestNg, GetAnimationCurve001, TestSize.Level1)
 
     tabBarPattern_->animationCurve_ = Curves::LINEAR;
     EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
+
+    ASSERT_NE(frameNode_, nullptr);
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), nullptr);
+    EXPECT_TRUE(TabBarPhysicalCurve->IsEqual(frameNode_->GetAnimationCurve(TabBarPhysicalCurve)));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), Curves::LINEAR);
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(frameNode_->GetAnimationCurve(TabBarPhysicalCurve)));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), nullptr);
+    EXPECT_TRUE(TabBarPhysicalCurve->IsEqual(frameNode_->GetAnimationCurve(TabBarPhysicalCurve)));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), Curves::FRICTION);
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(frameNode_->GetAnimationCurve(TabBarPhysicalCurve)));
 }
 } // namespace OHOS::Ace::NG
