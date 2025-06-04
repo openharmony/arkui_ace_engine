@@ -3576,7 +3576,10 @@ WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(
         }
         auto curIndex = childItemPattern->GetIndexInList();
         if (curIndex == tarMainIndex) {
-            target = childFocus;
+            auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
+            CHECK_NULL_RETURN(childItemPattern, false);
+            auto isFindTailOrHead = childItemPattern->FindHeadOrTailChild(childFocus, step, target);
+            target = !isFindTailOrHead ? childFocus : target;
             return true;
         }
         return false;

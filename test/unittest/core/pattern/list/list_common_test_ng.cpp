@@ -41,10 +41,11 @@ const Offset RIGHT_BOTTOM = Offset(360.f, 250.f);
 
 class ListCommonTestNg : public ListTestNg {
 public:
-    void CreateFocusableListItems(int32_t itemNumber);
+    void CreateFocusableListItems(int32_t itemNumber, int32_t count = 0);
     void CreateFocusableListItemGroups(int32_t groupNumber, int32_t groupItemNum = GROUP_ITEM_NUMBER);
     void MouseSelect(Offset start, Offset end);
     AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
+    AssertionResult IsEqualNextFocusNodeHOMEEND(FocusStep step, int32_t currentIndex, std::string id);
     AssertionResult IsEqualNextFocusNodeInGroup(FocusStep step, int32_t currentIndex, int32_t expectNextIndex,
         int32_t groupIndex = 0, int32_t groupItemNum = GROUP_ITEM_NUMBER);
     AssertionResult IsEqualNextFocusNodeInGroupWithHeaderAndFooter(FocusStep step, int32_t currentIndex, int32_t expectNextIndex,
@@ -71,24 +72,70 @@ public:
     RefPtr<ListItemDragManager> GetForEachItemDragManager(int32_t itemIndex);
     RefPtr<ListItemDragManager> GetLazyForEachItemDragManager(int32_t itemIndex);
     RefPtr<ListItemDragManager> GetRepeatItemDragManager(int32_t itemIndex);
-    ListItemGroupModelNG CreateListItemGroupWithHeaderAndFooter();
-    void CreateFocusableListItemGroupsWithHeaderAndFooter(int32_t groupNumber, int32_t groupItemNum);
-    std::function<void()> GetHeaderOrFooterButtonBuilder();
+    ListItemGroupModelNG CreateListItemGroupWithHeaderAndFooter(int32_t count = 0, int32_t index = 0);
+    void CreateFocusableListItemGroupsWithHeaderAndFooter(
+        int32_t groupNumber, int32_t groupItemNum, int32_t count = 0, int32_t index = 0);
+    std::function<void()> GetHeaderOrFooterButtonBuilder(int32_t count = 0, std::string prefix = "", int32_t index = 0);
+    static void CreateFocusableListItemsWithMultiComponent(int32_t index, std::string prefix = "");
 };
+void ListCommonTestNg::CreateFocusableListItemsWithMultiComponent(int32_t index, std::string prefix)
+{
+    RowModelNG rowModel;
+    rowModel.Create(std::nullopt, nullptr, "");
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(Dimension(GROUP_HEADER_LEN)));
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+    auto row = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto rowNode = AceType::DynamicCast<FrameNode>(row);
 
-void ListCommonTestNg::CreateFocusableListItems(int32_t itemNumber)
+    TextModelNG textModelNG;
+    textModelNG.Create("text1");
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true);
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+    auto text = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto textNode = AceType::DynamicCast<FrameNode>(text);
+    textNode->UpdateInspectorId(prefix + "text" + std::to_string(index));
+    text->MountToParent(rowNode);
+    ViewStackProcessor::GetInstance()->Pop();
+
+    ButtonModelNG buttonModelNG;
+    CreateWithPara para;
+    para.label = "label";
+    std::list<RefPtr<Component>> buttonChildren;
+    buttonModelNG.CreateWithLabel(para, buttonChildren);
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+    auto button = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto buttonNode = AceType::DynamicCast<FrameNode>(button);
+    buttonNode->UpdateInspectorId(prefix + "button" + std::to_string(index));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Pop();
+}
+void ListCommonTestNg::CreateFocusableListItems(int32_t itemNumber, int32_t count)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
-        CreateListItem();
-        {
-            ButtonModelNG buttonModelNG;
-            CreateWithPara para;
-            para.label = "label";
-            std::list<RefPtr<Component>> buttonChildren;
-            buttonModelNG.CreateWithLabel(para, buttonChildren);
-            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
-            ViewStackProcessor::GetInstance()->Pop();
+        if (count > 0) {
+            CreateListItem();
+            {
+                CreateFocusableListItemsWithMultiComponent(index);
+            }
+        } else {
+            CreateListItem();
+            {
+                ButtonModelNG buttonModelNG;
+                CreateWithPara para;
+                para.label = "label";
+                std::list<RefPtr<Component>> buttonChildren;
+                buttonModelNG.CreateWithLabel(para, buttonChildren);
+                auto button = ViewStackProcessor::GetInstance()->GetMainElementNode();
+                auto buttonNode = AceType::DynamicCast<FrameNode>(button);
+                buttonNode->UpdateInspectorId("button" + std::to_string(index));
+                ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+                ViewStackProcessor::GetInstance()->Pop();
+            }
         }
+
         ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
@@ -106,26 +153,30 @@ void ListCommonTestNg::CreateFocusableListItemGroups(int32_t groupNumber, int32_
     }
 }
 
-std::function<void()> ListCommonTestNg::GetHeaderOrFooterButtonBuilder()
+std::function<void()> ListCommonTestNg::GetHeaderOrFooterButtonBuilder(int32_t count, std::string prefix, int32_t index)
 {
-    return []() {
-        ButtonModelNG buttonModelNG;
-        CreateWithPara para;
-        para.label = "label";
-        std::list<RefPtr<Component>> buttonChildren;
-        buttonModelNG.CreateWithLabel(para, buttonChildren);
-        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
-        ViewStackProcessor::GetInstance()->Pop();
+    return [count, prefix, index]() {
+        if (count > 0) {
+            ListCommonTestNg::CreateFocusableListItemsWithMultiComponent(index, prefix);
+        } else {
+            ButtonModelNG buttonModelNG;
+            CreateWithPara para;
+            para.label = "label";
+            std::list<RefPtr<Component>> buttonChildren;
+            buttonModelNG.CreateWithLabel(para, buttonChildren);
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+            ViewStackProcessor::GetInstance()->Pop();
+        }
     };
 }
 
-ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter()
+ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter(int32_t count, int32_t index)
 {
     auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
-    auto header = GetHeaderOrFooterButtonBuilder();
-    auto footer = GetHeaderOrFooterButtonBuilder();
+    auto header = GetHeaderOrFooterButtonBuilder(count, "header", index);
+    auto footer = GetHeaderOrFooterButtonBuilder(count, "footer", index);
     ListItemGroupModelNG groupModel;
     groupModel.Create(V2::ListItemGroupStyle::NONE);
     groupModel.SetHeader(std::move(header));
@@ -135,10 +186,11 @@ ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter()
     return groupModel;
 }
 
-void ListCommonTestNg::CreateFocusableListItemGroupsWithHeaderAndFooter(int32_t groupNumber, int32_t groupItemNum)
+void ListCommonTestNg::CreateFocusableListItemGroupsWithHeaderAndFooter(
+    int32_t groupNumber, int32_t groupItemNum, int32_t count, int32_t index)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
-        auto groupMode = CreateListItemGroupWithHeaderAndFooter();
+        auto groupMode = CreateListItemGroupWithHeaderAndFooter(count, index);
         CreateFocusableListItems(groupItemNum);
         ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
@@ -174,6 +226,28 @@ AssertionResult ListCommonTestNg::IsEqualNextFocusNode(FocusStep step, int32_t c
     }
     int32_t nextIndex = FindFocusNodeIndex(nextFocusNode);
     return IsEqual(nextIndex, expectNextIndex);
+}
+
+AssertionResult ListCommonTestNg::IsEqualNextFocusNodeHOMEEND(FocusStep step, int32_t currentIndex, std::string id)
+{
+    auto isHome = step == FocusStep::LEFT_END || step == FocusStep::UP_END;
+    auto isEnd = step == FocusStep::RIGHT_END || step == FocusStep::DOWN_END;
+    if (!isHome && !isEnd) {
+        return AssertionFailure() << "FocusStep is NOT HOME/END";
+    }
+    std::vector<RefPtr<FrameNode>> listItems = GetListItemOrListItemGroupInList();
+    RefPtr<FocusHub> currentFocusNode = listItems[currentIndex]->GetOrCreateFocusHub();
+    if (currentFocusNode == nullptr) {
+        return AssertionFailure() << "Current FocusNode is null.";
+    }
+    currentFocusNode->RequestFocusImmediately();
+    RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNodeInList(step, currentFocusNode).Upgrade();
+    auto nextNodeIdStr =
+        nextFocusNode->GetFrameNode() != nullptr ? nextFocusNode->GetFrameNode()->GetInspectorId().value_or("") : "";
+    if (nextNodeIdStr != "" && nextNodeIdStr == id) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure() << "Next FocusNode is not equal to home or tail node.";
 }
 
 int32_t ListCommonTestNg::FindFocusNodeIndex(RefPtr<FocusHub>& focusNode)
@@ -481,7 +555,7 @@ HWTEST_F(ListCommonTestNg, FocusStep001, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, currentIndex, "button3"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
 }
@@ -506,8 +580,8 @@ HWTEST_F(ListCommonTestNg, FocusStep002, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::RIGHT_END, currentIndex, "button3"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 1));
 
@@ -518,7 +592,7 @@ HWTEST_F(ListCommonTestNg, FocusStep002, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 2));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
@@ -545,10 +619,10 @@ HWTEST_F(ListCommonTestNg, FocusStep003, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 0));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::RIGHT_END, currentIndex, "button5"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, currentIndex, "button5"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 1));
 
@@ -561,10 +635,10 @@ HWTEST_F(ListCommonTestNg, FocusStep003, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::RIGHT_END, currentIndex, "button5"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, currentIndex, "button5"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
 }
@@ -591,10 +665,10 @@ HWTEST_F(ListCommonTestNg, FocusStep004, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 2));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 5));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::RIGHT_END, currentIndex, "button5"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, currentIndex, "button5"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
 }
@@ -822,6 +896,38 @@ HWTEST_F(ListCommonTestNg, FocusStep010, TestSize.Level1)
      */
     EXPECT_TRUE(IsEqualNextFocusNodeInGroupWithHeaderAndFooter(FocusStep::UP, 4, 3, 0, 4));
 }
+
+/**
+ * @tc.name: FocusStep011
+ * @tc.desc: Test GetNextFocusNode HOME/END when ListItem in List has more than 1 focuable component.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FocusStep011, TestSize.Level1)
+{
+    CreateList();
+    CreateFocusableListItems(4, 2);
+    CreateDone();
+
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, 1, "text0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, 1, "button3"));
+}
+
+/**
+ * @tc.name: FocusStep012
+ * @tc.desc: Test GetNextFocusNode HOME/END when header and footer in ListItemGroup has more than 1 focuable component.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FocusStep012, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateFocusableListItemGroupsWithHeaderAndFooter(4, 4, 2);
+    CreateDone();
+
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, 1, "headertext0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, 1, "footerbutton3"));
+}
+
 
 HWTEST_F(ListCommonTestNg, FocusWrapMode001, TestSize.Level1)
 {
