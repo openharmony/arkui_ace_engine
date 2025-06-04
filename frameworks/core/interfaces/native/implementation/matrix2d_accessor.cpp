@@ -141,7 +141,7 @@ void SetRotateXImpl(Ark_Matrix2D peer,
 Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetScaleX());
+    return Converter::ArkValue<Opt_Number>(peer->GetScaleY());
 }
 void SetScaleYImpl(Ark_Matrix2D peer,
                    const Ark_Number* scaleY)
