@@ -180,7 +180,9 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     for (const auto& len : cross.first) {
         itemsCrossSize_[0].push_back(static_cast<float>(len));
     }
-    info_->lanes_[0].resize(itemsCrossSize_[0].size());
+
+    const float newStartPos = info_->lanes_[0].size() > 0 ? info_->lanes_[0][0].startPos : 0.0f;
+    info_->lanes_[0].resize(itemsCrossSize_[0].size(), WaterFlowLayoutInfoSW::Lane { newStartPos, newStartPos });
 }
 
 bool WaterFlowLayoutSW::ItemHeightChanged() const
