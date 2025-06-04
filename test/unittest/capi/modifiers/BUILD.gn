@@ -215,7 +215,7 @@ if (capi_theme_debug) {
 group("capi_modifiers_unittest") {
   testonly = true
   deps = [
-    # ":capi_all_modifiers_test",
+    ":capi_all_modifiers_test",
     # "generated:capi_generated_modifiers_unittest",
   ]
 }
