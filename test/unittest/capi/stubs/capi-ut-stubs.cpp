@@ -29,6 +29,8 @@ void PipelineBase::PrepareOpenImplicitAnimation() {}
 
 void PipelineBase::PrepareCloseImplicitAnimation() {}
 
+void PipelineBase::GetUIFontConfig(OHOS::Ace::FontConfigJsonInfo&) {}
+
 void NG::PipelineContext::SetCallBackNode(const WeakPtr<NG::FrameNode>& node) {}
 
 RefPtr<NG::FrameNode> NG::CircleModelNG::CreateFrameNode(int32_t nodeId)
