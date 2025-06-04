@@ -895,7 +895,6 @@ void JSWebController::ZoomOut(const JSCallbackInfo& args)
 
 void JSWebController::GetProgress(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
     if (webController_) {
         int result = webController_->GetProgress();
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
