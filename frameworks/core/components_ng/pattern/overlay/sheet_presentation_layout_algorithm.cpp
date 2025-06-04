@@ -226,13 +226,18 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 sheetMaxHeight = windowGlobalRect.Height() - SHEET_SPLIT_STATUS_BAR.ConvertToPx()-
                     SHEET_SPLIT_AI_BAR.ConvertToPx();
             }
+            auto pipeline = host->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+            CHECK_NULL_VOID(sheetTheme);
+            auto bigWindowMinHeight = sheetTheme->GetBigWindowMinHeight();
             auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * POPUP_LARGE_SIZE;
             maxHeight = SheetInSplitWindow()
-                ? maxHeight : std::max(maxHeight, static_cast<float>(SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()));
+                ? maxHeight : std::max(maxHeight, static_cast<float>(bigWindowMinHeight.ConvertToPx()));
             if (LessNotEqual(sheetHeight_, 0.0f)) {
                 sheetHeight_ = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
-            } else if (LessOrEqual(sheetHeight_, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()) && !SheetInSplitWindow()) {
-                sheetHeight_ = SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx();
+            } else if (LessOrEqual(sheetHeight_, bigWindowMinHeight.ConvertToPx()) && !SheetInSplitWindow()) {
+                sheetHeight_ = bigWindowMinHeight.ConvertToPx();
             } else if (GreatOrEqual(sheetHeight_, maxHeight)) {
                 sheetHeight_ = maxHeight;
             }
@@ -613,12 +618,19 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle(const float parent
         } else {
             height = sheetStyle_.sheetHeight.height->ConvertToPx();
         }
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_RETURN(host, height);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_RETURN(pipeline, height);
+        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        CHECK_NULL_RETURN(sheetTheme, height);
+        auto bigWindowMinHeight = sheetTheme->GetBigWindowMinHeight();
         maxHeight = SheetInSplitWindow()
-            ? maxHeight : std::max(maxHeight, static_cast<float>(SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()));
+            ? maxHeight : std::max(maxHeight, static_cast<float>(bigWindowMinHeight.ConvertToPx()));
         if (LessNotEqual(height, 0.0f)) {
             height = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
-        } else if (LessOrEqual(height, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()) && !SheetInSplitWindow()) {
-            height = SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx();
+        } else if (LessOrEqual(height, bigWindowMinHeight.ConvertToPx()) && !SheetInSplitWindow()) {
+            height = bigWindowMinHeight.ConvertToPx();
         } else if (GreatOrEqual(height, maxHeight)) {
             height = maxHeight;
         }

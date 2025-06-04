@@ -107,7 +107,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
             sheetTheme->GetOperationAreaHeight() - sheetTheme->GetSheetTitleAreaMargin())));
         if (sheetStyle.sheetTitle.has_value() && sheetStyle.sheetSubtitle.has_value()) {
             layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
-                SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAreaMargin())));
+                sheetTheme->GetOperationAreaHeightDouble() - sheetTheme->GetSheetTitleAreaMargin())));
         }
     }
     CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode, sheetDragBarHeight);
@@ -398,13 +398,14 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     return subtitleRow;
 }
 
-void SheetView::SetTitleColumnMinSize(RefPtr<LayoutProperty> layoutProperty, const NG::SheetStyle& sheetStyle)
+void SheetView::SetTitleColumnMinSize(RefPtr<LayoutProperty> layoutProperty, const NG::SheetStyle& sheetStyle,
+    const RefPtr<SheetTheme>& sheetTheme)
 {
     if (sheetStyle.sheetTitle.has_value()) {
         layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
         if (sheetStyle.sheetSubtitle.has_value()) {
-            layoutProperty->UpdateCalcMinSize(CalcSize(
-                std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
+            layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt,
+                CalcLength(sheetTheme->GetOperationAreaHeightDouble() - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
         }
     }
 }
@@ -456,11 +457,11 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     CHECK_NULL_RETURN(titleColumn, nullptr);
     auto layoutProperty = titleColumn->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
-    SetTitleColumnMinSize(layoutProperty, sheetStyle);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, nullptr);
+    SetTitleColumnMinSize(layoutProperty, sheetStyle, sheetTheme);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     bool isTitleCustombuilder = sheetStyle.isTitleBuilder.has_value() && sheetStyle.isTitleBuilder.value();
     if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() || isTitleCustombuilder) {
@@ -489,7 +490,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             subtitleRow->MountToParent(titleColumn);
             if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
                 layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
-                    SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
+                    sheetTheme->GetOperationAreaHeightDouble() - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
         }
     } else if (sheetStyle.isTitleBuilder.has_value()) {
