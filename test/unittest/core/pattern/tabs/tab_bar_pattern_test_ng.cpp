@@ -2507,14 +2507,14 @@ HWTEST_F(TabBarPatternTestNg, UpdatePaintIndicator, TestSize.Level1)
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     tabBarPattern_->visibleItemPosition_[2] = { 1.0f, 2.0f };
-    tabBarPattern_->UpdatePaintIndicator(2,true);
+    tabBarPattern_->UpdatePaintIndicator(2, true);
     EXPECT_NE(tabBarPattern_->visibleItemPosition_.find(2), tabBarPattern_->visibleItemPosition_.end());
     
 
     tabBarPattern_->isTouchingSwiper_ = true;
     tabBarPattern_->tabBarStyles_.clear();
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
-    tabBarPattern_->UpdatePaintIndicator(0,true);
+    tabBarPattern_->UpdatePaintIndicator(0, true);
     EXPECT_NE(tabBarPattern_->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
 }
 /**
@@ -2908,6 +2908,6 @@ HWTEST_F(TabBarPatternTestNg, DumpAdvanceInfo, TestSize.Level1)
     DumpLog::GetInstance().description_.clear();
     tabBarPattern_->DumpAdvanceInfo();
     EXPECT_EQ(DumpLog::GetInstance().description_[0], "isRTL:false\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[10],"scrollMargin:0.000000\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[10], "scrollMargin:0.000000\n");
 }
 } // namespace OHOS::Ace::NG
