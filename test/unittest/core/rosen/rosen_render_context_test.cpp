@@ -1946,4 +1946,39 @@ HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
     EXPECT_EQ(quaternionValue[2], 0);
     EXPECT_NE(quaternionValue[3], 0);
 }
+
+/**
+ * @tc.name: ClearModifiers001
+ * @tc.desc: Test cast to RosenRenderContextTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ClearModifiers001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    auto rsNode = rosenRenderContext->rsNode_;
+    ASSERT_NE(rsNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set rotateZ is 90.
+     * @tc.expected: GetRotation is 90.
+     */
+    auto angle = 90;
+    rosenRenderContext->SetRotation(0, 0, angle);
+    auto rotateZ = rsNode->GetStagingProperties().GetRotation();
+    EXPECT_EQ(rotateZ, angle);
+
+    /**
+     * @tc.steps: step3. ClearModifiers.
+     * @tc.expected: GetRotation is default value.
+     */
+    rosenRenderContext->ClearModifiers();
+    rotateZ = rsNode->GetStagingProperties().GetRotation();
+    EXPECT_EQ(rotateZ, 0);
+}
 } // namespace OHOS::Ace::NG
