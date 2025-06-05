@@ -50,7 +50,7 @@ void SelectContentOverlayPattern::UpdateMenuInfo(const SelectMenuInfo& info)
 
 void SelectContentOverlayPattern::UpdateIsShowHandleLine(bool isHandleLineShow)
 {
-    if (info_->isHandleLineShow == isHandleLineShow) {
+    if (info_->isHandleLineShow == isHandleLineShow || IsDraggingSingleHandle()) {
         return;
     }
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -72,6 +72,9 @@ void SelectContentOverlayPattern::UpdateIsSingleHandle(bool isSingleHandle)
 
 void SelectContentOverlayPattern::RestartHiddenHandleTask(bool isDelay)
 {
+    if (IsDraggingSingleHandle()) {
+        return;
+    }
     CancelHiddenHandleTask();
     StartHiddenHandleTask(isDelay);
 }
@@ -307,5 +310,10 @@ void SelectContentOverlayPattern::UpdateMenuAccessibility(bool menuIsShow)
     } else {
         contentOverlayManager->NotifyAccessibilityOwner();
     }
+}
+
+bool SelectContentOverlayPattern::IsDraggingSingleHandle()
+{
+    return info_->isSingleHandle && (IsDraggingHandle(true) || IsDraggingHandle(false));
 }
 } // namespace OHOS::Ace::NG
