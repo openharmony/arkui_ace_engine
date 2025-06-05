@@ -25,7 +25,7 @@ import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode, RenderNodeInternal } from "./RenderNode"
-import { CommonAttribute, ArkCommonMethodPeer, CommonMethod } from './component/common'
+import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal } from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
@@ -78,6 +78,7 @@ export class FrameNode implements MaterializedBase {
     instanceId_?: number;
     _nodeId: number = -1;
     protected _commonAttribute: CommonAttribute | undefined = undefined;
+    protected _gestureEvent: UIGestureEvent | undefined = undefined;
     getType(): string {
         return 'CustomFrameNode';
     }
@@ -87,6 +88,18 @@ export class FrameNode implements MaterializedBase {
     }
     public getPeer(): Finalizable | undefined {
         return this.peer
+    }
+    get commonEvent(): UICommonEvent {
+        return this.getCommonEvent()
+    }
+    get gestureEvent(): UIGestureEvent {
+        if (this._gestureEvent === undefined) {
+            this._gestureEvent = new UIGestureEvent();
+            const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(this))
+            let peer = new ArkFrameNodePeer(retval, this._nodeId as int32, "FrameNode", 0);
+            this._gestureEvent!.setPeer(peer);
+        }
+        return this._gestureEvent as UIGestureEvent;
     }
     static ctor_framenode(): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
@@ -304,6 +317,14 @@ export class FrameNode implements MaterializedBase {
     }
     public getUserConfigSize(): SizeT<LengthMetrics> {
         return this.getUserConfigSize_serialize()
+    }
+    private getCommonEvent(): UICommonEvent {
+        return this.getCommonEvent_serialize()
+    }
+    private getCommonEvent_serialize(): UICommonEvent {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getCommonEvent(this.peer!.ptr)
+        const obj : UICommonEvent = UICommonEventInternal.fromPtr(retval)
+        return obj
     }
     private isModifiable_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_isModifiable(this.peer!.ptr)

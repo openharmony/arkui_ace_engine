@@ -23980,6 +23980,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_FrameNode (*getAttachedFrameNodeById)(const Ark_String* id);
     Ark_FrameNode (*getFrameNodeById)(const Ark_Number* id);
     Ark_FrameNode (*getFrameNodeByUniqueId)(const Ark_Number* id);
+    Ark_UICommonEvent (*getCommonEvent)(Ark_FrameNode peer);
     void (*reuse)(Ark_FrameNode peer);
     void (*recycle)(Ark_FrameNode peer);
     Ark_RenderNode (*getRenderNode)(Ark_FrameNode peer);

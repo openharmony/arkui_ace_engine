@@ -26855,6 +26855,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return (Ark_FrameNode) 300;
     }
+    Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_UICommonEvent) 300;
+        string out("getCommonEvent(");
+        out.append(") \n");
+        out.append("[return (Ark_UICommonEvent) 300] \n");
+        appendGroupedLog(1, out);
+        return (Ark_UICommonEvent) 300;
+    }
     Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
     {
         if (!needGroupedLog(1))
@@ -43634,6 +43644,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+            FrameNodeAccessor::GetCommonEventImpl,
             FrameNodeAccessor::Reuse,
             FrameNodeAccessor::Recycle,
             FrameNodeAccessor::GetFrameNodePtrImpl,

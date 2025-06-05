@@ -1062,7 +1062,7 @@ export class TypeChecker {
     static isFrame(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof Frame
     }
-    static isFrameNode(value: Object | string | number | undefined): boolean {
+    static isFrameNode(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof FrameNode
     }
     static isFrictionMotion(value: Object | string | number | undefined): boolean {

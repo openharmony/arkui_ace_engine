@@ -29,6 +29,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/view_model_bridge.h"
+#include "core/interfaces/native/implementation/ui_common_event_peer.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
@@ -394,6 +395,13 @@ Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
     auto nodeRef = AceType::DynamicCast<NG::FrameNode>(node);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef));
 }
+Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
+{
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto ret = PeerUtils::CreatePeer<UICommonEventPeer>();
+    ret->node = peer->node;
+    return ret;
+}
 void ReuseImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -680,6 +688,7 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+        FrameNodeAccessor::GetCommonEventImpl,
         FrameNodeAccessor::ReuseImpl,
         FrameNodeAccessor::RecycleImpl,
         FrameNodeAccessor::GetRenderNodeImpl,
