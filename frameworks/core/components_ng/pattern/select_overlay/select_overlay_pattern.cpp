@@ -566,11 +566,17 @@ void SelectOverlayPattern::UpdateFirstAndSecondHandleInfo(
     if (info_->firstHandle == firstInfo && info_->secondHandle == secondInfo) {
         return;
     }
+    bool needUpdate = false;
     if (info_->firstHandle != firstInfo && !firstHandleDrag_) {
         info_->firstHandle = firstInfo;
+        needUpdate = true;
     }
     if (info_->secondHandle != secondInfo && !secondHandleDrag_) {
         info_->secondHandle = secondInfo;
+        needUpdate = true;
+    }
+    if (!needUpdate) {
+        return;
     }
     CheckHandleReverse();
     UpdateHandleHotZone();
