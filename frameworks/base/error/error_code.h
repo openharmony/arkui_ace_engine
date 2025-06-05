@@ -22,6 +22,8 @@ namespace OHOS::Ace {
 // Common error code
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
 constexpr int32_t ERROR_CODE_PERMISSION_DENIED = 201; // The application does not have permission to call the interface.
+// Permission verification failed, application which is not a system application uses system API.
+constexpr int32_t ERROR_CODE_VERIFICATION_FAILED = 202;
 constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;     // Invalid input parameter.
 constexpr int32_t ERROR_CODE_CAPI_INIT_ERROR = 500;     // C-API impl not initialized yet.
 constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCapability names was not found.
