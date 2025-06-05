@@ -26,7 +26,7 @@
 #include "core/components_ng/gestures/rotation_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
-#include "core/components_ng/pattern/gesture/gesture_model_ng.h"
+#include "core/components_ng/pattern/gesture/gesture_model_ng_static.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -267,7 +267,7 @@ void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ar
         gestureHub->AttachGesture(gesturePtr);
     } else {
         gestureHub->AddGesture(gesturePtr);
-        GestureEventFunc clickEvent = GestureModelNG::GetTapGestureEventFunc(gesturePtr);
+        GestureEventFunc clickEvent = GestureModelNGStatic::GetTapGestureEventFunc(gesturePtr);
         if (clickEvent) {
             auto focusHub = frameNode->GetOrCreateFocusHub();
             CHECK_NULL_VOID(focusHub);
