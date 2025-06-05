@@ -1014,6 +1014,7 @@ public:
     void HandleFitContontChange(float height);
     void GetCurrentScrollHeight();
     void RecoverScrollOrResizeAvoidStatus();
+    bool IsNeedChangeScrollHeight(float height);
     bool IsResizeWhenAvoidKeyboard();
     void InitScrollProps();
     uint32_t GetCurrentBroadcastDetentsIndex();

@@ -1080,10 +1080,9 @@ void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) 
 
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
-    bool isNeedChangeScrollHeight = sheetObject_->GetSheetType() != SheetType::SHEET_SIDE &&
-        scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDirectionUp_;
     if ((HasOnHeightDidChange() && IsSheetBottomStyle() && isTransitionIn && isNeedProcessHeight_)
-        || isNeedChangeScrollHeight) {
+        || (isTransitionIn && IsNeedChangeScrollHeight(height_))) {
+        // Pass height_ because it was updated by ChangeSheetHeight() before
         ModifyFireSheetTransition(dragVelocity);
         return;
     }
@@ -2180,6 +2179,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option.GetOnFinishEvent());
         SetBottomStyleHotAreaInSubwindow();
     } else {
+        AnimationUtils::StopAnimation(animation_);
         animation_ = AnimationUtils::StartAnimation(
             option,
             sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset),
@@ -3601,6 +3601,18 @@ void SheetPresentationPattern::OnAppear()
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SendMessagesAfterFirstTransitionIn(true);
     }
+}
+
+bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
+{
+    auto it = std::min_element(sheetDetentHeight_.begin(), sheetDetentHeight_.end());
+    if (it == sheetDetentHeight_.end()) {
+        return false;
+    }
+    float lowestDetentHeight = *it;
+    bool isNeedChangeScrollHeight =
+        scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && GreatOrEqual(height, lowestDetentHeight);
+    return isNeedChangeScrollHeight;
 }
 
 void SheetPresentationPattern::OnWillDisappear()
