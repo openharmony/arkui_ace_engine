@@ -2811,6 +2811,9 @@ struct ArkUITextModifier {
     ArkUI_Int32 (*getRadialGradient)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Uint32 (*colors)[10],
         ArkUI_Float32 (*stops)[10], ArkUI_Int32 unit);
     void (*resetTextGradient)(ArkUINodeHandle node);
+    void (*setTextVerticalAlign)(ArkUINodeHandle node, ArkUI_Uint32 textVerticalAlign);
+    void (*resetTextVerticalAlign)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextVerticalAlign)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {

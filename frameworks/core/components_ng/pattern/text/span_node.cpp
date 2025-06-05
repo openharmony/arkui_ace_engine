@@ -498,6 +498,7 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextOverflow, TextOverflow);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextAlign, TextAlign);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextVerticalAlign, ParagraphVerticalAlign);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, MaxLines, MaxLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, WordBreak, WordBreak);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, EllipsisMode, EllipsisMode);
@@ -833,6 +834,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
     COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
     COPY_TEXT_STYLE(textLineStyle, TextAlign, UpdateTextAlign);
+    COPY_TEXT_STYLE(textLineStyle, TextVerticalAlign, UpdateTextVerticalAlign);
     COPY_TEXT_STYLE(textLineStyle, MaxLength, UpdateMaxLength);
     COPY_TEXT_STYLE(textLineStyle, MaxLines, UpdateMaxLines);
     COPY_TEXT_STYLE(textLineStyle, HeightAdaptivePolicy, UpdateHeightAdaptivePolicy);
@@ -1221,6 +1223,9 @@ bool ImageSpanItem::UpdatePlaceholderRun(PlaceholderStyle placeholderStyle)
             case VerticalAlign::BASELINE:
                 run.alignment = PlaceholderAlignment::ABOVEBASELINE;
                 break;
+            case VerticalAlign::FOLLOW_PARAGRAPH:
+                run.alignment = PlaceholderAlignment::FOLLOW_PARAGRAPH;
+                break;
             default:
                 run.alignment = PlaceholderAlignment::BOTTOM;
         }
@@ -1543,6 +1548,7 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TextOverflow", StringUtils::ToString(textStyle->GetTextOverflow()).c_str());
     json->Put("VerticalAlign", StringUtils::ToString(textStyle->GetTextVerticalAlign()).c_str());
     json->Put("TextAlign", StringUtils::ToString(textStyle->GetTextAlign()).c_str());
+    json->Put("TextVerticalAlign", StringUtils::ToString(textStyle->GetParagraphVerticalAlign()).c_str());
     json->Put("WordBreak", StringUtils::ToString(textStyle->GetWordBreak()).c_str());
     json->Put("TextCase", StringUtils::ToString(textStyle->GetTextCase()).c_str());
     json->Put("EllipsisMode", StringUtils::ToString(textStyle->GetEllipsisMode()).c_str());

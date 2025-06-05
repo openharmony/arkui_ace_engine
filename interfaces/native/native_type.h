@@ -379,6 +379,22 @@ typedef enum {
 } ArkUI_TextAlignment;
 
 /**
+ * @brief 定义文本垂直对齐样式枚举值。
+ *
+ * @since 20
+ */
+typedef enum {
+    /** 基线对齐。 */
+    ARKUI_TEXT_VERTICAL_ALIGNMENT_BASELINE = 0,
+    /** 底部对齐。 */
+    ARKUI_TEXT_VERTICAL_ALIGNMENT_BOTTOM,
+    /** 居中对齐。 */
+    ARKUI_TEXT_VERTICAL_ALIGNMENT_CENTER,
+    /** 顶部对齐。 */
+    ARKUI_TEXT_VERTICAL_ALIGNMENT_TOP,
+} ArkUI_TextVerticalAlignment;
+
+/**
  * @brief Enumerates the types of the Enter key for a single-line text box.
  *
  * @since 12
@@ -1290,6 +1306,8 @@ typedef enum {
     ARKUI_IMAGE_SPAN_ALIGNMENT_CENTER,
     /** The image is top aligned with the text. */
     ARKUI_IMAGE_SPAN_ALIGNMENT_TOP,
+    /** The image follow with the text's alignment. */
+    ARKUI_IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH,
 } ArkUI_ImageSpanAlignment;
 
 /**

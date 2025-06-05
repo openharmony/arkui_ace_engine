@@ -437,6 +437,32 @@ inline TextAlign ConvertWrapStringToTextAlign(const std::string& str)
     return TextAlign::START;
 }
 
+inline std::string ConvertWrapTextVerticalAlignToString(TextVerticalAlign textVerticalAlign)
+{
+    static const LinearEnumMapNode<TextVerticalAlign, std::string> textVerticalAlignTable[] = {
+        { TextVerticalAlign::BASELINE, "TextVerticalAlign.BASELINE" },
+        { TextVerticalAlign::BOTTOM, "TextVerticalAlign.BOTTOM" },
+        { TextVerticalAlign::CENTER, "TextVerticalAlign.CENTER" },
+        { TextVerticalAlign::TOP, "TextVerticalAlign.TOP" },
+    };
+
+    auto index = BinarySearchFindIndex(
+        textVerticalAlignTable, ArraySize(textVerticalAlignTable), textVerticalAlign);
+    return index < 0 ? "TextVerticalAlign.BASELINE" : textVerticalAlignTable[index].value;
+}
+
+inline TextVerticalAlign ConvertWrapStringToTextVerticalAlign(const std::string& str)
+{
+    static const std::unordered_map<std::string, TextVerticalAlign> uMap {
+        { "TextVerticalAlign.BASELINE", TextVerticalAlign::BASELINE },
+        { "TextVerticalAlign.BOTTOM", TextVerticalAlign::BOTTOM },
+        { "TextVerticalAlign.CENTER", TextVerticalAlign::CENTER },
+        { "TextVerticalAlign.TOP", TextVerticalAlign::TOP },
+    };
+    auto iter = uMap.find(str);
+    return iter != uMap.end() ? iter->second : TextVerticalAlign::BASELINE;
+}
+
 inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
 {
     static const LinearEnumMapNode<TextOverflow, std::string> textOverflowTable[] = {

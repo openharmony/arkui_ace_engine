@@ -1373,4 +1373,23 @@ void TextModelNG::ResetTextGradient(FrameNode* frameNode)
         textLayoutProperty->ResetGradientShaderStyle();
     }
 }
+
+void TextModelNG::SetTextVerticalAlign(TextVerticalAlign verticalAlign)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextVerticalAlign, verticalAlign);
+}
+
+void TextModelNG::SetTextVerticalAlign(FrameNode* frameNode, TextVerticalAlign verticalAlign)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextVerticalAlign, verticalAlign, frameNode);
+}
+
+TextVerticalAlign TextModelNG::GetTextVerticalAlign(FrameNode* frameNode)
+{
+    TextVerticalAlign value = TextVerticalAlign::BASELINE;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, TextVerticalAlign, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

@@ -1263,6 +1263,7 @@ RefPtr<ParagraphStyleSpan> SpanString::ToParagraphStyleSpan(
     CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
     SpanParagraphStyle paragraphStyle;
     paragraphStyle.align = spanItem->textLineStyle->GetTextAlign();
+    paragraphStyle.textVerticalAlign = spanItem->textLineStyle->GetTextVerticalAlign();
     paragraphStyle.maxLines = spanItem->textLineStyle->GetMaxLines();
     paragraphStyle.textOverflow = spanItem->textLineStyle->GetTextOverflow();
     paragraphStyle.leadingMargin = spanItem->textLineStyle->GetLeadingMargin();

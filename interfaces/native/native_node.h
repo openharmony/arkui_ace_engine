@@ -2474,6 +2474,19 @@ typedef enum {
     NODE_TEXT_RADIAL_GRADIENT = 1034,
 
     /**
+     * @brief 设置文本内容垂直对齐方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextVerticalAlignment}，默认值：ARKUI_TEXT_VERTICAL_ALIGNMENT_BASELINE \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextVerticalAlignment}。 \n
+     *
+     * @since 20
+     */
+    NODE_TEXT_VERTICAL_ALIGN = 1035,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

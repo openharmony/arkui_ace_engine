@@ -3169,6 +3169,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.decorationStyle = static_cast<int32_t>(node->GetTextDecorationStyleValue(TextDecorationStyle::SOLID));
     textStyle.lineThicknessScale = node->GetLineThicknessScaleValue(1.0f);
     textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
+    textStyle.textVerticalAlign = static_cast<int32_t>(node->GetTextVerticalAlignValue(TextVerticalAlign::BASELINE));
     auto lm = node->GetLeadingMarginValue({});
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToFp();
