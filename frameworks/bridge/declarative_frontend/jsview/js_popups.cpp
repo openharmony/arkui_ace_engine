@@ -1711,6 +1711,7 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.enableFloatingDragBar = false;
     sheetStyle.showDragBar = true;
     sheetStyle.showCloseIcon = true;
     sheetStyle.showInPage = false;
@@ -1758,6 +1759,7 @@ void JSViewAbstract::ParseSheetStyle(
 {
     auto height = paramObj->GetProperty("height");
     auto showDragBar = paramObj->GetProperty("dragBar");
+    auto floatingDragBar = paramObj->GetProperty("enableFloatingDragBar");
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
     auto maskColor = paramObj->GetProperty("maskColor");
     auto sheetDetents = paramObj->GetProperty("detents");
@@ -1825,6 +1827,14 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.showDragBar.reset();
     } else {
         sheetStyle.showDragBar = true;
+    }
+
+    if (floatingDragBar->IsBoolean()) {
+        sheetStyle.enableFloatingDragBar = floatingDragBar->ToBoolean();
+    } else if (isPartialUpdate) {
+        sheetStyle.enableFloatingDragBar.reset();
+    } else {
+        sheetStyle.enableFloatingDragBar = false;
     }
 
     if (type->IsNull() || type->IsUndefined()) {

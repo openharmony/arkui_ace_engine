@@ -152,6 +152,7 @@ enum class SheetKeyboardAvoidMode {
 struct SheetStyle {
     SheetHeight sheetHeight;
     std::optional<bool> showDragBar;
+    std::optional<bool> enableFloatingDragBar;
     std::optional<bool> showCloseIcon;
     std::optional<bool> isTitleBuilder;
     std::optional<SheetType> sheetType;
@@ -184,6 +185,7 @@ struct SheetStyle {
     bool operator==(const SheetStyle& sheetStyle) const
     {
         return (sheetHeight == sheetStyle.sheetHeight &&
+                enableFloatingDragBar == sheetStyle.enableFloatingDragBar &&
                 showDragBar == sheetStyle.showDragBar && showCloseIcon == sheetStyle.showCloseIcon &&
                 isTitleBuilder == sheetStyle.isTitleBuilder && sheetType == sheetStyle.sheetType &&
                 backgroundColor == sheetStyle.backgroundColor && maskColor == sheetStyle.maskColor &&
@@ -214,6 +216,8 @@ struct SheetStyle {
                 sheetStyle.sheetHeight.sheetMode : sheetHeight.sheetMode;
         }
         showDragBar = sheetStyle.showDragBar.has_value() ? sheetStyle.showDragBar : showDragBar;
+        enableFloatingDragBar = sheetStyle.enableFloatingDragBar.has_value() ?
+            sheetStyle.enableFloatingDragBar : enableFloatingDragBar;
         showCloseIcon = sheetStyle.showCloseIcon.has_value() ? sheetStyle.showCloseIcon : showCloseIcon;
         isTitleBuilder = sheetStyle.isTitleBuilder.has_value() ? sheetStyle.isTitleBuilder : isTitleBuilder;
         sheetType = sheetStyle.sheetType.has_value() ? sheetStyle.sheetType : sheetType;

@@ -29,6 +29,7 @@ public:
     static RefPtr<FrameNode> CreateScrollNode(const NG::SheetStyle& sheetStyle);
     static RefPtr<FrameNode> CreateSheetMaskShowInSubwindow(const RefPtr<FrameNode>& sheetPageNode,
         const RefPtr<FrameNode>& sheetWrapperNode, const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
+    static bool IsSingleDetents(const NG::SheetStyle& sheetStyle);
 
 private:
     static RefPtr<FrameNode> CreateOperationColumnNode(

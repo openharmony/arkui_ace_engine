@@ -5633,6 +5633,10 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         CloseSheet(SheetKey(targetId));
         return;
     }
+    if (sheetStyle.enableFloatingDragBar.value_or(false)) {
+        sheetStyle.enableFloatingDragBar =
+            (sheetStyle.showDragBar.value_or(true) && !SheetView::IsSingleDetents(sheetStyle)) ? true : false;
+    }
     SheetKey sheetKey(targetId);
     auto iter = sheetMap_.find(sheetKey);
     if (iter != sheetMap_.end()) {
@@ -5774,6 +5778,8 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     if (isStartByUIContext) {
         currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
         UpdateSheetProperty(sheetNode, currentStyle, isPartialUpdate);
+        sheetNodePattern->UpdateDragBarStatus();
+        sheetNodePattern->UpdateTitleColumnSize();
     } else {
         sheetNodePattern->UpdateOnAppear(std::move(onAppear));
         sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
@@ -5820,9 +5826,16 @@ SheetStyle OverlayManager::UpdateSheetStyle(
     } else {
         auto currentShowInPage = currentStyle.showInPage;
         auto currentInstanceId = currentStyle.instanceId;
+        auto currentSheetTitle = currentStyle.sheetTitle;
+        auto currentSheetSubtitle = currentStyle.sheetSubtitle;
+
         currentStyle = sheetStyle;
         currentStyle.showInPage = currentShowInPage;
         currentStyle.instanceId = currentInstanceId;
+
+        currentStyle.sheetTitle = sheetStyle.sheetTitle.has_value() ? sheetStyle.sheetTitle : currentSheetTitle;
+        currentStyle.sheetSubtitle =
+            sheetStyle.sheetSubtitle.has_value() ? sheetStyle.sheetSubtitle : currentSheetSubtitle;
     }
     layoutProperty->UpdateSheetStyle(currentStyle);
     return currentStyle;

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -150,6 +151,17 @@ void SheetPresentationLayoutAlgorithm::ComputeWidthAndHeight(LayoutWrapper* layo
     sheetHeight_ = GetHeightByScreenSizeType(parentHeightConstraint, parentWidthConstraint, layoutWrapper);
 }
 
+void SheetPresentationLayoutAlgorithm::MeasureDragBar(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto dragBarNode = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    dragBarNode->Measure(constraint);
+}
+
 void SheetPresentationLayoutAlgorithm::MeasureOperation(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint)
 {
     auto host = layoutWrapper->GetHostNode();
@@ -192,6 +204,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
         auto childConstraint = CreateSheetChildConstraint(layoutProperty, layoutWrapper);
         layoutConstraint->percentReference = SizeF(sheetWidth_, sheetHeight_);
+        MeasureDragBar(layoutWrapper, childConstraint);
         MeasureOperation(layoutWrapper, childConstraint);
         MeasureCloseIcon(layoutWrapper, childConstraint);
         auto host = layoutWrapper->GetHostNode();
@@ -331,8 +344,7 @@ void SheetPresentationLayoutAlgorithm::MinusSubwindowDistance(const RefPtr<Frame
     sheetOffsetY_ -= subWindowGlobalRect.Top();
 }
 
-void SheetPresentationLayoutAlgorithm::LayoutTitleBuilder(const NG::OffsetF& translate,
-    LayoutWrapper* layoutWrapper)
+void SheetPresentationLayoutAlgorithm::LayoutTitleBuilder(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
@@ -345,7 +357,15 @@ void SheetPresentationLayoutAlgorithm::LayoutTitleBuilder(const NG::OffsetF& tra
     CHECK_NULL_VOID(titleBuilderWrapper);
     auto geometryNode = titleBuilderWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetMarginFrameOffset(translate);
+    auto offset = translate;
+    auto dragBarNode = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    if (!sheetStyle_.enableFloatingDragBar.value_or(false)) {
+        auto dragBar = dragBarNode->GetGeometryNode();
+        CHECK_NULL_VOID(dragBar);
+        offset += OffsetF(0, dragBar->GetFrameSize().Height());
+    }
+    geometryNode->SetMarginFrameOffset(offset);
     titleBuilderWrapper->Layout();
 }
 
@@ -385,8 +405,7 @@ void SheetPresentationLayoutAlgorithm::LayoutCloseIcon(const NG::OffsetF& transl
     closeIconWrapper->Layout();
 }
 
-void SheetPresentationLayoutAlgorithm::LayoutScrollNode(const NG::OffsetF& translate,
-    LayoutWrapper* layoutWrapper)
+void SheetPresentationLayoutAlgorithm::LayoutScrollNode(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
@@ -400,14 +419,50 @@ void SheetPresentationLayoutAlgorithm::LayoutScrollNode(const NG::OffsetF& trans
 
     auto offset = translate;
     auto titleBuilder = sheetPattern->GetTitleBuilderNode();
+    auto dragBarNode = sheetPattern->GetDragBarNode();
     if (titleBuilder) {
         auto titleBuilderNode = titleBuilder->GetGeometryNode();
         CHECK_NULL_VOID(titleBuilderNode);
-        offset += OffsetF(0, titleBuilderNode->GetFrameSize().Height());
+        float titleHeight =
+            Positive(titleBuilderNode->GetFrameSize().Height()) ? titleBuilderNode->GetFrameSize().Height() : 0.0f;
+        auto dragBar = dragBarNode->GetGeometryNode();
+        CHECK_NULL_VOID(dragBar);
+        if (!sheetStyle_.enableFloatingDragBar.value_or(false)) {
+            offset += OffsetF(0, titleHeight + dragBar->GetFrameSize().Height());
+        } else {
+            offset += OffsetF(0, titleHeight);
+        }
     }
     auto geometryNode = scrollWrapper->GetGeometryNode();
     geometryNode->SetMarginFrameOffset(offset);
     scrollWrapper->Layout();
+}
+
+void SheetPresentationLayoutAlgorithm::LayoutDragBar(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto dragBarNode = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto index = host->GetChildIndexById(dragBarNode->GetId());
+    auto dragBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(dragBarWrapper);
+    auto geometryNode = dragBarWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto sheetGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(sheetGeometryNode);
+    auto dragBarX = (sheetGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width()) / 2;
+    OffsetF positionOffset;
+    positionOffset.SetX(dragBarX + translate.GetX());
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetMarginFrameOffset(positionOffset);
+    dragBarWrapper->Layout();
 }
 
 void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -441,6 +496,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         UpdateTranslateOffsetWithPlacement(translate);
     }
     LayoutCloseIcon(translate, layoutWrapper);
+    LayoutDragBar(translate, layoutWrapper);
     LayoutTitleBuilder(translate, layoutWrapper);
     LayoutScrollNode(translate, layoutWrapper);
 }

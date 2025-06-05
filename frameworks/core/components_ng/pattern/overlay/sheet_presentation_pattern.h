@@ -740,6 +740,12 @@ public:
 
     float GetFitContentHeight();
 
+    void UpdateTitleColumnSize();
+
+    float GetTitleBuilderHeight() const;
+
+    static Dimension GetDragBarHeight(const RefPtr<FrameNode>& dragBarNode = nullptr);
+
     bool WillSpringBack() const
     {
         return isSpringBack_;
@@ -821,14 +827,12 @@ public:
     // Get ScrollHeight before avoid keyboard
     float GetScrollHeight() const
     {
-        auto titleHeight = GetFirstChildHeight();
+        auto titleHeight = GetTitleBuilderHeight();
         if (sheetType_ == SheetType::SHEET_CENTER) {
             return centerHeight_ - titleHeight;
         }
         return height_ - titleHeight;
     }
-
-    float GetFirstChildHeight() const;
 
     RefPtr<OverlayManager> GetOverlayManager();
     RefPtr<FrameNode> GetOverlayRoot();
@@ -946,6 +950,11 @@ public:
         closeButtonNode_ = node;
     }
 
+    void SetDragBarNode(const WeakPtr<FrameNode>& node)
+    {
+        dragBarNode_ = node;
+    }
+
     void SetScrollNode(const WeakPtr<FrameNode>& node) {
         scrolNode_ = node;
     }
@@ -953,7 +962,12 @@ public:
     void SetTitleBuilderNode(const WeakPtr<FrameNode>& node) {
         titleBuilderNode_ = node;
     }
-    
+
+    RefPtr<FrameNode> GetDragBarNode() const
+    {
+        return dragBarNode_.Upgrade();
+    }
+
     RefPtr<FrameNode> GetSheetCloseIcon() const
     {
         auto closeButtonNode = closeButtonNode_.Upgrade();
@@ -1196,6 +1210,7 @@ private:
     WeakPtr<FrameNode> scrolNode_;
     WeakPtr<FrameNode> titleBuilderNode_;
     RefPtr<SheetObject> sheetObject_;
+    WeakPtr<FrameNode> dragBarNode_;
 };
 } // namespace OHOS::Ace::NG
 
