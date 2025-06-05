@@ -24,6 +24,7 @@
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/event/touch_event.h"
@@ -48,6 +49,7 @@ const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 const std::string TOUCH_EVENT_INFO_TYPE = "onTouchDown";
 const std::vector<TouchPoint> POINTERS = { TouchPoint(), TouchPoint(), TouchPoint() };
 const std::vector<TouchPoint> POINTERS_2 = { { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE } };
+constexpr int32_t DEFAULT_PEN_ID = 102;
 } // namespace
 
 class TouchEventTestNg : public testing::Test {
@@ -599,5 +601,42 @@ HWTEST_F(TouchEventTestNg, TouchEventTest006, TestSize.Level1)
     TouchEventFunc&& callback_1 = std::forward<TouchEventFunc>(callback);
     touchEventActuator->commonTouchEventCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+}
+
+/**
+ * @tc.name: TouchEventOriginalIdTest001
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventOriginalIdTest001, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.originalId = 0;
+    touchEvent.sourceType = SourceType::TOUCH;
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.CovertId();
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(true);
+    EXPECT_EQ(touchEvent.GetOriginalReCovertId(), 0);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(false);
+    EXPECT_EQ(touchEvent.GetOriginalReCovertId(), DEFAULT_PEN_ID);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(true);
+}
+
+/**
+ * @tc.name: TouchEventOriginalIdTest002
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventOriginalIdTest002, TestSize.Level1)
+{
+    TouchPoint touchPoint;
+    touchPoint.originalId = 0;
+    touchPoint.sourceTool = SourceTool::PEN;
+    touchPoint.CovertId();
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(true);
+    EXPECT_EQ(touchPoint.GetOriginalReCovertId(), 0);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(false);
+    EXPECT_EQ(touchPoint.GetOriginalReCovertId(), DEFAULT_PEN_ID);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(true);
 }
 } // namespace OHOS::Ace::NG

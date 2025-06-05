@@ -252,6 +252,15 @@ public:
         return reusedNodeSkipMeasure_;
     }
 
+    void SetTouchPadIdChanged(bool touchPadIdChanged)
+    {
+        touchPadIdChanged_ = touchPadIdChanged;
+    }
+
+    bool GetTouchPadIdChanged() const
+    {
+        return touchPadIdChanged_;
+    }
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -284,6 +293,7 @@ protected:
     mutable std::shared_mutex eventsPassMutex_;
     TouchPassMode touchPassMode_ = TouchPassMode::DEFAULT;
     bool reusedNodeSkipMeasure_ = false;
+    bool touchPadIdChanged_ = false;
 };
 
 } // namespace OHOS::Ace
