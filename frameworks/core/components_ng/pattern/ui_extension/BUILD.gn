@@ -31,6 +31,8 @@ build_component_ng("ui_extension_pattern_ng") {
 
   # security_ui_extension_component
   sources += [
+    "preview_ui_extension_component/preview_session_wrapper_impl.cpp",
+    "preview_ui_extension_component/preview_ui_extension_pattern.cpp",
     "security_ui_extension_component/security_session_wrapper_impl.cpp",
     "security_ui_extension_component/security_ui_extension_pattern.cpp",
     "security_ui_extension_component/security_ui_extension_proxy.cpp",
