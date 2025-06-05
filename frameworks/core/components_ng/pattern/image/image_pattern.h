@@ -212,6 +212,7 @@ public:
     inline void DumpHdrBrightness(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     void DumpBorderRadiusProperties(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     inline void DumpOtherInfo();
+    inline void DumpMenmoryNameId();
     void DumpRenderInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -598,6 +599,7 @@ private:
     bool isSrcUndefined_ = false;
     bool isComponentSnapshotNode_ = false;
     bool isNeedReset_ = false;
+    bool hasSetPixelMapMemoryName_ = false;
 };
 
 } // namespace OHOS::Ace::NG
