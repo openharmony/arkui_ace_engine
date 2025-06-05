@@ -80,8 +80,6 @@ typedef struct FontConfigJsonInfo {
     FallbackGroupSet fallbackGroupSet;
 } FontConfigJsonInfo;
 
-using ExternalLoadFontPair = std::pair<std::string, std::function<void()>>;
-
 class FontManager : public virtual AceType {
     DECLARE_ACE_TYPE(FontManager, AceType);
 
@@ -140,8 +138,6 @@ protected:
 
 private:
     void FontNodeChangeStyleNG();
-    void RegisterLoadFontCallbacks();
-    void OnLoadFontChanged(const WeakPtr<PipelineBase>& context, const std::string& fontName);
 
     std::list<RefPtr<FontLoader>> fontLoaders_;
     std::vector<std::string> fontNames_;
@@ -151,8 +147,6 @@ private:
     std::set<WeakPtr<RenderNode>> variationNodes_;
     std::set<WeakPtr<NG::UINode>> variationNodesNG_;
     std::set<WeakPtr<FontChangeObserver>> observers_;
-    std::map<WeakPtr<NG::UINode>, ExternalLoadFontPair> externalLoadCallbacks_;
-    bool hasRegisterLoadFontCallback_ = false;
 
 #ifdef ACE_ENABLE_VK
     std::mutex hybridRenderNodesMutex_;
