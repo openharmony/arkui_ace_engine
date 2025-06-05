@@ -17,6 +17,7 @@
 
 #define private public
 
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_handler.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_press.h"
 #include "core/event/touch_event.h"
@@ -195,5 +196,68 @@ HWTEST_F(DragDropInitiatingStatePressTestNG, DragDropInitiatingStatePressTestNG0
             caseNum, static_cast<DragDropInitiatingStatus>(machine->currentState_), testCase.expectStatus));
         caseNum++;
     }
+}
+
+/**
+ * @tc.name: DragDropInitiatingStatePressTestNG002
+ * @tc.desc: Test GetThumbnailPixelMap is called when isThumbnailCallbackTriggered is false and text is not draggable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStatePressTestNG, DragDropInitiatingStatePressTestNG002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get the current pipeline context and dragDropManager.
+     * @tc.expected: Both should be non-null.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create a FrameNode of type IMAGE with a GestureEventHub, set text draggable to false.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    gestureHub->SetTextDraggable(false);
+
+    /**
+     * @tc.steps: step3. Assign a pixel map as preview to frameNode.
+     */
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    DragDropInfo previewInfo;
+    previewInfo.pixelMap = pixelMap;
+    frameNode->SetDragPreview(previewInfo);
+
+    /**
+     * @tc.steps: step4. Call GetThumbnailPixelMap with a callback and expect it to be triggered.
+     * @tc.expected: callbackTriggered is true.
+     */
+    bool callbackTriggered = false;
+    DragDropFuncWrapper::GetThumbnailPixelMap(
+        gestureHub, [&callbackTriggered](const RefPtr<PixelMap>&, bool) { callbackTriggered = true; }, true);
+
+    /**
+     * @tc.steps: step5. Initialize the DragDrop state machine and set isThumbnailCallbackTriggered to false.
+     */
+    auto handler = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    machine->InitializeState();
+    machine->dragDropInitiatingParams_.frameNode = frameNode;
+    machine->dragDropInitiatingParams_.isThumbnailCallbackTriggered = false;
+
+    /**
+     * @tc.steps: step6. Create and initialize DragDropInitiatingStatePress, triggering state logic.
+     * @tc.expected: The callback for GetThumbnailPixelMap is called.
+     */
+    auto pressState =
+        AceType::MakeRefPtr<DragDropInitiatingStatePress>(WeakPtr<DragDropInitiatingStateMachine>(machine));
+    ASSERT_NE(pressState, nullptr);
+    pressState->Init(static_cast<int32_t>(DragDropInitiatingStatus::PRESS));
+    EXPECT_TRUE(callbackTriggered);
 }
 } // namespace OHOS::Ace::NG

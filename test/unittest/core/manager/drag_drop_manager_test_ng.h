@@ -70,6 +70,15 @@ const std::string ITEM_INFO_LEAVE("item info LEAVE");
 const std::string ITEM_INFO_MOVE("item info MOVE");
 const std::string ITEM_INFO_ENTER("item info ENTER");
 constexpr int32_t INVALID_CURRENT_ID = -1;
+constexpr int32_t INVALID_PULL_ID = -1;
+constexpr int32_t CURRENT_PULL_ID = 123;
+constexpr int32_t NEW_PULL_ID = 456;
+constexpr int32_t WINDOW_ID = 1;
+constexpr int32_t PARENT_NODE_ID = 2;
+constexpr float POINT_X1 = 10.0f;
+constexpr float POINT_Y1 = 20.0f;
+constexpr float POINT_X2 = 30.0f;
+constexpr float POINT_Y2 = 40.0f;
 // before testing CheckDragDropProxy, DragWindow has created 6 times
 constexpr int32_t VALID_CURRENT_ID = 6;
 const OffsetF FRAME_OFFSET(0.0f, 0.0f);
