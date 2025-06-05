@@ -3226,11 +3226,10 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 
     if (cachedAnimateFlag_.load()) {
         const uint32_t delay = 50;
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-        CHECK_NULL_VOID(pipeline);
+        auto pipeline = container->GetPipelineContext();
         auto task = [cachedConfig = cachedConfig_, cachedReason = cachedReason_,
             cachedRsTransaction = cachedRsTransaction_, cachedAvoidAreas = cachedAvoidAreas_,
-            weak = WeakPtr<NG::PipelineContext>(pipeline), UICONTENT_IMPL_HELPER(content)] () {
+            weak = WeakPtr<PipelineBase>(pipeline), UICONTENT_IMPL_HELPER(content)] () {
             auto pipeline = weak.Upgrade();
             CHECK_NULL_VOID(pipeline);
             UICONTENT_IMPL_HELPER_GUARD(content, return);
