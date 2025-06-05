@@ -8640,7 +8640,7 @@ void RichEditorPattern::HandleAIMenuOption(const std::string& labelInfo)
 
 void RichEditorPattern::UpdateAIMenuOptions()
 {
-    if (copyOption_ != CopyOptions::Local || !NeedShowAIDetect()) {
+    if ((copyOption_ != CopyOptions::Local && copyOption_ != CopyOptions::Distributed) || !NeedShowAIDetect()) {
         SetIsShowAIMenuOption(false);
         return;
     }
