@@ -671,6 +671,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern025, TestSize.Level1)
     pattern->contentController_->SetTextValue(UtfUtils::Str8ToStr16("Hello"));
     pattern->HandleTouchEvent(touchInfo);
     EXPECT_TRUE(pattern->GetMagnifierController()->magnifierNodeExist_);
+
+    pattern->GetMagnifierController()->RemoveMagnifierFrameNode();
+    EXPECT_FALSE(pattern->GetMagnifierController()->magnifierNodeExist_);
 }
 
 /**
