@@ -1735,6 +1735,53 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest011, TestSize.Level1
 }
 
 /**
+ * @tc.name: SliderPatternAccessibilityTest012
+ * @tc.desc: Test slider_pattern SetUpdateAccessibilityCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
+    /**
+     * @tc.steps: step2. Create virtual parent node.
+     */
+    if (!sliderPattern->parentAccessibilityNode_) {
+        sliderPattern->parentAccessibilityNode_ = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    }
+    auto parent = sliderPattern->parentAccessibilityNode_;
+    ASSERT_NE(parent, nullptr);
+    /**
+     * @tc.steps: step3. Add Slider virtual child node.
+     */
+    sliderPattern->AddStepPointsAccessibilityVirtualNode();
+    /**
+     * @tc.steps: step4. Init ContentModifier and set step point.
+     */
+    EXPECT_FALSE(sliderPattern->InitAccessibilityVirtualNode());
+    if (!sliderPattern->sliderContentModifier_) {
+        sliderPattern->sliderContentModifier_ =
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+    }
+    auto contentModifier = sliderPattern->sliderContentModifier_;
+    ASSERT_NE(contentModifier, nullptr);
+    contentModifier->stepPointVec_ = HORIZONTAL_STEP_POINTS;
+    EXPECT_TRUE(sliderPattern->InitAccessibilityVirtualNode());
+    sliderPattern->InitAccessibilityVirtualNode();
+    ASSERT_NE(contentModifier->updateAccessibilityVirtualNode_, nullptr);
+}
+
+/**
  * @tc.name: SliderPatternTest023
  * @tc.desc: Test slider_pattern HandleHoverEvent
  * @tc.type: FUNC
