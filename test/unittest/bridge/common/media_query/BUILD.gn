@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,13 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-group("bridge_unittest") {
-  testonly = true
-  deps = [
-    "common/media_query:media_query_test_ng",
-    "common/sourcemap:bridge_source_map_test",
-    "common/utils:bridge_utils_test",
+ace_unittest("media_query_test_ng") {
+  type = "new"
+  module_output = bridge_test_output_path
+  sources = [
+    "$ace_root/frameworks/bridge/common/media_query/media_query_info.cpp",
+    "media_query_test.cpp",
   ]
 }
