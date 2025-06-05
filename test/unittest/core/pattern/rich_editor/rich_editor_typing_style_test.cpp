@@ -95,6 +95,7 @@ HWTEST_F(RichEditorTypingStyleTestNg, UseTypingParaStyle001, TestSize.Level1)
     auto& styleManager = richEditorPattern->styleManager_;
     std::list<RefPtr<SpanItem>> spans;
     int32_t caretPosition = 0;
+    EXPECT_EQ(styleManager->HasTypingParagraphStyle(), true);
     EXPECT_EQ(styleManager->UseTypingParaStyle(spans, caretPosition), true);
 
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
@@ -122,6 +123,7 @@ HWTEST_F(RichEditorTypingStyleTestNg, UseTypingParaStyle002, TestSize.Level1)
     std::list<RefPtr<SpanItem>> spans;
     RichEditorChangeValue changeValue;
     // empty
+    EXPECT_EQ(styleManager->HasTypingParagraphStyle(), true);
     EXPECT_EQ(styleManager->UseTypingParaStyle(spans, changeValue), true);
 
     // delete to empty
@@ -161,6 +163,7 @@ HWTEST_F(RichEditorTypingStyleTestNg, UseStyleByTypingParagraphStyle001, TestSiz
     auto spanNode = Ace::MakeRefPtr<SpanNode>();
 
     auto& styleManager = richEditorPattern->styleManager_;
+    EXPECT_EQ(styleManager->HasTypingParagraphStyle(), true);
     styleManager->UpdateStyleByTypingParagraphStyle(spanNode);
     auto textAlign = spanNode->GetTextAlign();
     auto leadingMargin = spanNode->GetLeadingMargin();
