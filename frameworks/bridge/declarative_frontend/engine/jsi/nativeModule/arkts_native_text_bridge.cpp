@@ -1356,13 +1356,13 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
         };
         arkUITextDetectConfig.onResult = reinterpret_cast<void*>(&callback);
     }
-    ParseAIEntityColor(runtimeCallInfo, arkUITextDetectConfig);
+    ParseAIEntityColorAndPreview(runtimeCallInfo, arkUITextDetectConfig);
     GetArkUINodeModifiers()->getTextModifier()->
         setTextDataDetectorConfigWithEvent(nativeNode, &arkUITextDetectConfig);
     return panda::JSValueRef::Undefined(vm);
 }
 
-void TextBridge::ParseAIEntityColor(
+void TextBridge::ParseAIEntityColorAndPreview(
     ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1388,6 +1388,13 @@ void TextBridge::ParseAIEntityColor(
     if (entityDecorationStyleArg->IsInt()) {
         arkUITextDetectConfig.entityDecorationStyle = entityDecorationStyleArg->Int32Value(vm);
     }
+
+    Local<JSValueRef> enablePreviewMenu = runtimeCallInfo->GetCallArgRef(NUM_7);
+    auto enablePreviewMenuValue = false;
+    if (enablePreviewMenu->IsBoolean()) {
+        enablePreviewMenuValue = enablePreviewMenu->ToBoolean(vm)->Value();
+    }
+    arkUITextDetectConfig.entityEnablePreviewMenu = enablePreviewMenuValue;
 }
 
 ArkUINativeModuleValue TextBridge::ResetDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo)

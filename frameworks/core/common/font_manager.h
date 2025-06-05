@@ -133,6 +133,21 @@ public:
     void RemoveHybridRenderNode(const WeakPtr<NG::UINode>& node);
     void UpdateHybridRenderNodes();
 
+    using StartAbilityOnInstallAppInStoreHandler = std::function<void(const std::string& appName)>;
+    void SetStartAbilityOnInstallAppInStoreHandler(StartAbilityOnInstallAppInStoreHandler&& listener)
+    {
+        startAbilityOnInstallAppInStoreHandler_ = std::move(listener);
+    }
+
+    using StartAbilityOnJumpBrowserHandler = std::function<void(const std::string& appName)>;
+    void SetStartAbilityOnJumpBrowserHandler(StartAbilityOnJumpBrowserHandler&& listener)
+    {
+        startAbilityOnJumpBrowserHandler_ = std::move(listener);
+    }
+
+    void StartAbilityOnJumpBrowser(const std::string& address) const;
+    void StartAbilityOnInstallAppInStore(const std::string& appName) const;
+
 protected:
     static float fontWeightScale_;
     static bool isDefaultFontChanged_;
@@ -153,6 +168,9 @@ private:
     std::set<WeakPtr<FontChangeObserver>> observers_;
     std::map<WeakPtr<NG::UINode>, ExternalLoadFontPair> externalLoadCallbacks_;
     bool hasRegisterLoadFontCallback_ = false;
+    
+    StartAbilityOnInstallAppInStoreHandler startAbilityOnInstallAppInStoreHandler_;
+    StartAbilityOnJumpBrowserHandler startAbilityOnJumpBrowserHandler_;
 
 #ifdef ACE_ENABLE_VK
     std::mutex hybridRenderNodesMutex_;

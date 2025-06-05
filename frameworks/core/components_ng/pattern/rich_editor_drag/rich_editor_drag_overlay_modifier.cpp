@@ -70,14 +70,13 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     canvas.ClipPath(*path, RSClipOp::INTERSECT, true);
     PaintSelBackground(canvas, textDragPattern, richEditor);
     canvas.Restore();
-
-    if (firstHandle_) {
+    if (firstHandle_ && isFirstHandleAnimated_) {
         auto selectPosition = pattern->GetSelectPosition();
         auto rect = firstHandle_->Get();
         auto startY = rect.Top() - selectPosition.globalY_;
         PaintHandle(canvas, firstHandle_->Get(), true, rect.Left() - selectPosition.globalX_, startY);
     }
-    if (secondHandle_) {
+    if (secondHandle_ && isSecondHandleAnimated_) {
         auto selectPosition = pattern->GetSelectPosition();
         auto rect = secondHandle_->Get();
         auto startY = rect.Bottom() - selectPosition.globalY_;

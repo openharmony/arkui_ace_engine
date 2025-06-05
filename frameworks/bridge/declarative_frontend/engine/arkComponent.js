@@ -13824,7 +13824,7 @@ class TextDataDetectorConfigModifier extends ModifierWithKey {
       getUINativeModule().text.resetDataDetectorConfig(node);
     } else {
       getUINativeModule().text.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate,
-        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle);
+        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle, this.value.enablePreviewMenu);
     }
   }
   checkObjectDiff() {
@@ -13833,7 +13833,8 @@ class TextDataDetectorConfigModifier extends ModifierWithKey {
     !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
     !isBaseOrResourceEqual(this.stageValue.decorationType, this.value.decorationType) ||
     !isBaseOrResourceEqual(this.stageValue.decorationColor, this.value.decorationColor) ||
-    !isBaseOrResourceEqual(this.stageValue.decorationStyle, this.value.decorationStyle);
+    !isBaseOrResourceEqual(this.stageValue.decorationStyle, this.value.decorationStyle) ||
+    !isBaseOrResourceEqual(this.stageValue.enablePreviewMenu, this.value.enablePreviewMenu);
   }
 }
 TextDataDetectorConfigModifier.identity = Symbol('textDataDetectorConfig');
@@ -14080,6 +14081,7 @@ class ArkTextComponent extends ArkComponent {
       detectorConfig.decorationColor = config.decoration.color;
       detectorConfig.decorationStyle = config.decoration.style;
     }
+    detectorConfig.enablePreviewMenu = config.enablePreviewMenu;
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
     return this;
   }
@@ -18791,11 +18793,13 @@ class TextDataDetectorConfig {
     this.decorationType = undefined;
     this.decorationColor = undefined;
     this.decorationStyle = undefined;
+    this.enablePreviewMenu = undefined;
   }
   isEqual(another) {
     return (this.types === another.types) && (this.onDetectResultUpdate === another.onDetectResultUpdate) &&
     (this.color === another.color) && (this.decorationType === another.decorationType) &&
-    (this.decorationColor=== another.decorationColor) && (this.decorationStyle === another.decorationStyle);
+    (this.decorationColor=== another.decorationColor) && (this.decorationStyle === another.decorationStyle) &&
+    (this.enablePreviewMenu === another.enablePreviewMenu);
   }
 }
 class ArkOnVisibleAreaChange {

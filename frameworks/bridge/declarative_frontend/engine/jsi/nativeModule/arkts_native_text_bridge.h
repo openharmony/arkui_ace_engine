@@ -123,7 +123,7 @@ public:
     static ArkUINativeModuleValue ResetTextVerticalAlign(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
-    static void ParseAIEntityColor(
+    static void ParseAIEntityColorAndPreview(
         ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig);
 };
 } // namespace OHOS::Ace::NG

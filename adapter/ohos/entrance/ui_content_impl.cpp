@@ -114,6 +114,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
+#include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
@@ -146,6 +147,7 @@ const std::string START_PARAMS_KEY = "__startParams";
 const std::string PARAM_QUERY_KEY = "query";
 const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+const std::string ACTION_APPDETAIL = "ohos.want.action.appdetail";
 const std::string USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
@@ -2350,6 +2352,34 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         want.AddEntity(Want::ENTITY_BROWSER);
         want.SetAction(ACTION_SEARCH);
         want.SetParam(PARAM_QUERY_KEY, queryWord);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+
+    container->SetAbilityOnInstallAppInStore([context = context_](const std::string& appName) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        want.SetAction(ACTION_APPDETAIL);
+        auto front = NG::ExpandedMenuPluginLoader::GetInstance().GetStoreUrlFront();
+        auto url = front + appName;
+        want.SetUri(url);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+
+    container->SetAbilityOnJumpBrowser([context = context_](const std::string& address) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        want.SetAction(ACTION_VIEWDATA);
+        want.SetUri(address);
+        auto appName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::URL);
+        want.SetBundle(appName);
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
