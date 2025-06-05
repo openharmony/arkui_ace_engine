@@ -298,6 +298,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnVerticalScrollBarAccessEnabledUpdate(true);
     webpattern.OnAudioResumeIntervalUpdate(0);
     webpattern.OnAudioExclusiveUpdate(true);
+    webpattern.OnAudioSessionTypeUpdate(WebAudioSessionType::AUTO);
     webpattern.OnOptimizeParserBudgetEnabledUpdate(true);
     webpattern.OnBlurOnKeyboardHideModeUpdate(0);
 #endif
@@ -382,6 +383,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
     webPattern->OnForceDarkAccessUpdate(true);
     webPattern->OnAudioResumeIntervalUpdate(0);
     webPattern->OnAudioExclusiveUpdate(true);
+    webPattern->OnAudioSessionTypeUpdate(WebAudioSessionType::AUTO);
     webPattern->isEnhanceSurface_ = true;
     webPattern->delegate_ = nullptr;
     webPattern->OnModifyDone();

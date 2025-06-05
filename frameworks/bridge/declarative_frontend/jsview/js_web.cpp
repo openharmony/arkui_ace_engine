@@ -59,6 +59,7 @@ const int32_t PARAM_ONE = 1;
 const int32_t PARAM_TWO = 2;
 constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
 constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
+const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 
 void EraseSpace(std::string& data)
 {
@@ -4742,6 +4743,22 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
         bool audioExclusive = audioExclusiveObj->ToBoolean();
         WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
+    auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
+    auto audioSessionType = WebAudioSessionType::AUTO;
+    if (audioSessionTypeObj->IsNumber()) {
+        int32_t audioSessionTypeIntValue = audioSessionTypeObj->ToNumber<int32_t>();
+        switch (audioSessionTypeIntValue) {
+            case 0:
+                audioSessionType = WebAudioSessionType::AUTO;
+                break;
+            case WEB_AUDIO_SESSION_TYPE_AMBIENT:
+                audioSessionType = WebAudioSessionType::AMBIENT;
+                break;
+            default:
+                audioSessionType = WebAudioSessionType::AUTO;
+        }
+    }
+    WebModel::GetInstance()->SetAudioSessionType(audioSessionType);
 }
 
 JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)

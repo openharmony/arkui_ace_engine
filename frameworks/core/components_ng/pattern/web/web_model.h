@@ -157,6 +157,7 @@ public:
     virtual void SetOnControllerAttached(std::function<void()>&& callback) {};
     virtual void NotifyPopupWindowResult(int32_t webId, bool result) {};
     virtual void SetAudioResumeInterval(int32_t resumeInterval) {};
+    virtual void SetAudioSessionType(WebAudioSessionType audioSessionType) {};
     virtual void SetAudioExclusive(bool audioExclusive) {};
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;

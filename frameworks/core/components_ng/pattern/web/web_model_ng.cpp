@@ -1117,6 +1117,12 @@ void WebModelNG::SetAudioExclusive(bool audioExclusive)
     webPattern->UpdateAudioExclusive(audioExclusive);
 }
 
+void WebModelNG::SetAudioSessionType(WebAudioSessionType audioSessionType)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioSessionType(audioSessionType);
+}
 void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;

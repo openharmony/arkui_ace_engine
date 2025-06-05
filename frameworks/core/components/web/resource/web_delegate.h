@@ -825,6 +825,7 @@ public:
     void UpdateForceDarkAccess(const bool& access);
     void UpdateAudioResumeInterval(const int32_t& resumeInterval);
     void UpdateAudioExclusive(const bool& audioExclusive);
+    void UpdateAudioSessionType(const WebAudioSessionType& audioSessionType);
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
