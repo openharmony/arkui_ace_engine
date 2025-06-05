@@ -408,6 +408,7 @@ public:
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
+    virtual void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;
