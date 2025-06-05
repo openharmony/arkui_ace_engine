@@ -678,26 +678,29 @@ void JSSlider::SetPrefix(const JSCallbackInfo& args)
     }
 
     NG::SliderPrefixOptions prefixOption;
-    if (args.Length() > 1) {
+    if (args.Length() > 1 && args[1]->IsObject() && !args[1]->IsNull()) {
         auto prefixOptions = JSRef<JSObject>::Cast(args[1]);
         if (!prefixOptions->IsEmpty() && !prefixOptions->IsUndefined()) {
             auto accessibilityTextProperty = prefixOptions->GetProperty("accessibilityText");
-            if (!accessibilityTextProperty->IsEmpty()) {
-                prefixOption.accessibilityText = accessibilityTextProperty->ToString();
+            std::string accessibilityText;
+            if (!accessibilityTextProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityTextProperty, accessibilityText)) {
+                prefixOption.accessibilityText = accessibilityText;
             }
-
             auto accessibilityDescriptionProperty = prefixOptions->GetProperty("accessibilityDescription");
-            if (!accessibilityDescriptionProperty->IsEmpty()) {
-                prefixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            std::string accessibilityDescription;
+            if (!accessibilityDescriptionProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityDescriptionProperty, accessibilityDescription)) {
+                prefixOption.accessibilityDescription = accessibilityDescription;
             }
-
             auto accessibilityLevelProperty = prefixOptions->GetProperty("accessibilityLevel");
-            if (!accessibilityLevelProperty->IsEmpty()) {
-                prefixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            std::string accessibilityLevel;
+            if (!accessibilityLevelProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityLevelProperty, accessibilityLevel)) {
+                prefixOption.accessibilityLevel = accessibilityLevel;
             }
-
             auto accessibilityGroupProperty = prefixOptions->GetProperty("accessibilityGroup");
-            if (!accessibilityGroupProperty->IsEmpty()) {
+            if (!accessibilityGroupProperty->IsNull() && !accessibilityGroupProperty->IsEmpty()) {
                 prefixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
             }
         }
@@ -721,26 +724,32 @@ void JSSlider::SetSuffix(const JSCallbackInfo& args)
     }
 
     NG::SliderSuffixOptions suffixOption;
-    if (args.Length() > 1) {
+    if (args.Length() > 1 && args[1]->IsObject() && !args[1]->IsNull()) {
         JSRef<JSObject> suffixOptions = JSRef<JSObject>::Cast(args[1]);
         if (!suffixOptions->IsEmpty() && !suffixOptions->IsUndefined()) {
             auto accessibilityTextProperty = suffixOptions->GetProperty("accessibilityText");
-            if (!accessibilityTextProperty->IsEmpty()) {
-                suffixOption.accessibilityText = accessibilityTextProperty->ToString();
+            std::string accessibilityText;
+            if (!accessibilityTextProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityTextProperty, accessibilityText)) {
+                suffixOption.accessibilityText = accessibilityText;
             }
 
             auto accessibilityDescriptionProperty = suffixOptions->GetProperty("accessibilityDescription");
-            if (!accessibilityDescriptionProperty->IsEmpty()) {
-                suffixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            std::string accessibilityDescription;
+            if (!accessibilityDescriptionProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityDescriptionProperty, accessibilityDescription)) {
+                suffixOption.accessibilityDescription = accessibilityDescription;
             }
 
             auto accessibilityLevelProperty = suffixOptions->GetProperty("accessibilityLevel");
-            if (!accessibilityLevelProperty->IsEmpty()) {
-                suffixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            std::string accessibilityLevel;
+            if (!accessibilityLevelProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityLevelProperty, accessibilityLevel)) {
+                suffixOption.accessibilityLevel = accessibilityLevel;
             }
 
             auto accessibilityGroupProperty = suffixOptions->GetProperty("accessibilityGroup");
-            if (!accessibilityGroupProperty->IsEmpty()) {
+            if (!accessibilityGroupProperty->IsNull() && !accessibilityGroupProperty->IsEmpty()) {
                 suffixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
             }
         }
