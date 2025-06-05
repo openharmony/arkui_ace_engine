@@ -2490,7 +2490,7 @@ int32_t ListLayoutAlgorithm::FindPredictSnapEndIndexInItemPositions(
         if (scrollSnapVelocity_ < -SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
             endIndex = std::min(GetEndIndex(), endIndex + 1);
         } else if (scrollSnapVelocity_ > SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
-            endIndex = std::min(GetStartIndex(), endIndex - 1);
+            endIndex = std::max(GetStartIndex(), endIndex - 1);
         }
     }
     return endIndex;
