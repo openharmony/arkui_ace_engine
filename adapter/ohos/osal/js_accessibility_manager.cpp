@@ -2078,6 +2078,41 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 }
 #ifdef WEB_SUPPORTED
 
+void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, const CommonProperty& commonProperty,
+    AccessibilityElementInfo& nodeInfo)
+{
+    auto rotateTransformData = commonProperty.rotateTransform;
+    auto currentDegree = rotateTransformData.rotateDegree;
+    if (!NearZero(currentDegree, 0)) {
+        AccessibilityRect rotateRect(node->GetRectX(), node->GetRectY(),
+            node->GetRectWidth(), node->GetRectHeight());
+        rotateRect.Rotate(rotateTransformData.innerCenterX, rotateTransformData.innerCenterY, currentDegree);
+        rotateRect.ApplyTransformation(rotateTransformData, commonProperty.scaleX, commonProperty.scaleY);
+        Accessibility::Rect bounds { static_cast<int32_t>(rotateRect.GetX()),
+            static_cast<int32_t>(rotateRect.GetY()),
+            static_cast<int32_t>(rotateRect.GetX() + rotateRect.GetWidth()),
+            static_cast<int32_t>(rotateRect.GetY() + rotateRect.GetHeight()) };
+        nodeInfo.SetRectInScreen(bounds);
+    } else {
+        NG::RectT<int32_t> rectInt {
+            node->GetRectX(),
+            node->GetRectY(),
+            node->GetRectWidth(),
+            node->GetRectHeight()
+        };
+        if (!NearZero(commonProperty.scaleX, 0) || !NearZero(commonProperty.scaleY, 0)) {
+            rectInt.SetRect(rectInt.GetX() * commonProperty.scaleX, rectInt.GetY() * commonProperty.scaleY,
+                rectInt.Width() * commonProperty.scaleX, rectInt.Height() * commonProperty.scaleY);
+        }
+        auto left = static_cast<int32_t>(rectInt.Left() + commonProperty.windowLeft);
+        auto top = static_cast<int32_t>(rectInt.Top() + commonProperty.windowTop);
+        auto right = static_cast<int32_t>(rectInt.Right() + commonProperty.windowLeft);
+        auto bottom = static_cast<int32_t>(rectInt.Bottom() + commonProperty.windowTop);
+        Accessibility::Rect bounds { left, top, right, bottom };
+        nodeInfo.SetRectInScreen(bounds);
+    }
+}
+
 void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
     const std::shared_ptr<NG::TransitionalNodeInfo>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::WebPattern>& webPattern)
@@ -2102,13 +2137,7 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
         CHECK_NULL_VOID(webPattern);
         auto webNode = webPattern->GetHost();
         CHECK_NULL_VOID(webNode);
-        auto webRect = webNode->GetTransformRectRelativeToWindow();
-        auto left = static_cast<int32_t>((webRect.Left() + node->GetRectX()) * scaleX_ + commonProperty.windowLeft);
-        auto top = static_cast<int32_t>((webRect.Top() + node->GetRectY()) * scaleY_ + commonProperty.windowTop);
-        auto right = static_cast<int32_t>(left + node->GetRectWidth() * scaleX_);
-        auto bottom = static_cast<int32_t>(top + node->GetRectHeight() * scaleY_);
-        Accessibility::Rect bounds { left, top, right, bottom };
-        nodeInfo.SetRectInScreen(bounds);
+        WebSetScreenRect(node, commonProperty, nodeInfo);
     }
 
     nodeInfo.SetWindowId(commonProperty.windowId);
@@ -3183,6 +3212,12 @@ void JsAccessibilityManager::RegisterDynamicRenderGetParentRectHandler()
         parentRectInfo.top = reply.GetParam<int32_t>("top", 0);
         parentRectInfo.scaleX = reply.GetParam<float>("scaleX", 1.0f);
         parentRectInfo.scaleY = reply.GetParam<float>("scaleY", 1.0f);
+        RotateTransform rotateData(reply.GetParam<int32_t>("rotateDegree", 0),
+                                   reply.GetParam<int32_t>("centerX", 0),
+                                   reply.GetParam<int32_t>("centerY", 0),
+                                   reply.GetParam<int32_t>("innerCenterX", 0),
+                                   reply.GetParam<int32_t>("innerCenterY", 0));
+        parentRectInfo.rotateTransform = rotateData;
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
             "Get DC host rect [left:%{public}d, top:%{public}d, scaleX:%{public}f, scaleY:%{public}f].",
             parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
@@ -6286,10 +6321,12 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityIdNG(int64_t ele
 
     AccessibilityElementInfo nodeInfo;
 
-    CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-
     CHECK_NULL_VOID(webPattern);
+    auto webNode = webPattern->GetHost();
+    CHECK_NULL_VOID(webNode);
+    CommonProperty commonProperty;
+    GenerateCommonPropertyForWeb(ngPipeline, commonProperty, mainContext, webNode);
+
     auto node = webPattern->GetTransitionalNodeById(elementId);
     CHECK_NULL_VOID(node);
     UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
@@ -6325,6 +6362,7 @@ void JsAccessibilityManager::FindWebFocusedElementInfoNG(int64_t elementId, int3
     Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
     const RefPtr<NG::WebPattern>& webPattern)
 {
+    CHECK_NULL_VOID(webPattern);
     auto mainContext = context_.Upgrade();
     CHECK_NULL_VOID(mainContext);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
@@ -6335,8 +6373,11 @@ void JsAccessibilityManager::FindWebFocusedElementInfoNG(int64_t elementId, int3
         return;
     }
     CHECK_NULL_VOID(node);
+
+    auto webNode = webPattern->GetHost();
+    CHECK_NULL_VOID(webNode);
     CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
+    GenerateCommonPropertyForWeb(ngPipeline, commonProperty, mainContext, webNode);
     UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
 }
 
@@ -6365,9 +6406,12 @@ void JsAccessibilityManager::WebFocusMoveSearchNG(int64_t elementId, int32_t dir
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
 
-    CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
     CHECK_NULL_VOID(webPattern);
+    auto webNode = webPattern->GetHost();
+    CHECK_NULL_VOID(webNode);
+    CommonProperty commonProperty;
+    GenerateCommonPropertyForWeb(ngPipeline, commonProperty, mainContext, webNode);
+
     auto node = webPattern->GetAccessibilityNodeByFocusMove(elementId, direction);
     if (node) {
         UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
@@ -7721,6 +7765,18 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     }
 }
 
+void JsAccessibilityManager::GenerateCommonPropertyForWeb(const RefPtr<PipelineBase>& context, CommonProperty& output,
+    const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node)
+{
+    GenerateCommonProperty(context, output, mainContext, node);
+    auto parentRectInfo = GetTransformRectInfoRelativeToWindow(node, context);
+    output.windowLeft = parentRectInfo.left;
+    output.windowTop = parentRectInfo.top;
+    output.rotateTransform = parentRectInfo.rotateTransform;
+    output.scaleX = parentRectInfo.scaleX;
+    output.scaleY = parentRectInfo.scaleY;
+}
+
 void JsAccessibilityManager::FindText(const RefPtr<NG::UINode>& node,
     std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<NG::PipelineContext>& context,
     const CommonProperty& commonProperty, const SearchParameter& searchParam)
@@ -7920,7 +7976,7 @@ int32_t JsAccessibilityManager::GetTransformDegreeRelativeToWindow(const RefPtr<
         }
         parent = parent->GetAncestorNodeOfFrame(true);
     }
-    return rotateDegree %= FULL_ANGLE;
+    return ((rotateDegree % FULL_ANGLE + FULL_ANGLE) % FULL_ANGLE);
 }
 
 AccessibilityParentRectInfo JsAccessibilityManager::GetTransformRectInfoRelativeToWindow(
