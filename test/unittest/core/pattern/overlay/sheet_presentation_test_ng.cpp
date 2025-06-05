@@ -1131,7 +1131,7 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint002, TestSize.Level1
 
     /**
      * @tc.steps: step4. set title height is 100 and excute CreateSheetChildConstraint function.
-     * @tc.expected: childConstraint.maxSize.Height() is 900.
+     * @tc.expected: childConstraint.maxSize.Height() is 1000.
      */
     auto operationNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(0));
     ASSERT_NE(operationNode, nullptr);
@@ -1140,7 +1140,7 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint002, TestSize.Level1
     titleGeometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
     auto childConstraint = algorithm->CreateSheetChildConstraint(
         sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
-    EXPECT_EQ(childConstraint.maxSize.Height(), 900);
+    EXPECT_EQ(childConstraint.maxSize.Height(), 1000);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -1191,7 +1191,7 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint003, TestSize.Level1
 
     /**
      * @tc.steps: step4. set title height is 100 and excute CreateSheetChildConstraint function.
-     * @tc.expected: childConstraint.maxSize.Height() is (900 - SHEET_ARROW_HEIGHT.ConvertToPx()).
+     * @tc.expected: childConstraint.maxSize.Height() is (1000 - SHEET_ARROW_HEIGHT.ConvertToPx()).
      */
     auto operationNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(0));
     ASSERT_NE(operationNode, nullptr);
@@ -1200,7 +1200,7 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint003, TestSize.Level1
     titleGeometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
     auto childConstraint = algorithm->CreateSheetChildConstraint(
         sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
-    EXPECT_EQ(childConstraint.maxSize.Height(), 900 - SHEET_ARROW_HEIGHT.ConvertToPx());
+    EXPECT_EQ(childConstraint.maxSize.Height(), 1000 - SHEET_ARROW_HEIGHT.ConvertToPx());
     MockContainer::Current()->SetApiTargetVersion(lastPlatformVersion);
     MockContainer::TearDown();
     SheetPresentationTestNg::TearDownTestCase();
@@ -1834,11 +1834,11 @@ HWTEST_F(SheetPresentationTestNg, IsScrollOutOfBoundary, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFirstChildHeight001
+ * @tc.name: GetTitleBuilderHeight001
  * @tc.desc: Test ChangeScrollHeight function.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestNg, GetFirstChildHeight001, TestSize.Level1)
+HWTEST_F(SheetPresentationTestNg, GetTitleBuilderHeight001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sheet page.
@@ -1889,7 +1889,7 @@ HWTEST_F(SheetPresentationTestNg, GetFirstChildHeight001, TestSize.Level1)
     layoutProperty->propSheetStyle_ = sheetStyle;
     
     /**
-     * @tc.steps: step4. test "GetFirstChildHeight", when isTitleBuilder is true.
+     * @tc.steps: step4. test "GetTitleBuilderHeight", when isTitleBuilder is true.
      */
     EXPECT_TRUE(layoutProperty->GetSheetStyle()->isTitleBuilder);
     EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
@@ -1897,15 +1897,15 @@ HWTEST_F(SheetPresentationTestNg, GetFirstChildHeight001, TestSize.Level1)
     ASSERT_NE(firstChildGeometryNode, nullptr);
     firstChildGeometryNode->SetFrameSize(SizeF(56, 56));
     sheetPattern->UpdateSheetTitle();
-    EXPECT_EQ(sheetPattern->GetFirstChildHeight(), SHEET_OPERATION_AREA_HEIGHT.ConvertToPx());
+    EXPECT_EQ(sheetPattern->GetTitleBuilderHeight(), SHEET_OPERATION_AREA_HEIGHT.ConvertToPx());
 }
 
 /**
- * @tc.name: GetFirstChildHeight002
+ * @tc.name: GetTitleBuilderHeight002
  * @tc.desc: Test ChangeScrollHeight function.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestNg, GetFirstChildHeight002, TestSize.Level1)
+HWTEST_F(SheetPresentationTestNg, GetTitleBuilderHeight002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sheet page.
@@ -1955,7 +1955,7 @@ HWTEST_F(SheetPresentationTestNg, GetFirstChildHeight002, TestSize.Level1)
     layoutProperty->propSheetStyle_ = sheetStyle;
 
     /**
-     * @tc.steps: step4. test "GetFirstChildHeight", when isTitleBuilder is false.
+     * @tc.steps: step4. test "GetTitleBuilderHeight", when isTitleBuilder is false.
      */
     sheetStyle.isTitleBuilder = false;
     layoutProperty->UpdateSheetStyle(sheetStyle);
@@ -1965,7 +1965,7 @@ HWTEST_F(SheetPresentationTestNg, GetFirstChildHeight002, TestSize.Level1)
     ASSERT_NE(firstChildGeometryNode, nullptr);
     firstChildGeometryNode->SetFrameSize(SizeF(0, 0));
     sheetPattern->UpdateSheetTitle();
-    EXPECT_EQ(sheetPattern->GetFirstChildHeight(), 0.0f);
+    EXPECT_EQ(sheetPattern->GetTitleBuilderHeight(), 0.0f);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -2746,9 +2746,9 @@ HWTEST_F(SheetPresentationTestNg, UpdateTitleTextColor001, TestSize.Level1)
     /**
      * @tc.steps: step4. get main text property.
      */
-    auto firstChild = sheetNode->GetChildAtIndex(0);
+    auto firstChild = sheetPattern->GetTitleBuilderNode();
     ASSERT_NE(firstChild, nullptr);
-    auto sheetTitleColumn = firstChild->GetChildAtIndex(1);
+    auto sheetTitleColumn = firstChild->GetChildAtIndex(0);
     ASSERT_NE(sheetTitleColumn, nullptr);
     auto mainRow = sheetTitleColumn->GetChildAtIndex(0);
     ASSERT_NE(mainRow, nullptr);
@@ -2800,9 +2800,9 @@ HWTEST_F(SheetPresentationTestNg, UpdateTitleTextColor002, TestSize.Level1)
     /**
      * @tc.steps: step4. get main text property.
      */
-    auto firstChild = sheetNode->GetChildAtIndex(0);
+    auto firstChild = sheetPattern->GetTitleBuilderNode();
     ASSERT_NE(firstChild, nullptr);
-    auto sheetTitleColumn = firstChild->GetChildAtIndex(1);
+    auto sheetTitleColumn = firstChild->GetChildAtIndex(0);
     ASSERT_NE(sheetTitleColumn, nullptr);
     auto subRow = sheetTitleColumn->GetChildAtIndex(1);
     ASSERT_NE(subRow, nullptr);
