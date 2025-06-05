@@ -925,13 +925,65 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest025, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAccessibilityParentRect001
+ * @tc.desc: Test PlatformContainerHandler GetAccessibilityParentRect pattern nullptr return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, GetAccessibilityParentRect001, TestSize.Level1)
+{
+    HandlerReply reply;
+    PlatformContainerHandler handler;
+
+    handler.hostPattern_ = nullptr;
+
+    bool result = handler.GetAccessibilityParentRect(reply);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetAccessibilityParentRect002
+ * @tc.desc: Test PlatformContainerHandler GetAccessibilityParentRect host nullptr return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, GetAccessibilityParentRect002, TestSize.Level1)
+{
+    HandlerReply reply;
+    PlatformContainerHandler handler;
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+
+    handler.SetContainerHostPattern(pattern);
+
+    bool result = handler.GetAccessibilityParentRect(reply);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetAccessibilityParentRect003
+ * @tc.desc: Test GetAccessibilityParentRect host and pattern are not nullptr return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, GetAccessibilityParentRect003, TestSize.Level1)
+{
+    HandlerReply reply;
+    PlatformContainerHandler handler;
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
+
+    handler.SetContainerHostPattern(pattern);
+
+    bool result = handler.GetAccessibilityParentRect(reply);
+    EXPECT_TRUE(result);
+}
+
+/**
  * @tc.name: DynamicPatternTest026
  * @tc.desc: Test PlatformContainerHandler GetDCAccessibilityParentRect
  * @tc.type: FUNC
  */
 HWTEST_F(DynamicPatternTestNg, DynamicPatternTest026, TestSize.Level1)
 {
-#ifdef OHOS_STANDARD_SYSTEM
     auto dynamicPattern = CreateDynamicComponent();
     EXPECT_NE(dynamicPattern, nullptr);
 
@@ -953,7 +1005,6 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest026, TestSize.Level1)
 
     auto rotateDegree = reply.GetParam<int32_t>("rotateDegree", -1);
     EXPECT_EQ(rotateDegree, 90);
-#endif
 }
 
 /**
@@ -963,7 +1014,6 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest026, TestSize.Level1)
  */
 HWTEST_F(DynamicPatternTestNg, DynamicPatternTest027, TestSize.Level1)
 {
-#ifdef OHOS_STANDARD_SYSTEM
     PlatformContainerHandler handler;
     HandlerReply reply;
 
@@ -990,7 +1040,6 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest027, TestSize.Level1)
     EXPECT_EQ(reply.GetParam<int32_t>("innerCenterX", -1), 50);
     EXPECT_EQ(reply.GetParam<int32_t>("innerCenterY", -1), 60);
     EXPECT_EQ(reply.GetParam<int32_t>("rotateDegree", -1), 90);
-#endif
 }
 
 } // namespace OHOS::Ace::NG

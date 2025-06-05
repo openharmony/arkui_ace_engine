@@ -2149,8 +2149,8 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 }
 #ifdef WEB_SUPPORTED
 
-void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, const CommonProperty& commonProperty,
-    AccessibilityElementInfo& nodeInfo)
+void JsAccessibilityManager::WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
+    const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo)
 {
     auto rotateTransformData = commonProperty.rotateTransform;
     auto currentDegree = rotateTransformData.rotateDegree;
@@ -2159,10 +2159,10 @@ void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, con
             node->GetRectWidth(), node->GetRectHeight());
         rotateRect.Rotate(rotateTransformData.innerCenterX, rotateTransformData.innerCenterY, currentDegree);
         rotateRect.ApplyTransformation(rotateTransformData, commonProperty.scaleX, commonProperty.scaleY);
-        Accessibility::Rect bounds { static_cast<int32_t>(rotateRect.GetX()),
-            static_cast<int32_t>(rotateRect.GetY()),
-            static_cast<int32_t>(rotateRect.GetX() + rotateRect.GetWidth()),
-            static_cast<int32_t>(rotateRect.GetY() + rotateRect.GetHeight()) };
+        Accessibility::Rect bounds { static_cast<int32_t>(std::floor(rotateRect.GetX())),
+            static_cast<int32_t>(std::floor(rotateRect.GetY())),
+            static_cast<int32_t>(std::floor(rotateRect.GetX() + rotateRect.GetWidth())),
+            static_cast<int32_t>(std::floor(rotateRect.GetY() + rotateRect.GetHeight())) };
         nodeInfo.SetRectInScreen(bounds);
     } else {
         NG::RectT<int32_t> rectInt {
@@ -2171,9 +2171,11 @@ void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, con
             node->GetRectWidth(),
             node->GetRectHeight()
         };
-        if (!NearZero(commonProperty.scaleX, 0) || !NearZero(commonProperty.scaleY, 0)) {
-            rectInt.SetRect(rectInt.GetX() * commonProperty.scaleX, rectInt.GetY() * commonProperty.scaleY,
-                rectInt.Width() * commonProperty.scaleX, rectInt.Height() * commonProperty.scaleY);
+        if (!NearZero(commonProperty.scaleX, 1.0f) || !NearZero(commonProperty.scaleY, 1.0f)) {
+            rectInt.SetRect(static_cast<int32_t>(std::floor(rectInt.GetX() * commonProperty.scaleX)),
+                static_cast<int32_t>(std::floor(rectInt.GetY() * commonProperty.scaleY)),
+                static_cast<int32_t>(std::floor(rectInt.Width() * commonProperty.scaleX)),
+                static_cast<int32_t>(std::floor(rectInt.Height() * commonProperty.scaleY)));
         }
         auto left = static_cast<int32_t>(rectInt.Left() + commonProperty.windowLeft);
         auto top = static_cast<int32_t>(rectInt.Top() + commonProperty.windowTop);
