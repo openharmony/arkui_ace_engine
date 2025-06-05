@@ -86,8 +86,28 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto opt = Converter::OptConvert<DatePickerOptions>(*options);
     CHECK_NULL_VOID(opt);
-    DatePickerModelNG::SetStartDate(frameNode, opt->start);
-    DatePickerModelNG::SetEndDate(frameNode, opt->end);
+
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto startDate = opt->start;
+    auto endDate = opt->end;
+    if (startDate.GetYear() <= 0) {
+        startDate = theme->GetDefaultStartDate();
+    }
+    if (endDate.GetYear() <= 0) {
+        endDate = theme->GetDefaultEndDate();
+    }
+    auto startDays = startDate.ToDays();
+    auto endDays = endDate.ToDays();
+    if (startDays > endDays) {
+        startDate = theme->GetDefaultStartDate();
+        endDate = theme->GetDefaultEndDate();
+    }
+
+    DatePickerModelNG::SetStartDate(frameNode, startDate);
+    DatePickerModelNG::SetEndDate(frameNode, endDate);
     DatePickerModelNG::SetSelectedDate(frameNode, opt->selected);
 }
 } // DatePickerInterfaceModifier

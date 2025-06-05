@@ -129,7 +129,15 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
         dialogCancelEvent["cancelId"] = onCancelFunc;
     }
 
-    CalendarDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope cope(currentId);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->ShowCalendarDialog(dialogProps, settingData, dialogEvent, dialogCancelEvent, {}, buttonInfos);
 }
 } // CalendarPickerDialogAccessor
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
