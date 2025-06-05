@@ -350,8 +350,8 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         }
 
         if (!node4Index) {
-            TAG_LOGW(AceLogTag::ACE_REPEAT, "index %{public}d -> key '%{public}s' not in caches and failed to build.",
-                static_cast<int32_t>(index), key->c_str());
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "index %{public}d -> node not in caches and failed to build.",
+                static_cast<int32_t>(index));
             return nullptr;
         }
     }
