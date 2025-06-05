@@ -1689,4 +1689,59 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePrimaryContentIfNeeded003, TestSize.
     EXPECT_FALSE(primaryContentNode->needSyncRenderTree_);
     NavigationPatternTestFourNg::TearDownTestSuite();
 }
+
+/**
+ * @tc.name: CheckIfNoNeedAnimationForForceSplit001
+ * @tc.desc: Branch: if (!forceSplitSuccess_) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, CheckIfNoNeedAnimationForForceSplit001, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->forceSplitSuccess_ = false;
+    EXPECT_FALSE(pattern->CheckIfNoNeedAnimationForForceSplit(nullptr, nullptr));
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CheckIfNoNeedAnimationForForceSplit002
+ * @tc.desc: Branch: if (!forceSplitSuccess_) { => false
+ *                   if (forceSplitUseNavBar_) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, CheckIfNoNeedAnimationForForceSplit002, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->forceSplitSuccess_ = true;
+    pattern->forceSplitUseNavBar_ = true;
+    EXPECT_TRUE(pattern->CheckIfNoNeedAnimationForForceSplit(nullptr, nullptr));
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CheckIfNoNeedAnimationForForceSplit003
+ * @tc.desc: Branch: if (!forceSplitSuccess_) { => false
+ *                   if (forceSplitUseNavBar_) { => false
+ *                   return (preDestination && preDestination->IsShowInPrimaryPartition()) ||
+ *                       (topDestination && topDestination->IsShowInPrimaryPartition()); => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, CheckIfNoNeedAnimationForForceSplit003, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->forceSplitSuccess_ = true;
+    pattern->forceSplitUseNavBar_ = false;
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    dest->SetIsShowInPrimaryPartition(true);
+    EXPECT_TRUE(pattern->CheckIfNoNeedAnimationForForceSplit(dest, nullptr));
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
 } // namespace OHOS::Ace::NG

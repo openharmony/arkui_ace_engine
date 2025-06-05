@@ -156,11 +156,6 @@ public:
 
     bool GetBackButtonState();
 
-    RefPtr<UINode> GetNavigationNode()
-    {
-        return navigationNode_.Upgrade();
-    }
-
     NavDestinationState GetNavDestinationState() const
     {
         auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
@@ -176,11 +171,6 @@ public:
     uint64_t GetNavDestinationId() const
     {
         return navDestinationId_;
-    }
-
-    void SetNavigationNode(const RefPtr<UINode>& navigationNode)
-    {
-        navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
 
     void OnDetachFromMainTree() override
@@ -341,15 +331,12 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void CheckIfStatusBarConfigChanged();
     void CheckIfNavigationIndicatorConfigChagned();
-    void InitOnTouchEvent(const RefPtr<FrameNode>& hostNode);
-    void RemoveOnTouchEvent();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
     std::string inspectorId_;
     RefPtr<NavDestinationContext> navDestinationContext_;
     RefPtr<UINode> customNode_;
-    WeakPtr<UINode> navigationNode_;
     RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
     bool isActive_ = false;

@@ -299,6 +299,9 @@ bool NavigationModelNG::CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNod
         navBarRenderContext->UpdateClipEdge(true);
         navigationGroupNode->AddChild(navBarNode);
         navigationGroupNode->SetNavBarNode(navBarNode);
+        auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+        CHECK_NULL_RETURN(navBarPattern, false);
+        navBarPattern->SetNavigationNode(navigationGroupNode);
 
         if (!CreateNavBarNodeChildsIfNeeded(navBarNode)) {
             return false;

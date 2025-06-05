@@ -719,6 +719,8 @@ private:
     void FirePrimaryNodesOnShowAndActive();
     void RemoveRedundantPrimaryNavDestination();
     static bool CheckIfNeedHideOrShowPrimaryNodes(const RefPtr<NavigationPattern>& pattern, int32_t lastStandardIndex);
+    bool CheckIfNoNeedAnimationForForceSplit(const RefPtr<NavDestinationGroupNode>& preDestination,
+        const RefPtr<NavDestinationGroupNode>& topDestination);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
