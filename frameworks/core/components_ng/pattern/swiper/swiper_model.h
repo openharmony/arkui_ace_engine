@@ -68,6 +68,7 @@ struct SwiperParameters {
     RefPtr<ResourceObject> resourceSelectedItemWidthValueObject;
     RefPtr<ResourceObject> resourceSelectedItemHeightValueObject;
     RefPtr<ResourceObject> resourceItemSizeValueObject;
+    std::unordered_set<std::string> parametersByUser;
 };
 
 struct SwiperDigitalParameters {

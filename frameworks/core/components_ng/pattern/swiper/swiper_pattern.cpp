@@ -4860,6 +4860,24 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
     return swiperParameters_;
 }
 
+std::shared_ptr<SwiperArrowParameters> SwiperPattern::GetSwiperArrowParameters() const
+{
+    if (swiperArrowParameters_ == nullptr) {
+        swiperArrowParameters_ = std::make_shared<SwiperArrowParameters>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, swiperArrowParameters_);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_RETURN(swiperIndicatorTheme, swiperArrowParameters_);
+        swiperArrowParameters_->isShowBackground = false;
+        swiperArrowParameters_->isSidebarMiddle = false;
+        swiperArrowParameters_->backgroundSize = swiperIndicatorTheme->GetSmallArrowSize();
+        swiperArrowParameters_->backgroundColor = swiperIndicatorTheme->GetSmallArrowBackgroundColor();
+        swiperArrowParameters_->arrowSize = swiperIndicatorTheme->GetSmallArrowSize();
+        swiperArrowParameters_->arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
+    }
+    return swiperArrowParameters_;
+}
+
 std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParameters() const
 {
     if (swiperDigitalParameters_ == nullptr) {
@@ -7631,6 +7649,14 @@ void SwiperPattern::UpdateDefaultColor()
     if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("selectedFontColor")) {
         swiperDigitalParameters_->selectedFontColor =
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+    if (swiperParameters_ && swiperParameters_->parametersByUser.count("dotIndicator") &&
+       !swiperParameters_->parametersByUser.count("colorVal")) {
+        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
+    }
+    if (swiperParameters_ && swiperParameters_->parametersByUser.count("dotIndicator") &&
+        !swiperParameters_->parametersByUser.count("selectedColorVal")) {
+        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
     }
     if (swiperArrowParameters_ && !swiperArrowParameters_->parametersByUser.count("backgroundColor")) {
         if (props->GetIsSidebarMiddleValue()) {
