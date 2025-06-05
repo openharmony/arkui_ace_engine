@@ -16,6 +16,31 @@
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void OnLoadFontFinished(const Rosen::FontCollection* collection, const std::string& name)
+{
+    auto txtFontCollection = AceType::DynamicCast<TxtFontCollection>(FontCollection::Current());
+    if (!txtFontCollection || txtFontCollection->GetRawFontCollection().get() != collection) {
+        return;
+    }
+    auto loadFinishCallback = FontCollection::Current()->GetLoadFontFinishCallback();
+    if (loadFinishCallback) {
+        loadFinishCallback(name);
+    }
+}
+
+void OnUnLoadFontFinished(const Rosen::FontCollection* collection, const std::string& name)
+{
+    auto txtFontCollection = AceType::DynamicCast<TxtFontCollection>(FontCollection::Current());
+    if (!txtFontCollection || txtFontCollection->GetRawFontCollection().get() != collection) {
+        return;
+    }
+    auto unLoadFinishCallback = FontCollection::Current()->GetUnloadFontFinishCallback();
+    if (unLoadFinishCallback) {
+        unLoadFinishCallback(name);
+    }
+}
+}
 
 RefPtr<FontCollection> TxtFontCollection::GetInstance()
 {
@@ -40,6 +65,8 @@ TxtFontCollection::TxtFontCollection()
         collection_->GetMinikinFontCollectionForFamilies({ "sans-serif" }, emptyLocale);
     }
     */
+    Rosen::FontCollection::RegisterLoadFontFinishCallback(OnLoadFontFinished);
+    Rosen::FontCollection::RegisterUnloadFontFinishCallback(OnUnLoadFontFinished);
 }
 
 TxtFontCollection::TxtFontCollection(const std::shared_ptr<Rosen::FontCollection>& fontCollection)
