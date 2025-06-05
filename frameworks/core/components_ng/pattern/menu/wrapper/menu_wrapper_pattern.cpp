@@ -284,6 +284,11 @@ void MenuWrapperPattern::HideSubMenu()
     }
     auto subMenu = host->GetChildren().back();
     CHECK_NULL_VOID(subMenu);
+    auto subMenuFrameNode = DynamicCast<FrameNode>(subMenu);
+    CHECK_NULL_VOID(subMenuFrameNode);
+    auto subMenuPattern = subMenuFrameNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    subMenuPattern->RemoveParentHoverStyle();
     auto menuNode = GetParentMenu(subMenu);
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
