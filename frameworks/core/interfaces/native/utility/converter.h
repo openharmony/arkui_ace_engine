@@ -484,6 +484,7 @@ namespace Converter {
     template<> BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src);
     template<> BorderStyleProperty Convert(const Ark_BorderStyle& src);
     template<> BorderStyleProperty Convert(const Ark_EdgeStyles& src);
+    template<> BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src);
     template<> BorderWidthProperty Convert(const Ark_EdgeWidths& src);
     template<> BorderWidthProperty Convert(const Ark_Length& src);
     template<> BorderWidthProperty Convert(const Ark_LengthMetrics& src);
