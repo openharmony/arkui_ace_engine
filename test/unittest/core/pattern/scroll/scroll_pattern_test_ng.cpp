@@ -1328,4 +1328,108 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval011, TestSize.Level1)
     scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::NONE);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), 0.0f);
 }
+
+/**
+ * @tc.name: GetPagingDelta001
+ * @tc.desc: Test GetPagingDelta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetPagingDelta001, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto result = scrollPattern->GetPagingDelta(2.0f, 3.0f, 4.0f);
+    EXPECT_EQ(result, 4.0f);
+}
+
+/**
+ * @tc.name: GetPagingDelta002
+ * @tc.desc: Test GetPagingDelta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetPagingDelta002, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto result = scrollPattern->GetPagingDelta(1.0f, 3.0f, 5.0f);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: GetPagingDelta003
+ * @tc.desc: Test GetPagingDelta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetPagingDelta003, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto result = scrollPattern->GetPagingDelta(1.0f, 1300.0f, 5.0f);
+    EXPECT_EQ(result, 5.0f);
+}
+
+/**
+ * @tc.name: GetPagingDelta004
+ * @tc.desc: Test GetPagingDelta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetPagingDelta004, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto result = scrollPattern->GetPagingDelta(2.0f, 1300.0f, 3.0f);
+    EXPECT_EQ(result, 3.0f);
+}
+
+/**
+ * @tc.name: GetPagingDelta005
+ * @tc.desc: Test GetPagingDelta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetPagingDelta005, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto result = scrollPattern->GetPagingDelta(2.0f, 3.0f, 3.0f);
+    EXPECT_EQ(result, 3.0f);
+}
+
+/**
+ * @tc.name: GetPagingDelta006
+ * @tc.desc: Test GetPagingDelta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetPagingDelta006, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto result = scrollPattern->GetPagingDelta(2.0f, -3.0f, 3.0f);
+    EXPECT_EQ(result, 3.0f);
+}
+
+/**
+ * @tc.name: GetPagingDelta007
+ * @tc.desc: Test GetPagingDelta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetPagingDelta007, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto result = scrollPattern->GetPagingDelta(-1.0f, 1300.0f, 3.0f);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: GetPagingDelta008
+ * @tc.desc: Test GetPagingDelta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetPagingDelta008, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto result = scrollPattern->GetPagingDelta(-1.0f, 1300.0f, -4.0f);
+    EXPECT_EQ(result, 0.0f);
+}
 } // namespace OHOS::Ace::NG
