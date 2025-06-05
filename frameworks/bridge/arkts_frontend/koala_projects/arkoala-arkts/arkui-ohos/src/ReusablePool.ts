@@ -14,47 +14,37 @@
  */
 
 import { Disposable } from "@koalaui/runtime";
-import { KoalaCallsiteKey } from "@koalaui/common"
 
 export class ReusablePool implements Disposable {
-    private cache: Map<KoalaCallsiteKey, Disposable>;
+    private cache: Disposable[];
+    disposed: boolean = false;
 
     constructor() {
-        this.cache = new Map<KoalaCallsiteKey, Disposable>();
+        this.cache = [];
     }
-    disposed: boolean = false
 
     /**
-     * prioritize reusing the same scope. If not found, use the earliest inserted scope
+     * Returns and removes the first available item from the pool
      */
-    get(key: KoalaCallsiteKey): Disposable | undefined {
+    get(): Disposable | undefined {
         if (this.disposed) return undefined;
-        if (!this.cache.has(key)) {
-            const leastUsedKey = this.cache.keys().next().value;
-            if (!leastUsedKey) return undefined
-            const leastUsedValue = this.cache.get(leastUsedKey!);
-            this.cache.delete(leastUsedKey!);
-            return leastUsedValue;
-        }
-        const value = this.cache.get(key)!;
-        this.cache.delete(key);
-        return value;
+        return this.cache.shift();
     }
 
-    put(key: KoalaCallsiteKey, value: Disposable): void {
-        if (this.disposed) return
-        if (this.cache.has(key)) {
-            throw Error("the same scope is recycled twice")
-        }
-        this.cache.set(key, value);
+    /**
+     * Adds an item to the pool
+     */
+    put(value: Disposable): void {
+        if (this.disposed) return;
+        this.cache.push(value);
     }
 
     dispose(): void {
-        if (this.disposed) return
-        this.disposed = true
-        for (const value of this.cache.values()) {
+        if (this.disposed) return;
+        this.disposed = true;
+        for (const value of this.cache) {
             value.dispose();
         }
-        this.cache.clear();
+        this.cache = [];
     }
 }
