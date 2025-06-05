@@ -154,10 +154,11 @@ public:
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
     }
 
-    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius,
+    static void SetFrontBlur(FrameNode* frameNode, const std::optional<float>& radius,
         const std::optional<BlurOption>& blurOption, const std::optional<SysOptions>& sysOptions)
     {
-        ViewAbstract::SetFrontBlur(frameNode, radius, blurOption.value_or(BlurOption()),
+        Dimension radiusPX(radius.value_or(0.0f), DimensionUnit::PX);
+        ViewAbstract::SetFrontBlur(frameNode, radiusPX, blurOption.value_or(BlurOption()),
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
     }
 

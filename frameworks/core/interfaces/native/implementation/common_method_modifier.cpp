@@ -5130,11 +5130,10 @@ void Blur1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto blur = Converter::OptConvertPtr<float>(blurRadius).value_or(0.f);
+    auto blurRadiusOpt = Converter::OptConvertPtr<float>(blurRadius);
     auto optionsOpt = Converter::OptConvertPtr<BlurOption>(options);
     auto sysOptionsOpt = Converter::OptConvertPtr<SysOptions>(sysOptions);
-    CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    ViewAbstractModelStatic::SetFrontBlur(frameNode, dimensionBlur, optionsOpt, sysOptionsOpt);
+    ViewAbstractModelStatic::SetFrontBlur(frameNode, blurRadiusOpt, optionsOpt, sysOptionsOpt);
 }
 void LinearGradientBlur0Impl(Ark_NativePointer node,
                              const Opt_Number* value,
