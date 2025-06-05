@@ -32,7 +32,7 @@ namespace OHOS::Ace::Framework {
 bool JSLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
     LocationButtonLocationDescription& text, LocationButtonIconStyle& icon, int32_t& bg)
 {
-    if (!info[0]->IsObject()) {
+    if ((info.Length() < 1) || (!info[0]->IsObject())) {
         return false;
     }
 
@@ -138,7 +138,7 @@ void JsLocationButtonClickFunction::Execute(GestureEvent& info)
 
 void JSLocationButton::JsOnClick(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
+    if ((info.Length() < 1) || (!info[0]->IsFunction())) {
         return;
     }
     auto jsOnClickFunc = AceType::MakeRefPtr<JsLocationButtonClickFunction>(JSRef<JSFunc>::Cast(info[0]));
