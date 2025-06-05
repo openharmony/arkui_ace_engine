@@ -253,7 +253,9 @@ void SwiperArrowPattern::InitNavigationArrow()
     host->AddChild(buttonNode);
     buttonNode->AddChild(imageNode);
     UpdateArrowContent();
-
+    auto pattern = buttonNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleBackgroundColor();
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
     buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
