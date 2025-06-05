@@ -1228,6 +1228,25 @@ HWTEST_F(ListAlgorithmTestNg, FixPredictSnapOffset002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FixPredictSnapOffset003
+ * @tc.desc: Test ListLayoutAlgorithm FixPredictSnapOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, FixPredictSnapOffset003, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listLayoutAlgorithm->scrollSnapVelocity_ = 1000.0f;
+    listLayoutAlgorithm->predictSnapOffset_ = 10.0f;
+    listLayoutAlgorithm->scrollSnapAlign_ = ScrollSnapAlign::CENTER;
+    ListItemInfo listItemInfo = { 2, -100.0f, 100.0f, false };
+    listLayoutAlgorithm->itemPosition_[1] = listItemInfo;
+    listLayoutAlgorithm->FixPredictSnapOffset(listLayoutProperty);
+    EXPECT_EQ(listLayoutAlgorithm->predictSnapOffset_, 0.0f);
+    EXPECT_EQ(listLayoutAlgorithm->predictSnapEndPos_, 0.0f);
+}
+
+/**
  * @tc.name: FixPredictSnapOffsetAlignStart001
  * @tc.desc: Test ListLayoutAlgorithm FixPredictSnapOffsetAlignStart
  * @tc.type: FUNC
