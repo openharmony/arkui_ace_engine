@@ -2155,4 +2155,34 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage076, TestSi
     dragDropManager->GetGatherPixelMap(dragData, 2.0f, 1.0f, 1.0f);
     EXPECT_EQ(dragData.shadowInfos.size(), 1);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage077
+ * @tc.desc: Test HandleStopDrag
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage077, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    frameNode->context_ = AceType::RawPtr(pipeline);
+    DragPointerEvent pointerEvent;
+    dragEvent->needDoInternalDropAnimation_ = true;
+    dragDropManager->dragCursorStyleCore_ = DragCursorStyleCore::MOVE;
+    dragDropManager->HandleStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_EQ(dragDropManager->dragCursorStyleCore_, DragCursorStyleCore::DEFAULT);
+
+    dragEvent->needDoInternalDropAnimation_ = true;
+    dragEvent->useCustomAnimation_ = true;
+    dragDropManager->dragCursorStyleCore_ = DragCursorStyleCore::MOVE;
+    dragDropManager->HandleStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_EQ(dragDropManager->dragCursorStyleCore_, DragCursorStyleCore::DEFAULT);
+}
 } // namespace OHOS::Ace::NG

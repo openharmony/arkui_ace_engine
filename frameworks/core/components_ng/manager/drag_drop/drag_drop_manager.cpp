@@ -1437,6 +1437,10 @@ void DragDropManager::HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, con
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
     }
     auto useCustomAnimation = event->IsUseCustomAnimation();
+    if (event->GetNeedDoInternalDropAnimation() && useCustomAnimation) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Need do internal drop animation, set useCustomAnimation to false.");
+        useCustomAnimation = false;
+    }
     auto dragBehavior = event->GetDragBehavior();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
