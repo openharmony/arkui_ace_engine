@@ -30,7 +30,7 @@ import { nullptr } from "@koalaui/interop"
 import { _animateTo } from "./src/handwritten/ArkAnimation"
 import { AnimateParam } from './src/component'
 import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
-import { Context } from "#external"
+import { Context, PointerStyle } from "#external"
 import { ArkUIAniModule } from "arkui.ani"
 import { Serializer } from "./src/component/peers/Serializer"
 import { componentUtils } from "@ohos/arkui/componentUtils"
@@ -47,6 +47,7 @@ import inspector from "@ohos/arkui/inspector"
 import router from './ohos.router'
 import promptAction from './ohos.promptAction';
 import { ContextMenu } from './src/component/contextMenu';
+import { GlobalScope } from "./src/component/GlobalScope"
 
 export class UIInspector {
     instanceId_: int32 = -1;
@@ -225,6 +226,25 @@ export class PromptAction {
     }
 }
 
+export class CursorController {
+    instanceId_: int32
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+
+    public restoreDefault(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        GlobalScope.cursorControl_restoreDefault()
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public setCursor(value: PointerStyle): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        GlobalScope.cursorControl_setCursor(value)
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
 export class UIContext {
     instanceId_: int32 = 100000;
     observer_ :UIObserver |null = null;
@@ -235,6 +255,7 @@ export class UIContext {
     uiInspector_: UIInspector | null = null;
     contextMenuController_: ContextMenuController;
     promptAction_: PromptAction | null = null;
+    cursorController_: CursorController;
     font_: Font;
     measureUtils_: MeasureUtils;
     textMenuController_: TextMenuController;
@@ -245,6 +266,7 @@ export class UIContext {
         this.componentUtils_ = new ComponentUtils(instanceId);
         this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
         this.contextMenuController_ = new ContextMenuController(instanceId);
+        this.cursorController_ = new CursorController(instanceId);
         this.font_ = new Font(instanceId);
         this.measureUtils_ = new MeasureUtils(instanceId);
         this.textMenuController_ = new TextMenuController(instanceId);
@@ -354,6 +376,9 @@ export class UIContext {
         return this.componentUtils_;
     }
 
+    public getCursorController(): CursorController {
+        return this.cursorController_;
+    }
     public getRouter(): Router {
         if (this.router_ === undefined) {
             this.router_ = new Router()
