@@ -727,4 +727,20 @@ void WebModelImpl::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
     CHECK_NULL_VOID(webComponent);
     webComponent->SetBypassVsyncCondition(condition);
 }
+
+void WebModelImpl::SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+    webComponent->SetOnLoadStartedEventId(eventMarker);
+}
+
+void WebModelImpl::SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+    webComponent->SetOnLoadFinishedEventId(eventMarker);
+}
 } // namespace OHOS::Ace::Framework

@@ -799,12 +799,13 @@ public:
     virtual void Close() = 0;
 };
 
-class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
+class ACE_EXPORT BaseLoadEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(BaseLoadEvent, BaseEventInfo);
 
 public:
-    explicit LoadWebPageStartEvent(const std::string& url) : BaseEventInfo("LoadWebPageStartEvent"), loadedUrl_(url) {}
-    ~LoadWebPageStartEvent() = default;
+    explicit BaseLoadEvent(const std::string& type, const std::string& url)
+        : BaseEventInfo(type), loadedUrl_(url) {}
+    ~BaseLoadEvent() = default;
 
     const std::string& GetLoadedUrl() const
     {
@@ -815,21 +816,36 @@ private:
     std::string loadedUrl_;
 };
 
-class ACE_EXPORT LoadWebPageFinishEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageFinishEvent, BaseEventInfo);
+class ACE_EXPORT LoadWebPageStartEvent : public BaseLoadEvent {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseLoadEvent);
 
 public:
-    explicit LoadWebPageFinishEvent(const std::string& url) : BaseEventInfo("LoadWebPageFinishEvent"), loadedUrl_(url)
-    {}
+    explicit LoadWebPageStartEvent(const std::string& url) : BaseLoadEvent("LoadWebPageStartEvent", url) {}
+    ~LoadWebPageStartEvent() = default;
+};
+
+class ACE_EXPORT LoadWebPageFinishEvent : public BaseLoadEvent {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageFinishEvent, BaseLoadEvent);
+
+public:
+    explicit LoadWebPageFinishEvent(const std::string& url) : BaseLoadEvent("LoadWebPageFinishEvent", url) {}
     ~LoadWebPageFinishEvent() = default;
+};
 
-    const std::string& GetLoadedUrl() const
-    {
-        return loadedUrl_;
-    }
+class ACE_EXPORT LoadStartedEvent : public BaseLoadEvent {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadStartedEvent, BaseLoadEvent);
 
-private:
-    std::string loadedUrl_;
+public:
+    explicit LoadStartedEvent(const std::string& url) : BaseLoadEvent("LoadStartedEvent", url) {}
+    ~LoadStartedEvent() = default;
+};
+
+class ACE_EXPORT LoadFinishedEvent : public BaseLoadEvent {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadFinishedEvent, BaseLoadEvent);
+
+public:
+    explicit LoadFinishedEvent(const std::string& url) : BaseLoadEvent("LoadFinishedEvent", url) {}
+    ~LoadFinishedEvent() = default;
 };
 
 class ACE_EXPORT PdfScrollEvent : public BaseEventInfo {

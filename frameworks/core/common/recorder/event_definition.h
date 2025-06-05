@@ -70,6 +70,8 @@ enum EventType : int32_t {
     TEXT_INPUT,
     WEB_ACTION,
     BACK_PRESSED,
+    LOAD_STARTED,
+    LOAD_FINISHED,
 };
 
 constexpr char KEY_COUNT[] = "count";
