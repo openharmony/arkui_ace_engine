@@ -118,6 +118,9 @@ template("ace_unittest") {
   } else if (type == "new") {
     ohos_unittest(ace_unittest_name) {
       module_out_path = "ace_engine/ace_engine/${module_output}"
+      if (ace_unittest_name == "display_sync_manager_test_ng") {
+        module_out_path = "ace_engine/Graphic_2d_LTPO_DisplaySync/${module_output}"
+      }
       sources = []
       sources += invoker.sources
       sources += flutter_sources
