@@ -44,7 +44,7 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_001, Tes
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    uint32_t code = 10;
+    uint32_t code = 11;
     std::u16string name = u"form_render_dispatcher_stub";
     data.WriteInterfaceToken(name);
     EXPECT_EQ(renderDispather->OnRemoteRequest(code, data, reply, option), ERR_INVALID_VALUE);
@@ -149,6 +149,19 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_004, Tes
     EXPECT_TRUE(data.ReadFloat(point));
     EXPECT_TRUE(data.ReadInt32(type));
     EXPECT_TRUE(data.ReadInt64(time));
+}
+
+/**
+ * @tc.number: FormRendererDispatcherStubTest_005
+ * @tc.name: HandleOnNotifyDumpInfo
+ * @tc.desc:
+ */
+HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_005, TestSize.Level1)
+{
+    sptr<AppExecFwk::MockFormRendererDispatherStub> renderDispather = new AppExecFwk::MockFormRendererDispatherStub();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(renderDispather->HandleOnNotifyDumpInfo(data, reply), ERR_OK);
 }
 }
 }

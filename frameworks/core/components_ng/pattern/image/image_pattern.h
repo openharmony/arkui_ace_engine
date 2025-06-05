@@ -167,6 +167,8 @@ public:
 
     std::string GetImageColorFilterStr(const std::vector<float>& colorFilter);
 
+    std::string GetSrcTypeToString(SrcType srcType);
+
     void SetSyncLoad(bool value)
     {
         syncLoad_ = value;
@@ -441,6 +443,7 @@ private:
     void OnCompleteInDataReady();
     void OnImageLoadFail(const std::string& errorMsg, const ImageErrorInfo& errorInfo);
     void OnImageLoadSuccess();
+    bool SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap);
     void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
         const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
@@ -478,6 +481,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
+    void ReportPerfData(const RefPtr<NG::FrameNode>& host, int state);
     void LoadImage(const ImageSourceInfo& src, bool needLayout);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 

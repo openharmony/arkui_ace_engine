@@ -3332,6 +3332,297 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg238, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNg239
+ * @tc.desc: Test OnTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg239, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    TouchEvent event;
+    event.type = TouchType::MOVE;
+    event.id = 4;
+    event.x = 70;
+    event.y = 80;
+    event.sourceType = SourceType::TOUCH;
+    event.passThrough = false;
+    context_->viewScale_ = 0;
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg240
+ * @tc.desc: Test OnTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg240, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    TouchEvent event;
+    event.type = TouchType::MOVE;
+    event.id = 4;
+    event.x = 70;
+    event.y = 80;
+    event.sourceType = SourceType::TOUCH;
+    event.passThrough = true;
+    context_->viewScale_ = 0;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->isEventsPassThrough_ = false;
+    context_->eventManager_->passThroughResult_ = true;
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    EXPECT_EQ(context_->eventManager_->passThroughResult_, context_->postEventManager_->passThroughResult_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg241
+ * @tc.desc: Test OnTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg241, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    TouchEvent event;
+    event.type = TouchType::MOVE;
+    event.id = 4;
+    event.x = 70;
+    event.y = 80;
+    event.sourceType = SourceType::TOUCH;
+    event.passThrough = false;
+    context_->isEventsPassThrough_ = false;
+    context_->viewScale_ = 0;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    EXPECT_EQ(context_->instanceId_, 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg242
+ * @tc.desc: Test OnTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg242, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    TouchEvent event;
+    event.type = TouchType::UP;
+    event.id = 4;
+    event.x = 70;
+    event.y = 80;
+    event.sourceType = SourceType::TOUCH;
+    event.passThrough = false;
+    context_->isEventsPassThrough_ = false;
+    context_->viewScale_ = 0;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    EXPECT_EQ(context_->eventManager_->passThroughResult_, context_->postEventManager_->passThroughResult_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg243
+ * @tc.desc: Test OnTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg243, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    TouchEvent event;
+    event.type = TouchType::UP;
+    event.id = 4;
+    event.x = 70;
+    event.y = 80;
+    event.sourceType = SourceType::TOUCH;
+    event.passThrough = false;
+    context_->isEventsPassThrough_ = false;
+    context_->viewScale_ = 0;
+    context_->postEventManager_ = nullptr;
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    EXPECT_EQ(context_->instanceId_, 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg244
+ * @tc.desc: Test OnTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg244, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    TouchEvent event;
+    event.type = TouchType::UP;
+    event.id = 4;
+    event.x = 70;
+    event.y = 80;
+    event.sourceType = SourceType::TOUCH;
+    event.passThrough = false;
+    context_->isEventsPassThrough_ = false;
+    context_->viewScale_ = 0;
+    context_->postEventManager_ = nullptr;
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    EXPECT_EQ(context_->instanceId_, 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg245
+ * @tc.desc: Test OnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg245, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    MouseEvent event;
+    event.action = MouseAction::PRESS;
+    event.passThrough = false;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->accessibilityManagerNG_ = AceType::MakeRefPtr<AccessibilityManagerNG>();
+    context_->OnMouseEvent(event, context_->rootNode_);
+    EXPECT_EQ(context_->lastMouseEvent_->node, context_->rootNode_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg246
+ * @tc.desc: Test OnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg246, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    MouseEvent event;
+    event.action = MouseAction::MOVE;
+    event.passThrough = true;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->accessibilityManagerNG_ = AceType::MakeRefPtr<AccessibilityManagerNG>();
+    context_->OnMouseEvent(event, context_->rootNode_);
+    EXPECT_EQ(context_->postEventManager_->passThroughResult_, context_->eventManager_->passThroughResult_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg247
+ * @tc.desc: Test OnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg247, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    MouseEvent event;
+    event.action = MouseAction::MOVE;
+    event.passThrough = false;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->accessibilityManagerNG_ = AceType::MakeRefPtr<AccessibilityManagerNG>();
+    context_->OnMouseEvent(event, context_->rootNode_);
+    EXPECT_EQ(context_->lastMouseEvent_->node, context_->rootNode_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg248
+ * @tc.desc: Test OnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg248, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    MouseEvent event;
+    event.action = MouseAction::PRESS;
+    event.passThrough = true;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->accessibilityManagerNG_ = AceType::MakeRefPtr<AccessibilityManagerNG>();
+    context_->OnMouseEvent(event, context_->rootNode_);
+    EXPECT_EQ(context_->lastMouseEvent_->node, context_->rootNode_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg249
+ * @tc.desc: Test OnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg249, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    MouseEvent event;
+    event.action = MouseAction::PRESS;
+    event.passThrough = false;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->accessibilityManagerNG_ = AceType::MakeRefPtr<AccessibilityManagerNG>();
+    context_->OnMouseEvent(event, context_->rootNode_);
+    EXPECT_EQ(context_->lastMouseEvent_->node, context_->rootNode_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg250
+ * @tc.desc: Test OnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg250, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    MouseEvent event;
+    event.action = MouseAction::MOVE;
+    event.passThrough = true;
+    context_->postEventManager_ = nullptr;
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->accessibilityManagerNG_ = AceType::MakeRefPtr<AccessibilityManagerNG>();
+    context_->OnMouseEvent(event, context_->rootNode_);
+    EXPECT_EQ(context_->lastMouseEvent_->node, context_->rootNode_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg251
+ * @tc.desc: Test OnAxisEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg251, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    AxisEvent event;
+    event.action = AxisAction::CANCEL;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->postEventManager_->passThroughResult_ = false;
+    context_->eventManager_->passThroughResult_ = true;
+    context_->accessibilityManagerNG_ = AceType::MakeRefPtr<AccessibilityManagerNG>();
+    context_->OnAxisEvent(event, context_->rootNode_);
+    EXPECT_EQ(context_->postEventManager_->passThroughResult_, context_->eventManager_->passThroughResult_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg252
+ * @tc.desc: Test OnAxisEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg252, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    AxisEvent event;
+    event.action = AxisAction::CANCEL;
+    context_->postEventManager_ = nullptr;
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->eventManager_->passThroughResult_ = true;
+    context_->accessibilityManagerNG_ = AceType::MakeRefPtr<AccessibilityManagerNG>();
+    context_->dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
+    context_->OnAxisEvent(event, context_->rootNode_);
+    EXPECT_FALSE(context_->dragDropManager_->isDragCancel_);
+}
+
+/**
  * @tc.name: UITaskSchedulerTestNg015
  * @tc.desc: Test FlushRenderTask.
  * @tc.type: FUNC

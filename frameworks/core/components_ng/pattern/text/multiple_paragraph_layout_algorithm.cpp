@@ -112,6 +112,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     UpdateShaderStyle(textLayoutProperty, textStyle);
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
     textStyle.SetEnableAutoSpacing(textLayoutProperty->GetEnableAutoSpacingValue(false));
+    textStyle.SetParagraphVerticalAlign(
+        textLayoutProperty->GetTextVerticalAlignValue(TextVerticalAlign::BASELINE));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
     FontRegisterCallback(frameNode, textStyle); // Register callback for fonts.
     textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
@@ -127,6 +129,8 @@ void MultipleParagraphLayoutAlgorithm::UpdateShaderStyle(
         auto gradients = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
         auto gradient = ToGradient(gradients);
         textStyle.SetGradient(gradient);
+    } else {
+        textStyle.SetGradient(std::nullopt);
     }
 }
 
@@ -135,6 +139,7 @@ std::optional<OHOS::Ace::Gradient> MultipleParagraphLayoutAlgorithm::ToGradient(
     OHOS::Ace::Gradient retGradient;
     retGradient.SetType(static_cast<OHOS::Ace::GradientType>(gradient.GetType()));
     if (retGradient.GetType() == OHOS::Ace::GradientType::LINEAR) {
+        CHECK_NULL_RETURN(gradient.GetLinearGradient(), std::nullopt);
         auto angle = gradient.GetLinearGradient()->angle;
         if (angle.has_value()) {
             retGradient.GetLinearGradient().angle = ToAnimatableDimension(angle.value());
@@ -149,6 +154,7 @@ std::optional<OHOS::Ace::Gradient> MultipleParagraphLayoutAlgorithm::ToGradient(
         }
     }
     if (retGradient.GetType() == OHOS::Ace::GradientType::RADIAL) {
+        CHECK_NULL_RETURN(gradient.GetRadialGradient(), std::nullopt);
         auto radialCenterX = gradient.GetRadialGradient()->radialCenterX;
         if (radialCenterX.has_value()) {
             retGradient.GetRadialGradient().radialCenterX = ToAnimatableDimension(radialCenterX.value());
@@ -303,6 +309,9 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     CHECK_NULL_VOID(lineStyle);
     if (lineStyle->HasTextAlign()) {
         pStyle.align = lineStyle->GetTextAlignValue();
+    }
+    if (lineStyle->HasTextVerticalAlign()) {
+        pStyle.verticalAlign = lineStyle->GetTextVerticalAlignValue();
     }
     if (lineStyle->HasMaxLines()) {
         pStyle.maxLines = std::min(lineStyle->GetMaxLinesValue(), pStyle.maxLines);
@@ -532,6 +541,7 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(const TextSty
 {
     return { .direction = textStyle.GetTextDirection(),
         .align = textStyle.GetTextAlign(),
+        .verticalAlign = textStyle.GetParagraphVerticalAlign(),
         .maxLines = static_cast<int32_t>(textStyle.GetMaxLines()) < 0 ? UINT32_MAX : textStyle.GetMaxLines(),
         .fontLocale = textStyle.GetLocale(),
         .wordBreak = textStyle.GetWordBreak(),

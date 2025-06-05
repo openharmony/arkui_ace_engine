@@ -53,7 +53,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     pattern_->scrollableEvent_->GetScrollable()->HandleTouchDown();
 
     UpdateCurrentOffset(300.0f);
-    EXPECT_NEAR(info->Offset(), 150.0f, 1.0f);
+    EXPECT_NEAR(info->Offset(), 46.0f, 1.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5100.0f, 100.0f);
 
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
@@ -61,7 +61,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     EXPECT_NEAR(info->EstimateTotalHeight(), 5150.0f, 100.0f);
 
     UpdateCurrentOffset(-300.0f);
-    EXPECT_NEAR(info->Offset(), -4500.0f, 100.0f);
+    EXPECT_NEAR(info->Offset(), -4396.0f, 100.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5150.0f, 100.0f);
 }
 
@@ -86,7 +86,7 @@ HWTEST_F(WaterFlowTestNg, Offset002, TestSize.Level1)
     EXPECT_EQ(info->EstimateTotalHeight(), 250.0F);
     EXPECT_EQ(GetChildHeight(frameNode_, 0), 50.0f);
 
-    UpdateCurrentOffset(-300.0f);
+    UpdateCurrentOffset(-8000.0f);
     EXPECT_NEAR(info->Offset(), -50.0f, 10.0f);
     EXPECT_EQ(info->EstimateTotalHeight(), 250.0f);
 

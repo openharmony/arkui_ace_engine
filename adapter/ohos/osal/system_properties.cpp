@@ -989,6 +989,11 @@ bool SystemProperties::ConfigChangePerform()
     return configChangePerform_;
 }
 
+void SystemProperties::SetConfigChangePerform()
+{
+    configChangePerform_ = true;
+}
+
 bool SystemProperties::GetTitleStyleEnabled()
 {
     return system::GetBoolParameter("persist.ace.title.style.enabled", false);

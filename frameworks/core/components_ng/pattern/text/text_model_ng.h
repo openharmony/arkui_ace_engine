@@ -92,6 +92,7 @@ public:
     void SetEnableAutoSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
+    void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -201,6 +202,8 @@ public:
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
     static NG::Gradient GetGradientStyle(FrameNode* frameNode);
     static void ResetTextGradient(FrameNode* frameNode);
+    static void SetTextVerticalAlign(FrameNode* frameNode, TextVerticalAlign verticalAlign);
+    static TextVerticalAlign GetTextVerticalAlign(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

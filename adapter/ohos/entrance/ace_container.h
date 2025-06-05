@@ -797,10 +797,11 @@ public:
         return uiWindow_->IsWaterfallModeEnabled();
     }
 
-    Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
+    Rect GetUIExtensionHostWindowRect() override
     {
         CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
-        auto rect = uiWindow_->GetHostWindowRect(instanceId);
+        auto hostWindowId = uiWindow_->GetRealParentId();
+        auto rect = uiWindow_->GetHostWindowRect(hostWindowId);
         return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
     void UpdateColorMode(uint32_t colorMode) override;

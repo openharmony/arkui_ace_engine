@@ -389,6 +389,16 @@ public:
         return displayId_;
     }
 
+    void SetNeedDoInternalDropAnimation(bool needDoInternalDropAnimation)
+    {
+        needDoInternalDropAnimation_ = needDoInternalDropAnimation;
+    }
+
+    bool GetNeedDoInternalDropAnimation() const
+    {
+        return needDoInternalDropAnimation_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -419,6 +429,7 @@ private:
     std::string bundleName_;
     bool isRemoteDev_ { false };
     int32_t displayId_ = -1;
+    bool needDoInternalDropAnimation_ = false;
 };
 
 class NotifyDragEvent : public DragEvent {

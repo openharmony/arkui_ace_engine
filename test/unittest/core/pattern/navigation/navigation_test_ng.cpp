@@ -1800,4 +1800,37 @@ HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded003, TestSize.Level1)
     navNode->primaryContentNode_ = nullptr;
     ASSERT_TRUE(navigationModel.CreatePrimaryContentIfNeeded(navNode));
 }
+
+/**
+ * @tc.name: SizeCalculationSplit001
+ * @tc.desc: Branch: if (pattern->IsForceSplitSuccess() && pattern->IsForceSplitUseNavBar()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, SizeCalculationSplit001, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(navigation, nullptr);
+    auto pattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->forceSplitSuccess_ = true;
+    pattern->forceSplitUseNavBar_ = true;
+
+    const float navWidth = 400.0f;
+    const float navHeight = 300.0f;
+    const float dividerWidthInPx = DIVIDER_WIDTH.ConvertToPx();
+    float halfWidth = (navWidth - dividerWidthInPx) / 2.0f;
+
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto property = AceType::MakeRefPtr<NavigationLayoutProperty>();
+    property->layoutConstraint_ = LayoutConstraintF();
+    algorithm->SizeCalculationSplit(navigation, property, SizeF(navWidth, navHeight));
+
+    EXPECT_TRUE(NearEqual(algorithm->navBarSize_.Width(), halfWidth));
+    EXPECT_TRUE(NearEqual(algorithm->realNavBarWidth_, halfWidth));
+    EXPECT_TRUE(NearEqual(algorithm->realContentWidth_, halfWidth));
+}
 } // namespace OHOS::Ace::NG

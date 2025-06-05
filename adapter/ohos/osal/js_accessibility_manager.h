@@ -619,6 +619,8 @@ private:
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
+    void GenerateCommonPropertyForWeb(const RefPtr<PipelineBase>& context, CommonProperty& output,
+            const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node);
 
     void FindText(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
         const RefPtr<NG::PipelineContext>& context,

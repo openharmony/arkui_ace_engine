@@ -283,10 +283,10 @@ void AllSslErrorResultOhos::HandleConfirm()
     }
 }
 
-void AllSslErrorResultOhos::HandleCancel()
+void AllSslErrorResultOhos::HandleCancel(bool abortLoading)
 {
     if (result_) {
-        result_->HandleCancel();
+        result_->HandleCancelV2(abortLoading);
     }
 }
 
@@ -1706,6 +1706,11 @@ void WebDelegate::GetHitTestValue(HitTestResult& result)
     }
 }
 
+int WebDelegate::GetProgress()
+{
+    return nweb_ ? nweb_->PageLoadProgress() : 0;
+}
+
 int WebDelegate::GetPageHeight()
 {
     if (nweb_) {
@@ -2506,6 +2511,10 @@ void WebDelegate::SetWebCallBack()
             if (delegate) {
                 delegate->GetHitTestValue(result);
             }
+        });
+        webController->SetGetProgressImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            return delegate ? delegate->GetProgress() : 0;
         });
         webController->SetGetPageHeightImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
@@ -3730,6 +3739,22 @@ void WebDelegate::UpdateAudioExclusive(const bool& audioExclusive)
             delegate->nweb_->SetAudioExclusive(audioExclusive);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateAudioExclusive");
+}
+
+void WebDelegate::UpdateAudioSessionType(const WebAudioSessionType& audioSessionType)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), audioSessionType]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAudioSessionType(static_cast<int32_t>(audioSessionType));
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateAudioSessionType");
 }
 
 void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled)

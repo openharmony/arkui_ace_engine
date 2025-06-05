@@ -1371,4 +1371,40 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage039
     DragDropFuncWrapper::UpdateNodePositionToWindow(frameNode, offset);
     EXPECT_NE(renderContext->GetPosition(), OffsetT<Dimension>(Dimension(5.0f), Dimension(5.0f)));
 }
+
+/**
+ * @tc.name: Test DragDropFuncWrapperTestNgCoverage040
+ * @tc.desc: Test HandleBackPressHideMenu
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage040, TestSize.Level1)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(mainPipeline, nullptr);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    dragDropManager->SetIsDragNodeNeedClean(false);
+    auto overlayManager = mainPipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto gatherNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(gatherNode, nullptr);
+    std::vector<GatherNodeChildInfo> gatherNodeInfo;
+    overlayManager->MountGatherNodeToRootNode(gatherNode, gatherNodeInfo);
+    EXPECT_EQ(dragDropManager->IsDragNodeNeedClean(), false);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isUIExtensionWindow_ = false;
+    DragDropFuncWrapper::HandleBackPressHideMenu();
+    EXPECT_EQ(dragDropManager->IsDragNodeNeedClean(), true);
+    EXPECT_EQ(overlayManager->hasGatherNode_, true);
+
+    dragDropManager->SetIsDragNodeNeedClean(false);
+    container->isUIExtensionWindow_ = true;
+    DragDropFuncWrapper::HandleBackPressHideMenu();
+    EXPECT_EQ(dragDropManager->IsDragNodeNeedClean(), true);
+    EXPECT_EQ(overlayManager->hasGatherNode_, false);
+}
 } // namespace OHOS::Ace::NG

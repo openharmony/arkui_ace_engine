@@ -46,6 +46,7 @@ private:
     static std::string ToHtml(const std::string& key, const std::optional<CalcDimension>& dimesion);
     static std::string ToHtml(const std::optional<ImageSpanSize>& size);
     static std::string ToHtml(const std::optional<OHOS::Ace::TextAlign>& object);
+    static std::string ToHtml(const std::optional<OHOS::Ace::TextVerticalAlign>& object);
     static std::string ToHtml(const std::optional<OHOS::Ace::WordBreak>& object);
     static std::string ToHtml(const std::optional<OHOS::Ace::TextOverflow>& object);
     static std::string ToHtml(const std::optional<OHOS::Ace::NG::BorderRadiusProperty>& borderRadius);

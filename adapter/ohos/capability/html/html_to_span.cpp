@@ -59,7 +59,7 @@ std::vector<std::string> ParseFontFamily(const std::string& fontFamily)
     return fonts;
 }
 
-VerticalAlign StringToTextVerticalAlign(const std::string& align)
+VerticalAlign StringToVerticalAlign(const std::string& align)
 {
     if (align == "bottom") {
         return VerticalAlign::BOTTOM;
@@ -348,6 +348,8 @@ void HtmlToSpan::InitParagraph(
 
     if (key == "text-align") {
         style->align = StringToTextAlign(value);
+    } else if (key == "vertical-align") {
+        style->textVerticalAlign = StringToTextVerticalAlign(value);
     } else if (key == "word-break") {
         style->wordBreak = StringToWordBreak(value);
     } else if (key == "text-overflow") {
@@ -743,7 +745,7 @@ void HtmlToSpan::HandleImgSpanOption(const Styles& styleMap, ImageSpanOptions& o
         } else if (key == "object-fit") {
             options.imageAttribute->objectFit = ConvertStrToFit(trimVal);
         } else if (key == "vertical-align") {
-            options.imageAttribute->verticalAlign = StringToTextVerticalAlign(trimVal);
+            options.imageAttribute->verticalAlign = StringToVerticalAlign(trimVal);
         } else if (key == "width" || key == "height") {
             HandleImageSize(key, trimVal, options);
         } else if (key == "sync-load") {
@@ -818,6 +820,23 @@ TextAlign HtmlToSpan::StringToTextAlign(const std::string& value)
         return TextAlign::JUSTIFY;
     }
     return TextAlign::LEFT;
+}
+
+TextVerticalAlign HtmlToSpan::StringToTextVerticalAlign(const std::string& value)
+{
+    if (value == "baseline") {
+        return TextVerticalAlign::BASELINE;
+    }
+    if (value == "bottom") {
+        return TextVerticalAlign::BOTTOM;
+    }
+    if (value == "middle") {
+        return TextVerticalAlign::CENTER;
+    }
+    if (value == "top") {
+        return TextVerticalAlign::TOP;
+    }
+    return TextVerticalAlign::BASELINE;
 }
 
 WordBreak HtmlToSpan::StringToWordBreak(const std::string& value)

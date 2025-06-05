@@ -1647,6 +1647,27 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
     }
     return index;
 }
+
+void SetTextVerticalAlign(ArkUINodeHandle node, ArkUI_Uint32 textVerticalAlign)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextVerticalAlign(frameNode, static_cast<TextVerticalAlign>(textVerticalAlign));
+}
+
+void ResetTextVerticalAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextVerticalAlign(frameNode, TextVerticalAlign::BASELINE);
+}
+
+ArkUI_Uint32 GetTextVerticalAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<uint32_t>(TextVerticalAlign::BASELINE));
+    return static_cast<ArkUI_Uint32>(TextModelNG::GetTextVerticalAlign(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1795,6 +1816,9 @@ const ArkUITextModifier* GetTextModifier()
         .setRadialGradient = SetTextRadialGradient,
         .getRadialGradient = GetTextRadialGradient,
         .resetTextGradient = ResetTextGradient,
+        .setTextVerticalAlign = SetTextVerticalAlign,
+        .resetTextVerticalAlign = ResetTextVerticalAlign,
+        .getTextVerticalAlign = GetTextVerticalAlign,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

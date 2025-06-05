@@ -2101,6 +2101,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
 #endif
     SetDeviceProperties();
+    bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";
+    });
+    if (configChangePerform) {
+        SystemProperties::SetConfigChangePerform();
+    }
     // Initialize performance check parameters
     AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
@@ -2446,12 +2452,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // Use metadata to control the center-alignment of text at line height.
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
-    bool visibleAreaRealTime =
-        std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-            return metaDataItem.name == "ArkTSVisibleAreaRealTime" && metaDataItem.value == "true";
-        });
     pipeline->SetHalfLeading(halfLeading);
-    pipeline->SetVisibleAreaRealTime(visibleAreaRealTime);
     bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(),
         [pipelineWeak = AceType::WeakClaim(AceType::RawPtr(pipeline))](const auto& metaDataItem) {
                 if (metaDataItem.name == "can_preview_text") {
@@ -2570,7 +2571,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
             pipeline->UpdateSystemSafeAreaWithoutAnimation(systemInsets);
             pipeline->UpdateCutoutSafeAreaWithoutAnimation(cutoutInsets);
             pipeline->UpdateNavSafeAreaWithoutAnimation(navInsets);
-            TAG_LOGI(ACE_LAYOUT,
+            TAG_LOGI(ACE_SAFE_AREA,
                 "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s",
                 systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
         }
@@ -3226,13 +3227,17 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 
     if (cachedAnimateFlag_.load()) {
         const uint32_t delay = 50;
+        auto pipeline = container->GetPipelineContext();
         auto task = [cachedConfig = cachedConfig_, cachedReason = cachedReason_,
             cachedRsTransaction = cachedRsTransaction_, cachedAvoidAreas = cachedAvoidAreas_,
-            UICONTENT_IMPL_HELPER(content)] () {
+            weak = WeakPtr<PipelineBase>(pipeline), UICONTENT_IMPL_HELPER(content)] () {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
             UICONTENT_IMPL_HELPER_GUARD(content, return);
             TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache");
             UICONTENT_IMPL_PTR(content)->UpdateViewportConfig(cachedConfig, cachedReason,
                 cachedRsTransaction, cachedAvoidAreas);
+            pipeline->RequestFrame();
         };
         taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay,
             "ArkUIExecKeyFrameCachedAnimateTask", PriorityType::HIGH);
@@ -3324,7 +3329,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     return false;
 }
 
-void UIContentImpl::SetUIExtensionImeShow(const Rect& keyboardRect, int32_t instanceId)
+void SetUIExtensionImeShow(const Rect& keyboardRect, int32_t instanceId)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId);
     CHECK_NULL_VOID(container);
@@ -3349,7 +3354,7 @@ void UIContentImpl::SetUIExtensionImeShow(const Rect& keyboardRect, int32_t inst
     }
 }
 
-bool UIContentImpl::UIExtensionKeyboardAvoid(const RefPtr<PipelineBase>& pipelineContext,
+bool UIExtensionKeyboardAvoid(const RefPtr<PipelineBase>& pipelineContext,
     int32_t instanceId, const Rect keyboardRect, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
@@ -3422,7 +3427,7 @@ bool UIContentImpl::LaterAvoid(const Rect& keyboardRect, double positionY, doubl
     return false;
 }
 
-void UIContentImpl::SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext, float height)
+void SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext, float height)
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(pipeline);
@@ -3431,9 +3436,9 @@ void UIContentImpl::SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext,
     safeAreaManager->SetKeyboardInfo(height);
 }
 
-void UIContentImpl::KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceId,
+void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceId,
     const RefPtr<PipelineBase>& pipelineContext, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
-    const RefPtr<Platform::AceContainer>& container, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+    const RefPtr<Platform::AceContainer>& container)
 {
     CHECK_NULL_VOID(info);
     if (reason != OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
@@ -3455,12 +3460,7 @@ void UIContentImpl::KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, in
     double textFieldHeight = info->textFieldHeight_;
     textFieldPositionY -= curWindow.Top();
     ContainerScope scope(instanceId);
-    if (LaterAvoid(keyboardRect, textFieldPositionY, textFieldHeight)) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Keyboard later avoid and return");
-        ACE_LAYOUT_SCOPED_TRACE("Keyboard later avoid and return");
-        return;
-    }
-    pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight, rsTransaction);
+    pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight);
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
@@ -3626,9 +3626,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
-        TAG_LOGI(ACE_LAYOUT, "UpdateViewportConfig return in advance");
-        taskExecutor->PostTask([this, context, config, avoidAreas, reason, instanceId = instanceId_,
-            pipelineContext, info, container, rsTransaction] {
+        TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
+        taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
+            pipelineContext, info, container] {
                 if (avoidAreas.empty() && !info) {
                     return;
                 }
@@ -3637,8 +3637,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 }
                 AvoidAreasUpdateOnUIExtension(context, avoidAreas);
                 if (pipelineContext) {
-                    TAG_LOGI(ACE_KEYBOARD, "KeyboardAvoid in advance");
-                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container, rsTransaction);
+                    TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in advance");
+                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
@@ -3646,9 +3646,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
 
     auto taskId = viewportConfigMgr_->MakeTaskId();
-    auto task = [this, config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, info,
-                    isDynamicRender = isDynamicRender_, animationOpt, avoidAreas, taskId,
-                    viewportConfigMgr = viewportConfigMgr_]() mutable {
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
+                    instanceId = instanceId_, info, isDynamicRender = isDynamicRender_, animationOpt, avoidAreas,
+                    taskId, viewportConfigMgr = viewportConfigMgr_]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
@@ -3692,8 +3692,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             static_cast<WindowSizeChangeReason>(reason));
         viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
         if (pipelineContext) {
-            TAG_LOGI(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
-            KeyboardAvoid(reason, instanceId_, pipelineContext, info, container, rsTransaction);
+            TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
+            KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
         }
     };
     auto changeBrightnessTask = [container]() {
@@ -3757,7 +3757,7 @@ void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config
 
 void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
 {
-    TAG_LOGI(ACE_LAYOUT, "[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u",
+    TAG_LOGI(ACE_SAFE_AREA, "[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, ignoreViewSafeArea);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);

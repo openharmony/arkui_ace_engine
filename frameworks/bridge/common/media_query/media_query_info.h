@@ -23,6 +23,8 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/system_properties.h"
+#include "core/common/container.h"
+#include "core/common/display_info.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -38,7 +40,7 @@ public:
 
     static std::string GetDeviceType();
 
-    static std::string GetOrientation();
+    static std::string GetOrientation(const RefPtr<OHOS::Ace::Container>& container);
 
     bool GetIsInit() const
     {

@@ -1330,6 +1330,7 @@ HWTEST_F(MenuPattern2TestNg, GetFirstMenuItem001, TestSize.Level1)
 
     auto menuPattern = outterMenuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
+    ASSERT_NE(menuPattern->GetFirstMenuItem(), nullptr);
     EXPECT_EQ(menuPattern->GetFirstMenuItem(), menuItemNode);
 }
 } // namespace OHOS::Ace::NG

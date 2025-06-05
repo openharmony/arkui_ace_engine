@@ -1380,6 +1380,11 @@ void NG::PipelineContext::NotifyColorModeChange(uint32_t colorMode) {}
 void NG::PipelineContext::RemoveNodeFromDirtyRenderNode(int32_t nodeId, int32_t pageId) {}
  
 void NG::PipelineContext::GetRemovedDirtyRenderAndErase(uint32_t id) {}
+
+std::shared_ptr<Rosen::RSUIDirector> NG::PipelineContext::GetRSUIDirector()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
 

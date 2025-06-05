@@ -45,6 +45,7 @@ public:
     MOCK_METHOD(bool, IsHdr, (), (const override));
     MOCK_METHOD(uint32_t, WritePixels, (const WritePixelsOptions& opts), (override));
     MOCK_METHOD(bool, GetIsWideColorGamut, (), (const override));
+    MOCK_METHOD(void, SetMemoryName, (std::string pixelMapName), (const override));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_PIXEL_MAP_H

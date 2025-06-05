@@ -64,6 +64,7 @@ public:
     virtual void UpdateForceDarkAccess(const bool& access) = 0;
     virtual void UpdateAudioResumeInterval(const int32_t& resumeInterval) = 0;
     virtual void UpdateAudioExclusive(const bool& audioExclusive) = 0;
+    virtual void UpdateAudioSessionType(const WebAudioSessionType& audioSessionType) = 0;
     virtual void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled) = 0;
     virtual void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled) = 0;
     virtual void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled) = 0;

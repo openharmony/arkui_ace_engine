@@ -33,6 +33,12 @@ bool SurfaceProxyNode::AddSurfaceNode(
     CHECK_NULL_RETURN(surfaceNode, false);
     auto host = host_.Upgrade();
     CHECK_NULL_RETURN(host, false);
+    GetRSUIContext();
+    if (rsUIContext_) {
+        TAG_LOGI(aceLogTag_, "SetRSUIContext rsUIContext_");
+        surfaceNode->SetRSUIContext(rsUIContext_);
+    }
+
     if (surfaceProxyNode_ == nullptr) {
         CreateSurfaceProxyNode();
         CHECK_NULL_RETURN(surfaceProxyNode_, false);
@@ -72,5 +78,25 @@ void SurfaceProxyNode::OnAddSurfaceNode()
 RefPtr<FrameNode> SurfaceProxyNode::GetSurfaceProxyNode()
 {
     return surfaceProxyNode_;
+}
+
+void SurfaceProxyNode::GetRSUIContext()
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    NG::PipelineContext* pipeline = host->GetContext();
+    if (!pipeline) {
+        TAG_LOGE(aceLogTag_, "pipeline is nullptr");
+        return;
+    }
+    std::shared_ptr<Rosen::RSUIDirector> rsUIDirector = pipeline->GetRSUIDirector();
+    if (!rsUIDirector) {
+        TAG_LOGE(aceLogTag_, "rsUIDirector is nullptr");
+        return;
+    }
+    rsUIContext_ = rsUIDirector->GetRSUIContext();
+    if (!rsUIContext_) {
+        TAG_LOGE(aceLogTag_, "rsUIContext_ is nullptr");
+    }
 }
 } // namespace OHOS::Ace::NG

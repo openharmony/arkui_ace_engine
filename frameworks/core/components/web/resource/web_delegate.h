@@ -208,7 +208,7 @@ public:
     AllSslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result) : result_(result) {}
 
     void HandleConfirm() override;
-    void HandleCancel() override;
+    void HandleCancel(bool abortLoading) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result_;
@@ -825,6 +825,7 @@ public:
     void UpdateForceDarkAccess(const bool& access);
     void UpdateAudioResumeInterval(const int32_t& resumeInterval);
     void UpdateAudioExclusive(const bool& audioExclusive);
+    void UpdateAudioSessionType(const WebAudioSessionType& audioSessionType);
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
@@ -1261,6 +1262,7 @@ private:
     bool ZoomOut();
     int ConverToWebHitTestType(int hitType);
     void GetHitTestValue(HitTestResult& result);
+    int GetProgress();
     int GetPageHeight();
     std::string GetTitle();
     std::string GetDefaultUserAgent();

@@ -274,6 +274,8 @@ private:
     void FireSwipeActionStateChange(ListItemSwipeIndex newSwiperIndex);
     void UpdateClickJudgeCallback();
     bool ClickJudgeVertical(const SizeF& size, double xOffset, double yOffset);
+    void InitOnFocusEvent();
+    void HandleFocusEvent();
     void ResetNodeSize()
     {
         startNodeSize_ = 0.0f;

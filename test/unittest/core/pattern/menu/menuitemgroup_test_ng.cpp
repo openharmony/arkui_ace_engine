@@ -857,7 +857,7 @@ HWTEST_F(MenuItemGroupTestNg, AddHeaderNull, TestSize.Level1)
 
 /**
  * @tc.name: AddFooterNormal
- * @tc.desc: Test MenuItemGroup pattern AddFooter.
+ * @tc.desc: Test MenuItemGroupView SetFooter method.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuItemGroupTestNg, AddFooterNormal, TestSize.Level1)

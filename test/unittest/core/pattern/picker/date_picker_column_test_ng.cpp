@@ -1885,4 +1885,41 @@ HWTEST_F(DatePickerColumnTest, DatePickerPatternTest021, TestSize.Level1)
     pickerPattern->LunarColumnsBuilding(current);
     EXPECT_NE(pickerPattern->lunar_, false);
 }
+
+/**
+ * @tc.name: CreateItemTouchEventListener001
+ * @tc.desc: Test DatePickerColumn CreateItemTouchEventListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, CreateItemTouchEventListener001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto blendNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->stopHaptic_ = false;
+    auto testImpl = columnPattern->CreateItemTouchEventListener();
+    ASSERT_NE(testImpl, nullptr);
+    TouchEventInfo info("touch");
+    info.SetSourceTool(SourceTool::MOUSE);
+    TouchLocationInfo touchLocationInfoUp(1);
+    touchLocationInfoUp.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchLocationInfoUp));
+    testImpl->GetTouchEventCallback()(info);
+    EXPECT_TRUE(columnPattern->stopHaptic_);
+    info.SetSourceTool(SourceTool::FINGER);
+    testImpl->GetTouchEventCallback()(info);
+    EXPECT_FALSE(columnPattern->stopHaptic_);
+}
 } // namespace OHOS::Ace::NG

@@ -44,18 +44,18 @@ bool PlatformContainerHandler::GetAccessibilityParentRect(HandlerReply& reply)
             if (pipeline) {
                 auto accessibilityManager = pipeline->GetAccessibilityManager();
                 if (accessibilityManager) {
-                    auto windowInfo = accessibilityManager->GenerateWindowInfo(hostNode, pipeline);
-                    parentRectInfo.left =
-                        static_cast<int32_t>(parentRectInfo.left * windowInfo.scaleX + windowInfo.left);
-                    parentRectInfo.top = static_cast<int32_t>(parentRectInfo.top * windowInfo.scaleY + windowInfo.top);
-                    parentRectInfo.scaleX *= windowInfo.scaleX;
-                    parentRectInfo.scaleY *= windowInfo.scaleY;
+                    parentRectInfo = accessibilityManager->GetTransformRectInfoRelativeToWindow(hostNode, pipeline);
                 }
             }
             reply.SetParam<int32_t>("left", parentRectInfo.left);
             reply.SetParam<int32_t>("top", parentRectInfo.top);
             reply.SetParam<float>("scaleX", parentRectInfo.scaleX);
             reply.SetParam<float>("scaleY", parentRectInfo.scaleY);
+            reply.SetParam<int32_t>("centerX", parentRectInfo.rotateTransform.centerX);
+            reply.SetParam<int32_t>("centerY", parentRectInfo.rotateTransform.centerY);
+            reply.SetParam<int32_t>("innerCenterX", parentRectInfo.rotateTransform.innerCenterX);
+            reply.SetParam<int32_t>("innerCenterY", parentRectInfo.rotateTransform.innerCenterY);
+            reply.SetParam<int32_t>("rotateDegree", parentRectInfo.rotateTransform.rotateDegree);
             TAG_LOGD(AceLogTag::ACE_DYNAMIC_COMPONENT,
                 "Transform DC rect param[left:%{public}d, top:%{public}d, scaleX:%{public}f, scaleY:%{public}f].",
                 parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
@@ -94,6 +94,11 @@ void PlatformContainerHandler::GetDCAccessibilityParentRect(HandlerReply& reply)
     reply.SetParam<int32_t>("top", rectInfo_.top);
     reply.SetParam<float>("scaleX", rectInfo_.scaleX);
     reply.SetParam<float>("scaleY", rectInfo_.scaleY);
+    reply.SetParam<int32_t>("centerX", rectInfo_.rotateTransform.centerX);
+    reply.SetParam<int32_t>("centerY", rectInfo_.rotateTransform.centerY);
+    reply.SetParam<int32_t>("innerCenterX", rectInfo_.rotateTransform.innerCenterX);
+    reply.SetParam<int32_t>("innerCenterY", rectInfo_.rotateTransform.innerCenterY);
+    reply.SetParam<int32_t>("rotateDegree", rectInfo_.rotateTransform.rotateDegree);
 }
 
 } // namespace OHOS::Ace::NG

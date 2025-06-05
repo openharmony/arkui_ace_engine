@@ -1008,4 +1008,23 @@ HWTEST_F(TextFieldPatternTestNine, PasteAfterStopEditing001, TestSize.Level0)
     auto value = pattern_->contentController_->GetTextValue();
     EXPECT_EQ(value, "abcdabcdefghijklmnopqrstuvwxyz");
 }
+
+/**
+ * @tc.name: RegisterFontCallback
+ * @tc.desc: test RegisterFontCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, RegisterFontCallback, TestSize.Level0)
+{
+    auto fontManager = FontManager::Create();
+    ASSERT_NE(fontManager, nullptr);
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(fontManager->externalLoadCallbacks_.empty());
+    bool hasChanged = false;
+    auto fontChangeCallback = [&]() { hasChanged = true; };
+    fontManager->RegisterCallbackNG(WeakPtr(frameNode_), "myFont", fontChangeCallback);
+    fontManager->externalLoadCallbacks_.emplace(WeakPtr(frameNode_), std::make_pair("myFont", fontChangeCallback));
+    fontChangeCallback();
+    EXPECT_TRUE(hasChanged);
+}
 } // namespace OHOS::Ace::NG

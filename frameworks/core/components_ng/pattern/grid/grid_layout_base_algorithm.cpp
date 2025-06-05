@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,5 +86,26 @@ void GridLayoutBaseAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     auto overlayGeometryNode = overlayNode->GetGeometryNode();
     CHECK_NULL_VOID(overlayGeometryNode);
     overlayGeometryNode->SetFrameSize(geometryNode->GetFrameSize());
+}
+
+
+void GridLayoutBaseAlgorithm::LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+    auto focusIndex = host->GetPattern<GridPattern>()->GetFocusedIndex();
+    CHECK_NULL_VOID(focusIndex.has_value());
+    if (focusIndex.value() >= start && focusIndex.value() <= end) {
+        return;
+    }
+    auto childFocusHub = focusHub->GetLastWeakFocusNode().Upgrade();
+    CHECK_NULL_VOID(childFocusHub);
+    if (childFocusHub->IsCurrentFocus()) {
+        focusHub->LostChildFocusToSelf();
+    }
 }
 } // namespace OHOS::Ace::NG

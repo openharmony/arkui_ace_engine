@@ -14,6 +14,7 @@
  */
 
 #include "image_base.h"
+#include "test/mock/base/mock_image_perf.h"
 
 #include "base/image/image_defines.h"
 
@@ -2259,5 +2260,51 @@ HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap003, TestSize.Level1)
      */
     bool result = sourceInfo.IsSurportCachePixelmap();
     EXPECT_EQ(result, true);
+}
+
+/**
+* @tc.name: SetPixelMapMemoryName001
+* @tc.desc: SetPixelMapMemoryName001
+* @tc.type: FUNC
+*/
+HWTEST_F(ImageTestNg, SetPixelMapMemoryName001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    RefPtr<PixelMap> pixMap = nullptr;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(parent, nullptr);
+    frameNode->SetParent(parent);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. call SetPixelMapMemoryName.
+    * @tc.expected: Returned value is false.
+    */
+    EXPECT_EQ(imagePattern->SetPixelMapMemoryName(pixMap), false);
+}
+
+/**
+ * @tc.name: TestReportPerfData001
+ * @tc.desc: Test ReportPerfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestReportPerfData001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto mockImagePerf = reinterpret_cast<MockImagePerf*>(MockImagePerf::GetPerfMonitor());
+    EXPECT_CALL(*mockImagePerf, EndRecordImageLoadStat(_, _, _, _)).Times(AtLeast(1));
+    imagePattern->ReportPerfData(frameNode, 1);
 }
 } // namespace OHOS::Ace::NG

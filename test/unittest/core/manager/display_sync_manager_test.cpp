@@ -47,7 +47,7 @@ void DisplaySyncManagerTestNg::TearDownTestCase()
  * @tc.desc: DisplaySyncManager adds and deletes a DisplaySync.
  * @tc.type: FUNC
  */
-HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest001, TestSize.Level1)
+HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
@@ -198,7 +198,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest002, TestSize.Level1)
  * @tc.desc: DisplaySync call callback function.
  * @tc.type: FUNC
  */
-HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest003, TestSize.Level1)
+HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.

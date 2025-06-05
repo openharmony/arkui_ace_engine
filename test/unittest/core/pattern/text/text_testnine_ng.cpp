@@ -138,6 +138,37 @@ HWTEST_F(TextTestNineNg, OnHandleMoveStart001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckTouchInHostNode001
+ * @tc.desc: test CheckTouchInHostNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckTouchInHostNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get textSelectOverlay and check geometryNode
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    stack->StartGetAccessRecordingFor(0);
+    stack->StopGetAccessRecording();
+    auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step2: call CheckTouchInHostNode
+     * @tc.expected: inHostNode is false
+     */
+    PointF touchPoint(0.0f, 0.0f);
+    auto inHostNode = textSelectOverlay->CheckTouchInHostNode(touchPoint);
+    EXPECT_FALSE(inHostNode);
+}
+
+/**
  * @tc.name: OnMenuItemAction001
  * @tc.desc: test OnMenuItemAction
  * @tc.type: FUNC
@@ -681,4 +712,113 @@ HWTEST_F(TextTestNineNg, FindScrollableParent003, TestSize.Level1)
     EXPECT_EQ(value, nullptr);
 }
 
+/**
+ * @tc.name: UpdateShaderStyle001
+ * @tc.desc: test UpdateShaderStyle of multiple paragraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    TextStyle textStyle;
+    multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
+    EXPECT_EQ(textStyle.GetGradient(), std::nullopt);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+    multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
+    EXPECT_EQ(textStyle.GetGradient().value().GetType(), Ace::GradientType::RADIAL);
+    auto radius = 10.0;
+    auto value = CalcDimension(radius);
+    gradient.GetRadialGradient()->radialCenterX = value;
+    gradient.GetRadialGradient()->radialCenterY = value;
+    gradient.GetRadialGradient()->radialVerticalSize = value;
+    gradient.GetRadialGradient()->radialHorizontalSize = value;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+    multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
+    AnimatableDimension result(value);
+    EXPECT_EQ(textStyle.GetGradient().value().GetRadialGradient().radialCenterX, result);
+    EXPECT_EQ(textStyle.GetGradient().value().GetRadialGradient().radialCenterY, result);
+    EXPECT_EQ(textStyle.GetGradient().value().GetRadialGradient().radialVerticalSize, result);
+    EXPECT_EQ(textStyle.GetGradient().value().GetRadialGradient().radialHorizontalSize, result);
+}
+
+/**
+ * @tc.name: UpdateShaderStyle002
+ * @tc.desc: test UpdateShaderStyle of multiple paragraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    TextStyle textStyle;
+    multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
+    EXPECT_EQ(textStyle.GetGradient(), std::nullopt);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+    multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
+    EXPECT_EQ(textStyle.GetGradient().value().GetType(), OHOS::Ace::GradientType::LINEAR);
+    auto value = 10.0;
+    auto values = CalcDimension(value);
+    gradient.GetLinearGradient()->angle = values;
+    gradient.GetLinearGradient()->linearX = GradientDirection::LEFT;
+    gradient.GetLinearGradient()->linearY = GradientDirection::RIGHT;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+    multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
+    AnimatableDimension result(value);
+    EXPECT_EQ(textStyle.GetGradient().value().GetLinearGradient().angle, result);
+    EXPECT_EQ(textStyle.GetGradient().value().GetLinearGradient().linearX, OHOS::Ace::GradientDirection::LEFT);
+    EXPECT_EQ(textStyle.GetGradient().value().GetLinearGradient().linearY, OHOS::Ace::GradientDirection::RIGHT);
+}
+
+/**
+ * @tc.name: UpdateRelayoutShaderStyle
+ * @tc.desc: Test UpdateRelayoutShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateRelayoutShaderStyle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create function
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    textLayoutAlgorithm->UpdateRelayoutShaderStyle(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_NE(textLayoutAlgorithm, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    textLayoutAlgorithm->paragraphManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 2 });
+    TextStyle textStyle;
+    Ace::Gradient gradient;
+    textStyle.SetGradient(gradient);
+    textLayoutAlgorithm->textStyle_ = textStyle;
+    textLayoutAlgorithm->UpdateRelayoutShaderStyle(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(textLayoutAlgorithm->spans_.empty(), true);
+    auto spanNode = AceType::MakeRefPtr<ImageSpanNode>("Test1", 1, pattern);
+    ASSERT_NE(spanNode, nullptr);
+    auto spanItem = spanNode->GetSpanItem();
+    ASSERT_NE(spanItem, nullptr);
+    textLayoutAlgorithm->spans_.emplace_back(spanItem);
+    textLayoutAlgorithm->UpdateRelayoutShaderStyle(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(textLayoutAlgorithm->spans_.empty(), false);
+}
 } // namespace OHOS::Ace::NG

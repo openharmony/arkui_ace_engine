@@ -45,6 +45,11 @@ enum MixedModeContent {
     MIXED_CONTENT_COMPATIBILITY_MODE = 2
 };
 
+enum WebAudioSessionType {
+    AUTO = 0,
+    AMBIENT = 3
+};
+
 enum WebCacheMode {
     DEFAULT = 0,
     USE_CACHE_ELSE_NETWORK,
@@ -545,6 +550,16 @@ public:
         return cookieManager_;
     }
 
+    using GetProgressImpl = std::function<int()>;
+    int GetProgress()
+    {
+        return getProgressImpl_ ? getProgressImpl_() : 0;
+    }
+    void SetGetProgressImpl(GetProgressImpl&& getProgressImpl)
+    {
+        getProgressImpl_ = getProgressImpl;
+    }
+
     using GetPageHeightImpl = std::function<int()>;
     int GetPageHeight()
     {
@@ -813,6 +828,7 @@ private:
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;
     GetHitTestValueImpl getHitTestValueImpl_;
+    GetProgressImpl getProgressImpl_;
     GetPageHeightImpl getPageHeightImpl_;
     GetWebIdImpl getWebIdImpl_;
     GetTitleImpl getTitleImpl_;

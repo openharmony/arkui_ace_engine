@@ -2116,32 +2116,25 @@ HWTEST_F(SliderPatternTestNg, EnableHapticFeedbackTest001, TestSize.Level1)
 
 /**
  * @tc.name: PlayHapticFeedbackTest001
- * @tc.desc: Test PlayHapticFeedback &&  InitHapticController
+ * @tc.desc: Test PlayHapticFeedback
  * @tc.type: FUNC
  */
 HWTEST_F(SliderPatternTestNg, PlayHapticFeedbackTest001, TestSize.Level1)
 {
     RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
-    float step = 10.0f;
-    float oldvalue = 1.0f;
     sliderPattern->isEnableHaptic_ = false;
-    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
-    sliderPattern->isEnableHaptic_ = true;
-    sliderPattern->InitHapticController();
-    EXPECT_FALSE(sliderPattern->hapticApiEnabled);
+    sliderPattern->PlayHapticFeedback(false);
     sliderPattern->isEnableHaptic_ = true;
     auto host = sliderPattern->GetHost();
     CHECK_NULL_VOID(host);
     host->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    sliderPattern->InitHapticController();
-    EXPECT_TRUE(sliderPattern->hapticApiEnabled);
     sliderPattern->valueRatio_ = 0.5f;
-    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->PlayHapticFeedback(true);
     sliderPattern->valueRatio_ = 0.0f;
-    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->PlayHapticFeedback(false);
     sliderPattern->valueRatio_ = 1.0f;
-    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->PlayHapticFeedback(true);
     EXPECT_TRUE(sliderPattern->isEnableHaptic_);
 }
 } // namespace OHOS::Ace::NG

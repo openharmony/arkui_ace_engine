@@ -29,6 +29,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components_ng/render/adapter/background_modifier.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/transition_modifier.h"

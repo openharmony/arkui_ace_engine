@@ -1542,13 +1542,26 @@ export struct SegmentButton {
             if (this.isCurrentPositionSelected) {
               return
             }
-            if (Math.abs(event.angle) < 90 && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
+
+            // Only handle horizontal swipes (angle between -45 to 45 degrees or 135 to 225 degrees)
+            let isHorizontalSwipe = (Math.abs(event.angle) <= 45) || (Math.abs(event.angle) >= 135);
+            if (!isHorizontalSwipe) {
+              return;
+            }
+
+            let isSwipeRight = Math.abs(event.angle) <= 45; // swipe right
+            let isSwipeLeft = Math.abs(event.angle) >= 135; // swipe left
+
+            let isSwipeToNext = this.isShouldMirror() ? isSwipeLeft : isSwipeRight;
+            let isSwipeToPrevious = this.isShouldMirror() ? isSwipeRight : isSwipeLeft;
+
+            if (isSwipeToNext && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
               this.buttonItemsSize.length) - 1) {
               // Move to next
               this.doSelectedChangeAnimate = true
               this.selectedIndexes[0] = this.selectedIndexes[0] + 1
               this.doSelectedChangeAnimate = false
-            } else if (Math.abs(event.angle) > 90 && this.selectedIndexes[0] !== 0) {
+            } else if (isSwipeToPrevious && this.selectedIndexes[0] !== 0) {
               // Move to previous
               this.doSelectedChangeAnimate = true
               this.selectedIndexes[0] = this.selectedIndexes[0] - 1
@@ -1572,10 +1585,13 @@ export struct SegmentButton {
             let selectedInfo = fingerInfo.localX
             this.panGestureStartPoint = { x: fingerInfo.globalX, y: fingerInfo.globalY }
             this.isPanGestureMoved = false
-            for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
+
+            let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+            for (let i = 0; i < buttonLength; i++) {
               selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
               if (selectedInfo < 0) {
-                this.isCurrentPositionSelected = i === this.selectedIndexes[0] ? true : false
+                let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+                this.isCurrentPositionSelected = realIndex === this.selectedIndexes[0] ? true : false;
                 break
               }
             }
@@ -1600,13 +1616,16 @@ export struct SegmentButton {
               fingerInfo.globalY)) {
               this.isPanGestureMoved = true
             }
-            for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
-              selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
+
+            let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+            for (let i = 0; i < buttonLength; i++) {
+              selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number);
               if (selectedInfo < 0) {
-                this.doSelectedChangeAnimate = true
-                this.selectedIndexes[0] = i
-                this.doSelectedChangeAnimate = false
-                break
+                let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+                this.doSelectedChangeAnimate = true;
+                this.selectedIndexes[0] = realIndex;
+                this.doSelectedChangeAnimate = false;
+                break;
               }
             }
             this.zoomScaleArray.forEach((_, index) => {
@@ -1641,9 +1660,14 @@ export struct SegmentButton {
             if (this.isMouseWheelScroll(event)) {
               let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY
               this.doSelectedChangeAnimate = true
-              if (offset > 0 && this.selectedIndexes[0] > 0) {
-                this.selectedIndexes[0] -= 1
-              } else if (offset < 0 && this.selectedIndexes[0] < Math.min(this.options.buttons.length,
+
+              // Reverse mouse wheel direction in mirrored layout
+              let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
+              let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
+
+              if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
+                this.selectedIndexes[0] -= 1;
+              } else if (shouldMoveNext && this.selectedIndexes[0] < Math.min(this.options.buttons.length,
                 this.buttonItemsSize.length) - 1) {
                 this.selectedIndexes[0] += 1
               }

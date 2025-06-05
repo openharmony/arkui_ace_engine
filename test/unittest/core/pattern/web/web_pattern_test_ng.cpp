@@ -32,6 +32,8 @@
 
 using namespace testing;
 using namespace testing::ext;
+#define PIP_WIDTH   100
+#define PIP_HEIGHT  100
 enum PictureInPictureState {
     PIP_STATE_ENTER = 0,
     PIP_STATE_EXIT,
@@ -208,7 +210,10 @@ public:
         return true;
     }
 };
-
+bool IsSnapshotPathValid(const std::string& snapshotPath)
+{
+    return true;
+}
 } // namespace OHOS::NWeb
 
 namespace OHOS::Ace::NG {
@@ -293,6 +298,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnVerticalScrollBarAccessEnabledUpdate(true);
     webpattern.OnAudioResumeIntervalUpdate(0);
     webpattern.OnAudioExclusiveUpdate(true);
+    webpattern.OnAudioSessionTypeUpdate(WebAudioSessionType::AUTO);
     webpattern.OnOptimizeParserBudgetEnabledUpdate(true);
     webpattern.OnBlurOnKeyboardHideModeUpdate(0);
 #endif
@@ -377,6 +383,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
     webPattern->OnForceDarkAccessUpdate(true);
     webPattern->OnAudioResumeIntervalUpdate(0);
     webPattern->OnAudioExclusiveUpdate(true);
+    webPattern->OnAudioSessionTypeUpdate(WebAudioSessionType::AUTO);
     webPattern->isEnhanceSurface_ = true;
     webPattern->delegate_ = nullptr;
     webPattern->OnModifyDone();
@@ -2841,19 +2848,14 @@ HWTEST_F(WebPatternTestNg, InitDataDetector_001, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, CreatePip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
 #endif
 }
@@ -2866,19 +2868,14 @@ HWTEST_F(WebPatternTestNg, CreatePip_001, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, CreatePip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_HLS_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_HLS_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
 #endif
 }
@@ -2891,22 +2888,16 @@ HWTEST_F(WebPatternTestNg, CreatePip_002, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, CreatePip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
-    ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
 #endif
 }
@@ -2919,27 +2910,21 @@ HWTEST_F(WebPatternTestNg, CreatePip_003, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, CreatePip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
 
     ASSERT_EQ(ret, true);
-    ret = webPattern->RegisterPip(pipController);
+    ret = webPattern.RegisterPip(pipController);
     ASSERT_EQ(ret, true);
-    ret = webPattern->StartPip(pipController);
+    ret = webPattern.StartPip(pipController);
     ASSERT_EQ(ret, true);
-    webPattern->EnablePip(pipController);
+    webPattern.EnablePip(pipController);
 #endif
 }
 
@@ -2951,27 +2936,21 @@ HWTEST_F(WebPatternTestNg, CreatePip_004, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, CreatePip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
-    uint32_t pipController = 1;
+    uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
     pipController++;
-    ret = webPattern->RegisterPip(pipController);
+    ret = webPattern.RegisterPip(pipController);
     ASSERT_EQ(ret, false);
-    ret = webPattern->StartPip(pipController);
+    ret = webPattern.StartPip(pipController);
     ASSERT_EQ(ret, false);
-    webPattern->EnablePip(pipController);
+    webPattern.EnablePip(pipController);
 #endif
 }
 
@@ -2983,27 +2962,21 @@ HWTEST_F(WebPatternTestNg, CreatePip_005, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, StopPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
-    ret = webPattern->RegisterPip(pipController);
+    ret = webPattern.RegisterPip(pipController);
     ASSERT_EQ(ret, true);
-    ret = webPattern->StartPip(pipController);
+    ret = webPattern.StartPip(pipController);
     ASSERT_EQ(ret, true);
-    webPattern->EnablePip(pipController);
-    ret = webPattern->StopPip(info.delegateId, info.childId, info.frameRoutingId);
+    webPattern.EnablePip(pipController);
+    ret = webPattern.StopPip(info.delegateId, info.childId, info.frameRoutingId);
     ASSERT_EQ(ret, true);
 #endif
 }
@@ -3016,28 +2989,22 @@ HWTEST_F(WebPatternTestNg, StopPip_001, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, StopPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
-    uint32_t pipController = 1;
+    uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
-    ret = webPattern->RegisterPip(pipController);
+    ret = webPattern.RegisterPip(pipController);
     ASSERT_EQ(ret, true);
-    ret = webPattern->StartPip(pipController);
+    ret = webPattern.StartPip(pipController);
     ASSERT_EQ(ret, true);
-    webPattern->EnablePip(pipController);
+    webPattern.EnablePip(pipController);
     info.delegateId = 1;
-    ret = webPattern->StopPip(info.delegateId, info.childId, info.frameRoutingId);
+    ret = webPattern.StopPip(info.delegateId, info.childId, info.frameRoutingId);
     ASSERT_EQ(ret, false);
 #endif
 }
@@ -3050,28 +3017,23 @@ HWTEST_F(WebPatternTestNg, StopPip_002, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, StopPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_HLS_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_HLS_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
-    ret = webPattern->RegisterPip(pipController);
+    ret = webPattern.RegisterPip(pipController);
     ASSERT_EQ(ret, true);
-    ret = webPattern->StartPip(pipController);
+    ret = webPattern.StartPip(pipController);
     ASSERT_EQ(ret, true);
-    webPattern->EnablePip(pipController);
-    ret = webPattern->StopPip(info.delegateId, info.childId, info.frameRoutingId);
-    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    info.childId = 1;
+    ret = webPattern.StopPip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
 #endif
 }
 
@@ -3083,27 +3045,21 @@ HWTEST_F(WebPatternTestNg, StopPip_003, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, PlayPausePip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
-    ret = webPattern->RegisterPip(pipController);
+    ret = webPattern.RegisterPip(pipController);
     ASSERT_EQ(ret, true);
-    ret = webPattern->StartPip(pipController);
+    ret = webPattern.StartPip(pipController);
     ASSERT_EQ(ret, true);
-    webPattern->EnablePip(pipController);
-    ret = webPattern->PlayPip(info.delegateId, info.childId, info.frameRoutingId);
+    webPattern.EnablePip(pipController);
+    ret = webPattern.PlayPip(info.delegateId, info.childId, info.frameRoutingId);
     ASSERT_EQ(ret, true);
 #endif
 }
@@ -3116,28 +3072,22 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_001, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, PlayPausePip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
-    uint32_t pipController = 1;
+    uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
-    ret = webPattern->RegisterPip(pipController);
+    ret = webPattern.RegisterPip(pipController);
     ASSERT_EQ(ret, true);
-    ret = webPattern->StartPip(pipController);
+    ret = webPattern.StartPip(pipController);
     ASSERT_EQ(ret, true);
-    webPattern->EnablePip(pipController);
+    webPattern.EnablePip(pipController);
     info.delegateId = 1;
-    ret = webPattern->PlayPip(info.delegateId, info.childId, info.frameRoutingId);
+    ret = webPattern.PlayPip(info.delegateId, info.childId, info.frameRoutingId);
     ASSERT_EQ(ret, false);
 #endif
 }
@@ -3150,27 +3100,21 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_002, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, PlayPausePip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
-    ret = webPattern->RegisterPip(pipController);
+    ret = webPattern.RegisterPip(pipController);
     ASSERT_EQ(ret, true);
-    ret = webPattern->StartPip(pipController);
+    ret = webPattern.StartPip(pipController);
     ASSERT_EQ(ret, true);
-    webPattern->EnablePip(pipController);
-    ret = webPattern->PausePip(info.delegateId, info.childId, info.frameRoutingId);
+    webPattern.EnablePip(pipController);
+    ret = webPattern.PausePip(info.delegateId, info.childId, info.frameRoutingId);
     ASSERT_EQ(ret, true);
 #endif
 }
@@ -3183,30 +3127,53 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_003, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, PlayPausePip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(
-            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
-    uint32_t pipController = 1;
+    uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo info{1, 0, 0, 0, 100, 100};
-    bool ret = webPattern->CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
     ASSERT_EQ(ret, true);
-    ret = webPattern->RegisterPip(pipController);
+    ret = webPattern.RegisterPip(pipController);
     ASSERT_EQ(ret, true);
-    ret = webPattern->StartPip(pipController);
+    ret = webPattern.StartPip(pipController);
     ASSERT_EQ(ret, true);
-    webPattern->EnablePip(pipController);
+    webPattern.EnablePip(pipController);
     info.delegateId = 1;
-    ret = webPattern->PlayPip(info.delegateId, info.childId, info.frameRoutingId);
+    ret = webPattern.PlayPip(info.delegateId, info.childId, info.frameRoutingId);
     ASSERT_EQ(ret, false);
 #endif
 }
 
+
+/**
+ * @tc.name: CreateSnapshotImageFrameNode_001
+ * @tc.desc: CreateSnapshotImageFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+   auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/web_frame_123456.png"), true);
+    std::string snapshotPath = "/data/storage/el2/base/cache/web/web_frame_123456.png";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    webPattern->RemoveSnapshotFrameNode();
+    webPattern->RemoveSnapshotFrameNode();
+    ASSERT_NE(webPattern, nullptr);
+    MockPipelineContext::TearDown();
+#endif
+}
 } // namespace OHOS::Ace::NG

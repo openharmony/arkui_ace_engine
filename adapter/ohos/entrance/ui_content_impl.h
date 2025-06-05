@@ -401,19 +401,7 @@ public:
 
     bool ConfigCustomWindowMask(bool enable) override;
 
-    void SetUIExtensionImeShow(const Rect& keyboardRect, int32_t instanceId);
-
-    bool UIExtensionKeyboardAvoid(const RefPtr<PipelineBase>& pipelineContext, int32_t instanceId,
-        const Rect keyboardRect, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info);
-
     bool LaterAvoid(const Rect& keyboardRect, double positionY, double height);
-
-    void SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext, float height);
-
-    void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceId,
-        const RefPtr<PipelineBase>& pipelineContext, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
-        const RefPtr<Platform::AceContainer>& container,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction);
 
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 

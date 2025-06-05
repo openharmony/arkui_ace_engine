@@ -58,6 +58,14 @@ let TextAlign;
   TextAlign[TextAlign.JUSTIFY = 3] = 'JUSTIFY';
 })(TextAlign || (TextAlign = {}));
 
+let TextVerticalAlign;
+(function (TextVerticalAlign) {
+  TextVerticalAlign[TextVerticalAlign.BASELINE = 0] = 'BASELINE';
+  TextVerticalAlign[TextVerticalAlign.BOTTOM = 1] = 'BOTTOM';
+  TextVerticalAlign[TextVerticalAlign.CENTER = 2] = 'CENTER';
+  TextVerticalAlign[TextVerticalAlign.TOP = 3] = 'TOP';
+})(TextVerticalAlign || (TextVerticalAlign = {}));
+
 let TextDataDetectorType;
 (function (TextDataDetectorType) {
   TextDataDetectorType[TextDataDetectorType.PHONE_NUMBER = 0] = 'PHONE_NUMBER';
@@ -1202,6 +1210,13 @@ let HapticFeedbackMode;
   HapticFeedbackMode[HapticFeedbackMode.ENABLED = 1] = 'ENABLED';
   HapticFeedbackMode[HapticFeedbackMode.AUTO = 2] = 'AUTO';
 })(HapticFeedbackMode || (HapticFeedbackMode = {}));
+
+let ModalMode;
+(function (ModalMode) {
+  ModalMode[ModalMode.AUTO = 0] = 'AUTO';
+  ModalMode[ModalMode.NONE = 1] = 'NONE';
+  ModalMode[ModalMode.TARGET_WINDOW = 2] = 'TARGET_WINDOW';
+})(ModalMode || (ModalMode = {}));
 
 let TextChangeReason;
 (function (TextChangeReason) {
@@ -3142,6 +3157,7 @@ let ImageSpanAlignment;
   ImageSpanAlignment[ImageSpanAlignment.CENTER = 2] = 'CENTER';
   ImageSpanAlignment[ImageSpanAlignment.BOTTOM = 3] = 'BOTTOM';
   ImageSpanAlignment[ImageSpanAlignment.BASELINE = 4] = 'BASELINE';
+  ImageSpanAlignment[ImageSpanAlignment.FOLLOW_PARAGRAPH = 5] = 'FOLLOW_PARAGRAPH';
 })(ImageSpanAlignment || (ImageSpanAlignment = {}));
 
 let MenuAlignType;
@@ -4085,3 +4101,8 @@ let ColorSpace;
   ColorSpace[ColorSpace.SRGB = 0] = 'SRGB';
   ColorSpace[ColorSpace.DISPLAY_P3 = 1] = 'DISPLAY_P3';
 })(ColorSpace || (ColorSpace = {}));
+
+let AudioSessionType;
+(function (AudioSessionType) {
+  AudioSessionType[AudioSessionType.AMBIENT = 3] = 'AMBIENT';
+})(AudioSessionType || (AudioSessionType = {}));

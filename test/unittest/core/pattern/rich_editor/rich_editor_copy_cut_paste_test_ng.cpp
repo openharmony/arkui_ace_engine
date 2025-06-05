@@ -332,8 +332,12 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnPaste001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = MockPipelineContext::GetCurrent();
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(taskExecutor);
     richEditorPattern->clipboard_ = clipboard;
     AddSpan("testHandleOnPaste1");
     richEditorPattern->HandleOnPaste();
@@ -347,6 +351,10 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnPaste001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->OnCopyOperation(true);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+
+    richEditorPattern->ResetSelection();
+    richEditorPattern->OnCopyOperation(true);
+    EXPECT_EQ(taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::BACKGROUND), 0);
 }
 
 /**

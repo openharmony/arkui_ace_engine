@@ -2440,6 +2440,33 @@ HWTEST_F(TextFieldPatternTest, TextPattern106, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnDragNodeDetachFromMainTree001
+ * @tc.desc: Test OnDragNodeDetachFromMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, OnDragNodeDetachFromMainTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    textFieldNode->SetParent(frameNode_);
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. prepare dragStatus_ and call OnDragNodeDetachFromMainTree
+     * @tc.expected: examine the OnDragNodeDetachFromMainTree function and no crash
+     */
+    pattern->dragStatus_ = DragStatus::ON_DROP;
+    pattern->OnDragNodeDetachFromMainTree();
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    EXPECT_TRUE(pattern->selectOverlay_->isShowMenu_);
+}
+
+/**
  * @tc.name: IsShowSearch001
  * @tc.desc: test testInput text IsShowSearch
  * @tc.type: FUNC

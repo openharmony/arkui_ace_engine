@@ -50,7 +50,7 @@ class MenuWrapperPattern : public PopupBasePattern {
     DECLARE_ACE_TYPE(MenuWrapperPattern, Pattern);
 
 public:
-    explicit MenuWrapperPattern(int32_t Id) : targetId_(Id) {}
+    explicit MenuWrapperPattern(int32_t Id, const std::string& tag = "") : targetId_(Id), targetTag_(tag) {}
     ~MenuWrapperPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -674,6 +674,9 @@ private:
     RefPtr<FrameNode> GetParentMenu(const RefPtr<UINode>& subMenu);
     void MenuFocusViewShow(const RefPtr<FrameNode>& menuNode);
     void EnsureMenuMaskTypeInitialized();
+    void AddTargetWindowHotArea(std::vector<Rect>& rects);
+    void AddWrapperChildHotArea(std::vector<Rect>& rects, const RefPtr<LayoutWrapper>& layoutWrapper);
+    void AddFilterHotArea(std::vector<Rect>& rects);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
@@ -684,6 +687,7 @@ private:
     RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+    std::string targetTag_ = "";
     int embeddedSubMenuExpandTotalCount_ = 0;
     bool forceUpdateEmbeddedMenu_ = false;
     LayoutConstraintF childLayoutConstraint_;

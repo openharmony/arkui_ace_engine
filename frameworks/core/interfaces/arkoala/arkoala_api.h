@@ -35,10 +35,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 140
+#define ARKUI_FULL_API_VERSION 141
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 140
+#define ARKUI_NODE_API_VERSION 141
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -397,7 +397,7 @@ struct ArkUIDragEvent {
     ArkUI_Int32 requestId;
     bool isDragEndPending;
     char* bundleName;
-    bool* isRemoteDev;
+    bool isRemoteDev;
     ArkUI_Int32 displayId;
 };
 
@@ -2811,6 +2811,9 @@ struct ArkUITextModifier {
     ArkUI_Int32 (*getRadialGradient)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Uint32 (*colors)[10],
         ArkUI_Float32 (*stops)[10], ArkUI_Int32 unit);
     void (*resetTextGradient)(ArkUINodeHandle node);
+    void (*setTextVerticalAlign)(ArkUINodeHandle node, ArkUI_Uint32 textVerticalAlign);
+    void (*resetTextVerticalAlign)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextVerticalAlign)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
