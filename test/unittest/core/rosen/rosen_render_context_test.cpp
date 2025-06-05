@@ -1081,18 +1081,21 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest042, TestSize.Level1)
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create node and check basic information.
+     */
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     const Color value = Color::RED;
-    rosenRenderContext->OnBackgroundColorUpdate(value);
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
-    OHOS::Rosen::RSColor rsColor = OHOS::Rosen::RSColor::FromArgbInt(value.GetValue());
-    GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
-    if (ColorSpace::DISPLAY_P3 == value.GetColorSpace()) {
-        colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
-    }
-    rsColor.SetColorSpace(colorSpace);
+    OHOS::Rosen::RSColor rsColor;
+    /**
+     * @tc.steps: step2. Call OnBackgroundColorUpdate function with value (RED), and convert it to rsColor.
+     * @tc.expected: step2. The backgroundColorVal value on node should match rsColor value.
+     */
+    rosenRenderContext->OnBackgroundColorUpdate(value);
+    rosenRenderContext->ColorToRSColor(value, rsColor);
     rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
     rosenRenderContext->PaintBackground();
     auto backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
@@ -1100,6 +1103,20 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
     EXPECT_EQ(backgroundColorVal.GetGreen(), rsColor.GetGreen());
     EXPECT_EQ(backgroundColorVal.GetBlue(), rsColor.GetBlue());
     EXPECT_EQ(backgroundColorVal.GetAlpha(), rsColor.GetAlpha());
+    EXPECT_EQ(backgroundColorVal.GetColorSpace(), rsColor.GetColorSpace());
+    /**
+     * @tc.steps: step3. Call OnBackgroundColorUpdate function with p3Color (RED with DISPLAY_P3 color space),
+     * and convert it to rsColor.
+     * @tc.expected: step3. The colorSpace of p3BackgroundColorVal on node should match colorSpace of rsColor.
+     */
+    Color p3Color = Color::RED;
+    p3Color.SetColorSpace(ColorSpace::DISPLAY_P3);
+    rosenRenderContext->OnBackgroundColorUpdate(p3Color);
+    rosenRenderContext->ColorToRSColor(p3Color, rsColor);
+    rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
+    rosenRenderContext->PaintBackground();
+    auto p3BackgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    EXPECT_EQ(p3BackgroundColorVal.GetColorSpace(), rsColor.GetColorSpace());
 }
 
 /**
@@ -1216,6 +1233,42 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
     EXPECT_EQ(rotationYValue, -rotateY);
     EXPECT_EQ(rotationZValue, rotateZ);
     EXPECT_EQ(cameraDistanceValue, perspective);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest048
+ * @tc.desc: Test BlendBgColor Func and ResetBlendBgColor Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and check basic information.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    /**
+     * @tc.steps: step2. Call the BlendBgColor function and ResetBlendBgColor function.
+     * @tc.expected: step2. The current colorSpace value on the node should match the original colorSpace value.
+     */
+    Color bgColor = Color::RED;
+    OHOS::Rosen::RSColor rsColor;
+    rosenRenderContext->OnBackgroundColorUpdate(bgColor);
+    rosenRenderContext->ColorToRSColor(bgColor, rsColor);
+    rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
+    rosenRenderContext->PaintBackground();
+    Color blendColor = Color::FromRGB(6, 7, 8);
+    auto originBackgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    rosenRenderContext->BlendBgColor(blendColor);
+    auto backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    EXPECT_EQ(backgroundColorVal.GetColorSpace(), originBackgroundColorVal.GetColorSpace());
+    rosenRenderContext->ResetBlendBgColor();
+    backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    EXPECT_EQ(backgroundColorVal.GetColorSpace(), originBackgroundColorVal.GetColorSpace());
 }
 
 /**
