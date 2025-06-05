@@ -14,7 +14,7 @@
  */
 
 import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, DataNode, memo, scheduleCallback } from "@koalaui/runtime";
-import { pointer } from "@koalaui/interop";
+import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop";
 import { LazyForEachType, PeerNode, PeerNodeType } from "../PeerNode";
 import { InternalListener } from "../DataChangeListener";
 import { setNeedCreate } from "../ArkComponentRoot";
@@ -47,7 +47,6 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
         dataSource.registerDataChangeListener(res)
         return res
     })
-    changeCounter.value // subscribe
     const changeIndex = listener.flush(0) // first item index that's affected by DataChange
     if (changeIndex < Number.POSITIVE_INFINITY) {
         scheduleCallback(() => {
@@ -55,12 +54,20 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
         })
     }
 
-    itemGenerator // subscribe to param
+    /* register scope dependencies */
+    changeCounter.value
+    itemGenerator
+
     /**
      * provide totalCount and callbacks to the backend
      */
     let createCallback = (index: int32) => {
-        return pool.getOrCreate(index, dataSource.getData(index), itemGenerator)
+        try {
+            return pool.getOrCreate(index, dataSource.getData(index), itemGenerator)
+        } catch (error) {
+            InteropNativeModule._NativeLog(`error during createLazyItem: ${error}`)
+            return nullptr
+        }
     }
     LazyForEachOps.Sync(parent.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
 }
@@ -202,6 +209,10 @@ class LazyItemPool implements Disposable {
      */
     updateActiveRange(start: int32, end: int32) {
         if (start > end) return
-        this.pruneBy(index => index < start || index > end)
+        try {
+            this.pruneBy(index => index < start || index > end)
+        } catch (error) {
+            InteropNativeModule._NativeLog(`error during LazyItem pruning: ${error}`)
+        }
     }
 }
