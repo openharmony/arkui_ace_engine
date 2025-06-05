@@ -1614,7 +1614,7 @@ HWTEST_F(MenuItemPatternTestOneNg, ISNeedAddExpandIcon001, TestSize.Level1)
 
 /**
  * @tc.name: AddExpandIcon002
- * @tc.desc: Verify AddExpandIcon()
+ * @tc.desc: Verify AddExpandIcon().
  * @tc.type: FUNC
  */
 HWTEST_F(MenuItemPatternTestOneNg, AddExpandIcon002, TestSize.Level1)

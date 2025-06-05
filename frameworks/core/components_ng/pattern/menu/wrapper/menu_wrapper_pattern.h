@@ -624,10 +624,7 @@ public:
 
     bool GetMenuMaskEnable() const;
     Color GetMenuMaskColor() const;
-    BlurStyle GetMenuMaskblurStyle() const;
-    void SetMenuMaskEnable(bool maskEnable);
-    void SetMenuMaskColor(Color maskColor);
-    void SetMenuMaskblurStyle(BlurStyle maskBlurStyle);
+    BlurStyle GetMenuMaskBlurStyle() const;
     void UpdateFilterMaskType();
     void CheckAndShowAnimation();
 
@@ -673,7 +670,6 @@ private:
         const std::list<RefPtr<UINode>>& children, const PointF& position);
     RefPtr<FrameNode> GetParentMenu(const RefPtr<UINode>& subMenu);
     void MenuFocusViewShow(const RefPtr<FrameNode>& menuNode);
-    void EnsureMenuMaskTypeInitialized();
     void AddTargetWindowHotArea(std::vector<Rect>& rects);
     void AddWrapperChildHotArea(std::vector<Rect>& rects, const RefPtr<LayoutWrapper>& layoutWrapper);
     void AddFilterHotArea(std::vector<Rect>& rects);

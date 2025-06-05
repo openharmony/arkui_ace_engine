@@ -1154,7 +1154,7 @@ Color MenuWrapperPattern::GetMenuMaskColor() const
     return menuTheme->GetPreviewMenuMaskColor();
 }
 
-BlurStyle MenuWrapperPattern::GetMenuMaskblurStyle() const
+BlurStyle MenuWrapperPattern::GetMenuMaskBlurStyle() const
 {
     if (menuParam_.maskType.has_value() && menuParam_.maskType->maskBackGroundBlurStyle.has_value()) {
         return menuParam_.maskType->maskBackGroundBlurStyle.value();
@@ -1162,36 +1162,12 @@ BlurStyle MenuWrapperPattern::GetMenuMaskblurStyle() const
     return BlurStyle::BACKGROUND_THIN;
 }
 
-void MenuWrapperPattern::SetMenuMaskEnable(bool maskEnable)
-{
-    menuParam_.maskEnable = maskEnable;
-}
-
-void MenuWrapperPattern::EnsureMenuMaskTypeInitialized()
-{
-    if (!menuParam_.maskType.has_value()) {
-        menuParam_.maskType.emplace();
-    }
-}
-
-void MenuWrapperPattern::SetMenuMaskColor(Color maskColor)
-{
-    EnsureMenuMaskTypeInitialized();
-    menuParam_.maskType->maskColor = maskColor;
-}
-
-void MenuWrapperPattern::SetMenuMaskblurStyle(BlurStyle maskBlurStyle)
-{
-    EnsureMenuMaskTypeInitialized();
-    menuParam_.maskType->maskBackGroundBlurStyle = maskBlurStyle;
-}
-
 void MenuWrapperPattern::UpdateFilterMaskType()
 {
     auto filterNode = GetFilterColumnNode();
     if (filterNode) {
         BlurStyleOption styleOption;
-        styleOption.blurStyle = GetMenuMaskblurStyle();
+        styleOption.blurStyle = GetMenuMaskBlurStyle();
         auto filterRenderContext = filterNode->GetRenderContext();
         CHECK_NULL_VOID(filterRenderContext);
         filterRenderContext->UpdateBackBlurStyle(styleOption);
