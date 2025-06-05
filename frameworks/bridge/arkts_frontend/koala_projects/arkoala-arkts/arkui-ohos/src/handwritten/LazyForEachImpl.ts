@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, DataNode, memo, scheduleCallback } from "@koalaui/runtime";
+import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime";
 import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop";
-import { LazyForEachType, PeerNode, PeerNodeType } from "../PeerNode";
+import { PeerNode } from "../PeerNode";
 import { InternalListener } from "../DataChangeListener";
 import { setNeedCreate } from "../ArkComponentRoot";
-import { int32, KoalaCallsiteKey } from "@koalaui/common";
+import { int32 } from "@koalaui/common";
 import { IDataSource } from "../component/lazyForEach";
 import { LazyForEachOps } from "../component";
 import { LazyItemNode } from "./LazyItemNode";
@@ -70,40 +70,6 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
         }
     }
     LazyForEachOps.Sync(parent.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
-}
-
-class LazyForEachIdentifier {
-    constructor(id: KoalaCallsiteKey, totalCnt: int32, activeCnt: int32) {
-        this.id = id
-        this.totalCnt = totalCnt
-        this.activeCnt = activeCnt
-    }
-    readonly id: KoalaCallsiteKey
-    readonly totalCnt: int32
-    readonly activeCnt: int32
-}
-
-/**
- * @param id unique identifier of LazyForEach
- * @returns item offset of LazyForEach in parent's children
- */
-/** @memo */
-function getOffset(parent: PeerNode, id: KoalaCallsiteKey): int32 {
-    let offset = 0
-    for (let child = parent.firstChild; child; child = child!.nextSibling) {
-        // corresponding DataNode is attached after the component items
-        let info = DataNode.extract<LazyForEachIdentifier>(LazyForEachType, child!!)
-        if (info?.id === id) {
-            offset -= info!.activeCnt
-            // console.log(`offset = ${offset}`)
-            return offset
-        } else if (info) {
-            offset += info!.totalCnt - info!.activeCnt // active nodes are already counted
-        } else if (child!.isKind(PeerNodeType)) {
-            ++offset
-        }
-    }
-    return offset // DataNode not found, maybe throw error?
 }
 
 class LazyItemCompositionContext {
@@ -162,9 +128,6 @@ class LazyItemPool implements Disposable {
     ): pointer {
         if (this._activeItems.has(index)) {
             const node = this._activeItems.get(index)!
-            if (node.recomputeNeeded) {
-                console.log(`recomputeNeeded: ${index}`)
-            }
             return node.value.getPeerPtr()
         }
 
