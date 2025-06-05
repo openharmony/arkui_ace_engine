@@ -37,6 +37,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_measure_util.cpp",
+    "$ace_root/test/mock/base/mock_image_perf.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
