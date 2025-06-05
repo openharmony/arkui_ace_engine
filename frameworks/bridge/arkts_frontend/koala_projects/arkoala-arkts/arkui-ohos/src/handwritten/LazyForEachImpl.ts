@@ -31,7 +31,7 @@ export function updateLazyItems() {
     }
 }
 
-/** @memo */
+/** @memo:intrinsic */
 export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,
@@ -42,6 +42,7 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
         pool?.dispose()
     })
     let changeCounter = rememberMutableState(0)
+    changeCounter.value //subscribe
     let listener = remember(() => {
         let res = new InternalListener(parent.peer.ptr, changeCounter)
         dataSource.registerDataChangeListener(res)
@@ -53,10 +54,6 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
             pool.pruneBy((index: int32) => index >= changeIndex)
         })
     }
-
-    /* register scope dependencies */
-    changeCounter.value
-    itemGenerator
 
     /**
      * provide totalCount and callbacks to the backend
@@ -137,7 +134,7 @@ class LazyItemPool implements Disposable {
                 let scope = new LazyItemCompositionContext(this._componentRoot)
                 memoEntry2<T, number, void>(
                     context,
-                    index, // using index to simplify reuse process
+                    0,
                     itemGenerator,
                     data,
                     index
