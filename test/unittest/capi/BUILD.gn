@@ -141,7 +141,6 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/shape/rect_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/video/video_model_static.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_model_static.cpp",
   ]
   sources += rebased_common_sources
   sources += rebased_generated_sources
