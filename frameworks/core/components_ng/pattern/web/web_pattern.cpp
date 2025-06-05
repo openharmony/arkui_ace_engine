@@ -3026,7 +3026,7 @@ void WebPattern::OnAudioExclusiveUpdate(bool audioExclusive)
 
 void WebPattern::OnAudioSessionTypeUpdate(WebAudioSessionType value)
 {
-     if (delegate_) {
+    if (delegate_) {
         delegate_->UpdateAudioSessionType(value);
     }
 }
