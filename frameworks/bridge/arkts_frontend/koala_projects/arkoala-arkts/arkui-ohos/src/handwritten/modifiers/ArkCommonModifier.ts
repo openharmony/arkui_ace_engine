@@ -1020,6 +1020,24 @@ class HitTestBehaviorModifier extends ModifierWithKey<HitTestMode> {
         return new HitTestBehaviorModifier(value)
     }
 }
+
+class ResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle | undefined> {
+    constructor(value: Array<Rectangle> | Rectangle | undefined) {
+        super(value);
+    }
+    static identity: string = 'responseRegion';
+    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
+        if (reset) {
+            // commomPeerNode.resetResponseRegion();
+        } else {
+            node.responseRegionAttribute(this.value);
+        }
+    }
+    static factory(value: Array<Rectangle> | Rectangle | undefined): ResponseRegionModifier {
+        return new ResponseRegionModifier(value)
+    }
+}
+
 class WidthModifier extends ModifierWithKey<Length> {
    constructor(value: Length) {
       super(value);
@@ -1158,6 +1176,11 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       return this
   }
   public responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+      if (value) {
+          modifierWithKey(this._modifiersWithKeys, ResponseRegionModifier.identity, ResponseRegionModifier.factory, value as (Array<Rectangle> | Rectangle | undefined));
+      } else {
+          modifierNullWithKey(this._modifiersWithKeys, ResponseRegionModifier.identity)
+      }
       return this
   }
   public mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
