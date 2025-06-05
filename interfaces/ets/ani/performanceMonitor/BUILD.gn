@@ -21,7 +21,6 @@ ohos_shared_library("performanceMonitor_ani") {
   include_dirs = [ "./include" ]
   sources = [ "./src/performanceMonitor.cpp" ]
   external_deps = [
-    #"runtime_core:libarkruntime",
     "napi:ace_napi",
     "runtime_core:ani",
   ]
