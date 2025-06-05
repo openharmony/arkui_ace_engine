@@ -68,6 +68,8 @@ OHOS::Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
 
 OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
 
+Rosen::TextVerticalAlign ConvertTxtTextVerticalAlign(TextVerticalAlign textVerticalAlign);
+
 OHOS::Rosen::TextRectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle);
 
 OHOS::Rosen::TextRectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle);
