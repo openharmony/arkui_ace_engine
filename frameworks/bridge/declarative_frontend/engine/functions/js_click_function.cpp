@@ -37,6 +37,9 @@ void JsClickFunction::Execute(const ClickInfo& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -92,6 +95,9 @@ void JsClickFunction::Execute(GestureEvent& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<int32_t>("hand", GetOperatingHand(info));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
@@ -129,17 +135,18 @@ void JsClickFunction::Execute(MouseInfo& info)
     JSRef<JSObject> obj = objectTemplate->NewInstance();
     obj->SetProperty<int32_t>("button", static_cast<int32_t>(info.GetButton()));
     obj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
-    Offset globalOffset = info.GetGlobalLocation();
-    Offset localOffset = info.GetLocalLocation();
-    Offset screenOffset = info.GetScreenLocation();
-    obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-    obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    obj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-    obj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    obj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-    obj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+    obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(info.GetScreenLocation().GetX()));
+    obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(info.GetScreenLocation().GetY()));
+    obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetX()));
+    obj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetY()));
+    obj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetX()));
+    obj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetY()));
+    obj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetX()));
+    obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetY()));
+    obj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalDisplayLocation().GetX()));
+    obj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalDisplayLocation().GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
@@ -190,6 +197,9 @@ void JsWeakClickFunction::Execute(const ClickInfo& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -225,6 +235,9 @@ void JsWeakClickFunction::Execute(GestureEvent& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -258,19 +271,20 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     JSRef<JSObjTemplate> objTemp = JSRef<JSObjTemplate>::New();
     objTemp->SetInternalFieldCount(1);
     JSRef<JSObject> obj = objTemp->NewInstance();
-    Offset localOffset = info.GetLocalLocation();
-    Offset globalOffset = info.GetGlobalLocation();
-    Offset screenOffset = info.GetScreenLocation();
     obj->SetProperty<int32_t>("button", static_cast<int32_t>(info.GetButton()));
     obj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
-    obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-    obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    obj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-    obj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    obj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-    obj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+    obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(info.GetScreenLocation().GetX()));
+    obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(info.GetScreenLocation().GetY()));
+    obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetX()));
+    obj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetY()));
+    obj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetX()));
+    obj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetY()));
+    obj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetX()));
+    obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetY()));
+    obj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalDisplayLocation().GetX()));
+    obj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalDisplayLocation().GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));

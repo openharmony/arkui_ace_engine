@@ -274,6 +274,8 @@ void DragDropEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool is
         touchEvent.y = info.GetTouches().front().GetGlobalLocation().GetY();
         touchEvent.screenX = info.GetTouches().front().GetScreenLocation().GetX();
         touchEvent.screenY = info.GetTouches().front().GetScreenLocation().GetY();
+        touchEvent.globalDisplayX = info.GetTouches().front().GetGlobalDisplayLocation().GetX();
+        touchEvent.globalDisplayY = info.GetTouches().front().GetGlobalDisplayLocation().GetY();
         touchEvent.id = info.GetTouches().front().GetFingerId();
         dragDropInitiatingHandler_->NotifyTouchEvent(touchEvent);
     }

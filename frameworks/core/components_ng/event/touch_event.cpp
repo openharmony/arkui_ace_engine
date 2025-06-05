@@ -155,6 +155,7 @@ TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& l
     changedInfo.SetLocalLocation(Offset(localX, localY));
     changedInfo.SetGlobalLocation(Offset(lastPoint.x, lastPoint.y));
     changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
+    changedInfo.SetGlobalDisplayLocation(Offset(lastPoint.globalDisplayX, lastPoint.globalDisplayY));
     changedInfo.SetTouchType(lastPoint.type);
     changedInfo.SetForce(lastPoint.force);
     changedInfo.SetPressedTime(lastPoint.pressedTime);
@@ -178,6 +179,8 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     float globalY = pointItem.y;
     float screenX = pointItem.screenX;
     float screenY = pointItem.screenY;
+    double globalDisplayX = pointItem.globalDisplayX;
+    double globalDisplayY = pointItem.globalDisplayY;
     PointF localPoint(globalX, globalY);
     NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
@@ -186,6 +189,7 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     info.SetGlobalLocation(Offset(globalX, globalY));
     info.SetLocalLocation(Offset(localX, localY));
     info.SetScreenLocation(Offset(screenX, screenY));
+    info.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
     info.SetTouchType(type);
     info.SetForce(pointItem.force);
     info.SetPressedTime(pointItem.downTime);
@@ -208,6 +212,8 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     float globalY = eventItem.y;
     float screenX = eventItem.screenX;
     float screenY = eventItem.screenY;
+    double globalDisplayX = eventItem.globalDisplayX;
+    double globalDisplayY = eventItem.globalDisplayY;
     PointF localPoint(globalX, globalY);
     NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
@@ -217,6 +223,7 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     historyInfo.SetGlobalLocation(Offset(globalX, globalY));
     historyInfo.SetLocalLocation(Offset(localX, localY));
     historyInfo.SetScreenLocation(Offset(screenX, screenY));
+    historyInfo.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
     historyInfo.SetTouchType(eventItem.type);
     historyInfo.SetForce(eventItem.force);
     historyInfo.SetPressedTime(eventItem.pressedTime);

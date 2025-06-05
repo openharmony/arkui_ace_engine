@@ -42,6 +42,8 @@ const float PREVIEW_RECT_WIDTH = 1.0f;
 const float PREVIEW_RECT_HEIGHT = 1.0f;
 const float DISPLAY_X = 1.0f;
 const float DISPLAY_Y = 1.0f;
+const float GLOBAL_DISPLAY_X = 1.0f;
+const float GLOBAL_DISPLAY_Y = 1.0f;
 const float VELOCITY_X = 1.0f;
 const float VELOCITY_Y = 1.0f;
 const float VELOCITY = 1.0f;
@@ -1369,5 +1371,75 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0047, TestSize.Level1)
     OH_UdmfDataLoadInfo_Destroy(info);
     OH_UdmfDataLoadParams_Destroy(dataLoadParams);
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0048
+ * @tc.desc: test set DragEvent property function;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0048, TestSize.Level1)
+{
+    /**
+     *@tc.steps : step1.create and set property.
+     */
+    ArkUIDragEvent dragEvent;
+    dragEvent.windowX = WINDOW_X;
+    dragEvent.windowY = WINDOW_Y;
+    dragEvent.displayX = DISPLAY_X;
+    dragEvent.displayY = DISPLAY_Y;
+    dragEvent.globalDisplayX = static_cast<double>(GLOBAL_DISPLAY_X);
+    dragEvent.globalDisplayY = static_cast<double>(GLOBAL_DISPLAY_Y);
+    dragEvent.touchPointX = TOUCH_POINT_X;
+    dragEvent.touchPointY = TOUCH_POINT_Y;
+
+    dragEvent.previewRectWidth = PREVIEW_RECT_WIDTH;
+    dragEvent.previewRectHeight = PREVIEW_RECT_HEIGHT;
+    dragEvent.velocityX = VELOCITY_X;
+    dragEvent.velocityY = VELOCITY_Y;
+    dragEvent.velocity = VELOCITY;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToWindow(drag_Event), WINDOW_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToWindow(drag_Event), WINDOW_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewTouchPointX(drag_Event), TOUCH_POINT_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewTouchPointY(drag_Event), TOUCH_POINT_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToDisplay(drag_Event), DISPLAY_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToDisplay(drag_Event), DISPLAY_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(drag_Event), GLOBAL_DISPLAY_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(drag_Event), GLOBAL_DISPLAY_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewRectWidth(drag_Event), PREVIEW_RECT_WIDTH);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewRectHeight(drag_Event), PREVIEW_RECT_HEIGHT);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocityX(drag_Event), VELOCITY_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocityY(drag_Event), VELOCITY_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocity(drag_Event), VELOCITY);
+}
+
+/**
+ * @tc.name: DragAndDropTest0049
+ * @tc.desc: test set DragEvent property function;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0049, TestSize.Level1)
+{
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToWindow(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToWindow(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewTouchPointX(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewTouchPointY(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToDisplay(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToDisplay(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewRectWidth(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewRectHeight(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocityX(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocityY(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocity(nullptr), 0.0f);
 }
 } // namespace OHOS::Ace

@@ -72,8 +72,8 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
         TransformForRecognizer(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
         FingerInfo fingerInfo = { point.second.GetOriginalReCovertId(), point.second.operatingHand,
-            point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()),
-            point.second.GetScreenOffset(), point.second.sourceType, point.second.sourceTool };
+            point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()), point.second.GetScreenOffset(),
+            point.second.GetGlobalDisplayOffset(), point.second.sourceType, point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);
         if (maxTimeStamp <= point.second.GetTimeStamp().time_since_epoch().count()
             && point.second.pointers.size() >= touchPoints_.size()) {

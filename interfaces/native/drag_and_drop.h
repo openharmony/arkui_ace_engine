@@ -446,6 +446,9 @@ float OH_ArkUI_DragEvent_GetTouchPointXToDisplay(ArkUI_DragEvent* event);
  */
 float OH_ArkUI_DragEvent_GetTouchPointYToDisplay(ArkUI_DragEvent* event);
 
+float OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(ArkUI_DragEvent* event);
+float OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(ArkUI_DragEvent* event);
+
 /**
  * @brief Obtains the dragging velocity along the x-axis.
  *

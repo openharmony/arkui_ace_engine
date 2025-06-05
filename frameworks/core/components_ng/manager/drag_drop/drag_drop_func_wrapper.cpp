@@ -734,6 +734,8 @@ void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, Drag
     event.windowY = touchPoint.y;
     event.displayX = touchPoint.screenX;
     event.displayY = touchPoint.screenY;
+    event.globalDisplayX = touchPoint.globalDisplayX;
+    event.globalDisplayY = touchPoint.globalDisplayY;
     event.deviceId = touchPoint.deviceId;
     event.displayId = touchPoint.targetDisplayId;
     event.x = event.windowX;

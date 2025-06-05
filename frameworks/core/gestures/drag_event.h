@@ -174,6 +174,26 @@ public:
         displayY_ = y;
     }
 
+    double GetGlobalDisplayX() const
+    {
+        return globalDisplayX_;
+    }
+
+    double GetGlobalDisplayY() const
+    {
+        return globalDisplayY_;
+    }
+
+    void SetGlobalDisplayX(double x)
+    {
+        globalDisplayX_ = x;
+    }
+
+    void SetGlobalDisplayY(double y)
+    {
+        globalDisplayY_ = y;
+    }
+
     void SetDescription(const std::string& description)
     {
         description_ = description;
@@ -418,6 +438,8 @@ private:
     double y_ = 0.0;
     double displayX_ = 0.0;
     double displayY_ = 0.0;
+    double globalDisplayX_ = 0.0;
+    double globalDisplayY_ = 0.0;
     std::string description_;
     RefPtr<PixelMap> pixelMap_;
     std::map<std::string, int64_t> summary_;

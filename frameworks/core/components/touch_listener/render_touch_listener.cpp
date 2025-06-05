@@ -148,6 +148,7 @@ bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
     changedInfo.SetLocalLocation(Offset(localX, localY));
     changedInfo.SetGlobalLocation(Offset(changedPoint.x, changedPoint.y));
     changedInfo.SetScreenLocation(Offset(changedPoint.screenX, changedPoint.screenY));
+    changedInfo.SetGlobalDisplayLocation(Offset(changedPoint.globalDisplayX, changedPoint.globalDisplayY));
     changedInfo.SetTouchType(changedPoint.type);
     changedInfo.SetForce(changedPoint.force);
     if (changedPoint.tiltX.has_value()) {
@@ -167,10 +168,13 @@ bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
         float screenY = pointPair.second.screenY;
         float localX = pointPair.second.x - coordinateOffset_.GetX();
         float localY = pointPair.second.y - coordinateOffset_.GetY();
+        double globalDisplayX = pointPair.second.globalDisplayX;
+        double globalDisplayY = pointPair.second.globalDisplayX;
         TouchLocationInfo info("onTouch", pointPair.second.id);
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));
+        info.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
         info.SetTouchType(pointPair.second.type);
         info.SetForce(pointPair.second.force);
         if (pointPair.second.tiltX.has_value()) {

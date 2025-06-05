@@ -784,6 +784,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
+        info.SetGlobalDisplayLocation(lastAxisEvent_.GetGlobalDisplayOffset());
         info.SetSourceTool(lastAxisEvent_.sourceTool);
         info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
         info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
@@ -792,6 +793,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
+        info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
         info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPointerEventId(lastTouchEvent_.touchEventId);

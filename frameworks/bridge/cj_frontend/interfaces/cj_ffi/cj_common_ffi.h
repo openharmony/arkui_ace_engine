@@ -249,6 +249,8 @@ struct CJClickInfo {
     double windowY;
     double displayX;
     double displayY;
+    double globalDisplayX;
+    double globalDisplayY;
     std::string ToString() const;
 };
 

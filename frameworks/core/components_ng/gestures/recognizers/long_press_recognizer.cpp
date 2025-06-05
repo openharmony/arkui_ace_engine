@@ -420,6 +420,7 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetGlobalLocation(lastTouchEvent_.GetOffset())
             .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
+        info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {

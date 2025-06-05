@@ -66,6 +66,8 @@ struct DragPointerEvent final : public PointerEvent {
     int32_t windowY = 0;
     int32_t displayX = 0;
     int32_t displayY = 0;
+    double globalDisplayX = 0.0;
+    double globalDisplayY = 0.0;
     double size = 0.0;
     float force = 0.0f;
     int32_t deviceId = 0;
@@ -90,6 +92,16 @@ struct DragPointerEvent final : public PointerEvent {
     DragPointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : pointerEventId(pointerEventId), windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
+    DragPointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY, double globalDisplayX,
+        double globalDisplayY)
+        : windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY), globalDisplayX(globalDisplayX),
+          globalDisplayY(globalDisplayY)
+    {}
+    DragPointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY,
+        double globalDisplayX, double globalDisplayY)
+        : pointerEventId(pointerEventId), windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY),
+          globalDisplayX(globalDisplayX), globalDisplayY(globalDisplayY)
+    {}
 
     Point GetPoint() const
     {
@@ -108,6 +120,16 @@ struct DragPointerEvent final : public PointerEvent {
     int32_t GetDisplayY() const
     {
         return displayY;
+    }
+
+    double GetGlobalDisplayX() const
+    {
+        return globalDisplayX;
+    }
+
+    double GetGlobalDisplayY() const
+    {
+        return globalDisplayY;
     }
 
     int32_t GetDisplayId() const

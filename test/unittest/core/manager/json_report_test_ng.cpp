@@ -37,7 +37,9 @@ const int32_t dropId = 2;
 const Offset offset(10, 10);
 const Offset offsetLocal(15, 15);
 const Offset offsetGlobal(20, 20);
-const FingerInfo fingerInfo = { 0, 0, offset, offsetLocal, offsetGlobal, SourceType::TOUCH, SourceTool::FINGER };
+const Offset offsetGlobalDisplay(30, 30);
+const FingerInfo fingerInfo = { 0, 0, offset, offsetLocal, offsetGlobal, offsetGlobalDisplay, SourceType::TOUCH,
+    SourceTool::FINGER };
 const std::list<FingerInfo> fingerList = { fingerInfo };
 } // namespace
 

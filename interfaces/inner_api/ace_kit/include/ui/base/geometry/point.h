@@ -35,6 +35,16 @@ public:
         : x_(x), y_(y), screenX_(screenX), screenY_(screenY), sourceType_(sourceType)
     {}
 
+    Point(double x, double y, double screenX, double screenY, double globalDisplayX, double globalDisplayY)
+        : x_(x), y_(y), screenX_(screenX), screenY_(screenY), globalDisplayX_(globalDisplayX),
+          globalDisplayY_(globalDisplayY)
+    {}
+    Point(double x, double y, double screenX, double screenY, double globalDisplayX, double globalDisplayY,
+        SourceType sourceType)
+        : x_(x), y_(y), screenX_(screenX), screenY_(screenY), globalDisplayX_(globalDisplayX),
+          globalDisplayY_(globalDisplayY), sourceType_(sourceType)
+    {}
+
     double GetX() const
     {
         return x_;
@@ -73,6 +83,26 @@ public:
     void SetScreenY(double y)
     {
         screenY_ = y;
+    }
+
+    double GetGlobalDisplayX() const
+    {
+        return globalDisplayX_;
+    }
+
+    double GetGlobalDisplayY() const
+    {
+        return globalDisplayY_;
+    }
+
+    void SetGlobalDisplayX(double x)
+    {
+        globalDisplayX_ = x;
+    }
+
+    void SetGlobalDisplayY(double y)
+    {
+        globalDisplayY_ = y;
     }
 
     void SetSourceType(SourceType sourceType)
@@ -123,6 +153,8 @@ private:
     double y_ = 0.0;
     double screenX_ = 0.0;
     double screenY_ = 0.0;
+    double globalDisplayX_ = 0.0;
+    double globalDisplayY_ = 0.0;
     SourceType sourceType_ = SourceType::NONE;
 };
 

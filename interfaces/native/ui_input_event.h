@@ -462,6 +462,11 @@ float OH_ArkUI_PointerEvent_GetDisplayY(const ArkUI_UIInputEvent* event);
  */
 float OH_ArkUI_PointerEvent_GetDisplayYByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
 
+float OH_ArkUI_PointerEvent_GetGlobalDisplayX(const ArkUI_UIInputEvent* event);
+float OH_ArkUI_PointerEvent_GetGlobalDisplayXByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
+float OH_ArkUI_PointerEvent_GetGlobalDisplayY(const ArkUI_UIInputEvent* event);
+float OH_ArkUI_PointerEvent_GetGlobalDisplayYByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
+
 /**
  * @brief Obtains the pressure applied to the touchscreen from a directional input event (for example, a touch event).
  *
@@ -689,6 +694,11 @@ float OH_ArkUI_PointerEvent_GetHistoryDisplayX(
  * @since 12
  */
 float OH_ArkUI_PointerEvent_GetHistoryDisplayY(
+    const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex);
+
+float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(
+    const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex);
+float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(
     const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex);
 
 /**

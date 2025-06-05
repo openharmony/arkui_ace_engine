@@ -3453,6 +3453,38 @@
     },
     {
         "first_introduced": "20",
+        "name": "OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetGlobalDisplayX"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetGlobalDisplayY"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetGlobalDisplayXByIndex"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetGlobalDisplayYByIndex"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY"
+    },
+    {
+        "first_introduced": "20",
         "name": "OH_ArkUI_PostAsyncUITask"
     },
     {

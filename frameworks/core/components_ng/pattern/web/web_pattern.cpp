@@ -6758,6 +6758,8 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent,
         touchEvent.y + offset.GetY() + pos.GetY()));
     changedInfo.SetScreenLocation(Offset(touchEvent.x + offset.GetX() + pos.GetX(),
         touchEvent.y + offset.GetY() + pos.GetY()));
+    changedInfo.SetGlobalDisplayLocation(Offset(touchEvent.x + offset.GetX() + pos.GetX(),
+        touchEvent.y + offset.GetY() + pos.GetY()));
     changedInfo.SetTouchType(touchEvent.type);
 
     SetTouchLocationInfo(touchEvent, changedInfo, tempTouchInfo, touchEventInfo);
@@ -6784,14 +6786,18 @@ void WebPattern::SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchL
             info.SetGlobalLocation(changedInfo.GetGlobalLocation());
             info.SetLocalLocation(changedInfo.GetLocalLocation());
             info.SetScreenLocation(changedInfo.GetScreenLocation());
+            info.SetGlobalDisplayLocation(changedInfo.GetGlobalDisplayLocation());
             info.SetTouchType(changedInfo.GetTouchType());
         } else {
             const OHOS::Ace::Offset& localLocation = location.GetLocalLocation();
             const OHOS::Ace::Offset& globalLocation = location.GetGlobalLocation();
             const OHOS::Ace::Offset& screenLocation = location.GetScreenLocation();
+            const OHOS::Ace::Offset& globalDisplayLocation = location.GetGlobalDisplayLocation();
             info.SetGlobalLocation(Offset(globalLocation.GetX() - scaleX, globalLocation.GetY() - scaleY));
             info.SetLocalLocation(Offset(localLocation.GetX() - scaleX, localLocation.GetY() - scaleY));
             info.SetScreenLocation(Offset(screenLocation.GetX() - scaleX, screenLocation.GetY() - scaleY));
+            info.SetGlobalDisplayLocation(
+                Offset(globalDisplayLocation.GetX() - scaleX, globalDisplayLocation.GetY() - scaleY));
             info.SetTouchType(location.GetTouchType());
         }
         touchEventInfo.AddTouchLocationInfo(std::move(info));

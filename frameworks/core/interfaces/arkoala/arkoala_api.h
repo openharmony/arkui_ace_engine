@@ -217,6 +217,8 @@ struct ArkUITouchPoint {
     ArkUI_Float32 screenY;
     ArkUI_Float32 windowX;
     ArkUI_Float32 windowY;
+    ArkUI_Float64 globalDisplayX;
+    ArkUI_Float64 globalDisplayY;
     ArkUI_Float32 nodeX;
     ArkUI_Float32 nodeY;
     ArkUI_Float64 pressure;
@@ -384,6 +386,8 @@ struct ArkUIDragEvent {
     ArkUI_Float64 displayY;
     ArkUI_Float64 screenX;
     ArkUI_Float64 screenY;
+    ArkUI_Float64 globalDisplayX;
+    ArkUI_Float64 globalDisplayY;
     ArkUI_Uint64 modifierKeyState;
     ArkUI_Int32 dragBehavior;
     bool useCustomDropAnimation;
@@ -1430,6 +1434,8 @@ struct ArkUIClickEvent {
     ArkUI_Float32 windowY;
     ArkUI_Float32 displayX;
     ArkUI_Float32 displayY;
+    ArkUI_Float64 globalDisplayX;
+    ArkUI_Float64 globalDisplayY;
     ArkUI_Float32 targetPositionX;
     ArkUI_Float32 targetPositionY;
     ArkUI_Float32 targetGlobalPositionX;

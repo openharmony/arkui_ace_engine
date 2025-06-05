@@ -325,6 +325,7 @@ bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
     info.SetGlobalLocation(event.GetOffset());
     info.SetLocalLocation(event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
     info.SetScreenLocation(event.GetScreenOffset());
+    info.SetGlobalDisplayLocation(event.GetGlobalDisplayOffset());
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
     info.SetSourceDevice(event.sourceType);

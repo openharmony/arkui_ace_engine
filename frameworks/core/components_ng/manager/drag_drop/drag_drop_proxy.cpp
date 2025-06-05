@@ -47,7 +47,7 @@ void HandleExtraDragMoveReporting(const RefPtr<FrameNode>& frameNode, const std:
     CHECK_NULL_VOID(dragDropManager);
     auto touchDownPoint = actuator->GetTouchDownPoint();
     auto pointerEvent = DragPointerEvent(touchDownPoint.x, touchDownPoint.y,
-        touchDownPoint.screenX, touchDownPoint.screenY);
+        touchDownPoint.screenX, touchDownPoint.screenY, touchDownPoint.globalDisplayX, touchDownPoint.globalDisplayY);
     dragDropManager->OnDragMove(pointerEvent, extraInfo);
 }
 
@@ -61,9 +61,11 @@ void DragDropProxy::OnDragStart(
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     auto point = Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY());
+        info.GetScreenLocation().GetY(), info.GetGlobalDisplayLocation().GetX(),
+        info.GetGlobalDisplayLocation().GetY());
     auto pointerEvent = DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
-        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY());
+        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(), info.GetGlobalDisplayLocation().GetX(),
+        info.GetGlobalDisplayLocation().GetY());
     pointerEvent.UpdatePressedKeyCodes(info.GetPressedKeyCodes());
     manager->RequireBundleInfo();
     manager->OnDragStart(point, frameNode);
@@ -85,7 +87,8 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
 
     std::string extraInfo = manager->GetExtraInfo();
     manager->OnDragMove(DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
-        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()), extraInfo);
+        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(),
+        info.GetGlobalDisplayLocation().GetX(), info.GetGlobalDisplayLocation().GetY()), extraInfo);
 }
 
 void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
@@ -101,7 +104,8 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
             static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
     } else {
         manager->OnDragEnd(DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
-            info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()), extraInfo);
+            info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(),
+            info.GetGlobalDisplayLocation().GetX(), info.GetGlobalDisplayLocation().GetY()), extraInfo);
     }
 }
 
