@@ -112,8 +112,9 @@ void TextTimerPattern::Tick(uint64_t duration)
 
     auto tmpValue = static_cast<double>(elapsedTime_);
     if (isCountDown_) {
+        auto elapsedTime = GetMillisecondsDuration(GetFormatDuration(elapsedTime_));
         tmpValue =
-            (inputCount_ >= static_cast<double>(elapsedTime_)) ? (inputCount_ - static_cast<double>(elapsedTime_)) : 0;
+            (inputCount_ >= static_cast<double>(elapsedTime_)) ? (inputCount_ - static_cast<double>(elapsedTime)) : 0;
     }
     if (isCountDown_ && tmpValue <= 0) {
         UpdateTextTimer(0);
