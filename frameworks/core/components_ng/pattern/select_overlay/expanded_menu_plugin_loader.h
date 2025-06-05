@@ -33,6 +33,9 @@ class ExpandedMenuPluginLoader {
         const std::shared_ptr<SelectOverlayInfo>& info
     );
 
+    typedef const char* (*GetStoreUrlFrontFunc)();
+    typedef const char* (*GetAPPNameFunc)(TextDataDetectType type);
+
 public:
     static ExpandedMenuPluginLoader& GetInstance()
     {
@@ -56,6 +59,77 @@ public:
             return false;
         }
         return true;
+#endif
+    }
+
+    bool LoadStoreUrlFront()
+    {
+#ifndef WINDOWS_PLATFORM
+        CHECK_NULL_RETURN(!getStoreUrlFront, true);
+        expandedMenuPluginHandle = dlopen(EXPANDED_MENU_PLUGIN_SO_PATH.c_str(), RTLD_LAZY);
+        if (!expandedMenuPluginHandle) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "dlopen lib %{public}s Fail", EXPANDED_MENU_PLUGIN_SO_PATH.c_str());
+            return false;
+        }
+        TAG_LOGI(AceLogTag::ACE_MENU, "dlopen lib %{public}s success", EXPANDED_MENU_PLUGIN_SO_PATH.c_str());
+        getStoreUrlFront = (GetStoreUrlFrontFunc)(dlsym(expandedMenuPluginHandle, "GetStoreUrlFront"));
+        if (!getStoreUrlFront) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "GetStoreUrlFront func load failed");
+            return false;
+        }
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    bool LoadAPPName()
+    {
+#ifndef WINDOWS_PLATFORM
+        CHECK_NULL_RETURN(!getAPPName, true);
+        expandedMenuPluginHandle = dlopen(EXPANDED_MENU_PLUGIN_SO_PATH.c_str(), RTLD_LAZY);
+        if (!expandedMenuPluginHandle) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "dlopen lib %{public}s Fail", EXPANDED_MENU_PLUGIN_SO_PATH.c_str());
+            return false;
+        }
+        getAPPName = (GetAPPNameFunc)(dlsym(expandedMenuPluginHandle, "GetAPPName"));
+        if (!getAPPName) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "GetAPPName func load failed");
+            return false;
+        }
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    std::string GetStoreUrlFront()
+    {
+#ifndef WINDOWS_PLATFORM
+        CHECK_NULL_RETURN(LoadStoreUrlFront(), "");
+        if (!getStoreUrlFront) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "dynamic get front failed");
+            return "";
+        }
+        std::string result = getStoreUrlFront();
+        return result;
+#else
+        return "";
+#endif
+    }
+
+    std::string GetAPPName(TextDataDetectType type)
+    {
+#ifndef WINDOWS_PLATFORM
+        CHECK_NULL_RETURN(LoadAPPName(), "");
+        if (!getAPPName) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "dynamic load name failed");
+            return "";
+        }
+        std::string result = getAPPName(type);
+        return result;
+#else
+        return "";
 #endif
     }
 
@@ -89,6 +163,8 @@ public:
 
     void *expandedMenuPluginHandle;
     CreateDeviceMenuFunc createDeviceMenu;
+    GetStoreUrlFrontFunc getStoreUrlFront;
+    GetAPPNameFunc getAPPName;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EXPANDED_MENU_PLUGIN_LOADER_H

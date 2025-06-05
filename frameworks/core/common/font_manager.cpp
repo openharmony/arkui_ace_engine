@@ -462,6 +462,20 @@ void FontManager::OnLoadFontChanged(const WeakPtr<PipelineBase>& weakContext, co
         TaskExecutor::TaskType::UI, "NotifyFontLoadUITask");
 }
 
+void FontManager::StartAbilityOnJumpBrowser(const std::string& address) const
+{
+    if (startAbilityOnJumpBrowserHandler_) {
+        startAbilityOnJumpBrowserHandler_(address);
+    }
+}
+
+void FontManager::StartAbilityOnInstallAppInStore(const std::string& appName) const
+{
+    if (startAbilityOnInstallAppInStoreHandler_) {
+        startAbilityOnInstallAppInStoreHandler_(appName);
+    }
+}
+
 #ifdef ACE_ENABLE_VK
 void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node)
 {

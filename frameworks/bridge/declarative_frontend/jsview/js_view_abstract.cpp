@@ -9975,7 +9975,10 @@ bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, TextDet
             func->Execute(result);
         };
     }
-
+    auto enablePreviewMenuValue = obj->GetProperty("enablePreviewMenu");
+    if (enablePreviewMenuValue->IsBoolean()) {
+        textDetectConfig.enablePreviewMenu = enablePreviewMenuValue->ToBoolean();
+    }
     return ParseAIEntityColor(obj, textDetectConfig);
 }
 

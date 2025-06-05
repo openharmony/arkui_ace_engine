@@ -45,6 +45,7 @@ struct TextDetectConfig {
     TextDecoration entityDecorationType = TextDecoration::UNDERLINE;
     Color entityDecorationColor;
     TextDecorationStyle entityDecorationStyle = TextDecorationStyle::SOLID;
+    bool enablePreviewMenu = false;
 
     TextDetectConfig()
     {

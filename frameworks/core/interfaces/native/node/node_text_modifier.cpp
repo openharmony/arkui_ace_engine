@@ -1149,6 +1149,7 @@ void SetTextDataDetectorConfigWithEvent(
     textDetectConfig.entityDecorationType = TextDecoration(arkUITextDetectConfig->entityDecorationType);
     textDetectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
     textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
+    textDetectConfig.enablePreviewMenu = arkUITextDetectConfig->entityEnablePreviewMenu;
     TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 

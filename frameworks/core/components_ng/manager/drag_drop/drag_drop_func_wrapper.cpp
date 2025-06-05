@@ -972,7 +972,7 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
 
     if (gestureHub->GetTextDraggable()) {
         auto pattern = frameNode->GetPattern<TextBase>();
-        if (pattern && !pattern->IsSelected()) {
+        if (pattern && !pattern->IsSelected() && !pattern->CanAIEntityDrag()) {
             TrySetDraggableStateAsync(frameNode, touchRestrict);
             TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, text is not selected.");
             return false;

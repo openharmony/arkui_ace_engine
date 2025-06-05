@@ -389,6 +389,20 @@ public:
         }
     }
 
+    void OnStartAbilityOnInstallAppInStore(const std::string& appName)
+    {
+        if (abilityOnInstallAppInStore_) {
+            abilityOnInstallAppInStore_(appName);
+        }
+    }
+
+    void OnStartAbilityOnJumpBrowser(const std::string& address)
+    {
+        if (abilityOnJumpBrowser_) {
+            abilityOnJumpBrowser_(address);
+        }
+    }
+
     int32_t GeneratePageId()
     {
         return pageId_++;
@@ -481,6 +495,16 @@ public:
     void SetAbilityOnSearch(AbilityOnQueryCallback&& callback)
     {
         abilityOnQueryCallback_ = std::move(callback);
+    }
+
+    void SetAbilityOnInstallAppInStore(AbilityOnQueryCallback&& callback)
+    {
+        abilityOnInstallAppInStore_ = std::move(callback);
+    }
+
+    void SetAbilityOnJumpBrowser(AbilityOnQueryCallback&& callback)
+    {
+        abilityOnJumpBrowser_ = std::move(callback);
     }
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
@@ -964,6 +988,8 @@ private:
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;
     AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
+    AbilityOnQueryCallback abilityOnInstallAppInStore_ = nullptr;
+    AbilityOnQueryCallback abilityOnJumpBrowser_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 

@@ -164,6 +164,11 @@ public:
         return textSelector_.IsValid() && !textSelector_.StartEqualToDest();
     }
 
+    virtual bool CanAIEntityDrag()
+    {
+        return false;
+    }
+
     MouseStatus GetMouseStatus() const
     {
         return mouseStatus_;
