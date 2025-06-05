@@ -51,7 +51,7 @@ struct PopupGradientColor {
 };
 
 struct PopupLinearGradientProperties {
-    GradientDirection popupDirection;
+    GradientDirection popupDirection = GradientDirection::BOTTOM;
     std::vector<PopupGradientColor> gradientColors;
 };
 
