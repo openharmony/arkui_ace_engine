@@ -227,7 +227,8 @@ HWTEST_F(PluginComponentModifierTest, setOnCompleteTest, TestSize.Level1)
         };
     };
 
-    auto arkCallback = Converter::ArkValue<VoidCallback>(checkCallback, contextId);
+    auto callback = Converter::ArkValue<VoidCallback>(checkCallback, contextId);
+    auto arkCallback = Converter::ArkValue<Opt_VoidCallback>(callback);
 
     modifier_->setOnComplete(node_, &arkCallback);
 
@@ -266,7 +267,8 @@ HWTEST_F(PluginComponentModifierTest, setOnErrorTest, TestSize.Level1)
         };
     };
 
-    auto arkCallback = ArkValue<PluginErrorCallback>(checkCallback, contextId);
+    auto callback = ArkValue<PluginErrorCallback>(checkCallback, contextId);
+    auto arkCallback = ArkValue<Opt_PluginErrorCallback>(callback);
 
     modifier_->setOnError(node_, &arkCallback);
 
