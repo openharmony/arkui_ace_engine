@@ -149,6 +149,7 @@ private:
     void ThumbnailTimer(int32_t time);
     RefPtr<DragEventActuator> GetDragEventActuator();
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
+    void TriggerCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type);
 
     int32_t duration_ = 500;
     bool repeat_ = false;

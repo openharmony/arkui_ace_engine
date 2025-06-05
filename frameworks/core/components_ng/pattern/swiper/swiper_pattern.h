@@ -653,8 +653,8 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
-    bool IsAtStart() const;
-    bool IsAtEnd() const;
+    ACE_FORCE_EXPORT bool IsAtStart() const;
+    ACE_FORCE_EXPORT bool IsAtEnd() const;
 
     bool IsIndicatorInteractive() const
     {
