@@ -132,4 +132,24 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad003, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_.size(), 6);
     EXPECT_FALSE(pattern_->prevMeasureBreak_);
 }
+
+/**
+ * @tc.name: SyncLoad004
+ * @tc.desc: Test List with out sync load
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSyncLoadTestNg, SyncLoad004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     * @tc.expected: List not sync load
+     */
+    ListModelNG model = CreateList();
+    model.SetSyncLoad(false);
+    CreateListItems(10);
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    CreateDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_FALSE(pattern_->prevMeasureBreak_);
+}
 }
