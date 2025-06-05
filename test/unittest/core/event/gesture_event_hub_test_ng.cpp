@@ -2041,4 +2041,42 @@ HWTEST_F(GestureEventHubTestNg, StartVibratorByDrag002, TestSize.Level1)
     bool dragFilter = DragDropGlobalController::GetInstance().IsDragFilterShowing();
     EXPECT_FALSE(dragFilter);
 }
+
+/**
+ * @tc.name: GetGestureEventInfo
+ * @tc.desc: Test GetGestureEventInfo and GetClickInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetGestureEventInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. construct a clickEventActuator
+     */
+    auto clickCallback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureEventHub->AddClickEvent(clickEvent);
+    auto eventInfo = gestureEventHub->GetGestureEventInfo();
+    auto clickInfo = gestureEventHub->GetClickInfo();
+    EXPECT_EQ(eventInfo.GetPointerEventId(), 0);
+    EXPECT_EQ(clickInfo.GetFingerId(), 0);
+    /**
+     * @tc.steps: step3. construct a clickEventActuator null
+     */
+    gestureEventHub->clickEventActuator_ = nullptr;
+    eventInfo = gestureEventHub->GetGestureEventInfo();
+    clickInfo = gestureEventHub->GetClickInfo();
+    EXPECT_EQ(eventInfo.GetPointerEventId(), 0);
+    EXPECT_EQ(clickInfo.GetFingerId(), -1);
+}
 } // namespace OHOS::Ace::NG
