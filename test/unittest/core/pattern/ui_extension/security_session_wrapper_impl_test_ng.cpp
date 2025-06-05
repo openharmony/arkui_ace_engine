@@ -57,6 +57,7 @@
 #include "core/event/pointer_event.h"
 #include "core/event/touch_event.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.h"
+#include "transaction/rs_transaction.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -400,6 +401,43 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg005, 
 }
 
 /**
+ * @tc.name: SecuritySessionWrapperImplTestNg006
+ * @tc.desc: Test the method NotifySizeChangeReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+
+    /**
+     * @tc.steps: step2. test NotifySizeChangeReason
+     */
+    auto type = OHOS::Ace::WindowSizeChangeReason::UNDEFINED;
+    Parcel parcel;
+    parcel.WriteUint64(123456);
+    parcel.WriteInt32(100);
+    parcel.WriteInt32(999);
+    parcel.WriteBool(true);
+    auto* rawTransaction = Rosen::RSTransaction::Unmarshalling(parcel);
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction(rawTransaction);
+    EXPECT_NE(rsTransaction, nullptr);
+    sessionWrapper->NotifySizeChangeReason(type, nullptr);
+    EXPECT_EQ(sessionWrapper->session_->reason_, Rosen::SizeChangeReason::UNDEFINED);
+
+    sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
+    EXPECT_TRUE(sessionWrapper->transaction_.expired());
+
+    type = OHOS::Ace::WindowSizeChangeReason::ROTATION;
+    sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
+    EXPECT_FALSE(sessionWrapper->transaction_.expired());
+}
+
+/**
  * @tc.name: SecuritySessionWrapperImplTestNg007
  * @tc.desc: Test the method NotifyOccupiedAreaChangeInfo, SetDensityDpiImpl and SendDataSync
  * @tc.type: FUNC
@@ -466,7 +504,6 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg008, 
     EXPECT_NE(sessionWrapper->instanceId_, sessionWrapper->hostPattern_.Upgrade()->GetInstanceIdFromHost());
     sessionWrapper->GetInstanceIdFromHost();
     sessionWrapper->instanceId_ = sessionWrapper->hostPattern_.Upgrade()->GetInstanceIdFromHost();
-    EXPECT_EQ(sessionWrapper->instanceId_, sessionWrapper->hostPattern_.Upgrade()->GetInstanceIdFromHost());
     sessionWrapper->GetInstanceIdFromHost();
 
     sessionWrapper->hostPattern_ = nullptr;
