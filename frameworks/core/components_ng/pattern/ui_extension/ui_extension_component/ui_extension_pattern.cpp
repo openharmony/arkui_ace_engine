@@ -428,7 +428,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
     UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
     usage_ = uIExtensionUsage;
-    UIEXT_LOGD("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
+    UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
         isKeyAsync_, uIExtensionUsage);
     MountPlaceholderNode(PlaceholderType::INITIAL);
     SessionConfig config;
@@ -2026,7 +2026,7 @@ void UIExtensionPattern::OnUIExtBusinessReceive(
 void UIExtensionPattern::RegisterUIExtBusinessConsumeReplyCallback(
     UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback)
 {
-    UIEXT_LOGD("RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
     businessDataUECConsumeReplyCallbacks_.try_emplace(code, callback);
 }
 
@@ -2060,7 +2060,7 @@ void UIExtensionPattern::NotifyHostWindowMode()
 
 void UIExtensionPattern::NotifyHostWindowMode(Rosen::WindowMode mode)
 {
-    UIEXT_LOGD("NotifyHostWindowMode: instanceId = %{public}d, followStrategy = %{public}d, mode = %{public}d",
+    UIEXT_LOGI("NotifyHostWindowMode: instanceId = %{public}d, followStrategy = %{public}d, mode = %{public}d",
         instanceId_, isWindowModeFollowHost_, static_cast<int32_t>(mode));
     CHECK_NULL_VOID(sessionWrapper_);
     if (isWindowModeFollowHost_ && mode != Rosen::WindowMode::WINDOW_MODE_UNDEFINED) {
