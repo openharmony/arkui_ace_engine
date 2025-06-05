@@ -20,7 +20,7 @@ import { int32, uint32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/co
 import { __context, __id, DataNode, RepeatByArray, remember, NodeAttach } from '@koalaui/runtime';
 import { RepeatItem, UIRepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
-import { LazyForEachImpl } from '../LazyForEach';
+import { LazyForEachImpl } from './LazyForEachImpl';
 import { RepeatType } from '../PeerNode';
 import { ArkColumnPeer } from '../component/column';
 

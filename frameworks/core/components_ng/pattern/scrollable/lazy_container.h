@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_LAZY_CONTAINER_H
 #include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
 namespace OHOS::Ace::NG {
 /**
  * @brief Base class of all components that support lazy load in ArkUI 2.0 (Arkoala)
@@ -26,16 +27,15 @@ class LazyContainer : virtual public Pattern {
     DECLARE_ACE_TYPE(LazyContainer, Pattern);
 
 public:
-    int32_t GetTotalChildCount() const final
-    {
-        return adapter_ ? adapter_->GetTotalCount() : -1;
-    }
+    int32_t GetTotalChildCount() const final;
 
     RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) final;
 
     ScrollWindowAdapter* GetScrollWindowAdapter() final;
 
     ScrollWindowAdapter* GetOrCreateScrollWindowAdapter() final;
+
+    LazyComposeAdapter* GetArkoalaLazyAdapter() final;
 
     /**
      * @brief Converts a large delta to a jump index
@@ -46,6 +46,9 @@ public:
     {
         return -1;
     }
+
+    void Synchronize(
+        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
 
 protected:
     void ResetAdapter()
@@ -85,7 +88,9 @@ protected:
 private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;
 
-    RefPtr<ScrollWindowAdapter> adapter_;
+    RefPtr<ScrollWindowAdapter> adapter_; // to be removed
+
+    std::unique_ptr<LazyComposeAdapter> newAdapter_;
 };
 
 /**

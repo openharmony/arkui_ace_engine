@@ -22,8 +22,9 @@ import { ReusablePool } from "./ReusablePool"
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
-export const LazyForEachType = 13
-export const RepeatType = 14
+export const LazyForEachType = 13 // corresponds to DataNode in LazyForEach
+export const LazyItemNodeType = 17 // LazyItems are detached node trees that are stored privately in LazyForEach
+export const RepeatType = 19
 const INITIAL_ID = 10000000
 
 export class PeerNode extends IncrementalNode {
@@ -38,7 +39,7 @@ export class PeerNode extends IncrementalNode {
     private _onRecycle?: () => void
     // Pool to store recycled child scopes, grouped by type
     private _reusePool?: Map<string, ReusablePool>
-    private _reusable: boolean = false
+    reusable: boolean = false
 
     getPeerPtr(): pointer {
         return this.peer.ptr
@@ -55,7 +56,7 @@ export class PeerNode extends IncrementalNode {
     }
 
     onReuse(): void {
-        if (!this._reusable) {
+        if (!this.reusable) {
             return
         }
         if (this._onReuse) {
@@ -124,7 +125,7 @@ export class PeerNode extends IncrementalNode {
             // TODO: rework to avoid search
             let peer = findPeerNode(child)
             if (peer) {
-                peer._reusable ? peer!.onReuse() : peer._reusable = true // becomes reusable after initial mount
+                peer.reusable ? peer!.onReuse() : peer.reusable = true // becomes reusable after initial mount
                 let peerPtr = peer.peer.ptr
                 if (this.insertMark != nullptr) {
                     if (this.insertDirection == 0) {
