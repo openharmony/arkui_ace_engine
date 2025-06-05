@@ -2146,6 +2146,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage076, TestSi
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(mockPixelMap, nullptr);
     dragDropManager->PushGatherPixelMap(mockPixelMap);
     dragDropManager->PushGatherPixelMap(nullptr);
     DragDataCore dragData;
