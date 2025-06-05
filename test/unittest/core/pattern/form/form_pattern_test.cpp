@@ -1998,4 +1998,29 @@ HWTEST_F(FormPatternTest, FormPatternTest_054, TestSize.Level1)
     EXPECT_NE(res, nullptr);
     EXPECT_EQ(res->GetTag(), "Column");
 }
+
+/**
+ * @tc.name: FormPatternTest_055
+ * @tc.desc: LoadFormSkeleton
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_055, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    pattern->frameNode_ = formNode;
+    EXPECT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    pattern->isUnTrust_ = false;
+    pattern->cardInfo_.dimension = 3;
+    pattern->LoadFormSkeleton(true);
+    int32_t num = host->GetTotalChildCount();
+    EXPECT_EQ(num, 1);
+
+    pattern->isUnTrust_ = true;
+    pattern->LoadFormSkeleton(true);
+    num = host->GetTotalChildCount();
+    EXPECT_EQ(num, 1);
+}
 } // namespace OHOS::Ace::NG

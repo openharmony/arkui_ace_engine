@@ -1160,7 +1160,7 @@ void FormPattern::LoadFormSkeleton(bool isRefresh)
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext != nullptr) {
         Color colorStyle = isDarkMode ? Color(CONTENT_BG_COLOR_DARK) : Color(CONTENT_BG_COLOR_LIGHT);
-        if (SystemProperties::IsFormSkeletonBlurEnabled()) {
+        if (SystemProperties::IsFormSkeletonBlurEnabled() && !isUnTrust_) {
             BlurStyleOption styleOption;
             styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
             renderContext->UpdateBackBlurStyle(styleOption);
