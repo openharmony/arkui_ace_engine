@@ -3824,7 +3824,7 @@ let AccessibilityRoleType;
   AccessibilityRoleType[AccessibilityRoleType.HYPERLINK = 39] = "HYPERLINK";
   AccessibilityRoleType[AccessibilityRoleType.IMAGE = 40] = "IMAGE";
   AccessibilityRoleType[AccessibilityRoleType.IMAGE_ANIMATOR = 41] = "IMAGE_ANIMATOR";
-  AccessibilityRoleType[AccessibilityRoleType.ROLE_IMAGE_BITMAP = 42] = "ROLE_IMAGE_BITMAP";
+  AccessibilityRoleType[AccessibilityRoleType.IMAGE_BITMAP = 42] = "ROLE_IMAGE_BITMAP";
   AccessibilityRoleType[AccessibilityRoleType.IMAGE_DATA = 43] = "IMAGE_DATA";
   AccessibilityRoleType[AccessibilityRoleType.IMAGE_SPAN = 44] = "IMAGE_SPAN";
   AccessibilityRoleType[AccessibilityRoleType.LABEL = 45] = "LABEL";
