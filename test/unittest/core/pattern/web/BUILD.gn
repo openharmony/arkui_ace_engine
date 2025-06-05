@@ -718,7 +718,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
-    "imf:inputmethod_client",
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_core",
@@ -726,9 +725,13 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
     "webview:libnweb",
-    "window_manager:libwm",
     "window_manager:libpip_ndk",
+    "window_manager:libwm",
   ]
+
+  if (defined(global_parts_info.inputmethod_imf)) {
+    external_deps += [ "imf:inputmethod_client" ]
+  }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 
