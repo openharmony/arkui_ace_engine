@@ -361,7 +361,7 @@ bool UdmfClientImpl::AddFileUriRecord(const RefPtr<UnifiedData>& unifiedData, st
         }
         auto status = UDMF::UtdClient::GetInstance().GetUniformDataTypesByFilenameExtension(
             filenameExtension, types, belongsToType);
-        if (status == UDMF::Status::E_OK) {
+        if (status == UDMF::Status::E_OK && types.size() > 0) {
             LOGI("DragDrop event AddFileUriRecord, extension type is %{public}s", types[0].c_str());
             std::shared_ptr<UDMF::Object> obj = std::make_shared<UDMF::Object>();
             obj->value_[UDMF::UNIFORM_DATA_TYPE] = "general.file-uri";
