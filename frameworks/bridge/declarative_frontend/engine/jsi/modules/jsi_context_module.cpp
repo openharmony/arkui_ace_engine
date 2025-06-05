@@ -25,6 +25,9 @@ namespace OHOS::Ace::Framework {
 
 thread_local std::unordered_map<int32_t, std::shared_ptr<JsValue>> JsiContextModule::contexts_;
 std::unordered_map<int32_t, std::weak_ptr<JsValue>> JsiContextModule::weakptrContexts_;
+#ifdef PREVIEW
+bool JsiContextModule::normalPreview = false;
+#endif
 namespace {
 bool IsDynamicComponentUiContentType(int32_t instanceId)
 {
@@ -102,7 +105,13 @@ std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRu
 
 void JsiContextModule::InitContextModule(const std::shared_ptr<JsRuntime>& runtime, std::shared_ptr<JsValue> moduleObj)
 {
+#ifdef PREVIEW
+    if (!normalPreview) {
+        moduleObj->SetProperty(runtime, "getContext", runtime->NewFunction(JsiContextModule::GetContext));
+    }
+#else
     moduleObj->SetProperty(runtime, "getContext", runtime->NewFunction(JsiContextModule::GetContext));
+#endif
 }
 
 void JsiContextModule::AddContext(int32_t key, const std::shared_ptr<JsValue>& value)
@@ -164,5 +173,12 @@ void JsiContextModule::RemoveContext(int32_t key)
         contexts_.erase(it);
     }
 }
+
+#ifdef PREVIEW
+void JsiContextModule::IsPreview()
+{
+    normalPreview = true;
+}
+#endif
 
 } // namespace OHOS::Ace::Framework
