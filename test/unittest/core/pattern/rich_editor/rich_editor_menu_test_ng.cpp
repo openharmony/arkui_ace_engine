@@ -1108,5 +1108,9 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions002, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::Local;
     selectOverlay->UpdateMenuOffset();
     EXPECT_EQ(pattern->IsShowAIMenuOption(), true);
+
+    pattern->copyOption_ = CopyOptions::Distributed;
+    pattern->UpdateAIMenuOptions();
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), true);
 }
 }
