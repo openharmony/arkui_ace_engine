@@ -45,6 +45,9 @@ constexpr float RING_SHADOW_BLUR_RADIUS_MIN = 5.0f;
 constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr float RING_SHADOW_OPACITY = 0.4f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
+constexpr int32_t ANIMATION_MIN_FFR = 15;
+constexpr int32_t ANIMATION_MAX_FFR = 60;
+constexpr int32_t ANIMATION_EXPECT_FFR = 30;
 } // namespace
 ProgressModifier::ProgressModifier(const WeakPtr<FrameNode>& host,
     const ProgressAnimatableProperty& progressAnimatableProperty_)
@@ -637,6 +640,9 @@ void ProgressModifier::SetValue(float value)
         } else {
             option.SetDuration(0);
         }
+        RefPtr<FrameRateRange> frameRateRange =
+            AceType::MakeRefPtr<FrameRateRange>(ANIMATION_MIN_FFR, ANIMATION_MAX_FFR, ANIMATION_EXPECT_FFR);
+        option.SetFrameRateRange(frameRateRange);
         AnimationUtils::Animate(option, [&]() { value_->Set(value); });
     } else {
         value_->Set(value);
