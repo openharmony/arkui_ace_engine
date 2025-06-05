@@ -56,7 +56,7 @@ void NavigationModelImpl::SetTitleHeight(const Dimension& height, bool isValid)
     return;
 }
 
-void NavigationModelImpl::SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid)
+void NavigationModelImpl::SetTitleHeight(const RefPtr<ResourceObject>& resObj)
 {
     return;
 }
