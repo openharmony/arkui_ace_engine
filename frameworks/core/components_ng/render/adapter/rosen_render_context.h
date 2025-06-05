@@ -248,6 +248,7 @@ public:
     {
         return propTransitionDisappearing_ != nullptr;
     }
+    void ClearModifiers();
     void OnNodeAppear(bool recursive) override;
     void OnNodeDisappear(bool recursive) override;
     void SetTransitionOutCallback(std::function<void()>&& callback) override;

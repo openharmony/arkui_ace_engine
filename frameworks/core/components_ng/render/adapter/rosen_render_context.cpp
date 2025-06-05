@@ -277,6 +277,16 @@ RosenRenderContext::~RosenRenderContext()
 void RosenRenderContext::DetachModifiers()
 {
     CHECK_NULL_VOID(rsNode_ && rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE);
+    ClearModifiers();
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
+}
+
+void RosenRenderContext::ClearModifiers()
+{
+    CHECK_NULL_VOID(rsNode_);
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
     }
@@ -287,10 +297,6 @@ void RosenRenderContext::DetachModifiers()
         if (modifier) {
             rsNode_->RemoveModifier(modifier);
         }
-    }
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    if (pipeline) {
-        pipeline->RequestFrame();
     }
 }
 
