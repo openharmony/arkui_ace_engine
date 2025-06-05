@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "lazy_compose_adapter.h"
+#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
 
 #include "core/components_ng/base/frame_node.h"
 namespace OHOS::Ace::NG {
