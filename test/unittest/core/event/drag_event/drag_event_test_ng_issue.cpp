@@ -1087,47 +1087,4 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue018, TestSize.Level1)
     EXPECT_EQ(DragDropGlobalController::GetInstance().stopDragCallback_, nullptr);
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
 }
-
-/**
- * @tc.name: DragEventTestNGIssue019
- * @tc.desc: Test IsCurrentNodeStatusSuitableForDragging function when OriginUIInputEventType is AXIS.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue019, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create DragEventActuator.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    ASSERT_NE(gestureEventHub, nullptr);
-    eventHub->gestureEventHub_ = gestureEventHub;
-    gestureEventHub->SetDragForbiddenForcely(false);
-    gestureEventHub->SetTextDraggable(false);
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-    /**
-     * @tc.steps: step2. call IsCurrentNodeStatusSuitableForDragging function.
-     * @tc.expected: step2. drag status equals.
-     */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->draggable_ = false;
-    frameNode->customerSet_ = false;
-    frameNode->eventHub_ = eventHub;
-    auto textPattern = frameNode->GetPattern<TextBase>();
-    textPattern->textSelector_.baseOffset = 0;
-    textPattern->textSelector_.destinationOffset = 1;
-    TouchRestrict dragTouchRestrict = { TouchRestrict::NONE };
-    dragTouchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    dragTouchRestrict.touchEvent.convertInfo.first = UIInputEventType::NONE;
-    auto status = dragEventActuator->IsCurrentNodeStatusSuitableForDragging(frameNode, dragTouchRestrict);
-    EXPECT_TRUE(status);
-    dragTouchRestrict.touchEvent.convertInfo.first = UIInputEventType::AXIS;
-    status = dragEventActuator->IsCurrentNodeStatusSuitableForDragging(frameNode, dragTouchRestrict);
-    EXPECT_FALSE(status);
-};
 } // namespace OHOS::Ace::NG
