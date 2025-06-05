@@ -6458,8 +6458,8 @@ void JSWeb::OnLoadStarted(const JSCallbackInfo& args)
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadStartedEvent>(info);
         func->Execute(*eventInfo);
-  };
-  WebModel::GetInstance()->SetOnLoadStarted(jsCallback);
+    };
+    WebModel::GetInstance()->SetOnLoadStarted(jsCallback);
 }
 
 void JSWeb::OnLoadFinished(const JSCallbackInfo& args)
@@ -6483,8 +6483,8 @@ void JSWeb::OnLoadFinished(const JSCallbackInfo& args)
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadFinishedEvent>(info);
         func->Execute(*eventInfo);
-  };
-  WebModel::GetInstance()->SetOnLoadFinished(jsCallback);
+    };
+    WebModel::GetInstance()->SetOnLoadFinished(jsCallback);
 }
 
 void JSWeb::GestureFocusMode(int32_t gestureFocusMode)

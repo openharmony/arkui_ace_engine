@@ -734,6 +734,8 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid) {}
 void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const {}
 void WebDelegate::OnPageStarted(const std::string& param) {}
 void WebDelegate::OnPageFinished(const std::string& param) {}
+void WebDelegate::OnLoadStarted(const std::string &param) {}
+void WebDelegate::OnLoadFinished(const std::string &param) {}
 void WebDelegate::SetPageFinishedState(const bool& state)
 {
     isPageFinished_ = state;
