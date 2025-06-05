@@ -988,7 +988,8 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
 }
 void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
 {
-    auto subWindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+    auto subWindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subWindow);
     auto overlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

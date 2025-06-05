@@ -2836,11 +2836,14 @@ void DragDropManager::GetGatherPixelMap(
 #if defined(PIXEL_MAP_SUPPORTED)
         pixelMapDuplicated = PixelMap::CopyPixelMap(gatherPixelMap);
         if (!pixelMapDuplicated) {
-            TAG_LOGW(AceLogTag::ACE_DRAG, "Copy PixelMap is failure!");
+            TAG_LOGW(AceLogTag::ACE_DRAG, "copy pixelMap failed!");
             pixelMapDuplicated = gatherPixelMap;
         }
 #endif
-        CHECK_NULL_VOID(pixelMapDuplicated);
+        if (!pixelMapDuplicated) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "skip null pixelMap.");
+            continue;
+        }
         auto width = pixelMapDuplicated->GetWidth() * scale;
         auto height = pixelMapDuplicated->GetHeight() * scale;
         auto updateScale = scale;
@@ -3196,7 +3199,8 @@ bool DragDropManager::CheckIsFolderSubwindowBoundary(float x, float y, int32_t i
     if (isCrossWindow || isSceneBoard) {
         return false;
     }
-    auto subwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_RETURN(subwindow, false);
     auto rect = subwindow->GetWindowRect();
     auto scale = dragStartAnimationRate_ * (info_.scale - info_.originScale.y) + info_.originScale.y;
