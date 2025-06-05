@@ -243,6 +243,7 @@ public:
     virtual bool EncodeTlv(std::vector<uint8_t>& buff) = 0;
     virtual uint32_t WritePixels(const WritePixelsOptions& opts) = 0;
     virtual bool GetIsWideColorGamut() const = 0;
+    virtual void SetMemoryName(std::string pixelMapName) const = 0;
 };
 
 } // namespace Ace
