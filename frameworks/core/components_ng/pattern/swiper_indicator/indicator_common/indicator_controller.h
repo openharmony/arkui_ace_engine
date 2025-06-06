@@ -27,9 +27,10 @@ class IndicatorController : public virtual AceType {
     DECLARE_ACE_TYPE(IndicatorController, AceType);
 
 public:
-    void ShowPrevious() const;
+    // overriding only for Mock
+    virtual void ShowPrevious() const;
 
-    void ShowNext() const;
+    virtual void ShowNext() const;
 
     void ChangeIndex(int32_t index, bool useAnimation) const;
 
