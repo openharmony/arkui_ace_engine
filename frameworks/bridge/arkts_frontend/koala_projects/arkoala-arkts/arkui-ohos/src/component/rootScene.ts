@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -50,16 +50,12 @@ export interface RootSceneSession {
 export type RootSceneInterface = (session: RootSceneSession) => RootSceneAttribute;
 export interface RootSceneAttribute extends CommonMethod {
 }
-export interface UIRootSceneAttribute extends UICommonMethod {
-}
 export class ArkRootSceneStyle extends ArkCommonMethodStyle implements RootSceneAttribute {
 }
-/** @memo:stable */
-export class ArkRootSceneComponent extends ArkCommonMethodComponent implements UIRootSceneAttribute {
+export class ArkRootSceneComponent extends ArkCommonMethodComponent implements RootSceneAttribute {
     getPeer(): ArkRootScenePeer {
         return (this.peer as ArkRootScenePeer)
     }
-    /** @memo */
     public setRootSceneOptions(session: RootSceneSession): this {
         if (this.checkPriority("setRootSceneOptions")) {
             const session_casted = session as (RootSceneSession)
@@ -77,7 +73,7 @@ export class ArkRootSceneComponent extends ArkCommonMethodComponent implements U
 /** @memo */
 export function RootScene(
     /** @memo */
-    style: ((attributes: UIRootSceneAttribute) => void) | undefined,
+    style: ((attributes: RootSceneAttribute) => void) | undefined,
     session: RootSceneSession,
     /** @memo */
     content_?: (() => void) | undefined,

@@ -22,8 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
-import { Callback_Void } from "./abilityComponent"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Callback_Boolean_Void } from "./navigation"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -159,23 +158,6 @@ export interface RefreshAttribute extends CommonMethod {
     pullDownRatio(value: number | undefined): this
     _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void
 }
-export interface UIRefreshAttribute extends UICommonMethod {
-    /** @memo */
-    onStateChange(value: ((state: RefreshStatus) => void) | undefined): this
-    /** @memo */
-    onRefreshing(value: (() => void) | undefined): this
-    /** @memo */
-    refreshOffset(value: number | undefined): this
-    /** @memo */
-    pullToRefresh(value: boolean | undefined): this
-    /** @memo */
-    onOffsetChange(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    pullDownRatio(value: number | undefined): this
-    /** @memo */
-    _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void
-    /** @memo */
-}
 export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttribute {
     onStateChange_value?: ((state: RefreshStatus) => void) | undefined
     onRefreshing_value?: (() => void) | undefined
@@ -205,12 +187,10 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIRefreshAttribute {
+export class ArkRefreshComponent extends ArkCommonMethodComponent implements RefreshAttribute {
     getPeer(): ArkRefreshPeer {
         return (this.peer as ArkRefreshPeer)
     }
-    /** @memo */
     public setRefreshOptions(value: RefreshOptions): this {
         if (this.checkPriority("setRefreshOptions")) {
             const value_casted = value as (RefreshOptions)
@@ -219,7 +199,6 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIR
         }
         return this
     }
-    /** @memo */
     public onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
         if (this.checkPriority("onStateChange")) {
             const value_casted = value as (((state: RefreshStatus) => void) | undefined)
@@ -228,7 +207,6 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIR
         }
         return this
     }
-    /** @memo */
     public onRefreshing(value: (() => void) | undefined): this {
         if (this.checkPriority("onRefreshing")) {
             const value_casted = value as ((() => void) | undefined)
@@ -237,7 +215,6 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIR
         }
         return this
     }
-    /** @memo */
     public refreshOffset(value: number | undefined): this {
         if (this.checkPriority("refreshOffset")) {
             const value_casted = value as (number | undefined)
@@ -246,7 +223,6 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIR
         }
         return this
     }
-    /** @memo */
     public pullToRefresh(value: boolean | undefined): this {
         if (this.checkPriority("pullToRefresh")) {
             const value_casted = value as (boolean | undefined)
@@ -255,7 +231,6 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIR
         }
         return this
     }
-    /** @memo */
     public onOffsetChange(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onOffsetChange")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -264,7 +239,6 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIR
         }
         return this
     }
-    /** @memo */
     public pullDownRatio(value: number | undefined): this {
         if (this.checkPriority("pullDownRatio")) {
             const value_casted = value as (number | undefined)
@@ -273,7 +247,6 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIR
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void {
         if (this.checkPriority("_onChangeEvent_refreshing")) {
             const callback_casted = callback as (((isVisible: boolean) => void))
@@ -291,7 +264,7 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIR
 /** @memo */
 export function Refresh(
     /** @memo */
-    style: ((attributes: UIRefreshAttribute) => void) | undefined,
+    style: ((attributes: RefreshAttribute) => void) | undefined,
     value: RefreshOptions,
     /** @memo */
     content_?: (() => void) | undefined,

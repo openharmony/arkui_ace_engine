@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, DecorationStyleResult, MenuType, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
-import { SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, CustomBuilder, ShadowOptions, Callback_ClickEvent_Void, ClickEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, CustomBuilder, ShadowOptions, Callback_ClickEvent_Void, ClickEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -27,7 +27,6 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { Callback_Void } from "./abilityComponent"
 import { CopyOptions, BarState, ResponseType, Color, FontStyle, FontWeight, TextAlign, WordBreak, LineBreakStrategy, ImageSpanAlignment, ImageFit } from "./enums"
 import { ResourceColor, ResourceStr, Length, Dimension, Padding, BorderRadiuses, Font } from "./units"
 import { Callback_Boolean_Void, Tuple_Dimension_Dimension } from "./navigation"
@@ -947,75 +946,6 @@ export interface RichEditorAttribute extends CommonMethod {
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this
 }
-export interface UIRichEditorAttribute extends UICommonMethod {
-    /** @memo */
-    onReady(value: (() => void) | undefined): this
-    /** @memo */
-    onSelect(value: ((parameter: RichEditorSelection) => void) | undefined): this
-    /** @memo */
-    onSelectionChange(value: ((parameter: RichEditorRange) => void) | undefined): this
-    /** @memo */
-    aboutToIMEInput(value: ((parameter: RichEditorInsertValue) => boolean) | undefined): this
-    /** @memo */
-    onIMEInputComplete(value: ((parameter: RichEditorTextSpanResult) => void) | undefined): this
-    /** @memo */
-    onDidIMEInput(value: ((parameter: TextRange) => void) | undefined): this
-    /** @memo */
-    aboutToDelete(value: ((parameter: RichEditorDeleteValue) => boolean) | undefined): this
-    /** @memo */
-    onDeleteComplete(value: (() => void) | undefined): this
-    /** @memo */
-    copyOptions(value: CopyOptions | undefined): this
-    /** @memo */
-    onPaste(value: PasteEventCallback | undefined): this
-    /** @memo */
-    enableDataDetector(value: boolean | undefined): this
-    /** @memo */
-    enablePreviewText(value: boolean | undefined): this
-    /** @memo */
-    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this
-    /** @memo */
-    caretColor(value: ResourceColor | undefined): this
-    /** @memo */
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    onEditingChange(value: ((isVisible: boolean) => void) | undefined): this
-    /** @memo */
-    enterKeyType(value: EnterKeyType | undefined): this
-    /** @memo */
-    onSubmit(value: SubmitCallback | undefined): this
-    /** @memo */
-    onWillChange(value: ((parameter: RichEditorChangeValue) => boolean) | undefined): this
-    /** @memo */
-    onDidChange(value: OnDidChangeCallback | undefined): this
-    /** @memo */
-    onCut(value: ((parameter: CutEvent) => void) | undefined): this
-    /** @memo */
-    onCopy(value: ((parameter: CopyEvent) => void) | undefined): this
-    /** @memo */
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    /** @memo */
-    enableKeyboardOnFocus(value: boolean | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    barState(value: BarState | undefined): this
-    /** @memo */
-    maxLength(value: number | undefined): this
-    /** @memo */
-    maxLines(value: number | undefined): this
-    /** @memo */
-    keyboardAppearance(value: KeyboardAppearance | undefined): this
-    /** @memo */
-    stopBackPress(value: boolean | undefined): this
-    /** @memo */
-    bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this
-    /** @memo */
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
-    /** @memo */
-    placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this
-    /** @memo */
-}
 export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEditorAttribute {
     onReady_value?: (() => void) | undefined
     onSelect_value?: ((parameter: RichEditorSelection) => void) | undefined
@@ -1160,12 +1090,10 @@ export type SubmitCallback = (enterKey: EnterKeyType, event: SubmitEvent) => voi
 export type MenuOnAppearCallback = (start: number, end: number) => void;
 export type MenuCallback = (start: number, end: number) => void;
 export type PasteEventCallback = (event?: PasteEvent) => void;
-/** @memo:stable */
-export class ArkRichEditorComponent extends ArkCommonMethodComponent implements UIRichEditorAttribute {
+export class ArkRichEditorComponent extends ArkCommonMethodComponent implements RichEditorAttribute {
     getPeer(): ArkRichEditorPeer {
         return (this.peer as ArkRichEditorPeer)
     }
-    /** @memo */
     public setRichEditorOptions(value: RichEditorOptions | RichEditorStyledStringOptions): this {
         if (this.checkPriority("setRichEditorOptions")) {
             const value_type = runtimeType(value)
@@ -1183,7 +1111,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onReady(value: (() => void) | undefined): this {
         if (this.checkPriority("onReady")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1192,7 +1119,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onSelect(value: ((parameter: RichEditorSelection) => void) | undefined): this {
         if (this.checkPriority("onSelect")) {
             const value_casted = value as (((parameter: RichEditorSelection) => void) | undefined)
@@ -1201,7 +1127,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onSelectionChange(value: ((parameter: RichEditorRange) => void) | undefined): this {
         if (this.checkPriority("onSelectionChange")) {
             const value_casted = value as (((parameter: RichEditorRange) => void) | undefined)
@@ -1210,7 +1135,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public aboutToIMEInput(value: ((parameter: RichEditorInsertValue) => boolean) | undefined): this {
         if (this.checkPriority("aboutToIMEInput")) {
             const value_casted = value as (((parameter: RichEditorInsertValue) => boolean) | undefined)
@@ -1219,7 +1143,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onIMEInputComplete(value: ((parameter: RichEditorTextSpanResult) => void) | undefined): this {
         if (this.checkPriority("onIMEInputComplete")) {
             const value_casted = value as (((parameter: RichEditorTextSpanResult) => void) | undefined)
@@ -1228,7 +1151,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onDidIMEInput(value: ((parameter: TextRange) => void) | undefined): this {
         if (this.checkPriority("onDidIMEInput")) {
             const value_casted = value as (((parameter: TextRange) => void) | undefined)
@@ -1237,7 +1159,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public aboutToDelete(value: ((parameter: RichEditorDeleteValue) => boolean) | undefined): this {
         if (this.checkPriority("aboutToDelete")) {
             const value_casted = value as (((parameter: RichEditorDeleteValue) => boolean) | undefined)
@@ -1246,7 +1167,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onDeleteComplete(value: (() => void) | undefined): this {
         if (this.checkPriority("onDeleteComplete")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1255,7 +1175,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public copyOptions(value: CopyOptions | undefined): this {
         if (this.checkPriority("copyOptions")) {
             const value_casted = value as (CopyOptions | undefined)
@@ -1264,7 +1183,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onPaste(value: PasteEventCallback | undefined): this {
         if (this.checkPriority("onPaste")) {
             const value_casted = value as (PasteEventCallback | undefined)
@@ -1273,7 +1191,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableDataDetector(value: boolean | undefined): this {
         if (this.checkPriority("enableDataDetector")) {
             const value_casted = value as (boolean | undefined)
@@ -1282,7 +1199,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enablePreviewText(value: boolean | undefined): this {
         if (this.checkPriority("enablePreviewText")) {
             const value_casted = value as (boolean | undefined)
@@ -1291,7 +1207,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
         if (this.checkPriority("dataDetectorConfig")) {
             const value_casted = value as (TextDataDetectorConfig | undefined)
@@ -1300,7 +1215,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public caretColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("caretColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1309,7 +1223,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public selectedBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedBackgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1318,7 +1231,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onEditingChange(value: ((isVisible: boolean) => void) | undefined): this {
         if (this.checkPriority("onEditingChange")) {
             const value_casted = value as (((isVisible: boolean) => void) | undefined)
@@ -1327,7 +1239,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enterKeyType(value: EnterKeyType | undefined): this {
         if (this.checkPriority("enterKeyType")) {
             const value_casted = value as (EnterKeyType | undefined)
@@ -1336,7 +1247,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onSubmit(value: SubmitCallback | undefined): this {
         if (this.checkPriority("onSubmit")) {
             const value_casted = value as (SubmitCallback | undefined)
@@ -1345,7 +1255,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onWillChange(value: ((parameter: RichEditorChangeValue) => boolean) | undefined): this {
         if (this.checkPriority("onWillChange")) {
             const value_casted = value as (((parameter: RichEditorChangeValue) => boolean) | undefined)
@@ -1354,7 +1263,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onDidChange(value: OnDidChangeCallback | undefined): this {
         if (this.checkPriority("onDidChange")) {
             const value_casted = value as (OnDidChangeCallback | undefined)
@@ -1363,7 +1271,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onCut(value: ((parameter: CutEvent) => void) | undefined): this {
         if (this.checkPriority("onCut")) {
             const value_casted = value as (((parameter: CutEvent) => void) | undefined)
@@ -1372,7 +1279,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onCopy(value: ((parameter: CopyEvent) => void) | undefined): this {
         if (this.checkPriority("onCopy")) {
             const value_casted = value as (((parameter: CopyEvent) => void) | undefined)
@@ -1381,7 +1287,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public editMenuOptions(value: EditMenuOptions | undefined): this {
         if (this.checkPriority("editMenuOptions")) {
             const value_casted = value as (EditMenuOptions | undefined)
@@ -1390,7 +1295,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableKeyboardOnFocus(value: boolean | undefined): this {
         if (this.checkPriority("enableKeyboardOnFocus")) {
             const value_casted = value as (boolean | undefined)
@@ -1399,7 +1303,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
@@ -1408,7 +1311,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public barState(value: BarState | undefined): this {
         if (this.checkPriority("barState")) {
             const value_casted = value as (BarState | undefined)
@@ -1417,7 +1319,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public maxLength(value: number | undefined): this {
         if (this.checkPriority("maxLength")) {
             const value_casted = value as (number | undefined)
@@ -1426,7 +1327,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public maxLines(value: number | undefined): this {
         if (this.checkPriority("maxLines")) {
             const value_casted = value as (number | undefined)
@@ -1435,7 +1335,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public keyboardAppearance(value: KeyboardAppearance | undefined): this {
         if (this.checkPriority("keyboardAppearance")) {
             const value_casted = value as (KeyboardAppearance | undefined)
@@ -1444,7 +1343,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public stopBackPress(value: boolean | undefined): this {
         if (this.checkPriority("stopBackPress")) {
             const value_casted = value as (boolean | undefined)
@@ -1453,7 +1351,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         if (this.checkPriority("bindSelectionMenu")) {
             const spanType_casted = spanType as (RichEditorSpanType | undefined)
@@ -1465,7 +1362,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
             const value_casted = value as (CustomBuilder | undefined)
@@ -1475,7 +1371,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
         if (this.checkPriority("placeholder")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -1494,7 +1389,7 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
 /** @memo */
 export function RichEditor(
     /** @memo */
-    style: ((attributes: UIRichEditorAttribute) => void) | undefined,
+    style: ((attributes: RichEditorAttribute) => void) | undefined,
     value: RichEditorOptions | RichEditorStyledStringOptions,
     /** @memo */
     content_?: (() => void) | undefined,

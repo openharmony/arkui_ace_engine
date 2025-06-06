@@ -27,7 +27,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, AttributeModifier } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Font, ResourceColor, Length } from "./units"
 import { Resource } from "global/resource"
 import { FontStyle, FontWeight, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, Color, TextOverflow } from "./enums"
@@ -989,95 +989,6 @@ export interface TextAttribute extends CommonMethod {
     selection(selectionStart: number | undefined, selectionEnd: number | undefined): this
     bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this
 }
-export interface UITextAttribute extends UICommonMethod {
-    /** @memo */
-    font(fontValue: Font | undefined, options?: FontSettingOptions): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    fontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    minFontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    maxFontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    minFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    maxFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    fontStyle(value: FontStyle | undefined): this
-    /** @memo */
-    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this
-    /** @memo */
-    lineSpacing(value: LengthMetrics | undefined): this
-    /** @memo */
-    textAlign(value: TextAlign | undefined): this
-    /** @memo */
-    lineHeight(value: number | string | Resource | undefined): this
-    /** @memo */
-    textOverflow(value: TextOverflowOptions | undefined): this
-    /** @memo */
-    fontFamily(value: string | Resource | undefined): this
-    /** @memo */
-    maxLines(value: number | undefined): this
-    /** @memo */
-    decoration(value: DecorationStyleInterface | undefined): this
-    /** @memo */
-    letterSpacing(value: number | string | undefined): this
-    /** @memo */
-    textCase(value: TextCase | undefined): this
-    /** @memo */
-    baselineOffset(value: number | string | undefined): this
-    /** @memo */
-    copyOption(value: CopyOptions | undefined): this
-    /** @memo */
-    draggable(value: boolean | undefined): this
-    /** @memo */
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    /** @memo */
-    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this
-    /** @memo */
-    textIndent(value: Length | undefined): this
-    /** @memo */
-    wordBreak(value: WordBreak | undefined): this
-    /** @memo */
-    lineBreakStrategy(value: LineBreakStrategy | undefined): this
-    /** @memo */
-    onCopy(value: ((breakpoints: string) => void) | undefined): this
-    /** @memo */
-    caretColor(value: ResourceColor | undefined): this
-    /** @memo */
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    ellipsisMode(value: EllipsisMode | undefined): this
-    /** @memo */
-    enableDataDetector(value: boolean | undefined): this
-    /** @memo */
-    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this
-    /** @memo */
-    onTextSelectionChange(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    fontFeature(value: string | undefined): this
-    /** @memo */
-    marqueeOptions(value: TextMarqueeOptions | undefined): this
-    /** @memo */
-    onMarqueeStateChange(value: ((parameter: MarqueeState) => void) | undefined): this
-    /** @memo */
-    privacySensitive(value: boolean | undefined): this
-    /** @memo */
-    textSelectable(value: TextSelectableMode | undefined): this
-    /** @memo */
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    /** @memo */
-    halfLeading(value: boolean | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this
-    /** @memo */
-    bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this
-    /** @memo */
-}
 export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute {
     font_value?: Font | undefined
     fontColor_value?: ResourceColor | undefined
@@ -1283,8 +1194,7 @@ export interface TextMarqueeOptions {
     fadeout?: boolean;
     marqueeStartPolicy?: MarqueeStartPolicy;
 }
-/** @memo:stable */
-export class ArkTextComponent extends ArkCommonMethodComponent implements UITextAttribute {
+export class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
   
     protected _modifierHost: ArkTextNode | undefined
     setModifierHost(value: ArkTextNode): void {
@@ -1315,7 +1225,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
     }
    
 
-    /** @memo */
     public setTextOptions(content?: string | Resource, value?: TextOptions): this {
         if (this.checkPriority("setTextOptions")) {
             const content_casted = content as (string | Resource | undefined)
@@ -1325,7 +1234,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         if (this.checkPriority("font")) {
             const fontValue_type = runtimeType(fontValue)
@@ -1340,7 +1248,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1349,7 +1256,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public fontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1358,7 +1264,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public minFontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("minFontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1367,7 +1272,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public maxFontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("maxFontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1376,7 +1280,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public minFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -1385,7 +1288,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public maxFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -1394,7 +1296,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public fontStyle(value: FontStyle | undefined): this {
         if (this.checkPriority("fontStyle")) {
             const value_casted = value as (FontStyle | undefined)
@@ -1403,7 +1304,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
         if (this.checkPriority("fontWeight")) {
             const weight_type = runtimeType(weight)
@@ -1418,7 +1318,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public lineSpacing(value: LengthMetrics | undefined): this {
         if (this.checkPriority("lineSpacing")) {
             const value_casted = value as (LengthMetrics | undefined)
@@ -1427,7 +1326,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public textAlign(value: TextAlign | undefined): this {
         if (this.checkPriority("textAlign")) {
             const value_casted = value as (TextAlign | undefined)
@@ -1436,7 +1334,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public lineHeight(value: number | string | Resource | undefined): this {
         if (this.checkPriority("lineHeight")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1445,7 +1342,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public textOverflow(value: TextOverflowOptions | undefined): this {
         if (this.checkPriority("textOverflow")) {
             const value_casted = value as (TextOverflowOptions | undefined)
@@ -1454,7 +1350,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public fontFamily(value: string | Resource | undefined): this {
         if (this.checkPriority("fontFamily")) {
             const value_casted = value as (string | Resource | undefined)
@@ -1463,7 +1358,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public maxLines(value: number | undefined): this {
         if (this.checkPriority("maxLines")) {
             const value_casted = value as (number | undefined)
@@ -1472,7 +1366,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public decoration(value: DecorationStyleInterface | undefined): this {
         if (this.checkPriority("decoration")) {
             const value_casted = value as (DecorationStyleInterface | undefined)
@@ -1481,7 +1374,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public letterSpacing(value: number | string | undefined): this {
         if (this.checkPriority("letterSpacing")) {
             const value_casted = value as (number | string | undefined)
@@ -1490,7 +1382,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public textCase(value: TextCase | undefined): this {
         if (this.checkPriority("textCase")) {
             const value_casted = value as (TextCase | undefined)
@@ -1499,7 +1390,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public baselineOffset(value: number | string | undefined): this {
         if (this.checkPriority("baselineOffset")) {
             const value_casted = value as (number | string | undefined)
@@ -1508,7 +1398,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public copyOption(value: CopyOptions | undefined): this {
         if (this.checkPriority("copyOption")) {
             const value_casted = value as (CopyOptions | undefined)
@@ -1517,7 +1406,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public draggable(value: boolean | undefined): this {
         if (this.checkPriority("draggable")) {
             const value_casted = value as (boolean | undefined)
@@ -1526,7 +1414,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         if (this.checkPriority("textShadow")) {
             const value_casted = value as (ShadowOptions | Array<ShadowOptions> | undefined)
@@ -1535,7 +1422,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
         if (this.checkPriority("heightAdaptivePolicy")) {
             const value_casted = value as (TextHeightAdaptivePolicy | undefined)
@@ -1544,7 +1430,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public textIndent(value: Length | undefined): this {
         if (this.checkPriority("textIndent")) {
             const value_casted = value as (Length | undefined)
@@ -1553,7 +1438,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public wordBreak(value: WordBreak | undefined): this {
         if (this.checkPriority("wordBreak")) {
             const value_casted = value as (WordBreak | undefined)
@@ -1562,7 +1446,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public lineBreakStrategy(value: LineBreakStrategy | undefined): this {
         if (this.checkPriority("lineBreakStrategy")) {
             const value_casted = value as (LineBreakStrategy | undefined)
@@ -1571,7 +1454,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public onCopy(value: ((breakpoints: string) => void) | undefined): this {
         if (this.checkPriority("onCopy")) {
             const value_casted = value as (((breakpoints: string) => void) | undefined)
@@ -1580,7 +1462,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public caretColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("caretColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1589,7 +1470,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public selectedBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedBackgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1598,7 +1478,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public ellipsisMode(value: EllipsisMode | undefined): this {
         if (this.checkPriority("ellipsisMode")) {
             const value_casted = value as (EllipsisMode | undefined)
@@ -1607,7 +1486,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public enableDataDetector(value: boolean | undefined): this {
         if (this.checkPriority("enableDataDetector")) {
             const value_casted = value as (boolean | undefined)
@@ -1616,7 +1494,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
         if (this.checkPriority("dataDetectorConfig")) {
             const value_casted = value as (TextDataDetectorConfig | undefined)
@@ -1625,7 +1502,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public onTextSelectionChange(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onTextSelectionChange")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -1634,7 +1510,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public fontFeature(value: string | undefined): this {
         if (this.checkPriority("fontFeature")) {
             const value_casted = value as (string | undefined)
@@ -1643,7 +1518,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public marqueeOptions(value: TextMarqueeOptions | undefined): this {
         if (this.checkPriority("marqueeOptions")) {
             const value_casted = value as (TextMarqueeOptions | undefined)
@@ -1652,7 +1526,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public onMarqueeStateChange(value: ((parameter: MarqueeState) => void) | undefined): this {
         if (this.checkPriority("onMarqueeStateChange")) {
             const value_casted = value as (((parameter: MarqueeState) => void) | undefined)
@@ -1661,7 +1534,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public privacySensitive(value: boolean | undefined): this {
         if (this.checkPriority("privacySensitive")) {
             const value_casted = value as (boolean | undefined)
@@ -1670,7 +1542,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public textSelectable(value: TextSelectableMode | undefined): this {
         if (this.checkPriority("textSelectable")) {
             const value_casted = value as (TextSelectableMode | undefined)
@@ -1679,7 +1550,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public editMenuOptions(value: EditMenuOptions | undefined): this {
         if (this.checkPriority("editMenuOptions")) {
             const value_casted = value as (EditMenuOptions | undefined)
@@ -1688,7 +1558,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public halfLeading(value: boolean | undefined): this {
         if (this.checkPriority("halfLeading")) {
             const value_casted = value as (boolean | undefined)
@@ -1697,7 +1566,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
@@ -1706,7 +1574,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
         if (this.checkPriority("selection")) {
             const selectionStart_casted = selectionStart as (number | undefined)
@@ -1716,7 +1583,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
     public bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
         if (this.checkPriority("bindSelectionMenu")) {
             const spanType_casted = spanType as (TextSpanType | undefined)
@@ -1737,7 +1603,7 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
 /** @memo */
 export function Text(
     /** @memo */
-    style: ((attributes: UITextAttribute) => void) | undefined,
+    style: ((attributes: TextAttribute) => void) | undefined,
     content?: string | Resource, value?: TextOptions,
     /** @memo */
     content_?: (() => void) | undefined,

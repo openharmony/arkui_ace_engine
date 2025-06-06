@@ -22,14 +22,13 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, AttributeModifier } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Resource } from "global/resource"
 import { PixelMap } from "./arkui-pixelmap"
 import { ResourceColor, ColorFilter, ResourceStr, EdgeWidths } from "./units"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "./enums"
 import { Matrix4Transit } from "./arkui-matrix4"
 import { DrawingColorFilter, DrawingLattice } from "./arkui-drawing"
-import { Callback_Void } from "./abilityComponent"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ResolutionQuality } from "./arkui-external"
 import { DrawableDescriptor } from "./arkui-drawabledescriptor"
@@ -653,63 +652,6 @@ export interface ImageAttribute extends CommonMethod {
     enhancedImageQuality(value: ResolutionQuality | undefined): this
     orientation(value: ImageRotateOrientation | undefined): this
 }
-export interface UIImageAttribute extends UICommonMethod {
-    /** @memo */
-    alt(value: string | Resource | PixelMap | undefined): this
-    /** @memo */
-    matchTextDirection(value: boolean | undefined): this
-    /** @memo */
-    fitOriginalSize(value: boolean | undefined): this
-    /** @memo */
-    fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this
-    /** @memo */
-    objectFit(value: ImageFit | undefined): this
-    /** @memo */
-    imageMatrix(value: Matrix4Transit | undefined): this
-    /** @memo */
-    objectRepeat(value: ImageRepeat | undefined): this
-    /** @memo */
-    autoResize(value: boolean | undefined): this
-    /** @memo */
-    renderMode(value: ImageRenderMode | undefined): this
-    /** @memo */
-    dynamicRangeMode(value: DynamicRangeMode | undefined): this
-    /** @memo */
-    interpolation(value: ImageInterpolation | undefined): this
-    /** @memo */
-    sourceSize(value: ImageSourceSize | undefined): this
-    /** @memo */
-    syncLoad(value: boolean | undefined): this
-    /** @memo */
-    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this
-    /** @memo */
-    copyOption(value: CopyOptions | undefined): this
-    /** @memo */
-    draggable(value: boolean | undefined): this
-    /** @memo */
-    pointLight(value: PointLightStyle | undefined): this
-    /** @memo */
-    edgeAntialiasing(value: number | undefined): this
-    /** @memo */
-    onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this
-    /** @memo */
-    onError(value: ImageErrorCallback | undefined): this
-    /** @memo */
-    onFinish(value: (() => void) | undefined): this
-    /** @memo */
-    enableAnalyzer(value: boolean | undefined): this
-    /** @memo */
-    analyzerConfig(value: ImageAnalyzerConfig | undefined): this
-    /** @memo */
-    resizable(value: ResizableOptions | undefined): this
-    /** @memo */
-    privacySensitive(value: boolean | undefined): this
-    /** @memo */
-    enhancedImageQuality(value: ResolutionQuality | undefined): this
-    /** @memo */
-    orientation(value: ImageRotateOrientation | undefined): this
-    /** @memo */
-}
 export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribute {
     alt_value?: string | Resource | PixelMap | undefined
     matchTextDirection_value?: boolean | undefined
@@ -830,8 +772,7 @@ export interface ResizableOptions {
     slice?: EdgeWidths;
     lattice?: DrawingLattice;
 }
-/** @memo:stable */
-export class ArkImageComponent extends ArkCommonMethodComponent implements UIImageAttribute {
+export class ArkImageComponent extends ArkCommonMethodComponent implements ImageAttribute {
     getPeer(): ArkImagePeer {
         return (this.peer as ArkImagePeer)
     }
@@ -844,7 +785,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         return this._modifierHost!
     }
 
-    /** @memo */
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
             const src_type = runtimeType(src)
@@ -869,7 +809,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public alt(value: string | Resource | PixelMap | undefined): this {
         if (this.checkPriority("alt")) {
             const value_casted = value as (string | Resource | PixelMap | undefined)
@@ -878,7 +817,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public matchTextDirection(value: boolean | undefined): this {
         if (this.checkPriority("matchTextDirection")) {
             const value_casted = value as (boolean | undefined)
@@ -887,7 +825,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public fitOriginalSize(value: boolean | undefined): this {
         if (this.checkPriority("fitOriginalSize")) {
             const value_casted = value as (boolean | undefined)
@@ -896,7 +833,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this {
         if (this.checkPriority("fillColor")) {
             const value_type = runtimeType(value)
@@ -914,7 +850,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public objectFit(value: ImageFit | undefined): this {
         if (this.checkPriority("objectFit")) {
             const value_casted = value as (ImageFit | undefined)
@@ -923,7 +858,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public imageMatrix(value: Matrix4Transit | undefined): this {
         if (this.checkPriority("imageMatrix")) {
             const value_casted = value as (Matrix4Transit | undefined)
@@ -932,7 +866,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public objectRepeat(value: ImageRepeat | undefined): this {
         if (this.checkPriority("objectRepeat")) {
             const value_casted = value as (ImageRepeat | undefined)
@@ -941,7 +874,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public autoResize(value: boolean | undefined): this {
         if (this.checkPriority("autoResize")) {
             const value_casted = value as (boolean | undefined)
@@ -950,7 +882,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public renderMode(value: ImageRenderMode | undefined): this {
         if (this.checkPriority("renderMode")) {
             const value_casted = value as (ImageRenderMode | undefined)
@@ -959,7 +890,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public dynamicRangeMode(value: DynamicRangeMode | undefined): this {
         if (this.checkPriority("dynamicRangeMode")) {
             const value_casted = value as (DynamicRangeMode | undefined)
@@ -968,7 +898,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public interpolation(value: ImageInterpolation | undefined): this {
         if (this.checkPriority("interpolation")) {
             const value_casted = value as (ImageInterpolation | undefined)
@@ -977,7 +906,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public sourceSize(value: ImageSourceSize | undefined): this {
         if (this.checkPriority("sourceSize")) {
             const value_casted = value as (ImageSourceSize | undefined)
@@ -986,7 +914,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public syncLoad(value: boolean | undefined): this {
         if (this.checkPriority("syncLoad")) {
             const value_casted = value as (boolean | undefined)
@@ -995,7 +922,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
         if (this.checkPriority("colorFilter")) {
             const value_casted = value as (ColorFilter | DrawingColorFilter | undefined)
@@ -1004,7 +930,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public copyOption(value: CopyOptions | undefined): this {
         if (this.checkPriority("copyOption")) {
             const value_casted = value as (CopyOptions | undefined)
@@ -1013,7 +938,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public draggable(value: boolean | undefined): this {
         if (this.checkPriority("draggable")) {
             const value_casted = value as (boolean | undefined)
@@ -1022,7 +946,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public pointLight(value: PointLightStyle | undefined): this {
         if (this.checkPriority("pointLight")) {
             const value_casted = value as (PointLightStyle | undefined)
@@ -1031,7 +954,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public edgeAntialiasing(value: number | undefined): this {
         if (this.checkPriority("edgeAntialiasing")) {
             const value_casted = value as (number | undefined)
@@ -1040,7 +962,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this {
         if (this.checkPriority("onComplete")) {
             const value_casted = value as (((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined)
@@ -1049,7 +970,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public onError(value: ImageErrorCallback | undefined): this {
         if (this.checkPriority("onError")) {
             const value_casted = value as (ImageErrorCallback | undefined)
@@ -1058,7 +978,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public onFinish(value: (() => void) | undefined): this {
         if (this.checkPriority("onFinish")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1067,7 +986,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public enableAnalyzer(value: boolean | undefined): this {
         if (this.checkPriority("enableAnalyzer")) {
             const value_casted = value as (boolean | undefined)
@@ -1076,7 +994,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
         if (this.checkPriority("analyzerConfig")) {
             const value_casted = value as (ImageAnalyzerConfig | undefined)
@@ -1085,7 +1002,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public resizable(value: ResizableOptions | undefined): this {
         if (this.checkPriority("resizable")) {
             const value_casted = value as (ResizableOptions | undefined)
@@ -1094,7 +1010,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public privacySensitive(value: boolean | undefined): this {
         if (this.checkPriority("privacySensitive")) {
             const value_casted = value as (boolean | undefined)
@@ -1103,7 +1018,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public enhancedImageQuality(value: ResolutionQuality | undefined): this {
         if (this.checkPriority("enhancedImageQuality")) {
             const value_casted = value as (ResolutionQuality | undefined)
@@ -1112,7 +1026,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public orientation(value: ImageRotateOrientation | undefined): this {
         if (this.checkPriority("orientation")) {
             const value_casted = value as (ImageRotateOrientation | undefined)
@@ -1121,7 +1034,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public attributeModifier<T>(value: AttributeModifier<T>): this {
         let peerNode = this.getPeer()
         if (!peerNode._attributeSet) {
@@ -1158,7 +1070,7 @@ export type ImageInterface = (...param: Object[]) => ArkImageNode
 /** @memo */
 export function Image(
     /** @memo */
-    style: ((attributes: UIImageAttribute) => void) | undefined,
+    style: ((attributes: ImageAttribute) => void) | undefined,
     src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions,
     /** @memo */
     content_?: (() => void) | undefined,

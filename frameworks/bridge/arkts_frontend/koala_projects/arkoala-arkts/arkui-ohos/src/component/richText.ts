@@ -22,8 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
-import { Callback_Void } from "./abilityComponent"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -72,13 +71,6 @@ export interface RichTextAttribute extends CommonMethod {
     onStart(value: (() => void) | undefined): this
     onComplete(value: (() => void) | undefined): this
 }
-export interface UIRichTextAttribute extends UICommonMethod {
-    /** @memo */
-    onStart(value: (() => void) | undefined): this
-    /** @memo */
-    onComplete(value: (() => void) | undefined): this
-    /** @memo */
-}
 export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAttribute {
     onStart_value?: (() => void) | undefined
     onComplete_value?: (() => void) | undefined
@@ -89,12 +81,10 @@ export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAt
         return this
         }
 }
-/** @memo:stable */
-export class ArkRichTextComponent extends ArkCommonMethodComponent implements UIRichTextAttribute {
+export class ArkRichTextComponent extends ArkCommonMethodComponent implements RichTextAttribute {
     getPeer(): ArkRichTextPeer {
         return (this.peer as ArkRichTextPeer)
     }
-    /** @memo */
     public setRichTextOptions(content: string): this {
         if (this.checkPriority("setRichTextOptions")) {
             const content_casted = content as (string)
@@ -103,7 +93,6 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -112,7 +101,6 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onComplete(value: (() => void) | undefined): this {
         if (this.checkPriority("onComplete")) {
             const value_casted = value as ((() => void) | undefined)
@@ -130,7 +118,7 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function RichText(
     /** @memo */
-    style: ((attributes: UIRichTextAttribute) => void) | undefined,
+    style: ((attributes: RichTextAttribute) => void) | undefined,
     content: string,
     /** @memo */
     content_?: (() => void) | undefined,

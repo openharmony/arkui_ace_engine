@@ -1445,6 +1445,12 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       }
       return this
   }
+  public animationStart(value: AnimateParam | undefined): this {
+    return this
+  }
+  public animationStop(value: AnimateParam | undefined): this {
+    return this
+  }
   public animation(value: AnimateParam | undefined): this {
       return this
   }
@@ -1971,8 +1977,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       }
       return this;
    }
-   attributeModifier(modifier: AttributeModifier<CommonMethod> | undefined): this {
-      return this;
-   }
-
+    public attributeModifier<T>(value: AttributeModifier<T>): this {
+        return this
+    }
 }

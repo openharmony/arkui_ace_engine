@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Dimension, ResourceColor, PX, VP, FP, LPX, Percentage } from "./units"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Resource } from "global/resource"
@@ -299,35 +299,6 @@ export interface PanelAttribute extends CommonMethod {
     onHeightChange(value: ((index: number) => void) | undefined): this
     _onChangeEvent_mode(callback: ((mode: PanelMode | undefined) => void)): void
 }
-export interface UIPanelAttribute extends UICommonMethod {
-    /** @memo */
-    mode(value: PanelMode | undefined): this
-    /** @memo */
-    type(value: PanelType | undefined): this
-    /** @memo */
-    dragBar(value: boolean | undefined): this
-    /** @memo */
-    customHeight(value: Dimension | PanelHeight | undefined): this
-    /** @memo */
-    fullHeight(value: number | string | undefined): this
-    /** @memo */
-    halfHeight(value: number | string | undefined): this
-    /** @memo */
-    miniHeight(value: number | string | undefined): this
-    /** @memo */
-    show(value: boolean | undefined): this
-    /** @memo */
-    backgroundMask(value: ResourceColor | undefined): this
-    /** @memo */
-    showCloseIcon(value: boolean | undefined): this
-    /** @memo */
-    onChange(value: ((width: number,height: number,mode: PanelMode) => void) | undefined): this
-    /** @memo */
-    onHeightChange(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    _onChangeEvent_mode(callback: ((mode: PanelMode | undefined) => void)): void
-    /** @memo */
-}
 export class ArkPanelStyle extends ArkCommonMethodStyle implements PanelAttribute {
     mode_value?: PanelMode | undefined
     type_value?: PanelType | undefined
@@ -381,12 +352,10 @@ export class ArkPanelStyle extends ArkCommonMethodStyle implements PanelAttribut
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPanelAttribute {
+export class ArkPanelComponent extends ArkCommonMethodComponent implements PanelAttribute {
     getPeer(): ArkPanelPeer {
         return (this.peer as ArkPanelPeer)
     }
-    /** @memo */
     public setPanelOptions(show: boolean): this {
         if (this.checkPriority("setPanelOptions")) {
             const show_casted = show as (boolean)
@@ -395,7 +364,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public mode(value: PanelMode | undefined): this {
         if (this.checkPriority("mode")) {
             const value_casted = value as (PanelMode | undefined)
@@ -404,7 +372,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public type(value: PanelType | undefined): this {
         if (this.checkPriority("type")) {
             const value_casted = value as (PanelType | undefined)
@@ -413,7 +380,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public dragBar(value: boolean | undefined): this {
         if (this.checkPriority("dragBar")) {
             const value_casted = value as (boolean | undefined)
@@ -422,7 +388,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public customHeight(value: Dimension | PanelHeight | undefined): this {
         if (this.checkPriority("customHeight")) {
             const value_casted = value as (Dimension | PanelHeight | undefined)
@@ -431,7 +396,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public fullHeight(value: number | string | undefined): this {
         if (this.checkPriority("fullHeight")) {
             const value_casted = value as (number | string | undefined)
@@ -440,7 +404,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public halfHeight(value: number | string | undefined): this {
         if (this.checkPriority("halfHeight")) {
             const value_casted = value as (number | string | undefined)
@@ -449,7 +412,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public miniHeight(value: number | string | undefined): this {
         if (this.checkPriority("miniHeight")) {
             const value_casted = value as (number | string | undefined)
@@ -458,7 +420,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public show(value: boolean | undefined): this {
         if (this.checkPriority("show")) {
             const value_casted = value as (boolean | undefined)
@@ -467,7 +428,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public backgroundMask(value: ResourceColor | undefined): this {
         if (this.checkPriority("backgroundMask")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -476,7 +436,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public showCloseIcon(value: boolean | undefined): this {
         if (this.checkPriority("showCloseIcon")) {
             const value_casted = value as (boolean | undefined)
@@ -485,7 +444,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((width: number,height: number,mode: PanelMode) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((width: number,height: number,mode: PanelMode) => void) | undefined)
@@ -494,7 +452,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public onHeightChange(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onHeightChange")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -503,7 +460,6 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_mode(callback: ((mode: PanelMode | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_mode")) {
             const callback_casted = callback as (((mode: PanelMode | undefined) => void))
@@ -521,7 +477,7 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
 /** @memo */
 export function Panel(
     /** @memo */
-    style: ((attributes: UIPanelAttribute) => void) | undefined,
+    style: ((attributes: PanelAttribute) => void) | undefined,
     show: boolean,
     /** @memo */
     content_?: (() => void) | undefined,

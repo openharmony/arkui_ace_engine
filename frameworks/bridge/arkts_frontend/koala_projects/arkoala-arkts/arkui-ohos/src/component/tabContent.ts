@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource } from "global/resource"
 import { ComponentContent } from "./arkui-custom"
 import { VoidCallback, Length, ResourceColor, ResourceStr, Padding, Dimension, LocalizedPadding, Font } from "./units"
@@ -221,15 +221,6 @@ export interface TabContentAttribute extends CommonMethod {
     onWillShow(value: VoidCallback | undefined): this
     onWillHide(value: VoidCallback | undefined): this
 }
-export interface UITabContentAttribute extends UICommonMethod {
-    /** @memo */
-    tabBar(value: string | Resource | CustomBuilder | TabBarOptions | undefined | SubTabBarStyle | BottomTabBarStyle | undefined | ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this
-    /** @memo */
-    onWillShow(value: VoidCallback | undefined): this
-    /** @memo */
-    onWillHide(value: VoidCallback | undefined): this
-    /** @memo */
-}
 export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabContentAttribute {
     tabBar_value?: string | Resource | CustomBuilder | TabBarOptions | undefined
     onWillShow_value?: VoidCallback | undefined
@@ -244,12 +235,10 @@ export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabConte
         return this
         }
 }
-/** @memo:stable */
-export class ArkTabContentComponent extends ArkCommonMethodComponent implements UITabContentAttribute {
+export class ArkTabContentComponent extends ArkCommonMethodComponent implements TabContentAttribute {
     getPeer(): ArkTabContentPeer {
         return (this.peer as ArkTabContentPeer)
     }
-    /** @memo */
     public setTabContentOptions(): this {
         if (this.checkPriority("setTabContentOptions")) {
             this.getPeer()?.setTabContentOptionsAttribute()
@@ -257,7 +246,6 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public tabBar(value: SubTabBarStyle | BottomTabBarStyle | undefined | string | Resource | CustomBuilder | TabBarOptions | undefined | ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         if (this.checkPriority("tabBar")) {
             const value_type = runtimeType(value)
@@ -280,7 +268,6 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onWillShow(value: VoidCallback | undefined): this {
         if (this.checkPriority("onWillShow")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -289,7 +276,6 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onWillHide(value: VoidCallback | undefined): this {
         if (this.checkPriority("onWillHide")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -307,7 +293,7 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
 /** @memo */
 export function TabContent(
     /** @memo */
-    style: ((attributes: UITabContentAttribute) => void) | undefined,
+    style: ((attributes: TabContentAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, MultiShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, MultiShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor, Length, ResourceStr, Dimension } from "./units"
 import { LinearGradient } from "./dataPanel"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
@@ -279,29 +279,6 @@ export interface GaugeAttribute extends CommonMethod {
     privacySensitive(value: boolean | undefined): this
     contentModifier(value: ContentModifier | undefined): this
 }
-export interface UIGaugeAttribute extends UICommonMethod {
-    /** @memo */
-    value(value: number | undefined): this
-    /** @memo */
-    startAngle(value: number | undefined): this
-    /** @memo */
-    endAngle(value: number | undefined): this
-    /** @memo */
-    colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): this
-    /** @memo */
-    strokeWidth(value: Length | undefined): this
-    /** @memo */
-    description(value: CustomBuilder | undefined): this
-    /** @memo */
-    trackShadow(value: GaugeShadowOptions | undefined): this
-    /** @memo */
-    indicator(value: GaugeIndicatorOptions | undefined): this
-    /** @memo */
-    privacySensitive(value: boolean | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-}
 export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribute {
     value_value?: number | undefined
     startAngle_value?: number | undefined
@@ -344,12 +321,10 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
         return this
         }
 }
-/** @memo:stable */
-export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGaugeAttribute {
+export class ArkGaugeComponent extends ArkCommonMethodComponent implements GaugeAttribute {
     getPeer(): ArkGaugePeer {
         return (this.peer as ArkGaugePeer)
     }
-    /** @memo */
     public setGaugeOptions(options: GaugeOptions): this {
         if (this.checkPriority("setGaugeOptions")) {
             const options_casted = options as (GaugeOptions)
@@ -358,7 +333,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public value(value: number | undefined): this {
         if (this.checkPriority("value")) {
             const value_casted = value as (number | undefined)
@@ -367,7 +341,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public startAngle(value: number | undefined): this {
         if (this.checkPriority("startAngle")) {
             const value_casted = value as (number | undefined)
@@ -376,7 +349,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public endAngle(value: number | undefined): this {
         if (this.checkPriority("endAngle")) {
             const value_casted = value as (number | undefined)
@@ -385,7 +357,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): this {
         if (this.checkPriority("colors")) {
             const value_casted = value as (ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined)
@@ -394,7 +365,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public strokeWidth(value: Length | undefined): this {
         if (this.checkPriority("strokeWidth")) {
             const value_casted = value as (Length | undefined)
@@ -403,7 +373,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public description(value: CustomBuilder | undefined): this {
         if (this.checkPriority("description")) {
             const value_casted = value as (CustomBuilder | undefined)
@@ -412,7 +381,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public trackShadow(value: GaugeShadowOptions | undefined): this {
         if (this.checkPriority("trackShadow")) {
             const value_casted = value as (GaugeShadowOptions | undefined)
@@ -421,7 +389,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public indicator(value: GaugeIndicatorOptions | undefined): this {
         if (this.checkPriority("indicator")) {
             const value_casted = value as (GaugeIndicatorOptions | undefined)
@@ -430,7 +397,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public privacySensitive(value: boolean | undefined): this {
         if (this.checkPriority("privacySensitive")) {
             const value_casted = value as (boolean | undefined)
@@ -439,7 +405,6 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_casted = value as (ContentModifier | undefined)
@@ -457,7 +422,7 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
 /** @memo */
 export function Gauge(
     /** @memo */
-    style: ((attributes: UIGaugeAttribute) => void) | undefined,
+    style: ((attributes: GaugeAttribute) => void) | undefined,
     options: GaugeOptions,
     /** @memo */
     content_?: (() => void) | undefined,

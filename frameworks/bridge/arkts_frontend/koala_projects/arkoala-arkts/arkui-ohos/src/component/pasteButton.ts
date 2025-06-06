@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle, UISecurityComponentMethod } from "./securityComponent"
+import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle } from "./securityComponent"
 import { ClickEvent } from "./common"
 import { BusinessError } from "#external"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -82,23 +82,16 @@ export type PasteButtonCallback = (event: ClickEvent, result: PasteButtonOnClick
 export interface PasteButtonAttribute extends SecurityComponentMethod {
     onClick(value: PasteButtonCallback | undefined): this
 }
-export interface UIPasteButtonAttribute extends UISecurityComponentMethod {
-    /** @memo */
-    onClick(value: PasteButtonCallback | undefined): this
-    /** @memo */
-}
 export class ArkPasteButtonStyle extends ArkSecurityComponentMethodStyle implements PasteButtonAttribute {
     onClick_value?: PasteButtonCallback | undefined
     public onClick(value: PasteButtonCallback | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent implements UIPasteButtonAttribute {
+export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent implements PasteButtonAttribute {
     getPeer(): ArkPasteButtonPeer {
         return (this.peer as ArkPasteButtonPeer)
     }
-    /** @memo */
     public setPasteButtonOptions(options?: PasteButtonOptions): this {
         if (options) {
             const options_type = runtimeType(options)
@@ -108,7 +101,6 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
         this.getPeer()?.setPasteButtonOptions0Attribute()
         return this
     }
-    /** @memo */
     public onClick(value: PasteButtonCallback | undefined): this {
         if (this.checkPriority("onClick")) {
             const value_casted = value as (PasteButtonCallback | undefined)
@@ -126,7 +118,7 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
 /** @memo */
 export function PasteButton(
     /** @memo */
-    style: ((attributes: UIPasteButtonAttribute) => void) | undefined,
+    style: ((attributes: PasteButtonAttribute) => void) | undefined,
     options?: PasteButtonOptions,
     /** @memo */
     content_?: (() => void) | undefined,

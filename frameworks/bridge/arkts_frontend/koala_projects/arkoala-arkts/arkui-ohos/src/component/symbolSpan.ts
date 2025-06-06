@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource } from "global/resource"
 import { ResourceColor } from "./units"
 import { FontWeight, Color } from "./enums"
@@ -174,19 +174,6 @@ export interface SymbolSpanAttribute extends CommonMethod {
     effectStrategy(value: SymbolEffectStrategy | undefined): this
     renderingStrategy(value: SymbolRenderingStrategy | undefined): this
 }
-export interface UISymbolSpanAttribute extends UICommonMethod {
-    /** @memo */
-    fontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    fontColor(value: Array<ResourceColor> | undefined): this
-    /** @memo */
-    fontWeight(value: number | FontWeight | string | undefined): this
-    /** @memo */
-    effectStrategy(value: SymbolEffectStrategy | undefined): this
-    /** @memo */
-    renderingStrategy(value: SymbolRenderingStrategy | undefined): this
-    /** @memo */
-}
 export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSpanAttribute {
     fontSize_value?: number | string | Resource | undefined
     fontColor_value?: Array<ResourceColor> | undefined
@@ -209,12 +196,10 @@ export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSp
         return this
         }
 }
-/** @memo:stable */
-export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements UISymbolSpanAttribute {
+export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements SymbolSpanAttribute {
     getPeer(): ArkSymbolSpanPeer {
         return (this.peer as ArkSymbolSpanPeer)
     }
-    /** @memo */
     public setSymbolSpanOptions(value: Resource): this {
         if (this.checkPriority("setSymbolSpanOptions")) {
             const value_casted = value as (Resource)
@@ -223,7 +208,6 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public fontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -232,7 +216,6 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public fontColor(value: Array<ResourceColor> | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (Array<ResourceColor> | undefined)
@@ -241,7 +224,6 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
             const value_casted = value as (number | FontWeight | string | undefined)
@@ -250,7 +232,6 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public effectStrategy(value: SymbolEffectStrategy | undefined): this {
         if (this.checkPriority("effectStrategy")) {
             const value_casted = value as (SymbolEffectStrategy | undefined)
@@ -259,7 +240,6 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
         if (this.checkPriority("renderingStrategy")) {
             const value_casted = value as (SymbolRenderingStrategy | undefined)
@@ -277,7 +257,7 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
 /** @memo */
 export function SymbolSpan(
     /** @memo */
-    style: ((attributes: UISymbolSpanAttribute) => void) | undefined,
+    style: ((attributes: SymbolSpanAttribute) => void) | undefined,
     value: Resource,
     /** @memo */
     content_?: (() => void) | undefined,

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, UICommonShapeMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -58,16 +58,12 @@ export interface CircleOptions {
 export type CircleInterface = (value?: CircleOptions) => CircleAttribute;
 export interface CircleAttribute extends CommonShapeMethod {
 }
-export interface UICircleAttribute extends UICommonShapeMethod {
-}
 export class ArkCircleStyle extends ArkCommonShapeMethodStyle implements CircleAttribute {
 }
-/** @memo:stable */
-export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements UICircleAttribute {
+export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements CircleAttribute {
     getPeer(): ArkCirclePeer {
         return (this.peer as ArkCirclePeer)
     }
-    /** @memo */
     public setCircleOptions(value?: CircleOptions): this {
         if (this.checkPriority("setCircleOptions")) {
             const value_casted = value as (CircleOptions | undefined)
@@ -84,7 +80,7 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
 /** @memo */
 export function Circle(
     /** @memo */
-    style: ((attributes: UICircleAttribute) => void) | undefined,
+    style: ((attributes: CircleAttribute) => void) | undefined,
     value?: CircleOptions,
     /** @memo */
     content_?: (() => void) | undefined,

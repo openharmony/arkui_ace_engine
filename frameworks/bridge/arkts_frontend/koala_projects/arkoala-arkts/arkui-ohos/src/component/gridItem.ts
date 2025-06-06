@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -175,27 +175,6 @@ export interface GridItemAttribute extends CommonMethod {
     onSelect(value: ((isVisible: boolean) => void) | undefined): this
     _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
 }
-export interface UIGridItemAttribute extends UICommonMethod {
-    /** @memo */
-    rowStart(value: number | undefined): this
-    /** @memo */
-    rowEnd(value: number | undefined): this
-    /** @memo */
-    columnStart(value: number | undefined): this
-    /** @memo */
-    columnEnd(value: number | undefined): this
-    /** @memo */
-    forceRebuild(value: boolean | undefined): this
-    /** @memo */
-    selectable(value: boolean | undefined): this
-    /** @memo */
-    selected(value: boolean | Bindable<boolean> | undefined): this
-    /** @memo */
-    onSelect(value: ((isVisible: boolean) => void) | undefined): this
-    /** @memo */
-    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
-    /** @memo */
-}
 export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAttribute {
     rowStart_value?: number | undefined
     rowEnd_value?: number | undefined
@@ -233,12 +212,10 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkGridItemComponent extends ArkCommonMethodComponent implements UIGridItemAttribute {
+export class ArkGridItemComponent extends ArkCommonMethodComponent implements GridItemAttribute {
     getPeer(): ArkGridItemPeer {
         return (this.peer as ArkGridItemPeer)
     }
-    /** @memo */
     public setGridItemOptions(value?: GridItemOptions): this {
         if (this.checkPriority("setGridItemOptions")) {
             const value_casted = value as (GridItemOptions | undefined)
@@ -247,7 +224,6 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public rowStart(value: number | undefined): this {
         if (this.checkPriority("rowStart")) {
             const value_casted = value as (number | undefined)
@@ -256,7 +232,6 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public rowEnd(value: number | undefined): this {
         if (this.checkPriority("rowEnd")) {
             const value_casted = value as (number | undefined)
@@ -265,7 +240,6 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public columnStart(value: number | undefined): this {
         if (this.checkPriority("columnStart")) {
             const value_casted = value as (number | undefined)
@@ -274,7 +248,6 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public columnEnd(value: number | undefined): this {
         if (this.checkPriority("columnEnd")) {
             const value_casted = value as (number | undefined)
@@ -283,7 +256,6 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public forceRebuild(value: boolean | undefined): this {
         if (this.checkPriority("forceRebuild")) {
             const value_casted = value as (boolean | undefined)
@@ -292,7 +264,6 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public selectable(value: boolean | undefined): this {
         if (this.checkPriority("selectable")) {
             const value_casted = value as (boolean | undefined)
@@ -301,7 +272,6 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public selected(value: boolean | Bindable<boolean> | undefined): this {
         if (typeof value === "boolean" || typeof value === "undefined") {
             if (this.checkPriority("selected")) {
@@ -314,7 +284,6 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
             (value as Bindable<boolean>));
         return this
     }
-    /** @memo */
     public onSelect(value: ((isVisible: boolean) => void) | undefined): this {
         if (this.checkPriority("onSelect")) {
             const value_casted = value as (((isVisible: boolean) => void) | undefined)
@@ -323,7 +292,6 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_selected")) {
             const callback_casted = callback as (((select: boolean | undefined) => void))
@@ -341,7 +309,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function GridItem(
     /** @memo */
-    style: ((attributes: UIGridItemAttribute) => void) | undefined,
+    style: ((attributes: GridItemAttribute) => void) | undefined,
     value?: GridItemOptions,
     /** @memo */
     content_?: (() => void) | undefined,

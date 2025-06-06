@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, AttributeModifier } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { ResourceColor } from "./units"
 import { LineCapStyle, Color } from "./enums"
 import { Resource } from "global/resource"
@@ -134,17 +134,6 @@ export interface DividerAttribute extends CommonMethod {
     strokeWidth(value: number | string | undefined): this
     lineCap(value: LineCapStyle | undefined): this
 }
-export interface UIDividerAttribute extends UICommonMethod {
-    /** @memo */
-    vertical(value: boolean | undefined): this
-    /** @memo */
-    color(value: ResourceColor | undefined): this
-    /** @memo */
-    strokeWidth(value: number | string | undefined): this
-    /** @memo */
-    lineCap(value: LineCapStyle | undefined): this
-    /** @memo */
-}
 export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttribute {
     vertical_value?: boolean | undefined
     color_value?: ResourceColor | undefined
@@ -163,8 +152,7 @@ export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttr
         return this
         }
 }
-/** @memo:stable */
-export class ArkDividerComponent extends ArkCommonMethodComponent implements UIDividerAttribute {
+export class ArkDividerComponent extends ArkCommonMethodComponent implements DividerAttribute {
 
     protected _modifierHost: ArkDividerNode | undefined;
     setModifierHost(value: ArkDividerNode): void {
@@ -192,7 +180,6 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements UID
     getPeer(): ArkDividerPeer {
         return (this.peer as ArkDividerPeer)
     }
-    /** @memo */
     public setDividerOptions(): this {
         if (this.checkPriority("setDividerOptions")) {
             this.getPeer()?.setDividerOptionsAttribute()
@@ -200,7 +187,6 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements UID
         }
         return this
     }
-    /** @memo */
     public vertical(value: boolean | undefined): this {
         if (this.checkPriority("vertical")) {
             const value_casted = value as (boolean | undefined)
@@ -209,7 +195,6 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements UID
         }
         return this
     }
-    /** @memo */
     public color(value: ResourceColor | undefined): this {
         if (this.checkPriority("color")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -218,7 +203,6 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements UID
         }
         return this
     }
-    /** @memo */
     public strokeWidth(value: number | string | undefined): this {
         if (this.checkPriority("strokeWidth")) {
             const value_casted = value as (number | string | undefined)
@@ -227,7 +211,6 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements UID
         }
         return this
     }
-    /** @memo */
     public lineCap(value: LineCapStyle | undefined): this {
         if (this.checkPriority("lineCap")) {
             const value_casted = value as (LineCapStyle | undefined)
@@ -245,7 +228,7 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements UID
 /** @memo */
 export function Divider(
     /** @memo */
-    style: ((attributes: UIDividerAttribute) => void) | undefined,
+    style: ((attributes: DividerAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

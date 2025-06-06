@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ChildrenMainSize, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ChildrenMainSize, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ListDividerOptions } from "./list"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -94,13 +94,6 @@ export interface ListItemGroupAttribute extends CommonMethod {
     divider(value: ListDividerOptions | undefined): this
     childrenMainSize(value: ChildrenMainSize | undefined): this
 }
-export interface UIListItemGroupAttribute extends UICommonMethod {
-    /** @memo */
-    divider(value: ListDividerOptions | undefined): this
-    /** @memo */
-    childrenMainSize(value: ChildrenMainSize | undefined): this
-    /** @memo */
-}
 export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListItemGroupAttribute {
     divider_value?: ListDividerOptions | undefined
     childrenMainSize_value?: ChildrenMainSize | undefined
@@ -111,12 +104,10 @@ export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListI
         return this
         }
 }
-/** @memo:stable */
-export class ArkListItemGroupComponent extends ArkCommonMethodComponent implements UIListItemGroupAttribute {
+export class ArkListItemGroupComponent extends ArkCommonMethodComponent implements ListItemGroupAttribute {
     getPeer(): ArkListItemGroupPeer {
         return (this.peer as ArkListItemGroupPeer)
     }
-    /** @memo */
     public setListItemGroupOptions(options?: ListItemGroupOptions): this {
         if (this.checkPriority("setListItemGroupOptions")) {
             const options_casted = options as (ListItemGroupOptions | undefined)
@@ -125,7 +116,6 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public divider(value: ListDividerOptions | undefined): this {
         if (this.checkPriority("divider")) {
             const value_casted = value as (ListDividerOptions | undefined)
@@ -134,7 +124,6 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
             const value_casted = value as (ChildrenMainSize | undefined)
@@ -152,7 +141,7 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
 /** @memo */
 export function ListItemGroup(
     /** @memo */
-    style: ((attributes: UIListItemGroupAttribute) => void) | undefined,
+    style: ((attributes: ListItemGroupAttribute) => void) | undefined,
     options?: ListItemGroupOptions,
     /** @memo */
     content_?: (() => void) | undefined,

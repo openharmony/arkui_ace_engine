@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceStr, Dimension, PX, VP, FP, LPX, Percentage } from "./units"
 import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -211,23 +211,6 @@ export interface Component3DAttribute extends CommonMethod {
     renderHeight(value: Dimension | undefined): this
     customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this
 }
-export interface UIComponent3DAttribute extends UICommonMethod {
-    /** @memo */
-    environment(value: ResourceStr | undefined): this
-    /** @memo */
-    shader(value: ResourceStr | undefined): this
-    /** @memo */
-    shaderImageTexture(value: ResourceStr | undefined): this
-    /** @memo */
-    shaderInputBuffer(value: Array<number> | undefined): this
-    /** @memo */
-    renderWidth(value: Dimension | undefined): this
-    /** @memo */
-    renderHeight(value: Dimension | undefined): this
-    /** @memo */
-    customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this
-    /** @memo */
-}
 export class ArkComponent3DStyle extends ArkCommonMethodStyle implements Component3DAttribute {
     environment_value?: ResourceStr | undefined
     shader_value?: ResourceStr | undefined
@@ -257,12 +240,10 @@ export class ArkComponent3DStyle extends ArkCommonMethodStyle implements Compone
         return this
         }
 }
-/** @memo:stable */
-export class ArkComponent3DComponent extends ArkCommonMethodComponent implements UIComponent3DAttribute {
+export class ArkComponent3DComponent extends ArkCommonMethodComponent implements Component3DAttribute {
     getPeer(): ArkComponent3DPeer {
         return (this.peer as ArkComponent3DPeer)
     }
-    /** @memo */
     public setComponent3DOptions(sceneOptions?: SceneOptions): this {
         if (this.checkPriority("setComponent3DOptions")) {
             const sceneOptions_casted = sceneOptions as (SceneOptions | undefined)
@@ -271,7 +252,6 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public environment(value: ResourceStr | undefined): this {
         if (this.checkPriority("environment")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -280,7 +260,6 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public shader(value: ResourceStr | undefined): this {
         if (this.checkPriority("shader")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -289,7 +268,6 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public shaderImageTexture(value: ResourceStr | undefined): this {
         if (this.checkPriority("shaderImageTexture")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -298,7 +276,6 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public shaderInputBuffer(value: Array<number> | undefined): this {
         if (this.checkPriority("shaderInputBuffer")) {
             const value_casted = value as (Array<number> | undefined)
@@ -307,7 +284,6 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public renderWidth(value: Dimension | undefined): this {
         if (this.checkPriority("renderWidth")) {
             const value_casted = value as (Dimension | undefined)
@@ -316,7 +292,6 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public renderHeight(value: Dimension | undefined): this {
         if (this.checkPriority("renderHeight")) {
             const value_casted = value as (Dimension | undefined)
@@ -325,7 +300,6 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this {
         if (this.checkPriority("customRender")) {
             const uri_casted = uri as (ResourceStr | undefined)
@@ -344,7 +318,7 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
 /** @memo */
 export function Component3D(
     /** @memo */
-    style: ((attributes: UIComponent3DAttribute) => void) | undefined,
+    style: ((attributes: Component3DAttribute) => void) | undefined,
     sceneOptions?: SceneOptions,
     /** @memo */
     content_?: (() => void) | undefined,

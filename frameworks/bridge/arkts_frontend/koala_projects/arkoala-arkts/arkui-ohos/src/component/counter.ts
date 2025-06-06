@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -98,17 +98,6 @@ export interface CounterAttribute extends CommonMethod {
     enableDec(value: boolean | undefined): this
     enableInc(value: boolean | undefined): this
 }
-export interface UICounterAttribute extends UICommonMethod {
-    /** @memo */
-    onInc(value: VoidCallback | undefined): this
-    /** @memo */
-    onDec(value: VoidCallback | undefined): this
-    /** @memo */
-    enableDec(value: boolean | undefined): this
-    /** @memo */
-    enableInc(value: boolean | undefined): this
-    /** @memo */
-}
 export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttribute {
     onInc_value?: VoidCallback | undefined
     onDec_value?: VoidCallback | undefined
@@ -127,12 +116,10 @@ export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttr
         return this
         }
 }
-/** @memo:stable */
-export class ArkCounterComponent extends ArkCommonMethodComponent implements UICounterAttribute {
+export class ArkCounterComponent extends ArkCommonMethodComponent implements CounterAttribute {
     getPeer(): ArkCounterPeer {
         return (this.peer as ArkCounterPeer)
     }
-    /** @memo */
     public setCounterOptions(): this {
         if (this.checkPriority("setCounterOptions")) {
             this.getPeer()?.setCounterOptionsAttribute()
@@ -140,7 +127,6 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements UIC
         }
         return this
     }
-    /** @memo */
     public onInc(value: VoidCallback | undefined): this {
         if (this.checkPriority("onInc")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -149,7 +135,6 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements UIC
         }
         return this
     }
-    /** @memo */
     public onDec(value: VoidCallback | undefined): this {
         if (this.checkPriority("onDec")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -158,7 +143,6 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements UIC
         }
         return this
     }
-    /** @memo */
     public enableDec(value: boolean | undefined): this {
         if (this.checkPriority("enableDec")) {
             const value_casted = value as (boolean | undefined)
@@ -167,7 +151,6 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements UIC
         }
         return this
     }
-    /** @memo */
     public enableInc(value: boolean | undefined): this {
         if (this.checkPriority("enableInc")) {
             const value_casted = value as (boolean | undefined)
@@ -185,7 +168,7 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements UIC
 /** @memo */
 export function Counter(
     /** @memo */
-    style: ((attributes: UICounterAttribute) => void) | undefined,
+    style: ((attributes: CounterAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { ResourceColor, Dimension, Font, ResourceStr, PX, VP, FP, LPX, Percentage, Length } from "./units"
 import { SymbolGlyphModifier } from "./arkui-external"
 import { Callback_Boolean_Void } from "./navigation"
@@ -940,105 +940,6 @@ export interface SearchAttribute extends CommonMethod {
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     _onChangeEvent_value(callback: ((breakpoints: string) => void)): void
 }
-export interface UISearchAttribute extends UICommonMethod {
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this
-    /** @memo */
-    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this
-    /** @memo */
-    textIndent(value: Dimension | undefined): this
-    /** @memo */
-    onEditChange(value: ((isVisible: boolean) => void) | undefined): this
-    /** @memo */
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    caretStyle(value: CaretStyle | undefined): this
-    /** @memo */
-    placeholderColor(value: ResourceColor | undefined): this
-    /** @memo */
-    placeholderFont(value: Font | undefined): this
-    /** @memo */
-    textFont(value: Font | undefined): this
-    /** @memo */
-    enterKeyType(value: EnterKeyType | undefined): this
-    /** @memo */
-    onSubmit(value: ((breakpoints: string) => void) | undefined | SearchSubmitCallback | undefined): this
-    /** @memo */
-    onChange(value: EditableTextOnChangeCallback | undefined): this
-    /** @memo */
-    onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this
-    /** @memo */
-    onContentScroll(value: OnContentScrollCallback | undefined): this
-    /** @memo */
-    onCopy(value: ((breakpoints: string) => void) | undefined): this
-    /** @memo */
-    onCut(value: ((breakpoints: string) => void) | undefined): this
-    /** @memo */
-    onPaste(value: OnPasteCallback | undefined): this
-    /** @memo */
-    copyOption(value: CopyOptions | undefined): this
-    /** @memo */
-    maxLength(value: number | undefined): this
-    /** @memo */
-    textAlign(value: TextAlign | undefined): this
-    /** @memo */
-    enableKeyboardOnFocus(value: boolean | undefined): this
-    /** @memo */
-    selectionMenuHidden(value: boolean | undefined): this
-    /** @memo */
-    minFontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    maxFontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    minFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    maxFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    decoration(value: TextDecorationOptions | undefined): this
-    /** @memo */
-    letterSpacing(value: number | string | Resource | undefined): this
-    /** @memo */
-    lineHeight(value: number | string | Resource | undefined): this
-    /** @memo */
-    type(value: SearchType | undefined): this
-    /** @memo */
-    fontFeature(value: string | undefined): this
-    /** @memo */
-    onWillInsert(value: ((parameter: InsertValue) => boolean) | undefined): this
-    /** @memo */
-    onDidInsert(value: ((parameter: InsertValue) => void) | undefined): this
-    /** @memo */
-    onWillDelete(value: ((parameter: DeleteValue) => boolean) | undefined): this
-    /** @memo */
-    onDidDelete(value: ((parameter: DeleteValue) => void) | undefined): this
-    /** @memo */
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    /** @memo */
-    enablePreviewText(value: boolean | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this
-    /** @memo */
-    halfLeading(value: boolean | undefined): this
-    /** @memo */
-    stopBackPress(value: boolean | undefined): this
-    /** @memo */
-    onWillChange(value: ((parameter: EditableTextChangeValue) => boolean) | undefined): this
-    /** @memo */
-    keyboardAppearance(value: KeyboardAppearance | undefined): this
-    /** @memo */
-    searchButton(value: string | undefined, option?: SearchButtonOptions): this
-    /** @memo */
-    inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this
-    /** @memo */
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
-    /** @memo */
-    _onChangeEvent_value(callback: ((breakpoints: string) => void)): void
-    /** @memo */
-}
 export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttribute {
     fontColor_value?: ResourceColor | undefined
     searchIcon_value?: IconOptions | SymbolGlyphModifier | undefined
@@ -1229,12 +1130,10 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkSearchComponent extends ArkCommonMethodComponent implements UISearchAttribute {
+export class ArkSearchComponent extends ArkCommonMethodComponent implements SearchAttribute {
     getPeer(): ArkSearchPeer {
         return (this.peer as ArkSearchPeer)
     }
-    /** @memo */
     public setSearchOptions(options?: SearchOptions): this {
         if (this.checkPriority("setSearchOptions")) {
             const options_casted = options as (SearchOptions | undefined)
@@ -1243,7 +1142,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1252,7 +1150,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this {
         if (this.checkPriority("searchIcon")) {
             const value_casted = value as (IconOptions | SymbolGlyphModifier | undefined)
@@ -1261,7 +1158,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
         if (this.checkPriority("cancelButton")) {
             const value_casted = value as (CancelButtonOptions | CancelButtonSymbolOptions | undefined)
@@ -1270,7 +1166,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public textIndent(value: Dimension | undefined): this {
         if (this.checkPriority("textIndent")) {
             const value_casted = value as (Dimension | undefined)
@@ -1279,7 +1174,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onEditChange(value: ((isVisible: boolean) => void) | undefined): this {
         if (this.checkPriority("onEditChange")) {
             const value_casted = value as (((isVisible: boolean) => void) | undefined)
@@ -1288,7 +1182,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectedBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedBackgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1297,7 +1190,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public caretStyle(value: CaretStyle | undefined): this {
         if (this.checkPriority("caretStyle")) {
             const value_casted = value as (CaretStyle | undefined)
@@ -1306,7 +1198,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public placeholderColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("placeholderColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1315,7 +1206,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public placeholderFont(value: Font | undefined): this {
         if (this.checkPriority("placeholderFont")) {
             const value_casted = value as (Font | undefined)
@@ -1324,7 +1214,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public textFont(value: Font | undefined): this {
         if (this.checkPriority("textFont")) {
             const value_casted = value as (Font | undefined)
@@ -1333,7 +1222,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public enterKeyType(value: EnterKeyType | undefined): this {
         if (this.checkPriority("enterKeyType")) {
             const value_casted = value as (EnterKeyType | undefined)
@@ -1342,7 +1230,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onSubmit(value: ((breakpoints: string) => void) | undefined | SearchSubmitCallback | undefined): this {
         if (this.checkPriority("onSubmit")) {
             const value_type = runtimeType(value)
@@ -1360,7 +1247,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onChange(value: EditableTextOnChangeCallback | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (EditableTextOnChangeCallback | undefined)
@@ -1369,7 +1255,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this {
         if (this.checkPriority("onTextSelectionChange")) {
             const value_casted = value as (OnTextSelectionChangeCallback | undefined)
@@ -1378,7 +1263,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onContentScroll(value: OnContentScrollCallback | undefined): this {
         if (this.checkPriority("onContentScroll")) {
             const value_casted = value as (OnContentScrollCallback | undefined)
@@ -1387,7 +1271,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onCopy(value: ((breakpoints: string) => void) | undefined): this {
         if (this.checkPriority("onCopy")) {
             const value_casted = value as (((breakpoints: string) => void) | undefined)
@@ -1396,7 +1279,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onCut(value: ((breakpoints: string) => void) | undefined): this {
         if (this.checkPriority("onCut")) {
             const value_casted = value as (((breakpoints: string) => void) | undefined)
@@ -1405,7 +1287,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onPaste(value: OnPasteCallback | undefined): this {
         if (this.checkPriority("onPaste")) {
             const value_casted = value as (OnPasteCallback | undefined)
@@ -1414,7 +1295,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public copyOption(value: CopyOptions | undefined): this {
         if (this.checkPriority("copyOption")) {
             const value_casted = value as (CopyOptions | undefined)
@@ -1423,7 +1303,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public maxLength(value: number | undefined): this {
         if (this.checkPriority("maxLength")) {
             const value_casted = value as (number | undefined)
@@ -1432,7 +1311,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public textAlign(value: TextAlign | undefined): this {
         if (this.checkPriority("textAlign")) {
             const value_casted = value as (TextAlign | undefined)
@@ -1441,7 +1319,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public enableKeyboardOnFocus(value: boolean | undefined): this {
         if (this.checkPriority("enableKeyboardOnFocus")) {
             const value_casted = value as (boolean | undefined)
@@ -1450,7 +1327,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectionMenuHidden(value: boolean | undefined): this {
         if (this.checkPriority("selectionMenuHidden")) {
             const value_casted = value as (boolean | undefined)
@@ -1459,7 +1335,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public minFontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("minFontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1468,7 +1343,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public maxFontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("maxFontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1477,7 +1351,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public minFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -1486,7 +1359,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public maxFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -1495,7 +1367,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public decoration(value: TextDecorationOptions | undefined): this {
         if (this.checkPriority("decoration")) {
             const value_casted = value as (TextDecorationOptions | undefined)
@@ -1504,7 +1375,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public letterSpacing(value: number | string | Resource | undefined): this {
         if (this.checkPriority("letterSpacing")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1513,7 +1383,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public lineHeight(value: number | string | Resource | undefined): this {
         if (this.checkPriority("lineHeight")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1522,7 +1391,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public type(value: SearchType | undefined): this {
         if (this.checkPriority("type")) {
             const value_casted = value as (SearchType | undefined)
@@ -1531,7 +1399,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public fontFeature(value: string | undefined): this {
         if (this.checkPriority("fontFeature")) {
             const value_casted = value as (string | undefined)
@@ -1540,7 +1407,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onWillInsert(value: ((parameter: InsertValue) => boolean) | undefined): this {
         if (this.checkPriority("onWillInsert")) {
             const value_casted = value as (((parameter: InsertValue) => boolean) | undefined)
@@ -1549,7 +1415,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onDidInsert(value: ((parameter: InsertValue) => void) | undefined): this {
         if (this.checkPriority("onDidInsert")) {
             const value_casted = value as (((parameter: InsertValue) => void) | undefined)
@@ -1558,7 +1423,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onWillDelete(value: ((parameter: DeleteValue) => boolean) | undefined): this {
         if (this.checkPriority("onWillDelete")) {
             const value_casted = value as (((parameter: DeleteValue) => boolean) | undefined)
@@ -1567,7 +1431,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onDidDelete(value: ((parameter: DeleteValue) => void) | undefined): this {
         if (this.checkPriority("onDidDelete")) {
             const value_casted = value as (((parameter: DeleteValue) => void) | undefined)
@@ -1576,7 +1439,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public editMenuOptions(value: EditMenuOptions | undefined): this {
         if (this.checkPriority("editMenuOptions")) {
             const value_casted = value as (EditMenuOptions | undefined)
@@ -1585,7 +1447,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public enablePreviewText(value: boolean | undefined): this {
         if (this.checkPriority("enablePreviewText")) {
             const value_casted = value as (boolean | undefined)
@@ -1594,7 +1455,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
@@ -1603,7 +1463,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
         if (this.checkPriority("autoCapitalizationMode")) {
             const value_casted = value as (AutoCapitalizationMode | undefined)
@@ -1612,7 +1471,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public halfLeading(value: boolean | undefined): this {
         if (this.checkPriority("halfLeading")) {
             const value_casted = value as (boolean | undefined)
@@ -1621,7 +1479,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public stopBackPress(value: boolean | undefined): this {
         if (this.checkPriority("stopBackPress")) {
             const value_casted = value as (boolean | undefined)
@@ -1630,7 +1487,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onWillChange(value: ((parameter: EditableTextChangeValue) => boolean) | undefined): this {
         if (this.checkPriority("onWillChange")) {
             const value_casted = value as (((parameter: EditableTextChangeValue) => boolean) | undefined)
@@ -1639,7 +1495,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public keyboardAppearance(value: KeyboardAppearance | undefined): this {
         if (this.checkPriority("keyboardAppearance")) {
             const value_casted = value as (KeyboardAppearance | undefined)
@@ -1648,7 +1503,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         if (this.checkPriority("searchButton")) {
             const value_casted = value as (string | undefined)
@@ -1658,7 +1512,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {
         if (this.checkPriority("inputFilter")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -1668,7 +1521,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
             const value_casted = value as (CustomBuilder | undefined)
@@ -1678,7 +1530,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_value(callback: ((breakpoints: string) => void)): void {
         if (this.checkPriority("_onChangeEvent_value")) {
             const callback_casted = callback as (((breakpoints: string) => void))
@@ -1696,7 +1547,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
 /** @memo */
 export function Search(
     /** @memo */
-    style: ((attributes: UISearchAttribute) => void) | undefined,
+    style: ((attributes: SearchAttribute) => void) | undefined,
     options?: SearchOptions,
     /** @memo */
     content_?: (() => void) | undefined,

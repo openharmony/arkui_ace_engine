@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { HorizontalAlign, FlexAlign } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -137,16 +137,6 @@ export interface ColumnAttribute extends CommonMethod {
     pointLight(value: PointLightStyle | undefined): this
     reverse(value: boolean | undefined): this
 }
-export interface UIColumnAttribute extends UICommonMethod {
-    /** @memo */
-    alignItems(value: HorizontalAlign | undefined): this
-    /** @memo */
-    justifyContent(value: FlexAlign | undefined): this
-    /** @memo */
-    pointLight(value: PointLightStyle | undefined): this
-    /** @memo */
-    reverse(value: boolean | undefined): this
-}
 export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttribute {
     alignItems_value?: HorizontalAlign | undefined
     justifyContent_value?: FlexAlign | undefined
@@ -165,12 +155,10 @@ export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttrib
         return this
     }
 }
-/** @memo:stable */
-export class ArkColumnComponent extends ArkCommonMethodComponent implements UIColumnAttribute {
+export class ArkColumnComponent extends ArkCommonMethodComponent implements ColumnAttribute {
     getPeer(): ArkColumnPeer {
         return (this.peer as ArkColumnPeer)
     }
-    /** @memo */
     public setColumnOptions(options?: ColumnOptions | ColumnOptions | ColumnOptionsV2): this {
         if (this.checkPriority("setColumnOptions")) {
             const options_type = runtimeType(options)
@@ -188,7 +176,6 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements UICo
         }
         return this
     }
-    /** @memo */
     public alignItems(value: HorizontalAlign | undefined): this {
         if (this.checkPriority("alignItems")) {
             const value_casted = value as (HorizontalAlign | undefined)
@@ -197,7 +184,6 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements UICo
         }
         return this
     }
-    /** @memo */
     public justifyContent(value: FlexAlign | undefined): this {
         if (this.checkPriority("justifyContent")) {
             const value_casted = value as (FlexAlign | undefined)
@@ -206,7 +192,6 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements UICo
         }
         return this
     }
-    /** @memo */
     public pointLight(value: PointLightStyle | undefined): this {
         if (this.checkPriority("pointLight")) {
             const value_casted = value as (PointLightStyle | undefined)
@@ -215,7 +200,6 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements UICo
         }
         return this
     }
-    /** @memo */
     public reverse(value: boolean | undefined): this {
         if (this.checkPriority("reverse")) {
             const value_casted = value as (boolean | undefined)
@@ -233,7 +217,7 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements UICo
 /** @memo */
 export function Column(
     /** @memo */
-    style: ((attributes: UIColumnAttribute) => void) | undefined,
+    style: ((attributes: ColumnAttribute) => void) | undefined,
     options?: ColumnOptions | ColumnOptions | ColumnOptionsV2,
     /** @memo */
     content_?: (() => void) | undefined,

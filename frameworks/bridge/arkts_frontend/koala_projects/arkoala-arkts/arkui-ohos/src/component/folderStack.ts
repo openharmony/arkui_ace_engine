@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Alignment, FoldStatus, AppRotation } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -129,19 +129,6 @@ export interface FolderStackAttribute extends CommonMethod {
     enableAnimation(value: boolean | undefined): this
     autoHalfFold(value: boolean | undefined): this
 }
-export interface UIFolderStackAttribute extends UICommonMethod {
-    /** @memo */
-    alignContent(value: Alignment | undefined): this
-    /** @memo */
-    onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this
-    /** @memo */
-    onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this
-    /** @memo */
-    enableAnimation(value: boolean | undefined): this
-    /** @memo */
-    autoHalfFold(value: boolean | undefined): this
-    /** @memo */
-}
 export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderStackAttribute {
     alignContent_value?: Alignment | undefined
     onFolderStateChange_value?: OnFoldStatusChangeCallback | undefined
@@ -170,12 +157,10 @@ export interface HoverEventParam {
     appRotation: AppRotation;
     windowStatusType: WindowStatusType;
 }
-/** @memo:stable */
-export class ArkFolderStackComponent extends ArkCommonMethodComponent implements UIFolderStackAttribute {
+export class ArkFolderStackComponent extends ArkCommonMethodComponent implements FolderStackAttribute {
     getPeer(): ArkFolderStackPeer {
         return (this.peer as ArkFolderStackPeer)
     }
-    /** @memo */
     public setFolderStackOptions(options?: FolderStackOptions): this {
         if (this.checkPriority("setFolderStackOptions")) {
             const options_casted = options as (FolderStackOptions | undefined)
@@ -184,7 +169,6 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public alignContent(value: Alignment | undefined): this {
         if (this.checkPriority("alignContent")) {
             const value_casted = value as (Alignment | undefined)
@@ -193,7 +177,6 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this {
         if (this.checkPriority("onFolderStateChange")) {
             const value_casted = value as (OnFoldStatusChangeCallback | undefined)
@@ -202,7 +185,6 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this {
         if (this.checkPriority("onHoverStatusChange")) {
             const value_casted = value as (OnHoverStatusChangeCallback | undefined)
@@ -211,7 +193,6 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public enableAnimation(value: boolean | undefined): this {
         if (this.checkPriority("enableAnimation")) {
             const value_casted = value as (boolean | undefined)
@@ -220,7 +201,6 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public autoHalfFold(value: boolean | undefined): this {
         if (this.checkPriority("autoHalfFold")) {
             const value_casted = value as (boolean | undefined)
@@ -238,7 +218,7 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
 /** @memo */
 export function FolderStack(
     /** @memo */
-    style: ((attributes: UIFolderStackAttribute) => void) | undefined,
+    style: ((attributes: FolderStackAttribute) => void) | undefined,
     options?: FolderStackOptions,
     /** @memo */
     content_?: (() => void) | undefined,

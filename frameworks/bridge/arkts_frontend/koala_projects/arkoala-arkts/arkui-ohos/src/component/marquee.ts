@@ -22,11 +22,10 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor, Length } from "./units"
 import { FontWeight, MarqueeUpdateStrategy, Color } from "./enums"
 import { Resource } from "global/resource"
-import { Callback_Void } from "./abilityComponent"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -240,27 +239,6 @@ export interface MarqueeAttribute extends CommonMethod {
     onBounce(value: (() => void) | undefined): this
     onFinish(value: (() => void) | undefined): this
 }
-export interface UIMarqueeAttribute extends UICommonMethod {
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    fontSize(value: Length | undefined): this
-    /** @memo */
-    allowScale(value: boolean | undefined): this
-    /** @memo */
-    fontWeight(value: number | FontWeight | string | undefined): this
-    /** @memo */
-    fontFamily(value: string | Resource | undefined): this
-    /** @memo */
-    marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this
-    /** @memo */
-    onStart(value: (() => void) | undefined): this
-    /** @memo */
-    onBounce(value: (() => void) | undefined): this
-    /** @memo */
-    onFinish(value: (() => void) | undefined): this
-    /** @memo */
-}
 export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttribute {
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
@@ -299,12 +277,10 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
         return this
         }
 }
-/** @memo:stable */
-export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIMarqueeAttribute {
+export class ArkMarqueeComponent extends ArkCommonMethodComponent implements MarqueeAttribute {
     getPeer(): ArkMarqueePeer {
         return (this.peer as ArkMarqueePeer)
     }
-    /** @memo */
     public setMarqueeOptions(options: MarqueeOptions): this {
         if (this.checkPriority("setMarqueeOptions")) {
             const options_casted = options as (MarqueeOptions)
@@ -313,7 +289,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -322,7 +297,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
     public fontSize(value: Length | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (Length | undefined)
@@ -331,7 +305,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
     public allowScale(value: boolean | undefined): this {
         if (this.checkPriority("allowScale")) {
             const value_casted = value as (boolean | undefined)
@@ -340,7 +313,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
     public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
             const value_casted = value as (number | FontWeight | string | undefined)
@@ -349,7 +321,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
     public fontFamily(value: string | Resource | undefined): this {
         if (this.checkPriority("fontFamily")) {
             const value_casted = value as (string | Resource | undefined)
@@ -358,7 +329,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
     public marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this {
         if (this.checkPriority("marqueeUpdateStrategy")) {
             const value_casted = value as (MarqueeUpdateStrategy | undefined)
@@ -367,7 +337,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
     public onStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -376,7 +345,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
     public onBounce(value: (() => void) | undefined): this {
         if (this.checkPriority("onBounce")) {
             const value_casted = value as ((() => void) | undefined)
@@ -385,7 +353,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
     public onFinish(value: (() => void) | undefined): this {
         if (this.checkPriority("onFinish")) {
             const value_casted = value as ((() => void) | undefined)
@@ -403,7 +370,7 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
 /** @memo */
 export function Marquee(
     /** @memo */
-    style: ((attributes: UIMarqueeAttribute) => void) | undefined,
+    style: ((attributes: MarqueeAttribute) => void) | undefined,
     options: MarqueeOptions,
     /** @memo */
     content_?: (() => void) | undefined,

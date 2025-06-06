@@ -22,12 +22,12 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkColumnPeer, ColumnAttribute, ArkColumnComponent, ArkColumnStyle, UIColumnAttribute } from "./column"
+import { ArkColumnPeer, ColumnAttribute, ArkColumnComponent, ArkColumnStyle } from "./column"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
-import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 export class ArkGridContainerPeer extends ArkColumnPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -69,17 +69,12 @@ export interface GridContainerOptions {
 export type GridContainerInterface = (value?: GridContainerOptions) => GridContainerAttribute;
 export interface GridContainerAttribute extends ColumnAttribute {
 }
-export interface UIGridContainerAttribute extends UIColumnAttribute {
-    /** @memo */
-}
 export class ArkGridContainerStyle extends ArkColumnStyle implements GridContainerAttribute {
 }
-/** @memo:stable */
-export class ArkGridContainerComponent extends ArkColumnComponent implements UIGridContainerAttribute {
+export class ArkGridContainerComponent extends ArkColumnComponent implements GridContainerAttribute {
     getPeer(): ArkGridContainerPeer {
         return (this.peer as ArkGridContainerPeer)
     }
-    /** @memo */
     public setGridContainerOptions(value?: GridContainerOptions): this {
         if (this.checkPriority("setGridContainerOptions")) {
             const value_casted = value as (GridContainerOptions | undefined)
@@ -97,7 +92,7 @@ export class ArkGridContainerComponent extends ArkColumnComponent implements UIG
 /** @memo */
 export function GridContainer(
     /** @memo */
-    style: ((attributes: UIGridContainerAttribute) => void) | undefined,
+    style: ((attributes: GridContainerAttribute) => void) | undefined,
     value?: GridContainerOptions,
     /** @memo */
     content_?: (() => void) | undefined,

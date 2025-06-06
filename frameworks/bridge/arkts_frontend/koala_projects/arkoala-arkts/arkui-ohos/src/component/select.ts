@@ -29,7 +29,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { OptionWidthMode, Color } from "./enums"
 import { ControlSize } from "./button"
 import { DividerOptions } from "./textPicker"
@@ -1262,69 +1262,6 @@ export interface SelectAttribute extends CommonMethod {
     _onChangeEvent_selected(callback: ((selected: number | Resource | undefined) => void)): void
     _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void
 }
-export interface UISelectAttribute extends UICommonMethod {
-    /** @memo */
-    selected(value: number | Resource | undefined): this
-    /** @memo */
-    value(value: ResourceStr | undefined): this
-    /** @memo */
-    font(value: Font | undefined): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    selectedOptionBgColor(value: ResourceColor | undefined): this
-    /** @memo */
-    selectedOptionFont(value: Font | undefined): this
-    /** @memo */
-    selectedOptionFontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    optionBgColor(value: ResourceColor | undefined): this
-    /** @memo */
-    optionFont(value: Font | undefined): this
-    /** @memo */
-    optionFontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    onSelect(value: ((index: number,value: string) => void) | undefined | OnSelectCallback | undefined): this
-    /** @memo */
-    space(value: Length | undefined): this
-    /** @memo */
-    arrowPosition(value: ArrowPosition | undefined): this
-    /** @memo */
-    optionWidth(value: Dimension | OptionWidthMode | undefined): this
-    /** @memo */
-    optionHeight(value: Dimension | undefined): this
-    /** @memo */
-    menuBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    menuBackgroundBlurStyle(value: BlurStyle | undefined): this
-    /** @memo */
-    controlSize(value: ControlSize | undefined): this
-    /** @memo */
-    menuItemContentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-    divider(value: DividerOptions | null | undefined): this
-    /** @memo */
-    textModifier(value: TextModifier | undefined): this
-    /** @memo */
-    arrowModifier(value: SymbolGlyphModifier | undefined): this
-    /** @memo */
-    optionTextModifier(value: TextModifier | undefined): this
-    /** @memo */
-    selectedOptionTextModifier(value: TextModifier | undefined): this
-    /** @memo */
-    dividerStyle(value: DividerStyleOptions | undefined): this
-    /** @memo */
-    avoidance(value: AvoidanceMode | undefined): this
-    /** @memo */
-    menuOutline(value: MenuOutlineOptions | undefined): this
-    /** @memo */
-    menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this
-    /** @memo */
-    _onChangeEvent_selected(callback: ((selected: number | Resource | undefined) => void)): void
-    /** @memo */
-    _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void
-    /** @memo */
-}
 export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttribute {
     selected_value?: number | Resource | undefined
     value_value?: ResourceStr | undefined
@@ -1444,12 +1381,10 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkSelectComponent extends ArkCommonMethodComponent implements UISelectAttribute {
+export class ArkSelectComponent extends ArkCommonMethodComponent implements SelectAttribute {
     getPeer(): ArkSelectPeer {
         return (this.peer as ArkSelectPeer)
     }
-    /** @memo */
     public setSelectOptions(options: Array<SelectOption>): this {
         if (this.checkPriority("setSelectOptions")) {
             const options_casted = options as (Array<SelectOption>)
@@ -1458,7 +1393,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selected(value: number | Resource | undefined): this {
         if (this.checkPriority("selected")) {
             const value_type = runtimeType(value)
@@ -1476,7 +1410,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public value(value: ResourceStr | undefined): this {
         if (this.checkPriority("value")) {
             const value_type = runtimeType(value)
@@ -1494,7 +1427,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public font(value: Font | undefined): this {
         if (this.checkPriority("font")) {
             const value_type = runtimeType(value)
@@ -1512,7 +1444,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_type = runtimeType(value)
@@ -1530,7 +1461,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectedOptionBgColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedOptionBgColor")) {
             const value_type = runtimeType(value)
@@ -1548,7 +1478,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectedOptionFont(value: Font | undefined): this {
         if (this.checkPriority("selectedOptionFont")) {
             const value_type = runtimeType(value)
@@ -1566,7 +1495,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectedOptionFontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedOptionFontColor")) {
             const value_type = runtimeType(value)
@@ -1584,7 +1512,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionBgColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("optionBgColor")) {
             const value_type = runtimeType(value)
@@ -1602,7 +1529,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionFont(value: Font | undefined): this {
         if (this.checkPriority("optionFont")) {
             const value_type = runtimeType(value)
@@ -1620,7 +1546,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionFontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("optionFontColor")) {
             const value_type = runtimeType(value)
@@ -1638,7 +1563,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onSelect(value: ((index: number,value: string) => void) | undefined | OnSelectCallback | undefined): this {
         if (this.checkPriority("onSelect")) {
             const value_type = runtimeType(value)
@@ -1656,7 +1580,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public space(value: Length | undefined): this {
         if (this.checkPriority("space")) {
             const value_type = runtimeType(value)
@@ -1674,7 +1597,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public arrowPosition(value: ArrowPosition | undefined): this {
         if (this.checkPriority("arrowPosition")) {
             const value_type = runtimeType(value)
@@ -1687,7 +1609,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionWidth(value: Dimension | OptionWidthMode | undefined): this {
         if (this.checkPriority("optionWidth")) {
             const value_type = runtimeType(value)
@@ -1705,7 +1626,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionHeight(value: Dimension | undefined): this {
         if (this.checkPriority("optionHeight")) {
             const value_type = runtimeType(value)
@@ -1723,7 +1643,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public menuBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("menuBackgroundColor")) {
             const value_type = runtimeType(value)
@@ -1741,7 +1660,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
         if (this.checkPriority("menuBackgroundBlurStyle")) {
             const value_type = runtimeType(value)
@@ -1754,7 +1672,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public controlSize(value: ControlSize | undefined): this {
         if (this.checkPriority("controlSize")) {
             const value_type = runtimeType(value)
@@ -1767,7 +1684,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public menuItemContentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("menuItemContentModifier")) {
             const value_type = runtimeType(value)
@@ -1785,7 +1701,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public divider(value: DividerOptions | null | undefined): this {
         if (this.checkPriority("divider")) {
             const value_casted = value as (DividerOptions | null | undefined)
@@ -1794,7 +1709,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public textModifier(value: TextModifier | undefined): this {
         if (this.checkPriority("textModifier")) {
             const value_casted = value as (TextModifier | undefined)
@@ -1803,7 +1717,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public arrowModifier(value: SymbolGlyphModifier | undefined): this {
         if (this.checkPriority("arrowModifier")) {
             const value_casted = value as (SymbolGlyphModifier | undefined)
@@ -1812,7 +1725,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionTextModifier(value: TextModifier | undefined): this {
         if (this.checkPriority("optionTextModifier")) {
             const value_casted = value as (TextModifier | undefined)
@@ -1821,7 +1733,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectedOptionTextModifier(value: TextModifier | undefined): this {
         if (this.checkPriority("selectedOptionTextModifier")) {
             const value_casted = value as (TextModifier | undefined)
@@ -1830,7 +1741,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public dividerStyle(value: DividerStyleOptions | undefined): this {
         if (this.checkPriority("dividerStyle")) {
             const value_casted = value as (DividerStyleOptions | undefined)
@@ -1839,7 +1749,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public avoidance(value: AvoidanceMode | undefined): this {
         if (this.checkPriority("avoidance")) {
             const value_casted = value as (AvoidanceMode | undefined)
@@ -1848,7 +1757,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public menuOutline(value: MenuOutlineOptions | undefined): this {
         if (this.checkPriority("menuOutline")) {
             const value_casted = value as (MenuOutlineOptions | undefined)
@@ -1857,7 +1765,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset | undefined): this {
         if (this.checkPriority("menuAlign")) {
             const alignType_type = runtimeType(alignType)
@@ -1872,7 +1779,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_selected(callback: ((selected: number | Resource | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_selected")) {
             const callback_casted = callback as (((selected: number | Resource | undefined) => void))
@@ -1881,7 +1787,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return
     }
-    /** @memo */
     public _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_value")) {
             const callback_casted = callback as (((value: ResourceStr | undefined) => void))
@@ -1899,7 +1804,7 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
 /** @memo */
 export function Select(
     /** @memo */
-    style: ((attributes: UISelectAttribute) => void) | undefined,
+    style: ((attributes: SelectAttribute) => void) | undefined,
     options: Array<SelectOption>,
     /** @memo */
     content_?: (() => void) | undefined,
