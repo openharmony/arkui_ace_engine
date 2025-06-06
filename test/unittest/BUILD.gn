@@ -221,6 +221,7 @@ ohos_source_set("ace_components_base") {
   sources = [
     "$ace_root/adapter/preview/entrance/ui_session/ui_session_json_util.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/token_colors.cpp",
+    "$ace_root/frameworks/core/common/card_scope.cpp",
     "$ace_root/frameworks/core/common/multi_thread_build_manager.cpp",
     "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
     "$ace_root/frameworks/core/common/resource/resource_wrapper.cpp",

@@ -6006,7 +6006,7 @@ bool JSViewAbstract::ParseJsLengthNG(const JSRef<JSVal>& jsValue, NG::CalcLength
         result = NG::CalcLength(value->ToNumber<double>(), unit);
         auto jsRes = jsObj->GetProperty("res");
         if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
-            !jsRes->IsNull() && !jsRes->IsObject()) {
+            !jsRes->IsNull() && jsRes->IsObject()) {
             JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
             JSViewAbstract::CompleteResourceObject(resObj);
             resourceObj = JSViewAbstract::GetResourceObject(resObj);
@@ -6145,7 +6145,7 @@ bool JSViewAbstract::ParseJsLengthMetricsVpWithResObj(const JSRef<JSObject>& jsO
     result = dimension;
     auto jsRes = jsObj->GetProperty("res");
     if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
-        !jsRes->IsNull() && !jsRes->IsObject()) {
+        !jsRes->IsNull() && jsRes->IsObject()) {
         JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
         JSViewAbstract::CompleteResourceObject(resObj);
         resourceObj = JSViewAbstract::GetResourceObject(resObj);

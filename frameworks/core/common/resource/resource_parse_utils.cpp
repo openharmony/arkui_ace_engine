@@ -44,10 +44,14 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     return result;
 }
 
-RefPtr<ThemeConstants> ResourceParseUtils::GetThemeConstants()
+RefPtr<ThemeConstants> ResourceParseUtils::GetThemeConstants(const RefPtr<ResourceObject>& resObj)
 {
     std::string bundleName;
     std::string moduleName;
+    if (resObj) {
+        bundleName = resObj->GetBundleName();
+        moduleName = resObj->GetModuleName();
+    }
 
     auto cardId = CardScope::CurrentId();
     if (cardId != INVALID_CARD_ID) {
@@ -88,6 +92,7 @@ RefPtr<ThemeConstants> ResourceParseUtils::GetThemeConstants()
 
 RefPtr<ResourceWrapper> CreateResourceWrapper()
 {
+    RefPtr<ResourceObject> resObj;
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
@@ -96,7 +101,26 @@ RefPtr<ResourceWrapper> CreateResourceWrapper()
             return nullptr;
         }
     } else {
-        themeConstants = ResourceParseUtils::GetThemeConstants();
+        themeConstants = ResourceParseUtils::GetThemeConstants(resObj);
+        if (!themeConstants) {
+            return nullptr;
+        }
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    return resourceWrapper;
+}
+
+RefPtr<ResourceWrapper> GetOrCreateResourceWrapper(const RefPtr<ResourceObject>& resObj)
+{
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+        if (!resourceAdapter) {
+            return nullptr;
+        }
+    } else {
+        themeConstants = ResourceParseUtils::GetThemeConstants(resObj);
         if (!themeConstants) {
             return nullptr;
         }
@@ -240,14 +264,13 @@ bool ResourceParseUtils::ParseResInteger(const RefPtr<ResourceObject>& resObj, i
 
 bool ResourceParseUtils::ParseResIntegerArray(const RefPtr<ResourceObject>& resObj, std::vector<uint32_t>& result)
 {
+    CHECK_NULL_RETURN(resObj, false);
     auto resType = resObj->GetType();
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -273,14 +296,13 @@ bool ResourceParseUtils::ParseResIntegerArray(const RefPtr<ResourceObject>& resO
 
 bool ResourceParseUtils::ParseResStrArray(const RefPtr<ResourceObject>& resObj, std::vector<std::string>& result)
 {
+    CHECK_NULL_RETURN(resObj, false);
     auto resType = resObj->GetType();
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -306,10 +328,9 @@ bool ResourceParseUtils::ParseResStrArray(const RefPtr<ResourceObject>& resObj, 
 
 bool ResourceParseUtils::ParseResFontFamilies(const RefPtr<ResourceObject>& resObj, std::vector<std::string>& result)
 {
+    CHECK_NULL_RETURN(resObj, false);
     result.clear();
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -329,9 +350,9 @@ bool ResourceParseUtils::ParseResFontFamilies(const RefPtr<ResourceObject>& resO
 
 bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result)
 {
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    CHECK_NULL_RETURN(resObj, false);
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
+    CHECK_NULL_RETURN(resourceWrapper, false);
     auto resId = resObj->GetId();
     if (resId == -1) {
         auto params = resObj->GetParams();
@@ -339,6 +360,7 @@ bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Col
             return false;
         }
         result = resourceWrapper->GetColorByName(params[0].value.value());
+        return true;
     }
 
     auto type = resObj->GetType();
@@ -361,6 +383,7 @@ bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Col
 
 bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result)
 {
+    CHECK_NULL_RETURN(resObj, false);
     std::string u8Result;
     bool ret = ParseResString(resObj, u8Result);
     if (ret) {
@@ -399,14 +422,13 @@ bool ResourceParseUtils::ParseResStringObj(const std::vector<ResourceObjectParam
 
 bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result)
 {
+    CHECK_NULL_RETURN(resObj, false);
     auto type = resObj->GetType();
     if (type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
     auto params = resObj->GetParams();
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -443,12 +465,11 @@ bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, st
 
 bool ResourceParseUtils::ParseResMedia(const RefPtr<ResourceObject>& resObj, std::string& result)
 {
+    CHECK_NULL_RETURN(resObj, false);
     auto type = resObj->GetType();
     auto resIdNum = resObj->GetId();
     if (type != UNKNOWN_RESOURCE_TYPE) {
-        auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-        RefPtr<ThemeConstants> themeConstants = nullptr;
-        auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+        auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
         if (!resourceWrapper) {
             return false;
         }
@@ -491,14 +512,13 @@ bool ResourceParseUtils::ParseResMedia(const RefPtr<ResourceObject>& resObj, std
 
 bool ResourceParseUtils::ParseResBool(const RefPtr<ResourceObject>& resObj, bool& result)
 {
+    CHECK_NULL_RETURN(resObj, false);
     auto type = resObj->GetType();
     if (type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -523,12 +543,8 @@ bool ResourceParseUtils::ParseResBool(const RefPtr<ResourceObject>& resObj, bool
 
 bool ResourceParseUtils::ParseResourceToDouble(const RefPtr<ResourceObject>& resObj, double& result)
 {
-    if (!resObj) {
-        return false;
-    }
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    CHECK_NULL_RETURN(resObj, false);
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -562,7 +578,7 @@ bool ResourceParseUtils::ParseResourceToDouble(const RefPtr<ResourceObject>& res
         result = resourceWrapper->GetDouble(resIdNum);
         return true;
     }
-    return true;
+    return false;
 }
 
 bool ResourceParseUtils::ParseResDouble(const RefPtr<ResourceObject>& resObj, double& result)
@@ -585,12 +601,8 @@ bool ResourceParseUtils::ParseResDimensionVpNG(const RefPtr<ResourceObject>& res
 bool ResourceParseUtils::ParseResDimensionNG(
     const RefPtr<ResourceObject>& resObj, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
-    if (!resObj) {
-        return false;
-    }
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    CHECK_NULL_RETURN(resObj, false);
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -624,7 +636,7 @@ bool ResourceParseUtils::ParseResDimensionNG(
         result = resourceWrapper->GetDimension(resIdNum);
         return true;
     }
-    return true;
+    return false;
 }
 
 bool ResourceParseUtils::ParseResDimensionVp(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
@@ -647,12 +659,8 @@ bool ResourceParseUtils::ParseResDimensionPx(const RefPtr<ResourceObject>& resOb
 bool ResourceParseUtils::ParseResDimension(
     const RefPtr<ResourceObject>& resObj, CalcDimension& result, DimensionUnit defaultUnit)
 {
-    if (!resObj) {
-        return false;
-    }
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    CHECK_NULL_RETURN(resObj, false);
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -694,9 +702,7 @@ bool ResourceParseUtils::ParseResDimension(
 
 bool ResourceParseUtils::ParseResResource(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
 {
-    if (!resObj) {
-        return false;
-    }
+    CHECK_NULL_RETURN(resObj, false);
     auto resIdNum = resObj->GetId();
     auto type = resObj->GetType();
     if (type == UNKNOWN_RESOURCE_TYPE) {
@@ -726,9 +732,7 @@ bool ResourceParseUtils::ParseResResource(const RefPtr<ResourceObject>& resObj, 
 template<class T>
 bool ResourceParseUtils::ConvertFromResObjNG(const RefPtr<ResourceObject>& resObj, T& result)
 {
-    if (!resObj) {
-        return false;
-    }
+    CHECK_NULL_RETURN(resObj, false);
     if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
         double value;
         if (ParseResDouble(resObj, value)) {
@@ -752,9 +756,7 @@ bool ResourceParseUtils::ConvertFromResObjNG(const RefPtr<ResourceObject>& resOb
 template<class T>
 bool ResourceParseUtils::ConvertFromResObj(const RefPtr<ResourceObject>& resObj, T& result)
 {
-    if (!resObj) {
-        return false;
-    }
+    CHECK_NULL_RETURN(resObj, false);
     if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
         double value;
         if (ParseResDouble(resObj, value)) {

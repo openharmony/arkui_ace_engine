@@ -1161,7 +1161,7 @@ bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>&
     result = dimension;
     auto jsRes = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "res"));
     if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
-        !jsRes->IsNull() && !jsRes->IsObject(vm)) {
+        !jsRes->IsNull() && jsRes->IsObject(vm)) {
         auto jsObjRes = jsRes->ToObject(vm);
         CompleteResourceObject(vm, jsObjRes);
         resourceObj = GetResourceObject(vm, jsObjRes);

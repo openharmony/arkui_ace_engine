@@ -32,6 +32,7 @@ void PatternResourceManager::AddResource(
         resCacheMap_.clear();
     }
     resMap_[key] = { resObj, std::move(updateFunc) };
+    resKeyArray_.emplace_back(key);
 }
 
 void PatternResourceManager::AddResCache(const std::string& key, const std::string& value)
@@ -58,11 +59,20 @@ void PatternResourceManager::RemoveResource(const std::string& key)
     if (iter != resMap_.end()) {
         resMap_.erase(iter);
     }
+    auto it = std::find(resKeyArray_.begin(), resKeyArray_.end(), key);
+    if (it != resKeyArray_.end()) {
+        resKeyArray_.erase(it);
+    }
+    resCacheMap_.clear();
 }
 
 void PatternResourceManager::ReloadResources()
 {
-    for (const auto& [key, resourceUpdater] : resMap_) {
+    for (const auto& key : resKeyArray_) {
+        if (!resMap_.count(key)) {
+            continue;
+        }
+        auto resourceUpdater = resMap_[key];
         resourceUpdater.updateFunc(resourceUpdater.obj);
     }
 }
