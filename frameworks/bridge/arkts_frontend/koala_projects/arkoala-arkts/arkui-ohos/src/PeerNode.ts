@@ -96,6 +96,15 @@ export class PeerNode extends IncrementalNode {
         return true
     }
 
+    setReusePoolSize(size: number, reuseKey: string): void {
+        if (!this.isKind(RootPeerType)) {
+            if (this.parent?.isKind(PeerNodeType))
+                (this.parent! as PeerNode).setReusePoolSize(size, reuseKey)
+            return
+        }
+        this._reusePool?.get(reuseKey)?.setMaxSize(size)
+    }
+
     setOnRecycle(cb: () => void): void {
         this._recycleCb = cb
     }
