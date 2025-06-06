@@ -559,7 +559,7 @@ public:
     virtual void SetIntentParam(const std::string& intentInfoSerialized,
         const std::function<void()>&& loadPageCallback, bool isColdStart) {}
 
-    virtual std::string GetTopNavDestinationInfo(bool onlyFullScreen = false)
+    virtual std::string GetTopNavDestinationInfo(bool onlyFullScreen = false, bool needParam = true)
     {
         return "";
     }
