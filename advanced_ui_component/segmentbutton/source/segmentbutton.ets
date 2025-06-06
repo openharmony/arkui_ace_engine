@@ -15,7 +15,7 @@
 import curves from '@ohos.curves';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import util from '@ohos.util';
-import { LengthMetrics } from '@ohos.arkui.node';
+import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import I18n from '@ohos.i18n';
 
 const MIN_ITEM_COUNT = 2
@@ -954,38 +954,41 @@ struct SegmentButtonItemArrayComponent {
     const isSingleSelect = this.options.type === 'tab' || !(this.options.multiply ?? false);
     const buttonsLength =
       this.options.buttons ? Math.min(this.options.buttons.length, this.buttonItemsSize.length) : MIN_ITEM_COUNT;
-    const setAllCorners = (array: LocalizedBorderRadiuses[], index: number, value: number) => {
+
+    const setAllCorners = (array: LocalizedBorderRadiuses[], index: number, lengthMetrics: LengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
 
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(safeValue);
-      array[index].topEnd = LengthMetrics.vp(safeValue);
-      array[index].bottomStart = LengthMetrics.vp(safeValue);
-      array[index].bottomEnd = LengthMetrics.vp(safeValue);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      array[index].topStart = safeLengthMetrics;
+      array[index].topEnd = safeLengthMetrics;
+      array[index].bottomStart = safeLengthMetrics;
+      array[index].bottomEnd = safeLengthMetrics;
     };
 
-    const setLeftCorners = (array: LocalizedBorderRadiuses[], index: number, value: number) => {
+    const setLeftCorners = (array: LocalizedBorderRadiuses[], index: number, lengthMetrics: LengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(safeValue);
-      array[index].topEnd = LengthMetrics.vp(0);
-      array[index].bottomStart = LengthMetrics.vp(safeValue);
-      array[index].bottomEnd = LengthMetrics.vp(0);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      const zeroLengthMetrics = LengthMetrics.vp(0);
+      array[index].topStart = safeLengthMetrics;
+      array[index].topEnd = zeroLengthMetrics;
+      array[index].bottomStart = safeLengthMetrics;
+      array[index].bottomEnd = zeroLengthMetrics;
     };
 
-    const setRightCorners = (array: LocalizedBorderRadiuses[], index: number, value: number) => {
+    const setRightCorners = (array: LocalizedBorderRadiuses[], index: number, lengthMetrics: LengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(0);
-      array[index].topEnd = LengthMetrics.vp(safeValue);
-      array[index].bottomStart = LengthMetrics.vp(0);
-      array[index].bottomEnd = LengthMetrics.vp(safeValue);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      const zeroLengthMetrics = LengthMetrics.vp(0);
+      array[index].topStart = zeroLengthMetrics;
+      array[index].topEnd = safeLengthMetrics;
+      array[index].bottomStart = zeroLengthMetrics;
+      array[index].bottomEnd = safeLengthMetrics;
     };
 
     const setMiddleCorners = (array: LocalizedBorderRadiuses[], index: number) => {
@@ -1001,19 +1004,27 @@ struct SegmentButtonItemArrayComponent {
     for (let index = 0; index < this.buttonBorderRadius.length; index++) {
       let halfButtonItemsSizeHeight = this.buttonItemsSize[index].height as number / 2;
       let radius = this.options.iconTextRadius ?? halfButtonItemsSizeHeight; // default radius
-
+      // Determine which border radius to use based on mode setting
       const isCustomMode = this.options.borderRadiusMode === BorderRadiusMode.CUSTOM &&
         this.options.itemBorderRadius !== undefined;
-      const radiusValue = isCustomMode ? this.options.itemBorderRadius!.value : radius;
+
+      let radiusLengthMetrics: LengthMetrics;
+      if (isCustomMode && this.options.itemBorderRadius) {
+        // Use custom border radius from options
+        radiusLengthMetrics = this.options.itemBorderRadius;
+      } else {
+        // Use default calculated radius value
+        radiusLengthMetrics = LengthMetrics.vp(radius);
+      }
       if (isSingleSelect) {
         // single-select
-        setAllCorners(borderRadiusArray, index, radiusValue);
+        setAllCorners(borderRadiusArray, index, radiusLengthMetrics);
       } else {
         // multi-select
         if (index === 0) {
-          setLeftCorners(borderRadiusArray, index, radiusValue);
+          setLeftCorners(borderRadiusArray, index, radiusLengthMetrics);
         } else if (index === buttonsLength - 1) {
-          setRightCorners(borderRadiusArray, index, radiusValue);
+          setRightCorners(borderRadiusArray, index, radiusLengthMetrics);
         } else {
           setMiddleCorners(borderRadiusArray, index);
         }
@@ -1774,13 +1785,46 @@ function resourceToNumber(context: Context | undefined, resource: Resource, defa
   }
 }
 
-function getBackgroundBorderRadius(options: SegmentButtonOptions, defaultRadius: number): number {
+class LengthMetricsUtils {
+  private static instance?: LengthMetricsUtils;
+
+  private constructor() {
+  }
+
+  public static getInstance(): LengthMetricsUtils {
+    if (!LengthMetricsUtils.instance) {
+      LengthMetricsUtils.instance = new LengthMetricsUtils();
+    }
+    return LengthMetricsUtils.instance;
+  }
+
+  stringify(metrics: LengthMetrics): Dimension {
+    switch (metrics.unit) {
+      case LengthUnit.PX:
+        return `${metrics.value}px`;
+      case LengthUnit.VP:
+        return `${metrics.value}vp`;
+      case LengthUnit.FP:
+        return `${metrics.value}fp`;
+      case LengthUnit.PERCENT:
+        return `${metrics.value}%`;
+      case LengthUnit.LPX:
+        return `${metrics.value}lpx`;
+    }
+  }
+
+  isNaturalNumber(metrics: LengthMetrics): boolean {
+    return metrics.value >= 0;
+  }
+}
+
+function getBackgroundBorderRadius(options: SegmentButtonOptions, defaultRadius: number): Length {
   if (options.borderRadiusMode === BorderRadiusMode.CUSTOM) {
     // For capsule multi-select buttons, use itemBorderRadius
     if (options.type === 'capsule' && (options.multiply ?? false) && options.itemBorderRadius !== undefined) {
-      return options.itemBorderRadius.value;
+      return LengthMetricsUtils.getInstance().stringify(options.itemBorderRadius);
     } else if (options.backgroundBorderRadius !== undefined) {
-      return options.backgroundBorderRadius.value;
+      return LengthMetricsUtils.getInstance().stringify(options.backgroundBorderRadius);
     }
   }
 
