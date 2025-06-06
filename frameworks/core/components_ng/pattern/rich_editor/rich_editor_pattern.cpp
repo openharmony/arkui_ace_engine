@@ -3092,9 +3092,10 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
     spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
     spanNode->UpdateLineBreakStrategy(style.lineBreakStrategy.value_or(LineBreakStrategy::GREEDY));
     spanNode->UpdateTextVerticalAlign(style.textVerticalAlign.value_or(TextVerticalAlign::BASELINE));
+    auto paragraphSpacing = spanNode->GetParagraphSpacing();
     if (style.paragraphSpacing.has_value()) {
         spanNode->UpdateParagraphSpacing(style.paragraphSpacing.value());
-    } else {
+    } else if (!NearEqual(paragraphSpacing->Value(), 0.0f) || paragraphSpacing->Unit() != DimensionUnit::PX) {
         spanNode->ResetParagraphSpacing();
     }
     auto leadingMarginValue = spanNode->GetLeadingMarginValue({});
