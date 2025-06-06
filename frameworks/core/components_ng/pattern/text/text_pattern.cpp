@@ -135,9 +135,6 @@ void TextPattern::OnAttachToFrameNode()
     InitSurfacePositionChangedCallback();
     pipeline->AddWindowStateChangedCallback(host->GetId());
     pipeline->AddWindowSizeChangeCallback(host->GetId());
-    if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
-        ProcessVisibleAreaCallback();
-    }
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto theme = pipeline->GetTheme<TextTheme>();
@@ -3707,6 +3704,7 @@ void TextPattern::OnModifyDone()
     }
     RecoverCopyOption();
     RegisterFormVisibleChangeCallback();
+    RegisterVisibleAreaChangeCallback();
 }
 
 void TextPattern::UpdateMarqueeStartPolicy()
@@ -4412,21 +4410,6 @@ void TextPattern::OnVisibleChange(bool isVisible)
         }
         ResumeSymbolAnimation();
     }
-}
-
-void TextPattern::ProcessVisibleAreaCallback()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnVisibleChange(visible);
-    };
-    std::vector<double> ratioList = { 0.0 };
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
 }
 
 void TextPattern::PauseSymbolAnimation()
@@ -6346,6 +6329,36 @@ void TextPattern::RegisterFormVisibleChangeCallback()
     };
     formMgr->AddFormVisibleChangeNode(host, formCallback);
     hasRegisterFormVisibleCallback_ = true;
+}
+
+void TextPattern::RegisterVisibleAreaChangeCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    bool isLoopAnimation = layoutProperty->GetIsLoopAnimation();
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (isLoopAnimation && !isRegisteredAreaCallback_) {
+        isRegisteredAreaCallback_ = true;
+        auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnVisibleChange(visible);
+        }
+        std::vector<double> ratioList = {0.0};
+        pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+    } else if (!isLoopAnimation && isRegisteredAreaCallback_) {
+        isRegisteredAreaCallback_ = false;
+        pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+        host->CleanVisibleAreaInnerCallback();
+    } else {
+        return;
+    }
 }
 
 void TextPattern::RemoveFormVisibleChangeCallback(int32_t id)

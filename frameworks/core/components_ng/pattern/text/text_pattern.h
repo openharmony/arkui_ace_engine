@@ -1108,11 +1108,11 @@ private:
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
     RefPtr<SpanItem> FindSpanItemByOffset(const PointF& textOffset);
     void UpdateMarqueeStartPolicy();
-    void ProcessVisibleAreaCallback();
     void PauseSymbolAnimation();
     void ResumeSymbolAnimation();
     bool IsLocationInFrameRegion(const Offset& localOffset) const;
     void RegisterFormVisibleChangeCallback();
+    void RegisterVisibleAreaChangeCallback();
     void HandleFormVisibleChange(bool visible);
     void RemoveFormVisibleChangeCallback(int32_t id);
     void GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
@@ -1183,6 +1183,7 @@ private:
     bool isTryEntityDragging_ = false;
     bool isShowAIMenuOption_ = false;
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
+    bool isRegisteredAreaCallback_ = false;
 };
 } // namespace OHOS::Ace::NG
 
