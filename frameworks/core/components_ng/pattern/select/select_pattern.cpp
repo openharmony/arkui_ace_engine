@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "base/utils/utf_helper.h"
 #include "core/animation/curves.h"
+#include "core/common/ace_engine.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
@@ -296,6 +297,18 @@ void SelectPattern::RegisterOnClick()
         if (selected > -1 && selected < static_cast<int32_t>(pattern->GetOptions().size())) {
             pattern->UpdateSelectedProps(selected);
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+        CHECK_NULL_VOID(selectLayoutProps);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false) &&
+            NG::ViewAbstractModelNG::CheckSkipMenuShow(host)) {
+            return;
+        }
         pattern->ShowSelectMenu();
     };
     auto gestureHub = host->GetOrCreateGestureEventHub();
@@ -303,6 +316,72 @@ void SelectPattern::RegisterOnClick()
         return;
     }
     gestureHub->BindMenu(std::move(callback));
+
+    auto targetNode = RawPtr(host);
+    CHECK_NULL_VOID(targetNode);
+    BindMenuTouch(targetNode, gestureHub);
+}
+
+void SelectPattern::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto weakTarget = AceType::WeakClaim(targetNode);
+    auto touchCallback = [weakTarget](const TouchEventInfo& info) {
+        auto targetNode = weakTarget.Upgrade();
+        CHECK_NULL_VOID(targetNode);
+        const auto& touches = info.GetTouches();
+        CHECK_EQUAL_VOID(touches.empty(), true);
+        auto touchType = touches.front().GetTouchType();
+        auto targetId = targetNode->GetId();
+        auto subwindow =
+            SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+        CHECK_NULL_VOID(subwindow);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto subwindowPipline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(subwindowPipline);
+        auto subwindowOverlay = subwindowPipline->GetOverlayManager();
+        CHECK_NULL_VOID(subwindowOverlay);
+        if (touchType == TouchType::DOWN) {
+            auto wrapperNode = subwindowOverlay->GetMenuNode(targetId);
+            CHECK_NULL_VOID(wrapperNode);
+            auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
+            if (wrapperPattern->IsShow() || wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+                subwindowOverlay->SkipMenuShow(targetId);
+            }
+        } else if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) &&
+                   subwindowOverlay->CheckSkipMenuShow(targetId)) {
+            auto weakOverlay = AceType::WeakClaim(AceType::RawPtr(subwindowOverlay));
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weakOverlay, targetId]() mutable {
+                    auto subwindowOverlay = weakOverlay.Upgrade();
+                    CHECK_NULL_VOID(subwindowOverlay);
+                    subwindowOverlay->ResumeMenuShow(targetId);
+                },
+                TaskExecutor::TaskType::PLATFORM, "ArkUIResumeMenuShow");
+        }
+    };
+    gestrueHub->RegisterMenuOnTouch(touchCallback);
+}
+
+bool SelectPattern::CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+    CHECK_NULL_RETURN(subwindow, false);
+    auto childContainerId = subwindow->GetChildContainerId();
+    auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+    CHECK_NULL_RETURN(childContainer, false);
+    auto subwindowPipline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(subwindowPipline, false);
+    auto subwindowOverlay = subwindowPipline->GetOverlayManager();
+    CHECK_NULL_RETURN(subwindowOverlay, false);
+    return subwindowOverlay->CheckSkipMenuShow(targetNode->GetId());
 }
 
 void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
