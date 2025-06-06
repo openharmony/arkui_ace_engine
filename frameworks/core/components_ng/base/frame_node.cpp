@@ -1365,8 +1365,8 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
     bool parentRerender = parentNode ? parentNode->GetRerenderable() : GetRerenderable();
     // bool parentActive = parentNode ? parentNode->IsActive() : true;
     SetRerenderable(parentRerender && ((IsVisible() && IsActive()) || CheckMeasureAnyway()));
-    
-    if (GetRerenderable()) {
+
+    if (GetRerenderable() && GetContext()) {
         SetDarkMode(GetContext()->GetColorMode() == ColorMode::DARK);
     }
 
