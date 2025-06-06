@@ -1552,4 +1552,21 @@ HWTEST_F(TextPatternTestNg, HandleSingleClickEvent018, TestSize.Level1)
     textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->moveOverClickThreshold_, false);
 }
+
+/**
+ * @tc.name: RegisterVisibleAreaChangeCallback019
+ * @tc.desc: Test RegisterVisibleAreaChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, RegisterVisibleAreaChangeCallback019, TestSize.Level1)
+{
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    textPattern->frameNode_.Upgrade() = frameNode;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    textPattern->RegisterVisibleAreaChangeCallback();
+}
 } // namespace OHOS::Ace::NG
