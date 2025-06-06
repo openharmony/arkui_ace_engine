@@ -6349,7 +6349,7 @@ void TextPattern::RegisterVisibleAreaChangeCallback()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnVisibleChange(visible);
-        }
+        };
         std::vector<double> ratioList = {0.0};
         pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
     } else if (!isLoopAnimation && isRegisteredAreaCallback_) {
