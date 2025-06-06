@@ -7213,4 +7213,56 @@ HWTEST_F(NativeNodeTest, NativeNodeTest143, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
+
+/**
+ * @tc.name: NativeNodeTest144
+ * @tc.desc: Test ScrollBarMargin function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest144, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+    ASSERT_NE(list, nullptr);
+    ArkUI_NumberValue value1[] = { { .f32 = 10.0f }, { .f32 = 50.0f } };
+    ArkUI_AttributeItem item = { value1, sizeof(value1) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_SCROLL_BAR_MARGIN, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto ret = nodeAPI->getAttribute(list, NODE_SCROLL_BAR_MARGIN);
+    EXPECT_EQ(ret->value[0].f32, 10.0);
+    EXPECT_EQ(ret->value[1].f32, 50.0);
+
+    ArkUI_NumberValue value2[] = { { .f32 = -1.0f }, { .f32 = -1.0f } };
+    item = { value2, sizeof(value2) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_SCROLL_BAR_MARGIN, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ret = nodeAPI->getAttribute(list, NODE_SCROLL_BAR_MARGIN);
+    EXPECT_EQ(ret->value[0].f32, 0.0);
+    EXPECT_EQ(ret->value[1].f32, 0.0);
+
+    ArkUI_NumberValue value3[] = { { .f32 = 0.5f }, { .f32 = 0.5f } };
+    item = { value3, sizeof(value3) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_SCROLL_BAR_MARGIN, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ret = nodeAPI->getAttribute(list, NODE_SCROLL_BAR_MARGIN);
+    EXPECT_EQ(ret->value[0].f32, 0.5);
+    EXPECT_EQ(ret->value[1].f32, 0.5);
+
+    ArkUI_NumberValue value4[] = {};
+    item = { value4, 0, nullptr, nullptr };
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_SCROLL_BAR_MARGIN, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ret = nodeAPI->getAttribute(list, NODE_SCROLL_BAR_MARGIN);
+    EXPECT_EQ(ret->value[0].f32, 0.0);
+    EXPECT_EQ(ret->value[1].f32, 0.0);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(list, NODE_SCROLL_BAR_MARGIN), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ret = nodeAPI->getAttribute(list, NODE_SCROLL_BAR_MARGIN);
+    EXPECT_EQ(ret->value[0].f32, 0.0);
+    EXPECT_EQ(ret->value[1].f32, 0.0);
+
+    nodeAPI->disposeNode(list);
+}
 } // namespace OHOS::Ace
