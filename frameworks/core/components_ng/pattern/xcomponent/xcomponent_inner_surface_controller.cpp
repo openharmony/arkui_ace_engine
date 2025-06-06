@@ -41,6 +41,7 @@ int32_t XComponentInnerSurfaceController::SetRenderFitBySurfaceId(
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
     CHECK_NULL_RETURN(rosenRenderContext, 1);
     std::shared_ptr<Rosen::RSNode> rsNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_RETURN(rsNode, 1);
     auto rsSurfaceNode = rsNode->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_RETURN(rsSurfaceNode, 1);
     rsSurfaceNode->SetFrameGravityNewVersionEnabled(isRenderFitNewVersionEnabled);
@@ -65,6 +66,7 @@ int32_t XComponentInnerSurfaceController::GetRenderFitBySurfaceId(
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
     CHECK_NULL_RETURN(rosenRenderContext, 1);
     std::shared_ptr<Rosen::RSNode> rsNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_RETURN(rsNode, 1);
     auto rsSurfaceNode = rsNode->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_RETURN(rsSurfaceNode, 1);
     isRenderFitNewVersionEnabled = rsSurfaceNode->GetFrameGravityNewVersionEnabled();

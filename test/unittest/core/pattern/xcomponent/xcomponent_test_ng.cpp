@@ -1461,5 +1461,12 @@ HWTEST_F(XComponentTestNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Level1)
             EXPECT_EQ(code, 1);
         }
     }
+    /**
+     * @tc.steps: step4. call SetRenderFitBySurfaceId after the renderContext has been destroyed.
+     * @tc.expected: the return value equals 1
+     */
+    pattern->handlingSurfaceRenderContext_.Reset();
+    code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(SURFACE_ID, RenderFit::CENTER, true);
+    EXPECT_EQ(code, 1);
 }
 } // namespace OHOS::Ace::NG
