@@ -501,6 +501,19 @@ void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
     AvoidAreasUpdateOnUIExtension(context, avoidAreas);
 }
 
+void ClearAllMenuPopup(int32_t instanceId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto overlay = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->HideAllMenusWithoutAnimation(false);
+    overlay->HideAllPopupsWithoutAnimation();
+    SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
+}
+
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
 public:
     explicit OccupiedAreaChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -875,7 +888,7 @@ public:
                 auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
                 context->OnFoldStatusChanged(aceFoldStatus);
                 if (SystemProperties::IsSuperFoldDisplayDevice()) {
-                    SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
+                    ClearAllMenuPopup(instanceId);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged");
@@ -977,15 +990,7 @@ public:
             [instanceId = instanceId_, isWindowSizeChanged] {
                 CHECK_EQUAL_VOID(isWindowSizeChanged, false);
                 ContainerScope scope(instanceId);
-                auto container = Platform::AceContainer::GetContainer(instanceId);
-                CHECK_NULL_VOID(container);
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-                CHECK_NULL_VOID(pipeline);
-                auto overlay = pipeline->GetOverlayManager();
-                CHECK_NULL_VOID(overlay);
-                overlay->HideAllMenusWithoutAnimation(false);
-                overlay->HideAllPopupsWithoutAnimation();
-                SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
+                ClearAllMenuPopup(instanceId);
             },
             TaskExecutor::TaskType::UI, "ArkUIWindowRectChange");
     }
