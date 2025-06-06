@@ -108,6 +108,8 @@ public:
     static void SetStrokeWidth(const JSCallbackInfo& info);
     static void SetStrokeColor(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static void SetOnWillAttachIME(const JSCallbackInfo& info);
+    static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

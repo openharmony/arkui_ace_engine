@@ -198,4 +198,15 @@ std::string SearchTextFieldPattern::GetPlaceholderFont() const
         "size", layoutProperty->GetPlaceholderFontSizeValue(searchTheme->GetFontSize()).ToString().c_str());
     return jsonValue->ToString();
 }
+
+IMEClient SearchTextFieldPattern::GetIMEClientInfo()
+{
+    IMEClient clientInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, clientInfo);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(parentFrameNode, clientInfo);
+    clientInfo.nodeId = parentFrameNode->GetId();
+    return clientInfo;
+}
 } // namespace OHOS::Ace::NG
