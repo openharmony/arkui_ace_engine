@@ -283,6 +283,10 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
         paragraphStyleObj->SetProperty<double>("paragraphSpacing",
             textStyleResult.paragraphSpacing.value().ConvertToFp());
     }
+    if (textStyleResult.textVerticalAlign.has_value()) {
+        paragraphStyleObj->SetProperty<int32_t>("textVerticalAlign",
+            textStyleResult.textVerticalAlign.value());
+    }
     return paragraphStyleObj;
 }
 
@@ -369,6 +373,9 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     obj->SetPropertyObject("leadingMargin", lmObj);
     if (info.paragraphSpacing.has_value()) {
         obj->SetProperty<double>("paragraphSpacing", info.paragraphSpacing.value());
+    }
+    if (info.textVerticalAlign.has_value()) {
+        obj->SetProperty<int32_t>("textVerticalAlign", info.textVerticalAlign.value());
     }
     return obj;
 }
@@ -2256,6 +2263,21 @@ void JSRichEditorBaseController::ParseParagraphSpacing(const JSRef<JSObject>& st
     }
 }
 
+void JSRichEditorBaseController::ParseTextVerticalAlign(const JSRef<JSObject>& styleObject,
+    struct UpdateParagraphStyle& style)
+{
+    auto textVerticalAlignObj = styleObject->GetProperty("textVerticalAlign");
+    if (textVerticalAlignObj->IsNull() || !textVerticalAlignObj->IsNumber()) {
+        return;
+    }
+
+    auto textVerticalAlign = static_cast<TextVerticalAlign>(textVerticalAlignObj->ToNumber<int32_t>());
+    if (textVerticalAlign < TextVerticalAlign::BASELINE || textVerticalAlign > TextVerticalAlign::TOP) {
+        textVerticalAlign = TextVerticalAlign::BASELINE;
+    }
+    style.textVerticalAlign = textVerticalAlign;
+}
+
 bool JSRichEditorBaseController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2268,7 +2290,7 @@ bool JSRichEditorBaseController::ParseParagraphStyle(const JSRef<JSObject>& styl
         ParseWordBreakParagraphStyle(styleObject, style);
     }
     ParseParagraphSpacing(styleObject, style);
-
+    ParseTextVerticalAlign(styleObject, style);
     auto lm = styleObject->GetProperty("leadingMargin");
     if (lm->IsObject()) {
         // [LeadingMarginPlaceholder]
