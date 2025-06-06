@@ -123,6 +123,7 @@ public:
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
     static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
     static WaterFlowLayoutMode GetLayoutMode(FrameNode* frameNode);
+    static void SetFooter(FrameNode* frameNode, std::function<void()>&& footer);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H
