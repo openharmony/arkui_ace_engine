@@ -24,6 +24,25 @@ import { LazyForEachImpl } from './LazyForEachImpl';
 import { ArkColumnPeer } from '../component/column';
 import { InternalListener } from '../DataChangeListener';
 
+/** @memo:intrinsic */
+export function RepeatImpl<T>(
+    /** @memo */
+    style: ((attributes: UIRepeatAttribute<T>) => void) | undefined,
+    arr: RepeatArray<T>
+): void {
+    const repeat = remember(() => {
+        return new UIRepeatAttributeImpl<T>();
+    });
+    repeat.updateDataLength(arr.length);
+    style?.(repeat);
+    if (!repeat.itemGenFuncs_.get(RepeatEachFuncType)) {
+        throw new Error('Repeat item builder function unspecified. Usage error!');
+    }
+    repeat.isVirtualScroll_
+        ? virtualRender<T>(arr, repeat.itemGenFuncs_, repeat.keyGenFunc_, repeat.ttypeGenFunc_, repeat.reusable_)
+        : nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
+}
+
 class RepeatItemImpl<T> implements RepeatItem<T> {
     __item: T;
     __index: number;
@@ -237,23 +256,4 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
         /** @memo */
         itemGenerator(ri);
     });
-}
-
-/** @memo */
-export function RepeatImpl<T>(
-    /** @memo */
-    style: ((attributes: UIRepeatAttribute<T>) => void) | undefined,
-    arr: RepeatArray<T>
-): void {
-    const repeat = remember(() => {
-        return new UIRepeatAttributeImpl<T>();
-    });
-    repeat.updateDataLength(arr.length)
-    style?.(repeat);
-    if (!repeat.itemGenFuncs_.get(RepeatEachFuncType)) {
-        throw new Error('Repeat item builder function unspecified. Usage error!');
-    }
-    repeat.isVirtualScroll_
-        ? virtualRender<T>(arr, repeat.itemGenFuncs_, repeat.keyGenFunc_, repeat.ttypeGenFunc_, repeat.reusable_)
-        : nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
 }

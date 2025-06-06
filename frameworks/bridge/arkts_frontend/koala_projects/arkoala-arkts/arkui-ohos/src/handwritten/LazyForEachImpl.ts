@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, DataNode, memo, scheduleCallback } from "@koalaui/runtime";
-import { pointer } from "@koalaui/interop";
-import { LazyForEachType, PeerNode, PeerNodeType } from "../PeerNode";
+import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime";
+import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop";
+import { PeerNode } from "../PeerNode";
 import { InternalListener } from "../DataChangeListener";
 import { setNeedCreate } from "../ArkComponentRoot";
-import { int32, KoalaCallsiteKey } from "@koalaui/common";
+import { int32 } from "@koalaui/common";
 import { IDataSource } from "../component/lazyForEach";
 import { LazyForEachOps } from "../component";
 import { LazyItemNode } from "./LazyItemNode";
+import { CustomComponent } from "../component/customComponent";
 
 let globalLazyItems: Set<ComputableState<LazyItemNode>> = new Set<ComputableState<LazyItemNode>>()
 export function updateLazyItems() {
@@ -30,23 +31,23 @@ export function updateLazyItems() {
     }
 }
 
-/** @memo */
+/** @memo:intrinsic */
 export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
     const parent = contextNode<PeerNode>()
-    let pool = rememberDisposable(() => new LazyItemPool(parent), (pool?: LazyItemPool) => {
+    let pool = rememberDisposable(() => new LazyItemPool(parent, CustomComponent.current), (pool?: LazyItemPool) => {
         pool?.dispose()
     })
     let changeCounter = rememberMutableState(0)
+    changeCounter.value //subscribe
     let listener = remember(() => {
         let res = new InternalListener(parent.peer.ptr, changeCounter)
         dataSource.registerDataChangeListener(res)
         return res
     })
-    changeCounter.value // subscribe
     const changeIndex = listener.flush(0) // first item index that's affected by DataChange
     if (changeIndex < Number.POSITIVE_INFINITY) {
         scheduleCallback(() => {
@@ -54,57 +55,55 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
         })
     }
 
-    itemGenerator // subscribe to param
     /**
      * provide totalCount and callbacks to the backend
      */
     let createCallback = (index: int32) => {
-        return pool.getOrCreate(index, dataSource.getData(index), itemGenerator)
+        try {
+            return pool.getOrCreate(index, dataSource.getData(index), itemGenerator)
+        } catch (error) {
+            InteropNativeModule._NativeLog(`error during createLazyItem: ${error}`)
+            return nullptr
+        }
     }
     LazyForEachOps.Sync(parent.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
 }
 
-class LazyForEachIdentifier {
-    constructor(id: KoalaCallsiteKey, totalCnt: int32, activeCnt: int32) {
-        this.id = id
-        this.totalCnt = totalCnt
-        this.activeCnt = activeCnt
-    }
-    readonly id: KoalaCallsiteKey
-    readonly totalCnt: int32
-    readonly activeCnt: int32
-}
+class LazyItemCompositionContext {
+    private prevFrozen: boolean
+    private prevNeedCreate: boolean
+    private prevCurrent?: Object
 
-/**
- * @param id unique identifier of LazyForEach
- * @returns item offset of LazyForEach in parent's children
- */
-/** @memo */
-function getOffset(parent: PeerNode, id: KoalaCallsiteKey): int32 {
-    let offset = 0
-    for (let child = parent.firstChild; child; child = child!.nextSibling) {
-        // corresponding DataNode is attached after the component items
-        let info = DataNode.extract<LazyForEachIdentifier>(LazyForEachType, child!!)
-        if (info?.id === id) {
-            offset -= info!.activeCnt
-            // console.log(`offset = ${offset}`)
-            return offset
-        } else if (info) {
-            offset += info!.totalCnt - info!.activeCnt // active nodes are already counted
-        } else if (child!.isKind(PeerNodeType)) {
-            ++offset
-        }
+    constructor(parentComponent?: Object) {
+        const manager = GlobalStateManager.instance
+        this.prevFrozen = manager.frozen
+        manager.frozen = true
+        this.prevNeedCreate = setNeedCreate(true) // ensure synchronous creation of all inner CustomComponent
+        this.prevCurrent = CustomComponent.current
+        CustomComponent.current = parentComponent // setup CustomComponent context to link with @Provide variables
     }
-    return offset // DataNode not found, maybe throw error?
+
+    exit(): void {
+        CustomComponent.current = this.prevCurrent
+        setNeedCreate(this.prevNeedCreate)
+        GlobalStateManager.instance.frozen = this.prevFrozen
+    }
 }
 
 class LazyItemPool implements Disposable {
     private _activeItems = new Map<int32, ComputableState<LazyItemNode>>()
     private _parent: PeerNode
+    private _componentRoot?: Object
     disposed: boolean = false
 
-    constructor(parent: PeerNode) {
+    /**
+     * 
+     * @param parent direct parent node (should be the scroll container node)
+     * @param root root object of the current CustomComponent
+     */
+    constructor(parent: PeerNode, root?: Object) {
         this._parent = parent
+        this._componentRoot = root
     }
 
     dispose(): void {
@@ -126,27 +125,21 @@ class LazyItemPool implements Disposable {
     ): pointer {
         if (this._activeItems.has(index)) {
             const node = this._activeItems.get(index)!
-            if (node.recomputeNeeded) {
-                console.log(`recomputeNeeded: ${index}`)
-            }
             return node.value.getPeerPtr()
         }
 
         const manager = GlobalStateManager.instance
         const node = manager.updatableNode<LazyItemNode>(new LazyItemNode(this._parent),
             (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
-                setNeedCreate(true) // ensure synchronous creation of CustomComponent
+                let scope = new LazyItemCompositionContext(this._componentRoot)
                 memoEntry2<T, number, void>(
                     context,
-                    index, // using index to simplify reuse process
+                    0,
                     itemGenerator,
                     data,
                     index
                 )
-                setNeedCreate(false)
-                manager.frozen = frozen
+                scope.exit()
             }
         )
 
@@ -176,6 +169,10 @@ class LazyItemPool implements Disposable {
      */
     updateActiveRange(start: int32, end: int32) {
         if (start > end) return
-        this.pruneBy(index => index < start || index > end)
+        try {
+            this.pruneBy(index => index < start || index > end)
+        } catch (error) {
+            InteropNativeModule._NativeLog(`error during LazyItem pruning: ${error}`)
+        }
     }
 }
