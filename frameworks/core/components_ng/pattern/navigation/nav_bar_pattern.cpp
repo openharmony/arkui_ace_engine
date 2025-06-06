@@ -197,7 +197,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
         MenuParam menuParam;
         menuParam.isShowInSubWindow = false;
-         if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
             menuParam.isShowInSubWindow = true;
         }
         auto targetId = barItemNode->GetId();
