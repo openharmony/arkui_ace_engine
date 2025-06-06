@@ -396,7 +396,7 @@ public:
     {
         HandleSysScaleChanged();
         return MakeRefPtr<RichEditorLayoutAlgorithm>(
-            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder());
+            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder(), GetAISpanMap());
     }
 
     void HandleSysScaleChanged()
@@ -1316,12 +1316,7 @@ public:
 
     const std::map<int32_t, AISpan>& GetAISpanMap() override
     {
-        auto& aiSpanMap = dataDetectorAdapter_->aiSpanMap_;
-        if (aiSpanMap != lastAISpanMap_) {
-            paragraphCache_.Clear();
-            lastAISpanMap_ = aiSpanMap;
-        }
-        return aiSpanMap;
+        return dataDetectorAdapter_->aiSpanMap_;
     }
 
     void SetTextDetectEnable(bool enable) override
