@@ -963,6 +963,7 @@ public:
     std::u16string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
     uint32_t GetMaxLines() const;
+    uint32_t GetMinLines() const;
     std::string GetInputFilter() const;
     std::string GetCopyOptionString() const;
     std::string GetInputStyleString() const;
