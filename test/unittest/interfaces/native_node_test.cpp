@@ -31,6 +31,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/error/error_code.h"
+#include "frameworks/core/components_ng/base/ui_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -7264,5 +7265,69 @@ HWTEST_F(NativeNodeTest, NativeNodeTest144, TestSize.Level1)
     EXPECT_EQ(ret->value[1].f32, 0.0);
 
     nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeTest_GetNodeHandleByUniqueId_001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId and OH_ArkUI_NodeUtils_GetNodeUniqueId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_GetNodeHandleByUniqueId_001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle column = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    ArkUI_NumberValue value[] = { 480 };
+    ArkUI_AttributeItem item = { value, 1 };
+    nodeAPI->setAttribute(column, NODE_WIDTH, &item);
+    value[0].f32 = 720;
+    nodeAPI->setAttribute(column, NODE_HEIGHT, &item);
+    int32_t uniqueId = 1;
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetNodeUniqueId(column, &uniqueId), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId(uniqueId, &column), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeTest_GetNodeHandleByUniqueId_002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId and OH_ArkUI_NodeUtils_GetNodeUniqueId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_GetNodeHandleByUniqueId_002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle column = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    ArkUI_NumberValue value[] = { 480 };
+    ArkUI_AttributeItem item = { value, 1 };
+    nodeAPI->setAttribute(column, NODE_WIDTH, &item);
+    value[0].f32 = 720;
+    nodeAPI->setAttribute(column, NODE_HEIGHT, &item);
+    auto columnId = 0;
+    auto* currentNode = reinterpret_cast<NG::UINode*>(column->uiNodeHandle);
+    currentNode->SetUndefinedNodeId();
+    OH_ArkUI_NodeUtils_GetNodeUniqueId(column, &columnId);
+    EXPECT_EQ(columnId, -1);
+}
+
+/**
+ * @tc.name: NativeNodeTest_GetNodeHandleByUniqueId_003
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId and OH_ArkUI_NodeUtils_GetNodeUniqueId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_GetNodeHandleByUniqueId_003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle button = nodeAPI->createNode(ARKUI_NODE_BUTTON);
+    ArkUI_NumberValue value[] = { 480 };
+    ArkUI_AttributeItem item = { value, 1 };
+    nodeAPI->setAttribute(button, NODE_WIDTH, &item);
+    value[0].f32 = 320;
+    nodeAPI->setAttribute(button, NODE_HEIGHT, &item);
+    nodeAPI->disposeNode(button);
+    button = nullptr;
+    auto buttonId = 0;
+    OH_ArkUI_NodeUtils_GetNodeUniqueId(button, &buttonId);
+    EXPECT_EQ(buttonId, -1);
 }
 } // namespace OHOS::Ace

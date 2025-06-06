@@ -1536,6 +1536,14 @@
         "name": "OH_ArkUI_NodeUtils_GetAttachedNodeHandleById"
     },
     {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_NodeUtils_GetNodeUniqueId"
+    },
+    {
         "first_introduced": "15",
         "name": "OH_ArkUI_NodeUtils_GetWindowInfo"
     },
