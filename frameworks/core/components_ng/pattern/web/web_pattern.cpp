@@ -224,6 +224,11 @@ std::mutex pipCallbackMapMutex_;
 void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "PipStartPipCallback %{public}d", controllerId);
+    if (g_currentControllerId != controllerId) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not current %{public}d",
+            g_currentControllerId);
+        return;
+    }
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     auto it = pipCallbackMap_.find(controllerId);
     if (it != pipCallbackMap_.end()) {
@@ -243,10 +248,15 @@ void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surf
     }
 }
 
-void PipLifeCycleCallback(uint32_t controllerId, PictureInPicture_PipState state, int32_t errorCode)
+void PipLifecycleCallback(uint32_t controllerId, PictureInPicture_PipState state, int32_t errorCode)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "PipLifeCycleCallback, controllerId:%{public}u, "
         "PipState:%{public}d, errorCode:%{public}d", controllerId, state, errorCode);
+    if (g_currentControllerId != controllerId) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not current %{public}d",
+            g_currentControllerId);
+        return;
+    }
     uint32_t event;
     {
         std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
@@ -280,6 +290,11 @@ void PipControlEventCallback(
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "PipControlEventCallback, controllerId:%{public}u,"
         "actionType:%{public}d, status:%{public}d", controllerId, actionType, status);
+    if (g_currentControllerId != controllerId) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not current %{public}d",
+            g_currentControllerId);
+        return;
+    }
     uint32_t event;
     switch (actionType) {
         case PictureInPicture_PipControlType::VIDEO_PLAY_PAUSE:
@@ -313,6 +328,11 @@ void PipResizeCallback(uint32_t controllerId, uint32_t width, uint32_t height, d
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "PipResizeCallback, controllerId:%{public}u, "
         "width:%{public}d, height:%{public}d", controllerId, width, height);
+    if (g_currentControllerId != controllerId) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not current %{public}d",
+            g_currentControllerId);
+        return;
+    }
 
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     auto it = pipCallbackMap_.find(controllerId);
@@ -7896,16 +7916,18 @@ bool WebPattern::CreatePip(int status, napi_env env, bool& init, uint32_t &pipCo
     if (status == PIP_STATE_ENTER) {
         controlGroupLength = 1;
     }
-    auto errCode = OH_PictureInPicture_CreatePip(&pipController);
-    if (errCode != 0) {
+    PictureInPicture_PipConfig pipConfig;
+    OH_PictureInPicture_CreatePipConfig(&pipConfig);
+    OH_PictureInPicture_SetPipMainWindowId(pipConfig, pipInfo.mainWindowId);
+    OH_PictureInPicture_SetPipTemplateType(pipConfig, pipTemplateType);
+    OH_PictureInPicture_SetPipRect(pipConfig, pipInfo.width, pipInfo.height);
+    OH_PictureInPicture_SetPipControlGroup(pipConfig, controlGroup, controlGroupLength);
+    OH_PictureInPicture_SetPipNapiEnv(pipConfig, env);
+    auto errCode = OH_PictureInPicture_CreatePip(pipConfig, &pipController);    if (errCode != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "OH_PictureInPicture_CreatePip err:%{public}d", errCode);
         return false;
     }
-    OH_PictureInPicture_SetPipMainWindowId(pipController, pipInfo.mainWindowId);
-    OH_PictureInPicture_SetPipTemplateType(pipController, pipTemplateType);
-    OH_PictureInPicture_SetPipRect(pipController, pipInfo.width, pipInfo.height);
-    OH_PictureInPicture_SetPipControlGroup(pipController, controlGroup, controlGroupLength);
-    OH_PictureInPicture_SetPipNapiEnv(pipController, env);
+    OH_PictureInPicture_DestroyPipConfig(&pipConfig);
     struct PipData pipData;
     pipData.pipWebPattern = AceType::WeakClaim(this).Upgrade();
     pipData.delegateId = pipInfo.delegateId;
@@ -7945,7 +7967,7 @@ bool WebPattern::RegisterPip(uint32_t pipController)
         TAG_LOGE(AceLogTag::ACE_WEB, "RegisterStartPipCallback err:%{public}d", errCode);
         return false;
     }
-    errCode = OH_PictureInPicture_RegisterLifeCycleListener(pipController, PipLifeCycleCallback);
+    errCode = OH_PictureInPicture_RegisterLifecycleListener(pipController, PipLifecycleCallback);
     if (errCode != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "RegisterLifecycleListener err:%{public}d", errCode);
         return false;
@@ -7969,6 +7991,10 @@ bool WebPattern::StartPip(uint32_t pipController)
     if (errCode != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "OH_PictureInPicture_StartPip err: %{public}d", errCode);
         return false;
+    }
+    {
+        std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+        g_currentControllerId = pipController;
     }
     return true;
 }

@@ -48,7 +48,8 @@ enum PictureInPictureState {
     PIP_STATE_NONE,
 };
 
-int32_t OH_PictureInPicture_CreatePip(uint32_t* controllerId)
+int32_t OH_PictureInPicture_CreatePip(
+    PictureInPicture_PipConfig pipConfig, uint32_t* controllerId)
 {
     return static_cast<int32_t>(*controllerId);
 }
@@ -64,23 +65,25 @@ int32_t OH_PictureInPicture_StopPip(uint32_t controllerId)
 {
     return static_cast<int32_t>(controllerId);
 }
-void OH_PictureInPicture_UpdatePipControlStatus(
+int32_t OH_PictureInPicture_UpdatePipControlStatus(
     uint32_t controllerId, PictureInPicture_PipControlType controlType,
     PictureInPicture_PipControlStatus status)
 {
+    return static_cast<int32_t>(controllerId);
 }
-void OH_PictureInPicture_SetPipControlEnabled(
+int32_t OH_PictureInPicture_SetPipControlEnabled(
     uint32_t controllerId, PictureInPicture_PipControlType controlType,
     bool enabled)
 {
+    return static_cast<int32_t>(controllerId);
 }
 int32_t OH_PictureInPicture_RegisterStartPipCallback(
     uint32_t controllerId, WebPipStartPipCallback callback)
 {
     return static_cast<int32_t>(controllerId);
 }
-int32_t OH_PictureInPicture_RegisterLifeCycleListener(
-    uint32_t controllerId, WebPipLifeCycleCallback callback)
+int32_t OH_PictureInPicture_RegisterLifecycleListener(
+    uint32_t controllerId, WebPipLifecycleCallback callback)
 {
     return static_cast<int32_t>(controllerId);
 }
@@ -100,29 +103,31 @@ int32_t OH_PictureInPicture_UnregisterAllResizeListeners(
     return static_cast<int32_t>(controllerId);
 }
 int32_t OH_PictureInPicture_SetPipMainWindowId(
-    uint32_t controllerId, uint32_t mainWindowId)
+    PictureInPicture_PipConfig pipConfig, uint32_t mainWindowId)
 {
-    return static_cast<int32_t>(controllerId);
+    return 0;
 }
 int32_t OH_PictureInPicture_SetPipTemplateType(
-    uint32_t controllerId, PictureInPicture_PipTemplateType pipTemplateType)
+    PictureInPicture_PipConfig pipConfig, PictureInPicture_PipTemplateType pipTemplateType)
 {
-    return static_cast<int32_t>(controllerId);
+    return 0;
 }
 int32_t OH_PictureInPicture_SetPipRect(
-    uint32_t controllerId, uint32_t width, uint32_t height)
+    PictureInPicture_PipConfig pipConfig, uint32_t width, uint32_t height)
 {
-    return static_cast<int32_t>(controllerId);
+    return 0;
 }
 int32_t OH_PictureInPicture_SetPipControlGroup(
-    uint32_t controllerId, PictureInPicture_PipControlGroup* controlGroup,
+    PictureInPicture_PipConfig pipConfig,
+    PictureInPicture_PipControlGroup* controlGroup,
     uint8_t controlGroupLength)
 {
-    return static_cast<int32_t>(controllerId);
+    return 0;
 }
-int32_t OH_PictureInPicture_SetPipNapiEnv(uint32_t controllerId, void* env)
+int32_t OH_PictureInPicture_SetPipNapiEnv(
+    PictureInPicture_PipConfig pipConfig, void* env)
 {
-    return static_cast<int32_t>(controllerId);
+    return 0;
 }
 namespace OHOS::Ace {
 void DialogTheme::Builder::ParseNewPattern(
