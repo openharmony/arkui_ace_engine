@@ -279,6 +279,16 @@ TextDecorationStyle RichEditorAbstractSpanResult::GetTextDecorationStyle() const
     return textDecorationStyle_;
 }
 
+void RichEditorAbstractSpanResult::SetLineThicknessScale(float thicknessScale)
+{
+    lineThicknessScale_ = thicknessScale;
+}
+
+float RichEditorAbstractSpanResult::GetLineThicknessScale() const
+{
+    return lineThicknessScale_;
+}
+
 void RichEditorAbstractSpanResult::SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap)
 {
     valuePixelMap_ = valuePixelMap;

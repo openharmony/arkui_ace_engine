@@ -126,6 +126,8 @@ public:
     const std::string& GetColor() const;
     void SetTextDecorationStyle(TextDecorationStyle textDecorationStyle);
     TextDecorationStyle GetTextDecorationStyle() const;
+    void SetLineThicknessScale(float thicknessScale);
+    float GetLineThicknessScale() const;
     void SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap);
     const RefPtr<PixelMap>& GetValuePixelMap() const;
     void SetValueResourceStr(const std::string valueResourceStr);
@@ -189,6 +191,7 @@ private:
     TextDecoration textDecoration_;
     std::string color_;
     TextDecorationStyle textDecorationStyle_;
+    float lineThicknessScale_ = 1.0f;
     RefPtr<PixelMap> valuePixelMap_;
     std::string valueResourceStr_;
     int32_t width_ = 0;
