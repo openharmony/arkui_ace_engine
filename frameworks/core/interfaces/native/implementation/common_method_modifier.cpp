@@ -3248,16 +3248,26 @@ void HueRotate0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    // ViewAbstract::SetHueRotate(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    auto convValue = std::optional<float>();
+    if (optValue.has_value()) {
+        Converter::VisitUnion(optValue.value(),
+            [&convValue](const Ark_Number& val) {
+                convValue = Converter::Convert<float>(val);
+            },
+            [&convValue](const Ark_String& val) {
+                std::string degreeStr = Converter::Convert<std::string>(val);
+                convValue = static_cast<float>(StringUtils::StringToDegree(degreeStr));
+            },
+            []() {});
+    }
+    Validator::ValidateDegree(convValue);
+    ViewAbstract::SetHueRotate(frameNode, convValue.value_or(0.0f));
 }
 void HueRotate1Impl(Ark_NativePointer node,
                     const Opt_Union_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetHueRotate1(frameNode, convValue);
+    HueRotate0Impl(node, value);
 }
 void UseShadowBatching0Impl(Ark_NativePointer node,
                             const Opt_Boolean* value)

@@ -27,6 +27,7 @@ namespace {
     constexpr float INTENSITY_MAX = 1.0f;
     constexpr float BLOOM_MIN = 0.0f;
     constexpr float BLOOM_MAX = 1.0f;
+    constexpr double ROUND_UNIT = 360.0;
     const auto DATE_MIN = PickerDate(1970, 1, 1);
     const auto DATE_MAX = PickerDate(2100, 12, 31);
     constexpr uint32_t DEFAULT_DURATION = 1000; // ms
@@ -210,6 +211,20 @@ void ValidateAnimationOption(AnimationOption& opt, bool isForm)
             opt.SetTempo(tempo);
         }
     }
+}
+
+void ValidateDegree(std::optional<float>& opt)
+{
+    float deg = 0.0f;
+    if (opt) {
+        deg = opt.value();
+        opt.reset();
+    }
+    deg = std::fmod(deg, ROUND_UNIT);
+    if (deg < 0.0f) {
+        deg += ROUND_UNIT;
+    }
+    opt = deg;
 }
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
