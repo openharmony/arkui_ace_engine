@@ -948,7 +948,7 @@ void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
+            TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
             pattern->HandleFocusEvent();
         }
     });
@@ -970,7 +970,7 @@ void UIExtensionPattern::InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& f
     focusHub->SetOnClearFocusStateInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
+            TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
             pattern->DispatchFocusActiveEvent(false);
         }
     });
@@ -1798,7 +1798,7 @@ const char* UIExtensionPattern::ToString(AbilityState state)
 void UIExtensionPattern::DumpInfo()
 {
     CHECK_NULL_VOID(sessionWrapper_);
-    UIEXT_LOGI("Dump UIE Info In String Format");
+    UIEXT_LOGD("Dump UIE Info In String Format");
     DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("want: ").append(want_));
@@ -2126,7 +2126,7 @@ void UIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
     data.SetParam("innerCenterX", parentRectInfo.rotateTransform.innerCenterX);
     data.SetParam("innerCenterY", parentRectInfo.rotateTransform.innerCenterY);
     data.SetParam("rotateDegree", parentRectInfo.rotateTransform.rotateDegree);
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f], rotateDegree: %{public}d.",
         parentRectInfo.scaleX, parentRectInfo.scaleY, parentRectInfo.rotateTransform.rotateDegree);
     SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);

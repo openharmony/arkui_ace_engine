@@ -645,7 +645,7 @@ void JsThirdProviderInteractionOperation::SetChildTreeIdAndWinId(
 
 void JsThirdProviderInteractionOperation::SetBelongTreeId(const int32_t treeId)
 {
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "SetBelongTreeId treeId: %{public}d", treeId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "SetBelongTreeId treeId: %{public}d", treeId);
     belongTreeId_ = treeId;
 }
 
