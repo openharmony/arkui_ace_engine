@@ -323,7 +323,7 @@ public:
         ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration,
         bool& limitFingerCount, uint32_t argNumber);
     static void GetPanGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction,
-        PanDistanceMap& distanceMap, bool& limitFingerCount, uint32_t argNumber);
+        PanDistanceMapDimension& distanceMap, bool& limitFingerCount, uint32_t argNumber);
     static Local<panda::ObjectRef> CreateTapGestureLocationInfo(
         EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
     static void GetSwipeGestureValue(

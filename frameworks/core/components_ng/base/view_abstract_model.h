@@ -306,6 +306,8 @@ public:
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold = std::numeric_limits<double>::infinity()) = 0;
+    virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) = 0;
     virtual void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) = 0;
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(

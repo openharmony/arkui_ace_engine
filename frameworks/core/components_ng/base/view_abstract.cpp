@@ -2221,6 +2221,23 @@ void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc, double distance
     uiNode->SetModifierEventRegistrationState(uiNode->IsCNode(), true);
 }
 
+void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc, Dimension distanceThreshold)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
+
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true, false);
+
+    auto* uiNode = reinterpret_cast<UINode*>(frameNode);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetModifierEventRegistrationState(uiNode->IsCNode(), true);
+}
+
 void ViewAbstract::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -6541,6 +6558,21 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback)
 }
 
 void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
+
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true, false);
+
+    auto* uiNode = reinterpret_cast<UINode*>(frameNode);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetModifierEventRegistrationState(uiNode->IsCNode(), true);
+}
+
+void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

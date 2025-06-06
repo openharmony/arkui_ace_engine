@@ -1132,6 +1132,12 @@ public:
         ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
     }
 
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override
+    {
+        ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
+    }
+
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override
     {
         ViewAbstract::SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));

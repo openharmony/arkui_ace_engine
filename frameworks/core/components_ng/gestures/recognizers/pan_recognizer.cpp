@@ -48,8 +48,10 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
     : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), distance_(distance),
     mouseDistance_(distance), newFingers_(fingers_), newDistance_(distance_), newDirection_(direction_)
 {
-    distanceMap_[SourceTool::UNKNOWN] = distance_;
-    newDistanceMap_[SourceTool::UNKNOWN] = distance_;
+    distanceMap_[SourceTool::UNKNOWN] = Dimension(
+        Dimension(distance_, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    newDistanceMap_[SourceTool::UNKNOWN] = Dimension(
+        Dimension(distance_, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
     panVelocity_.SetDirection(direction_.type);
     if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
         fingers_ = DEFAULT_PAN_FINGERS;
@@ -58,6 +60,18 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
 
 PanRecognizer::PanRecognizer(
     int32_t fingers, const PanDirection& direction, const PanDistanceMap& distanceMap, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), newFingers_(fingers_),
+      newDirection_(direction_)
+{
+    SetDistanceMap(distanceMap);
+    panVelocity_.SetDirection(direction_.type);
+    if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
+        fingers_ = DEFAULT_PAN_FINGERS;
+    }
+}
+
+PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction,
+    const PanDistanceMapDimension& distanceMap, bool isLimitFingerCount)
     : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), newFingers_(fingers_),
       newDirection_(direction_), distanceMap_(distanceMap), newDistanceMap_(distanceMap)
 {
@@ -75,10 +89,10 @@ RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
 void PanRecognizer::ResetDistanceMap()
 {
     for (auto& iter : distanceMap_) {
-        distanceMap_[iter.first] = LessNotEqual(iter.second, 0.0) ? DEFAULT_PAN_DISTANCE.ConvertToPx() : iter.second;
+        distanceMap_[iter.first] = LessNotEqual(iter.second.ConvertToPx(), 0.0) ? DEFAULT_PAN_DISTANCE : iter.second;
     }
     if (distanceMap_.find(SourceTool::UNKNOWN) == distanceMap_.end()) {
-        distanceMap_[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
+        distanceMap_[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE;
     }
 }
 
@@ -1007,10 +1021,12 @@ void PanRecognizer::ChangeDistance(double distance)
         distanceMap_.clear();
         newDistanceMap_.clear();
         if (refereeState_ == RefereeState::READY || refereeState_ == RefereeState::DETECTING) {
-            distanceMap_[SourceTool::UNKNOWN] = distance;
+            distanceMap_[SourceTool::UNKNOWN] = Dimension(
+                Dimension(distance, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
             distance_ = distance;
         }
-        newDistanceMap_[SourceTool::UNKNOWN] = distance;
+        newDistanceMap_[SourceTool::UNKNOWN] = Dimension(
+            Dimension(distance, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
         newDistance_ = distance;
         mouseDistance_ = distance;
     }
@@ -1018,10 +1034,12 @@ void PanRecognizer::ChangeDistance(double distance)
 
 void PanRecognizer::SetMouseDistance(double distance)
 {
-    distanceMap_[SourceTool::MOUSE] = distance;
-    distanceMap_[SourceTool::TOUCHPAD] = distance;
-    newDistanceMap_[SourceTool::MOUSE] = distance;
-    newDistanceMap_[SourceTool::TOUCHPAD] = distance;
+    Dimension distanceDimension = Dimension(
+        Dimension(distance, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    distanceMap_[SourceTool::MOUSE] = distanceDimension;
+    distanceMap_[SourceTool::TOUCHPAD] = distanceDimension;
+    newDistanceMap_[SourceTool::MOUSE] = distanceDimension;
+    newDistanceMap_[SourceTool::TOUCHPAD] = distanceDimension;
     mouseDistance_ = distance;
 }
 
@@ -1033,12 +1051,24 @@ double PanRecognizer::GetDistance() const
 double PanRecognizer::GetDistanceConfigFor(SourceTool sourceTool) const
 {
     if (distanceMap_.find(sourceTool) != distanceMap_.end()) {
-        return distanceMap_.at(sourceTool);
+        return distanceMap_.at(sourceTool).ConvertToPx();
     }
     if (distanceMap_.find(SourceTool::UNKNOWN) != distanceMap_.end()) {
-        return distanceMap_.at(SourceTool::UNKNOWN);
+        return distanceMap_.at(SourceTool::UNKNOWN).ConvertToPx();
     }
     return distance_;
+}
+
+void PanRecognizer::SetDistanceMap(const PanDistanceMap& distanceMap)
+{
+    distanceMap_.clear();
+    newDistanceMap_.clear();
+    for (auto& iter : distanceMap) {
+        auto distanceDimension = Dimension(
+            Dimension(iter.second, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+        distanceMap_[iter.first] = distanceDimension;
+        newDistanceMap_[iter.first] = distanceDimension;
+    }
 }
 
 double PanRecognizer::GetMainAxisDelta()
@@ -1064,7 +1094,7 @@ RefPtr<GestureSnapshot> PanRecognizer::Dump() const
         << "distanceMap: [";
     for (auto iter : distanceMap_) {
         oss << "sourceTool: " << std::to_string(static_cast<int32_t>(iter.first)) << ", "
-            << "distance: " << iter.second << ", ";
+            << "distance: " << iter.second.ConvertToPx() << ", ";
     }
     oss << "], distance: " << GetDistanceConfigFor(deviceTool_) << ", "
         << "fingers: " << fingers_ << ", "

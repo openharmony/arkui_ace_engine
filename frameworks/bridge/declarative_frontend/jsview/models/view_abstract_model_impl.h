@@ -199,6 +199,8 @@ public:
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold) override;
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
     void SetShouldBuiltInRecognizerParallelWith(
