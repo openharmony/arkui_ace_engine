@@ -3524,6 +3524,36 @@ std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
     return allNavdestinationInfo;
 }
 
+std::unique_ptr<JsonValue> NavigationPattern::GetTopNavdestinationJson(bool needParam)
+{
+    auto topNavdestinationJson = JsonUtil::Create(true);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, topNavdestinationJson);
+    auto topNavDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(GetNavDestinationNode()));
+    if (!topNavDestinationNode) {
+        return topNavdestinationJson;
+    }
+    auto navdestinationPattern = topNavDestinationNode->GetPattern<NavDestinationPattern>();
+    if (!navdestinationPattern) {
+        return topNavdestinationJson;
+    }
+    auto name = navdestinationPattern->GetName();
+    auto mode = static_cast<int32_t>(topNavDestinationNode->GetNavDestinationMode());
+    topNavdestinationJson->Put("name", name.c_str());
+    topNavdestinationJson->Put("mode", mode);
+    topNavdestinationJson->Put("navigationId", hostNode->GetCurId().c_str());
+    std::string param = "";
+    if (needParam) {
+        param = navigationStack_->GetSerializedParamSafely(topNavDestinationNode->GetIndex());
+        topNavdestinationJson->Put("param", param.c_str());
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get top navDestinationInfo success, name: %{public}s, mode: %{public}d, "
+        "navigationId: %{public}s, hasParam? %{public}s", name.c_str(), mode, hostNode->GetCurId().c_str(),
+        param.empty() ? "no" : "yes");
+    return topNavdestinationJson;
+}
+
 void NavigationPattern::RestoreJsStackIfNeeded()
 {
     auto pipeline = PipelineContext::GetCurrentContext();

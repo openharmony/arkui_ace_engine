@@ -1093,15 +1093,9 @@ UIContentErrorCode UIContentImpl::InitializeInner(
         errorCode = CommonInitializeForm(window, contentInfo, storage);
         CHECK_ERROR_CODE_RETURN(errorCode);
     }
-    if (!intentInfoSerialized_.empty()) {
-        auto container = Platform::AceContainer::GetContainer(instanceId_);
-        if (container) {
-            TAG_LOGI(AceLogTag::ACE_ROUTER, "intentInfo exist, will distribute intentInfo");
-            ContainerScope scope(instanceId_);
-            container->DistributeIntentInfo(intentInfoSerialized_, true, std::move(loadPageCallback_));
-            intentInfoSerialized_ = "";
-            loadPageCallback_ = nullptr;
-        }
+    RunIntentPageIfNeeded();
+    if (!restoreNavDestinationInfo_.empty()) {
+        RestoreNavDestinationInfoInner(std::move(restoreNavDestinationInfo_), true);
     }
     LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_, startUrl_.c_str());
@@ -5711,5 +5705,54 @@ void UIContentImpl::SetIntentParam(const std::string& intentInfoSerialized,
     }
     intentInfoSerialized_ = intentInfoSerialized;
     loadPageCallback_ = std::move(loadPageCallback);
+}
+
+std::string UIContentImpl::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    std::string serializedEmpty = "{}";
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, serializedEmpty);
+    ContainerScope scope(instanceId_);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, serializedEmpty);
+    return frontend->GetTopNavDestinationInfo(onlyFullScreen, needParam);
+}
+
+void UIContentImpl::RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart)
+{
+    if (isColdStart) {
+        restoreNavDestinationInfo_ = navDestinationInfo;
+        return;
+    }
+    RestoreNavDestinationInfoInner(navDestinationInfo, false);
+}
+
+void UIContentImpl::RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "will restore navDestination info, isColdStart? %{public}s", isColdStart ? "yes" : "no");
+    restoreNavDestinationInfo_ = "";
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->RestoreNavDestinationInfo(navDestinationInfo, isColdStart);
+}
+
+void UIContentImpl::RunIntentPageIfNeeded()
+{
+    if (!intentInfoSerialized_.empty()) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        if (container) {
+            TAG_LOGI(AceLogTag::ACE_ROUTER, "intentInfo exist, will distribute intentInfo");
+            ContainerScope scope(instanceId_);
+            container->DistributeIntentInfo(intentInfoSerialized_, true, std::move(loadPageCallback_));
+            intentInfoSerialized_ = "";
+            loadPageCallback_ = nullptr;
+        }
+    }
 }
 } // namespace OHOS::Ace

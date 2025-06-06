@@ -869,4 +869,48 @@ HWTEST_F(NavigationManagerTestNg, AddNavigationTest002, TestSize.Level1)
     ASSERT_EQ(navigationManager->navigationMap_[routerPageId].size(), 2);
     navigationManager->navigationMap_.clear();
 }
+
+/**
+ * @tc.name: GetNavigationByInspectorIdTest001
+ * @tc.desc: Branch: if input arg inspectorId is valid in navigationMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest001, TestSize.Level1)
+{
+    auto navigationManager = GetNavigationManager();
+    ASSERT_TRUE(navigationManager->navigationMap_.empty());
+    const int32_t routerPageId = 1;
+    const std::string navigationInspectorId = "navigationOne";
+    auto navigationGroupNode = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = navigationInspectorId;
+    ASSERT_EQ(navigationGroupNode->GetCurId(), navigationInspectorId);
+    navigationManager->AddNavigation(routerPageId, navigationGroupNode);
+    ASSERT_FALSE(navigationManager->navigationMap_.empty());
+    ASSERT_EQ(navigationManager->GetNavigationByInspectorId(navigationInspectorId), navigationGroupNode);
+    navigationManager->navigationMap_.clear();
+}
+
+/**
+ * @tc.name: GetNavigationByInspectorIdTest002
+ * @tc.desc: Branch: if input arg inspectorId is invalid in navigationMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest002, TestSize.Level1)
+{
+    auto navigationManager = GetNavigationManager();
+    ASSERT_TRUE(navigationManager->navigationMap_.empty());
+    const int32_t routerPageId = 1;
+    const std::string navigationInspectorId = "navigationOne";
+    auto navigationGroupNode = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = navigationInspectorId;
+    ASSERT_EQ(navigationGroupNode->GetCurId(), navigationInspectorId);
+    navigationManager->AddNavigation(routerPageId, navigationGroupNode);
+    ASSERT_FALSE(navigationManager->navigationMap_.empty());
+    const std::string wrongNavigationId = "wrongId";
+    ASSERT_NE(navigationManager->GetNavigationByInspectorId(wrongNavigationId), navigationGroupNode);
+    ASSERT_EQ(navigationManager->GetNavigationByInspectorId(wrongNavigationId), nullptr);
+    navigationManager->navigationMap_.clear();
+}
 } // namespace OHOS::Ace::NG

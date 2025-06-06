@@ -56,6 +56,8 @@ public:
     void RunIntentPage();
     void SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
         const std::function<void()>&& loadPageCallback);
+    std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam);
+
     void OnConfigurationUpdated(const std::string& data);
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);

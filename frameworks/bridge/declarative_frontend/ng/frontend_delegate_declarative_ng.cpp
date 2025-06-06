@@ -250,6 +250,14 @@ void FrontendDelegateDeclarativeNG::SetRouterIntentInfo(const std::string& inten
         TaskExecutor::TaskType::JS, "ArkUISetRouterIntentInfo");
 }
 
+std::string FrontendDelegateDeclarativeNG::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    if (pageRouterManager_) {
+        return pageRouterManager_->GetTopNavDestinationInfo(onlyFullScreen, needParam);
+    }
+    return "{}";
+}
+
 void FrontendDelegateDeclarativeNG::OnConfigurationUpdated(const std::string& data)
 {
     // only support mediaQueryUpdate

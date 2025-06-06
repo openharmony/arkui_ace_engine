@@ -2519,4 +2519,19 @@ std::string PageRouterManager::ParseUrlNameFromOhmUrl(const std::string& ohmUrl)
     }
     return ohmUrl.substr(pageUrlIndex, andTagIndex - pageUrlIndex);
 }
+
+std::string PageRouterManager::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    std::string serializedEmpty = "{}";
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, serializedEmpty);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, serializedEmpty);
+    auto currentPageNode = GetCurrentPageNode();
+    if (!currentPageNode) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "current router page node is nullptr!");
+        return serializedEmpty;
+    }
+    return navigationManager->GetTopNavDestinationInfo(currentPageNode->GetId(), onlyFullScreen, needParam);
+}
 } // namespace OHOS::Ace::NG

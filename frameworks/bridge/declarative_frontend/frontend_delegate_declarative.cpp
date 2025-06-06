@@ -258,6 +258,14 @@ void FrontendDelegateDeclarative::SetRouterIntentInfo(const std::string& intentI
         TaskExecutor::TaskType::JS, "ArkUISetRouterIntentInfo");
 }
 
+std::string FrontendDelegateDeclarative::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    if (pageRouterManager_) {
+        return pageRouterManager_->GetTopNavDestinationInfo(onlyFullScreen, needParam);
+    }
+    return "{}";
+}
+
 void FrontendDelegateDeclarative::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
     taskExecutor_->PostTask(
