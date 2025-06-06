@@ -754,6 +754,11 @@ public:
         return heightLayoutBreakpoints_;
     }
 
+    static bool IsSyncLoadEnabled()
+    {
+        return syncLoadEnabled_;
+    }
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -847,6 +852,7 @@ private:
     static int32_t formSharedImageCacheThreshold_;
     static WidthLayoutBreakPoint widthLayoutBreakpoints_;
     static HeightLayoutBreakPoint heightLayoutBreakpoints_;
+    static bool syncLoadEnabled_;
 };
 
 } // namespace OHOS::Ace
