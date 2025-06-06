@@ -33,7 +33,7 @@ export function RepeatImpl<T>(
     const repeat = remember(() => {
         return new UIRepeatAttributeImpl<T>();
     });
-    repeat.updateDataLength(arr.length)
+    repeat.updateDataLength(arr.length);
     style?.(repeat);
     if (!repeat.itemGenFuncs_.get(RepeatEachFuncType)) {
         throw new Error('Repeat item builder function unspecified. Usage error!');
