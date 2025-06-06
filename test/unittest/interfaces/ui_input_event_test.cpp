@@ -3623,6 +3623,9 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetTiltX001, TestSize.Level1)
     setEvent.eventTypeId = C_TOUCH_EVENT_ID;
     auto res = OH_ArkUI_PointerEvent_GetTiltX(nullptr, -1);
     EXPECT_EQ(res, 0);
+    touchEvent.subKind = ON_HOVER_MOVE;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
     res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, -1);
     setEvent.eventTypeId = TOUCH_EVENT_ID;
     res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
@@ -3672,6 +3675,9 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetTiltY001, TestSize.Level1)
     setEvent.inputEvent = &touchEvent;
     setEvent.eventTypeId = C_TOUCH_EVENT_ID;
     auto res = OH_ArkUI_PointerEvent_GetTiltY(nullptr, -1);
+    EXPECT_EQ(res, 0);
+    touchEvent.subKind = ON_HOVER_MOVE;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
     EXPECT_EQ(res, 0);
     res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, -1);
     setEvent.eventTypeId = TOUCH_EVENT_ID;
