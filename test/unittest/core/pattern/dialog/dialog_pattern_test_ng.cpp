@@ -1801,7 +1801,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternUpdateBackgroundColorTest00
     ASSERT_NE(dialogContext, nullptr);
 
     pipelineContext->isSystemColorChange_ = true;
-
+    EXPECT_TRUE(pipelineContext->isSystemColorChange_);
     std::string colorStr = "#FF0000";
     /**
      * @tc.steps: step2. Call UpdateBackGroundColor and check the result.

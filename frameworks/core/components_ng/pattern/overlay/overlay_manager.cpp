@@ -833,7 +833,6 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     auto root = node->GetParent();
     CHECK_NULL_VOID(root);
     SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_CLOSE);
-    DeleteDialogHotAreas(node);
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove DialogNode/%{public}d from RootNode/%{public}d",
         node->GetId(), root->GetId());
     root->RemoveChild(node, node->GetIsUseTransitionAnimator());
@@ -848,6 +847,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
             SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
         }
     }
+    DeleteDialogHotAreas(node);
 }
 
 void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
