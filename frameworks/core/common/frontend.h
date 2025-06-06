@@ -157,6 +157,11 @@ public:
         return UIContentErrorCode::NO_ERRORS;
     }
 
+    virtual std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+    {
+        return "";
+    }
+
     virtual void ReplacePage(const std::string& url, const std::string& params) = 0;
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;

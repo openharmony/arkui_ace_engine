@@ -451,6 +451,7 @@ public:
     bool FindInCurStack(const RefPtr<FrameNode>& navDestinationNode);
 
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
+    std::unique_ptr<JsonValue> GetTopNavdestinationJson(bool needParam);
     RefPtr<NavigationPattern> GetParentNavigationPattern();
     void RestoreJsStackIfNeeded();
 

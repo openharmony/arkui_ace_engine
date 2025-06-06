@@ -436,7 +436,11 @@ public:
     // intent framework
     void SetIntentParam(const std::string& intentInfoSerialized,
         const std::function<void()>&& loadPageCallback, bool isColdStart) override;
+    std::string GetTopNavDestinationInfo(bool onlyFullScreen = false, bool needParam = true) override;
+    void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) override;
 private:
+    void RunIntentPageIfNeeded();
+    void RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart);
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(
@@ -540,6 +544,7 @@ private:
 
     std::function<void()> loadPageCallback_;
     std::string intentInfoSerialized_;
+    std::string restoreNavDestinationInfo_;
 };
 
 } // namespace OHOS::Ace

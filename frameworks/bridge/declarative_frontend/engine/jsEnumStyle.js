@@ -2949,6 +2949,17 @@ class NavPathStack {
     let option = { launchMode: LaunchMode.MOVE_TO_TOP_SINGLETON, animated: needTransition };
     this.pushPath(new NavPathInfo(name, paramObj), option);
   }
+  // for inner use
+  getSerializedParamSafely(index) {
+    if (typeof(index) !== 'number' || index < 0 || index >= this.pathArray.length) {
+      return '';
+    }
+    try {
+      return JSON.stringify(this.pathArray[index].param);
+    } catch (error) {
+      return '';
+    }
+  }
 }
 
 globalThis.NavPathStack = NavPathStack;

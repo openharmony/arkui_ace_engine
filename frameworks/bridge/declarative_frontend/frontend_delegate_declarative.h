@@ -91,6 +91,8 @@ public:
     void RunIntentPage();
     void SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
         const std::function<void()>&& loadPageCallback);
+    std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam);
+
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data);
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
