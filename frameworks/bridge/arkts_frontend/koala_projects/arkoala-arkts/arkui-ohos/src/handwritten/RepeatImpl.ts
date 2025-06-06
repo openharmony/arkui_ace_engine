@@ -198,6 +198,7 @@ function virtualRender<T>(arr: RepeatArray<T>,
 ): void {
     let dataSource = remember(()=> new RepeatDataSource<T>(arr))
     dataSource.updateData(arr)
+    const repeatId = __id()
     /** @memo */
     const itemGen = (item: T, index: number): void => {
         const ri = new RepeatItemImpl<T>(item, index as number);
@@ -214,7 +215,7 @@ function virtualRender<T>(arr: RepeatArray<T>,
         if (reusable) {
             NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => {
                 itemBuilder(ri);
-            }, _type) // using type as reuseKey
+            }, _type + repeatId) // using type as reuseKey
         } else {
             itemBuilder(ri);
         }
