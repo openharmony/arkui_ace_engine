@@ -103,10 +103,6 @@ void DragDropInitiatingStateBase::HidePixelMap(bool startDrag, double x, double 
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     if (params.hasGatherNode) {
-        if (!startDrag) {
-            manager->RemovePreviewBadgeNode();
-            manager->RemoveGatherNodeWithAnimation();
-        }
         DragAnimationHelper::HideDragNodeCopyWithAnimation(manager, frameNode);
     }
 
