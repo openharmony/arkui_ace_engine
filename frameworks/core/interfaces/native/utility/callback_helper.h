@@ -73,6 +73,9 @@ public:
     void InvokeSync(Params&&... args) const
     {
         if (callback_.callSync) {
+            if (!vmContext_) {
+                vmContext_ = GetVMContext();
+            }
             (*callback_.callSync)(vmContext_, callback_.resource.resourceId, std::forward<Params>(args)...);
         }
     }
@@ -174,7 +177,7 @@ protected:
         .call = nullptr,
         .callSync = nullptr
     };
-    Ark_VMContext vmContext_;
+    mutable Ark_VMContext vmContext_;
 };
 } // namespace OHOS::Ace::NG
 
