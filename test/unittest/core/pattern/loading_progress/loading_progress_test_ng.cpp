@@ -1212,4 +1212,33 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest001, TestSize.Leve
     EXPECT_EQ(paintProperty->GetColor().value(), originalColor);
     EXPECT_EQ(renderContext->GetForegroundColor().value(), originalColor);
 }
+
+/**
+ * @tc.name: LoadingProgressFrameRateRangeTest001
+ * @tc.desc: Test LoadingProgress color update property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameRateRangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create loading progress and get pattern
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. test FrameRateRange
+     * @tc.expected: FrameRateRange is 30
+     */
+    loadingProgressPattern->CreateNodePaintMethod();
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    auto layoutProperty = loadingProgressPattern->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+}
 } // namespace OHOS::Ace::NG
