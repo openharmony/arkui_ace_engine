@@ -972,7 +972,7 @@ HWTEST_F(ScrollPatternTestNg, GetChildrenExpandedSize03, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetChildrenExpandedSize014
+ * @tc.name: GetChildrenExpandedSize04
  * @tc.desc: Test GetChildrenExpandedSize
  * @tc.type: FUNC
  */
