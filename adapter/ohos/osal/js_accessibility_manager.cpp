@@ -1840,6 +1840,11 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
         nodeInfo.AddAction(action);
     }
     nodeInfo.SetAccessibilityGroup(node->GetIsAccessibilityGroup());
+    ExtraElementInfo extraElementInfo {};
+    extraElementInfo.SetExtraElementInfo("componentTypeDescription", node->GetComponentTypeDescription());
+    extraElementInfo.SetExtraElementInfo("CheckboxGroupSelectedStatus", node->GetCheckboxGroupSelectedStatus());
+    extraElementInfo.SetExtraElementInfo("expandedState", node->GetExpandedState());
+    nodeInfo.SetExtraElement(extraElementInfo);
 }
 
 #endif
