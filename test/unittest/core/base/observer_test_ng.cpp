@@ -487,4 +487,28 @@ HWTEST_F(ObserverTestNg, ObserverTestNg017, TestSize.Level1)
     auto info = UIObserverHandler::GetInstance().GetRouterPageState(childFrame);
     ASSERT_EQ(info, nullptr);
 }
+
+/**
+ * @tc.name: ObserverTestNg018
+ * @tc.desc: Test the scroll direction of components
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg018, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SCROLL_ETS_TAG, 12, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+ 
+    pattern->SetAxis(Axis::VERTICAL);
+    auto info = UIObserverHandler::GetInstance().GetScrollEventState(frameNode);
+    ASSERT_EQ(info->axis, Axis::VERTICAL);
+ 
+    pattern->SetAxis(Axis::HORIZONTAL);
+    info = UIObserverHandler::GetInstance().GetScrollEventState(frameNode);
+    ASSERT_EQ(info->axis, Axis::HORIZONTAL);
+ 
+    pattern->SetAxis(Axis::NONE);
+    info = UIObserverHandler::GetInstance().GetScrollEventState(frameNode);
+    ASSERT_EQ(info->axis, Axis::NONE);
+}
 }
