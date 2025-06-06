@@ -29,11 +29,11 @@
 namespace OHOS::Ace::NG {
 class NavigationStack;
 struct NavigationInfo {
-    int32_t nodeId;
+    int32_t nodeId = -1;
     std::string navigationId; // inspectorId
     WeakPtr<NavigationStack> pathStack;
     WeakPtr<FrameNode> navigationNode;
-    int32_t uniqueId;
+    int32_t uniqueId = -1;
     
     NavigationInfo() = default;
     NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack)
