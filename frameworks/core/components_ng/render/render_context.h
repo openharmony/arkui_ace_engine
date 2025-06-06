@@ -77,6 +77,7 @@ class RenderPropertyNode;
 class FrameNode;
 class InspectorFilter;
 class Modifier;
+class PipelineContext;
 
 struct PaintFocusExtraInfo final {
     PaintFocusExtraInfo() = default;
@@ -227,6 +228,8 @@ public:
     virtual void ResetBlendBorderColor() {}
 
     virtual void BlendBorderColor(const Color& color) {}
+
+    virtual void SetRSUIContext(PipelineContext* context) {}
 
     // Paint focus state by component's setting. It will paint along the paintRect
     virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,

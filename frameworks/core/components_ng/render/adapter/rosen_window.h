@@ -132,6 +132,8 @@ public:
         return rsUIDirector_->GetAnimateExpectedRate();
     }
 
+    void FlushImplicitTransaction(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
+
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     
     void SetUiDvsyncSwitch(bool vsyncSwitch) override;
