@@ -303,6 +303,41 @@ HWTEST_F(RichEditorControllerTest, RichEditorModel016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel017
+ * @tc.desc: test paragraph style textVerticalAlign attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorControllerTest, RichEditorModel017, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+
+    // test paragraph style linebreakstrategy default value
+    richEditorController->AddTextSpan(options);
+    auto info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    auto hasTextVerticalAlign = info[0].textVerticalAlign.has_value();
+    EXPECT_FALSE(hasTextVerticalAlign);
+
+    std::vector strategies = { TextVerticalAlign::BASELINE, TextVerticalAlign::BOTTOM,
+    TextVerticalAlign::CENTER, TextVerticalAlign::TOP};
+    struct UpdateParagraphStyle style;
+    for (TextVerticalAlign strategy : strategies) {
+        // test paragraph style textVerticalAlign
+        style.textVerticalAlign = strategy;
+        richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+        info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+        hasTextVerticalAlign = info[0].textVerticalAlign.has_value();
+        EXPECT_TRUE(hasTextVerticalAlign);
+        EXPECT_EQ(static_cast<TextVerticalAlign>(info[0].textVerticalAlign.value()), strategy);
+    }
+}
+
+/**
  * @tc.name: PreventDefault001
  * @tc.desc: test PreventDefault001 in ImageSpan and TextSpan
  * @tc.type: FUNC

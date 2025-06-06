@@ -509,6 +509,33 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController009, TestSize.Level
 }
 
 /**
+ * @tc.name: StyledStringController010
+ * @tc.desc: Test textVerticalAlign.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController010, TestSize.Level1)
+{
+    /*
+     *@tc.steps: step1. create styledString with text
+     */
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
+    /**
+     *@tc.steps: step2. get richEditor styledString controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
+    ASSERT_NE(styledStringController, nullptr);
+    styledStringController->SetStyledString(mutableStr);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
+    EXPECT_EQ(richEditorPattern->dataDetectorAdapter_->textForAI_, INIT_STRING_1);
+    auto spanItem = richEditorPattern->spans_.front();
+    auto& textLineStyle = spanItem->textLineStyle;
+    EXPECT_NE(textLineStyle->GetTextVerticalAlign(), std::nullopt);
+}
+
+/**
  * @tc.name: StyledStringInsertValue001
  * @tc.desc: Test insert value in styledString mode.
  * @tc.type: FUNC
