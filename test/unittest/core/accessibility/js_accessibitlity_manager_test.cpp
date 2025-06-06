@@ -2394,4 +2394,41 @@ HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoBySurfaceId001, TestSize.L
     rootElement->RemoveChild(embedNode);
     MockPipelineContext::TearDown();
 }
+
+/**
+ * @tc.name: IsTagInEmbedComponent001
+ * @tc.desc: Test IsTagInEmbedComponent with exist componentType
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsTagInEmbedComponent001, TestSize.Level1)
+{
+    std::string tag = "embeddedObject";
+    bool result = OHOS::Ace::Framework::JsAccessibilityManager::IsTagInEmbedComponent(tag);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsTagInEmbedComponent002
+ * @tc.desc: Test IsTagInEmbedComponent with no exist componentType
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsTagInEmbedComponent002, TestSize.Level1)
+{
+    std::string tag = "noExist_embeddedObject";
+    bool result = OHOS::Ace::Framework::JsAccessibilityManager::IsTagInEmbedComponent(tag);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsTagInEmbedComponent003
+ * @tc.desc: Test IsTagInEmbedComponent with null string
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsTagInEmbedComponent003, TestSize.Level1)
+{
+    std::string tag = "";
+    bool result = OHOS::Ace::Framework::JsAccessibilityManager::IsTagInEmbedComponent(tag);
+    EXPECT_FALSE(result);
+}
+
 } // namespace OHOS::Ace::NG

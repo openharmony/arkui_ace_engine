@@ -168,8 +168,9 @@ public:
     void HandleComponentPostBinding() override;
     void RegisterSubWindowInteractionOperation(int windowId) override;
     void SetPipelineContext(const RefPtr<PipelineBase>& context) override;
-    void UpdateElementInfosTreeId(std::list<Accessibility::AccessibilityElementInfo>& infos);
+    void UpdateElementInfosTreeId(std::list<Accessibility::AccessibilityElementInfo>& infos, bool checkEmbed = false);
     void UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info);
+    static bool IsTagInEmbedComponent(const std::string& tag);
 
     void UpdateViewScale();
 
@@ -316,6 +317,8 @@ public:
     void WebFocusMoveSearch(const int64_t elementId, const int32_t direction, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId,
         const RefPtr<NG::WebPattern>& webPattern);
+    void WebFocusMoveSearchByComponent(AccessibilityElementInfo& nodeInfo, const RefPtr<NG::WebPattern>& webPattern,
+        const int32_t direction, RefPtr<PipelineBase> context);
     void WebFocusMoveSearchNG(int64_t elementId, int32_t direction,
         Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
         const RefPtr<NG::WebPattern>& webPattern);
@@ -395,6 +398,9 @@ public:
     void RegisterGetParentRectHandler();
 
     bool IsScreenReaderEnabled() override;
+    WeakPtr<NG::WebPattern> GetWebPatternBySurfaceId(const std::string& surfaceId) override;
+    void SetWebPatternBySurfaceId(const std::string& surfaceId, WeakPtr<NG::WebPattern> pattern) override;
+    void RemoveWebPatternBySurfaceId(const std::string& surfaceId) override;
 
     void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) override;
     void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) override;
@@ -426,6 +432,8 @@ protected:
 
 private:
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
+    mutable std::mutex webPatternMapMutex_;
+    std::unordered_map<std::string, WeakPtr<NG::WebPattern>> webPatternMap_;
 
     class JsInteractionOperation : public Accessibility::AccessibilityElementOperator {
     public:
@@ -575,7 +583,7 @@ private:
     bool ConvertActionTypeToBoolen(Accessibility::ActionType action, RefPtr<NG::FrameNode>& frameNode,
         int64_t elementId, RefPtr<NG::PipelineContext>& context);
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
-        std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId);
+        std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId, bool checkEmbed = false);
 
     void SetSearchElementInfoByTextResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId);
@@ -691,6 +699,8 @@ private:
     void UpdateWebCacheInfo(std::list<Accessibility::AccessibilityElementInfo>& infos, int64_t nodeId,
         const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam, const RefPtr<NG::WebPattern>& webPattern);
+    void PushElementsIntoInfos(AccessibilityElementInfo& nodeInfo, std::shared_ptr<NG::TransitionalNodeInfo>& node,
+        std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::WebPattern>& webPattern);
 
     int64_t GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId);
 #endif //WEB_SUPPORTED

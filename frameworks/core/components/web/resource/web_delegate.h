@@ -928,7 +928,8 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter);
+    void HandleAccessibilityHoverEvent(
+        const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
@@ -1032,6 +1033,9 @@ public:
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     void OnNativeEmbedAllDestory();
+    std::string GetSurfaceIdByHtmlElementId(const std::string& htmlElementId);
+    std::string GetHtmlElementIdBySurfaceId(const std::string& surfaceId);
+    int64_t GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId);
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
@@ -1429,6 +1433,7 @@ private:
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
     bool isEmbedModeEnabled_ = false;
+    std::shared_mutex embedDataInfoMutex_;
     std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
