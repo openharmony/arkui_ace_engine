@@ -745,4 +745,19 @@ WaterFlowLayoutMode WaterFlowModelNG::GetLayoutMode(FrameNode* frameNode)
     CHECK_NULL_RETURN(pattern, WaterFlowLayoutMode::TOP_DOWN);
     return pattern->GetLayoutMode();
 }
+
+void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& footer)
+{
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    CHECK_NULL_VOID(footerNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(footerNode);
+}
 } // namespace OHOS::Ace::NG
