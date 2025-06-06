@@ -194,6 +194,31 @@ Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
     return convertValue;
 }
 
+Rosen::TextVerticalAlign ConvertTxtTextVerticalAlign(TextVerticalAlign textVerticalAlign)
+{
+    Rosen::TextVerticalAlign convertValue;
+    switch (textVerticalAlign) {
+        case TextVerticalAlign::BASELINE:
+            convertValue = Rosen::TextVerticalAlign::BASELINE;
+            break;
+        case TextVerticalAlign::BOTTOM:
+            convertValue = Rosen::TextVerticalAlign::BOTTOM;
+            break;
+        case TextVerticalAlign::CENTER:
+            convertValue = Rosen::TextVerticalAlign::CENTER;
+            break;
+        case TextVerticalAlign::TOP:
+            convertValue = Rosen::TextVerticalAlign::TOP;
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_FONT,
+                "TextVerticalAlign setting error! Now using default TextVerticalAlign");
+            convertValue = Rosen::TextVerticalAlign::BASELINE;
+            break;
+    }
+    return convertValue;
+}
+
 Rosen::TextRectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle)
 {
     switch (heightStyle) {
@@ -738,6 +763,7 @@ Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlign
             convertValue = Rosen::PlaceholderVerticalAlignment::CENTER_OF_ROW_BOX;
             break;
         case PlaceholderAlignment::FOLLOW_PARAGRAPH:
+            convertValue = Rosen::PlaceholderVerticalAlignment::FOLLOW_PARAGRAPH;
             break;
         default:
             TAG_LOGW(AceLogTag::ACE_FONT, "PlaceholderAlignment setting error! Now using default PlaceholderAlignment");

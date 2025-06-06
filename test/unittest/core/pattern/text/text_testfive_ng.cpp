@@ -3336,7 +3336,7 @@ HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
 HWTEST_F(TextTestFiveNg, TextParagraphVerticalAlign, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create text node and set textVerticalAlign value
+     * @tc.steps: Create text node and set textVerticalAlign value.
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);
@@ -3348,16 +3348,16 @@ HWTEST_F(TextTestFiveNg, TextParagraphVerticalAlign, TestSize.Level1)
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
     /**
-     * @tc.expected: Get textVerticalAlign value
+     * @tc.expected: Get textVerticalAlign value.
      */
     EXPECT_EQ(textLayoutProperty->GetTextVerticalAlign(), TextVerticalAlign::BASELINE);
     EXPECT_EQ(TextModelNG::GetTextVerticalAlign(frameNode), TextVerticalAlign::BASELINE);
     /**
-     * @tc.expected: Set textVerticalAlign TextVerticalAlign::CENTER
+     * @tc.expected: Set textVerticalAlign TextVerticalAlign::CENTER.
      */
     TextModelNG::SetTextVerticalAlign(frameNode, TextVerticalAlign::CENTER);
     /**
-     * @tc.expected: Get textVerticalAlign value
+     * @tc.expected: Get textVerticalAlign value.
      */
     EXPECT_EQ(textLayoutProperty->GetTextVerticalAlign(), TextVerticalAlign::CENTER);
     EXPECT_EQ(TextModelNG::GetTextVerticalAlign(frameNode), TextVerticalAlign::CENTER);
