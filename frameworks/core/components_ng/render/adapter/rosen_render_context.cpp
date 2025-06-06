@@ -6116,7 +6116,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = Claim(frameNode->GetContextWithCheck());
     CHECK_NULL_VOID(pipeline);
     auto rsUIContext = rsNode_->GetRSUIContext();
     RSNode::ExecuteWithoutAnimation([this, &frameNode, isTransitionIn, &pipeline]() {
@@ -6124,7 +6124,6 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 // transitionIn, reset to state before attaching in case of node reappear
                 transitionEffect_->Attach(Claim(this), true);
             }
-
             SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
             auto parentOffset = frameNode->GetPaintRectOffset(true);
             auto rect = GetPaintRectWithoutTransform();
