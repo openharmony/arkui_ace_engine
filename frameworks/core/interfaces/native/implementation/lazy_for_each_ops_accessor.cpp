@@ -27,13 +27,28 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
-Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node, Ark_NativePointer mark, Ark_Int32 direction) {
+Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node, Ark_NativePointer mark, Ark_Int32 direction)
+{
     return nullptr;
 }
 void OnRangeUpdateImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_RangeUpdate* updater) {}
 void SetCurrentIndexImpl(Ark_NativePointer node, Ark_Int32 index) {}
 void PrepareImpl(Ark_NativePointer node, Ark_Int32 totalCount, Ark_Int32 offset) {}
-void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt) {}
+void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<LazyContainer>();
+        CHECK_NULL_VOID(pattern);
+    if (startIdx >= 0) {
+        frameNode->ChildrenUpdatedFrom(startIdx);
+    }
+    if (endIdx >= 0) {
+        pattern->NotifyDataChange(endIdx, changeCnt);
+    }
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    pattern->RemoveItemsOnChange(startIdx);
+}
 
 void SyncImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_CreateItem* creator,
     const Callback_RangeUpdate* updater)

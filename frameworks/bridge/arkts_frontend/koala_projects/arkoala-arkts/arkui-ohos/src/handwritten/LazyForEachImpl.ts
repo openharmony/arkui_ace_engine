@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, DataNode } from "@koalaui/runtime";
+import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, DataNode, memo, scheduleCallback } from "@koalaui/runtime";
 import { pointer } from "@koalaui/interop";
 import { LazyForEachType, PeerNode, PeerNodeType } from "../PeerNode";
 import { InternalListener } from "../DataChangeListener";
@@ -29,39 +29,39 @@ export function updateLazyItems() {
         node.value
     }
 }
- 
+
 /** @memo */
 export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
-    let changeCounter = rememberMutableState(0)
     const parent = contextNode<PeerNode>()
-    const offset = getOffset(parent, __id())
+    let pool = rememberDisposable(() => new LazyItemPool(parent), (pool?: LazyItemPool) => {
+        pool?.dispose()
+    })
+    let changeCounter = rememberMutableState(0)
     let listener = remember(() => {
         let res = new InternalListener(parent.peer.ptr, changeCounter)
         dataSource.registerDataChangeListener(res)
         return res
     })
-    const changeIndex = listener.flush(offset) // first item index that's affected by DataChange
+    changeCounter.value // subscribe
+    const changeIndex = listener.flush(0) // first item index that's affected by DataChange
+    if (changeIndex < Number.POSITIVE_INFINITY) {
+        scheduleCallback(() => {
+            pool.pruneBy((index: int32) => index >= changeIndex)
+        })
+    }
 
-    // Entering this method implies that the parameters have changed.
-    let pool = rememberDisposable(() => new LazyItemPool(parent), (pool?: LazyItemPool) => {
-        pool?.dispose()
-    })
-
+    itemGenerator // subscribe to param
     /**
      * provide totalCount and callbacks to the backend
      */
     let createCallback = (index: int32) => {
         return pool.getOrCreate(index, dataSource.getData(index), itemGenerator)
     }
-    LazyForEachOps.Sync(parent.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.prune)
-
-    // create DataNode to provide count information to parent
-    const identifier = new LazyForEachIdentifier(__id(), dataSource.totalCount() as int32, pool.activeCount)
-    DataNode.attach(LazyForEachType, identifier)
+    LazyForEachOps.Sync(parent.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
 }
 
 class LazyForEachIdentifier {
@@ -110,10 +110,7 @@ class LazyItemPool implements Disposable {
     dispose(): void {
         if (this.disposed) return
 
-        for (let node of this._activeItems.values()) {
-            node.dispose()
-            globalLazyItems.delete(node)
-        }
+        this.pruneBy(() => true)
         this.disposed = true
     }
 
@@ -159,18 +156,26 @@ class LazyItemPool implements Disposable {
     }
 
     /**
+     *
+     * @param criteria predicate to determine if the item needs to be removed
+     */
+    pruneBy(criteria: (index: int32) => boolean) {
+        this._activeItems.forEach((node, index) => {
+            if (criteria(index)) {
+                node.dispose()
+                this._activeItems.delete(index)
+                globalLazyItems.delete(node)
+            }
+        })
+    }
+
+    /**
      * prune items outside the range [start, end]
      * @param start 
      * @param end 
      */
-    prune(start: int32, end: int32) {
+    updateActiveRange(start: int32, end: int32) {
         if (start > end) return
-        this._activeItems.forEach((node, index) => {
-            if (index < start || index > end) {
-                node.dispose()
-                this._activeItems.delete(index) // Delete in-place
-                globalLazyItems.delete(node)
-            }
-        })
+        this.pruneBy(index => index < start || index > end)
     }
 }
