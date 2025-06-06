@@ -1013,7 +1013,7 @@ void JSRichEditor::SetCopyOptions(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    auto copyOptions = CopyOptions::Distributed;
+    auto copyOptions = CopyOptions::Local;
     auto tmpInfo = info[0];
     if (tmpInfo->IsNumber()) {
         auto emunNumber = tmpInfo->ToNumber<int>();

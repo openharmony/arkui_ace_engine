@@ -288,6 +288,7 @@ HWTEST_F(RichEditorMenuTestNg, OnMenuItemAction001, TestSize.Level1)
     EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
+    EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::Local);
 	
     /**
      * @tc.step: step4. test OnMenuItemAction
