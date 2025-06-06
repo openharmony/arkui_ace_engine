@@ -1605,6 +1605,24 @@ HWTEST_F(TitleBarPatternTestNg, UpdateScaleByDragOverDragOffset004, TestSize.Lev
 }
 
 /**
+ * @tc.name: onAttachFrameNode
+ * @tc.desc: no branch test renderContext clipEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestNg, onAttachFrameNode, TestSize.Level1)
+{
+    TitleBarPatternTestNg::SetUpTestSuite();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    
+    auto renderContext = titleBarNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    
+    bool value = renderContext->GetClipEdgeValue(false);
+    EXPECT_EQ(value, true);
+}
+
+/**
  * @tc.name: GetFontSize001
  * @tc.desc: Branch: if (GreatOrEqualTargetAPIVersion(VERSION_TWELVE)) = false
  *           Branch: if (!NearZero(titleBarHeightDiff)) = false
