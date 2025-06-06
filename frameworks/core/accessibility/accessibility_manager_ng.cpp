@@ -190,9 +190,10 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
             return;
     }
     PointF point(event.x, event.y);
+    auto& hoverState = hoverStateManager_.GetHoverState(root->GetAccessibilityId());
     if (event.pointers.size() > 1 && event.sourceType == SourceType::TOUCH) {
-        if (hoverState_.source == SourceType::TOUCH) {
-            ResetHoverState();
+        if (hoverState.source == SourceType::TOUCH) {
+            hoverStateManager_.ResetHoverState(hoverState);
             return;
         }
     }
@@ -294,34 +295,37 @@ HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     const HandleHoverEventParam& param,
     const TouchEvent& event)
 {
+    CHECK_NULL_RETURN(root, HandleHoverRet::HOVER_FAIL);
+    auto& hoverState = hoverStateManager_.GetHoverState(root->GetAccessibilityId());
     auto sourceType = param.sourceType;
     auto eventType = param.eventType;
     auto time = param.time;
     static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 10;
     uint64_t duration =
-        static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count());
-    if (!hoverState_.idle) {
-        if ((!IsEventTypeChangeDirectHandleHover(eventType)) && (duration < THROTTLE_INTERVAL_HOVER_EVENT)) {
+        static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState.time).count());
+    if (!hoverState.idle) {
+        if ((!IsEventTypeChangeDirectHandleHover(eventType, hoverState.eventType))
+            && (duration < THROTTLE_INTERVAL_HOVER_EVENT)) {
             return HandleHoverRet::IN_TIME_LIMIT;
         }
     }
 
     static constexpr size_t MIN_SOURCE_CHANGE_GAP_MS = 1000;
-    if (sourceType != hoverState_.source && !hoverState_.idle) {
+    if (sourceType != hoverState.source && !hoverState.idle) {
         if (duration < MIN_SOURCE_CHANGE_GAP_MS) {
             return HandleHoverRet::IN_TIME_LIMIT;
         }
-        ResetHoverState();
+        hoverStateManager_.ResetHoverState(hoverState);
     }
 
     ACE_SCOPED_TRACE("HandleAccessibilityHoverEventInner");
     if (eventType == AccessibilityHoverEventType::ENTER) {
-        ResetHoverState();
+        hoverStateManager_.ResetHoverState(hoverState);
     }
     std::vector<WeakPtr<FrameNode>> currentNodesHovering;
     std::vector<RefPtr<FrameNode>> lastNodesHovering;
     std::vector<int32_t> lastNodesHoveringId;
-    for (const auto& nodeWeak: hoverState_.nodesHovering) {
+    for (const auto& nodeWeak: hoverState.nodesHovering) {
         auto node = nodeWeak.Upgrade();
         if (node != nullptr) {
             lastNodesHovering.push_back(node);
@@ -378,11 +382,11 @@ HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
         HandleAccessibilityHoverTransparentCallback(transformHover, root, callbackParam, param.point, event);
     }
 
-    hoverState_.nodesHovering = std::move(currentNodesHovering);
-    hoverState_.time = time;
-    hoverState_.source = sourceType;
-    hoverState_.idle = eventType == AccessibilityHoverEventType::EXIT;
-    hoverState_.eventType = eventType;
+    hoverState.nodesHovering = std::move(currentNodesHovering);
+    hoverState.time = time;
+    hoverState.source = sourceType;
+    hoverState.idle = eventType == AccessibilityHoverEventType::EXIT;
+    hoverState.eventType = eventType;
     if (sendHoverEnter && !transformHover) {
         return HandleHoverRet::HOVER_HIT;
     }
@@ -428,12 +432,6 @@ bool AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNod
         return true;
     }
     return false;
-}
-
-void AccessibilityManagerNG::ResetHoverState()
-{
-    hoverState_.idle = true;
-    hoverState_.nodesHovering.clear();
 }
 
 void AccessibilityManagerNG::HoverTestDebug(const RefPtr<FrameNode>& root, const PointF& point,
@@ -496,9 +494,11 @@ bool AccessibilityManagerNG::ConvertPointFromAncestorToNode(
     return true;
 }
 
-bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(AccessibilityHoverEventType eventType)
+bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(
+    AccessibilityHoverEventType eventType,
+    AccessibilityHoverEventType prevEventType)
 {
-    if ((hoverState_.eventType == AccessibilityHoverEventType::MOVE)
+    if ((prevEventType == AccessibilityHoverEventType::MOVE)
         && (eventType == AccessibilityHoverEventType::EXIT)) {
         return true;
     }
@@ -544,5 +544,21 @@ void AccessibilityManagerNG::HandlePipelineAccessibilityHoverEnter(
     auto pipeline = root->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->OnAccessibilityHoverEvent(event, root);
+}
+
+AccessibilityHoverState& AccessibilityHoverStateManager::GetHoverState(int64_t accessibilityId)
+{
+    auto it = hoverStateMap_.find(accessibilityId);
+    if (it != hoverStateMap_.end()) {
+        return it->second;
+    }
+    hoverStateMap_.emplace(accessibilityId, AccessibilityHoverState {});
+    return hoverStateMap_[accessibilityId];
+}
+
+void AccessibilityHoverStateManager::ResetHoverState(AccessibilityHoverState& hoverState)
+{
+    hoverState.idle = true;
+    hoverState.nodesHovering.clear();
 }
 } // namespace OHOS::Ace::NG
