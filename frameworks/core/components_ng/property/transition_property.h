@@ -218,6 +218,9 @@ public:
     }
     void SetAnimationOption(const std::shared_ptr<AnimationOption>& option)
     {
+        if (option) {
+            option->SetAnimationInterface(AnimationInterface::TRANSITION);
+        }
         animationOption_ = option;
     }
     virtual std::string ToString() = 0;

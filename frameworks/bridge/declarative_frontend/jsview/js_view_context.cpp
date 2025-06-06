@@ -654,6 +654,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     PrintAnimationInfo(option, AnimationInterface::ANIMATION, std::nullopt);
     AceScopedTrace paramTrace("duration:%d, curve:%s, iteration:%d", option.GetDuration(),
         option.GetCurve()->ToString().c_str(), option.GetIteration());
+    option.SetAnimationInterface(AnimationInterface::ANIMATION);
     ViewContextModel::GetInstance()->openAnimation(option);
     JankFrameReport::GetInstance().ReportJSAnimation();
 }
@@ -777,6 +778,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     option.SetOnFinishEvent(onFinishEvent);
+    option.SetAnimationInterface(
+        immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
                     << ",iteration:" << option.GetIteration()
@@ -871,6 +874,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     AceScopedTrace trace("KeyframeAnimateTo iteration:%d, delay:%d",
                          overallAnimationOption.GetIteration(), overallAnimationOption.GetDelay());
     PrintAnimationInfo(overallAnimationOption, AnimationInterface::KEYFRAME_ANIMATE_TO, count);
+    overallAnimationOption.SetAnimationInterface(AnimationInterface::KEYFRAME_ANIMATE_TO);
     if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
             "when call keyframeAnimateTo, node stack is not empty, not suitable for keyframeAnimateTo."
