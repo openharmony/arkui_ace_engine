@@ -567,7 +567,7 @@ bool TimePickerColumnPattern::CanMove(bool isDown) const
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    int totalOptionCount = GetOptionCount();
+    int totalOptionCount = static_cast<int>(GetOptionCount());
     auto timePickerColumnPattern = host->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(timePickerColumnPattern, false);
     int currentIndex = static_cast<int>(timePickerColumnPattern->GetCurrentIndex());
