@@ -2042,6 +2042,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
     JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
+    JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -5830,6 +5831,23 @@ void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
         return;
     }
     WebModel::GetInstance()->SetDataDetectorConfig(textDetectConfig);
+}
+
+void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
+{
+    auto condition = WebBypassVsyncCondition::NONE;
+    switch (webBypassVsyncCondition) {
+        case 0:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+        case 1:
+            condition = WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET;
+            break;
+        default:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+    }
+    WebModel::GetInstance()->SetBypassVsyncCondition(condition);
 }
 
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)

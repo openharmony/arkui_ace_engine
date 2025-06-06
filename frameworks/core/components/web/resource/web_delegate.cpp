@@ -8280,4 +8280,26 @@ void WebDelegate::SendPipEvent(int delegate_id, int child_id, int frame_routing_
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSendPipEvent");
 }
+
+void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), condition]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::UpdateBypassVsyncCondition condition:%{public}d", condition);
+                    setting->SetBypassVsyncCondition(static_cast<int32_t>(condition));
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebBypassVsyncCondition");
+}
 } // namespace OHOS::Ace

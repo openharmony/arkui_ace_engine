@@ -151,6 +151,7 @@ public:
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void OptimizeParserBudgetEnabled(bool enable);
+    static void BypassVsyncCondition(int32_t webBypassVsyncCondition);
     static void RunJavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);

@@ -4052,6 +4052,12 @@ let AxisAction;
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
 
+let WebBypassVsyncCondition;
+(function (WebBypassVsyncCondition) {
+  WebBypassVsyncCondition[WebBypassVsyncCondition.NONE = 0] = 'NONE';
+  WebBypassVsyncCondition[WebBypassVsyncCondition.SCROLLBY_FROM_ZERO_OFFSET = 1] = 'SCROLLBY_FROM_ZERO_OFFSET';
+})(WebBypassVsyncCondition || (WebBypassVsyncCondition = {}));
+
 let CommonState;
 (function (CommonState) {
   CommonState[CommonState.UNINITIALIZED = 0] = 'UNINITIALIZED';

@@ -211,6 +211,7 @@ public:
     virtual void SetEnableDataDetector(bool isEnabled) {};
     virtual void SetDataDetectorConfig(const TextDetectConfig& config) {};
     virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
+    virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

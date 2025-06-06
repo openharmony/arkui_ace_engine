@@ -698,4 +698,11 @@ void WebModelImpl::SetOptimizeParserBudgetEnabled(bool enable)
     CHECK_NULL_VOID(webComponent);
     webComponent->SetOptimizeParserBudgetEnabled(enable);
 }
+
+void WebModelImpl::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetBypassVsyncCondition(condition);
+}
 } // namespace OHOS::Ace::Framework

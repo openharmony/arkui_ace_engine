@@ -3582,6 +3582,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
         delegate_->UpdateLoadsImagesAutomatically(GetImageAccessEnabledValue(true));
         delegate_->UpdateMixedContentMode(GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
+        delegate_->UpdateBypassVsyncCondition(GetBypassVsyncConditionValue(WebBypassVsyncCondition::NONE));
         isEmbedModeEnabled_ = GetNativeEmbedModeEnabledValue(false);
         if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
             delegate_->UpdateSupportZoom(false);
@@ -3711,6 +3712,7 @@ void WebPattern::OnModifyDone()
     if (delegate_) {
         delegate_->SetSurfaceDensity(density_);
     }
+    CheckAndSetWebNestedScrollExisted();
 }
 
 void WebPattern::SetSurfaceDensity(double density)
@@ -6222,6 +6224,34 @@ bool WebPattern::FilterScrollEventHandlevVlocity(const float velocity)
     return false;
 }
 
+void WebPattern::CheckAndSetWebNestedScrollExisted()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckAndSetWebNestedScrollExisted");
+    auto webBypassVsyncCondition = GetWebBypassVsyncCondition();
+    bool isVsyncCondition = WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET == webBypassVsyncCondition;
+    auto it = parentsMap_.find(Axis::VERTICAL);
+    if (parentsMap_.find(Axis::VERTICAL) != parentsMap_.end()) {
+        auto parent = it->second.Upgrade();
+        if (parent) {
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "WebPattern::CheckAndSetWebNestedScrollExisted isVsyncCondition:%{public}d",
+                isVsyncCondition);
+            parent->SetWebNestedScrollExisted(isVsyncCondition);
+        }
+    }
+
+    it = parentsMap_.find(Axis::HORIZONTAL);
+    if (parentsMap_.find(Axis::HORIZONTAL) != parentsMap_.end()) {
+        auto parent = it->second.Upgrade();
+        if (parent) {
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "WebPattern::CheckAndSetWebNestedScrollExisted isVsyncCondition:%{public}d",
+                isVsyncCondition);
+            parent->SetWebNestedScrollExisted(isVsyncCondition);
+        }
+    }
+}
+
 bool WebPattern::IsDefaultFocusNodeExist()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -8053,4 +8083,15 @@ bool WebPattern::PausePip(int delegateId, int childId, int frameRoutingId)
     }
     return true;
 }
+
+void WebPattern::OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnBypassVsyncConditionUpdate condition:%{public}d", condition);
+    webBypassVsyncCondition_ = condition;
+    if (delegate_) {
+        delegate_->UpdateBypassVsyncCondition(condition);
+    }
+}
+
+
 } // namespace OHOS::Ace::NG

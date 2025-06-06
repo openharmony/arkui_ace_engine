@@ -476,6 +476,11 @@ public:
         mixedContentMode_ = mixedModeNum;
     }
 
+    void SetBypassVsyncCondition(WebBypassVsyncCondition webBypassVsyncCondition)
+    {
+        webBypassVsyncCondition_ = webBypassVsyncCondition;
+    }
+
     bool GetZoomAccessEnabled() const
     {
         return isZoomAccessEnabled_;
@@ -1189,6 +1194,7 @@ private:
     bool isDomStorageAccessEnabled_ = false;
     bool isImageAccessEnabled_ = true;
     MixedModeContent mixedContentMode_ = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
+    WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
     bool isZoomAccessEnabled_ = true;
     bool isGeolocationAccessEnabled_ = true;
     bool isOverviewModeAccessEnabled_ = true;

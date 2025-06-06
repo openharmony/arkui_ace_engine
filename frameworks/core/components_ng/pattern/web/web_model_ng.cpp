@@ -1995,6 +1995,14 @@ void WebModelNG::SetOnNavigationEntryCommitted(
     webEventHub->SetOnNavigationEntryCommittedEvent(std::move(navigationEntryCommitted));
 }
 
+void WebModelNG::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebModelNG::SetBypassVsyncCondition condition:%{public}d", condition);
+    webPattern->UpdateBypassVsyncCondition(condition);
+}
+
 void WebModelNG::SetOnSearchResultReceive(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {

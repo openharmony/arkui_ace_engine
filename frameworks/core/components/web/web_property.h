@@ -93,6 +93,11 @@ enum class WebElementType : int32_t {
     NONE,
 };
 
+enum class WebBypassVsyncCondition : int32_t {
+    NONE = 0,
+    SCROLLBY_FROM_ZERO_OFFSET = 1
+};
+
 struct WebPreviewSelectionMenuParam {
     WebElementType type;
     ResponseType responseType;
