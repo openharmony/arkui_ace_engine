@@ -1069,6 +1069,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
 
 const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
   [
+    ['Swiper', (node: FrameNode): ArkSwiperComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkSwiperComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
     ['Scroll', (node: FrameNode): ArkScrollComponent => {
       if (node._componentAttribute) {
         return node._componentAttribute;
@@ -1079,6 +1089,76 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
+    ['List', (node: FrameNode): ArkListComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkListComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['ListItem', (node: FrameNode): ArkListItemComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkListItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['ListItemGroup', (node: FrameNode): ArkListItemGroupComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkListItemGroupComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['WaterFlow', (node: FrameNode): ArkWaterFlowComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['FlowItem', (node: FrameNode): ArkFlowItemComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Grid', (node: FrameNode): ArkGridComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkGridComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['GridItem', (node: FrameNode): ArkGridItemComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }]
   ]
 )
 
@@ -1135,6 +1215,26 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
   ]
 )
 
+const __bindControllerCallbackMap__ = new Map<string, (node: FrameNode, controller: Scroller | SwiperController) => void>(
+  [
+    ['Swiper', (node: FrameNode, controller: SwiperController) => {
+      getUINativeModule().swiper.setSwiperInitialize(node.getNodePtr(), controller);
+    }],
+    ['Scroll', (node: FrameNode, controller: Scroller) => {
+      getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
+    }],
+    ['List', (node: FrameNode, controller: Scroller) => {
+      getUINativeModule().list.setInitialScroller(node.getNodePtr(), controller);
+    }],
+    ['WaterFlow', (node: FrameNode, controller: Scroller) => {
+      getUINativeModule().waterFlow.setWaterFlowScroller(node.getNodePtr(), controller);
+    }],
+    ['Grid', (node: FrameNode, controller: Scroller) => {
+      getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller);
+    }]
+  ]
+)
+
 class typeNode {
   static createNode(context: UIContext, type: string, options?: object): FrameNode {
     let creator = __creatorMap__.get(type)
@@ -1169,14 +1269,22 @@ class typeNode {
     return event(node);
   } 
 
-  static bindController(node: FrameNode, controller: Scroller, nodeType: string): void {
+  static bindController(node: FrameNode, controller: Scroller | SwiperController, nodeType: string): void {
     if (node === undefined || node === null || controller === undefined || controller === null ||
       node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
-      throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+      if (nodeType === undefined || nodeType === null || nodeType === 'Scroll') {
+        throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+      } else {
+        throw { message: 'Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.', code: 100023 };
+      }
     }
     if (!node.checkIfCanCrossLanguageAttributeSetting()) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
-    getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
+    let callback = __bindControllerCallbackMap__.get(nodeType);
+    if (callback === undefined || callback === null) {
+      return;
+    }
+    callback(node, controller);
   }
 }
