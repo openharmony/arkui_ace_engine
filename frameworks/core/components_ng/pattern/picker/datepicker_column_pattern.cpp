@@ -590,7 +590,7 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
     if (canLoop && !NotLoopOptions()) {
         return true;
     }
-    int totalOptionCount = GetOptionCount();
+    int totalOptionCount = static_cast<int>(GetOptionCount());
 
     auto datePickerColumnPattern = host->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(datePickerColumnPattern, false);
