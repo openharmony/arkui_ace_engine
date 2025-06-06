@@ -574,23 +574,23 @@ void MenuLayoutAlgorithm::InitWrapperRect(
 }
 
 void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
-    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, float creaseHeightOffset)
+    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, double creaseHeightOffset)
 {
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
-    float creaseTop = 0;
-    float creaseBottom = 0;
-    float creaseHeight = 0;
+    double creaseTop = 0.0;
+    double creaseBottom = 0.0;
+    double creaseHeight = 0.0;
     if (!foldCreaseRects.empty()) {
         auto foldCrease = foldCreaseRects.front();
         creaseTop = foldCrease.Top() - creaseHeightOffset;
         creaseBottom = foldCrease.Bottom() - creaseHeightOffset;
         creaseHeight = foldCrease.Height();
     }
-    float offsetY = 0;
+    double offsetY = 0.0;
     if (props->GetMenuPlacement().has_value()) {
         offsetY = targetOffset_.GetY();
     } else {
@@ -828,7 +828,8 @@ void MenuLayoutAlgorithm::CalcWrapperRectForHoverMode(const RefPtr<MenuPattern>&
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProperty);
     if (OverlayManager::IsNeedAvoidFoldCrease(menuNode, true, isExpandDisplay_, menuWrapperPattern->GetHoverMode())) {
-        auto creaseHeightOffset = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx());
+        auto creaseHeightOffset =
+            pipelineContext->GetDisplayAvailableRect().Top() + menuNode->GetParentGlobalOffsetWithSafeArea().GetY();
         UpdateWrapperRectForHoverMode(menuLayoutProperty, menuPattern, creaseHeightOffset);
     }
 }
