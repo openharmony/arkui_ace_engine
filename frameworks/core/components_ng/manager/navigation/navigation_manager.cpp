@@ -79,7 +79,8 @@ void NavigationManager::OnDumpInfo()
             CHECK_NULL_VOID(navDestination);
             DumpLog::GetInstance().Print(space + navDestination->ToDumpString());
             depth++;
-            if (!stack.empty() && curNode->GetParent()->GetTag() == V2::PRIMARY_CONTENT_NODE_ETS_TAG &&
+            auto parent = curNode->GetParent();
+            if (!stack.empty() && parent && parent->GetTag() == V2::PRIMARY_CONTENT_NODE_ETS_TAG &&
                 stack.top().first->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
                 DumpLog::GetInstance().Print("----------------------------------------------------------");
             }

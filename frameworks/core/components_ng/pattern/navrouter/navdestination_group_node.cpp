@@ -1102,9 +1102,9 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreatePlaceHolder(
     auto phNode = ForceSplitUtils::CreatePlaceHolderNavDestination(context);
     CHECK_NULL_RETURN(phNode, nullptr);
     phNode->SetPrimaryNode(WeakClaim(this));
-    auto phPattern = phNode->GetPattern<NavDestinationGroupNode>();
+    auto phPattern = phNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(phPattern, nullptr);
-    phPattern->SetIndex(index_, false);
+    phPattern->SetIndex(index_);
     placeHolderNode_ = phNode;
     return placeHolderNode_;
 }

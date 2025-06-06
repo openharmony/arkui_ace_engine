@@ -376,6 +376,7 @@ void NavBarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    NavDestinationPatternBase::InitOnTouchEvent(host);
     auto pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
@@ -504,6 +505,7 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    NavDestinationPatternBase::RemoveOnTouchEvent(frameNode);
 }
 
 bool NavBarPattern::CanCoordScrollUp(float offset) const

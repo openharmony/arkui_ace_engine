@@ -842,8 +842,10 @@ void NavigationPattern::ClearSecondaryNodesIfNeeded(NavPathList&& preList)
      * The NavDestination between the homeNode and the first newly added STANDARD NavDestination will be removed.
      */
     auto homeNode = homeNode_.Upgrade();
-    CHECK_NULL_VOID(homeNode);
-    if (!homeNodeTouched_) {
+    if (!forceSplitSuccess_ || !homeNodeTouched_) {
+        return;
+    }
+    if (!forceSplitUseNavBar_ && !homeNode) {
         return;
     }
     const auto& curList = navigationStack_->GetAllNavDestinationNodes();
@@ -864,14 +866,15 @@ void NavigationPattern::ClearSecondaryNodesIfNeeded(NavPathList&& preList)
     for (int32_t index = firstNewStandardNodeIndex - 1; index >= 0; --index) {
         auto node = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(curList[index].second));
-        if (node == homeNode) {
+        CHECK_NULL_CONTINUE(node);
+        if (!forceSplitUseNavBar_ && node == homeNode) {
             foundHomeNode = true;
             break;
         }
         removeIndexes.push_back(index);
     }
-    if (!foundHomeNode) {
-        removeIndexes.clear();
+    if (!forceSplitUseNavBar_ && !foundHomeNode) {
+        return;
     }
     if (removeIndexes.empty()) {
         return;
@@ -3251,6 +3254,19 @@ void NavigationPattern::NotifyCurPrimaryNodesOnWillShow(std::set<RefPtr<NavDesti
     }
 }
 
+bool NavigationPattern::CheckIfNoNeedAnimationForForceSplit(const RefPtr<NavDestinationGroupNode>& preDestination,
+    const RefPtr<NavDestinationGroupNode>& topDestination)
+{
+    if (!forceSplitSuccess_) {
+        return false;
+    }
+    if (forceSplitUseNavBar_) {
+        return !preDestination || !topDestination;
+    }
+    return (preDestination && preDestination->IsShowInPrimaryPartition()) ||
+        (topDestination && topDestination->IsShowInPrimaryPartition());
+}
+
 void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible)
@@ -3267,9 +3283,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition navigationMode_:%{public}d isNotNeedAnimation:%{public}d",
         navigationMode_, isNotNeedAnimation);
 #endif
-    if (forceSplitSuccess_ && !forceSplitUseNavBar_ &&
-        ((preDestination && preDestination->IsShowInPrimaryPartition()) ||
-        (topDestination && topDestination->IsShowInPrimaryPartition()))) {
+    if (CheckIfNoNeedAnimationForForceSplit(preDestination, topDestination)) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition don't need animation in forceSplit mode");
         isNotNeedAnimation = true;
     }

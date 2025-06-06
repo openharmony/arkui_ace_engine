@@ -482,6 +482,11 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     CHECK_NULL_VOID(hostNode);
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto usrNavigationMode = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
+    if (navigationPattern->IsForceSplitSuccess()) {
+        usrNavigationMode = NavigationMode::SPLIT;
+    }
     if (usrNavigationMode == NavigationMode::AUTO) {
         if (frameSize.Width() >= CalculateNavigationWidth(hostNode)) {
             usrNavigationMode = NavigationMode::SPLIT;
@@ -493,7 +498,6 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
             usrNavigationMode = NavigationMode::STACK;
         }
     }
-    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
     bool isFirstTimeLayout = (navigationPattern->GetNavigationMode() == INITIAL_MODE);
     bool enableModeChangeAnimation = navigationLayoutProperty->GetEnableModeChangeAnimation().value_or(true);
@@ -810,7 +814,8 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (pattern->IsForceSplitSuccess() && !pattern->IsForceSplitUseNavBar()) {
         navBarOrPrimarNodeWidth = LayoutPrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty);
     } else {
-        navBarPosition = navigationLayoutProperty->GetNavBarPositionValue(NavBarPosition::START);
+        navBarPosition = pattern->IsForceSplitUseNavBar() ? NavBarPosition::START :
+            navigationLayoutProperty->GetNavBarPositionValue(NavBarPosition::START);
         OffsetF navBarOffset(0.0, 0.0);
         navBarOrPrimarNodeWidth = LayoutNavBar(
             layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
