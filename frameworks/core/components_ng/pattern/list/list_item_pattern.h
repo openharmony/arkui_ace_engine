@@ -243,6 +243,8 @@ public:
 
     SwipeActionState GetSwipeActionState();
 
+    bool FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target);
+
 protected:
     void OnModifyDone() override;
     virtual void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);

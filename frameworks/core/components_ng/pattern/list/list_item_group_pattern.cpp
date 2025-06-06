@@ -857,11 +857,9 @@ void ListItemGroupPattern::AdjustMountTreeSequence(int32_t footerCount)
 {
     // Adjust the mount tree sequence to header, listitem, footer
     if (footerIndex_ >= 0 && footerIndex_ < itemStartIndex_) {
-        auto groupHost = GetHost();
-        CHECK_NULL_VOID(groupHost);
-        auto totalChildCount = groupHost->GetTotalChildCount();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto totalChildCount = host->GetTotalChildCount();
         auto childNode = host->GetChildAtIndex(itemStartIndex_);
         CHECK_NULL_VOID(childNode);
         auto endNode = host->GetChildAtIndex(footerIndex_);
