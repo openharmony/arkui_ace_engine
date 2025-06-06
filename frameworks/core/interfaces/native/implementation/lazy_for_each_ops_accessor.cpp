@@ -38,16 +38,16 @@ void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, 
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<LazyContainer>();
+        CHECK_NULL_VOID(pattern);
     if (startIdx >= 0) {
         frameNode->ChildrenUpdatedFrom(startIdx);
     }
     if (endIdx >= 0) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
         pattern->NotifyDataChange(endIdx, changeCnt);
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    frameNode->RemoveItemsOnChange(startIdx);
+    pattern->RemoveItemsOnChange(startIdx);
 }
 
 void SyncImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_CreateItem* creator,

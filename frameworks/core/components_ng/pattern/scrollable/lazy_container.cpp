@@ -106,4 +106,22 @@ LazyComposeAdapter* LazyContainer::GetArkoalaLazyAdapter()
 {
     return newAdapter_.get();
 }
+
+void LazyContainer::RemoveItemsOnChange(int32_t changeIndex)
+{
+    CHECK_NULL_VOID(newAdapter_);
+    std::vector<RefPtr<UINode>> toRemove;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& child : host->GetChildren()) {
+        const int32_t index = static_cast<int32_t>(newAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+        if (index >= changeIndex) {
+            toRemove.push_back(child);
+        }
+    }
+    for (auto&& node : toRemove) {
+        host->RemoveChild(node);
+    }
+    newAdapter_->OnDataChange(changeIndex);
+}
 } // namespace OHOS::Ace::NG

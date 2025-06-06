@@ -1345,8 +1345,6 @@ public:
     ScrollWindowAdapter* GetScrollWindowAdapter() const;
     ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
 
-    void RemoveItemsOnChange(int32_t changeIndex);
-
     bool HasMultipleChild();
 
 protected:

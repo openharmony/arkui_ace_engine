@@ -4927,23 +4927,6 @@ void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheSta
     }
 }
 
-void FrameNode::RemoveItemsOnChange(int32_t changeIndex)
-{
-    auto* adapter = pattern_->GetArkoalaLazyAdapter();
-    CHECK_NULL_VOID(adapter);
-    std::vector<RefPtr<UINode>> toRemove;
-    for (const auto& child : GetChildren()) {
-        const int32_t index = static_cast<int32_t>(adapter->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-        if (index >= changeIndex) {
-            toRemove.push_back(child);
-        }
-    }
-    for (auto&& node : toRemove) {
-        RemoveChild(node);
-    }
-    adapter->OnDataChange(changeIndex);
-}
-
 void FrameNode::SetActiveChildRange(
     const std::optional<ActiveChildSets>& activeChildSets, const std::optional<ActiveChildRange>& activeChildRange)
 {

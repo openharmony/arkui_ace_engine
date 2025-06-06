@@ -49,6 +49,8 @@ public:
 
     void Synchronize(
         LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
+    
+    void RemoveItemsOnChange(int32_t changeIndex);
 
 protected:
     void ResetAdapter()
