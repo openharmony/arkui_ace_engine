@@ -38,6 +38,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CHILDREN_MIN_SIZE = 2;
@@ -857,11 +858,39 @@ int32_t TabsPattern::OnInjectionEvent(const std::string& command)
 
 void TabsPattern::OnColorModeChange(uint32_t colorMode)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     Pattern::OnColorModeChange(colorMode);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(theme);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+
+    if (!tabsLayoutProperty->HasDividerColorSetByUser() ||
+        (tabsLayoutProperty->HasDividerColorSetByUser() && !tabsLayoutProperty->GetDividerColorSetByUserValue())) {
+        auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
+        currentDivider.color = theme->GetDividerColor();
+        auto dividerFrameNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+        CHECK_NULL_VOID(dividerFrameNode);
+        auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_VOID(dividerRenderProperty);
+        dividerRenderProperty->UpdateDividerColor(currentDivider.color);
+    }
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    if (!tabsLayoutProperty->HasBarBackgroundColorSetByUser() ||
+        (tabsLayoutProperty->HasBarBackgroundColorSetByUser() &&
+            !tabsLayoutProperty->GetBarBackgroundColorSetByUserValue())) {
+        Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
+        tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
+    }
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG
