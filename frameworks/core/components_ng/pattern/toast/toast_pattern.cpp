@@ -116,14 +116,16 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
 {
     auto hoverModeArea = toastProps->GetHoverModeAreaValue(HoverModeAreaType::TOP_SCREEN);
     auto container = Container::CurrentSafelyWithCheck();
-    auto displayInfo = container->GetDisplayInfo();
-    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
     float foldCreaseTop = 0.0f;
     float foldCreaseBottom = 0.0f;
-    if (!foldCreaseRects.empty()) {
-        auto foldCrease = foldCreaseRects.front();
-        foldCreaseTop = foldCrease.Top();
-        foldCreaseBottom = foldCrease.Bottom();
+    auto displayInfo = container->GetDisplayInfo();
+    if (displayInfo) {
+        auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+        if (!foldCreaseRects.empty()) {
+            auto foldCrease = foldCreaseRects.front();
+            foldCreaseTop = foldCrease.Top();
+            foldCreaseBottom = foldCrease.Bottom();
+        }
     }
     bool isKeyboardShow = false;
     auto showMode = ToastShowMode::DEFAULT;
