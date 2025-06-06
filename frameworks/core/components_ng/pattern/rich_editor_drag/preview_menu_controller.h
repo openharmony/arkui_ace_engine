@@ -19,6 +19,7 @@
 #include "ui/base/referenced.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -31,7 +32,7 @@ class PreviewMenuController : public virtual AceType {
 public:
     PreviewMenuController(const WeakPtr<TextPattern>& pattern);
     virtual ~PreviewMenuController() = default;
-    void BindConTextMenu(const RefPtr<FrameNode>& targetNode, bool isShow = true);
+    void BindContextMenu(const RefPtr<FrameNode>& targetNode, bool isShow = true);
     void ClosePreviewMenu()
     {
         isShow_ = false;
@@ -42,16 +43,21 @@ public:
         return isShow_;
     }
 
+    static void CreatePreviewMenu(
+        TextDataDetectType type, const std::string& content, std::function<void()> disappearCallback);
+
 private:
     void CreateAIEntityMenu();
-    void CreatePreviewMenu(const RefPtr<FrameNode>& targetNode);
-    RefPtr<FrameNode> CreateNonLinkingNode();
-    RefPtr<FrameNode> CreateLinkingNode(TextDataDetectType type);
-    void UpdateNonLinkNodeProperty(
-        const RefPtr<ImageLayoutProperty>& imageLayoutProperty, const RefPtr<TextLayoutProperty>& textLayoutProperty);
-    RefPtr<FrameNode> CreateErrorNode();
+    static RefPtr<FrameNode> CreateContactNode(const std::string& content, std::function<void()>&& disappearCallback);
+    static RefPtr<FrameNode> CreateLinkingNode(TextDataDetectType type, std::function<void()>&& disappearCallback);
+    static void UpdateNonLinkNodeProperty(const RefPtr<ImageLayoutProperty>& imageLayoutProperty,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const std::string& content);
+    static void UpdateLinkNodeProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<FlexLayoutProperty>& flexLayoutProperty, TextDataDetectType type);
+    static RefPtr<FrameNode> CreateErrorNode(
+        TextDataDetectType type, const std::string& content, std::function<void()>&& disappearCallback);
     std::function<void()> GetDisappearCallback();
-    std::function<void()> GetLinkingCallback(const std::string& appName);
+    static std::function<void()> GetLinkingCallback(const std::string& appName);
 
     MenuParam menuParam_;
     std::function<void()> menuBuilder_ = nullptr;

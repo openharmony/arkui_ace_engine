@@ -34,7 +34,6 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
-#include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
@@ -52,6 +51,7 @@ constexpr Dimension AVATAR_SIZE = 40.0_vp;
 constexpr Dimension PADDING_SIZE = 12.0_vp;
 constexpr Dimension MARGIN_SIZE = 16.0_vp;
 constexpr Dimension PREVIEW_MIN_HEIGHT = 60.0_vp;
+constexpr Dimension FAILED_TEXT_LINE_SPACING = 8.0_vp;
 constexpr float MAX_HEIGHT_PROPORTIONS = 0.65;
 } // namespace
 PreviewMenuController::PreviewMenuController(const WeakPtr<TextPattern>& pattern)
@@ -131,12 +131,7 @@ void PreviewMenuController::CreateAIEntityMenu()
 
 std::function<void()> PreviewMenuController::GetDisappearCallback()
 {
-    auto textPattern = pattern_.Upgrade();
-    CHECK_NULL_RETURN(textPattern, nullptr);
-    auto targetNode = textPattern->MoveDragNode();
-    CHECK_NULL_RETURN(targetNode, nullptr);
-    return [weak = WeakClaim(this), node = WeakPtr<FrameNode>(targetNode), pattern = WeakPtr<TextPattern>(textPattern),
-               mainId = Container::CurrentIdSafelyWithCheck()]() {
+    return [weak = WeakClaim(this), pattern = pattern_, mainId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(mainId);
         auto controller = weak.Upgrade();
         CHECK_NULL_VOID(controller);
@@ -147,15 +142,15 @@ std::function<void()> PreviewMenuController::GetDisappearCallback()
             CHECK_NULL_VOID(host);
             TAG_LOGI(AceLogTag::ACE_TEXT, "CreateAIEntityMenu onMenuDisappear id:%{public}d", host->GetId());
         }
-        auto targetNode = node.Upgrade();
+        auto targetNode = textPattern->MoveDragNode();
         CHECK_NULL_VOID(targetNode);
-        controller->BindConTextMenu(targetNode, false);
+        controller->BindContextMenu(targetNode, false);
     };
 }
 
 std::function<void()> PreviewMenuController::GetLinkingCallback(const std::string& appName)
 {
-    return [appName, pattern = pattern_, mainId = Container::CurrentIdSafelyWithCheck()]() {
+    return [appName, mainId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(mainId);
         auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
@@ -163,17 +158,13 @@ std::function<void()> PreviewMenuController::GetLinkingCallback(const std::strin
         CHECK_NULL_VOID(fontManager);
         fontManager->StartAbilityOnInstallAppInStore(appName);
         if (SystemProperties::GetTextTraceEnabled()) {
-            auto textPattern = pattern.Upgrade();
-            CHECK_NULL_VOID(textPattern);
-            auto host = textPattern->GetHost();
-            CHECK_NULL_VOID(host);
-            TAG_LOGI(AceLogTag::ACE_TEXT, "preview failed onLinkingCallback id:%{public}d appName:%{public}s",
-                host->GetId(), appName.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT, "preview failed onLinkingCallback");
         }
     };
 }
 
-void PreviewMenuController::CreatePreviewMenu(const RefPtr<FrameNode>& targetNode)
+void PreviewMenuController::CreatePreviewMenu(
+    TextDataDetectType type, const std::string& content, std::function<void()> disappearCallback)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -184,22 +175,16 @@ void PreviewMenuController::CreatePreviewMenu(const RefPtr<FrameNode>& targetNod
         stack->Push(frameNode);
         auto flexLayoutProperty = frameNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(flexLayoutProperty);
-        flexLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+        flexLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
         auto flexRenderContext = frameNode->GetRenderContext();
         CHECK_NULL_VOID(flexRenderContext);
-        auto context = targetNode->GetContext();
+        auto context = frameNode->GetContext();
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         auto bgColor = theme->GetBackgroundColor();
         flexRenderContext->UpdateBackgroundColor(bgColor);
-        auto windowRect = context->GetDisplayWindowRectInfo();
-        std::optional<CalcLength> minHeight = CalcLength(PREVIEW_MIN_HEIGHT);
-        std::optional<CalcLength> maxHeight = CalcLength(Dimension(windowRect.Height() * MAX_HEIGHT_PROPORTIONS));
-        std::optional<CalcLength> maxWidth = CalcLength(PREVIEW_MAX_WIDTH);
-        flexLayoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
-        flexLayoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, maxHeight));
-        auto node = CreateErrorNode();
+        auto node = CreateErrorNode(type, content, std::move(disappearCallback));
         if (node) {
             node->MountToParent(frameNode);
         }
@@ -208,32 +193,28 @@ void PreviewMenuController::CreatePreviewMenu(const RefPtr<FrameNode>& targetNod
     stack->Push(childFrameNode);
 }
 
-RefPtr<FrameNode> PreviewMenuController::CreateErrorNode()
+RefPtr<FrameNode> PreviewMenuController::CreateErrorNode(
+    TextDataDetectType type, const std::string& content, std::function<void()>&& disappearCallback)
 {
-    auto textPattern = pattern_.Upgrade();
-    CHECK_NULL_RETURN(textPattern, nullptr);
-    auto host = textPattern->GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
     RefPtr<FrameNode> node;
-    auto data = textPattern->GetSelectedAIData();
-    switch (data.type) {
+    switch (type) {
         case TextDataDetectType::PHONE_NUMBER:
         case TextDataDetectType::EMAIL:
-            node = CreateNonLinkingNode();
+            node = CreateContactNode(content, std::move(disappearCallback));
             break;
         case TextDataDetectType::DATE_TIME:
         case TextDataDetectType::ADDRESS:
         case TextDataDetectType::URL:
-            node = CreateLinkingNode(data.type);
+            node = CreateLinkingNode(type, std::move(disappearCallback));
             break;
         default:
-            TAG_LOGI(AceLogTag::ACE_TEXT, "CreatePreviewMenu AI empty type id:%{public}d", host->GetId());
             break;
     }
     return node;
 }
 
-RefPtr<FrameNode> PreviewMenuController::CreateNonLinkingNode()
+RefPtr<FrameNode> PreviewMenuController::CreateContactNode(
+    const std::string& content, std::function<void()>&& disappearCallback)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::FLEX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<FlexLayoutPattern>(false); });
@@ -243,20 +224,28 @@ RefPtr<FrameNode> PreviewMenuController::CreateNonLinkingNode()
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto flexLayoutProperty = frameNode->GetLayoutProperty<FlexLayoutProperty>();
     CHECK_NULL_RETURN(flexLayoutProperty, nullptr);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
     auto padding = CalcLength(PADDING_SIZE);
     flexLayoutProperty->UpdatePadding({ padding, padding, padding, padding });
-    std::optional<CalcLength> height = CalcLength(PREVIEW_MIN_HEIGHT);
-    flexLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
     flexLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
     flexLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    auto windowRect = context->GetDisplayWindowRectInfo();
+    std::optional<CalcLength> minHeight = CalcLength(PREVIEW_MIN_HEIGHT);
+    auto maxHeightValue = windowRect.Height() * MAX_HEIGHT_PROPORTIONS;
+    std::optional<CalcLength> maxHeight = CalcLength(Dimension(maxHeightValue));
+    std::optional<CalcLength> maxWidth = CalcLength(PREVIEW_MAX_WIDTH);
+    flexLayoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
+    flexLayoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, maxHeight));
+    std::optional<CalcLength> height = CalcLength(PREVIEW_MIN_HEIGHT);
+    flexLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
 
     auto eventHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventHub, nullptr);
-    auto&& callback = GetDisappearCallback();
-    eventHub->SetUserOnClick([callback, mainId = Container::CurrentIdSafelyWithCheck()](GestureEvent& info) {
+    eventHub->SetUserOnClick([disappearCallback, mainId = Container::CurrentIdSafelyWithCheck()](GestureEvent& info) {
         ContainerScope scope(mainId);
-        if (callback) {
-            callback();
+        if (disappearCallback) {
+            disappearCallback();
         }
     });
 
@@ -264,7 +253,7 @@ RefPtr<FrameNode> PreviewMenuController::CreateNonLinkingNode()
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    UpdateNonLinkNodeProperty(imageLayoutProperty, textLayoutProperty);
+    UpdateNonLinkNodeProperty(imageLayoutProperty, textLayoutProperty, content);
 
     avatarNode->MarkModifyDone();
     avatarNode->MountToParent(frameNode);
@@ -273,8 +262,8 @@ RefPtr<FrameNode> PreviewMenuController::CreateNonLinkingNode()
     return frameNode;
 }
 
-void PreviewMenuController::UpdateNonLinkNodeProperty(
-    const RefPtr<ImageLayoutProperty>& imageLayoutProperty, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+void PreviewMenuController::UpdateNonLinkNodeProperty(const RefPtr<ImageLayoutProperty>& imageLayoutProperty,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, const std::string& content)
 {
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
@@ -292,10 +281,7 @@ void PreviewMenuController::UpdateNonLinkNodeProperty(
     imageLayoutProperty->UpdateMargin(
         { std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, endMargin });
 
-    auto textPattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(textPattern);
-    auto data = textPattern->GetSelectedAIData();
-    textLayoutProperty->UpdateContent(data.content);
+    textLayoutProperty->UpdateContent(content);
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
@@ -304,18 +290,18 @@ void PreviewMenuController::UpdateNonLinkNodeProperty(
     textLayoutProperty->UpdateTextColor(theme->GetMenuFontColor());
 }
 
-RefPtr<FrameNode> PreviewMenuController::CreateLinkingNode(TextDataDetectType type)
+RefPtr<FrameNode> PreviewMenuController::CreateLinkingNode(
+    TextDataDetectType type, std::function<void()>&& disappearCallback)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    auto flexLayoutProperty = frameNode->GetLayoutProperty<LinearLayoutProperty>();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::FLEX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<FlexLayoutPattern>(false); });
+    auto flexLayoutProperty = frameNode->GetLayoutProperty<FlexLayoutProperty>();
     CHECK_NULL_RETURN(flexLayoutProperty, nullptr);
-    flexLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     auto eventHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventHub, nullptr);
     std::function<void()> callback;
     if (type == TextDataDetectType::URL) {
-        callback = GetDisappearCallback();
+        callback = disappearCallback;
     } else if (type == TextDataDetectType::DATE_TIME) {
         auto name = ExpandedMenuPluginLoader::GetInstance().GetAPPName(type);
         callback = GetLinkingCallback(name);
@@ -329,29 +315,47 @@ RefPtr<FrameNode> PreviewMenuController::CreateLinkingNode(TextDataDetectType ty
             callback();
         }
     });
-
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto theme = context->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    auto content = theme->GetPreviewDisplayFailedContent(type);
-    textLayoutProperty->UpdateContent(content);
-    std::optional<CalcLength> height = CalcLength(PREVIEW_MAX_WIDTH);
-    textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
-    textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
-    textLayoutProperty->UpdateFontSize(theme->GetPreviewFailedFontSize());
-    textLayoutProperty->UpdateTextColor(theme->GetPreviewFailedFontColor());
-    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-
+    UpdateLinkNodeProperty(textLayoutProperty, flexLayoutProperty, type);
     textNode->MountToParent(frameNode);
     return frameNode;
 }
 
-void PreviewMenuController::BindConTextMenu(const RefPtr<FrameNode>& targetNode, bool isShow)
+void PreviewMenuController::UpdateLinkNodeProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<FlexLayoutProperty>& flexLayoutProperty, TextDataDetectType type)
+{
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    flexLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+    flexLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    flexLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
+    auto windowRect = context->GetDisplayWindowRectInfo();
+    std::optional<CalcLength> minHeight = CalcLength(PREVIEW_MIN_HEIGHT);
+    auto maxHeightValue = windowRect.Height() * MAX_HEIGHT_PROPORTIONS;
+    std::optional<CalcLength> maxHeight = CalcLength(Dimension(maxHeightValue));
+    std::optional<CalcLength> maxWidth = CalcLength(PREVIEW_MAX_WIDTH);
+    flexLayoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
+    flexLayoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, maxHeight));
+    auto heightValue = std::clamp(PREVIEW_MAX_WIDTH.ConvertToPx(), PREVIEW_MIN_HEIGHT.ConvertToPx(), maxHeightValue);
+    std::optional<CalcLength> height = CalcLength(Dimension(heightValue));
+    flexLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
+
+    auto theme = context->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    auto content = theme->GetPreviewDisplayFailedContent(type);
+    textLayoutProperty->UpdateContent(content);
+    textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
+    textLayoutProperty->UpdateFontSize(theme->GetPreviewFailedFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetPreviewFailedFontColor());
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    textLayoutProperty->UpdateLineSpacing(FAILED_TEXT_LINE_SPACING);
+    textLayoutProperty->UpdateIsOnlyBetweenLines(true);
+}
+
+void PreviewMenuController::BindContextMenu(const RefPtr<FrameNode>& targetNode, bool isShow)
 {
 #ifndef ACE_UNITTEST
     CHECK_NULL_VOID(targetNode);
@@ -362,14 +366,15 @@ void PreviewMenuController::BindConTextMenu(const RefPtr<FrameNode>& targetNode,
         CHECK_NULL_VOID(controller);
         controller->CreateAIEntityMenu();
     };
-    previewBuilder_ = [weak = WeakClaim(this), node = WeakPtr<FrameNode>(targetNode),
-                          mainId = Container::CurrentIdSafelyWithCheck()]() {
+    previewBuilder_ = [weak = WeakClaim(this), pattern = pattern_, mainId = Container::CurrentIdSafelyWithCheck(),
+                          func = GetDisappearCallback()]() {
         ContainerScope scope(mainId);
-        auto targetNode = node.Upgrade();
-        CHECK_NULL_VOID(targetNode);
         auto controller = weak.Upgrade();
         CHECK_NULL_VOID(controller);
-        controller->CreatePreviewMenu(targetNode);
+        auto textPattern = pattern.Upgrade();
+        CHECK_NULL_VOID(textPattern);
+        auto data = textPattern->GetSelectedAIData();
+        controller->CreatePreviewMenu(data.type, data.content, func);
     };
     menuParam_.isShow = isShow;
     isShow_ = isShow;

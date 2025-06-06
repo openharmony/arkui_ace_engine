@@ -2363,8 +2363,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         CHECK_NULL_VOID(abilityContext);
         AAFwk::Want want;
         want.SetAction(ACTION_APPDETAIL);
-        auto front = NG::ExpandedMenuPluginLoader::GetInstance().GetStoreUrlFront();
-        auto url = front + appName;
+        auto urlPrefix = NG::ExpandedMenuPluginLoader::GetInstance().GetStoreUrlFront();
+        auto url = urlPrefix + appName;
         want.SetUri(url);
         abilityContext->StartAbility(want, REQUEST_CODE);
     });

@@ -161,7 +161,8 @@ HWTEST_F(PreviewMenuControllerTest, CreatePreviewMenuTest, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    controller.CreatePreviewMenu(targetNode);
+    auto func = controller.GetDisappearCallback();
+    controller.CreatePreviewMenu(aiSpan1.type, aiSpan1.content, std::move(func));
 
     auto afterSize = stack->elementsStack_.size();
     EXPECT_GT(afterSize, beforeSize);
@@ -183,16 +184,17 @@ HWTEST_F(PreviewMenuControllerTest, CreateLinkingNodeTest, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
 
+    auto callback = []() {};
     // Test with URL type
-    auto urlNode = controller.CreateLinkingNode(TextDataDetectType::URL);
+    auto urlNode = controller.CreateLinkingNode(TextDataDetectType::URL, callback);
     EXPECT_NE(urlNode, nullptr);
 
     // Test with DATE_TIME type
-    auto dateNode = controller.CreateLinkingNode(TextDataDetectType::DATE_TIME);
+    auto dateNode = controller.CreateLinkingNode(TextDataDetectType::DATE_TIME, callback);
     EXPECT_NE(dateNode, nullptr);
 
     // Test with ADDRESS type
-    auto addrNode = controller.CreateLinkingNode(TextDataDetectType::ADDRESS);
+    auto addrNode = controller.CreateLinkingNode(TextDataDetectType::ADDRESS, callback);
     EXPECT_NE(addrNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -1536,7 +1536,9 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     }
     // ai长按预览菜单hovescale依赖dragNode节点截图
     if (textBase->CanAIEntityDrag()) {
-        auto dragGestureHub = dragNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+        auto hub = dragNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto dragGestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(dragGestureHub);
         dragGestureHub->SetPixelMap(textPixelMap_);
     }

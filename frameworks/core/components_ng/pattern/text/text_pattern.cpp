@@ -270,6 +270,7 @@ bool TextPattern::CanAIEntityDrag()
     CHECK_NULL_RETURN(dataDetectorAdapter_, false);
     CHECK_NULL_RETURN(dataDetectorAdapter_->enablePreviewMenu_, false);
     CHECK_NULL_RETURN(!IsSelected(), false);
+    // 如果已触发拉起预览菜单则，不允许做拖拽
     if (previewController_ && previewController_->IsPreviewMenuShow()) {
         return false;
     }
@@ -309,8 +310,6 @@ void TextPattern::InitAiSelection(const Offset& globalOffset)
     bool isAiSpan = false;
     if (dataDetectorAdapter_) {
         auto aiSpanIter = dataDetectorAdapter_->aiSpanMap_.upper_bound(extend);
-        if (aiSpanIter != dataDetectorAdapter_->aiSpanMap_.end()) {
-        }
         if (aiSpanIter != dataDetectorAdapter_->aiSpanMap_.begin()) {
             --aiSpanIter;
         }
@@ -575,7 +574,7 @@ void TextPattern::ShowAIEntityPreviewMenuTimer()
         CHECK_NULL_VOID(dragNode);
         auto parent = dragNode->GetParent();
         CHECK_NULL_VOID(parent);
-        previewController->BindConTextMenu(dragNode);
+        previewController->BindContextMenu(dragNode);
     };
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);

@@ -270,13 +270,15 @@ std::function<void()> GetTextAnimationFinishCallback(
                weakEvent = AceType::WeakClaim(AceType::RawPtr(gestureHub)),
                weakModifier = WeakPtr<TextDragOverlayModifier>(modifier)] {
         ContainerScope scope(id);
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
         if (!startDrag) {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pattern);
             auto modifier = weakModifier.Upgrade();
             CHECK_NULL_VOID(modifier);
             pattern->ShowHandles(modifier->IsHandlesShow());
         }
+        // 长按ai菜单预览回落时，执行弹出ai菜单操作
+        pattern->ShowAIEntityMenuForCancel();
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetOverlayManager();
@@ -321,7 +323,13 @@ void DragDropInitiatingStateBase::HideTextAnimation(bool startDrag, double globa
     auto manager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     auto dragNode = manager->GetPixelMapNode();
-    CHECK_NULL_VOID(dragNode);
+    if (!dragNode) {
+        auto pattern = frameNode->GetPattern<TextDragBase>();
+        CHECK_NULL_VOID(pattern);
+        // 长按ai菜单预览回落时，执行弹出ai菜单操作
+        pattern->ShowAIEntityMenuForCancel();
+        return;
+    }
     auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
     auto frameWidth = dragFrame.Width();
     auto frameHeight = dragFrame.Height();
@@ -377,7 +385,7 @@ void DragDropInitiatingStateBase::HandleTextDragStart(const RefPtr<FrameNode>& f
     CHECK_NULL_VOID(gestureHub);
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         CHECK_NULL_VOID(pattern);
-        if (!pattern->IsSelected()) {
+        if (!pattern->IsSelected() && !pattern->CanAIEntityDrag()) {
             dragDropManager->ResetDragging();
             gestureHub->SetIsTextDraggable(false);
             TAG_LOGW(AceLogTag::ACE_DRAG, "Text is not selected, stop dragging.");
