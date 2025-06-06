@@ -139,7 +139,7 @@ private:
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void CalcWrapperRectForHoverMode(const RefPtr<MenuPattern>& menuPattern);
     void UpdateWrapperRectForHoverMode(
-        const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, float creaseHeightOffset);
+        const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, double creaseHeightOffset);
     uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
         const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);

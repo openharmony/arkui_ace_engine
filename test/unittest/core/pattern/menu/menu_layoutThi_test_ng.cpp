@@ -644,7 +644,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     int32_t creaseYTop = CREASE_Y;
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_TOP);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_TOP);
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0f);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
 
     auto top = layoutAlgorithm->top_;
     auto left = layoutAlgorithm->left_;
@@ -705,7 +705,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
 
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0f);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
 
     auto bottom = layoutAlgorithm->bottom_;
     auto left = layoutAlgorithm->left_;
@@ -767,7 +767,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg051, TestSize.Level1)
 
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0f);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
 
     auto top = layoutAlgorithm->top_;
     auto bottom = layoutAlgorithm->bottom_;
