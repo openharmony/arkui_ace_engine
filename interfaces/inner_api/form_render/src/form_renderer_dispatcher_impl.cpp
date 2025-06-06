@@ -329,10 +329,12 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
             auto uiContent = content.lock();
             if (!uiContent) {
                 HILOG_ERROR("uiContent is nullptr");
+                dumpCondition->cv.notify_all();
                 return;
             }
             HILOG_INFO("OnNotifyDumpInfo");
             uiContent->DumpInfo(params, info);
+            dumpCondition->cv.notify_all();
         },
         "OnNotifyDumpInfoTask");
     if (dumpCondition->cv.wait_for(lock, std::chrono::milliseconds(DUMP_WAIT_TIME)) == std::cv_status::timeout) {
