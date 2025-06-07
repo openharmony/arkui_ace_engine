@@ -213,7 +213,7 @@ void ParseDivider(JSRef<JSObject>& obj, NG::ItemDivider& divider)
         divider.strokeWidth = strokeWidth;
         divider.strokeWidthResObj = strokeWidthResObj;
     }
-    
+
     Color color = defaultColor;
     RefPtr<ResourceObject> colorResObj;
     if (ConvertFromJSValue(obj->GetProperty("color"), color, colorResObj)) {
@@ -292,10 +292,6 @@ void JSTextPicker::SetDefaultTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "defaultTextStyle");
-    }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseDefaultTextStyleResObj(textStyle);
     }
     TextPickerModel::GetInstance()->SetDefaultTextStyle(theme, textStyle);
 }
@@ -1223,10 +1219,6 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseDisappearTextStyleResObj(textStyle);
-    }
     TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -1238,10 +1230,6 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "textStyle");
     }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);
-    }
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -1252,10 +1240,6 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
-    }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseSelectedTextStyleResObj(textStyle);
     }
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
     if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
@@ -1435,9 +1419,6 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
         divider.strokeWidth = 0.0_vp;
     }
 
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseDividerResObj();
-    }
     TextPickerModel::GetInstance()->SetDivider(divider);
 }
 
