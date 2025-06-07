@@ -294,6 +294,25 @@ void GetScrollBarMargin(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     (*values)[0].f32 = scrollBarMargin.start_.ConvertToVp();
     (*values)[1].f32 = scrollBarMargin.end_.ConvertToVp();
 }
+
+void SetOnWillStopDragging(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onWillStopDragging = reinterpret_cast<OnWillStopDraggingEvent*>(extraParam);
+        ScrollableModelNG::SetOnWillStopDragging(frameNode, std::move(*onWillStopDragging));
+    } else {
+        ScrollableModelNG::SetOnWillStopDragging(frameNode, nullptr);
+    }
+}
+
+void ResetOnWillStopDragging(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillStopDragging(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -333,6 +352,8 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .setScrollBarMargin = SetScrollBarMargin,
         .resetScrollBarMargin = ResetScrollBarMargin,
         .getScrollBarMargin = GetScrollBarMargin,
+        .setOnWillStopDragging = SetOnWillStopDragging,
+        .resetOnWillStopDragging = ResetOnWillStopDragging,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
