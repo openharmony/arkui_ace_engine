@@ -7273,6 +7273,37 @@ HWTEST_F(NativeNodeTest, NativeNodeTest144, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeTest_SetForceDarkConfig_001
+ * @tc.desc: Test OH_ArkUI_SetForceDarkConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_SetForceDarkConfig_001, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({ .id = 0 });
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(nullptr, true, ARKUI_NODE_LIST, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(uiContext, true, ARKUI_NODE_LIST, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(nullptr, true, ARKUI_NODE_LIST, [](uint32_t color) { return color; }),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(uiContext, true, ARKUI_NODE_LIST, [](uint32_t color) { return color; }),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(nullptr, true, ARKUI_NODE_UNDEFINED, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(uiContext, true, ARKUI_NODE_UNDEFINED, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(nullptr, true, ARKUI_NODE_UNDEFINED, [](uint32_t color) { return color; }),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(uiContext, true, ARKUI_NODE_UNDEFINED, [](uint32_t color) { return color; }),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(nullptr, false, ARKUI_NODE_LIST, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(uiContext, false, ARKUI_NODE_LIST, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(nullptr, false, ARKUI_NODE_UNDEFINED, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(uiContext, false, ARKUI_NODE_UNDEFINED, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(nullptr, false, ARKUI_NODE_LIST, [](uint32_t color) { return color; }),
+        ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(uiContext, false, ARKUI_NODE_LIST, [](uint32_t color) { return color; }),
+        ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID);
+}
+
+/**
  * @tc.name: NativeNodeTest_GetNodeHandleByUniqueId_001
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId and OH_ArkUI_NodeUtils_GetNodeUniqueId.
  * @tc.type: FUNC

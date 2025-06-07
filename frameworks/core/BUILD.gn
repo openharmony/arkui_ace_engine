@@ -165,6 +165,7 @@ template("ace_core_source_set") {
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
+      "common/color_inverter.cpp",
 
       # declaration
       "components/declaration/badge/badge_declaration.cpp",
@@ -793,6 +794,7 @@ template("ace_core_ng_source_set") {
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
+      "common/color_inverter.cpp",
 
       # event
       "event/axis_event.cpp",

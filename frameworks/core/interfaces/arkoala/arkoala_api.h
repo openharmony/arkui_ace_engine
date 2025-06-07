@@ -6634,6 +6634,8 @@ struct ArkUIFrameNodeModifier {
     void (*addSupportedUIStates)(
         ArkUINodeHandle node, int32_t state, void* statesChangeHandler, bool isExcludeInner, void* userData);
     void (*removeSupportedUIStates)(ArkUINodeHandle node, int32_t state);
+    ArkUI_Int32 (*setForceDarkConfig)(
+        ArkUI_Int32 instanceId, bool forceDark, ArkUI_CharPtr nodeTag, uint32_t (*colorInvertFunc)(uint32_t color));
 };
 
 struct ArkUINodeContentEvent {
