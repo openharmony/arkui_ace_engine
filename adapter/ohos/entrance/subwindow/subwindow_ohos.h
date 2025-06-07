@@ -279,6 +279,9 @@ private:
         OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
         const Rosen::WindowType& toastWindowType, uint32_t mainWindowId);
 
+    void InitDialogWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
+    void InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
+
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
