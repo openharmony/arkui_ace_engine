@@ -1771,4 +1771,63 @@ HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityTextHint001, TestSize.Level1)
     viewAbstractModelNG.SetAccessibilityTextHint(&frameNode, TEST_TEXT_HINT);
     EXPECT_EQ(accessibilityProperty->textTypeHint_, TEST_TEXT_HINT);
 }
+
+/**
+ * @tc.name: BindContextMenuTest2
+ * @tc.desc: Test the BindContextMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, BindContextMenuTest2, TestSize.Level1)
+{
+    std::function<void()> buildFunc = nullptr;
+    std::function<void()> previewBuildFunc = nullptr;
+    MenuParam menuParam;
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
+    menuParam.anchorPosition = {10, 20};
+    menuParam.isAnchorPosition = true;
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    EXPECT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam, previewBuildFunc);
+    EXPECT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+}
+
+/**
+ * @tc.name: BindMenuTest
+ * @tc.desc: Test the BindMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, BindMenuTest, TestSize.Level1)
+{
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+    menuParam.setShow = true;
+    menuParam.anchorPosition = {10, 20};
+    menuParam.isAnchorPosition = true;
+    menuParam.isShow = true;
+    menuParam.isShowInSubWindow = true;
+    buildFunc = []() { flag++; };
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    EXPECT_NE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode(), nullptr);
+
+    params.push_back(OptionParam());
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    EXPECT_NE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode(), nullptr);
+}
 } // namespace OHOS::Ace::NG

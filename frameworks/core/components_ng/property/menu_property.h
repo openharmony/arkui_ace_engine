@@ -100,6 +100,8 @@ struct MenuParam {
     std::optional<bool> maskEnable;
     std::optional<MenuMaskType> maskType;
     std::optional<ModalMode> modalMode;
+    OffsetF anchorPosition;
+    bool isAnchorPosition = false;
 };
 
 } // namespace OHOS::Ace::NG
