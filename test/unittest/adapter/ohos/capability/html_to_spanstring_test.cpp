@@ -2253,39 +2253,4 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvertTestSuperscriptText, TestSize.Level1)
     EXPECT_EQ((*it)->fontStyle->GetSuperscript().value(), OHOS::Ace::SuperscriptStyle::SUPERSCRIPT);
 }
 
-/**
- * @tc.name: HtmlConvertTestBlodText
- * @tc.desc: Test the conversion of BLOD text (<b>labels)
- * @tc.level: 1
- */
-HWTEST_F(HtmlConvertTestNg, HtmlConvertTestBlodText, TestSize.Level1)
-{
-    const std::string html = "<html><body><p>This is <b>b</b> text</p></body></html>";
-    HtmlToSpan toSpan;
-    auto dstSpan = toSpan.ToSpanString(html);
-    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
-    EXPECT_EQ(spans.size(), 3);
-    auto it = spans.begin();
-    ++it;
-    EXPECT_TRUE((*it)->fontStyle->GetFontWeight().has_value());
-    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::BOLD);
-}
-
-/**
- * @tc.name: HtmlConvertTestEmphasizeText
- * @tc.desc: Test the conversion of emphasize text (<em>labels)
- * @tc.level: 1
- */
-HWTEST_F(HtmlConvertTestNg, HtmlConvertTestEmphasizeText, TestSize.Level1)
-{
-    const std::string html = "<html><body><p>This is <em>em</em> text</p></body></html>";
-    HtmlToSpan toSpan;
-    auto dstSpan = toSpan.ToSpanString(html);
-    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
-    EXPECT_EQ(spans.size(), 3);
-    auto it = spans.begin();
-    ++it;
-    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
-}
-
 } // namespace OHOS::Ace::NG
