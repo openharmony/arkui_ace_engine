@@ -494,6 +494,7 @@ bool ImagePattern::SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap)
     auto id = host->GetInspectorId();
     if (id.has_value()) {
         pixelMap->SetMemoryName(id.value());
+        hasSetPixelMapMemoryName_ = true;
         return true;
     }
     return false;
@@ -1891,6 +1892,17 @@ void ImagePattern::DumpOtherInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("selfOrientation: ").append(ConvertOrientationToString(selfOrientation_)));
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpMenmoryNameId();
+}
+
+void ImagePattern::DumpMenmoryNameId()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetInspectorId();
+    if (id.has_value() && hasSetPixelMapMemoryName_) {
+        DumpLog::GetInstance().AddDesc(std::string("PixelMapMemoryName id : ").append(id.value()));
+    }
 }
 
 void ImagePattern::DumpInfo()
