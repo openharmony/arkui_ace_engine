@@ -16,11 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_FE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_FE_H
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkImageFilter.h"
-#else
 #include "core/components_ng/render/drawing.h"
-#endif
 
 #include "base/memory/ace_type.h"
 
@@ -30,16 +26,9 @@ class RosenRenderSvgFe : public AceType {
     DECLARE_ACE_TYPE(RosenRenderSvgFe, AceType);
 
 public:
-#ifndef USE_ROSEN_DRAWING
-    virtual void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const {}
-    virtual void OnAsImageFilter(const sk_sp<SkImageFilter>& backImageFilter,
-        const sk_sp<SkImageFilter>& foreImageFilter, sk_sp<SkImageFilter>& imageFilter) const
-    {}
-#else
     virtual void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const {}
     virtual void OnAsImageFilter(const std::shared_ptr<RSImageFilter>& backImageFilter,
         const std::shared_ptr<RSImageFilter>& foreImageFilter, std::shared_ptr<RSImageFilter>& imageFilter) const {}
-#endif
 };
 
 } // namespace OHOS::Ace

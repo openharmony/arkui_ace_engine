@@ -25,14 +25,9 @@ class RosenRenderSvgFeComposite : public RenderSvgFeComposite, RosenRenderSvgFe 
     DECLARE_ACE_TYPE(RosenRenderSvgFeComposite, RenderSvgFeComposite, RosenRenderSvgFe);
 
 public:
-#ifndef USE_ROSEN_DRAWING
-    void OnAsImageFilter(const sk_sp<SkImageFilter>& backImageFilter, const sk_sp<SkImageFilter>& foreImageFilter,
-        sk_sp<SkImageFilter>& imageFilter) const override;
-#else
     void OnAsImageFilter(const std::shared_ptr<RSImageFilter>& backImageFilter,
         const std::shared_ptr<RSImageFilter>& foreImageFilter,
         std::shared_ptr<RSImageFilter>& imageFilter) const override;
-#endif
 };
 
 } // namespace OHOS::Ace
