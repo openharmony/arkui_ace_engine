@@ -452,7 +452,7 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
     if (!convValue) {
         return;
     }
-    ViewAbstract::SetPrivacySensitive(frameNode, *convValue);
+    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, *convValue);
 }
 void EnhancedImageQualityImpl(Ark_NativePointer node,
                               const Opt_ResolutionQuality* value)
