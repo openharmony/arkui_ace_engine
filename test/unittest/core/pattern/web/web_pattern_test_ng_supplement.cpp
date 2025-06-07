@@ -1485,6 +1485,62 @@ HWTEST_F(WebPatternTestNgSupplement, OnScrollStartTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckAndSetWebNestedScrollExisted001
+ * @tc.desc: CheckAndSetWebNestedScrollExisted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, CheckAndSetWebNestedScrollExisted001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->parentsMap_ = { {Axis::HORIZONTAL, parent} };
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnBypassVsyncConditionUpdate(WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
+    EXPECT_EQ(WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET, webPattern->GetWebBypassVsyncCondition());
+    webPattern->CheckAndSetWebNestedScrollExisted();
+    EXPECT_TRUE(parent->GetWebNestedScrollExisted());
+#endif
+}
+
+/**
+ * @tc.name: CheckAndSetWebNestedScrollExisted002
+ * @tc.desc: CheckAndSetWebNestedScrollExisted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, CheckAndSetWebNestedScrollExisted002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->parentsMap_ = { {Axis::HORIZONTAL, parent} };
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnBypassVsyncConditionUpdate(WebBypassVsyncCondition::NONE);
+    EXPECT_EQ(WebBypassVsyncCondition::NONE, webPattern->GetWebBypassVsyncCondition());
+    webPattern->CheckAndSetWebNestedScrollExisted();
+    EXPECT_FALSE(parent->GetWebNestedScrollExisted());
+#endif
+}
+
+/**
  * @tc.name: ReleaseResizeHoldTest001
  * @tc.desc: ReleaseResizeHold.
  * @tc.type: FUNC

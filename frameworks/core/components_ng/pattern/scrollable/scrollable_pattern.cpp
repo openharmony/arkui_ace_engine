@@ -488,13 +488,17 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
 
 void ScrollablePattern::SetUiDvsyncSwitch(bool on)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::SetUiDvsyncSwitch ");
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    if (on && inScrollingStatus_) {
+    bool WebNestedScrollExisted = GetWebNestedScrollExisted();
+    if (on && inScrollingStatus_ && !WebNestedScrollExisted) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::SetUiDvsyncSwitch SetUiDvsyncSwitch true");
         inScrollingStatus_ = false;
         context->SetUiDvsyncSwitch(true);
         switchOnStatus_ = true;
     } else if (!on && switchOnStatus_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::SetUiDvsyncSwitch SetUiDvsyncSwitch false");
         context->SetUiDvsyncSwitch(false);
         switchOnStatus_ = false;
     }

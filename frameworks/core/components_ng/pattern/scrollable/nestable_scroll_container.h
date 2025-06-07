@@ -104,6 +104,20 @@ public:
 
     virtual void StopScrollAnimation() {};
 
+    void SetWebNestedScrollExisted(bool webNestedScrollExisted)
+    {
+        webNestedScrollExisted_ = webNestedScrollExisted;
+        auto parent = GetNestedScrollParent();
+        if (parent) {
+            parent->SetWebNestedScrollExisted(webNestedScrollExisted);
+        }
+    }
+
+    bool GetWebNestedScrollExisted()
+    {
+        return webNestedScrollExisted_;
+    }
+
 protected:
     /**
      * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.
@@ -164,6 +178,7 @@ private:
     bool isFixedNestedScrollMode_ = false;
     bool isSearchRefresh_ = true;
     bool isNestedInterrupt_ = false; // nested scroll interrupted by change of nested mode
+    bool webNestedScrollExisted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(NestableScrollContainer);
 };
 } // namespace OHOS::Ace::NG
