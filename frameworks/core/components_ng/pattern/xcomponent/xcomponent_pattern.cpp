@@ -202,6 +202,7 @@ void XComponentPattern::InitSurface()
         InitNativeWindow(initSize_.Width(), initSize_.Height());
     }
     surfaceId_ = renderSurface_->GetUniqueId();
+    initialSurfaceId_ = surfaceId_;
     UpdateTransformHint();
     RegisterSurfaceRenderContext();
 }
@@ -210,7 +211,14 @@ void XComponentPattern::RegisterSurfaceRenderContext()
 {
     if (type_ == XComponentType::SURFACE) {
         XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
-            surfaceId_, WeakPtr(handlingSurfaceRenderContext_));
+            initialSurfaceId_, WeakPtr(handlingSurfaceRenderContext_));
+    }
+}
+
+void XComponentPattern::UnregisterSurfaceRenderContext()
+{
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(initialSurfaceId_);
     }
 }
 
@@ -458,11 +466,9 @@ void XComponentPattern::OnRebuildFrame()
 
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    UnregisterSurfaceRenderContext();
     CHECK_NULL_VOID(frameNode);
     UninitializeAccessibility(frameNode);
-    if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(surfaceId_);
-    }
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
             HandleSurfaceDestroyed(frameNode);
