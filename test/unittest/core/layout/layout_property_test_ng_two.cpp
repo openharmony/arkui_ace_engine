@@ -1217,4 +1217,73 @@ HWTEST_F(LayoutPropertyTestNgTwo, UpdateLayoutConstraint002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value(), CALC_SIZE);
     EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize.value(), CALC_SIZE);
 }
+
+/**
+ * @tc.name: CheckIgnoreLayoutSafeArea
+ * @tc.desc: Test CheckIgnoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckIgnoreLayoutSafeArea, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+
+    layoutProperty->ignoreLayoutSafeAreaOpts_->rawEdges = LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP;
+    layoutProperty->CheckIgnoreLayoutSafeArea(TextDirection::LTR);
+    EXPECT_EQ(
+        layoutProperty->ignoreLayoutSafeAreaOpts_->edges, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    layoutProperty->CheckIgnoreLayoutSafeArea(TextDirection::RTL);
+    EXPECT_EQ(layoutProperty->ignoreLayoutSafeAreaOpts_->edges, LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
+
+    layoutProperty->ignoreLayoutSafeAreaOpts_->rawEdges = LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+    layoutProperty->CheckIgnoreLayoutSafeArea(TextDirection::LTR);
+    EXPECT_EQ(
+        layoutProperty->ignoreLayoutSafeAreaOpts_->edges, LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    layoutProperty->CheckIgnoreLayoutSafeArea(TextDirection::RTL);
+    EXPECT_EQ(
+        layoutProperty->ignoreLayoutSafeAreaOpts_->edges, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+}
+
+/**
+ * @tc.name: TestIsIgnoreOptsValid
+ * @tc.desc: Test IsIgnoreOptsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestIsIgnoreOptsValid, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    EXPECT_EQ(layoutProperty->IsIgnoreOptsValid(), false);
+    layoutProperty->ignoreLayoutSafeAreaOpts_->type = LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
+    EXPECT_EQ(layoutProperty->IsIgnoreOptsValid(), true);
+}
+
+/**
+ * @tc.name: TestIsExpandConstraintNeeded
+ * @tc.desc: Test IsExpandConstraintNeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestIsExpandConstraintNeeded, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
+    layoutProperty->layoutPolicy_ = NG::LayoutPolicyProperty();
+    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_->type = LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_ALL;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
+
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_HORIZONTAL;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), true);
+
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), true);
+}
 }

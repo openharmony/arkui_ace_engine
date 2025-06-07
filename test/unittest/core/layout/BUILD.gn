@@ -31,6 +31,14 @@ ace_unittest("layout_wrapper_test_ng") {
   ]
 }
 
+ace_unittest("layout_algorithm_test_ng") {
+  type = "new"
+  module_output = "layout"
+  sources = [
+    "layout_algorithm_test_ng.cpp",
+  ]
+}
+
 ace_unittest("layout_wrapper_build_test_ng") {
   type = "new"
   module_output = "layout"
