@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Length, ResourceColor } from "./units"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Resource } from "global/resource"
@@ -396,35 +396,6 @@ export interface PatternLockAttribute extends CommonMethod {
     activateCircleStyle(value: CircleStyleOptions | undefined): this
     skipUnselectedPoint(value: boolean | undefined): this
 }
-export interface UIPatternLockAttribute extends UICommonMethod {
-    /** @memo */
-    sideLength(value: Length | undefined): this
-    /** @memo */
-    circleRadius(value: Length | undefined): this
-    /** @memo */
-    backgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    regularColor(value: ResourceColor | undefined): this
-    /** @memo */
-    selectedColor(value: ResourceColor | undefined): this
-    /** @memo */
-    activeColor(value: ResourceColor | undefined): this
-    /** @memo */
-    pathColor(value: ResourceColor | undefined): this
-    /** @memo */
-    pathStrokeWidth(value: number | string | undefined): this
-    /** @memo */
-    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this
-    /** @memo */
-    autoReset(value: boolean | undefined): this
-    /** @memo */
-    onDotConnect(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    activateCircleStyle(value: CircleStyleOptions | undefined): this
-    /** @memo */
-    skipUnselectedPoint(value: boolean | undefined): this
-    /** @memo */
-}
 export class ArkPatternLockStyle extends ArkCommonMethodStyle implements PatternLockAttribute {
     sideLength_value?: Length | undefined
     circleRadius_value?: Length | undefined
@@ -479,12 +450,10 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
         return this
         }
 }
-/** @memo:stable */
-export class ArkPatternLockComponent extends ArkCommonMethodComponent implements UIPatternLockAttribute {
+export class ArkPatternLockComponent extends ArkCommonMethodComponent implements PatternLockAttribute {
     getPeer(): ArkPatternLockPeer {
         return (this.peer as ArkPatternLockPeer)
     }
-    /** @memo */
     public setPatternLockOptions(controller?: PatternLockController): this {
         if (this.checkPriority("setPatternLockOptions")) {
             const controller_casted = controller as (PatternLockController | undefined)
@@ -493,7 +462,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public sideLength(value: Length | undefined): this {
         if (this.checkPriority("sideLength")) {
             const value_casted = value as (Length | undefined)
@@ -502,7 +470,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public circleRadius(value: Length | undefined): this {
         if (this.checkPriority("circleRadius")) {
             const value_casted = value as (Length | undefined)
@@ -511,7 +478,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public backgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("backgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -520,7 +486,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public regularColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("regularColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -529,7 +494,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public selectedColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -538,7 +502,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public activeColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("activeColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -547,7 +510,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public pathColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("pathColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -556,7 +518,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public pathStrokeWidth(value: number | string | undefined): this {
         if (this.checkPriority("pathStrokeWidth")) {
             const value_casted = value as (number | string | undefined)
@@ -565,7 +526,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
         if (this.checkPriority("onPatternComplete")) {
             const value_casted = value as (((input: Array<number>) => void) | undefined)
@@ -574,7 +534,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public autoReset(value: boolean | undefined): this {
         if (this.checkPriority("autoReset")) {
             const value_casted = value as (boolean | undefined)
@@ -583,7 +542,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public onDotConnect(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onDotConnect")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -592,7 +550,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public activateCircleStyle(value: CircleStyleOptions | undefined): this {
         if (this.checkPriority("activateCircleStyle")) {
             const value_casted = value as (CircleStyleOptions | undefined)
@@ -601,7 +558,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public skipUnselectedPoint(value: boolean | undefined): this {
         if (this.checkPriority("skipUnselectedPoint")) {
             const value_casted = value as (boolean | undefined)
@@ -619,7 +575,7 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
 /** @memo */
 export function PatternLock(
     /** @memo */
-    style: ((attributes: UIPatternLockAttribute) => void) | undefined,
+    style: ((attributes: PatternLockAttribute) => void) | undefined,
     controller?: PatternLockController,
     /** @memo */
     content_?: (() => void) | undefined,

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, UICommonShapeMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 import { Length } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -174,15 +174,6 @@ export interface RectAttribute extends CommonShapeMethod {
     radiusHeight(value: number | string | undefined): this
     radius(value: number | string | Array<number | string> | undefined): this
 }
-export interface UIRectAttribute extends UICommonShapeMethod {
-    /** @memo */
-    radiusWidth(value: number | string | undefined): this
-    /** @memo */
-    radiusHeight(value: number | string | undefined): this
-    /** @memo */
-    radius(value: number | string | Array<number | string> | undefined): this
-    /** @memo */
-}
 export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttribute {
     radiusWidth_value?: number | string | undefined
     radiusHeight_value?: number | string | undefined
@@ -197,12 +188,10 @@ export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttri
         return this
         }
 }
-/** @memo:stable */
-export class ArkRectComponent extends ArkCommonShapeMethodComponent implements UIRectAttribute {
+export class ArkRectComponent extends ArkCommonShapeMethodComponent implements RectAttribute {
     getPeer(): ArkRectPeer {
         return (this.peer as ArkRectPeer)
     }
-    /** @memo */
     public setRectOptions(options?: RectOptions | RoundedRectOptions): this {
         if (this.checkPriority("setRectOptions")) {
             const options_casted = options as (RectOptions | RoundedRectOptions | undefined)
@@ -211,7 +200,6 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public radiusWidth(value: number | string | undefined): this {
         if (this.checkPriority("radiusWidth")) {
             const value_casted = value as (number | string | undefined)
@@ -220,7 +208,6 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public radiusHeight(value: number | string | undefined): this {
         if (this.checkPriority("radiusHeight")) {
             const value_casted = value as (number | string | undefined)
@@ -229,7 +216,6 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public radius(value: number | string | Array<number | string> | undefined): this {
         if (this.checkPriority("radius")) {
             const value_casted = value as (number | string | Array<number | string> | undefined)
@@ -247,7 +233,7 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements U
 /** @memo */
 export function Rect(
     /** @memo */
-    style: ((attributes: UIRectAttribute) => void) | undefined,
+    style: ((attributes: RectAttribute) => void) | undefined,
     options?: RectOptions | RoundedRectOptions,
     /** @memo */
     content_?: (() => void) | undefined,

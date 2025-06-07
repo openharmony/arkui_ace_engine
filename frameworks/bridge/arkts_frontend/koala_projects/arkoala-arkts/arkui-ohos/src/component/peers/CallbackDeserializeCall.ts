@@ -60,7 +60,7 @@ import { Callback_Opt_Boolean_Void, OnCheckboxChangeCallback } from "./../checkb
 import { Resource } from "global/resource"
 import { StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../styledString"
 import { TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../tabs"
-import { Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents } from "./../arkui-custom"
+import { Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Callback_CreateItem } from "./../arkui-custom"
 import { Callback_RefreshStatus_Void, RefreshStatus } from "./../refresh"
 import { Callback_String_Number_Void, Callback_TextPickerResult_Void, TextPickerResult, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback, Type_TextPickerAttribute_onChange_callback } from "./../textPicker"
 import { Callback_String_Void } from "./../gridRow"
@@ -69,7 +69,6 @@ import { Callback_SwiperContentTransitionProxy_Void, SwiperContentTransitionProx
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
 import { Callback_TimePickerResult_Void, TimePickerResult, OnTimePickerChangeCallback } from "./../timePicker"
 import { Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageErrorCallback, ImageError } from "./../image"
-import { Callback_Void } from "./../abilityComponent"
 import { WithThemeAttribute, WithThemeInterface, WithThemeOptions } from "./../withTheme"
 import { Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./../arkui-wrapper-builder"
 import { CustomNodeBuilder } from "./../customBuilder"
@@ -264,6 +263,14 @@ export function deserializeAndCallCallback_CopyEvent_Void(thisDeserializer: Dese
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((parameter: CopyEvent) => void))
     let parameter : CopyEvent = thisDeserializer.readCopyEvent()
     _call(parameter)
+}
+export function deserializeAndCallCallback_CreateItem(thisDeserializer: Deserializer): void {
+    const _resourceId: int32 = thisDeserializer.readInt32()
+    const _call = (ResourceHolder.instance().get(_resourceId) as Callback_CreateItem)
+    let index: int32 = thisDeserializer.readInt32()
+    let _continuation: ((value: KPointer) => void) = thisDeserializer.readCallback_Pointer_Void(true)
+    const _callResult = _call(index)
+    _continuation(_callResult)
 }
 export function deserializeAndCallCallback_CrownEvent_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -1188,12 +1195,11 @@ export function deserializeAndCallCallback_PreparedInfo_Void(thisDeserializer: D
     _call(parameter)
 }
 export function deserializeAndCallCallback_RangeUpdate(thisDeserializer: Deserializer): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_RangeUpdate)
-    let index : int32 = thisDeserializer.readInt32()
-    let mark : KPointer = thisDeserializer.readPointer()
-    let end : int32 = thisDeserializer.readInt32()
-    _call(index, mark, end)
+    const _resourceId: int32 = thisDeserializer.readInt32()
+    const _call = (ResourceHolder.instance().get(_resourceId) as Callback_RangeUpdate)
+    let start: int32 = thisDeserializer.readInt32()
+    let end: int32 = thisDeserializer.readInt32()
+    _call(start, end)
 }
 export function deserializeAndCallCallback_RefreshStatus_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2536,6 +2542,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 1097178637/*CallbackKind.Kind_Callback_ClickEvent_Void*/: return deserializeAndCallCallback_ClickEvent_Void(thisDeserializer);
         case -1270343661/*CallbackKind.Kind_Callback_ComputedBarAttribute_Void*/: return deserializeAndCallCallback_ComputedBarAttribute_Void(thisDeserializer);
         case -120437466/*CallbackKind.Kind_Callback_CopyEvent_Void*/: return deserializeAndCallCallback_CopyEvent_Void(thisDeserializer);
+        case -2019730059/*CallbackKind.Kind_Callback_CreateItem*/: return deserializeAndCallCallback_CreateItem(thisDeserializer);
         case -827253372/*CallbackKind.Kind_Callback_CrownEvent_Void*/: return deserializeAndCallCallback_CrownEvent_Void(thisDeserializer);
         case -721106019/*CallbackKind.Kind_Callback_CustomBuilder_Void*/: return deserializeAndCallCallback_CustomBuilder_Void(thisDeserializer);
         case -1875695871/*CallbackKind.Kind_Callback_CutEvent_Void*/: return deserializeAndCallCallback_CutEvent_Void(thisDeserializer);

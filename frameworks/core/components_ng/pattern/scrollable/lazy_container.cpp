@@ -47,27 +47,18 @@ void LazyContainer::OnLayoutFinished(Axis axis, bool firstLayout)
 
 ScrollWindowAdapter* LazyContainer::GetOrCreateScrollWindowAdapter()
 {
-    // initialize ArkUI2.0 scrollWindowAdapter.
-    if (!adapter_) {
-        auto algo = CreateFillAlgorithm();
-        CHECK_NULL_RETURN(algo, nullptr);
-        adapter_ = MakeRefPtr<ScrollWindowAdapter>(GetHost().GetRawPtr(), CreateFillAlgorithm());
-    }
-    return adapter_.GetRawPtr();
+    return nullptr;
 }
 
 ScrollWindowAdapter* LazyContainer::GetScrollWindowAdapter()
 {
-    if (adapter_) {
-        return adapter_.GetRawPtr();
-    }
     return nullptr;
 }
 
 RefPtr<FrameNode> LazyContainer::GetOrCreateChildByIndex(uint32_t index)
 {
-    if (adapter_) {
-        return adapter_->GetChildByIndex(index);
+    if (newAdapter_) {
+        newAdapter_->GetOrCreateChild(index);
     }
     return nullptr;
 }
@@ -97,5 +88,40 @@ bool LazyContainer::RequestFillToTarget(int32_t idx, ScrollAlign align, float ex
         return adapter_->PrepareLoadToTarget(idx, align, extraOffset);
     }
     return true;
+}
+void LazyContainer::Synchronize(
+    LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount)
+{
+    if (!newAdapter_) {
+        newAdapter_ = std::make_unique<LazyComposeAdapter>();
+    }
+    newAdapter_->SetCallbacks(std::move(creator), std::move(updater));
+    newAdapter_->SetTotalCount(totalCount);
+}
+int32_t LazyContainer::GetTotalChildCount() const
+{
+    return newAdapter_ ? newAdapter_->GetTotalCount() : -1;
+}
+LazyComposeAdapter* LazyContainer::GetArkoalaLazyAdapter()
+{
+    return newAdapter_.get();
+}
+
+void LazyContainer::RemoveItemsOnChange(int32_t changeIndex)
+{
+    CHECK_NULL_VOID(newAdapter_);
+    std::vector<RefPtr<UINode>> toRemove;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& child : host->GetChildren()) {
+        const int32_t index = static_cast<int32_t>(newAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+        if (index >= changeIndex) {
+            toRemove.push_back(child);
+        }
+    }
+    for (auto&& node : toRemove) {
+        host->RemoveChild(node);
+    }
+    newAdapter_->OnDataChange(changeIndex);
 }
 } // namespace OHOS::Ace::NG

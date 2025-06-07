@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, UICommonShapeMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 import { Length } from "./units"
 import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -95,13 +95,6 @@ export interface LineAttribute extends CommonShapeMethod {
     startPoint(value: ShapePoint | undefined): this
     endPoint(value: ShapePoint | undefined): this
 }
-export interface UILineAttribute extends UICommonShapeMethod {
-    /** @memo */
-    startPoint(value: ShapePoint | undefined): this
-    /** @memo */
-    endPoint(value: ShapePoint | undefined): this
-    /** @memo */
-}
 export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttribute {
     startPoint_value?: ShapePoint | undefined
     endPoint_value?: ShapePoint | undefined
@@ -112,12 +105,10 @@ export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttri
         return this
         }
 }
-/** @memo:stable */
-export class ArkLineComponent extends ArkCommonShapeMethodComponent implements UILineAttribute {
+export class ArkLineComponent extends ArkCommonShapeMethodComponent implements LineAttribute {
     getPeer(): ArkLinePeer {
         return (this.peer as ArkLinePeer)
     }
-    /** @memo */
     public setLineOptions(options?: LineOptions): this {
         if (this.checkPriority("setLineOptions")) {
             const options_casted = options as (LineOptions | undefined)
@@ -126,7 +117,6 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public startPoint(value: ShapePoint | undefined): this {
         if (this.checkPriority("startPoint")) {
             const value_casted = value as (ShapePoint | undefined)
@@ -135,7 +125,6 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public endPoint(value: ShapePoint | undefined): this {
         if (this.checkPriority("endPoint")) {
             const value_casted = value as (ShapePoint | undefined)
@@ -153,7 +142,7 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements U
 /** @memo */
 export function Line(
     /** @memo */
-    style: ((attributes: UILineAttribute) => void) | undefined,
+    style: ((attributes: LineAttribute) => void) | undefined,
     options?: LineOptions,
     /** @memo */
     content_?: (() => void) | undefined,

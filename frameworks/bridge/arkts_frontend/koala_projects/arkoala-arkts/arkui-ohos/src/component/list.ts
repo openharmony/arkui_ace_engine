@@ -22,11 +22,10 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, ChildrenMainSize, ItemDragInfo, CustomBuilder, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod, RectResult, OnWillScrollCallback, OnScrollCallback } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, ChildrenMainSize, ItemDragInfo, CustomBuilder, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, RectResult, OnWillScrollCallback, OnScrollCallback } from "./common"
 import { Axis, BarState, EdgeEffect } from "./enums"
 import { Resource } from "global/resource"
 import { Callback_Number_Number_Void, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain } from "./grid"
-import { Callback_Void } from "./abilityComponent"
 import { ListAttribute_onItemDragStart_event_type } from "./type-replacements"
 import { LengthConstrain, Dimension, PX, VP, FP, LPX, Percentage, Length, ResourceColor } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -683,85 +682,6 @@ export interface ListAttribute extends ScrollableCommonMethod {
     lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
 }
-export interface UIListAttribute extends UIScrollableCommonMethod {
-    /** @memo */
-    alignListItem(value: ListItemAlign | undefined): this
-    /** @memo */
-    listDirection(value: Axis | undefined): this
-    /** @memo */
-    scrollBar(value: BarState | undefined): this
-    /** @memo */
-    contentStartOffset(value: number | undefined): this
-    /** @memo */
-    contentEndOffset(value: number | undefined): this
-    /** @memo */
-    divider(value: ListDividerOptions | undefined): this
-    /** @memo */
-    editMode(value: boolean | undefined): this
-    /** @memo */
-    multiSelectable(value: boolean | undefined): this
-    /** @memo */
-    cachedCount(count: number | undefined, show?: boolean): this
-    /** @memo */
-    chainAnimation(value: boolean | undefined): this
-    /** @memo */
-    chainAnimationOptions(value: ChainAnimationOptions | undefined): this
-    /** @memo */
-    sticky(value: StickyStyle | undefined): this
-    /** @memo */
-    scrollSnapAlign(value: ScrollSnapAlign | undefined): this
-    /** @memo */
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    /** @memo */
-    enableScrollInteraction(value: boolean | undefined): this
-    /** @memo */
-    friction(value: number | Resource | undefined): this
-    /** @memo */
-    childrenMainSize(value: ChildrenMainSize | undefined): this
-    /** @memo */
-    maintainVisibleContentPosition(value: boolean | undefined): this
-    /** @memo */
-    stackFromEnd(value: boolean | undefined): this
-    /** @memo */
-    onScroll(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this
-    /** @memo */
-    onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this
-    /** @memo */
-    onReachStart(value: (() => void) | undefined): this
-    /** @memo */
-    onReachEnd(value: (() => void) | undefined): this
-    /** @memo */
-    onScrollStart(value: (() => void) | undefined): this
-    /** @memo */
-    onScrollStop(value: (() => void) | undefined): this
-    /** @memo */
-    onItemDelete(value: ((index: number) => boolean) | undefined): this
-    /** @memo */
-    onItemMove(value: ((from: number,to: number) => boolean) | undefined): this
-    /** @memo */
-    onItemDragStart(value: ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined): this
-    /** @memo */
-    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this
-    /** @memo */
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this
-    /** @memo */
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this
-    /** @memo */
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this
-    /** @memo */
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
-    /** @memo */
-    onWillScroll(value: OnWillScrollCallback | undefined): this
-    /** @memo */
-    onDidScroll(value: OnScrollCallback | undefined): this
-    /** @memo */
-    lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this
-    /** @memo */
-    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    /** @memo */
-}
 export class ArkListStyle extends ArkScrollableCommonMethodStyle implements ListAttribute {
     alignListItem_value?: ListItemAlign | undefined
     listDirection_value?: Axis | undefined
@@ -914,12 +834,10 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
         return this
         }
 }
-/** @memo:stable */
-export class ArkListComponent extends ArkScrollableCommonMethodComponent implements UIListAttribute {
+export class ArkListComponent extends ArkScrollableCommonMethodComponent implements ListAttribute {
     getPeer(): ArkListPeer {
         return (this.peer as ArkListPeer)
     }
-    /** @memo */
     public setListOptions(options?: ListOptions): this {
         if (this.checkPriority("setListOptions")) {
             const options_casted = options as (ListOptions | undefined)
@@ -928,7 +846,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public alignListItem(value: ListItemAlign | undefined): this {
         if (this.checkPriority("alignListItem")) {
             const value_casted = value as (ListItemAlign | undefined)
@@ -937,7 +854,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public listDirection(value: Axis | undefined): this {
         if (this.checkPriority("listDirection")) {
             const value_casted = value as (Axis | undefined)
@@ -946,7 +862,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public scrollBar(value: BarState | undefined): this {
         if (this.checkPriority("scrollBar")) {
             const value_casted = value as (BarState | undefined)
@@ -955,7 +870,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public contentStartOffset(value: number | undefined): this {
         if (this.checkPriority("contentStartOffset")) {
             const value_casted = value as (number | undefined)
@@ -964,7 +878,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public contentEndOffset(value: number | undefined): this {
         if (this.checkPriority("contentEndOffset")) {
             const value_casted = value as (number | undefined)
@@ -973,7 +886,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public divider(value: ListDividerOptions | undefined): this {
         if (this.checkPriority("divider")) {
             const value_casted = value as (ListDividerOptions | undefined)
@@ -982,7 +894,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public editMode(value: boolean | undefined): this {
         if (this.checkPriority("editMode")) {
             const value_casted = value as (boolean | undefined)
@@ -991,7 +902,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public multiSelectable(value: boolean | undefined): this {
         if (this.checkPriority("multiSelectable")) {
             const value_casted = value as (boolean | undefined)
@@ -1000,7 +910,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public cachedCount(count: number | undefined, show?: boolean): this {
         if (this.checkPriority("cachedCount")) {
             const count_type = runtimeType(count)
@@ -1020,7 +929,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public chainAnimation(value: boolean | undefined): this {
         if (this.checkPriority("chainAnimation")) {
             const value_casted = value as (boolean | undefined)
@@ -1029,7 +937,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public chainAnimationOptions(value: ChainAnimationOptions | undefined): this {
         if (this.checkPriority("chainAnimationOptions")) {
             const value_casted = value as (ChainAnimationOptions | undefined)
@@ -1038,7 +945,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public sticky(value: StickyStyle | undefined): this {
         if (this.checkPriority("sticky")) {
             const value_casted = value as (StickyStyle | undefined)
@@ -1047,7 +953,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public scrollSnapAlign(value: ScrollSnapAlign | undefined): this {
         if (this.checkPriority("scrollSnapAlign")) {
             const value_casted = value as (ScrollSnapAlign | undefined)
@@ -1056,7 +961,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public nestedScroll(value: NestedScrollOptions | undefined): this {
         if (this.checkPriority("nestedScroll")) {
             const value_casted = value as (NestedScrollOptions | undefined)
@@ -1065,7 +969,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public enableScrollInteraction(value: boolean | undefined): this {
         if (this.checkPriority("enableScrollInteraction")) {
             const value_casted = value as (boolean | undefined)
@@ -1074,7 +977,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public friction(value: number | Resource | undefined): this {
         if (this.checkPriority("friction")) {
             const value_casted = value as (number | Resource | undefined)
@@ -1083,7 +985,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
             const value_casted = value as (ChildrenMainSize | undefined)
@@ -1092,7 +993,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public maintainVisibleContentPosition(value: boolean | undefined): this {
         if (this.checkPriority("maintainVisibleContentPosition")) {
             const value_casted = value as (boolean | undefined)
@@ -1101,7 +1001,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public stackFromEnd(value: boolean | undefined): this {
         if (this.checkPriority("stackFromEnd")) {
             const value_casted = value as (boolean | undefined)
@@ -1110,7 +1009,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onScroll(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onScroll")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -1119,7 +1017,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this {
         if (this.checkPriority("onScrollIndex")) {
             const value_casted = value as (((start: number,end: number,center: number) => void) | undefined)
@@ -1128,7 +1025,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this {
         if (this.checkPriority("onScrollVisibleContentChange")) {
             const value_casted = value as (OnScrollVisibleContentChangeCallback | undefined)
@@ -1137,7 +1033,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onReachStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onReachStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1146,7 +1041,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onReachEnd(value: (() => void) | undefined): this {
         if (this.checkPriority("onReachEnd")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1155,7 +1049,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onScrollStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onScrollStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1164,7 +1057,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onScrollStop(value: (() => void) | undefined): this {
         if (this.checkPriority("onScrollStop")) {
             const value_casted = value as ((() => void) | undefined)
@@ -1173,7 +1065,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onItemDelete(value: ((index: number) => boolean) | undefined): this {
         if (this.checkPriority("onItemDelete")) {
             const value_casted = value as (((index: number) => boolean) | undefined)
@@ -1182,7 +1073,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onItemMove(value: ((from: number,to: number) => boolean) | undefined): this {
         if (this.checkPriority("onItemMove")) {
             const value_casted = value as (((from: number,to: number) => boolean) | undefined)
@@ -1191,7 +1081,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onItemDragStart(value: ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined): this {
         if (this.checkPriority("onItemDragStart")) {
             const value_casted = value as (((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined)
@@ -1200,7 +1089,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
         if (this.checkPriority("onItemDragEnter")) {
             const value_casted = value as (((event: ItemDragInfo) => void) | undefined)
@@ -1209,7 +1097,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
         if (this.checkPriority("onItemDragMove")) {
             const value_casted = value as (((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined)
@@ -1218,7 +1105,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
         if (this.checkPriority("onItemDragLeave")) {
             const value_casted = value as (((event: ItemDragInfo,itemIndex: number) => void) | undefined)
@@ -1227,7 +1113,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
         if (this.checkPriority("onItemDrop")) {
             const value_casted = value as (((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined)
@@ -1236,7 +1121,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
         if (this.checkPriority("onScrollFrameBegin")) {
             const value_casted = value as (((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined)
@@ -1245,7 +1129,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onWillScroll(value?: OnWillScrollCallback | undefined): this {
         if (this.checkPriority("onWillScroll")) {
             const value_casted = value as (OnWillScrollCallback | undefined)
@@ -1254,7 +1137,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onDidScroll(value?: OnScrollCallback | undefined): this {
         if (this.checkPriority("onDidScroll")) {
             const value_casted = value as (OnScrollCallback | undefined)
@@ -1263,7 +1145,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this {
         if (this.checkPriority("lanes")) {
             const value_casted = value as (number | LengthConstrain | undefined)
@@ -1273,7 +1154,6 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         if (this.checkPriority("edgeEffect")) {
             const value_casted = value as (EdgeEffect | undefined)
@@ -1292,7 +1172,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
 /** @memo */
 export function List(
     /** @memo */
-    style: ((attributes: UIListAttribute) => void) | undefined,
+    style: ((attributes: ListAttribute) => void) | undefined,
     options?: ListOptions,
     /** @memo */
     content_?: (() => void) | undefined,

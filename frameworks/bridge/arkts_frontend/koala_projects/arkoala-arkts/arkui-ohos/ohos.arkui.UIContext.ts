@@ -19,8 +19,9 @@
 import { FrameNode, FrameNodeInternal, FrameNodeUtils } from "./src/FrameNode"
 import { GlobalScope_ohos_font } from "./src/component/arkui-external"
 import { GlobalScope_ohos_measure_utils } from "./src/component/arkui-external"
+import { GlobalScopeUicontextFontScale, GlobalScopeUicontextTextMenu } from "./src/component/arkui-uicontext-text-utils"
 import { UIContextDispatchKeyEvent, UIContextAtomicServiceBar } from "./src/component/arkui-custom"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { SizeOptions } from "./src/component/units"
 import { ArkUIGeneratedNativeModule } from "#components"
@@ -29,13 +30,14 @@ import { nullptr } from "@koalaui/interop"
 import { _animateTo } from "./src/handwritten/ArkAnimation"
 import { AnimateParam } from './src/component'
 import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
-import { Context } from "#external"
+import { Context, PointerStyle } from "#external"
 import { ArkUIAniModule } from "arkui.ani"
 import { Serializer } from "./src/component/peers/Serializer"
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "./src/Graphics"
 import { KeyEvent } from "./src/component/common"
+import { TextMenuOptions } from "./src/component/textCommon"
 import { Nullable } from "./src/component/enums"
 import { KeyProcessingMode } from "./src/component/focus"
 import { uiObserver } from "@ohos/arkui/observer"
@@ -45,6 +47,7 @@ import inspector from "@ohos/arkui/inspector"
 import router from './ohos.router'
 import promptAction from './ohos.promptAction';
 import { ContextMenu } from './src/component/contextMenu';
+import { GlobalScope } from "./src/component/GlobalScope"
 
 export class UIInspector {
     instanceId_: int32 = -1;
@@ -60,7 +63,7 @@ export class UIInspector {
 }
 
 export class Font {
-    instanceId_: int32 = 10001;
+    instanceId_: int32;
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
     }
@@ -84,7 +87,7 @@ export class Font {
 }
 
 export class MeasureUtils {
-    instanceId_: int32 = 10001;
+    instanceId_: int32;
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
     }
@@ -99,6 +102,18 @@ export class MeasureUtils {
         let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return sizeOptions;
+    }
+}
+
+export class TextMenuController {
+    instanceId_: int32;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+    public setMenuOptions(options: TextMenuOptions) : void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        GlobalScopeUicontextTextMenu.setMenuOptions(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
 
@@ -211,6 +226,25 @@ export class PromptAction {
     }
 }
 
+export class CursorController {
+    instanceId_: int32
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+
+    public restoreDefault(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        GlobalScope.cursorControl_restoreDefault()
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public setCursor(value: PointerStyle): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        GlobalScope.cursorControl_setCursor(value)
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
 export class UIContext {
     instanceId_: int32 = 100000;
     observer_ :UIObserver |null = null;
@@ -221,6 +255,10 @@ export class UIContext {
     uiInspector_: UIInspector | null = null;
     contextMenuController_: ContextMenuController;
     promptAction_: PromptAction | null = null;
+    cursorController_: CursorController;
+    font_: Font;
+    measureUtils_: MeasureUtils;
+    textMenuController_: TextMenuController;
 
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
@@ -228,14 +266,31 @@ export class UIContext {
         this.componentUtils_ = new ComponentUtils(instanceId);
         this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
         this.contextMenuController_ = new ContextMenuController(instanceId);
+        this.cursorController_ = new CursorController(instanceId);
+        this.font_ = new Font(instanceId);
+        this.measureUtils_ = new MeasureUtils(instanceId);
+        this.textMenuController_ = new TextMenuController(instanceId);
     }
     public getFont() : Font {
-        let font : Font = new Font(this.instanceId_);
-        return font;
+        return this.font_;
     }
     public getMeasureUtils() : MeasureUtils {
-        let measureUtils : MeasureUtils = new MeasureUtils(this.instanceId_);
-        return measureUtils;
+        return this.measureUtils_;
+    }
+    public getTextMenuController() : TextMenuController {
+        return this.textMenuController_;
+    }
+    public isFollowingSystemFontScale() : boolean {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let follow = GlobalScopeUicontextFontScale.isFollowingSystemFontScale();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return follow;
+    }
+    public getMaxFontScale() : number {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let fontScale = GlobalScopeUicontextFontScale.getMaxFontScale();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return fontScale;
     }
     public getFrameNodeById(id: string): FrameNode | null {
         const id_casted = id as (string);
@@ -321,6 +376,9 @@ export class UIContext {
         return this.componentUtils_;
     }
 
+    public getCursorController(): CursorController {
+        return this.cursorController_;
+    }
     public getRouter(): Router {
         if (this.router_ === undefined) {
             this.router_ = new Router()

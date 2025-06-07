@@ -15,9 +15,10 @@
 
 namespace OHOS::Ace::Ani {
 
-ani_long ConstructCustomNode([[maybe_unused]] ani_env* env, [[maybe_unused]]ani_object aniClass,
-            ani_int id, ani_object obj);
+ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
+                             ani_int id, ani_object obj);
 
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CUSTOM_NODE_MODULE
+    

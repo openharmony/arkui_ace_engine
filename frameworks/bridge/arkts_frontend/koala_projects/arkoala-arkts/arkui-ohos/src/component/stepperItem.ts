@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -94,15 +94,6 @@ export interface StepperItemAttribute extends CommonMethod {
     nextLabel(value: string | undefined): this
     status(value: ItemState | undefined): this
 }
-export interface UIStepperItemAttribute extends UICommonMethod {
-    /** @memo */
-    prevLabel(value: string | undefined): this
-    /** @memo */
-    nextLabel(value: string | undefined): this
-    /** @memo */
-    status(value: ItemState | undefined): this
-    /** @memo */
-}
 export class ArkStepperItemStyle extends ArkCommonMethodStyle implements StepperItemAttribute {
     prevLabel_value?: string | undefined
     nextLabel_value?: string | undefined
@@ -117,12 +108,10 @@ export class ArkStepperItemStyle extends ArkCommonMethodStyle implements Stepper
         return this
         }
 }
-/** @memo:stable */
-export class ArkStepperItemComponent extends ArkCommonMethodComponent implements UIStepperItemAttribute {
+export class ArkStepperItemComponent extends ArkCommonMethodComponent implements StepperItemAttribute {
     getPeer(): ArkStepperItemPeer {
         return (this.peer as ArkStepperItemPeer)
     }
-    /** @memo */
     public setStepperItemOptions(): this {
         if (this.checkPriority("setStepperItemOptions")) {
             this.getPeer()?.setStepperItemOptionsAttribute()
@@ -130,7 +119,6 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public prevLabel(value: string | undefined): this {
         if (this.checkPriority("prevLabel")) {
             const value_casted = value as (string | undefined)
@@ -139,7 +127,6 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public nextLabel(value: string | undefined): this {
         if (this.checkPriority("nextLabel")) {
             const value_casted = value as (string | undefined)
@@ -148,7 +135,6 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public status(value: ItemState | undefined): this {
         if (this.checkPriority("status")) {
             const value_casted = value as (ItemState | undefined)
@@ -166,7 +152,7 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
 /** @memo */
 export function StepperItem(
     /** @memo */
-    style: ((attributes: UIStepperItemAttribute) => void) | undefined,
+    style: ((attributes: StepperItemAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

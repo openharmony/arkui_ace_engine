@@ -55,6 +55,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -4828,24 +4829,27 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    RefPtr<LayoutWrapper> overrideChild = pattern_->GetOrCreateChildByIndex(index);
-    if (!overrideChild) {
-        overrideChild = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
+    auto* lazyItemAdapter = pattern_->GetArkoalaLazyAdapter();
+    if (lazyItemAdapter) {
+        auto node = lazyItemAdapter->GetOrCreateChild(index);
+        AddChild(node);
+        return node;
     }
-    if (overrideChild) {
-        overrideChild->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
+    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
+    if (child) {
+        child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
-            overrideChild->SetActive(true);
+            child->SetActive(true);
         }
     }
-    return overrideChild;
+    return child;
 }
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    auto* scrollWindowAdapter = GetScrollWindowAdapter();
-    if (scrollWindowAdapter) {
-        return scrollWindowAdapter->GetChildByIndex(index);
+    auto* lazyItemAdapter = pattern_->GetArkoalaLazyAdapter();
+    if (lazyItemAdapter) {
+        return lazyItemAdapter->GetChild(index);
     }
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
@@ -4896,14 +4900,23 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    auto* adapter = GetScrollWindowAdapter();
+    auto* adapter = pattern_->GetArkoalaLazyAdapter();
     if (adapter) {
         int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
         int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
+        std::vector<RefPtr<UINode>> toRemove;
         for (const auto& child : GetChildren()) {
             const int32_t index = static_cast<int32_t>(adapter->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-            child->SetActive(index >= startIndex && index <= endIndex);
+            if (index >= startIndex && index <= endIndex) {
+                child->SetActive(true);
+            } else {
+                toRemove.push_back(child);
+            }
         }
+        for (auto&& node : toRemove) {
+            RemoveChild(node);
+        }
+        adapter->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
         return;
     }
     if (showCached) {
@@ -6646,12 +6659,12 @@ const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 
 ScrollWindowAdapter* FrameNode::GetScrollWindowAdapter() const
 {
-    return pattern_->GetScrollWindowAdapter();
+    return nullptr;
 }
 
 ScrollWindowAdapter* FrameNode::GetOrCreateScrollWindowAdapter()
 {
-    return pattern_->GetOrCreateScrollWindowAdapter();
+    return nullptr;
 }
 
 bool FrameNode::IsDrawFocusOnTop() const

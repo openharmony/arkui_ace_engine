@@ -25,10 +25,9 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
-import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
+import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Summary, IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
-import { Callback_Void } from "./abilityComponent"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global/resource"
@@ -60,6 +59,7 @@ import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
 import { rememberMutableState } from '@koalaui/runtime'
 import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
+import { PointerStyle } from '#external';
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -7403,9 +7403,9 @@ export enum SourceTool {
     Finger = 1,
     PEN = 2,
     Pen = 2,
-    MOUSE = 3,
-    TOUCHPAD = 4,
-    JOYSTICK = 5
+    MOUSE = 7,
+    TOUCHPAD = 9,
+    JOYSTICK = 10
 }
 export enum RepeatMode {
     REPEAT = 0,
@@ -8045,537 +8045,157 @@ export interface CommonMethod {
     outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
     outlineRadius(value: Dimension | OutlineRadiuses | undefined): this
     foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold?: number): this
-    onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this
-    onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this
-    onAccessibilityHover(value: AccessibilityCallback | undefined): this
-    hoverEffect(value: HoverEffect | undefined): this
-    onMouse(value: ((event: MouseEvent) => void) | undefined): this
-    onTouch(value: ((event: TouchEvent) => void) | undefined): this
-    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this
-    onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this
-    onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this
-    onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this
-    onFocusAxisEvent(value: ((parameter: FocusAxisEvent) => void) | undefined): this
-    onAxisEvent(value: ((parameter: AxisEvent) => void) | undefined): this
-    focusable(value: boolean | undefined): this
-    nextFocus(value: FocusMovement | undefined): this
-    tabStop(value: boolean | undefined): this
-    onFocus(value: (() => void) | undefined): this
-    onBlur(value: (() => void) | undefined): this
-    tabIndex(value: number | undefined): this
-    defaultFocus(value: boolean | undefined): this
-    groupDefaultFocus(value: boolean | undefined): this
-    focusOnTouch(value: boolean | undefined): this
-    focusBox(value: FocusBoxStyle | undefined): this
-    animation(value: AnimateParam | undefined): this
-    transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
-    motionBlur(value: MotionBlurOptions | undefined): this
-    brightness(value: number | undefined): this
-    contrast(value: number | undefined): this
-    grayscale(value: number | undefined): this
-    colorBlend(value: Color | string | Resource | undefined): this
-    saturate(value: number | undefined): this
-    sepia(value: number | undefined): this
-    invert(value: number | InvertOptions | undefined): this
-    hueRotate(value: number | string | undefined): this
-    useShadowBatching(value: boolean | undefined): this
-    useEffect(useEffect: boolean | undefined, effectType?: EffectType | undefined | EffectType): this
-    renderGroup(value: boolean | undefined): this
-    freeze(value: boolean | undefined): this
-    translate(value: TranslateOptions | undefined): this
-    scale(value: ScaleOptions | undefined): this
-    gridSpan(value: number | undefined): this
-    gridOffset(value: number | undefined): this
-    rotate(value: RotateOptions | undefined): this
-    transform(value: TransformationMatrix | undefined | Object | undefined): this
-    onAppear(value: (() => void) | undefined): this
-    onDisAppear(value: (() => void) | undefined): this
-    onAttach(value: (() => void) | undefined): this
-    onDetach(value: (() => void) | undefined): this
-    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this
-    visibility(value: Visibility | undefined): this
-    flexGrow(value: number | undefined): this
-    flexShrink(value: number | undefined): this
-    flexBasis(value: number | string | undefined): this
-    alignSelf(value: ItemAlign | undefined): this
-    displayPriority(value: number | undefined): this
-    zIndex(value: number | undefined): this
-    direction(value: Direction | undefined): this
-    align(value: Alignment | undefined): this
-    position(value: Position | Edges | LocalizedEdges | undefined): this
-    markAnchor(value: Position | LocalizedPosition | undefined): this
-    offset(value: Position | Edges | LocalizedEdges | undefined): this
-    enabled(value: boolean | undefined): this
-    useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this
-    alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this
-    aspectRatio(value: number | undefined): this
-    clickEffect(value: ClickEffect | undefined): this
-    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this
-    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this
-    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    allowDrop(value: Array<UniformDataType> | undefined): this
-    draggable(value: boolean | undefined): this
-    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this
-    onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this
-    linearGradient(value: LinearGradientOptions | undefined): this
-    sweepGradient(value: SweepGradientOptions | undefined): this
-    radialGradient(value: RadialGradientOptions | undefined): this
-    motionPath(value: MotionPathOptions | undefined): this
-    shadow(value: ShadowOptions | ShadowStyle | undefined): this
-    clip(value: boolean | undefined): this
-    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    mask(value: ProgressMask | undefined): this
-    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    key(value: string | undefined): this
-    id(value: string | undefined): this
-    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this
-    stateStyles(value: StateStyles | undefined): this
-    restoreId(value: number | undefined): this
-    sphericalEffect(value: number | undefined): this
-    lightUpEffect(value: number | undefined): this
-    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this
-    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this
-    accessibilityText(value: string | undefined | Resource | undefined): this
-    accessibilityNextFocusId(value: string | undefined): this
-    accessibilityDefaultFocus(value: boolean | undefined): this
-    accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this
-    accessibilityScrollTriggerable(value: boolean | undefined): this
-    accessibilityRole(value: AccessibilityRoleType | undefined): this
-    onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this
-    accessibilityTextHint(value: string | undefined): this
-    accessibilityDescription(value: string | undefined | Resource | undefined): this
-    accessibilityLevel(value: string | undefined): this
-    accessibilityVirtualNode(value: CustomBuilder | undefined): this
-    accessibilityChecked(value: boolean | undefined): this
-    accessibilitySelected(value: boolean | undefined): this
-    obscured(value: Array<ObscuredReasons> | undefined): this
-    reuseId(value: string | undefined): this
-    reuse(value: ReuseOptions | undefined): this
-    renderFit(value: RenderFit | undefined): this
-    gestureModifier(value: GestureModifier | undefined): this
-    backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this
-    onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this
-    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this
-    shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this
-    monopolizeEvents(value: boolean | undefined): this
-    onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this
-    onSizeChange(value: SizeChangeCallback | undefined): this
-    accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this
-    customProperty(name: string | undefined, value: Object | undefined): this
-    expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this
-    background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
-    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
-    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this
-    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this
-    systemBarEffect(): this
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this
-    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
-    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this
-    overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this
-    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this
-    advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this
-    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this
-    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
-    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this
-    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
-    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this
-    bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
-    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this
-    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
-}
-export interface UICommonMethod {
-    /** @memo */
-    width(value: Length | undefined | Length | LayoutPolicy | undefined): this
-    /** @memo */
-    height(value: Length | undefined | Length | LayoutPolicy | undefined): this
-    /** @memo */
-    drawModifier(value: DrawModifier | undefined): this
-    /** @memo */
-    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this
-    /** @memo */
-    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this
-    /** @memo */
-    size(value: SizeOptions | undefined): this
-    /** @memo */
-    constraintSize(value: ConstraintSizeOptions | undefined): this
-    /** @memo */
-    touchable(value: boolean | undefined): this
-    /** @memo */
-    hitTestBehavior(value: HitTestMode | undefined): this
-    /** @memo */
-    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this
-    /** @memo */
-    layoutWeight(value: number | string | undefined): this
-    /** @memo */
-    chainWeight(value: ChainWeightOptions | undefined): this
-    /** @memo */
-    padding(value: Padding | Length | LocalizedPadding | undefined): this
-    /** @memo */
-    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this
-    /** @memo */
-    margin(value: Padding | Length | LocalizedPadding | undefined): this
-    /** @memo */
-    backgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    pixelRound(value: PixelRoundPolicy | undefined): this
-    /** @memo */
-    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this
-    /** @memo */
-    backgroundImagePosition(value: Position | Alignment | undefined): this
-    /** @memo */
-    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this
-    /** @memo */
-    backgroundImageResizable(value: ResizableOptions | undefined): this
-    /** @memo */
-    foregroundEffect(value: ForegroundEffectOptions | undefined): this
-    /** @memo */
-    visualEffect(value: VisualEffect | undefined): this
-    /** @memo */
-    backgroundFilter(value: Filter | undefined): this
-    /** @memo */
-    foregroundFilter(value: Filter | undefined): this
-    /** @memo */
-    compositingFilter(value: Filter | undefined): this
-    /** @memo */
-    opacity(value: number | Resource | undefined): this
-    /** @memo */
-    border(value: BorderOptions | undefined): this
-    /** @memo */
-    borderStyle(value: BorderStyle | EdgeStyles | undefined): this
-    /** @memo */
-    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this
-    /** @memo */
-    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
-    /** @memo */
-    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this
-    /** @memo */
-    borderImage(value: BorderImageOption | undefined): this
-    /** @memo */
-    outline(value: OutlineOptions | undefined): this
-    /** @memo */
-    outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this
-    /** @memo */
-    outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this
-    /** @memo */
-    outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
-    /** @memo */
-    outlineRadius(value: Dimension | OutlineRadiuses | undefined): this
-    /** @memo */
-    foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this
-    /** @memo */
     onClick(event: ((event: ClickEvent) => void) | undefined): this
-    /** @memo */
     onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this
-    /** @memo */
     onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this
-    /** @memo */
     onAccessibilityHover(value: AccessibilityCallback | undefined): this
-    /** @memo */
     hoverEffect(value: HoverEffect | undefined): this
-    /** @memo */
     onMouse(value: ((event: MouseEvent) => void) | undefined): this
-    /** @memo */
     onTouch(value: ((event: TouchEvent) => void) | undefined): this
-    /** @memo */
     onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this
-    /** @memo */
     onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this
-    /** @memo */
     onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this
-    /** @memo */
     onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this
-    /** @memo */
     onFocusAxisEvent(value: ((parameter: FocusAxisEvent) => void) | undefined): this
-    /** @memo */
     onAxisEvent(value: ((parameter: AxisEvent) => void) | undefined): this
-    /** @memo */
     focusable(value: boolean | undefined): this
-    /** @memo */
     nextFocus(value: FocusMovement | undefined): this
-    /** @memo */
     tabStop(value: boolean | undefined): this
-    /** @memo */
     onFocus(value: (() => void) | undefined): this
-    /** @memo */
     onBlur(value: (() => void) | undefined): this
-    /** @memo */
     tabIndex(value: number | undefined): this
-    /** @memo */
     defaultFocus(value: boolean | undefined): this
-    /** @memo */
     groupDefaultFocus(value: boolean | undefined): this
-    /** @memo */
     focusOnTouch(value: boolean | undefined): this
-    /** @memo */
     focusBox(value: FocusBoxStyle | undefined): this
     animationStart(value: AnimateParam | undefined): this
     animationStop(value: AnimateParam | undefined):this
-    /** @memo */
     transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
-    /** @memo */
     motionBlur(value: MotionBlurOptions | undefined): this
-    /** @memo */
     brightness(value: number | undefined): this
-    /** @memo */
     contrast(value: number | undefined): this
-    /** @memo */
     grayscale(value: number | undefined): this
-    /** @memo */
     colorBlend(value: Color | string | Resource | undefined): this
-    /** @memo */
     saturate(value: number | undefined): this
-    /** @memo */
     sepia(value: number | undefined): this
-    /** @memo */
     invert(value: number | InvertOptions | undefined): this
-    /** @memo */
     hueRotate(value: number | string | undefined): this
-    /** @memo */
     useShadowBatching(value: boolean | undefined): this
-    /** @memo */
     useEffect(useEffect: boolean | undefined, effectType?: EffectType | undefined | EffectType): this
-    /** @memo */
     renderGroup(value: boolean | undefined): this
-    /** @memo */
     freeze(value: boolean | undefined): this
-    /** @memo */
     translate(value: TranslateOptions | undefined): this
-    /** @memo */
     scale(value: ScaleOptions | undefined): this
-    /** @memo */
     gridSpan(value: number | undefined): this
-    /** @memo */
     gridOffset(value: number | undefined): this
-    /** @memo */
     rotate(value: RotateOptions | undefined): this
-    /** @memo */
     transform(value: TransformationMatrix | undefined | Object | undefined): this
-    /** @memo */
     onAppear(value: (() => void) | undefined): this
-    /** @memo */
     onDisAppear(value: (() => void) | undefined): this
-    /** @memo */
     onAttach(value: (() => void) | undefined): this
-    /** @memo */
     onDetach(value: (() => void) | undefined): this
-    /** @memo */
     onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this
-    /** @memo */
     visibility(value: Visibility | undefined): this
-    /** @memo */
     flexGrow(value: number | undefined): this
-    /** @memo */
     flexShrink(value: number | undefined): this
-    /** @memo */
     flexBasis(value: number | string | undefined): this
-    /** @memo */
     alignSelf(value: ItemAlign | undefined): this
-    /** @memo */
     displayPriority(value: number | undefined): this
-    /** @memo */
     zIndex(value: number | undefined): this
-    /** @memo */
     direction(value: Direction | undefined): this
-    /** @memo */
     align(value: Alignment | undefined): this
-    /** @memo */
     position(value: Position | Edges | LocalizedEdges | undefined): this
-    /** @memo */
     markAnchor(value: Position | LocalizedPosition | undefined): this
-    /** @memo */
     offset(value: Position | Edges | LocalizedEdges | undefined): this
-    /** @memo */
     enabled(value: boolean | undefined): this
-    /** @memo */
     useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this
-    /** @memo */
     alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this
-    /** @memo */
     aspectRatio(value: number | undefined): this
-    /** @memo */
     clickEffect(value: ClickEffect | undefined): this
-    /** @memo */
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this
-    /** @memo */
     onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    /** @memo */
     onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    /** @memo */
     onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    /** @memo */
     onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this
-    /** @memo */
     onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    /** @memo */
     allowDrop(value: Array<UniformDataType> | undefined): this
-    /** @memo */
     draggable(value: boolean | undefined): this
-    /** @memo */
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this
-    /** @memo */
     onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this
-    /** @memo */
     linearGradient(value: LinearGradientOptions | undefined): this
-    /** @memo */
     sweepGradient(value: SweepGradientOptions | undefined): this
-    /** @memo */
     radialGradient(value: RadialGradientOptions | undefined): this
-    /** @memo */
     motionPath(value: MotionPathOptions | undefined): this
-    /** @memo */
     shadow(value: ShadowOptions | ShadowStyle | undefined): this
-    /** @memo */
     clip(value: boolean | undefined): this
-    /** @memo */
     clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    /** @memo */
     mask(value: ProgressMask | undefined): this
-    /** @memo */
     maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    /** @memo */
     key(value: string | undefined): this
-    /** @memo */
     id(value: string | undefined): this
-    /** @memo */
     geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this
-    /** @memo */
     stateStyles(value: StateStyles | undefined): this
-    /** @memo */
     restoreId(value: number | undefined): this
-    /** @memo */
     sphericalEffect(value: number | undefined): this
-    /** @memo */
     lightUpEffect(value: number | undefined): this
-    /** @memo */
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this
-    /** @memo */
     accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this
-    /** @memo */
     accessibilityText(value: string | undefined | Resource | undefined): this
-    /** @memo */
     accessibilityNextFocusId(value: string | undefined): this
-    /** @memo */
     accessibilityDefaultFocus(value: boolean | undefined): this
-    /** @memo */
     accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this
-    /** @memo */
     accessibilityScrollTriggerable(value: boolean | undefined): this
-    /** @memo */
     accessibilityRole(value: AccessibilityRoleType | undefined): this
-    /** @memo */
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this
-    /** @memo */
     accessibilityTextHint(value: string | undefined): this
-    /** @memo */
     accessibilityDescription(value: string | undefined | Resource | undefined): this
-    /** @memo */
     accessibilityLevel(value: string | undefined): this
-    /** @memo */
     accessibilityVirtualNode(value: CustomBuilder | undefined): this
-    /** @memo */
     accessibilityChecked(value: boolean | undefined): this
-    /** @memo */
     accessibilitySelected(value: boolean | undefined): this
-    /** @memo */
     obscured(value: Array<ObscuredReasons> | undefined): this
-    /** @memo */
     reuseId(value: string | undefined): this
-    /** @memo */
     reuse(value: ReuseOptions | undefined): this
-    /** @memo */
     renderFit(value: RenderFit | undefined): this
-    /** @memo */
     gestureModifier(value: GestureModifier | undefined): this
-    /** @memo */
     backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this
-    /** @memo */
     onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this
-    /** @memo */
     onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this
-    /** @memo */
     shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this
-    /** @memo */
     monopolizeEvents(value: boolean | undefined): this
-    /** @memo */
     onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this
-    /** @memo */
     onSizeChange(value: SizeChangeCallback | undefined): this
-    /** @memo */
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this
-    /** @memo */
     customProperty(name: string | undefined, value: Object | undefined): this
-    /** @memo */
     expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this
-    /** @memo */
     background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
-    /** @memo */
     backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
-    /** @memo */
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    /** @memo */
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    /** @memo */
     focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this
-    /** @memo */
     focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this
-    /** @memo */
     gesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    /** @memo */
     priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    /** @memo */
     parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    /** @memo */
     blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    /** @memo */
     linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this
-    /** @memo */
     systemBarEffect(): this
-    /** @memo */
     backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    /** @memo */
     sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this
-    /** @memo */
     chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
-    /** @memo */
     dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this
-    /** @memo */
     overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this
-    /** @memo */
     blendMode(value: BlendMode | undefined, type?: BlendApplyType): this
-    /** @memo */
     advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this
-    /** @memo */
     bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this
-    /** @memo */
     bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
-    /** @memo */
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this
-    /** @memo */
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
-    /** @memo */
     bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this
-    /** @memo */
     bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this
-    /** @memo */
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
-    /** @memo */
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this
-    /** @memo */
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
-    /** @memo */
     attributeModifier<T>(value: AttributeModifier<T>): this
 }
 export class ArkCommonMethodStyle implements CommonMethod {
@@ -8855,7 +8475,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
         return this
     }
-    public onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold?: number): this {
+    public onClick(event: ((event: ClickEvent) => void) | undefined): this {
         return this
     }
     public onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {
@@ -8922,6 +8542,12 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     public focusBox(value: FocusBoxStyle | undefined): this {
+        return this
+    }
+    public animationStart(value: AnimateParam | undefined): this {
+        return this
+    }
+    public animationStop(value: AnimateParam | undefined): this {
         return this
     }
     public animation(value: AnimateParam | undefined): this {
@@ -9305,19 +8931,12 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
         return this
     }
+    public attributeModifier<T>(value: AttributeModifier<T>): this {
+        return this
+    }
 }
-export interface CommonAttribute extends CommonMethod {
-   
-}
-export interface UICommonAttribute extends UICommonMethod {
- 
-}
-export class ArkCommonStyle extends ArkCommonMethodStyle implements CommonAttribute {
-  
-}
-export type CommonInterface = (...params:Object[]) => CommonAttribute;
+export type CommonAttribute = CommonMethod
 export type CustomBuilder = 
-/** @memo */
 () => void;
 export interface OverlayOptions {
     align?: Alignment;
@@ -9342,30 +8961,6 @@ export interface CommonShapeMethod extends CommonMethod {
     fillOpacity(value: number | string | Resource | undefined): this
     strokeWidth(value: Length | undefined): this
     antiAlias(value: boolean | undefined): this
-    strokeDashArray(value: Array<Length> | undefined): this
-}
-export interface UICommonShapeMethod extends UICommonMethod {
-    /** @memo */
-    stroke(value: ResourceColor | undefined): this
-    /** @memo */
-    fill(value: ResourceColor | undefined): this
-    /** @memo */
-    strokeDashOffset(value: number | string | undefined): this
-    /** @memo */
-    strokeLineCap(value: LineCapStyle | undefined): this
-    /** @memo */
-    strokeLineJoin(value: LineJoinStyle | undefined): this
-    /** @memo */
-    strokeMiterLimit(value: number | string | undefined): this
-    /** @memo */
-    strokeOpacity(value: number | string | Resource | undefined): this
-    /** @memo */
-    fillOpacity(value: number | string | Resource | undefined): this
-    /** @memo */
-    strokeWidth(value: Length | undefined): this
-    /** @memo */
-    antiAlias(value: boolean | undefined): this
-    /** @memo */
     strokeDashArray(value: Array<Length> | undefined): this
 }
 export class ArkCommonShapeMethodStyle extends ArkCommonMethodStyle implements CommonShapeMethod {
@@ -9517,42 +9112,6 @@ export interface ScrollableCommonMethod extends CommonMethod {
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     backToTop(value: boolean | undefined): this
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
-}
-export interface UIScrollableCommonMethod extends UICommonMethod {
-    /** @memo */
-    scrollBar(value: BarState | undefined): this
-    /** @memo */
-    scrollBarColor(value: Color | number | string | undefined): this
-    /** @memo */
-    scrollBarWidth(value: number | string | undefined): this
-    /** @memo */
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    /** @memo */
-    enableScrollInteraction(value: boolean | undefined): this
-    /** @memo */
-    friction(value: number | Resource | undefined): this
-    /** @memo */
-    onScroll(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onReachStart(value: (() => void) | undefined): this
-    /** @memo */
-    onReachEnd(value: (() => void) | undefined): this
-    /** @memo */
-    onScrollStart(value: (() => void) | undefined): this
-    /** @memo */
-    onScrollStop(value: (() => void) | undefined): this
-    /** @memo */
-    flingSpeedLimit(value: number | undefined): this
-    /** @memo */
-    clipContent(value: ContentClipMode | RectShape | undefined): this
-    /** @memo */
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    /** @memo */
-    backToTop(value: boolean | undefined): this
-    /** @memo */
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    /** @memo */
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
@@ -9722,8 +9281,7 @@ export interface DateRange {
     start?: Date;
     end?: Date;
 }
-/** @memo:stable */
-export class ArkCommonMethodComponent extends ComponentBase implements UICommonMethod {
+export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
 
     protected _modifierHost: ArkBaseNode | undefined
     setModifierHost(value: ArkBaseNode): void {
@@ -9760,7 +9318,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this.gestureEvent as UIGestureEvent;
     }
-    /** @memo */
     public width(value: Length | undefined | Length | LayoutPolicy | undefined): this {
         if (this.checkPriority("width")) {
             const value_type = runtimeType(value)
@@ -9778,7 +9335,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public height(value: Length | undefined | Length | LayoutPolicy | undefined): this {
         if (this.checkPriority("height")) {
             const value_type = runtimeType(value)
@@ -9796,7 +9352,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public drawModifier(value: DrawModifier | undefined): this {
         if (this.checkPriority("drawModifier")) {
             const value_casted = value as (DrawModifier | undefined)
@@ -9805,7 +9360,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
         if (this.checkPriority("responseRegion")) {
             const value_casted = value as (Array<Rectangle> | Rectangle | undefined)
@@ -9814,7 +9368,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
         if (this.checkPriority("mouseResponseRegion")) {
             const value_casted = value as (Array<Rectangle> | Rectangle | undefined)
@@ -9823,7 +9376,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public size(value: SizeOptions | undefined): this {
         if (this.checkPriority("size")) {
             const value_casted = value as (SizeOptions | undefined)
@@ -9832,7 +9384,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public constraintSize(value: ConstraintSizeOptions | undefined): this {
         if (this.checkPriority("constraintSize")) {
             const value_casted = value as (ConstraintSizeOptions | undefined)
@@ -9841,7 +9392,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public touchable(value: boolean | undefined): this {
         if (this.checkPriority("touchable")) {
             const value_casted = value as (boolean | undefined)
@@ -9850,7 +9400,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public hitTestBehavior(value: HitTestMode | undefined): this {
         if (this.checkPriority("hitTestBehavior")) {
             const value_casted = value as (HitTestMode | undefined)
@@ -9859,7 +9408,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {
         if (this.checkPriority("onChildTouchTest")) {
             const value_casted = value as (((value: Array<TouchTestInfo>) => TouchResult) | undefined)
@@ -9868,7 +9416,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public layoutWeight(value: number | string | undefined): this {
         if (this.checkPriority("layoutWeight")) {
             const value_casted = value as (number | string | undefined)
@@ -9877,7 +9424,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public chainWeight(value: ChainWeightOptions | undefined): this {
         if (this.checkPriority("chainWeight")) {
             const value_casted = value as (ChainWeightOptions | undefined)
@@ -9886,7 +9432,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public padding(value: Padding | Length | LocalizedPadding | undefined): this {
         if (this.checkPriority("padding")) {
             const value_casted = value as (Padding | Length | LocalizedPadding | undefined)
@@ -9895,7 +9440,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this {
         if (this.checkPriority("safeAreaPadding")) {
             const value_casted = value as (Padding | LengthMetrics | LocalizedPadding | undefined)
@@ -9904,7 +9448,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public margin(value: Padding | Length | LocalizedPadding | undefined): this {
         if (this.checkPriority("margin")) {
             const value_casted = value as (Padding | Length | LocalizedPadding | undefined)
@@ -9913,7 +9456,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("backgroundColor")) {
             const value_type = runtimeType(value)
@@ -9931,7 +9473,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public pixelRound(value: PixelRoundPolicy | undefined): this {
         if (this.checkPriority("pixelRound")) {
             const value_casted = value as (PixelRoundPolicy | undefined)
@@ -9940,7 +9481,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {
         if (this.checkPriority("backgroundImageSize")) {
             const value_casted = value as (SizeOptions | ImageSize | undefined)
@@ -9949,7 +9489,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backgroundImagePosition(value: Position | Alignment | undefined): this {
         if (this.checkPriority("backgroundImagePosition")) {
             const value_casted = value as (Position | Alignment | undefined)
@@ -9958,7 +9497,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("backgroundEffect")) {
             const options_type = runtimeType(options)
@@ -9978,7 +9516,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backgroundImageResizable(value: ResizableOptions | undefined): this {
         if (this.checkPriority("backgroundImageResizable")) {
             const value_casted = value as (ResizableOptions | undefined)
@@ -9987,7 +9524,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public foregroundEffect(value: ForegroundEffectOptions | undefined): this {
         if (this.checkPriority("foregroundEffect")) {
             const value_casted = value as (ForegroundEffectOptions | undefined)
@@ -9996,7 +9532,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public visualEffect(value: VisualEffect | undefined): this {
         if (this.checkPriority("visualEffect")) {
             const value_casted = value as (VisualEffect | undefined)
@@ -10005,7 +9540,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backgroundFilter(value: Filter | undefined): this {
         if (this.checkPriority("backgroundFilter")) {
             const value_casted = value as (Filter | undefined)
@@ -10014,7 +9548,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public foregroundFilter(value: Filter | undefined): this {
         if (this.checkPriority("foregroundFilter")) {
             const value_casted = value as (Filter | undefined)
@@ -10023,7 +9556,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public compositingFilter(value: Filter | undefined): this {
         if (this.checkPriority("compositingFilter")) {
             const value_casted = value as (Filter | undefined)
@@ -10032,7 +9564,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public opacity(value: number | Resource | undefined): this {
         if (this.checkPriority("opacity")) {
             const value_type = runtimeType(value)
@@ -10050,7 +9581,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public border(value: BorderOptions | undefined): this {
         if (this.checkPriority("border")) {
             const value_casted = value as (BorderOptions | undefined)
@@ -10059,7 +9589,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
         if (this.checkPriority("borderStyle")) {
             const value_casted = value as (BorderStyle | EdgeStyles | undefined)
@@ -10068,7 +9597,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
         if (this.checkPriority("borderWidth")) {
             const value_casted = value as (Length | EdgeWidths | LocalizedEdgeWidths | undefined)
@@ -10077,7 +9605,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
         if (this.checkPriority("borderColor")) {
             const value_casted = value as (ResourceColor | EdgeColors | LocalizedEdgeColors | undefined)
@@ -10086,7 +9613,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
         if (this.checkPriority("borderRadius")) {
             const value_casted = value as (Length | BorderRadiuses | LocalizedBorderRadiuses | undefined)
@@ -10095,7 +9621,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public borderImage(value: BorderImageOption | undefined): this {
         if (this.checkPriority("borderImage")) {
             const value_casted = value as (BorderImageOption | undefined)
@@ -10104,7 +9629,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public outline(value: OutlineOptions | undefined): this {
         if (this.checkPriority("outline")) {
             const value_type = runtimeType(value)
@@ -10122,7 +9646,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this {
         if (this.checkPriority("outlineStyle")) {
             const value_type = runtimeType(value)
@@ -10140,7 +9663,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this {
         if (this.checkPriority("outlineWidth")) {
             const value_type = runtimeType(value)
@@ -10158,7 +9680,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
         if (this.checkPriority("outlineColor")) {
             const value_type = runtimeType(value)
@@ -10176,7 +9697,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public outlineRadius(value: Dimension | OutlineRadiuses | undefined): this {
         if (this.checkPriority("outlineRadius")) {
             const value_type = runtimeType(value)
@@ -10194,7 +9714,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
         if (this.checkPriority("foregroundColor")) {
             const value_type = runtimeType(value)
@@ -10212,7 +9731,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onClick(event: ((event: ClickEvent) => void) | undefined): this {
         if (this.checkPriority("onClick")) {
             const event_type = runtimeType(event)
@@ -10232,7 +9750,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {
         if (this.checkPriority("onHover")) {
             const value_casted = value as (((isHover: boolean,event: HoverEvent) => void) | undefined)
@@ -10241,7 +9758,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this {
         if (this.checkPriority("onHoverMove")) {
             const value_casted = value as (((parameter: HoverEvent) => void) | undefined)
@@ -10250,7 +9766,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onAccessibilityHover(value: AccessibilityCallback | undefined): this {
         if (this.checkPriority("onAccessibilityHover")) {
             const value_casted = value as (AccessibilityCallback | undefined)
@@ -10259,7 +9774,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public hoverEffect(value: HoverEffect | undefined): this {
         if (this.checkPriority("hoverEffect")) {
             const value_casted = value as (HoverEffect | undefined)
@@ -10268,7 +9782,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onMouse(value: ((event: MouseEvent) => void) | undefined): this {
         if (this.checkPriority("onMouse")) {
             const value_casted = value as (((event: MouseEvent) => void) | undefined)
@@ -10277,7 +9790,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         if (this.checkPriority("onTouch")) {
             const value_casted = value as (((event: TouchEvent) => void) | undefined)
@@ -10286,7 +9798,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onKeyEvent")) {
             const value_type = runtimeType(value)
@@ -10299,7 +9810,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {
         if (this.checkPriority("onDigitalCrown")) {
             const value_casted = value as (((parameter: CrownEvent) => void) | undefined)
@@ -10308,7 +9818,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onKeyPreIme")) {
             const value_casted = value as (((parameter: KeyEvent) => boolean) | undefined)
@@ -10317,7 +9826,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onKeyEventDispatch")) {
             const value_casted = value as (((parameter: KeyEvent) => boolean) | undefined)
@@ -10326,7 +9834,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onFocusAxisEvent(value: ((parameter: FocusAxisEvent) => void) | undefined): this {
         if (this.checkPriority("onFocusAxisEvent")) {
             const value_casted = value as (((parameter: FocusAxisEvent) => void) | undefined)
@@ -10335,7 +9842,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onAxisEvent(value: ((parameter: AxisEvent) => void) | undefined): this {
         if (this.checkPriority("onAxisEvent")) {
             const value_casted = value as (((parameter: AxisEvent) => void) | undefined)
@@ -10344,7 +9850,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public focusable(value: boolean | undefined): this {
         if (this.checkPriority("focusable")) {
             const value_casted = value as (boolean | undefined)
@@ -10353,7 +9858,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public nextFocus(value: FocusMovement | undefined): this {
         if (this.checkPriority("nextFocus")) {
             const value_casted = value as (FocusMovement | undefined)
@@ -10362,7 +9866,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public tabStop(value: boolean | undefined): this {
         if (this.checkPriority("tabStop")) {
             const value_casted = value as (boolean | undefined)
@@ -10371,7 +9874,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onFocus(value: (() => void) | undefined): this {
         if (this.checkPriority("onFocus")) {
             const value_casted = value as ((() => void) | undefined)
@@ -10380,7 +9882,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onBlur(value: (() => void) | undefined): this {
         if (this.checkPriority("onBlur")) {
             const value_casted = value as ((() => void) | undefined)
@@ -10389,7 +9890,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public tabIndex(value: number | undefined): this {
         if (this.checkPriority("tabIndex")) {
             const value_casted = value as (number | undefined)
@@ -10398,7 +9898,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public defaultFocus(value: boolean | undefined): this {
         if (this.checkPriority("defaultFocus")) {
             const value_casted = value as (boolean | undefined)
@@ -10407,7 +9906,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public groupDefaultFocus(value: boolean | undefined): this {
         if (this.checkPriority("groupDefaultFocus")) {
             const value_casted = value as (boolean | undefined)
@@ -10416,7 +9914,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public focusOnTouch(value: boolean | undefined): this {
         if (this.checkPriority("focusOnTouch")) {
             const value_casted = value as (boolean | undefined)
@@ -10425,7 +9922,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public focusBox(value: FocusBoxStyle | undefined): this {
         if (this.checkPriority("focusBox")) {
             const value_casted = value as (FocusBoxStyle | undefined)
@@ -10451,7 +9947,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         if (this.checkPriority("transition")) {
             const effect_type = runtimeType(effect)
@@ -10471,7 +9966,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public motionBlur(value: MotionBlurOptions | undefined): this {
         if (this.checkPriority("motionBlur")) {
             const value_type = runtimeType(value)
@@ -10489,7 +9983,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public brightness(value: number | undefined): this {
         if (this.checkPriority("brightness")) {
             const value_type = runtimeType(value)
@@ -10507,7 +10000,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public contrast(value: number | undefined): this {
         if (this.checkPriority("contrast")) {
             const value_type = runtimeType(value)
@@ -10525,7 +10017,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public grayscale(value: number | undefined): this {
         if (this.checkPriority("grayscale")) {
             const value_type = runtimeType(value)
@@ -10543,7 +10034,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public colorBlend(value: Color | string | Resource | undefined): this {
         if (this.checkPriority("colorBlend")) {
             const value_type = runtimeType(value)
@@ -10561,7 +10051,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public saturate(value: number | undefined): this {
         if (this.checkPriority("saturate")) {
             const value_type = runtimeType(value)
@@ -10579,7 +10068,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public sepia(value: number | undefined): this {
         if (this.checkPriority("sepia")) {
             const value_type = runtimeType(value)
@@ -10597,7 +10085,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public invert(value: number | InvertOptions | undefined): this {
         if (this.checkPriority("invert")) {
             const value_type = runtimeType(value)
@@ -10615,7 +10102,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public hueRotate(value: number | string | undefined): this {
         if (this.checkPriority("hueRotate")) {
             const value_type = runtimeType(value)
@@ -10633,7 +10119,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public useShadowBatching(value: boolean | undefined): this {
         if (this.checkPriority("useShadowBatching")) {
             const value_type = runtimeType(value)
@@ -10651,7 +10136,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public useEffect(useEffect: boolean | undefined, effectType?: EffectType | undefined | EffectType): this {
         if (this.checkPriority("useEffect")) {
             const useEffect_type = runtimeType(useEffect)
@@ -10677,7 +10161,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public renderGroup(value: boolean | undefined): this {
         if (this.checkPriority("renderGroup")) {
             const value_type = runtimeType(value)
@@ -10695,7 +10178,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public freeze(value: boolean | undefined): this {
         if (this.checkPriority("freeze")) {
             const value_type = runtimeType(value)
@@ -10713,7 +10195,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public translate(value: TranslateOptions | undefined): this {
         if (this.checkPriority("translate")) {
             const value_type = runtimeType(value)
@@ -10731,7 +10212,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public scale(value: ScaleOptions | undefined): this {
         if (this.checkPriority("scale")) {
             const value_type = runtimeType(value)
@@ -10749,7 +10229,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public gridSpan(value: number | undefined): this {
         if (this.checkPriority("gridSpan")) {
             const value_casted = value as (number | undefined)
@@ -10758,7 +10237,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public gridOffset(value: number | undefined): this {
         if (this.checkPriority("gridOffset")) {
             const value_casted = value as (number | undefined)
@@ -10767,7 +10245,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public rotate(value: RotateOptions | undefined): this {
         if (this.checkPriority("rotate")) {
             const value_type = runtimeType(value)
@@ -10785,7 +10262,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public transform(value: TransformationMatrix | undefined | Object | undefined): this {
         if (this.checkPriority("transform")) {
             const value_type = runtimeType(value)
@@ -10803,7 +10279,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onAppear(value: (() => void) | undefined): this {
         if (this.checkPriority("onAppear")) {
             const value_casted = value as ((() => void) | undefined)
@@ -10812,7 +10287,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onDisAppear(value: (() => void) | undefined): this {
         if (this.checkPriority("onDisAppear")) {
             const value_casted = value as ((() => void) | undefined)
@@ -10821,7 +10295,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onAttach(value: (() => void) | undefined): this {
         if (this.checkPriority("onAttach")) {
             const value_casted = value as ((() => void) | undefined)
@@ -10830,7 +10303,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onDetach(value: (() => void) | undefined): this {
         if (this.checkPriority("onDetach")) {
             const value_casted = value as ((() => void) | undefined)
@@ -10839,7 +10311,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
         if (this.checkPriority("onAreaChange")) {
             const value_casted = value as (((oldValue: Area,newValue: Area) => void) | undefined)
@@ -10848,7 +10319,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public visibility(value: Visibility | undefined): this {
         if (this.checkPriority("visibility")) {
             const value_casted = value as (Visibility | undefined)
@@ -10857,7 +10327,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public flexGrow(value: number | undefined): this {
         if (this.checkPriority("flexGrow")) {
             const value_casted = value as (number | undefined)
@@ -10866,7 +10335,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public flexShrink(value: number | undefined): this {
         if (this.checkPriority("flexShrink")) {
             const value_casted = value as (number | undefined)
@@ -10875,7 +10343,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public flexBasis(value: number | string | undefined): this {
         if (this.checkPriority("flexBasis")) {
             const value_casted = value as (number | string | undefined)
@@ -10884,7 +10351,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public alignSelf(value: ItemAlign | undefined): this {
         if (this.checkPriority("alignSelf")) {
             const value_casted = value as (ItemAlign | undefined)
@@ -10893,7 +10359,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public displayPriority(value: number | undefined): this {
         if (this.checkPriority("displayPriority")) {
             const value_casted = value as (number | undefined)
@@ -10902,7 +10367,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public zIndex(value: number | undefined): this {
         if (this.checkPriority("zIndex")) {
             const value_casted = value as (number | undefined)
@@ -10911,7 +10375,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public direction(value: Direction | undefined): this {
         if (this.checkPriority("direction")) {
             const value_casted = value as (Direction | undefined)
@@ -10920,7 +10383,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public align(value: Alignment | undefined): this {
         if (this.checkPriority("align")) {
             const value_casted = value as (Alignment | undefined)
@@ -10929,7 +10391,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public position(value: Position | Edges | LocalizedEdges | undefined): this {
         if (this.checkPriority("position")) {
             const value_casted = value as (Position | Edges | LocalizedEdges | undefined)
@@ -10938,7 +10399,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public markAnchor(value: Position | LocalizedPosition | undefined): this {
         if (this.checkPriority("markAnchor")) {
             const value_casted = value as (Position | LocalizedPosition | undefined)
@@ -10947,7 +10407,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public offset(value: Position | Edges | LocalizedEdges | undefined): this {
         if (this.checkPriority("offset")) {
             const value_casted = value as (Position | Edges | LocalizedEdges | undefined)
@@ -10956,7 +10415,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public enabled(value: boolean | undefined): this {
         if (this.checkPriority("enabled")) {
             const value_casted = value as (boolean | undefined)
@@ -10965,7 +10423,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this {
         if (this.checkPriority("useSizeType")) {
             const value_casted = value as (Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined)
@@ -10974,7 +10431,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {
         if (this.checkPriority("alignRules")) {
             const value_type = runtimeType(value)
@@ -10992,7 +10448,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public aspectRatio(value: number | undefined): this {
         if (this.checkPriority("aspectRatio")) {
             const value_casted = value as (number | undefined)
@@ -11001,7 +10456,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public clickEffect(value: ClickEffect | undefined): this {
         if (this.checkPriority("clickEffect")) {
             const value_type = runtimeType(value)
@@ -11019,7 +10473,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         if (this.checkPriority("onDragStart")) {
             const value_casted = value as (((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)
@@ -11028,7 +10481,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         if (this.checkPriority("onDragEnter")) {
             const value_casted = value as (((event: DragEvent,extraParams?: string) => void) | undefined)
@@ -11037,7 +10489,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         if (this.checkPriority("onDragMove")) {
             const value_casted = value as (((event: DragEvent,extraParams?: string) => void) | undefined)
@@ -11046,7 +10497,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         if (this.checkPriority("onDragLeave")) {
             const value_casted = value as (((event: DragEvent,extraParams?: string) => void) | undefined)
@@ -11055,7 +10505,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         if (this.checkPriority("onDrop")) {
             const eventCallback_type = runtimeType(eventCallback)
@@ -11075,7 +10524,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         if (this.checkPriority("onDragEnd")) {
             const value_casted = value as (((event: DragEvent,extraParams?: string) => void) | undefined)
@@ -11084,7 +10532,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public allowDrop(value: Array<UniformDataType> | undefined): this {
         if (this.checkPriority("allowDrop")) {
             const value_casted = value as (Array<UniformDataType> | undefined)
@@ -11093,7 +10540,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public draggable(value: boolean | undefined): this {
         if (this.checkPriority("draggable")) {
             const value_casted = value as (boolean | undefined)
@@ -11102,7 +10548,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
         if (this.checkPriority("dragPreview")) {
             const preview_type = runtimeType(preview)
@@ -11122,7 +10567,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this {
         if (this.checkPriority("onPreDrag")) {
             const value_casted = value as (((parameter: PreDragStatus) => void) | undefined)
@@ -11131,7 +10575,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public linearGradient(value: LinearGradientOptions | undefined): this {
         if (this.checkPriority("linearGradient")) {
             const value_type = runtimeType(value)
@@ -11149,7 +10592,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public sweepGradient(value: SweepGradientOptions | undefined): this {
         if (this.checkPriority("sweepGradient")) {
             const value_type = runtimeType(value)
@@ -11167,7 +10609,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public radialGradient(value: RadialGradientOptions | undefined): this {
         if (this.checkPriority("radialGradient")) {
             const value_type = runtimeType(value)
@@ -11185,7 +10626,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public motionPath(value: MotionPathOptions | undefined): this {
         if (this.checkPriority("motionPath")) {
             const value_casted = value as (MotionPathOptions | undefined)
@@ -11194,7 +10634,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public shadow(value: ShadowOptions | ShadowStyle | undefined): this {
         if (this.checkPriority("shadow")) {
             const value_type = runtimeType(value)
@@ -11212,7 +10651,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public clip(value: boolean | undefined): this {
         if (this.checkPriority("clip")) {
             const value_type = runtimeType(value)
@@ -11235,7 +10673,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
         if (this.checkPriority("clipShape")) {
             const value_type = runtimeType(value)
@@ -11253,7 +10690,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public mask(value: ProgressMask | undefined): this {
         if (this.checkPriority("mask")) {
             const value_type = runtimeType(value)
@@ -11276,7 +10712,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
         if (this.checkPriority("maskShape")) {
             const value_type = runtimeType(value)
@@ -11294,7 +10729,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public key(value: string | undefined): this {
         if (this.checkPriority("key")) {
             const value_casted = value as (string | undefined)
@@ -11303,7 +10737,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public id(value: string | undefined): this {
         if (this.checkPriority("id")) {
             const value_casted = value as (string | undefined)
@@ -11312,7 +10745,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
         if (this.checkPriority("geometryTransition")) {
             const id_type = runtimeType(id)
@@ -11332,7 +10764,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
             const value_casted = value as (StateStyles | undefined)
@@ -11341,7 +10772,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public restoreId(value: number | undefined): this {
         if (this.checkPriority("restoreId")) {
             const value_casted = value as (number | undefined)
@@ -11350,7 +10780,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public sphericalEffect(value: number | undefined): this {
         if (this.checkPriority("sphericalEffect")) {
             const value_type = runtimeType(value)
@@ -11368,7 +10797,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public lightUpEffect(value: number | undefined): this {
         if (this.checkPriority("lightUpEffect")) {
             const value_type = runtimeType(value)
@@ -11386,7 +10814,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
         if (this.checkPriority("pixelStretchEffect")) {
             const value_type = runtimeType(value)
@@ -11404,7 +10831,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
         if (this.checkPriority("accessibilityGroup")) {
             const isGroup_type = runtimeType(isGroup)
@@ -11424,7 +10850,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityText(value: string | undefined | Resource | undefined): this {
         if (this.checkPriority("accessibilityText")) {
             const value_type = runtimeType(value)
@@ -11442,7 +10867,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityNextFocusId(value: string | undefined): this {
         if (this.checkPriority("accessibilityNextFocusId")) {
             const value_casted = value as (string | undefined)
@@ -11451,7 +10875,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityDefaultFocus(value: boolean | undefined): this {
         if (this.checkPriority("accessibilityDefaultFocus")) {
             const value_casted = value as (boolean | undefined)
@@ -11460,7 +10883,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this {
         if (this.checkPriority("accessibilityUseSamePage")) {
             const value_casted = value as (AccessibilitySamePageMode | undefined)
@@ -11469,7 +10891,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityScrollTriggerable(value: boolean | undefined): this {
         if (this.checkPriority("accessibilityScrollTriggerable")) {
             const value_casted = value as (boolean | undefined)
@@ -11478,7 +10899,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityRole(value: AccessibilityRoleType | undefined): this {
         if (this.checkPriority("accessibilityRole")) {
             const value_casted = value as (AccessibilityRoleType | undefined)
@@ -11487,7 +10907,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
         if (this.checkPriority("onAccessibilityFocus")) {
             const value_casted = value as (AccessibilityFocusCallback | undefined)
@@ -11496,7 +10915,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityTextHint(value: string | undefined): this {
         if (this.checkPriority("accessibilityTextHint")) {
             const value_casted = value as (string | undefined)
@@ -11505,7 +10923,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityDescription(value: string | undefined | Resource | undefined): this {
         if (this.checkPriority("accessibilityDescription")) {
             const value_type = runtimeType(value)
@@ -11523,7 +10940,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityLevel(value: string | undefined): this {
         if (this.checkPriority("accessibilityLevel")) {
             const value_casted = value as (string | undefined)
@@ -11532,7 +10948,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityVirtualNode(value: CustomBuilder | undefined): this {
         if (this.checkPriority("accessibilityVirtualNode")) {
             const value_casted = value as (CustomBuilder | undefined)
@@ -11541,7 +10956,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityChecked(value: boolean | undefined): this {
         if (this.checkPriority("accessibilityChecked")) {
             const value_casted = value as (boolean | undefined)
@@ -11550,7 +10964,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilitySelected(value: boolean | undefined): this {
         if (this.checkPriority("accessibilitySelected")) {
             const value_casted = value as (boolean | undefined)
@@ -11559,7 +10972,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public obscured(value: Array<ObscuredReasons> | undefined): this {
         if (this.checkPriority("obscured")) {
             const value_casted = value as (Array<ObscuredReasons> | undefined)
@@ -11568,7 +10980,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public reuseId(value: string | undefined): this {
         if (this.checkPriority("reuseId")) {
             const value_casted = value as (string | undefined)
@@ -11577,7 +10988,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public reuse(value: ReuseOptions | undefined): this {
         if (this.checkPriority("reuse")) {
             const value_casted = value as (ReuseOptions | undefined)
@@ -11586,7 +10996,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public renderFit(value: RenderFit | undefined): this {
         if (this.checkPriority("renderFit")) {
             const value_type = runtimeType(value)
@@ -11604,7 +11013,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public gestureModifier(value: GestureModifier | undefined): this {
         if (this.checkPriority("gestureModifier")) {
             if (value === undefined) {
@@ -11618,7 +11026,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {
         if (this.checkPriority("backgroundBrightness")) {
             const value_type = runtimeType(value)
@@ -11636,7 +11043,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
         if (this.checkPriority("onGestureJudgeBegin")) {
             const value_casted = value as (((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined)
@@ -11645,7 +11051,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this {
         if (this.checkPriority("onGestureRecognizerJudgeBegin")) {
             const callback__type = runtimeType(callback_)
@@ -11665,7 +11070,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
         if (this.checkPriority("shouldBuiltInRecognizerParallelWith")) {
             const value_casted = value as (ShouldBuiltInRecognizerParallelWithCallback | undefined)
@@ -11674,7 +11078,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public monopolizeEvents(value: boolean | undefined): this {
         if (this.checkPriority("monopolizeEvents")) {
             const value_casted = value as (boolean | undefined)
@@ -11683,7 +11086,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this {
         if (this.checkPriority("onTouchIntercept")) {
             const value_casted = value as (((parameter: TouchEvent) => HitTestMode) | undefined)
@@ -11692,7 +11094,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onSizeChange(value: SizeChangeCallback | undefined): this {
         if (this.checkPriority("onSizeChange")) {
             const value_casted = value as (SizeChangeCallback | undefined)
@@ -11701,7 +11102,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         if (this.checkPriority("accessibilityFocusDrawLevel")) {
             const value_casted = value as (FocusDrawLevel | undefined)
@@ -11710,7 +11110,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public customProperty(name: string | undefined, value: Object | undefined): this {
         if (this.checkPriority("customProperty")) {
             const name_casted = name as (string | undefined)
@@ -11720,7 +11119,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         if (this.checkPriority("expandSafeArea")) {
             const types_casted = types as (Array<SafeAreaType> | undefined)
@@ -11730,7 +11128,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
         if (this.checkPriority("background")) {
             const builder_casted = builder as (CustomBuilder | undefined)
@@ -11740,7 +11137,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         if (this.checkPriority("backgroundImage")) {
             const src_type = runtimeType(src)
@@ -11754,7 +11150,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("backgroundBlurStyle")) {
             const style_type = runtimeType(style)
@@ -11777,7 +11172,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("foregroundBlurStyle")) {
             const style_type = runtimeType(style)
@@ -11800,7 +11194,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
         if (this.checkPriority("focusScopeId")) {
             const id_type = runtimeType(id)
@@ -11817,7 +11210,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {
         if (this.checkPriority("focusScopePriority")) {
             const scopeId_casted = scopeId as (string | undefined)
@@ -11827,7 +11219,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
             if (gesture instanceof Gesture) {
@@ -11842,7 +11233,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
             if (gesture instanceof Gesture) {
@@ -11857,7 +11247,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
             if (gesture instanceof Gesture) {
@@ -11872,7 +11261,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("blur")) {
             const blurRadius_type = runtimeType(blurRadius)
@@ -11895,7 +11283,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
         if (this.checkPriority("linearGradientBlur")) {
             const value_type = runtimeType(value)
@@ -11916,7 +11303,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public systemBarEffect(): this {
         if (this.checkPriority("systemBarEffect")) {
             this.getPeer()?.systemBarEffectAttribute()
@@ -11924,7 +11310,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("backdropBlur")) {
             const radius_type = runtimeType(radius)
@@ -11947,7 +11332,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         if (this.checkPriority("sharedTransition")) {
             const id_casted = id as (string | undefined)
@@ -11957,7 +11341,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
         if (this.checkPriority("chainMode")) {
             const direction_casted = direction as (Axis | undefined)
@@ -11967,7 +11350,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
         if (this.checkPriority("dragPreviewOptions")) {
             const value_casted = value as (DragPreviewOptions | undefined)
@@ -11977,7 +11359,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
         if (this.checkPriority("overlay")) {
             const value_casted = value as (string | CustomBuilder | ComponentContent | undefined)
@@ -11987,7 +11368,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("blendMode")) {
             const value_type = runtimeType(value)
@@ -12008,7 +11388,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("advancedBlendMode")) {
             const effect_casted = effect as (BlendMode | BrightnessBlender | undefined)
@@ -12018,7 +11397,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
         if (this.checkPriority("bindTips")) {
             const message_casted = message as (TipsMessageType | undefined)
@@ -12028,7 +11406,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
         if (this.checkPriority("bindPopup")) {
             const show_casted = show as (boolean | undefined)
@@ -12038,7 +11415,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
         if (this.checkPriority("bindMenu")) {
             const content_type = runtimeType(content)
@@ -12053,7 +11429,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         if (this.checkPriority("bindContextMenu")) {
             const content_type = runtimeType(content)
@@ -12070,7 +11445,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {
         if (this.checkPriority("bindContentCover")) {
             const isShow_type = runtimeType(isShow)
@@ -12087,7 +11461,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
         if (this.checkPriority("bindSheet")) {
             const isShow_casted = isShow as (boolean | undefined)
@@ -12098,7 +11471,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         if (this.checkPriority("onVisibleAreaChange")) {
             const ratios_casted = ratios as (Array<number> | undefined)
@@ -12108,7 +11480,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
         if (this.checkPriority("onVisibleAreaApproximateChange")) {
             const options_casted = options as (VisibleAreaEventOptions | undefined)
@@ -12118,7 +11489,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
     public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
         if (this.checkPriority("keyboardShortcut")) {
             const value_casted = value as (string | FunctionKey | undefined)
@@ -12129,8 +11499,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-  
-    /** @memo */
     public attributeModifier<T>(modifier: AttributeModifier<T>): this {
 
         let peerNode = this.getPeer()
@@ -12154,24 +11522,22 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         this.applyModifierByState(isAttributeUpdater, modifier);
         return this;
     }
-
-    /** @memo */
     public applyModifierByState<T>(isAttributeUpdater: boolean, modifier: AttributeModifier<T>): void {
-        let currentState = rememberMutableState<int32>(0);
-        let peerNode = this.getPeer()
-        let isInit =  rememberMutableState<boolean>(true);
-        remember(() => {
-            StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
-                currentState.value = state;
-                isInit.value = false;
-            })
-        })
-        if (isAttributeUpdater) {
-            applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
-        } else {
-            applyUIAttributes(modifier!, peerNode, currentState.value);
-        }
-        this.getAttributeSet().applyModifierPatch(peerNode);
+        // let currentState = rememberMutableState<int32>(0);
+        // let peerNode = this.getPeer()
+        // let isInit =  rememberMutableState<boolean>(true);
+        // remember(() => {
+        //     StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
+        //         currentState.value = state;
+        //         isInit.value = false;
+        //     })
+        // })
+        // if (isAttributeUpdater) {
+        //     applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
+        // } else {
+        //     applyUIAttributes(modifier!, peerNode, currentState.value);
+        // }
+        // this.getAttributeSet().applyModifierPatch(peerNode);
     }
 
     public applyAttributesFinish(): void {
@@ -12179,49 +11545,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         super.applyAttributesFinish()
     }
 }
-/** @memo:stable */
-export class ArkCommonComponent extends ArkCommonMethodComponent implements UICommonAttribute {
-
-    getPeer(): ArkCommonPeer {
-        return (this.peer as ArkCommonPeer)
-    }
-    /** @memo */
-    public setCommonOptions(): this {
-        if (this.checkPriority("setCommonOptions")) {
-            this.getPeer()?.setCommonOptionsAttribute()
-            return this
-        }
-        return this
-    }
-    public applyAttributesFinish(): void {
-        // we call this function outside of class, so need to make it public
-        super.applyAttributesFinish()
-    }
-}
-/** @memo */
-export function Common(
-    /** @memo */
-    style: ((attributes: UICommonAttribute) => void) | undefined,
-    
-    /** @memo */
-    content_?: (() => void) | undefined,
-): void {
-    const receiver = remember(() => {
-        return new ArkCommonComponent()
-    })
-    NodeAttach<ArkCommonPeer>((): ArkCommonPeer => ArkCommonPeer.create(receiver), (_: ArkCommonPeer) => {
-        receiver.setCommonOptions()
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
-}
-/** @memo:stable */
-export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent implements UICommonShapeMethod {
+export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent implements CommonShapeMethod {
     getPeer(): ArkCommonShapeMethodPeer {
         return (this.peer as ArkCommonShapeMethodPeer)
     }
-    /** @memo */
     public stroke(value: ResourceColor | undefined): this {
         if (this.checkPriority("stroke")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -12230,7 +11557,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public fill(value: ResourceColor | undefined): this {
         if (this.checkPriority("fill")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -12239,7 +11565,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public strokeDashOffset(value: number | string | undefined): this {
         if (this.checkPriority("strokeDashOffset")) {
             const value_casted = value as (number | string | undefined)
@@ -12248,7 +11573,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public strokeLineCap(value: LineCapStyle | undefined): this {
         if (this.checkPriority("strokeLineCap")) {
             const value_casted = value as (LineCapStyle | undefined)
@@ -12257,7 +11581,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public strokeLineJoin(value: LineJoinStyle | undefined): this {
         if (this.checkPriority("strokeLineJoin")) {
             const value_casted = value as (LineJoinStyle | undefined)
@@ -12266,7 +11589,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public strokeMiterLimit(value: number | string | undefined): this {
         if (this.checkPriority("strokeMiterLimit")) {
             const value_casted = value as (number | string | undefined)
@@ -12275,7 +11597,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public strokeOpacity(value: number | string | Resource | undefined): this {
         if (this.checkPriority("strokeOpacity")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -12284,7 +11605,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public fillOpacity(value: number | string | Resource | undefined): this {
         if (this.checkPriority("fillOpacity")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -12293,7 +11613,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public strokeWidth(value: Length | undefined): this {
         if (this.checkPriority("strokeWidth")) {
             const value_casted = value as (Length | undefined)
@@ -12302,7 +11621,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public antiAlias(value: boolean | undefined): this {
         if (this.checkPriority("antiAlias")) {
             const value_casted = value as (boolean | undefined)
@@ -12311,7 +11629,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public strokeDashArray(value: Array<Length> | undefined): this {
         if (this.checkPriority("strokeDashArray")) {
             const value_casted = value as (Array<Length> | undefined)
@@ -12325,12 +11642,10 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         super.applyAttributesFinish()
     }
 }
-/** @memo:stable */
-export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent implements UIScrollableCommonMethod {
+export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent implements ScrollableCommonMethod {
     getPeer(): ArkScrollableCommonMethodPeer {
         return (this.peer as ArkScrollableCommonMethodPeer)
     }
-    /** @memo */
     public scrollBar(value: BarState | undefined): this {
         if (this.checkPriority("scrollBar")) {
             const value_casted = value as (BarState | undefined)
@@ -12339,7 +11654,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public scrollBarColor(value: Color | number | string | undefined): this {
         if (this.checkPriority("scrollBarColor")) {
             const value_casted = value as (Color | number | string | undefined)
@@ -12348,7 +11662,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public scrollBarWidth(value: number | string | undefined): this {
         if (this.checkPriority("scrollBarWidth")) {
             const value_casted = value as (number | string | undefined)
@@ -12357,7 +11670,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public nestedScroll(value: NestedScrollOptions | undefined): this {
         if (this.checkPriority("nestedScroll")) {
             const value_casted = value as (NestedScrollOptions | undefined)
@@ -12366,7 +11678,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public enableScrollInteraction(value: boolean | undefined): this {
         if (this.checkPriority("enableScrollInteraction")) {
             const value_casted = value as (boolean | undefined)
@@ -12375,7 +11686,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public friction(value: number | Resource | undefined): this {
         if (this.checkPriority("friction")) {
             const value_casted = value as (number | Resource | undefined)
@@ -12384,7 +11694,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public onScroll(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onScroll")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -12393,7 +11702,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public onReachStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onReachStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -12402,7 +11710,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public onReachEnd(value: (() => void) | undefined): this {
         if (this.checkPriority("onReachEnd")) {
             const value_casted = value as ((() => void) | undefined)
@@ -12411,7 +11718,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public onScrollStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onScrollStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -12420,7 +11726,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public onScrollStop(value: (() => void) | undefined): this {
         if (this.checkPriority("onScrollStop")) {
             const value_casted = value as ((() => void) | undefined)
@@ -12429,7 +11734,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public flingSpeedLimit(value: number | undefined): this {
         if (this.checkPriority("flingSpeedLimit")) {
             const value_casted = value as (number | undefined)
@@ -12438,7 +11742,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public clipContent(value: ContentClipMode | RectShape | undefined): this {
         if (this.checkPriority("clipContent")) {
             const value_casted = value as (ContentClipMode | RectShape | undefined)
@@ -12447,7 +11750,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         if (this.checkPriority("digitalCrownSensitivity")) {
             const value_casted = value as (CrownSensitivity | undefined)
@@ -12456,7 +11758,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public backToTop(value: boolean | undefined): this {
         if (this.checkPriority("backToTop")) {
             const value_casted = value as (boolean | undefined)
@@ -12465,7 +11766,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         if (this.checkPriority("edgeEffect")) {
             const edgeEffect_casted = edgeEffect as (EdgeEffect | undefined)
@@ -12475,7 +11775,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    /** @memo */
     public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
         if (this.checkPriority("fadingEdge")) {
             const enabled_casted = enabled as (boolean | undefined)
@@ -12595,7 +11894,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         this.setHand(hand_NonNull)
     }
     get preventDefault(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getPreventDefault();
     }
     set preventDefault(preventDefault: (() => void)) {
         this.setPreventDefault(preventDefault)
@@ -12756,8 +12055,17 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._ClickEvent_setHand(this.peer!.ptr, TypeChecker.InteractionHand_ToNumeric(hand))
     }
     private getPreventDefault_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getPreventDefault(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getPreventDefault(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult;
     }
     private setPreventDefault_serialize(preventDefault: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -12898,43 +12206,121 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         return
     }
     private getX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setX_serialize(x: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setX(this.peer!.ptr, x)
     }
     private getY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setY_serialize(y: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setY(this.peer!.ptr, y)
     }
     private getWindowX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setWindowX_serialize(windowX: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setWindowX(this.peer!.ptr, windowX)
     }
     private getWindowY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setWindowY_serialize(windowY: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setWindowY(this.peer!.ptr, windowY)
     }
     private getDisplayX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setDisplayX_serialize(displayX: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayX(this.peer!.ptr, displayX)
     }
     private getDisplayY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setDisplayY_serialize(displayY: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayY(this.peer!.ptr, displayY)
@@ -13264,15 +12650,41 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
     private getRawDeltaX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        //@ts-ignore
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setRawDeltaX_serialize(rawDeltaX: number): void {
         ArkUIGeneratedNativeModule._MouseEvent_setRawDeltaX(this.peer!.ptr, rawDeltaX)
     }
     private getRawDeltaY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        //@ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setRawDeltaY_serialize(rawDeltaY: number): void {
         ArkUIGeneratedNativeModule._MouseEvent_setRawDeltaY(this.peer!.ptr, rawDeltaY)
@@ -13683,7 +13095,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         return obj
     }
 }
-export interface AxisEvent {
+export interface AxisEvent extends BaseEvent {
     action: AxisAction
     displayX: number
     displayY: number
@@ -13747,7 +13159,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setScrollStep(scrollStep_NonNull)
     }
     get propagation(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getPropagation()
     }
     set propagation(propagation: (() => void)) {
         this.setPropagation(propagation)
@@ -13900,15 +13312,39 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         ArkUIGeneratedNativeModule._AxisEvent_setY(this.peer!.ptr, y)
     }
     private getScrollStep_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getScrollStep(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getScrollStep(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setScrollStep_serialize(scrollStep: number): void {
         ArkUIGeneratedNativeModule._AxisEvent_setScrollStep(this.peer!.ptr, scrollStep)
     }
     private getPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult;
     }
     private setPropagation_serialize(propagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()

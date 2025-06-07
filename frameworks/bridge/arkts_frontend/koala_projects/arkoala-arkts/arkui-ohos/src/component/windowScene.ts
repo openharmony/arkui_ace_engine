@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Position } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -66,22 +66,15 @@ export type WindowSceneInterface = (persistentId: number) => WindowSceneAttribut
 export interface WindowSceneAttribute extends CommonMethod {
     attractionEffect(destination: Position | undefined, fraction: number | undefined): this
 }
-export interface UIWindowSceneAttribute extends UICommonMethod {
-    /** @memo */
-    attractionEffect(destination: Position | undefined, fraction: number | undefined): this
-    /** @memo */
-}
 export class ArkWindowSceneStyle extends ArkCommonMethodStyle implements WindowSceneAttribute {
     public attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements UIWindowSceneAttribute {
+export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements WindowSceneAttribute {
     getPeer(): ArkWindowScenePeer {
         return (this.peer as ArkWindowScenePeer)
     }
-    /** @memo */
     public setWindowSceneOptions(persistentId: number): this {
         if (this.checkPriority("setWindowSceneOptions")) {
             const persistentId_casted = persistentId as (number)
@@ -90,7 +83,6 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
         if (this.checkPriority("attractionEffect")) {
             const destination_casted = destination as (Position | undefined)
@@ -109,7 +101,7 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
 /** @memo */
 export function WindowScene(
     /** @memo */
-    style: ((attributes: UIWindowSceneAttribute) => void) | undefined,
+    style: ((attributes: WindowSceneAttribute) => void) | undefined,
     persistentId: number,
     /** @memo */
     content_?: (() => void) | undefined,

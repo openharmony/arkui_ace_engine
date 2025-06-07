@@ -21,15 +21,15 @@
  
 namespace OHOS::Ace::Ani {
  
-ani_long ConstructCustomNode([[maybe_unused]] ani_env* env, [[maybe_unused]]ani_object aniClass,
-            ani_int id, ani_object obj)
+ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
+                             ani_int id, ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return 0;
     }
 
-    // 这里需要处理前端处理的ani_object obj
+    // ani_object obj from ts is supposed to be processed here
 
     ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(id);
     return customNode;

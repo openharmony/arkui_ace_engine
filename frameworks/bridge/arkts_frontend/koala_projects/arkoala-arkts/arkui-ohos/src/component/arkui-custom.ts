@@ -27,7 +27,6 @@ import { PanDirection, SwipeDirection, GestureMode, Callback_GestureEvent_Void, 
 import { ResourceStr, Font, ResourceColor } from "./units"
 import { Resource } from "global/resource"
 import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
-import { Callback_Void } from "./abilityComponent"
 import { TextPickerDialogOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Frame } from "../Graphics"
@@ -158,6 +157,14 @@ export class LazyForEachOps {
         LazyForEachOps.NotifyChange_serialize(node_casted, startIndex_casted, endIndex_casted, count_casted)
         return
     }
+    public static Sync(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+        const node_casted = node as (KPointer)
+        const totalCount_casted = totalCount as (int32)
+        const creator_casted = creator as (Callback_CreateItem)
+        const updater_casted = updater as (Callback_RangeUpdate)
+        LazyForEachOps.Sync_serialize(node_casted, totalCount_casted, creator_casted, updater_casted)
+        return
+    }
     private static NeedMoreElements_serialize(node: KPointer, mark: KPointer, direction: int32): KPointer {
         const retval  = ArkUIGeneratedNativeModule._LazyForEachOps_NeedMoreElements(node, mark, direction)
         return retval
@@ -176,6 +183,13 @@ export class LazyForEachOps {
     }
     private static NotifyChange_serialize(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
         ArkUIGeneratedNativeModule._LazyForEachOps_NotifyChange(node, startIndex, endIndex, count)
+    }
+    private static Sync_serialize(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(creator)
+        thisSerializer.holdAndWriteCallback(updater)
+        ArkUIGeneratedNativeModule._LazyForEachOps_Sync(node, totalCount, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class SystemOps {
@@ -982,53 +996,9 @@ export class UIContextDispatchKeyEvent {
 }
 
 export type Context_getGroupDir_Callback = (result: string) => void;
-export enum PointerStyle {
-    DEFAULT = 0,
-    EAST = 1,
-    WEST = 2,
-    SOUTH = 3,
-    NORTH = 4,
-    WEST_EAST = 5,
-    NORTH_SOUTH = 6,
-    NORTH_EAST = 7,
-    NORTH_WEST = 8,
-    SOUTH_EAST = 9,
-    SOUTH_WEST = 10,
-    NORTH_EAST_SOUTH_WEST = 11,
-    NORTH_WEST_SOUTH_EAST = 12,
-    CROSS = 13,
-    CURSOR_COPY = 14,
-    CURSOR_FORBID = 15,
-    COLOR_SUCKER = 16,
-    HAND_GRABBING = 17,
-    HAND_OPEN = 18,
-    HAND_POINTING = 19,
-    HELP = 20,
-    MOVE = 21,
-    RESIZE_LEFT_RIGHT = 22,
-    RESIZE_UP_DOWN = 23,
-    SCREENSHOT_CHOOSE = 24,
-    SCREENSHOT_CURSOR = 25,
-    TEXT_CURSOR = 26,
-    ZOOM_IN = 27,
-    ZOOM_OUT = 28,
-    MIDDLE_BTN_EAST = 29,
-    MIDDLE_BTN_WEST = 30,
-    MIDDLE_BTN_SOUTH = 31,
-    MIDDLE_BTN_NORTH = 32,
-    MIDDLE_BTN_NORTH_SOUTH = 33,
-    MIDDLE_BTN_NORTH_EAST = 34,
-    MIDDLE_BTN_NORTH_WEST = 35,
-    MIDDLE_BTN_SOUTH_EAST = 36,
-    MIDDLE_BTN_SOUTH_WEST = 37,
-    MIDDLE_BTN_NORTH_SOUTH_WEST_EAST = 38,
-    HORIZONTAL_TEXT_CURSOR = 39,
-    CURSOR_CROSS = 40,
-    CURSOR_CIRCLE = 41,
-    LOADING = 42,
-    RUNNING = 43
-}
-export type Callback_RangeUpdate = (index: int32, mark: KPointer, end: int32) => void;
+
+export type Callback_RangeUpdate = (start: int32, end: int32) => void;
+export type Callback_CreateItem = (index: int32) => KPointer;
 export interface CustomColors {
     brand?: ResourceColor;
     warning?: ResourceColor;

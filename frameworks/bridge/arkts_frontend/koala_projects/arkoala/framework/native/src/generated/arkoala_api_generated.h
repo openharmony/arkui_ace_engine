@@ -758,6 +758,12 @@ typedef struct Opt_UIContext Opt_UIContext;
 typedef struct UIExtensionProxyPeer UIExtensionProxyPeer;
 typedef struct UIExtensionProxyPeer* Ark_UIExtensionProxy;
 typedef struct Opt_UIExtensionProxy Opt_UIExtensionProxy;
+typedef struct Ark_UIFontAdjustInfo Ark_UIFontAdjustInfo;
+typedef struct Opt_UIFontAdjustInfo Opt_UIFontAdjustInfo;
+typedef struct Ark_UIFontAliasInfo Ark_UIFontAliasInfo;
+typedef struct Opt_UIFontAliasInfo Opt_UIFontAliasInfo;
+typedef struct Ark_UIFontFallbackInfo Ark_UIFontFallbackInfo;
+typedef struct Opt_UIFontFallbackInfo Opt_UIFontFallbackInfo;
 typedef struct Ark_UIGestureEvent Ark_UIGestureEvent;
 typedef struct Opt_UIGestureEvent Opt_UIGestureEvent;
 typedef struct Opt_Undefined Opt_Undefined;
@@ -1031,6 +1037,16 @@ typedef struct Array_Tuple_ResourceColor_Number Array_Tuple_ResourceColor_Number
 typedef struct Opt_Array_Tuple_ResourceColor_Number Opt_Array_Tuple_ResourceColor_Number;
 typedef struct Array_Tuple_Union_ResourceColor_LinearGradient_Number Array_Tuple_Union_ResourceColor_LinearGradient_Number;
 typedef struct Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number;
+typedef struct Array_UIFontAdjustInfo Array_UIFontAdjustInfo;
+typedef struct Opt_Array_UIFontAdjustInfo Opt_Array_UIFontAdjustInfo;
+typedef struct Array_UIFontAliasInfo Array_UIFontAliasInfo;
+typedef struct Opt_Array_UIFontAliasInfo Opt_Array_UIFontAliasInfo;
+typedef struct Array_UIFontFallbackGroupInfo Array_UIFontFallbackGroupInfo;
+typedef struct Opt_Array_UIFontFallbackGroupInfo Opt_Array_UIFontFallbackGroupInfo;
+typedef struct Array_UIFontFallbackInfo Array_UIFontFallbackInfo;
+typedef struct Opt_Array_UIFontFallbackInfo Opt_Array_UIFontFallbackInfo;
+typedef struct Array_UIFontGenericInfo Array_UIFontGenericInfo;
+typedef struct Opt_Array_UIFontGenericInfo Opt_Array_UIFontGenericInfo;
 typedef struct Array_UniformDataType Array_UniformDataType;
 typedef struct Opt_Array_UniformDataType Opt_Array_UniformDataType;
 typedef struct Array_Union_Color_Number Array_Union_Color_Number;
@@ -2308,6 +2324,8 @@ typedef struct Ark_TextContentControllerOptions Ark_TextContentControllerOptions
 typedef struct Opt_TextContentControllerOptions Opt_TextContentControllerOptions;
 typedef struct Ark_TextMarqueeOptions Ark_TextMarqueeOptions;
 typedef struct Opt_TextMarqueeOptions Opt_TextMarqueeOptions;
+typedef struct Ark_TextMenuOptions Ark_TextMenuOptions;
+typedef struct Opt_TextMenuOptions Opt_TextMenuOptions;
 typedef struct Ark_TextRange Ark_TextRange;
 typedef struct Opt_TextRange Opt_TextRange;
 typedef struct TextShadowStylePeer TextShadowStylePeer;
@@ -2353,6 +2371,12 @@ typedef struct Ark_Type_XComponentInterface_callable1_value Ark_Type_XComponentI
 typedef struct Opt_Type_XComponentInterface_callable1_value Opt_Type_XComponentInterface_callable1_value;
 typedef struct Ark_UIExtensionOptions Ark_UIExtensionOptions;
 typedef struct Opt_UIExtensionOptions Opt_UIExtensionOptions;
+typedef struct Ark_UIFontConfig Ark_UIFontConfig;
+typedef struct Opt_UIFontConfig Opt_UIFontConfig;
+typedef struct Ark_UIFontFallbackGroupInfo Ark_UIFontFallbackGroupInfo;
+typedef struct Opt_UIFontFallbackGroupInfo Opt_UIFontFallbackGroupInfo;
+typedef struct Ark_UIFontGenericInfo Ark_UIFontGenericInfo;
+typedef struct Opt_UIFontGenericInfo Opt_UIFontGenericInfo;
 typedef struct Ark_Union_Array_MenuElement_CustomBuilder Ark_Union_Array_MenuElement_CustomBuilder;
 typedef struct Opt_Union_Array_MenuElement_CustomBuilder Opt_Union_Array_MenuElement_CustomBuilder;
 typedef struct Ark_Union_Array_NavigationMenuItem_CustomBuilder Ark_Union_Array_NavigationMenuItem_CustomBuilder;
@@ -4984,10 +5008,10 @@ typedef struct Opt_ModifierKey {
     Ark_ModifierKey value;
 } Opt_ModifierKey;
 typedef enum Ark_MouseAction {
-    ARK_MOUSE_ACTION_PRESS = 0,
-    ARK_MOUSE_ACTION_RELEASE = 1,
-    ARK_MOUSE_ACTION_MOVE = 2,
-    ARK_MOUSE_ACTION_HOVER = 3,
+    ARK_MOUSE_ACTION_PRESS = 1,
+    ARK_MOUSE_ACTION_RELEASE = 2,
+    ARK_MOUSE_ACTION_MOVE = 3,
+    ARK_MOUSE_ACTION_HOVER = 4,
     ARK_MOUSE_ACTION_CANCEL = 13,
 } Ark_MouseAction;
 typedef struct Opt_MouseAction {
@@ -4995,12 +5019,12 @@ typedef struct Opt_MouseAction {
     Ark_MouseAction value;
 } Opt_MouseAction;
 typedef enum Ark_MouseButton {
-    ARK_MOUSE_BUTTON_LEFT = 0,
-    ARK_MOUSE_BUTTON_RIGHT = 1,
-    ARK_MOUSE_BUTTON_MIDDLE = 2,
-    ARK_MOUSE_BUTTON_BACK = 3,
-    ARK_MOUSE_BUTTON_FORWARD = 4,
-    ARK_MOUSE_BUTTON_NONE = 5,
+    ARK_MOUSE_BUTTON_LEFT = 1,
+    ARK_MOUSE_BUTTON_RIGHT = 2,
+    ARK_MOUSE_BUTTON_MIDDLE = 3,
+    ARK_MOUSE_BUTTON_BACK = 4,
+    ARK_MOUSE_BUTTON_FORWARD = 16,
+    ARK_MOUSE_BUTTON_NONE = 0,
 } Ark_MouseButton;
 typedef struct Opt_MouseButton {
     Ark_Tag tag;
@@ -5917,9 +5941,9 @@ typedef enum Ark_SourceTool {
     ARK_SOURCE_TOOL_UNKNOWN = 0,
     ARK_SOURCE_TOOL_FINGER = 1,
     ARK_SOURCE_TOOL_PEN = 2,
-    ARK_SOURCE_TOOL_MOUSE = 3,
-    ARK_SOURCE_TOOL_TOUCHPAD = 4,
-    ARK_SOURCE_TOOL_JOYSTICK = 5,
+    ARK_SOURCE_TOOL_MOUSE = 7,
+    ARK_SOURCE_TOOL_TOUCHPAD = 9,
+    ARK_SOURCE_TOOL_JOYSTICK = 10,
 } Ark_SourceTool;
 typedef struct Opt_SourceTool {
     Ark_Tag tag;
@@ -7814,6 +7838,30 @@ typedef struct Opt_UIExtensionProxy {
     Ark_Tag tag;
     Ark_UIExtensionProxy value;
 } Opt_UIExtensionProxy;
+typedef struct Ark_UIFontAdjustInfo {
+    Ark_Number weight;
+    Ark_Number to;
+} Ark_UIFontAdjustInfo;
+typedef struct Opt_UIFontAdjustInfo {
+    Ark_Tag tag;
+    Ark_UIFontAdjustInfo value;
+} Opt_UIFontAdjustInfo;
+typedef struct Ark_UIFontAliasInfo {
+    Ark_String name;
+    Ark_Number weight;
+} Ark_UIFontAliasInfo;
+typedef struct Opt_UIFontAliasInfo {
+    Ark_Tag tag;
+    Ark_UIFontAliasInfo value;
+} Opt_UIFontAliasInfo;
+typedef struct Ark_UIFontFallbackInfo {
+    Ark_String language;
+    Ark_String family;
+} Ark_UIFontFallbackInfo;
+typedef struct Opt_UIFontFallbackInfo {
+    Ark_Tag tag;
+    Ark_UIFontFallbackInfo value;
+} Opt_UIFontFallbackInfo;
 typedef struct Ark_UIGestureEvent {
     void *handle;
 } Ark_UIGestureEvent;
@@ -8883,6 +8931,46 @@ typedef struct Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number {
     Ark_Tag tag;
     Array_Tuple_Union_ResourceColor_LinearGradient_Number value;
 } Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number;
+typedef struct Array_UIFontAdjustInfo {
+    Ark_UIFontAdjustInfo* array;
+    Ark_Int32 length;
+} Array_UIFontAdjustInfo;
+typedef struct Opt_Array_UIFontAdjustInfo {
+    Ark_Tag tag;
+    Array_UIFontAdjustInfo value;
+} Opt_Array_UIFontAdjustInfo;
+typedef struct Array_UIFontAliasInfo {
+    Ark_UIFontAliasInfo* array;
+    Ark_Int32 length;
+} Array_UIFontAliasInfo;
+typedef struct Opt_Array_UIFontAliasInfo {
+    Ark_Tag tag;
+    Array_UIFontAliasInfo value;
+} Opt_Array_UIFontAliasInfo;
+typedef struct Array_UIFontFallbackGroupInfo {
+    Ark_UIFontFallbackGroupInfo* array;
+    Ark_Int32 length;
+} Array_UIFontFallbackGroupInfo;
+typedef struct Opt_Array_UIFontFallbackGroupInfo {
+    Ark_Tag tag;
+    Array_UIFontFallbackGroupInfo value;
+} Opt_Array_UIFontFallbackGroupInfo;
+typedef struct Array_UIFontFallbackInfo {
+    Ark_UIFontFallbackInfo* array;
+    Ark_Int32 length;
+} Array_UIFontFallbackInfo;
+typedef struct Opt_Array_UIFontFallbackInfo {
+    Ark_Tag tag;
+    Array_UIFontFallbackInfo value;
+} Opt_Array_UIFontFallbackInfo;
+typedef struct Array_UIFontGenericInfo {
+    Ark_UIFontGenericInfo* array;
+    Ark_Int32 length;
+} Array_UIFontGenericInfo;
+typedef struct Opt_Array_UIFontGenericInfo {
+    Ark_Tag tag;
+    Array_UIFontGenericInfo value;
+} Opt_Array_UIFontGenericInfo;
 typedef struct Array_UniformDataType {
     Ark_UniformDataType* array;
     Ark_Int32 length;
@@ -9119,6 +9207,16 @@ typedef struct Opt_Callback_CopyEvent_Void {
     Ark_Tag tag;
     Callback_CopyEvent_Void value;
 } Opt_Callback_CopyEvent_Void;
+typedef struct Callback_CreateItem {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation);
+} Callback_CreateItem;
+typedef struct Opt_Callback_CreateItem {
+    Ark_Tag tag;
+    Callback_CreateItem value;
+} Opt_Callback_CreateItem;
 typedef struct Callback_CrownEvent_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_CrownEvent parameter);
@@ -10182,9 +10280,10 @@ typedef struct Opt_Callback_PreparedInfo_Void {
     Callback_PreparedInfo_Void value;
 } Opt_Callback_PreparedInfo_Void;
 typedef struct Callback_RangeUpdate {
+    /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_NativePointer mark, const Ark_Int32 end);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_NativePointer mark, const Ark_Int32 end);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
 } Callback_RangeUpdate;
 typedef struct Opt_Callback_RangeUpdate {
     Ark_Tag tag;
@@ -14420,6 +14519,13 @@ typedef struct Opt_TextMarqueeOptions {
     Ark_Tag tag;
     Ark_TextMarqueeOptions value;
 } Opt_TextMarqueeOptions;
+typedef struct Ark_TextMenuOptions {
+    Opt_TextMenuShowMode showMode;
+} Ark_TextMenuOptions;
+typedef struct Opt_TextMenuOptions {
+    Ark_Tag tag;
+    Ark_TextMenuOptions value;
+} Opt_TextMenuOptions;
 typedef struct Ark_TextRange {
     Opt_Number start;
     Opt_Number end;
@@ -14641,6 +14747,32 @@ typedef struct Opt_UIExtensionOptions {
     Ark_Tag tag;
     Ark_UIExtensionOptions value;
 } Opt_UIExtensionOptions;
+typedef struct Ark_UIFontConfig {
+    Array_String fontDir;
+    Array_UIFontGenericInfo generic;
+    Array_UIFontFallbackGroupInfo fallbackGroups;
+} Ark_UIFontConfig;
+typedef struct Opt_UIFontConfig {
+    Ark_Tag tag;
+    Ark_UIFontConfig value;
+} Opt_UIFontConfig;
+typedef struct Ark_UIFontFallbackGroupInfo {
+    Ark_String fontSetName;
+    Array_UIFontFallbackInfo fallback;
+} Ark_UIFontFallbackGroupInfo;
+typedef struct Opt_UIFontFallbackGroupInfo {
+    Ark_Tag tag;
+    Ark_UIFontFallbackGroupInfo value;
+} Opt_UIFontFallbackGroupInfo;
+typedef struct Ark_UIFontGenericInfo {
+    Ark_String family;
+    Array_UIFontAliasInfo alias;
+    Array_UIFontAdjustInfo adjust;
+} Ark_UIFontGenericInfo;
+typedef struct Opt_UIFontGenericInfo {
+    Ark_Tag tag;
+    Ark_UIFontGenericInfo value;
+} Opt_UIFontGenericInfo;
 typedef struct Ark_Union_Array_MenuElement_CustomBuilder {
     Ark_Int32 selector;
     union {
@@ -23322,6 +23454,10 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
                          Ark_Int32 startIndex,
                          Ark_Int32 endIndex,
                          Ark_Int32 count);
+    void (*Sync)(Ark_NativePointer node,
+                 Ark_Int32 totalCount,
+                 const Callback_CreateItem* creator,
+                 const Callback_RangeUpdate* updater);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
 typedef struct GENERATED_ArkUISystemOpsAccessor {
@@ -23787,6 +23923,7 @@ typedef struct GENERATED_ArkUIGlobalScope_ohos_fontAccessor {
     void (*registerFont)(const Ark_FontOptions* options);
     Array_String (*getSystemFontList)();
     Ark_FontInfo (*getFontByName)(const Ark_String* fontName);
+    Ark_UIFontConfig (*getUIFontConfig)();
 } GENERATED_ArkUIGlobalScope_ohos_fontAccessor;
 
 typedef struct GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor {
@@ -23858,6 +23995,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_FrameNode (*getAttachedFrameNodeById)(const Ark_String* id);
     Ark_FrameNode (*getFrameNodeById)(const Ark_Number* id);
     Ark_FrameNode (*getFrameNodeByUniqueId)(const Ark_Number* id);
+    Ark_UICommonEvent (*getCommonEvent)(Ark_FrameNode peer);
     void (*reuse)(Ark_FrameNode peer);
     void (*recycle)(Ark_FrameNode peer);
     Ark_RenderNode (*getRenderNode)(Ark_FrameNode peer);
@@ -24119,6 +24257,15 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
     void (*setLengthMetricsUnit)(Ark_RenderNode peer,
                                  Ark_LengthMetricsUnit lengthMetricsUnit);
 } GENERATED_ArkUIRenderNodeAccessor;
+
+typedef struct GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor {
+    Ark_Boolean (*isFollowingSystemFontScale)();
+    Ark_Number (*getMaxFontScale)();
+} GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor;
+
+typedef struct GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor {
+    void (*setMenuOptions)(const Ark_TextMenuOptions* options);
+} GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor;
 
 typedef struct GENERATED_ArkUITabsOpsAccessor {
     Ark_NativePointer (*registerBarMode)(Ark_NativePointer node,
@@ -26952,6 +27099,8 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUINodeContentAccessor* (*getNodeContentAccessor)();
     const GENERATED_ArkUIPixelMapAccessor* (*getPixelMapAccessor)();
     const GENERATED_ArkUIRenderNodeAccessor* (*getRenderNodeAccessor)();
+    const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* (*getGlobalScopeUicontextFontScaleAccessor)();
+    const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* (*getGlobalScopeUicontextTextMenuAccessor)();
     const GENERATED_ArkUITabsOpsAccessor* (*getTabsOpsAccessor)();
     const GENERATED_ArkUIUIContextImpAccessor* (*getUIContextImpAccessor)();
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();

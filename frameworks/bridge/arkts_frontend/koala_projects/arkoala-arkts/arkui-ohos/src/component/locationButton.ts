@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle, UISecurityComponentMethod } from "./securityComponent"
+import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle } from "./securityComponent"
 import { ClickEvent } from "./common"
 import { BusinessError } from "#external"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -93,23 +93,16 @@ export type LocationButtonCallback = (event: ClickEvent, result: LocationButtonO
 export interface LocationButtonAttribute extends SecurityComponentMethod {
     onClick(value: LocationButtonCallback | undefined): this
 }
-export interface UILocationButtonAttribute extends UISecurityComponentMethod {
-    /** @memo */
-    onClick(value: LocationButtonCallback | undefined): this
-    /** @memo */
-}
 export class ArkLocationButtonStyle extends ArkSecurityComponentMethodStyle implements LocationButtonAttribute {
     onClick_value?: LocationButtonCallback | undefined
     public onClick(value: LocationButtonCallback | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkLocationButtonComponent extends ArkSecurityComponentMethodComponent implements UILocationButtonAttribute {
+export class ArkLocationButtonComponent extends ArkSecurityComponentMethodComponent implements LocationButtonAttribute {
     getPeer(): ArkLocationButtonPeer {
         return (this.peer as ArkLocationButtonPeer)
     }
-    /** @memo */
     public setLocationButtonOptions(options?: LocationButtonOptions): this {
         if (this.checkPriority("setLocationButtonOptions")) {
             const options_type = runtimeType(options)
@@ -118,7 +111,6 @@ export class ArkLocationButtonComponent extends ArkSecurityComponentMethodCompon
         }
         return this
     }
-    /** @memo */
     public onClick(value: LocationButtonCallback | undefined): this {
         if (this.checkPriority("onClick")) {
             const value_casted = value as (LocationButtonCallback | undefined)
@@ -136,7 +128,7 @@ export class ArkLocationButtonComponent extends ArkSecurityComponentMethodCompon
 /** @memo */
 export function LocationButton(
     /** @memo */
-    style: ((attributes: UILocationButtonAttribute) => void) | undefined,
+    style: ((attributes: LocationButtonAttribute) => void) | undefined,
     options?: LocationButtonOptions,
     /** @memo */
     content_?: (() => void) | undefined,

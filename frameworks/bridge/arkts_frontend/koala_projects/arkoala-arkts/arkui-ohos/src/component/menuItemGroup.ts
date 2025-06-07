@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -59,17 +59,12 @@ export interface MenuItemGroupOptions {
 export type MenuItemGroupInterface = (value?: MenuItemGroupOptions) => MenuItemGroupAttribute;
 export interface MenuItemGroupAttribute extends CommonMethod {
 }
-export interface UIMenuItemGroupAttribute extends UICommonMethod {
-    /** @memo */
-}
 export class ArkMenuItemGroupStyle extends ArkCommonMethodStyle implements MenuItemGroupAttribute {
 }
-/** @memo:stable */
-export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implements UIMenuItemGroupAttribute {
+export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implements MenuItemGroupAttribute {
     getPeer(): ArkMenuItemGroupPeer {
         return (this.peer as ArkMenuItemGroupPeer)
     }
-    /** @memo */
     public setMenuItemGroupOptions(value?: MenuItemGroupOptions): this {
         if (this.checkPriority("setMenuItemGroupOptions")) {
             const value_casted = value as (MenuItemGroupOptions | undefined)
@@ -87,7 +82,7 @@ export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implemen
 /** @memo */
 export function MenuItemGroup(
     /** @memo */
-    style: ((attributes: UIMenuItemGroupAttribute) => void) | undefined,
+    style: ((attributes: MenuItemGroupAttribute) => void) | undefined,
     value?: MenuItemGroupOptions,
     /** @memo */
     content_?: (() => void) | undefined,

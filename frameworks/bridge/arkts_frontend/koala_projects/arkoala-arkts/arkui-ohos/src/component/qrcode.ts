@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor } from "./units"
 import { Resource } from "global/resource"
 import { Color } from "./enums"
@@ -140,15 +140,6 @@ export interface QRCodeAttribute extends CommonMethod {
     backgroundColor(value: ResourceColor | undefined): this
     contentOpacity(value: number | Resource | undefined): this
 }
-export interface UIQRCodeAttribute extends UICommonMethod {
-    /** @memo */
-    color(value: ResourceColor | undefined): this
-    /** @memo */
-    backgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    contentOpacity(value: number | Resource | undefined): this
-    /** @memo */
-}
 export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttribute {
     color_value?: ResourceColor | undefined
     backgroundColor_value?: ResourceColor | undefined
@@ -163,12 +154,10 @@ export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttrib
         return this
         }
 }
-/** @memo:stable */
-export class ArkQRCodeComponent extends ArkCommonMethodComponent implements UIQRCodeAttribute {
+export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCodeAttribute {
     getPeer(): ArkQRCodePeer {
         return (this.peer as ArkQRCodePeer)
     }
-    /** @memo */
     public setQRCodeOptions(value: string): this {
         if (this.checkPriority("setQRCodeOptions")) {
             const value_casted = value as (string)
@@ -177,7 +166,6 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements UIQR
         }
         return this
     }
-    /** @memo */
     public color(value: ResourceColor | undefined): this {
         if (this.checkPriority("color")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -186,7 +174,6 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements UIQR
         }
         return this
     }
-    /** @memo */
     public backgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("backgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -195,7 +182,6 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements UIQR
         }
         return this
     }
-    /** @memo */
     public contentOpacity(value: number | Resource | undefined): this {
         if (this.checkPriority("contentOpacity")) {
             const value_casted = value as (number | Resource | undefined)
@@ -213,7 +199,7 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements UIQR
 /** @memo */
 export function QRCode(
     /** @memo */
-    style: ((attributes: UIQRCodeAttribute) => void) | undefined,
+    style: ((attributes: QRCodeAttribute) => void) | undefined,
     value: string,
     /** @memo */
     content_?: (() => void) | undefined,

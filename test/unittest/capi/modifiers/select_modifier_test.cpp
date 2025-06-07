@@ -138,38 +138,38 @@ HWTEST_F(SelectModifierTest, setFontColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, defaultColor.ToString());
 
-    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setFontColor0(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
     modifier_->setFontColor0(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
     modifier_->setFontColor0(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
 
-    Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
+    Opt_ResourceColor strColor = ArkUnion<Opt_ResourceColor, Ark_String>("#11223344");
     modifier_->setFontColor0(node_, &strColor);
     auto checkVal5 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal5, "#11223344");
 
-    Ark_ResourceColor strNumber = ArkUnion<Ark_ResourceColor, Ark_String>("65535");
+    Opt_ResourceColor strNumber = ArkUnion<Opt_ResourceColor, Ark_String>("65535");
     modifier_->setFontColor0(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+    auto resNameColor = CreateResourceUnion<Opt_ResourceColor>(
         NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setFontColor0(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setFontColor0(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -188,38 +188,38 @@ HWTEST_F(SelectModifierTest, setMenuBackgroundColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, Color::TRANSPARENT.ToString());
 
-    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setMenuBackgroundColor0(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
     modifier_->setMenuBackgroundColor0(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
     modifier_->setMenuBackgroundColor0(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
 
-    Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
+    Opt_ResourceColor strColor = ArkUnion<Opt_ResourceColor, Ark_String>("#11223344");
     modifier_->setMenuBackgroundColor0(node_, &strColor);
     auto checkVal5 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal5, "#11223344");
 
-    Ark_ResourceColor strNumber = ArkUnion<Ark_ResourceColor, Ark_String>("65535");
+    Opt_ResourceColor strNumber = ArkUnion<Opt_ResourceColor, Ark_String>("65535");
     modifier_->setMenuBackgroundColor0(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+    auto resNameColor = CreateResourceUnion<Opt_ResourceColor>(
         NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setMenuBackgroundColor0(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setMenuBackgroundColor0(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -238,38 +238,38 @@ HWTEST_F(SelectModifierTest, setSelectedOptionBgColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, "");
 
-    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setSelectedOptionBgColor0(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
     modifier_->setSelectedOptionBgColor0(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
     modifier_->setSelectedOptionBgColor0(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
 
-    Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
+    Opt_ResourceColor strColor = ArkUnion<Opt_ResourceColor, Ark_String>("#11223344");
     modifier_->setSelectedOptionBgColor0(node_, &strColor);
     auto checkVal5 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal5, "#11223344");
 
-    Ark_ResourceColor strNumber = ArkUnion<Ark_ResourceColor, Ark_String>("65535");
+    Opt_ResourceColor strNumber = ArkUnion<Opt_ResourceColor, Ark_String>("65535");
     modifier_->setSelectedOptionBgColor0(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+    auto resNameColor = CreateResourceUnion<Opt_ResourceColor>(
         NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setSelectedOptionBgColor0(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setSelectedOptionBgColor0(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -288,38 +288,38 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, THEME_SELECTED_OPTION_FONT_COLOR.ToString());
 
-    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setSelectedOptionFontColor0(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
     modifier_->setSelectedOptionFontColor0(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
     modifier_->setSelectedOptionFontColor0(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
 
-    Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
+    Opt_ResourceColor strColor = ArkUnion<Opt_ResourceColor, Ark_String>("#11223344");
     modifier_->setSelectedOptionFontColor0(node_, &strColor);
     auto checkVal5 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal5, "#11223344");
 
-    Ark_ResourceColor strNumber = ArkUnion<Ark_ResourceColor, Ark_String>("65535");
+    Opt_ResourceColor strNumber = ArkUnion<Opt_ResourceColor, Ark_String>("65535");
     modifier_->setSelectedOptionFontColor0(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+    auto resNameColor = CreateResourceUnion<Opt_ResourceColor>(
         NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setSelectedOptionFontColor0(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setSelectedOptionFontColor0(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -338,38 +338,38 @@ HWTEST_F(SelectModifierTest, setOptionBgColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, Color::TRANSPARENT.ToString());
 
-    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setOptionBgColor0(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
     modifier_->setOptionBgColor0(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
     modifier_->setOptionBgColor0(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
 
-    Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
+    Opt_ResourceColor strColor = ArkUnion<Opt_ResourceColor, Ark_String>("#11223344");
     modifier_->setOptionBgColor0(node_, &strColor);
     auto checkVal5 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal5, "#11223344");
 
-    Ark_ResourceColor strNumber = ArkUnion<Ark_ResourceColor, Ark_String>("65535");
+    Opt_ResourceColor strNumber = ArkUnion<Opt_ResourceColor, Ark_String>("65535");
     modifier_->setOptionBgColor0(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+    auto resNameColor = CreateResourceUnion<Opt_ResourceColor>(
         NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setOptionBgColor0(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setOptionBgColor0(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -388,38 +388,38 @@ HWTEST_F(SelectModifierTest, setOptionFontColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, THEME_FONT_COLOR.ToString());
 
-    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setOptionFontColor0(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
     modifier_->setOptionFontColor0(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
     modifier_->setOptionFontColor0(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
 
-    Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
+    Opt_ResourceColor strColor = ArkUnion<Opt_ResourceColor, Ark_String>("#11223344");
     modifier_->setOptionFontColor0(node_, &strColor);
     auto checkVal5 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal5, "#11223344");
 
-    Ark_ResourceColor strNumber = ArkUnion<Ark_ResourceColor, Ark_String>("65535");
+    Opt_ResourceColor strNumber = ArkUnion<Opt_ResourceColor, Ark_String>("65535");
     modifier_->setOptionFontColor0(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+    auto resNameColor = CreateResourceUnion<Opt_ResourceColor>(
         NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setOptionFontColor0(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setOptionFontColor0(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -438,12 +438,12 @@ HWTEST_F(SelectModifierTest, setControlSizeTest, TestSize.Level1)
     // check default value
     auto checkVal0 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal0, "ControlSize.NORMAL");
-
-    modifier_->setControlSize0(node_, ARK_CONTROL_SIZE_SMALL);
+    auto controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
+    modifier_->setControlSize0(node_, &controlSize);
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, "ControlSize.SMALL");
-
-    modifier_->setControlSize0(node_, ARK_CONTROL_SIZE_NORMAL);
+    controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_NORMAL);
+    modifier_->setControlSize0(node_, &controlSize);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "ControlSize.NORMAL");
 }
@@ -477,7 +477,8 @@ HWTEST_F(SelectModifierTest, setMenuBackgroundBlurStyleTest, TestSize.Level1)
     ASSERT_NE(modifier_->setMenuBackgroundBlurStyle0, nullptr);
 
     for (auto blurStyle: BLUR_STYLE_TEST_PLAN) {
-        modifier_->setMenuBackgroundBlurStyle0(node_, blurStyle.first);
+        auto style = Converter::ArkValue<Opt_BlurStyle>(blurStyle.first);
+        modifier_->setMenuBackgroundBlurStyle0(node_, &style);
         auto checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, blurStyle.second);
     }
@@ -521,7 +522,8 @@ HWTEST_F(SelectModifierTest, setMenuAlignTest, TestSize.Level1)
 
     for (const auto& data: MENU_ALIGN_TEST_PLAN) {
         auto optOffset = ArkValue<Opt_Offset>(data.offset);
-        modifier_->setMenuAlign0(node_, data.menuAlignType, &optOffset);
+        auto alignType = Converter::ArkValue<Opt_MenuAlignType>(data.menuAlignType);
+        modifier_->setMenuAlign0(node_, &alignType, &optOffset);
 
         auto fullJson = GetJsonValue(node_);
         auto menuAlignJson = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "menuAlign");
@@ -550,10 +552,10 @@ HWTEST_F(SelectModifierTest, setSpaceTest, TestSize.Level1)
 
     const std::string expectedDefaultSpace("23.00px");
 
-    using Pair = std::pair<Ark_Length, std::string>;
+    using Pair = std::pair<Opt_Length, std::string>;
     const std::vector<Pair> SPACE_TEST_PLAN = {
-        { ALEN_VP_NEG, expectedDefaultSpace },
-        { ALEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
+        {  OPT_LEN_VP_NEG, expectedDefaultSpace },
+        {  OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
     };
 
     ASSERT_NE(modifier_->setSpace0, nullptr);
@@ -574,12 +576,12 @@ HWTEST_F(SelectModifierTest, setArrowPositionTest, TestSize.Level1)
 {
     const auto propName("arrowPosition");
     ASSERT_NE(modifier_->setArrowPosition0, nullptr);
-
-    modifier_->setArrowPosition0(node_, Ark_ArrowPosition::ARK_ARROW_POSITION_START);
+    auto position = Converter::ArkValue<Opt_ArrowPosition>(Ark_ArrowPosition::ARK_ARROW_POSITION_START);
+    modifier_->setArrowPosition0(node_, &position);
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, "ArrowPosition.START");
-
-    modifier_->setArrowPosition0(node_, Ark_ArrowPosition::ARK_ARROW_POSITION_END);
+    position = Converter::ArkValue<Opt_ArrowPosition>(Ark_ArrowPosition::ARK_ARROW_POSITION_END);
+    modifier_->setArrowPosition0(node_, &position);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "ArrowPosition.END");
 }
@@ -593,10 +595,10 @@ HWTEST_F(SelectModifierTest, setOptionHeightTest, TestSize.Level1)
 {
     const auto propName("optionHeight");
 
-    using Pair = std::pair<Ark_Length, float>;
+    using Pair = std::pair<Opt_Length, float>;
     const std::vector<Pair> OPTION_HEIGHT_TEST_PLAN = {
-        { ALEN_VP_POS, 1.234f },
-        { ALEN_VP_NEG, 1.234f }, // check that negative value is ignored
+        { OPT_LEN_VP_POS, 1.234f },
+        { OPT_LEN_VP_NEG, 1.234f }, // check that negative value is ignored
     };
 
     ASSERT_NE(modifier_->setOptionHeight0, nullptr);
@@ -620,13 +622,13 @@ HWTEST_F(SelectModifierTest, setSelectedTest, TestSize.Level1)
 
     const int size = SELECT_PARAMS.size();
     const int defaultValue = -1;
-    std::vector<std::pair<Ark_Union_Number_Resource, int>> TEST_PLAN = {
-        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1), 1 },
-        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0), 0 },
-        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(size), defaultValue }, // check invalid value
-        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(size - 1), size - 1 },
-        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-10), defaultValue }, // check invalid value
-        { ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1.8f), 1 }
+    std::vector<std::pair<Opt_Union_Number_Resource, int>> TEST_PLAN = {
+        { ArkUnion<Opt_Union_Number_Resource, Ark_Number>(1), 1 },
+        { ArkUnion<Opt_Union_Number_Resource, Ark_Number>(0), 0 },
+        { ArkUnion<Opt_Union_Number_Resource, Ark_Number>(size), defaultValue }, // check invalid value
+        { ArkUnion<Opt_Union_Number_Resource, Ark_Number>(size - 1), size - 1 },
+        { ArkUnion<Opt_Union_Number_Resource, Ark_Number>(-10), defaultValue }, // check invalid value
+        { ArkUnion<Opt_Union_Number_Resource, Ark_Number>(1.8f), 1 }
     };
 
     auto checkVal0 = GetStringAttribute(node_, propName);
@@ -666,8 +668,8 @@ HWTEST_F(SelectModifierTest, setOnSelectTest, TestSize.Level1)
             };
         }
     };
-
-    modifier_->setOnSelect0(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Number_String_Void>(arkCallback);
+    modifier_->setOnSelect0(node_, &optCallback);
     auto selectEventHub = frameNode->GetEventHub<SelectEventHub>();
     EXPECT_FALSE(checkEvent.has_value());
 
@@ -689,8 +691,8 @@ HWTEST_F(SelectModifierTest, setOnSelectTest, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setFontTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont0, nullptr);
-
-    modifier_->setFont0(node_, &TEST_ARK_FONT);
+    auto font = Converter::ArkValue<Opt_Font>(TEST_ARK_FONT);
+    modifier_->setFont0(node_, &font);
     TestFont checkedVal(node_, FONT_ATTR);
 
     EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
@@ -711,15 +713,17 @@ HWTEST_F(SelectModifierTest, setFontTestSize, TestSize.Level1)
     auto testPlan = getFontSizeTestPlan(DEFAULT_FONT_SIZE);
 
     for (const auto &[font, expected]: testPlan) {
-        modifier_->setFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setFont0(node_, &fontOpt);
         TestFont actual(node_, FONT_ATTR);
         EXPECT_EQ(actual.size, expected);
     }
-
-    modifier_->setControlSize0(node_, ARK_CONTROL_SIZE_SMALL);
+    auto controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
+    modifier_->setControlSize0(node_, &controlSize);
 
     for (const auto &[font, expected]: testPlan) {
-        modifier_->setFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setFont0(node_, &fontOpt);
         TestFont actual(node_, FONT_ATTR);
         EXPECT_EQ(actual.size, expected);
     }
@@ -737,7 +741,8 @@ HWTEST_F(SelectModifierTest, setFontTestWeight, TestSize.Level1)
     auto testPlan = getFontWeightTestPlan(DEFAULT_FONT_WEIGHT);
 
     for (const auto &[font, expected]: testPlan) {
-        modifier_->setFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setFont0(node_, &fontOpt);
         TestFont actual(node_, FONT_ATTR);
         EXPECT_EQ(actual.weight, expected);
     }
@@ -753,7 +758,8 @@ HWTEST_F(SelectModifierTest, setFontTestFamily, TestSize.Level1)
     ASSERT_NE(modifier_->setFont0, nullptr);
 
     for (const auto &[font, expected]: getFontFamilyTestPlan()) {
-        modifier_->setFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setFont0(node_, &fontOpt);
         TestFont actual(node_, FONT_ATTR);
         EXPECT_EQ(actual.family, expected);
     }
@@ -769,7 +775,8 @@ HWTEST_F(SelectModifierTest, setFontTestStyle, TestSize.Level1)
     ASSERT_NE(modifier_->setFont0, nullptr);
 
     for (const auto &[font, expected]: getFontStyleTestPlan()) {
-        modifier_->setFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setFont0(node_, &fontOpt);
         TestFont actual(node_, FONT_ATTR);
         EXPECT_EQ(actual.style, expected);
     }
@@ -783,10 +790,10 @@ HWTEST_F(SelectModifierTest, setFontTestStyle, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedOptionFont0, nullptr);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
-
-    modifier_->setSelectedOptionFont0(node_, &TEST_ARK_FONT);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
+    auto fontOpt = Converter::ArkValue<Opt_Font>(TEST_ARK_FONT);
+    modifier_->setSelectedOptionFont0(node_, &fontOpt);
     TestFont checkedVal(node_, SELECTED_OPTION_FONT_ATTR);
 
     EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
@@ -803,10 +810,10 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTest, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTestNothingSelected, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedOptionFont0, nullptr);
-
-    modifier_->setSelected0(node_, &INVALID_INDEX);
-
-    modifier_->setSelectedOptionFont0(node_, &TEST_ARK_FONT);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(INVALID_INDEX);
+    modifier_->setSelected0(node_, &options);
+    auto fontOpt = Converter::ArkValue<Opt_Font>(TEST_ARK_FONT);
+    modifier_->setSelectedOptionFont0(node_, &fontOpt);
     TestFont checkedVal(node_, SELECTED_OPTION_FONT_ATTR);
 
     EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
@@ -825,11 +832,12 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSize, TestSize.Level1)
     ASSERT_NE(modifier_->setSelectedOptionFont0, nullptr);
 
     auto testPlan = getFontSizeTestPlan(DEFAULT_FONT_SIZE);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
 
     for (const auto &[font, expected]: testPlan) {
-        modifier_->setSelectedOptionFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setSelectedOptionFont0(node_, &fontOpt);
         TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
         EXPECT_EQ(actual.size, expected);
     }
@@ -845,11 +853,12 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestWeight, TestSize.Level1)
     ASSERT_NE(modifier_->setSelectedOptionFont0, nullptr);
 
     auto testPlan = getFontWeightTestPlan(DEFAULT_FONT_WEIGHT);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
 
     for (const auto &[font, expected]: testPlan) {
-        modifier_->setSelectedOptionFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setSelectedOptionFont0(node_, &fontOpt);
         TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
         EXPECT_EQ(actual.weight, expected);
     }
@@ -863,11 +872,12 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestWeight, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedOptionFont0, nullptr);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
 
     for (const auto &[font, expected]: getFontFamilyTestPlan()) {
-        modifier_->setSelectedOptionFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setSelectedOptionFont0(node_, &fontOpt);
         TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
         EXPECT_EQ(actual.family, expected);
     }
@@ -881,11 +891,12 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestFamily, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTestStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedOptionFont0, nullptr);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
 
     for (const auto &[font, expected]: getFontStyleTestPlan()) {
-        modifier_->setSelectedOptionFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setSelectedOptionFont0(node_, &fontOpt);
         TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
         EXPECT_EQ(actual.style, expected);
     }
@@ -899,10 +910,10 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestStyle, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setOptionFontTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOptionFont0, nullptr);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
-
-    modifier_->setOptionFont0(node_, &TEST_ARK_FONT);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
+    auto fontOpt = Converter::ArkValue<Opt_Font>(TEST_ARK_FONT);
+    modifier_->setOptionFont0(node_, &fontOpt);
     TestFont checkedVal(node_, OPTION_FONT_ATTR);
 
     EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
@@ -919,10 +930,10 @@ HWTEST_F(SelectModifierTest, setOptionFontTest, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setOptionFontTestNothingSelected, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOptionFont0, nullptr);
-
-    modifier_->setSelected0(node_, &INVALID_INDEX);
-
-    modifier_->setOptionFont0(node_, &TEST_ARK_FONT);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(INVALID_INDEX);
+    modifier_->setSelected0(node_, &options);
+    auto fontOpt = Converter::ArkValue<Opt_Font>(TEST_ARK_FONT);
+    modifier_->setOptionFont0(node_, &fontOpt);
     TestFont checkedVal(node_, OPTION_FONT_ATTR);
 
     EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
@@ -941,11 +952,12 @@ HWTEST_F(SelectModifierTest, setOptionFontTestSize, TestSize.Level1)
     ASSERT_NE(modifier_->setOptionFont0, nullptr);
 
     auto testPlan = getFontSizeTestPlan(DEFAULT_FONT_SIZE);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
 
     for (const auto &[font, expected]: testPlan) {
-        modifier_->setOptionFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setOptionFont0(node_, &fontOpt);
         TestFont actual(node_, OPTION_FONT_ATTR);
         EXPECT_EQ(actual.size, expected);
     }
@@ -961,11 +973,12 @@ HWTEST_F(SelectModifierTest, setOptionFontTestWeight, TestSize.Level1)
     ASSERT_NE(modifier_->setOptionFont0, nullptr);
 
     auto testPlan = getFontWeightTestPlan(DEFAULT_FONT_WEIGHT);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
 
     for (const auto &[font, expected]: testPlan) {
-        modifier_->setOptionFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setOptionFont0(node_, &fontOpt);
         TestFont actual(node_, OPTION_FONT_ATTR);
         EXPECT_EQ(actual.weight, expected);
     }
@@ -979,11 +992,12 @@ HWTEST_F(SelectModifierTest, setOptionFontTestWeight, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setOptionFontTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOptionFont0, nullptr);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
 
     for (const auto &[font, expected]: getFontFamilyTestPlan()) {
-        modifier_->setOptionFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setOptionFont0(node_, &fontOpt);
         TestFont actual(node_, OPTION_FONT_ATTR);
         EXPECT_EQ(actual.family, expected);
     }
@@ -997,11 +1011,12 @@ HWTEST_F(SelectModifierTest, setOptionFontTestFamily, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setOptionFontTestStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOptionFont0, nullptr);
-
-    modifier_->setSelected0(node_, &SELECTED_INDEX);
+    auto options = Converter::ArkValue<Opt_Union_Number_Resource>(SELECTED_INDEX);
+    modifier_->setSelected0(node_, &options);
 
     for (const auto &[font, expected]: getFontStyleTestPlan()) {
-        modifier_->setOptionFont0(node_, &font);
+        auto fontOpt = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setOptionFont0(node_, &fontOpt);
         TestFont actual(node_, OPTION_FONT_ATTR);
         EXPECT_EQ(actual.style, expected);
     }
@@ -1019,10 +1034,10 @@ HWTEST_F(SelectModifierTest, setValueTest, TestSize.Level1)
 
     auto arkResName = NamedResourceId(VALUE_RES_NAME, Converter::ResourceType::STRING);
 
-    using TestStep = std::tuple<Ark_ResourceStr, std::string>;
+    using TestStep = std::tuple<Opt_ResourceStr, std::string>;
     std::vector<TestStep> testPlan = {
-        { ArkUnion<Ark_ResourceStr, Ark_String>(valueStr), valueStr },
-        { CreateResourceUnion<Ark_ResourceStr>(arkResName), VALUE_RES_VALUE },
+        { ArkUnion<Opt_ResourceStr, Ark_String>(valueStr), valueStr },
+        { CreateResourceUnion<Opt_ResourceStr>(arkResName), VALUE_RES_VALUE },
     };
 
     ASSERT_NE(modifier_->setValue0, nullptr);
@@ -1053,18 +1068,18 @@ HWTEST_F(SelectModifierTest, setOptionWidthTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOptionWidth0, nullptr);
 
     for (const auto &[lengthValue, expectVal]: testPlan) {
-        auto value = ArkUnion<Ark_Union_Dimension_OptionWidthMode, Ark_Length>(lengthValue);
+        auto value = ArkUnion<Opt_Union_Dimension_OptionWidthMode, Ark_Length>(lengthValue);
         modifier_->setOptionWidth0(node_, &value);
         auto checkVal = GetStringAttribute(node_, optionWidthPropName);
         EXPECT_FLOAT_EQ(strToFloat(checkVal), expectVal);
     }
 
-    auto value1 = ArkUnion<Ark_Union_Dimension_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_TRIGGER);
+    auto value1 = ArkUnion<Opt_Union_Dimension_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_TRIGGER);
     modifier_->setOptionWidth0(node_, &value1);
     auto checkVal1 = GetStringAttribute(node_, optionWidthPropName);
     EXPECT_EQ(checkVal1, "OptionWidthMode.FIT_TRIGGER");
 
-    auto value2 = ArkUnion<Ark_Union_Dimension_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_CONTENT);
+    auto value2 = ArkUnion<Opt_Union_Dimension_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_CONTENT);
     modifier_->setOptionWidth0(node_, &value2);
     auto checkVal2 = GetStringAttribute(node_, optionWidthPropName);
     EXPECT_EQ(strToFloat(checkVal2), 250.5f); // old width value is used
@@ -1279,16 +1294,14 @@ HWTEST_F(SelectModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_Number_Resource parameter) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Opt_Union_Number_Resource parameter) {
         checkEvent = {
             .nodeId = resourceId,
             .value = Converter::OptConvert<int32_t>(parameter)
         };
     };
 
-    Callback_Union_Number_Resource_Void arkCallback =
-        Converter::ArkValue<Callback_Union_Number_Resource_Void>(checkCallback, contextId);
-
+    auto arkCallback = Converter::ArkValue<Callback_Opt_Union_Number_Resource_Void>(checkCallback, contextId);
     modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
@@ -1323,15 +1336,14 @@ HWTEST_F(SelectModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_ResourceStr parameter) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Opt_ResourceStr parameter) {
         checkEvent = {
             .nodeId = resourceId,
             .value = Converter::OptConvert<std::string>(parameter)
         };
     };
 
-    Callback_ResourceStr_Void arkCallback =
-        Converter::ArkValue<Callback_ResourceStr_Void>(checkCallback, contextId);
+    auto arkCallback = Converter::ArkValue<Callback_Opt_ResourceStr_Void>(checkCallback, contextId);
 
     modifier_->set_onChangeEvent_value(node_, &arkCallback);
 

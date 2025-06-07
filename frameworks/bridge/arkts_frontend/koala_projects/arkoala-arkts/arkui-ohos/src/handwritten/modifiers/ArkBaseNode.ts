@@ -14,7 +14,7 @@
  */
 
 import { ComponentBase } from "../../ComponentBase";
-import { AccessibilityCallback, AlignRuleOption, AnimateParam, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType, BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions, ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions, GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent, LinearGradientBlurOptions, Literal_Alignment_align, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions, MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus, ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOptions, TranslateOptions, VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer, SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions, OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions} from "../../component/common";
+import { AccessibilityCallback, AlignRuleOption, AnimateParam, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType, BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions, ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions, GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent, LinearGradientBlurOptions, Literal_Alignment_align, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions, MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus, ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOptions, TranslateOptions, VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer, SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions, OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions, AttributeModifier} from "../../component/common";
 import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from '../../component/enums'
 import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges } from '../../component/units'
 import { Resource } from "global/resource"
@@ -29,6 +29,7 @@ import { UniformDataType } from "../../component/arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
 import { ComponentContent } from "../../component/arkui-custom"
 import { BlendMode } from "../../component/arkui-drawing"
+import { InteropNativeModule } from '@koalaui/interop';
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
 
@@ -51,6 +52,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+        this.getPeer().responseRegionAttribute(value);
         return this
     }
     public mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
@@ -64,6 +66,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public hitTestBehavior(value: HitTestMode | undefined): this {
+        this.getPeer().hitTestBehaviorAttribute(value);
         return this
     }
     public onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {
@@ -88,15 +91,18 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {
+        this.getPeer().backgroundImageSizeAttribute(value);
         return this
     }
     public backgroundImagePosition(value: Position | Alignment | undefined): this {
+        this.getPeer().backgroundImagePositionAttribute(value);
         return this
     }
     public backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
     public backgroundImageResizable(value: ResizableOptions | undefined): this {
+        this.getPeer().backgroundImageResizableAttribute(value);
         return this
     }
     public foregroundEffect(value: ForegroundEffectOptions | undefined): this {
@@ -154,69 +160,95 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public onHover(value: ((isHover: boolean, event: HoverEvent) => void) | undefined): this {
+        this.getPeer().onHoverAttribute(value);
         return this
     }
     public onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this {
+        this.getPeer().onHoverMoveAttribute(value);
         return this
     }
     public onAccessibilityHover(value: AccessibilityCallback | undefined): this {
         return this
     }
     public hoverEffect(value: HoverEffect | undefined): this {
+        this.getPeer().hoverEffectAttribute(value);
         return this
     }
     public onMouse(value: ((event: MouseEvent) => void) | undefined): this {
+        this.getPeer().onMouseAttribute(value);
         return this
     }
     public onTouch(value: ((event: TouchEvent) => void) | undefined): this {
+        this.getPeer().onTouchAttribute(value);
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => void) | undefined | ((parameter: KeyEvent) => boolean) | undefined): this {
+    public onKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this {
+        this.getPeer().onKeyEvent1Attribute(value);
         return this
     }
     public onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {
         return this
     }
     public onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this {
+        this.getPeer().onKeyPreImeAttribute(value);
         return this
     }
     public onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this {
+        this.getPeer().onKeyEventDispatchAttribute(value);
         return this
     }
     public onFocusAxisEvent(value: ((parameter: FocusAxisEvent) => void) | undefined): this {
+        this.getPeer().onFocusAxisEventAttribute(value);
         return this
     }
     public onAxisEvent(value: ((parameter: AxisEvent) => void) | undefined): this {
+        this.getPeer().onAxisEventAttribute(value);
         return this
     }
     public focusable(value: boolean | undefined): this {
+        this.getPeer().focusableAttribute(value);
         return this
     }
     public nextFocus(value: FocusMovement | undefined): this {
+        this.getPeer().nextFocusAttribute(value);
         return this
     }
     public tabStop(value: boolean | undefined): this {
+        this.getPeer().tabStopAttribute(value);
         return this
     }
     public onFocus(value: (() => void) | undefined): this {
+        this.getPeer().onFocusAttribute(value);
         return this
     }
     public onBlur(value: (() => void) | undefined): this {
+        this.getPeer().onBlurAttribute(value);
         return this
     }
     public tabIndex(value: number | undefined): this {
+        this.getPeer().tabIndexAttribute(value);
         return this
     }
     public defaultFocus(value: boolean | undefined): this {
+        this.getPeer().defaultFocusAttribute(value);
         return this
     }
     public groupDefaultFocus(value: boolean | undefined): this {
+        this.getPeer().defaultFocusAttribute(value);
         return this
     }
     public focusOnTouch(value: boolean | undefined): this {
+        this.getPeer().focusOnTouchAttribute(value);
         return this
     }
     public focusBox(value: FocusBoxStyle | undefined): this {
+        this.getPeer().focusBoxAttribute(value);
+        return this
+    }
+    public animationStart(value: AnimateParam | undefined): this {
+        return this
+    }
+    public animationStop(value: AnimateParam | undefined): this {
         return this
     }
     public animation(value: AnimateParam | undefined): this {
@@ -283,21 +315,27 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public onAppear(value: (() => void) | undefined): this {
+        this.getPeer().onAppearAttribute(value);
         return this
     }
     public onDisAppear(value: (() => void) | undefined): this {
+        this.getPeer().onDisAppearAttribute(value);
         return this
     }
     public onAttach(value: (() => void) | undefined): this {
+        this.getPeer().onAttachAttribute(value);
         return this
     }
     public onDetach(value: (() => void) | undefined): this {
+        this.getPeer().onDetachAttribute(value);
         return this
     }
     public onAreaChange(value: ((oldValue: Area, newValue: Area) => void) | undefined): this {
+        this.getPeer().onAreaChangeAttribute(value);
         return this
     }
     public visibility(value: Visibility | undefined): this {
+        this.getPeer().visibilityAttribute(value);
         return this
     }
     public flexGrow(value: number | undefined): this {
@@ -331,6 +369,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public enabled(value: boolean | undefined): this {
+        this.getPeer().enabledAttribute(value);
         return this
     }
     public useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this {
@@ -403,6 +442,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public key(value: string | undefined): this {
+        this.getPeer().keyAttribute(value);
         return this
     }
     public id(value: string | undefined): this {
@@ -415,6 +455,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public restoreId(value: number | undefined): this {
+        this.getPeer().restoreIdAttribute(value);
         return this
     }
     public sphericalEffect(value: number | undefined): this {
@@ -487,21 +528,26 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public onGestureJudgeBegin(value: ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
+        this.getPeer().onGestureJudgeBeginAttribute(value);
         return this
     }
     public onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this {
+        this.getPeer().onGestureRecognizerJudgeBegin1Attribute(callback_, exposeInnerGesture);
         return this
     }
     public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
+        this.getPeer().shouldBuiltInRecognizerParallelWithAttribute(value);
         return this
     }
     public monopolizeEvents(value: boolean | undefined): this {
+        this.getPeer().monopolizeEventsAttribute(value);
         return this
     }
     public onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this {
         return this
     }
     public onSizeChange(value: SizeChangeCallback | undefined): this {
+        this.getPeer().onSizeChangeAttribute(value);
         return this
     }
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
@@ -516,7 +562,8 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
         return this
     }
-    public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | BackgroundImageOptions): this {
+    public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
+        this.getPeer().backgroundImage0Attribute(src, repeat);
         return this
     }
     public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -526,9 +573,11 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
+        this.getPeer().focusScopeId1Attribute(id, isGroup, arrowStepOut);
         return this
     }
     public focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {
+        this.getPeer().focusScopePriorityAttribute(scopeId, priority);
         return this
     }
     public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
@@ -592,9 +641,14 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        this.getPeer().onVisibleAreaApproximateChangeAttribute(options, event);
         return this
     }
     public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
+        this.getPeer().keyboardShortcutAttribute(value, keys,action);
+        return this
+    }
+    public attributeModifier<T>(value: AttributeModifier<T>): this {
         return this
     }
 
@@ -616,7 +670,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         }
         return this;
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined): this {
         this.getPeer().onClick0Attribute(event);
         return this;
     }

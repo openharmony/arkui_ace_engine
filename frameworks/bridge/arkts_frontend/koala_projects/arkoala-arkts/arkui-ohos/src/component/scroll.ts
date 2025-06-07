@@ -18,7 +18,7 @@
 
 import { Edge, Axis, ScrollSource, BarState, Color, EdgeEffect, Curve } from "./enums"
 import { Length, VoidCallback, Dimension } from "./units"
-import { RectResult, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { RectResult, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 import { Resource } from "global/resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
@@ -31,7 +31,6 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Callback_Number_Number_Void } from "./grid"
 import { ScrollState, ScrollSnapAlign } from "./list"
-import { Callback_Void } from "./abilityComponent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
 
@@ -619,47 +618,6 @@ export interface ScrollAttribute extends ScrollableCommonMethod {
     initialOffset(value: OffsetOptions | undefined): this
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
 }
-export interface UIScrollAttribute extends UIScrollableCommonMethod {
-    /** @memo */
-    scrollable(value: ScrollDirection | undefined): this
-    /** @memo */
-    onScroll(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onWillScroll(value: ScrollOnWillScrollCallback | undefined): this
-    /** @memo */
-    onDidScroll(value: ScrollOnScrollCallback | undefined): this
-    /** @memo */
-    onScrollEdge(value: OnScrollEdgeCallback | undefined): this
-    /** @memo */
-    onScrollStart(value: VoidCallback | undefined): this
-    /** @memo */
-    onScrollEnd(value: (() => void) | undefined): this
-    /** @memo */
-    onScrollStop(value: VoidCallback | undefined): this
-    /** @memo */
-    scrollBar(value: BarState | undefined): this
-    /** @memo */
-    scrollBarColor(value: Color | number | string | undefined): this
-    /** @memo */
-    scrollBarWidth(value: number | string | undefined): this
-    /** @memo */
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
-    /** @memo */
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    /** @memo */
-    enableScrollInteraction(value: boolean | undefined): this
-    /** @memo */
-    friction(value: number | Resource | undefined): this
-    /** @memo */
-    scrollSnap(value: ScrollSnapOptions | undefined): this
-    /** @memo */
-    enablePaging(value: boolean | undefined): this
-    /** @memo */
-    initialOffset(value: OffsetOptions | undefined): this
-    /** @memo */
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    /** @memo */
-}
 export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements ScrollAttribute {
     scrollable_value?: ScrollDirection | undefined
     onScroll_value?: ((first: number,last: number) => void) | undefined
@@ -739,12 +697,10 @@ export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements Sc
 }
 export type ScrollOnScrollCallback = (xOffset: number, yOffset: number, scrollState: ScrollState) => void;
 export type ScrollOnWillScrollCallback = (xOffset: number, yOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => OffsetResult;
-/** @memo:stable */
-export class ArkScrollComponent extends ArkScrollableCommonMethodComponent implements UIScrollAttribute {
+export class ArkScrollComponent extends ArkScrollableCommonMethodComponent implements ScrollAttribute {
     getPeer(): ArkScrollPeer {
         return (this.peer as ArkScrollPeer)
     }
-    /** @memo */
     public setScrollOptions(scroller?: Scroller): this {
         if (this.checkPriority("setScrollOptions")) {
             const scroller_casted = scroller as (Scroller | undefined)
@@ -753,7 +709,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public scrollable(value: ScrollDirection | undefined): this {
         if (this.checkPriority("scrollable")) {
             const value_casted = value as (ScrollDirection | undefined)
@@ -762,7 +717,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public onScroll(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onScroll")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -771,7 +725,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
         if (this.checkPriority("onWillScroll")) {
             const value_casted = value as (ScrollOnWillScrollCallback | undefined)
@@ -780,7 +733,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public onDidScroll(value: ScrollOnScrollCallback | undefined): this {
         if (this.checkPriority("onDidScroll")) {
             const value_casted = value as (ScrollOnScrollCallback | undefined)
@@ -789,7 +741,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public onScrollEdge(value: OnScrollEdgeCallback | undefined): this {
         if (this.checkPriority("onScrollEdge")) {
             const value_casted = value as (OnScrollEdgeCallback | undefined)
@@ -798,7 +749,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public onScrollStart(value: VoidCallback | undefined): this {
         if (this.checkPriority("onScrollStart")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -807,7 +757,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public onScrollEnd(value: (() => void) | undefined): this {
         if (this.checkPriority("onScrollEnd")) {
             const value_casted = value as ((() => void) | undefined)
@@ -816,7 +765,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public onScrollStop(value: VoidCallback | undefined): this {
         if (this.checkPriority("onScrollStop")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -825,7 +773,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public scrollBar(value: BarState | undefined): this {
         if (this.checkPriority("scrollBar")) {
             const value_casted = value as (BarState | undefined)
@@ -834,7 +781,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public scrollBarColor(value: Color | number | string | undefined): this {
         if (this.checkPriority("scrollBarColor")) {
             const value_casted = value as (Color | number | string | undefined)
@@ -843,7 +789,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public scrollBarWidth(value: number | string | undefined): this {
         if (this.checkPriority("scrollBarWidth")) {
             const value_casted = value as (number | string | undefined)
@@ -852,7 +797,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         if (this.checkPriority("onScrollFrameBegin")) {
             const value_casted = value as (OnScrollFrameBeginCallback | undefined)
@@ -861,7 +805,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public nestedScroll(value: NestedScrollOptions | undefined): this {
         if (this.checkPriority("nestedScroll")) {
             const value_casted = value as (NestedScrollOptions | undefined)
@@ -870,7 +813,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public enableScrollInteraction(value: boolean | undefined): this {
         if (this.checkPriority("enableScrollInteraction")) {
             const value_casted = value as (boolean | undefined)
@@ -879,7 +821,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public friction(value: number | Resource | undefined): this {
         if (this.checkPriority("friction")) {
             const value_casted = value as (number | Resource | undefined)
@@ -888,7 +829,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public scrollSnap(value: ScrollSnapOptions | undefined): this {
         if (this.checkPriority("scrollSnap")) {
             const value_casted = value as (ScrollSnapOptions | undefined)
@@ -897,7 +837,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public enablePaging(value: boolean | undefined): this {
         if (this.checkPriority("enablePaging")) {
             const value_casted = value as (boolean | undefined)
@@ -906,7 +845,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public initialOffset(value: OffsetOptions | undefined): this {
         if (this.checkPriority("initialOffset")) {
             const value_casted = value as (OffsetOptions | undefined)
@@ -915,7 +853,6 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         if (this.checkPriority("edgeEffect")) {
             const edgeEffect_casted = edgeEffect as (EdgeEffect | undefined)
@@ -934,7 +871,7 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
 /** @memo */
 export function Scroll(
     /** @memo */
-    style: ((attributes: UIScrollAttribute) => void) | undefined,
+    style: ((attributes: ScrollAttribute) => void) | undefined,
     scroller?: Scroller,
     /** @memo */
     content_?: (() => void) | undefined,

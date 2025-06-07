@@ -29,8 +29,7 @@ import { Resource } from "global/resource"
 import { Callback_String_Void } from "./gridRow"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, Callback_KeyEvent_Boolean, KeyEvent, NestedScrollOptions, CustomBuilder, TouchEvent, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
-import { Callback_Void } from "./abilityComponent"
+import { ArkCommonMethodPeer, CommonMethod, Callback_KeyEvent_Boolean, KeyEvent, NestedScrollOptions, CustomBuilder, TouchEvent, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CopyOptions, NestedScrollMode } from "./enums"
 import { EditMenuOptions, MenuType } from "./textCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -1504,21 +1503,17 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
     }
     setWebOptionsAttribute(value: WebOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
-        if (TypeChecker.isWebController(value.controller) || TypeChecker.isWebviewController(value.controller)) {
-            thisSerializer.writeWebOptions(value)
-            ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        } else if (TypeChecker.isWebviewControllerAni(value.controller)) {
+        if (TypeChecker.isWebviewControllerAni(value.controller)) {
             this.webviewController = new WebviewController()
             const value_casted = {
                 src: value.src,
-                controller: (this.webviewController as WebviewController),
                 renderMode: value.renderMode,
                 incognitoMode: value.incognitoMode,
                 sharedRenderProcessToken: value.sharedRenderProcessToken
-            } as (WebOptions)
+            } as (WebOptionsSerializer)
             thisSerializer.writeWebOptions(value_casted)
             ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-            ArkUIAniModule._Web_SetWebOptions(this.peer.ptr, (value.controller as WebviewControllerAni))
+            ArkUIAniModule._Web_SetWebOptions(this.peer.ptr, value.controller)
         }
         thisSerializer.release()
     }
@@ -3370,7 +3365,13 @@ export interface Literal_Object_object__String_name_Array_String_methodList {
 }
 export interface WebOptions {
     src: string | Resource;
-    controller: WebController | WebviewController | WebviewControllerAni;
+    controller: WebviewControllerAni;
+    renderMode?: RenderMode;
+    incognitoMode?: boolean;
+    sharedRenderProcessToken?: string;
+}
+export interface WebOptionsSerializer {
+    src: string | Resource;
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;
@@ -3789,263 +3790,6 @@ export interface WebAttribute extends CommonMethod {
     nativeEmbedOptions(value: EmbedOptions | undefined): this
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
-}
-export interface UIWebAttribute extends UICommonMethod {
-    /** @memo */
-    javaScriptAccess(value: boolean | undefined): this
-    /** @memo */
-    fileAccess(value: boolean | undefined): this
-    /** @memo */
-    onlineImageAccess(value: boolean | undefined): this
-    /** @memo */
-    domStorageAccess(value: boolean | undefined): this
-    /** @memo */
-    imageAccess(value: boolean | undefined): this
-    /** @memo */
-    mixedMode(value: MixedMode | undefined): this
-    /** @memo */
-    zoomAccess(value: boolean | undefined): this
-    /** @memo */
-    geolocationAccess(value: boolean | undefined): this
-    /** @memo */
-    javaScriptProxy(value: JavaScriptProxy | undefined): this
-    /** @memo */
-    password(value: boolean | undefined): this
-    /** @memo */
-    cacheMode(value: CacheMode | undefined): this
-    /** @memo */
-    darkMode(value: WebDarkMode | undefined): this
-    /** @memo */
-    forceDarkAccess(value: boolean | undefined): this
-    /** @memo */
-    mediaOptions(value: WebMediaOptions | undefined): this
-    /** @memo */
-    tableData(value: boolean | undefined): this
-    /** @memo */
-    wideViewModeAccess(value: boolean | undefined): this
-    /** @memo */
-    overviewModeAccess(value: boolean | undefined): this
-    /** @memo */
-    overScrollMode(value: OverScrollMode | undefined): this
-    /** @memo */
-    blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this
-    /** @memo */
-    textZoomAtio(value: number | undefined): this
-    /** @memo */
-    textZoomRatio(value: number | undefined): this
-    /** @memo */
-    databaseAccess(value: boolean | undefined): this
-    /** @memo */
-    initialScale(value: number | undefined): this
-    /** @memo */
-    userAgent(value: string | undefined): this
-    /** @memo */
-    metaViewport(value: boolean | undefined): this
-    /** @memo */
-    onPageEnd(value: ((parameter: OnPageEndEvent) => void) | undefined): this
-    /** @memo */
-    onPageBegin(value: ((parameter: OnPageBeginEvent) => void) | undefined): this
-    /** @memo */
-    onProgressChange(value: ((parameter: OnProgressChangeEvent) => void) | undefined): this
-    /** @memo */
-    onTitleReceive(value: ((parameter: OnTitleReceiveEvent) => void) | undefined): this
-    /** @memo */
-    onGeolocationHide(value: (() => void) | undefined): this
-    /** @memo */
-    onGeolocationShow(value: ((parameter: OnGeolocationShowEvent) => void) | undefined): this
-    /** @memo */
-    onRequestSelected(value: (() => void) | undefined): this
-    /** @memo */
-    onAlert(value: ((parameter: OnAlertEvent) => boolean) | undefined): this
-    /** @memo */
-    onBeforeUnload(value: ((parameter: OnBeforeUnloadEvent) => boolean) | undefined): this
-    /** @memo */
-    onConfirm(value: ((parameter: OnConfirmEvent) => boolean) | undefined): this
-    /** @memo */
-    onPrompt(value: ((parameter: OnPromptEvent) => boolean) | undefined): this
-    /** @memo */
-    onConsole(value: ((parameter: OnConsoleEvent) => boolean) | undefined): this
-    /** @memo */
-    onErrorReceive(value: ((parameter: OnErrorReceiveEvent) => void) | undefined): this
-    /** @memo */
-    onHttpErrorReceive(value: ((parameter: OnHttpErrorReceiveEvent) => void) | undefined): this
-    /** @memo */
-    onDownloadStart(value: ((parameter: OnDownloadStartEvent) => void) | undefined): this
-    /** @memo */
-    onRefreshAccessedHistory(value: ((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined): this
-    /** @memo */
-    onUrlLoadIntercept(value: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined): this
-    /** @memo */
-    onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): this
-    /** @memo */
-    onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this
-    /** @memo */
-    onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): this
-    /** @memo */
-    onFileSelectorShow(value: ((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined): this
-    /** @memo */
-    onResourceLoad(value: ((parameter: OnResourceLoadEvent) => void) | undefined): this
-    /** @memo */
-    onFullScreenExit(value: (() => void) | undefined): this
-    /** @memo */
-    onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this
-    /** @memo */
-    onScaleChange(value: ((parameter: OnScaleChangeEvent) => void) | undefined): this
-    /** @memo */
-    onHttpAuthRequest(value: ((parameter: OnHttpAuthRequestEvent) => boolean) | undefined): this
-    /** @memo */
-    onInterceptRequest(value: ((parameter: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this
-    /** @memo */
-    onPermissionRequest(value: ((parameter: OnPermissionRequestEvent) => void) | undefined): this
-    /** @memo */
-    onScreenCaptureRequest(value: ((parameter: OnScreenCaptureRequestEvent) => void) | undefined): this
-    /** @memo */
-    onContextMenuShow(value: ((parameter: OnContextMenuShowEvent) => boolean) | undefined): this
-    /** @memo */
-    onContextMenuHide(value: OnContextMenuHideCallback | undefined): this
-    /** @memo */
-    mediaPlayGestureAccess(value: boolean | undefined): this
-    /** @memo */
-    onSearchResultReceive(value: ((parameter: OnSearchResultReceiveEvent) => void) | undefined): this
-    /** @memo */
-    onScroll(value: ((parameter: OnScrollEvent) => void) | undefined): this
-    /** @memo */
-    onSslErrorEventReceive(value: ((parameter: OnSslErrorEventReceiveEvent) => void) | undefined): this
-    /** @memo */
-    onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this
-    /** @memo */
-    onClientAuthenticationRequest(value: ((parameter: OnClientAuthenticationEvent) => void) | undefined): this
-    /** @memo */
-    onWindowNew(value: ((parameter: OnWindowNewEvent) => void) | undefined): this
-    /** @memo */
-    onWindowExit(value: (() => void) | undefined): this
-    /** @memo */
-    multiWindowAccess(value: boolean | undefined): this
-    /** @memo */
-    onInterceptKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this
-    /** @memo */
-    webStandardFont(value: string | undefined): this
-    /** @memo */
-    webSerifFont(value: string | undefined): this
-    /** @memo */
-    webSansSerifFont(value: string | undefined): this
-    /** @memo */
-    webFixedFont(value: string | undefined): this
-    /** @memo */
-    webFantasyFont(value: string | undefined): this
-    /** @memo */
-    webCursiveFont(value: string | undefined): this
-    /** @memo */
-    defaultFixedFontSize(value: number | undefined): this
-    /** @memo */
-    defaultFontSize(value: number | undefined): this
-    /** @memo */
-    minFontSize(value: number | undefined): this
-    /** @memo */
-    minLogicalFontSize(value: number | undefined): this
-    /** @memo */
-    defaultTextEncodingFormat(value: string | undefined): this
-    /** @memo */
-    forceDisplayScrollBar(value: boolean | undefined): this
-    /** @memo */
-    blockNetwork(value: boolean | undefined): this
-    /** @memo */
-    horizontalScrollBarAccess(value: boolean | undefined): this
-    /** @memo */
-    verticalScrollBarAccess(value: boolean | undefined): this
-    /** @memo */
-    onTouchIconUrlReceived(value: ((parameter: OnTouchIconUrlReceivedEvent) => void) | undefined): this
-    /** @memo */
-    onFaviconReceived(value: ((parameter: OnFaviconReceivedEvent) => void) | undefined): this
-    /** @memo */
-    onPageVisible(value: ((parameter: OnPageVisibleEvent) => void) | undefined): this
-    /** @memo */
-    onDataResubmitted(value: ((parameter: OnDataResubmittedEvent) => void) | undefined): this
-    /** @memo */
-    pinchSmooth(value: boolean | undefined): this
-    /** @memo */
-    allowWindowOpenMethod(value: boolean | undefined): this
-    /** @memo */
-    onAudioStateChanged(value: ((parameter: OnAudioStateChangedEvent) => void) | undefined): this
-    /** @memo */
-    onFirstContentfulPaint(value: ((parameter: OnFirstContentfulPaintEvent) => void) | undefined): this
-    /** @memo */
-    onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this
-    /** @memo */
-    onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this
-    /** @memo */
-    onLoadIntercept(value: ((parameter: OnLoadInterceptEvent) => boolean) | undefined): this
-    /** @memo */
-    onControllerAttached(value: (() => void) | undefined): this
-    /** @memo */
-    onOverScroll(value: ((parameter: OnOverScrollEvent) => void) | undefined): this
-    /** @memo */
-    onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this
-    /** @memo */
-    onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this
-    /** @memo */
-    onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this
-    /** @memo */
-    javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this
-    /** @memo */
-    javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this
-    /** @memo */
-    layoutMode(value: WebLayoutMode | undefined): this
-    /** @memo */
-    nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this
-    /** @memo */
-    enableNativeEmbedMode(value: boolean | undefined): this
-    /** @memo */
-    onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this
-    /** @memo */
-    onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this
-    /** @memo */
-    onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this
-    /** @memo */
-    copyOptions(value: CopyOptions | undefined): this
-    /** @memo */
-    onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this
-    /** @memo */
-    textAutosizing(value: boolean | undefined): this
-    /** @memo */
-    enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this
-    /** @memo */
-    onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this
-    /** @memo */
-    onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this
-    /** @memo */
-    selectionMenuOptions(value: Array<ExpandedMenuItemOptions> | undefined): this
-    /** @memo */
-    onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this
-    /** @memo */
-    onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this
-    /** @memo */
-    onAdsBlocked(value: OnAdsBlockedCallback | undefined): this
-    /** @memo */
-    keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this
-    /** @memo */
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    optimizeParserBudget(value: boolean | undefined): this
-    /** @memo */
-    enableFollowSystemFontWeight(value: boolean | undefined): this
-    /** @memo */
-    enableWebAVSession(value: boolean | undefined): this
-    /** @memo */
-    runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this
-    /** @memo */
-    runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this
-    /** @memo */
-    runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this
-    /** @memo */
-    nativeEmbedOptions(value: EmbedOptions | undefined): this
-    /** @memo */
-    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this
-    /** @memo */
-    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
-    /** @memo */
 }
 export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     javaScriptAccess_value?: boolean | undefined
@@ -4582,12 +4326,10 @@ export interface NestedScrollOptionsExt {
 export interface EmbedOptions {
     supportDefaultIntrinsicSize?: boolean;
 }
-/** @memo:stable */
-export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAttribute {
+export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttribute {
     getPeer(): ArkWebPeer {
         return (this.peer as ArkWebPeer)
     }
-    /** @memo */
     public setWebOptions(value: WebOptions): this {
         if (this.checkPriority("setWebOptions")) {
             const value_casted = value as (WebOptions)
@@ -4596,7 +4338,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public javaScriptAccess(value: boolean | undefined): this {
         if (this.checkPriority("javaScriptAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4605,7 +4346,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public fileAccess(value: boolean | undefined): this {
         if (this.checkPriority("fileAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4614,7 +4354,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onlineImageAccess(value: boolean | undefined): this {
         if (this.checkPriority("onlineImageAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4623,7 +4362,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public domStorageAccess(value: boolean | undefined): this {
         if (this.checkPriority("domStorageAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4632,7 +4370,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public imageAccess(value: boolean | undefined): this {
         if (this.checkPriority("imageAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4641,7 +4378,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public mixedMode(value: MixedMode | undefined): this {
         if (this.checkPriority("mixedMode")) {
             const value_casted = value as (MixedMode | undefined)
@@ -4650,7 +4386,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public zoomAccess(value: boolean | undefined): this {
         if (this.checkPriority("zoomAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4659,7 +4394,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public geolocationAccess(value: boolean | undefined): this {
         if (this.checkPriority("geolocationAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4668,7 +4402,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public javaScriptProxy(value: JavaScriptProxy | undefined): this {
         if (this.checkPriority("javaScriptProxy")) {
             const value_casted = value as (JavaScriptProxy | undefined)
@@ -4677,7 +4410,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public password(value: boolean | undefined): this {
         if (this.checkPriority("password")) {
             const value_casted = value as (boolean | undefined)
@@ -4686,7 +4418,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public cacheMode(value: CacheMode | undefined): this {
         if (this.checkPriority("cacheMode")) {
             const value_casted = value as (CacheMode | undefined)
@@ -4695,7 +4426,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public darkMode(value: WebDarkMode | undefined): this {
         if (this.checkPriority("darkMode")) {
             const value_casted = value as (WebDarkMode | undefined)
@@ -4704,7 +4434,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public forceDarkAccess(value: boolean | undefined): this {
         if (this.checkPriority("forceDarkAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4713,7 +4442,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public mediaOptions(value: WebMediaOptions | undefined): this {
         if (this.checkPriority("mediaOptions")) {
             const value_casted = value as (WebMediaOptions | undefined)
@@ -4722,7 +4450,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public tableData(value: boolean | undefined): this {
         if (this.checkPriority("tableData")) {
             const value_casted = value as (boolean | undefined)
@@ -4731,7 +4458,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public wideViewModeAccess(value: boolean | undefined): this {
         if (this.checkPriority("wideViewModeAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4740,7 +4466,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public overviewModeAccess(value: boolean | undefined): this {
         if (this.checkPriority("overviewModeAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4749,7 +4474,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public overScrollMode(value: OverScrollMode | undefined): this {
         if (this.checkPriority("overScrollMode")) {
             const value_casted = value as (OverScrollMode | undefined)
@@ -4758,7 +4482,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
         if (this.checkPriority("blurOnKeyboardHideMode")) {
             const value_casted = value as (BlurOnKeyboardHideMode | undefined)
@@ -4767,7 +4490,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public textZoomAtio(value: number | undefined): this {
         if (this.checkPriority("textZoomAtio")) {
             const value_casted = value as (number | undefined)
@@ -4776,7 +4498,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public textZoomRatio(value: number | undefined): this {
         if (this.checkPriority("textZoomRatio")) {
             const value_casted = value as (number | undefined)
@@ -4785,7 +4506,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public databaseAccess(value: boolean | undefined): this {
         if (this.checkPriority("databaseAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -4794,7 +4514,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public initialScale(value: number | undefined): this {
         if (this.checkPriority("initialScale")) {
             const value_casted = value as (number | undefined)
@@ -4803,7 +4522,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public userAgent(value: string | undefined): this {
         if (this.checkPriority("userAgent")) {
             const value_casted = value as (string | undefined)
@@ -4812,7 +4530,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public metaViewport(value: boolean | undefined): this {
         if (this.checkPriority("metaViewport")) {
             const value_casted = value as (boolean | undefined)
@@ -4821,7 +4538,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onPageEnd(value: ((parameter: OnPageEndEvent) => void) | undefined): this {
         if (this.checkPriority("onPageEnd")) {
             const value_casted = value as (((parameter: OnPageEndEvent) => void) | undefined)
@@ -4830,7 +4546,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onPageBegin(value: ((parameter: OnPageBeginEvent) => void) | undefined): this {
         if (this.checkPriority("onPageBegin")) {
             const value_casted = value as (((parameter: OnPageBeginEvent) => void) | undefined)
@@ -4839,7 +4554,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onProgressChange(value: ((parameter: OnProgressChangeEvent) => void) | undefined): this {
         if (this.checkPriority("onProgressChange")) {
             const value_casted = value as (((parameter: OnProgressChangeEvent) => void) | undefined)
@@ -4848,7 +4562,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onTitleReceive(value: ((parameter: OnTitleReceiveEvent) => void) | undefined): this {
         if (this.checkPriority("onTitleReceive")) {
             const value_casted = value as (((parameter: OnTitleReceiveEvent) => void) | undefined)
@@ -4857,7 +4570,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onGeolocationHide(value: (() => void) | undefined): this {
         if (this.checkPriority("onGeolocationHide")) {
             const value_casted = value as ((() => void) | undefined)
@@ -4866,7 +4578,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onGeolocationShow(value: ((parameter: OnGeolocationShowEvent) => void) | undefined): this {
         if (this.checkPriority("onGeolocationShow")) {
             const value_casted = value as (((parameter: OnGeolocationShowEvent) => void) | undefined)
@@ -4875,7 +4586,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onRequestSelected(value: (() => void) | undefined): this {
         if (this.checkPriority("onRequestSelected")) {
             const value_casted = value as ((() => void) | undefined)
@@ -4884,7 +4594,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onAlert(value: ((parameter: OnAlertEvent) => boolean) | undefined): this {
         if (this.checkPriority("onAlert")) {
             const value_casted = value as (((parameter: OnAlertEvent) => boolean) | undefined)
@@ -4893,7 +4602,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onBeforeUnload(value: ((parameter: OnBeforeUnloadEvent) => boolean) | undefined): this {
         if (this.checkPriority("onBeforeUnload")) {
             const value_casted = value as (((parameter: OnBeforeUnloadEvent) => boolean) | undefined)
@@ -4902,7 +4610,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onConfirm(value: ((parameter: OnConfirmEvent) => boolean) | undefined): this {
         if (this.checkPriority("onConfirm")) {
             const value_casted = value as (((parameter: OnConfirmEvent) => boolean) | undefined)
@@ -4911,7 +4618,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onPrompt(value: ((parameter: OnPromptEvent) => boolean) | undefined): this {
         if (this.checkPriority("onPrompt")) {
             const value_casted = value as (((parameter: OnPromptEvent) => boolean) | undefined)
@@ -4920,7 +4626,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onConsole(value: ((parameter: OnConsoleEvent) => boolean) | undefined): this {
         if (this.checkPriority("onConsole")) {
             const value_casted = value as (((parameter: OnConsoleEvent) => boolean) | undefined)
@@ -4929,7 +4634,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onErrorReceive(value: ((parameter: OnErrorReceiveEvent) => void) | undefined): this {
         if (this.checkPriority("onErrorReceive")) {
             const value_casted = value as (((parameter: OnErrorReceiveEvent) => void) | undefined)
@@ -4938,7 +4642,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onHttpErrorReceive(value: ((parameter: OnHttpErrorReceiveEvent) => void) | undefined): this {
         if (this.checkPriority("onHttpErrorReceive")) {
             const value_casted = value as (((parameter: OnHttpErrorReceiveEvent) => void) | undefined)
@@ -4947,7 +4650,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onDownloadStart(value: ((parameter: OnDownloadStartEvent) => void) | undefined): this {
         if (this.checkPriority("onDownloadStart")) {
             const value_casted = value as (((parameter: OnDownloadStartEvent) => void) | undefined)
@@ -4956,7 +4658,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onRefreshAccessedHistory(value: ((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
         if (this.checkPriority("onRefreshAccessedHistory")) {
             const value_casted = value as (((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined)
@@ -4965,7 +4666,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onUrlLoadIntercept(value: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined): this {
         if (this.checkPriority("onUrlLoadIntercept")) {
             const value_casted = value as (((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined)
@@ -4974,7 +4674,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): this {
         if (this.checkPriority("onSslErrorReceive")) {
             const value_casted = value as (((event?: Literal_Function_handler_Object_error) => void) | undefined)
@@ -4983,7 +4682,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this {
         if (this.checkPriority("onRenderExited")) {
             const value_type = runtimeType(value)
@@ -5001,7 +4699,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): this {
         if (this.checkPriority("onShowFileSelector")) {
             const value_casted = value as (((parameter: OnShowFileSelectorEvent) => boolean) | undefined)
@@ -5010,7 +4707,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onFileSelectorShow(value: ((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined): this {
         if (this.checkPriority("onFileSelectorShow")) {
             const value_casted = value as (((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined)
@@ -5019,7 +4715,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onResourceLoad(value: ((parameter: OnResourceLoadEvent) => void) | undefined): this {
         if (this.checkPriority("onResourceLoad")) {
             const value_casted = value as (((parameter: OnResourceLoadEvent) => void) | undefined)
@@ -5028,7 +4723,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onFullScreenExit(value: (() => void) | undefined): this {
         if (this.checkPriority("onFullScreenExit")) {
             const value_casted = value as ((() => void) | undefined)
@@ -5037,7 +4731,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
         if (this.checkPriority("onFullScreenEnter")) {
             const value_casted = value as (OnFullScreenEnterCallback | undefined)
@@ -5046,7 +4739,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onScaleChange(value: ((parameter: OnScaleChangeEvent) => void) | undefined): this {
         if (this.checkPriority("onScaleChange")) {
             const value_casted = value as (((parameter: OnScaleChangeEvent) => void) | undefined)
@@ -5055,7 +4747,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onHttpAuthRequest(value: ((parameter: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         if (this.checkPriority("onHttpAuthRequest")) {
             const value_casted = value as (((parameter: OnHttpAuthRequestEvent) => boolean) | undefined)
@@ -5064,7 +4755,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onInterceptRequest(value: ((parameter: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
         if (this.checkPriority("onInterceptRequest")) {
             const value_casted = value as (((parameter: OnInterceptRequestEvent) => WebResourceResponse) | undefined)
@@ -5073,7 +4763,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onPermissionRequest(value: ((parameter: OnPermissionRequestEvent) => void) | undefined): this {
         if (this.checkPriority("onPermissionRequest")) {
             const value_casted = value as (((parameter: OnPermissionRequestEvent) => void) | undefined)
@@ -5082,7 +4771,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onScreenCaptureRequest(value: ((parameter: OnScreenCaptureRequestEvent) => void) | undefined): this {
         if (this.checkPriority("onScreenCaptureRequest")) {
             const value_casted = value as (((parameter: OnScreenCaptureRequestEvent) => void) | undefined)
@@ -5091,7 +4779,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onContextMenuShow(value: ((parameter: OnContextMenuShowEvent) => boolean) | undefined): this {
         if (this.checkPriority("onContextMenuShow")) {
             const value_casted = value as (((parameter: OnContextMenuShowEvent) => boolean) | undefined)
@@ -5100,7 +4787,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
         if (this.checkPriority("onContextMenuHide")) {
             const value_casted = value as (OnContextMenuHideCallback | undefined)
@@ -5109,7 +4795,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public mediaPlayGestureAccess(value: boolean | undefined): this {
         if (this.checkPriority("mediaPlayGestureAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -5118,7 +4803,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onSearchResultReceive(value: ((parameter: OnSearchResultReceiveEvent) => void) | undefined): this {
         if (this.checkPriority("onSearchResultReceive")) {
             const value_casted = value as (((parameter: OnSearchResultReceiveEvent) => void) | undefined)
@@ -5127,7 +4811,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onScroll(value: ((parameter: OnScrollEvent) => void) | undefined): this {
         if (this.checkPriority("onScroll")) {
             const value_casted = value as (((parameter: OnScrollEvent) => void) | undefined)
@@ -5136,7 +4819,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onSslErrorEventReceive(value: ((parameter: OnSslErrorEventReceiveEvent) => void) | undefined): this {
         if (this.checkPriority("onSslErrorEventReceive")) {
             const value_casted = value as (((parameter: OnSslErrorEventReceiveEvent) => void) | undefined)
@@ -5145,7 +4827,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
         if (this.checkPriority("onSslErrorEvent")) {
             const value_casted = value as (OnSslErrorEventCallback | undefined)
@@ -5154,7 +4835,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onClientAuthenticationRequest(value: ((parameter: OnClientAuthenticationEvent) => void) | undefined): this {
         if (this.checkPriority("onClientAuthenticationRequest")) {
             const value_casted = value as (((parameter: OnClientAuthenticationEvent) => void) | undefined)
@@ -5163,7 +4843,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onWindowNew(value: ((parameter: OnWindowNewEvent) => void) | undefined): this {
         if (this.checkPriority("onWindowNew")) {
             const value_casted = value as (((parameter: OnWindowNewEvent) => void) | undefined)
@@ -5172,7 +4851,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onWindowExit(value: (() => void) | undefined): this {
         if (this.checkPriority("onWindowExit")) {
             const value_casted = value as ((() => void) | undefined)
@@ -5181,7 +4859,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public multiWindowAccess(value: boolean | undefined): this {
         if (this.checkPriority("multiWindowAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -5190,7 +4867,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onInterceptKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onInterceptKeyEvent")) {
             const value_casted = value as (((parameter: KeyEvent) => boolean) | undefined)
@@ -5199,7 +4875,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public webStandardFont(value: string | undefined): this {
         if (this.checkPriority("webStandardFont")) {
             const value_casted = value as (string | undefined)
@@ -5208,7 +4883,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public webSerifFont(value: string | undefined): this {
         if (this.checkPriority("webSerifFont")) {
             const value_casted = value as (string | undefined)
@@ -5217,7 +4891,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public webSansSerifFont(value: string | undefined): this {
         if (this.checkPriority("webSansSerifFont")) {
             const value_casted = value as (string | undefined)
@@ -5226,7 +4899,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public webFixedFont(value: string | undefined): this {
         if (this.checkPriority("webFixedFont")) {
             const value_casted = value as (string | undefined)
@@ -5235,7 +4907,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public webFantasyFont(value: string | undefined): this {
         if (this.checkPriority("webFantasyFont")) {
             const value_casted = value as (string | undefined)
@@ -5244,7 +4915,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public webCursiveFont(value: string | undefined): this {
         if (this.checkPriority("webCursiveFont")) {
             const value_casted = value as (string | undefined)
@@ -5253,7 +4923,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public defaultFixedFontSize(value: number | undefined): this {
         if (this.checkPriority("defaultFixedFontSize")) {
             const value_casted = value as (number | undefined)
@@ -5262,7 +4931,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public defaultFontSize(value: number | undefined): this {
         if (this.checkPriority("defaultFontSize")) {
             const value_casted = value as (number | undefined)
@@ -5271,7 +4939,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public minFontSize(value: number | undefined): this {
         if (this.checkPriority("minFontSize")) {
             const value_casted = value as (number | undefined)
@@ -5280,7 +4947,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public minLogicalFontSize(value: number | undefined): this {
         if (this.checkPriority("minLogicalFontSize")) {
             const value_casted = value as (number | undefined)
@@ -5289,7 +4955,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public defaultTextEncodingFormat(value: string | undefined): this {
         if (this.checkPriority("defaultTextEncodingFormat")) {
             const value_casted = value as (string | undefined)
@@ -5298,7 +4963,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public forceDisplayScrollBar(value: boolean | undefined): this {
         if (this.checkPriority("forceDisplayScrollBar")) {
             const value_casted = value as (boolean | undefined)
@@ -5307,7 +4971,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public blockNetwork(value: boolean | undefined): this {
         if (this.checkPriority("blockNetwork")) {
             const value_casted = value as (boolean | undefined)
@@ -5316,7 +4979,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public horizontalScrollBarAccess(value: boolean | undefined): this {
         if (this.checkPriority("horizontalScrollBarAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -5325,7 +4987,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public verticalScrollBarAccess(value: boolean | undefined): this {
         if (this.checkPriority("verticalScrollBarAccess")) {
             const value_casted = value as (boolean | undefined)
@@ -5334,7 +4995,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onTouchIconUrlReceived(value: ((parameter: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
         if (this.checkPriority("onTouchIconUrlReceived")) {
             const value_casted = value as (((parameter: OnTouchIconUrlReceivedEvent) => void) | undefined)
@@ -5343,7 +5003,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onFaviconReceived(value: ((parameter: OnFaviconReceivedEvent) => void) | undefined): this {
         if (this.checkPriority("onFaviconReceived")) {
             const value_casted = value as (((parameter: OnFaviconReceivedEvent) => void) | undefined)
@@ -5352,7 +5011,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onPageVisible(value: ((parameter: OnPageVisibleEvent) => void) | undefined): this {
         if (this.checkPriority("onPageVisible")) {
             const value_casted = value as (((parameter: OnPageVisibleEvent) => void) | undefined)
@@ -5361,7 +5019,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onDataResubmitted(value: ((parameter: OnDataResubmittedEvent) => void) | undefined): this {
         if (this.checkPriority("onDataResubmitted")) {
             const value_casted = value as (((parameter: OnDataResubmittedEvent) => void) | undefined)
@@ -5370,7 +5027,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public pinchSmooth(value: boolean | undefined): this {
         if (this.checkPriority("pinchSmooth")) {
             const value_casted = value as (boolean | undefined)
@@ -5379,7 +5035,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public allowWindowOpenMethod(value: boolean | undefined): this {
         if (this.checkPriority("allowWindowOpenMethod")) {
             const value_casted = value as (boolean | undefined)
@@ -5388,7 +5043,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onAudioStateChanged(value: ((parameter: OnAudioStateChangedEvent) => void) | undefined): this {
         if (this.checkPriority("onAudioStateChanged")) {
             const value_casted = value as (((parameter: OnAudioStateChangedEvent) => void) | undefined)
@@ -5397,7 +5051,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onFirstContentfulPaint(value: ((parameter: OnFirstContentfulPaintEvent) => void) | undefined): this {
         if (this.checkPriority("onFirstContentfulPaint")) {
             const value_casted = value as (((parameter: OnFirstContentfulPaintEvent) => void) | undefined)
@@ -5406,7 +5059,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
         if (this.checkPriority("onFirstMeaningfulPaint")) {
             const value_casted = value as (OnFirstMeaningfulPaintCallback | undefined)
@@ -5415,7 +5067,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
         if (this.checkPriority("onLargestContentfulPaint")) {
             const value_casted = value as (OnLargestContentfulPaintCallback | undefined)
@@ -5424,7 +5075,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onLoadIntercept(value: ((parameter: OnLoadInterceptEvent) => boolean) | undefined): this {
         if (this.checkPriority("onLoadIntercept")) {
             const value_casted = value as (((parameter: OnLoadInterceptEvent) => boolean) | undefined)
@@ -5433,7 +5083,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onControllerAttached(value: (() => void) | undefined): this {
         if (this.checkPriority("onControllerAttached")) {
             const value_casted = value as ((() => void) | undefined)
@@ -5442,7 +5091,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onOverScroll(value: ((parameter: OnOverScrollEvent) => void) | undefined): this {
         if (this.checkPriority("onOverScroll")) {
             const value_casted = value as (((parameter: OnOverScrollEvent) => void) | undefined)
@@ -5451,7 +5099,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
         if (this.checkPriority("onSafeBrowsingCheckResult")) {
             const value_casted = value as (OnSafeBrowsingCheckResultCallback | undefined)
@@ -5460,7 +5107,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
         if (this.checkPriority("onNavigationEntryCommitted")) {
             const value_casted = value as (OnNavigationEntryCommittedCallback | undefined)
@@ -5469,7 +5115,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
         if (this.checkPriority("onIntelligentTrackingPreventionResult")) {
             const value_casted = value as (OnIntelligentTrackingPreventionCallback | undefined)
@@ -5478,7 +5123,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
         if (this.checkPriority("javaScriptOnDocumentStart")) {
             const value_casted = value as (Array<ScriptItem> | undefined)
@@ -5487,7 +5131,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
         if (this.checkPriority("javaScriptOnDocumentEnd")) {
             const value_casted = value as (Array<ScriptItem> | undefined)
@@ -5496,7 +5139,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public layoutMode(value: WebLayoutMode | undefined): this {
         if (this.checkPriority("layoutMode")) {
             const value_casted = value as (WebLayoutMode | undefined)
@@ -5505,7 +5147,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
         if (this.checkPriority("nestedScroll")) {
             const value_casted = value as (NestedScrollOptions | NestedScrollOptionsExt | undefined)
@@ -5514,7 +5155,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public enableNativeEmbedMode(value: boolean | undefined): this {
         if (this.checkPriority("enableNativeEmbedMode")) {
             const value_casted = value as (boolean | undefined)
@@ -5523,7 +5163,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
         if (this.checkPriority("onNativeEmbedLifecycleChange")) {
             const value_casted = value as (((event: NativeEmbedDataInfo) => void) | undefined)
@@ -5532,7 +5171,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
         if (this.checkPriority("onNativeEmbedVisibilityChange")) {
             const value_casted = value as (OnNativeEmbedVisibilityChangeCallback | undefined)
@@ -5541,7 +5179,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
         if (this.checkPriority("onNativeEmbedGestureEvent")) {
             const value_casted = value as (((event: NativeEmbedTouchInfo) => void) | undefined)
@@ -5550,7 +5187,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public copyOptions(value: CopyOptions | undefined): this {
         if (this.checkPriority("copyOptions")) {
             const value_casted = value as (CopyOptions | undefined)
@@ -5559,7 +5195,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
         if (this.checkPriority("onOverrideUrlLoading")) {
             const value_casted = value as (OnOverrideUrlLoadingCallback | undefined)
@@ -5568,7 +5203,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public textAutosizing(value: boolean | undefined): this {
         if (this.checkPriority("textAutosizing")) {
             const value_casted = value as (boolean | undefined)
@@ -5577,7 +5211,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
         if (this.checkPriority("enableNativeMediaPlayer")) {
             const value_casted = value as (NativeMediaPlayerConfig | undefined)
@@ -5586,7 +5219,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
         if (this.checkPriority("onRenderProcessNotResponding")) {
             const value_casted = value as (OnRenderProcessNotRespondingCallback | undefined)
@@ -5595,7 +5227,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
         if (this.checkPriority("onRenderProcessResponding")) {
             const value_casted = value as (OnRenderProcessRespondingCallback | undefined)
@@ -5604,7 +5235,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public selectionMenuOptions(value: Array<ExpandedMenuItemOptions> | undefined): this {
         if (this.checkPriority("selectionMenuOptions")) {
             const value_casted = value as (Array<ExpandedMenuItemOptions> | undefined)
@@ -5613,7 +5243,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
         if (this.checkPriority("onViewportFitChanged")) {
             const value_casted = value as (OnViewportFitChangedCallback | undefined)
@@ -5622,7 +5251,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
         if (this.checkPriority("onInterceptKeyboardAttach")) {
             const value_casted = value as (WebKeyboardCallback | undefined)
@@ -5631,7 +5259,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
         if (this.checkPriority("onAdsBlocked")) {
             const value_casted = value as (OnAdsBlockedCallback | undefined)
@@ -5640,7 +5267,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
         if (this.checkPriority("keyboardAvoidMode")) {
             const value_casted = value as (WebKeyboardAvoidMode | undefined)
@@ -5649,7 +5275,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public editMenuOptions(value: EditMenuOptions | undefined): this {
         if (this.checkPriority("editMenuOptions")) {
             const value_casted = value as (EditMenuOptions | undefined)
@@ -5658,7 +5283,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
@@ -5667,7 +5291,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public optimizeParserBudget(value: boolean | undefined): this {
         if (this.checkPriority("optimizeParserBudget")) {
             const value_casted = value as (boolean | undefined)
@@ -5676,7 +5299,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public enableFollowSystemFontWeight(value: boolean | undefined): this {
         if (this.checkPriority("enableFollowSystemFontWeight")) {
             const value_casted = value as (boolean | undefined)
@@ -5685,7 +5307,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public enableWebAVSession(value: boolean | undefined): this {
         if (this.checkPriority("enableWebAVSession")) {
             const value_casted = value as (boolean | undefined)
@@ -5694,7 +5315,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
         if (this.checkPriority("runJavaScriptOnDocumentStart")) {
             const value_casted = value as (Array<ScriptItem> | undefined)
@@ -5703,7 +5323,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
         if (this.checkPriority("runJavaScriptOnDocumentEnd")) {
             const value_casted = value as (Array<ScriptItem> | undefined)
@@ -5712,7 +5331,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
         if (this.checkPriority("runJavaScriptOnHeadEnd")) {
             const value_casted = value as (Array<ScriptItem> | undefined)
@@ -5721,7 +5339,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public nativeEmbedOptions(value: EmbedOptions | undefined): this {
         if (this.checkPriority("nativeEmbedOptions")) {
             const value_casted = value as (EmbedOptions | undefined)
@@ -5730,7 +5347,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         if (this.checkPriority("registerNativeEmbedRule")) {
             const tag_casted = tag as (string | undefined)
@@ -5740,7 +5356,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
     public bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
         if (this.checkPriority("bindSelectionMenu")) {
             const elementType_casted = elementType as (WebElementType | undefined)
@@ -5761,7 +5376,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
 /** @memo */
 export function Web(
     /** @memo */
-    style: ((attributes: UIWebAttribute) => void) | undefined,
+    style: ((attributes: WebAttribute) => void) | undefined,
     value: WebOptions,
     /** @memo */
     content_?: (() => void) | undefined,

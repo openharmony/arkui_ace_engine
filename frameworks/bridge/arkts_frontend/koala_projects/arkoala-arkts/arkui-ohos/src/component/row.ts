@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VerticalAlign, FlexAlign } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -135,17 +135,6 @@ export interface RowAttribute extends CommonMethod {
     pointLight(value: PointLightStyle | undefined): this
     reverse(value: boolean | undefined): this
 }
-export interface UIRowAttribute extends UICommonMethod {
-    /** @memo */
-    alignItems(value: VerticalAlign | undefined): this
-    /** @memo */
-    justifyContent(value: FlexAlign | undefined): this
-    /** @memo */
-    pointLight(value: PointLightStyle | undefined): this
-    /** @memo */
-    reverse(value: boolean | undefined): this
-    /** @memo */
-}
 export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
     alignItems_value?: VerticalAlign | undefined
     justifyContent_value?: FlexAlign | undefined
@@ -164,12 +153,10 @@ export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
         return this
         }
 }
-/** @memo:stable */
-export class ArkRowComponent extends ArkCommonMethodComponent implements UIRowAttribute {
+export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttribute {
     getPeer(): ArkRowPeer {
         return (this.peer as ArkRowPeer)
     }
-    /** @memo */
     public setRowOptions(options?: RowOptions | RowOptions | RowOptionsV2): this {
         if (this.checkPriority("setRowOptions")) {
             const options_type = runtimeType(options)
@@ -187,7 +174,6 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements UIRowAt
         }
         return this
     }
-    /** @memo */
     public alignItems(value: VerticalAlign | undefined): this {
         if (this.checkPriority("alignItems")) {
             const value_casted = value as (VerticalAlign | undefined)
@@ -196,7 +182,6 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements UIRowAt
         }
         return this
     }
-    /** @memo */
     public justifyContent(value: FlexAlign | undefined): this {
         if (this.checkPriority("justifyContent")) {
             const value_casted = value as (FlexAlign | undefined)
@@ -205,7 +190,6 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements UIRowAt
         }
         return this
     }
-    /** @memo */
     public pointLight(value: PointLightStyle | undefined): this {
         if (this.checkPriority("pointLight")) {
             const value_casted = value as (PointLightStyle | undefined)
@@ -214,7 +198,6 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements UIRowAt
         }
         return this
     }
-    /** @memo */
     public reverse(value: boolean | undefined): this {
         if (this.checkPriority("reverse")) {
             const value_casted = value as (boolean | undefined)
@@ -232,7 +215,7 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements UIRowAt
 /** @memo */
 export function Row(
     /** @memo */
-    style: ((attributes: UIRowAttribute) => void) | undefined,
+    style: ((attributes: RowAttribute) => void) | undefined,
     options?: RowOptions | RowOptions | RowOptionsV2,
     /** @memo */
     content_?: (() => void) | undefined,

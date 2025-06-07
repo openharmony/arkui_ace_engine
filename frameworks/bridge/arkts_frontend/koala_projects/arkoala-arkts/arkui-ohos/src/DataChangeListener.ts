@@ -20,11 +20,11 @@ import { MutableState } from "@koalaui/runtime";
 import { DataChangeListener } from "./component/lazyForEach";
 
 export class InternalListener implements DataChangeListener {
-    parent: pointer
-    startIndex: number // Tracks the minimum item index that has changed
-    endIndex: number
-    changeCount: number // Tracks the number of items added or deleted
-    version: MutableState<int32> // reference to mark LazyForEach dirty
+    readonly parent: pointer
+    private startIndex: number // Tracks the minimum item index that has changed
+    private endIndex: number
+    private changeCount: number // Tracks the number of items added or deleted
+    private version: MutableState<int32> // reference to mark LazyForEach dirty
 
     constructor(parent: pointer, version: MutableState<int32>) {
         this.parent = parent
@@ -157,5 +157,15 @@ export class InternalListener implements DataChangeListener {
     }
     onDataChanged(index: number): void {
         this.onDataChange(index)
+    }
+
+    /**
+     * @internal
+     * Notify data change without updating MutableState. Safe to call during composition.
+     */
+    update(start: number, end: number, countDiff: number): void {
+        this.startIndex = Math.min(start, this.startIndex)
+        this.endIndex = Math.max(end, this.endIndex)
+        this.changeCount += countDiff
     }
 }

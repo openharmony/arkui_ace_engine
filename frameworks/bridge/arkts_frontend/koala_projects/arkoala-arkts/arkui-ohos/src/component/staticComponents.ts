@@ -78,7 +78,6 @@ export interface UIComponentRoot {
 }
 export class ArkComponentRootStyle implements ComponentRoot {
 }
-/** @memo:stable */
 export class ArkRootComponent extends ComponentBase implements UIRoot {
     getPeer(): ArkRootPeer {
         return (this.peer as ArkRootPeer)
@@ -89,7 +88,6 @@ export class ArkRootComponent extends ComponentBase implements UIRoot {
         super.applyAttributesFinish()
     }
 }
-/** @memo:stable */
 export class ArkComponentRootComponent extends ComponentBase implements UIComponentRoot {
     getPeer(): ArkComponentRootPeer {
         return (this.peer as ArkComponentRootPeer)

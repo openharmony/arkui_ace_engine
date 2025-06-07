@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_static.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -48,7 +49,7 @@ void SetTimePickerOptionsImpl(Ark_NativePointer node,
     if (pickerFormat.has_value() && pickerFormat.value() == TimePickerFormat::HOUR_MINUTE_SECOND) {
         showSeconds = true;
     }
-    TimePickerModelNG::SetHasSecond(frameNode, showSeconds);
+    TimePickerModelStatic::SetHasSecond(frameNode, showSeconds);
 
     auto selected = options ?
         Converter::OptConvert<PickerTime>(options->value.selected) :
@@ -282,7 +283,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = EnumToInt(value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt);
-    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+    TimePickerModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
 }
 void EnableCascadeImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
@@ -312,7 +313,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(result);
     };
-    TimePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
+    TimePickerModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()

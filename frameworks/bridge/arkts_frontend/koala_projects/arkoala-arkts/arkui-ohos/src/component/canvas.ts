@@ -31,13 +31,12 @@ import { ArkUIAniModule } from "arkui.ani"
 import { DrawingCanvas, DrawingCanvasInternal } from "./arkui-drawing"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
 import { ImageAIOptions, ImageAnalyzerConfig } from "./imageCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { FrameNode, FrameNodeInternal } from "../FrameNode"
 
-import { Callback_Void } from "./abilityComponent"
 export class CanvasGradientInternal {
     public static fromPtr(ptr: KPointer): CanvasGradient {
         const obj : CanvasGradient = new CanvasGradient()
@@ -694,12 +693,6 @@ export interface CanvasAttribute extends CommonMethod {
     onReady(value: VoidCallback | undefined): this
     enableAnalyzer(value: boolean | undefined): this
 }
-export interface UICanvasAttribute extends UICommonMethod {
-    /** @memo */
-    onReady(value: VoidCallback | undefined): this
-    /** @memo */
-    enableAnalyzer(value: boolean | undefined): this
-}
 export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttribute {
     onReady_value?: VoidCallback | undefined
     enableAnalyzer_value?: boolean | undefined
@@ -710,12 +703,10 @@ export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttrib
         return this
     }
 }
-/** @memo:stable */
-export class ArkCanvasComponent extends ArkCommonMethodComponent implements UICanvasAttribute {
+export class ArkCanvasComponent extends ArkCommonMethodComponent implements CanvasAttribute {
     getPeer(): ArkCanvasPeer {
         return (this.peer as ArkCanvasPeer)
     }
-    /** @memo */
     public setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setCanvasOptions")) {
             const context_type = runtimeType(context)
@@ -735,7 +726,6 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements UICa
         }
         return this
     }
-    /** @memo */
     public onReady(value: VoidCallback | undefined): this {
         if (this.checkPriority("onReady")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -744,7 +734,6 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements UICa
         }
         return this
     }
-    /** @memo */
     public enableAnalyzer(value: boolean | undefined): this {
         if (this.checkPriority("enableAnalyzer")) {
             const value_casted = value as (boolean | undefined)
@@ -761,7 +750,7 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements UICa
 /** @memo */
 export function Canvas(
     /** @memo */
-    style: ((attributes: UICanvasAttribute) => void) | undefined,
+    style: ((attributes: CanvasAttribute) => void) | undefined,
     context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions,
     /** @memo */
     content_?: (() => void) | undefined,

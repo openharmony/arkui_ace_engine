@@ -25,10 +25,9 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ImageFit } from "./enums"
 import { VoidCallback } from "./units"
-import { Callback_Void } from "./abilityComponent"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ColorMetrics } from "../Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -437,47 +436,6 @@ export interface VideoAttribute extends CommonMethod {
     surfaceBackgroundColor(value: ColorMetrics | undefined): this
     enableShortcutKey(value: boolean | undefined): this
 }
-export interface UIVideoAttribute extends UICommonMethod {
-    /** @memo */
-    muted(value: boolean | undefined): this
-    /** @memo */
-    autoPlay(value: boolean | undefined): this
-    /** @memo */
-    controls(value: boolean | undefined): this
-    /** @memo */
-    loop(value: boolean | undefined): this
-    /** @memo */
-    objectFit(value: ImageFit | undefined): this
-    /** @memo */
-    onStart(value: VoidCallback | undefined): this
-    /** @memo */
-    onPause(value: VoidCallback | undefined): this
-    /** @memo */
-    onFinish(value: VoidCallback | undefined): this
-    /** @memo */
-    onFullscreenChange(value: ((parameter: FullscreenInfo) => void) | undefined): this
-    /** @memo */
-    onPrepared(value: ((parameter: PreparedInfo) => void) | undefined): this
-    /** @memo */
-    onSeeking(value: ((parameter: PlaybackInfo) => void) | undefined): this
-    /** @memo */
-    onSeeked(value: ((parameter: PlaybackInfo) => void) | undefined): this
-    /** @memo */
-    onUpdate(value: ((parameter: PlaybackInfo) => void) | undefined): this
-    /** @memo */
-    onError(value: (() => void) | undefined): this
-    /** @memo */
-    onStop(value: ((value: undefined) => void) | undefined): this
-    /** @memo */
-    enableAnalyzer(value: boolean | undefined): this
-    /** @memo */
-    analyzerConfig(value: ImageAnalyzerConfig | undefined): this
-    /** @memo */
-    surfaceBackgroundColor(value: ColorMetrics | undefined): this
-    /** @memo */
-    enableShortcutKey(value: boolean | undefined): this
-    /** @memo */
-}
 export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribute {
     muted_value?: boolean | undefined
     autoPlay_value?: boolean | undefined
@@ -556,12 +514,10 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
         return this
         }
 }
-/** @memo:stable */
-export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVideoAttribute {
+export class ArkVideoComponent extends ArkCommonMethodComponent implements VideoAttribute {
     getPeer(): ArkVideoPeer {
         return (this.peer as ArkVideoPeer)
     }
-    /** @memo */
     public setVideoOptions(value: VideoOptions): this {
         if (this.checkPriority("setVideoOptions")) {
             const value_casted = value as (VideoOptions)
@@ -570,7 +526,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public muted(value: boolean | undefined): this {
         if (this.checkPriority("muted")) {
             const value_casted = value as (boolean | undefined)
@@ -579,7 +534,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public autoPlay(value: boolean | undefined): this {
         if (this.checkPriority("autoPlay")) {
             const value_casted = value as (boolean | undefined)
@@ -588,7 +542,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public controls(value: boolean | undefined): this {
         if (this.checkPriority("controls")) {
             const value_casted = value as (boolean | undefined)
@@ -597,7 +550,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public loop(value: boolean | undefined): this {
         if (this.checkPriority("loop")) {
             const value_casted = value as (boolean | undefined)
@@ -606,7 +558,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public objectFit(value: ImageFit | undefined): this {
         if (this.checkPriority("objectFit")) {
             const value_casted = value as (ImageFit | undefined)
@@ -615,7 +566,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onStart(value: VoidCallback | undefined): this {
         if (this.checkPriority("onStart")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -624,7 +574,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onPause(value: VoidCallback | undefined): this {
         if (this.checkPriority("onPause")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -633,7 +582,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onFinish(value: VoidCallback | undefined): this {
         if (this.checkPriority("onFinish")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -642,7 +590,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onFullscreenChange(value: ((parameter: FullscreenInfo) => void) | undefined): this {
         if (this.checkPriority("onFullscreenChange")) {
             const value_casted = value as (((parameter: FullscreenInfo) => void) | undefined)
@@ -651,7 +598,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onPrepared(value: ((parameter: PreparedInfo) => void) | undefined): this {
         if (this.checkPriority("onPrepared")) {
             const value_casted = value as (((parameter: PreparedInfo) => void) | undefined)
@@ -660,7 +606,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onSeeking(value: ((parameter: PlaybackInfo) => void) | undefined): this {
         if (this.checkPriority("onSeeking")) {
             const value_casted = value as (((parameter: PlaybackInfo) => void) | undefined)
@@ -669,7 +614,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onSeeked(value: ((parameter: PlaybackInfo) => void) | undefined): this {
         if (this.checkPriority("onSeeked")) {
             const value_casted = value as (((parameter: PlaybackInfo) => void) | undefined)
@@ -678,7 +622,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onUpdate(value: ((parameter: PlaybackInfo) => void) | undefined): this {
         if (this.checkPriority("onUpdate")) {
             const value_casted = value as (((parameter: PlaybackInfo) => void) | undefined)
@@ -687,7 +630,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onError(value: (() => void) | undefined): this {
         if (this.checkPriority("onError")) {
             const value_casted = value as ((() => void) | undefined)
@@ -696,7 +638,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public onStop(value: ((value: undefined) => void) | undefined): this {
         if (this.checkPriority("onStop")) {
             const value_casted = value as ((() => void) | undefined)
@@ -705,7 +646,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public enableAnalyzer(value: boolean | undefined): this {
         if (this.checkPriority("enableAnalyzer")) {
             const value_casted = value as (boolean | undefined)
@@ -714,7 +654,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
         if (this.checkPriority("analyzerConfig")) {
             const value_casted = value as (ImageAnalyzerConfig | undefined)
@@ -723,7 +662,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public surfaceBackgroundColor(value: ColorMetrics | undefined): this {
         if (this.checkPriority("surfaceBackgroundColor")) {
             const value_casted = value as (ColorMetrics | undefined)
@@ -732,7 +670,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
     public enableShortcutKey(value: boolean | undefined): this {
         if (this.checkPriority("enableShortcutKey")) {
             const value_casted = value as (boolean | undefined)
@@ -750,7 +687,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
 /** @memo */
 export function Video(
     /** @memo */
-    style: ((attributes: UIVideoAttribute) => void) | undefined,
+    style: ((attributes: VideoAttribute) => void) | undefined,
     value: VideoOptions,
     /** @memo */
     content_?: (() => void) | undefined,

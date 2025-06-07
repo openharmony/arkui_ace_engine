@@ -23,7 +23,6 @@ import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { Callback_Void } from "./abilityComponent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { InteractionHand } from "./enums"
 import { SourceTool, BaseEvent, BaseEventInternal, Callback } from "./common"
@@ -1446,7 +1445,7 @@ export interface BaseGestureEvent {
 }
 export class BaseGestureEventInternal extends BaseEventInternal implements MaterializedBase,BaseGestureEvent {
     get fingerList(): Array<FingerInfo> {
-        throw new Error("Not implemented")
+        return this.getFingerList();
     }
     set fingerList(fingerList: Array<FingerInfo>) {
         this.setFingerList(fingerList)
@@ -1472,8 +1471,15 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         return
     }
     private getFingerList_serialize(): Array<FingerInfo> {
-        const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_getFingerList(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_getFingerList(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<FingerInfo> = new Array<FingerInfo>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

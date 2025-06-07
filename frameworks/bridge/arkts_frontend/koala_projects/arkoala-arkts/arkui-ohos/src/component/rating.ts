@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -205,21 +205,6 @@ export interface RatingAttribute extends CommonMethod {
     contentModifier(value: ContentModifier | undefined): this
     _onChangeEvent_rating(callback: ((index: number) => void)): void
 }
-export interface UIRatingAttribute extends UICommonMethod {
-    /** @memo */
-    stars(value: number | undefined): this
-    /** @memo */
-    stepSize(value: number | undefined): this
-    /** @memo */
-    starStyle(value: StarStyleOptions | undefined): this
-    /** @memo */
-    onChange(value: ((index: number) => void) | undefined | OnRatingChangeCallback | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-    _onChangeEvent_rating(callback: ((index: number) => void)): void
-    /** @memo */
-}
 export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttribute {
     stars_value?: number | undefined
     stepSize_value?: number | undefined
@@ -245,12 +230,10 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRatingAttribute {
+export class ArkRatingComponent extends ArkCommonMethodComponent implements RatingAttribute {
     getPeer(): ArkRatingPeer {
         return (this.peer as ArkRatingPeer)
     }
-    /** @memo */
     public setRatingOptions(options?: RatingOptions): this {
         if (this.checkPriority("setRatingOptions")) {
             const options_casted = options as (RatingOptions | undefined)
@@ -259,7 +242,6 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRa
         }
         return this
     }
-    /** @memo */
     public stars(value: number | undefined): this {
         if (this.checkPriority("stars")) {
             const value_type = runtimeType(value)
@@ -277,7 +259,6 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRa
         }
         return this
     }
-    /** @memo */
     public stepSize(value: number | undefined): this {
         if (this.checkPriority("stepSize")) {
             const value_type = runtimeType(value)
@@ -295,7 +276,6 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRa
         }
         return this
     }
-    /** @memo */
     public starStyle(value: StarStyleOptions | undefined): this {
         if (this.checkPriority("starStyle")) {
             const value_type = runtimeType(value)
@@ -313,7 +293,6 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRa
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((index: number) => void) | undefined | OnRatingChangeCallback | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_type = runtimeType(value)
@@ -331,7 +310,6 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRa
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_type = runtimeType(value)
@@ -349,7 +327,6 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRa
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_rating(callback: ((index: number) => void)): void {
         if (this.checkPriority("_onChangeEvent_rating")) {
             const callback_casted = callback as (((index: number) => void))
@@ -367,7 +344,7 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRa
 /** @memo */
 export function Rating(
     /** @memo */
-    style: ((attributes: UIRatingAttribute) => void) | undefined,
+    style: ((attributes: RatingAttribute) => void) | undefined,
     options?: RatingOptions,
     /** @memo */
     content_?: (() => void) | undefined,

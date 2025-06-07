@@ -25,11 +25,11 @@ import { CallbackTransformer } from "./CallbackTransformer"
 import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
-import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, PointerStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
+import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme, Callback_CreateItem } from "./../arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
-import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, DecorationStyleResult } from "./../textCommon"
+import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
 import { ErrorCallback } from "./../ohos.base"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../waterFlow"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
@@ -39,7 +39,7 @@ import { LocationButtonCallback, LocationButtonOnClickResult, LocationDescriptio
 import { MenuCallback, MenuOnAppearCallback, PasteEventCallback, SubmitCallback, RichEditorAttribute, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, PasteEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_CutEvent_Void, CutEvent, Callback_CopyEvent_Void, CopyEvent, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle, RichEditorBaseController, RichEditorBaseControllerInternal, RichEditorTextStyle, RichEditorController, RichEditorControllerInternal, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorImageSpanResult, RichEditorParagraphResult, RichEditorSpan, RichEditorDeleteDirection, RichEditorOptions, RichEditorStyledStringController, RichEditorStyledStringControllerInternal, RichEditorStyledStringOptions, LeadingMarginPlaceholder, PreviewMenuOptions, RichEditorGesture, RichEditorSpanPosition, RichEditorLayoutStyle, RichEditorParagraphStyle, RichEditorSymbolSpanStyle, RichEditorSpanStyleOptions, RichEditorUrlStyle, RichEditorImageSpanStyle, RichEditorImageSpanStyleResult, RichEditorTextStyleResult } from "./../richEditor"
 import { NavDestinationTransitionDelegate, NavDestinationActiveReason, NavDestinationAttribute, Callback_Boolean, Callback_Object_Void, NavDestinationMode, Callback_NavDestinationContext_Void, NavDestinationContext, NavDestinationContextInternal, NavigationSystemTransitionType, NestedScrollInfo, Callback_NavDestinationActiveReason_Void, Orientation, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationTransition, RouteMapConfig } from "./../navDestination"
 import { NavExtender_OnUpdateStack } from "./../navigationExtender"
-import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ClientAuthenticationHandlerInternal, ConsoleMessage, ConsoleMessageInternal, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, ControllerHandlerInternal, DataResubmissionHandler, DataResubmissionHandlerInternal, EventResult, EventResultInternal, FileSelectorMode, FileSelectorParam, FileSelectorParamInternal, FileSelectorResult, FileSelectorResultInternal, FullScreenExitHandler, FullScreenExitHandlerInternal, HitTestType, HttpAuthHandler, HttpAuthHandlerInternal, JsGeolocation, JsGeolocationInternal, JsResult, JsResultInternal, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, PermissionRequestInternal, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureHandlerInternal, ScreenCaptureConfig, SslError, SslErrorHandler, SslErrorHandlerInternal, ThreatType, ViewportFit, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, WebResourceRequestInternal, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, WebResourceResponseInternal, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, FirstMeaningfulPaint, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, LoadCommittedDetails, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, RenderProcessNotRespondingData, ExpandedMenuItemOptions, WebKeyboardCallbackInfo, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuParamInternal, WebContextMenuResult, WebContextMenuResultInternal, WebController, WebControllerInternal, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebCookieInternal, WebKeyboardController, WebKeyboardControllerInternal, WebNavigationType, WebResourceError, WebResourceErrorInternal, Callback_Literal_String_plainText_Void, Literal_String_plainText, WebKeyboardOptions, WebOptions, NativeEmbedInfo } from "./../web"
+import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ClientAuthenticationHandlerInternal, ConsoleMessage, ConsoleMessageInternal, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, ControllerHandlerInternal, DataResubmissionHandler, DataResubmissionHandlerInternal, EventResult, EventResultInternal, FileSelectorMode, FileSelectorParam, FileSelectorParamInternal, FileSelectorResult, FileSelectorResultInternal, FullScreenExitHandler, FullScreenExitHandlerInternal, HitTestType, HttpAuthHandler, HttpAuthHandlerInternal, JsGeolocation, JsGeolocationInternal, JsResult, JsResultInternal, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, PermissionRequestInternal, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureHandlerInternal, ScreenCaptureConfig, SslError, SslErrorHandler, SslErrorHandlerInternal, ThreatType, ViewportFit, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, WebResourceRequestInternal, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, WebResourceResponseInternal, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, FirstMeaningfulPaint, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, LoadCommittedDetails, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, RenderProcessNotRespondingData, ExpandedMenuItemOptions, WebKeyboardCallbackInfo, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuParamInternal, WebContextMenuResult, WebContextMenuResultInternal, WebController, WebControllerInternal, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebCookieInternal, WebKeyboardController, WebKeyboardControllerInternal, WebNavigationType, WebResourceError, WebResourceErrorInternal, Callback_Literal_String_plainText_Void, Literal_String_plainText, WebKeyboardOptions, WebOptionsSerializer, NativeEmbedInfo } from "./../web"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback, AlphabetIndexerAttribute, Callback_Number_Void, IndexerAlign, Callback_Opt_Number_Void, AlphabetIndexerOptions } from "./../alphabetIndexer"
 import { OnCheckboxChangeCallback, Callback_Opt_Boolean_Void, CheckboxOptions } from "./../checkbox"
 import { OnCheckboxGroupChangeCallback, SelectStatus, CheckboxGroupResult, CheckboxGroupOptions } from "./../checkboxgroup"
@@ -61,7 +61,7 @@ import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteI
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { SaveButtonCallback, SaveButtonOnClickResult, SaveDescription, SaveIconStyle, SaveButtonOptions } from "./../saveButton"
 import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchType, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../search"
@@ -94,7 +94,6 @@ import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DateP
 import { DialogAlignment, DialogButtonDirection, LevelOrder, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, UIExtensionProxyInternal, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, Callback_Literal_Number_code__want_Void, Literal_Number_code__want, Callback_Map_String_Object_Void, UIExtensionOptions } from "./../uiExtensionComponent"
-import { Callback_Void } from "./../abilityComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, Callback_SwipeActionState_Void, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../listItem"
 import { EffectFillStyle, PulseSymbolEffect, PulseSymbolEffectInternal, SymbolEffectStrategy, SymbolGlyphAttribute, SymbolRenderingStrategy, AppearSymbolEffect, AppearSymbolEffectInternal, BounceSymbolEffect, BounceSymbolEffectInternal, DisappearSymbolEffect, DisappearSymbolEffectInternal, HierarchicalSymbolEffect, HierarchicalSymbolEffectInternal } from "./../symbolglyph"
 import { EventTargetInfo, EventTargetInfoInternal, GestureControl, GestureGroupInterface, GestureGroupInterfaceInternal, GestureMode, GestureType, TapGestureInterface, TapGestureInterfaceInternal, LongPressGestureInterface, LongPressGestureInterfaceInternal, PanGestureInterface, PanGestureInterfaceInternal, PinchGestureInterface, PinchGestureInterfaceInternal, SwipeGestureInterface, SwipeGestureInterfaceInternal, RotationGestureInterface, RotationGestureInterfaceInternal, GestureJudgeResult, GestureMask, GesturePriority, GestureRecognizer, GestureRecognizerInternal, GestureRecognizerState, GestureInterface, Literal_Number_duration_fingers_Boolean_repeat, LongPressGestureHandlerOptions, Callback_GestureEvent_Void, GestureEvent, GestureEventInternal, LongPressRecognizer, LongPressRecognizerInternal, PanDirection, Literal_Number_distance_fingers_PanDirection_direction, PanGestureOptions, PanGestureOptionsInternal, PanGestureHandlerOptions, PanRecognizer, PanRecognizerInternal, Literal_Number_distance_fingers, PinchGestureHandlerOptions, PinchRecognizer, PinchRecognizerInternal, Literal_Number_angle_fingers, RotationGestureHandlerOptions, RotationRecognizer, RotationRecognizerInternal, ScrollableTargetInfo, ScrollableTargetInfoInternal, SwipeDirection, Literal_Number_fingers_speed_SwipeDirection_direction, SwipeGestureHandlerOptions, SwipeRecognizer, SwipeRecognizerInternal, TapGestureParameters, TapRecognizer, TapRecognizerInternal, GestureHandler, GestureInfo, BaseGestureEvent, BaseGestureEventInternal, FingerInfo, BaseHandlerOptions, LongPressGestureEvent, LongPressGestureEventInternal, PanGestureEvent, PanGestureEventInternal, PinchGestureEvent, PinchGestureEventInternal, RotationGestureEvent, RotationGestureEventInternal, SwipeGestureEvent, SwipeGestureEventInternal, TapGestureEvent, TapGestureEventInternal } from "./../gesture"
@@ -172,7 +171,7 @@ import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 import { drawing } from "../../../ohos.graphics.drawing"
 import promptAction from '@ohos/promptAction'
-
+import { PointerStyle } from '#external'
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
         super(data, length)
@@ -1134,6 +1133,27 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return UIExtensionProxyInternal.fromPtr(ptr)
     }
+    readUIFontAdjustInfo(): UIFontAdjustInfo {
+        let valueDeserializer : Deserializer = this
+        const weight_result : number = (valueDeserializer.readNumber() as number)
+        const to_result : number = (valueDeserializer.readNumber() as number)
+        let value : UIFontAdjustInfo = ({weight: weight_result, to: to_result} as UIFontAdjustInfo)
+        return value
+    }
+    readUIFontAliasInfo(): UIFontAliasInfo {
+        let valueDeserializer : Deserializer = this
+        const name_result : string = (valueDeserializer.readString() as string)
+        const weight_result : number = (valueDeserializer.readNumber() as number)
+        let value : UIFontAliasInfo = ({name: name_result, weight: weight_result} as UIFontAliasInfo)
+        return value
+    }
+    readUIFontFallbackInfo(): UIFontFallbackInfo {
+        let valueDeserializer : Deserializer = this
+        const language_result : string = (valueDeserializer.readString() as string)
+        const family_result : string = (valueDeserializer.readString() as string)
+        let value : UIFontFallbackInfo = ({language: language_result, family: family_result} as UIFontFallbackInfo)
+        return value
+    }
     readUIGestureEvent(): UIGestureEvent {
         throw new Error("Interface with functions is not supported")
     }
@@ -1584,6 +1604,23 @@ export class Deserializer extends DeserializerBase {
     (isSync) ? (InteropNativeModule._CallCallbackSync(-120437466, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-120437466, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
+    }
+    public readCallback_CreateItem(isSync: boolean = false): Callback_CreateItem {
+        const _resource: CallbackResource = this.readCallbackResource()
+        const _call: KPointer = this.readPointer()
+        const _callSync: KPointer = this.readPointer()
+        return (index: int32): KPointer => { 
+    const _argsSerializer: Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(index);
+    let _continuationValue: KPointer | undefined|undefined ;
+    const _continuationCallback: ((value: KPointer) => void) = (value: KPointer): void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2019730059, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2019730059, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as KPointer); }
     }
     readCallback_CrownEvent_Void(isSync: boolean = false): ((parameter: CrownEvent) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -3473,17 +3510,16 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return; }
     }
-    readCallback_RangeUpdate(isSync: boolean = false): Callback_RangeUpdate {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (index: int32, mark: KPointer, end: int32):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
+    public readCallback_RangeUpdate(isSync: boolean = false): Callback_RangeUpdate {
+        const _resource: CallbackResource = this.readCallbackResource()
+        const _call: KPointer = this.readPointer()
+        const _callSync: KPointer = this.readPointer()
+        return (start: int32, end: int32): void => { 
+    const _argsSerializer: Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(index);
-    _argsSerializer.writePointer(mark);
+    _argsSerializer.writeInt32(start);
     _argsSerializer.writeInt32(end);
     (isSync) ? (InteropNativeModule._CallCallbackSync(797834474, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(797834474, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
@@ -11553,6 +11589,18 @@ export class Deserializer extends DeserializerBase {
         let value : TextMarqueeOptions = ({start: start_result, step: step_result, loop: loop_result, fromStart: fromStart_result, delay: delay_result, fadeout: fadeout_result, marqueeStartPolicy: marqueeStartPolicy_result} as TextMarqueeOptions)
         return value
     }
+    readTextMenuOptions(): TextMenuOptions {
+        let valueDeserializer : Deserializer = this
+        const showMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let showMode_buf : TextMenuShowMode | undefined
+        if ((RuntimeType.UNDEFINED) != (showMode_buf_runtimeType))
+        {
+            showMode_buf = TypeChecker.TextMenuShowMode_FromNumeric(valueDeserializer.readInt32())
+        }
+        const showMode_result : TextMenuShowMode | undefined = showMode_buf
+        let value : TextMenuOptions = ({showMode: showMode_result} as TextMenuOptions)
+        return value
+    }
     readTextRange(): TextRange {
         let valueDeserializer : Deserializer = this
         const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -11929,6 +11977,59 @@ export class Deserializer extends DeserializerBase {
         let value : UIExtensionOptions = ({isTransferringCaller: isTransferringCaller_result, placeholder: placeholder_result, areaChangePlaceholder: areaChangePlaceholder_result, dpiFollowStrategy: dpiFollowStrategy_result, windowModeFollowStrategy: windowModeFollowStrategy_result} as UIExtensionOptions)
         return value
     }
+    readUIFontConfig(): UIFontConfig {
+        let valueDeserializer : Deserializer = this
+        const fontDir_buf_length : int32 = valueDeserializer.readInt32()
+        let fontDir_buf : Array<string> = new Array<string>(fontDir_buf_length)
+        for (let fontDir_buf_i = 0; fontDir_buf_i < fontDir_buf_length; fontDir_buf_i++) {
+            fontDir_buf[fontDir_buf_i] = (valueDeserializer.readString() as string)
+        }
+        const fontDir_result : Array<string> = fontDir_buf
+        const generic_buf_length : int32 = valueDeserializer.readInt32()
+        let generic_buf : Array<UIFontGenericInfo> = new Array<UIFontGenericInfo>(generic_buf_length)
+        for (let generic_buf_i = 0; generic_buf_i < generic_buf_length; generic_buf_i++) {
+            generic_buf[generic_buf_i] = valueDeserializer.readUIFontGenericInfo()
+        }
+        const generic_result : Array<UIFontGenericInfo> = generic_buf
+        const fallbackGroups_buf_length : int32 = valueDeserializer.readInt32()
+        let fallbackGroups_buf : Array<UIFontFallbackGroupInfo> = new Array<UIFontFallbackGroupInfo>(fallbackGroups_buf_length)
+        for (let fallbackGroups_buf_i = 0; fallbackGroups_buf_i < fallbackGroups_buf_length; fallbackGroups_buf_i++) {
+            fallbackGroups_buf[fallbackGroups_buf_i] = valueDeserializer.readUIFontFallbackGroupInfo()
+        }
+        const fallbackGroups_result : Array<UIFontFallbackGroupInfo> = fallbackGroups_buf
+        let value : UIFontConfig = ({fontDir: fontDir_result, generic: generic_result, fallbackGroups: fallbackGroups_result} as UIFontConfig)
+        return value
+    }
+    readUIFontFallbackGroupInfo(): UIFontFallbackGroupInfo {
+        let valueDeserializer : Deserializer = this
+        const fontSetName_result : string = (valueDeserializer.readString() as string)
+        const fallback_buf_length : int32 = valueDeserializer.readInt32()
+        let fallback_buf : Array<UIFontFallbackInfo> = new Array<UIFontFallbackInfo>(fallback_buf_length)
+        for (let fallback_buf_i = 0; fallback_buf_i < fallback_buf_length; fallback_buf_i++) {
+            fallback_buf[fallback_buf_i] = valueDeserializer.readUIFontFallbackInfo()
+        }
+        const fallback_result : Array<UIFontFallbackInfo> = fallback_buf
+        let value : UIFontFallbackGroupInfo = ({fontSetName: fontSetName_result, fallback: fallback_result} as UIFontFallbackGroupInfo)
+        return value
+    }
+    readUIFontGenericInfo(): UIFontGenericInfo {
+        let valueDeserializer : Deserializer = this
+        const family_result : string = (valueDeserializer.readString() as string)
+        const alias_buf_length : int32 = valueDeserializer.readInt32()
+        let alias_buf : Array<UIFontAliasInfo> = new Array<UIFontAliasInfo>(alias_buf_length)
+        for (let alias_buf_i = 0; alias_buf_i < alias_buf_length; alias_buf_i++) {
+            alias_buf[alias_buf_i] = valueDeserializer.readUIFontAliasInfo()
+        }
+        const alias_result : Array<UIFontAliasInfo> = alias_buf
+        const adjust_buf_length : int32 = valueDeserializer.readInt32()
+        let adjust_buf : Array<UIFontAdjustInfo> = new Array<UIFontAdjustInfo>(adjust_buf_length)
+        for (let adjust_buf_i = 0; adjust_buf_i < adjust_buf_length; adjust_buf_i++) {
+            adjust_buf[adjust_buf_i] = valueDeserializer.readUIFontAdjustInfo()
+        }
+        const adjust_result : Array<UIFontAdjustInfo> = adjust_buf
+        let value : UIFontGenericInfo = ({family: family_result, alias: alias_result, adjust: adjust_result} as UIFontGenericInfo)
+        return value
+    }
     readViewportRect(): ViewportRect {
         let valueDeserializer : Deserializer = this
         const x_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -12226,7 +12327,7 @@ export class Deserializer extends DeserializerBase {
         let value : WebMediaOptions = ({resumeInterval: resumeInterval_result, audioExclusive: audioExclusive_result} as WebMediaOptions)
         return value
     }
-    readWebOptions(): WebOptions {
+    readWebOptions(): WebOptionsSerializer {
         let valueDeserializer : Deserializer = this
         const src_buf_selector : int32 = valueDeserializer.readInt8()
         let src_buf : string | Resource | undefined
@@ -12240,18 +12341,6 @@ export class Deserializer extends DeserializerBase {
             throw new Error("One of the branches for src_buf has to be chosen through deserialisation.")
         }
         const src_result : string | Resource = (src_buf as string | Resource)
-        const controller_buf_selector : int32 = valueDeserializer.readInt8()
-        let controller_buf : WebController | WebviewController | undefined
-        if (controller_buf_selector == 0) {
-            controller_buf = (valueDeserializer.readWebController() as WebController)
-        }
-        else if (controller_buf_selector == 1) {
-            controller_buf = (valueDeserializer.readWebviewController() as WebviewController)
-        }
-        else {
-            throw new Error("One of the branches for controller_buf has to be chosen through deserialisation.")
-        }
-        const controller_result : WebController | WebviewController = (controller_buf as WebController | WebviewController)
         const renderMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let renderMode_buf : RenderMode | undefined
         if ((RuntimeType.UNDEFINED) != (renderMode_buf_runtimeType))
@@ -12273,7 +12362,7 @@ export class Deserializer extends DeserializerBase {
             sharedRenderProcessToken_buf = (valueDeserializer.readString() as string)
         }
         const sharedRenderProcessToken_result : string | undefined = sharedRenderProcessToken_buf
-        let value : WebOptions = ({src: src_result, controller: controller_result, renderMode: renderMode_result, incognitoMode: incognitoMode_result, sharedRenderProcessToken: sharedRenderProcessToken_result} as WebOptions)
+        let value : WebOptionsSerializer = ({src: src_result, renderMode: renderMode_result, incognitoMode: incognitoMode_result, sharedRenderProcessToken: sharedRenderProcessToken_result} as WebOptionsSerializer)
         return value
     }
     readWorkerOptions(): WorkerOptions {

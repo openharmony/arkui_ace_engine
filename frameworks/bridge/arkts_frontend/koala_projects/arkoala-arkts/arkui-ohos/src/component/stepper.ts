@@ -22,8 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
-import { Callback_Void } from "./abilityComponent"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Callback_Number_Number_Void } from "./grid"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -139,21 +138,6 @@ export interface StepperAttribute extends CommonMethod {
     onPrevious(value: ((first: number,last: number) => void) | undefined): this
     _onChangeEvent_index(callback: ((index: number) => void)): void
 }
-export interface UIStepperAttribute extends UICommonMethod {
-    /** @memo */
-    onFinish(value: (() => void) | undefined): this
-    /** @memo */
-    onSkip(value: (() => void) | undefined): this
-    /** @memo */
-    onChange(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onNext(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onPrevious(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    _onChangeEvent_index(callback: ((index: number) => void)): void
-    /** @memo */
-}
 export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttribute {
     onFinish_value?: (() => void) | undefined
     onSkip_value?: (() => void) | undefined
@@ -179,12 +163,10 @@ export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttr
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkStepperComponent extends ArkCommonMethodComponent implements UIStepperAttribute {
+export class ArkStepperComponent extends ArkCommonMethodComponent implements StepperAttribute {
     getPeer(): ArkStepperPeer {
         return (this.peer as ArkStepperPeer)
     }
-    /** @memo */
     public setStepperOptions(value?: StepperOptionalIndex): this {
         if (this.checkPriority("setStepperOptions")) {
             const value_casted = value as (StepperOptionalIndex | undefined)
@@ -193,7 +175,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public onFinish(value: (() => void) | undefined): this {
         if (this.checkPriority("onFinish")) {
             const value_casted = value as ((() => void) | undefined)
@@ -202,7 +183,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public onSkip(value: (() => void) | undefined): this {
         if (this.checkPriority("onSkip")) {
             const value_casted = value as ((() => void) | undefined)
@@ -211,7 +191,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -220,7 +199,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public onNext(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onNext")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -229,7 +207,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public onPrevious(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onPrevious")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -238,7 +215,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_index(callback: ((index: number) => void)): void {
         if (this.checkPriority("_onChangeEvent_index")) {
             const callback_casted = callback as (((index: number) => void))
@@ -256,7 +232,7 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
 /** @memo */
 export function Stepper(
     /** @memo */
-    style: ((attributes: UIStepperAttribute) => void) | undefined,
+    style: ((attributes: StepperAttribute) => void) | undefined,
     value?: StepperOptionalIndex,
     /** @memo */
     content_?: (() => void) | undefined,

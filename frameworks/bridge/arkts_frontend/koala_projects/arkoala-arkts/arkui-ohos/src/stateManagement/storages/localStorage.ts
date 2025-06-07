@@ -39,7 +39,9 @@ export class LocalStorage {
     // how FinalizationRegistry is used: when creating a link or prop:
     // finalizationRegistry_.register(prop/link object, { propName: propName, id: id })
     private finalizationRegistry_: FinalizationRegistry<StorageLinkPropRegistration> =
-        new FinalizationRegistry<StorageLinkPropRegistration>(this.__clearLinkInternalByRegistration);
+        new FinalizationRegistry<StorageLinkPropRegistration>((linkPropRegistration: StorageLinkPropRegistration) => {
+            this.__clearLinkInternalByRegistration(linkPropRegistration);
+        });
 
     // framework internal function, not STK
     public __clearLinkInternalByRegistration(linkPropRegistration: StorageLinkPropRegistration): void {

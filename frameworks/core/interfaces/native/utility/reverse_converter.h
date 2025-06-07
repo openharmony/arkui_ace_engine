@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
+#include "core/interfaces/native/implementation/axis_event_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -248,6 +249,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src);
     void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src);
     void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src);
+    void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src);
     void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationContext>& src);
     void AssignArkValue(Ark_NavDestinationContext& dst, const RefPtr<NG::NavDestinationContext>& src);
     void AssignArkValue(Ark_NavigationTransitionProxy& dst, const RefPtr<NavigationTransitionProxy>& src);
@@ -339,6 +341,12 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_TextDirection& dst, const Ace::TextDirection& src);
+    void AssignArkValue(Ark_UIFontFallbackInfo& dst, const FallbackInfo& src, ConvContext* ctx);
+    void AssignArkValue(Ark_UIFontFallbackGroupInfo& dst, const FallbackGroup& src, ConvContext* ctx);
+    void AssignArkValue(Ark_UIFontAdjustInfo& dst, const AdjustInfo& src);
+    void AssignArkValue(Ark_UIFontAliasInfo& dst, const AliasInfo& src, ConvContext* ctx);
+    void AssignArkValue(Ark_UIFontGenericInfo& dst, const FontGenericInfo& src, ConvContext* ctx);
+    void AssignArkValue(Ark_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvContext* ctx);
     void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src);
     void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src);
     void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src);
@@ -798,6 +806,7 @@ namespace OHOS::Ace::NG::Converter {
     using ArkMouseEventSync = SyncEvent<Ark_MouseEvent>;
     using ArkSubmitEventSync = SyncEvent<Ark_SubmitEvent>;
     using ArkTouchEventSync = SyncEvent<Ark_TouchEvent>;
+    using ArkAxisEventSync = SyncEvent<Ark_AxisEvent>;
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H

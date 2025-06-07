@@ -131,9 +131,9 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         style: ((instance: S) => void) | undefined,
         factory: () => S,
         initializers?: S_Options,
+        reuseKey?: string,
         /** @memo */
-        content?: () => void,
-        reuseKey?: string
+        content?: () => void
     ): void {
         CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(factory()), content, initializers, reuseKey);
     }

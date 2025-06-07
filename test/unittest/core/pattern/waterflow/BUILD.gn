@@ -51,7 +51,6 @@ ace_unittest("water_flow_test_sw") {
   type = "new"
   defines = [ "TEST_WATER_FLOW_SW" ]
   sources = [
-    "water_flow_arkoala_test.cpp",
     "water_flow_estimation_test.cpp",
     "water_flow_regular_test.cpp",
     "water_flow_segment_common_test.cpp",

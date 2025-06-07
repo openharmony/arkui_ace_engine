@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
@@ -436,6 +437,20 @@ private:
     ImageAttachmentPeer* peer = nullptr;
 };
 
+struct StyledStringUnionCustomSpan {
+    Ark_Union_String_ImageAttachment_CustomSpan* Union()
+    {
+        peer = PeerUtils::CreatePeer<CustomSpanPeer>(AceType::MakeRefPtr<CustomSpan>());
+        static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
+            Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(peer);
+        return &value;
+    }
+    Opt_Array_StyleOptions* Styles() { return nullptr; }
+    void TearDown() {}
+private:
+    CustomSpanPeer* peer = nullptr;
+};
+
 template <typename V1>
 class StyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIStyledStringAccessor,
     &GENERATED_ArkUIAccessors::getStyledStringAccessor, StyledStringPeer> {
@@ -500,6 +515,7 @@ private:
 using StyledStringAccessorUnionNullTest = StyledStringAccessorTest<StyledStringUnionNull>;
 using StyledStringAccessorUnionStringTest = StyledStringAccessorTest<StyledStringUnionString>;
 using StyledStringAccessorUnionImageAttachmentTest = StyledStringAccessorTest<StyledStringUnionImageAttachment>;
+using StyledStringAccessorUnionCustomSpanTest = StyledStringAccessorTest<StyledStringUnionCustomSpan>;
 
 /**
  * @tc.name: peerSucceeded
@@ -1051,5 +1067,24 @@ HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, ctorImageAttachmentTest, 
     ASSERT_TRUE(imageAttribute.value().paddingProp.has_value());
     auto paddingStr = imageAttribute.value().paddingProp.value().ToString();
     EXPECT_EQ(paddingStr, TEST_LENGTHMETRICS_STR);
+}
+
+/**
+ * @tc.name: ctorCustomSpanTest
+ * @tc.desc: CustomSpan check
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionCustomSpanTest, ctorCustomSpanTest, TestSize.Level1)
+{
+    ASSERT_NE(peer_->spanString, nullptr);
+    auto spans = peer_->spanString->GetSpans(0, 1);
+    ASSERT_EQ(spans.size(), 1);
+    auto customSpan = AceType::DynamicCast<CustomSpan>(spans[0]);
+    ASSERT_NE(customSpan, nullptr);
+    EXPECT_EQ(customSpan->ToString(), "CustomSpan [0:1]");
+    EXPECT_EQ(customSpan->GetLength(), 1);
+    EXPECT_EQ(customSpan->GetStartIndex(), 0);
+    EXPECT_EQ(customSpan->GetEndIndex(), 1);
+    EXPECT_EQ(customSpan->GetSpanType(), SpanType::CustomSpan);
 }
 } // namespace OHOS::Ace::NG

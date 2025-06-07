@@ -3785,6 +3785,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LazyForEachOps_NotifyChange(node: KPointer, startIndex: KInt, endIndex: KInt, count: KInt): void
     @ani.unsafe.Direct
+    native static _LazyForEachOps_Sync(node: KPointer, totalCount: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SystemOps_StartFrame(): KPointer
     @ani.unsafe.Direct
     native static _SystemOps_EndFrame(root: KPointer): void
@@ -4137,6 +4139,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_ohos_font_getSystemFontList(): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _GlobalScope_ohos_font_getFontByName(fontName: KStringPtr): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _GlobalScope_ohos_font_getUIFontConfig(): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GlobalScope_ohos_measure_utils_measureText(thisArray: KSerializerBuffer, thisLength: int32): number
     @ani.unsafe.Quick
@@ -4201,6 +4205,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNode_getPositionToWindowWithTransform(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _FrameNode_getFrameNodeByKey(name: KStringPtr): KPointer
+    @ani.unsafe.Direct
+    native static _FrameNode_getCommonEvent(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _FrameNode_getIdByFrameNode(ptr: KPointer, node: KPointer): number
     @ani.unsafe.Direct
@@ -4503,6 +4509,12 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderNode_getLengthMetricsUnit(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _RenderNode_setLengthMetricsUnit(ptr: KPointer, lengthMetricsUnit: KInt): void
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextFontScale_isFollowingSystemFontScale(): boolean
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextFontScale_getMaxFontScale(): number
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextTextMenu_setMenuOptions(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _UIContextImp_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
     @ani.unsafe.Direct
@@ -4758,8 +4770,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ClickEvent_getHand(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ClickEvent_setHand(ptr: KPointer, hand: KInt): void
-    @ani.unsafe.Direct
-    native static _ClickEvent_getPreventDefault(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _ClickEvent_getPreventDefault(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ClickEvent_setPreventDefault(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4952,8 +4964,8 @@ export class ArkUIGeneratedNativeModule {
     native static _AxisEvent_getScrollStep(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _AxisEvent_setScrollStep(ptr: KPointer, scrollStep: number): void
-    @ani.unsafe.Direct
-    native static _AxisEvent_getPropagation(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _AxisEvent_getPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _AxisEvent_setPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
