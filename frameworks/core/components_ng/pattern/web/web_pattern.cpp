@@ -3397,10 +3397,6 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t nodeId = host->GetId();
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    if (dragDropManager) {
-        dragDropManager->AddDragFrameNode(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
-    }
 
     pipelineContext->AddWindowStateChangedCallback(nodeId);
     pipelineContext->AddWindowSizeChangeCallback(nodeId);
@@ -3434,11 +3430,6 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
 
     if (observer_) {
         observer_->OnDetachContext();
-    }
-
-    auto dragDropManager = context->GetDragDropManager();
-    if (dragDropManager) {
-        dragDropManager->RemoveDragFrameNode(nodeId);
     }
 
     if (tooltipId_ != -1) {

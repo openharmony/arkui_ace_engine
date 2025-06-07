@@ -53,9 +53,6 @@ public:
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, nullptr);
         pipeline->AddWindowStateChangedCallback(nodeId);
-        auto dragDropManager = pipeline->GetDragDropManager();
-        CHECK_NULL_RETURN(dragDropManager, nullptr);
-        dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
         return frameNode;
     }
 

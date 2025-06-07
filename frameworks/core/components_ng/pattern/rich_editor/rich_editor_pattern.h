@@ -1490,27 +1490,6 @@ private:
     void ReplacePlaceholderWithCustomSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void ReplacePlaceholderWithSymbolSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void ReplacePlaceholderWithImageSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
-    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto dragDropManager = context->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    }
-
-    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto dragDropManager = context->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->RemoveDragFrameNode(frameNode->GetId());
-    }
 
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);

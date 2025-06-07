@@ -698,10 +698,8 @@ void RichEditorPattern::OnModifyDone()
     selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
     if (host->IsDraggable()) {
         InitDragDropEvent();
-        AddDragFrameNodeToManager(host);
     } else {
         ClearDragDropEvent();
-        RemoveDragFrameNodeFromManager(host);
     }
     Register2DragDropManager();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

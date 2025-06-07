@@ -600,18 +600,6 @@ void SearchPattern::InitTextFieldDragEvent()
     }
 
     searchEventHub->ClearCustomerOnDragFunc();
-    RemoveDragFrameNodeFromManager();
-}
-
-void SearchPattern::RemoveDragFrameNodeFromManager()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto dragDropManager = context->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->RemoveDragFrameNode(frameNode->GetId());
 }
 
 void SearchPattern::OnAfterModifyDone()
