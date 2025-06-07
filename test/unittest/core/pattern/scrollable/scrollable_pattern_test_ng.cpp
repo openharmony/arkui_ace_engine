@@ -1759,17 +1759,18 @@ HWTEST_F(ScrollablePatternTestNg, HandleOnReachEvent001, TestSize.Level1)
 {
     RefPtr<ScrollerObserverManager> manager = AceType::MakeRefPtr<ScrollerObserverManager>();
     manager->observers_.clear();
-    bool callbackTriggered = true;
+    bool callbackTriggered = false;
     ScrollerObserver observer;
     observer.onReachStartEvent = nullptr;
     observer.onReachEndEvent = [manager, observer, &callbackTriggered]() {
-        callbackTriggered = false;
-        manager->AddObserver(observer, 2);
+        callbackTriggered = true;
+        manager->RemoveObserver(2);
     };
     manager->AddObserver(observer, 1);
+    manager->AddObserver(observer, 2);
     manager->HandleOnReachEvent(true);
-    EXPECT_FALSE(callbackTriggered);
-    EXPECT_EQ(manager->observers_.count(2), 1);
+    EXPECT_TRUE(callbackTriggered);
+    EXPECT_EQ(manager->observers_.count(2), 0);
 }
 
 /**
@@ -1885,17 +1886,17 @@ HWTEST_F(ScrollablePatternTestNg, HandleOnScrollStopEvent001, TestSize.Level1)
 {
     RefPtr<ScrollerObserverManager> manager = AceType::MakeRefPtr<ScrollerObserverManager>();
     manager->observers_.clear();
-    bool callbackTriggered = true;
+    bool callbackTriggered = false;
     ScrollerObserver observer;
     observer.onScrollStopEvent = [manager, observer, &callbackTriggered]() {
-        callbackTriggered = false;
-        manager->AddObserver(observer, 3);
+        callbackTriggered = true;
+        manager->RemoveObserver(2);
     };
     manager->AddObserver(observer, 1);
     manager->AddObserver(observer, 2);
     manager->HandleOnScrollStopEvent();
-    EXPECT_FALSE(callbackTriggered);
-    EXPECT_EQ(manager->observers_.count(3), 1);
+    EXPECT_TRUE(callbackTriggered);
+    EXPECT_EQ(manager->observers_.count(2), 0);
 }
 
 /**
