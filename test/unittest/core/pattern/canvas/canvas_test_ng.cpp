@@ -516,4 +516,29 @@ HWTEST_F(CanvasTestNg, GetImageDataTest, TestSize.Level1)
     auto imageData2 = pattern->GetImageData(10, 20, 30, 40);
     EXPECT_FALSE(imageData2);
 }
+
+/**
+ * @tc.name: IsEnableMatchParentTest
+ * @tc.desc: CanvasPattern::IsEnableMatchParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, IsEnableMatchParentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Check Function IsEnableMatchParent's return value.
+     * @tc.expected: Function IsEnableMatchParent returns true.
+     */
+    EXPECT_TRUE(pattern->IsEnableMatchParent());
+}
 } // namespace OHOS::Ace::NG

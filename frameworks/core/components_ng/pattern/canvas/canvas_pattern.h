@@ -45,6 +45,11 @@ public:
     void SetOnContext2DAttach(std::function<void()>&& callback);
     void SetOnContext2DDetach(std::function<void()>&& callback);
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     int32_t GetId() const
     {
         auto host = GetHost();
