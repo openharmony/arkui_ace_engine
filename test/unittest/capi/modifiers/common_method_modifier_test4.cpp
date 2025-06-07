@@ -316,10 +316,15 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
     using OneTestStep = std::tuple<Opt_Union_Number_String, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0)), 0.0},
-        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(1.0)), 1.0},
-        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("4.0")), 4.0},
-        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("5.0")), 5.0},
-        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-90.0")), -90.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(90.0)), 90.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(360)), 0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(422)), 62.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(-465)), 255.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("4")), 4.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("5deg")), 5.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-90deg")), 270.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("3305deg")), 65.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("1.5turn")), 180.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setHueRotate0(node_, &inputValue);
