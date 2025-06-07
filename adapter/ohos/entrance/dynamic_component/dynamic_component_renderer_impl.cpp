@@ -256,12 +256,31 @@ void DynamicComponentRendererImpl::BuildDynamicInitialConfig(
     auto context = container->GetPipelineContext();
     CHECK_NULL_VOID(context);
     if (container->IsSceneBoardWindow()) {
-        dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
-        dynamicInitialConfig.hostWindowInfo.realHostWindowId = static_cast<uint32_t>(GetWindowSceneId());
+        dynamicInitialConfig.hostWindowInfo.focusWindowId = static_cast<uint32_t>(GetWindowSceneId());
+        dynamicInitialConfig.hostWindowInfo.realHostWindowId = context->GetRealHostWindowId();
     } else {
         dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
         dynamicInitialConfig.hostWindowInfo.realHostWindowId = context->GetRealHostWindowId();
     }
+}
+
+void DynamicComponentRendererImpl::OnAccessibilityParentRectInfoUpdate()
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto instanceId = uiContent_->GetInstanceId();
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([instanceId] {
+            auto container = Container::GetContainer(instanceId);
+            CHECK_NULL_VOID(container);
+            auto pipeline = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipeline);
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+            CHECK_NULL_VOID(ngPipeline);
+            auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+            CHECK_NULL_VOID(uiExtensionManager);
+            uiExtensionManager->TransferAccessibilityRectInfo();
+        }, TaskExecutor::TaskType::UI, "OnAccessibilityParentRectInfoUpdate");
 }
 
 void DynamicComponentRendererImpl::InitUiContent(
