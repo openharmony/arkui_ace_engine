@@ -1522,6 +1522,10 @@ void MenuPattern::ShowStackMenuAppearAnimation()
     auto subMenuPattern = host->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(subMenuPattern);
 
+    auto mainMenuAccessibilityProps = mainMenu->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(mainMenuAccessibilityProps);
+    mainMenuAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
+
     auto [originOffset, endOffset] = GetMenuOffset(mainMenu, host);
     if (originOffset ==  OffsetF()) {
         TAG_LOGW(AceLogTag::ACE_MENU, "not found parent MenuItem when show stack sub menu");
@@ -1821,6 +1825,10 @@ void MenuPattern::ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuN
     });
 
     CHECK_NULL_VOID(menuNode);
+    auto menuNodeAccessibilityProps = menuNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(menuNodeAccessibilityProps);
+    menuNodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+
     CHECK_NULL_VOID(subMenuNode);
     auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
