@@ -167,14 +167,18 @@ std::shared_ptr<InspectorJsonValue> SwipeJsonReport::GetJsonData() const
     auto upValue = InspectorJsonUtil::CreateArray();
     for (auto& fingerList : GetFingerList()) {
         auto point = fingerList.globalLocation_;
-        upValue->Put(point.GetX());
-        upValue->Put(point.GetY());
+        auto upTouchValueChild = InspectorJsonUtil::CreateArray();
+        upTouchValueChild->Put(point.GetX());
+        upTouchValueChild->Put(point.GetY());
+        upValue->Put(upTouchValueChild);
     }
     auto downValue = InspectorJsonUtil::CreateArray();
     for (auto& downEvent : touchEvents_) {
         auto point = downEvent.second;
-        downValue->Put(point.x);
-        downValue->Put(point.y);
+        auto downTouchValueChild = InspectorJsonUtil::CreateArray();
+        downTouchValueChild->Put(point.x);
+        downTouchValueChild->Put(point.y);
+        downValue->Put(downTouchValueChild);
     }
     auto value = InspectorJsonUtil::Create();
     value->Put("GestureType", "Swipe");
