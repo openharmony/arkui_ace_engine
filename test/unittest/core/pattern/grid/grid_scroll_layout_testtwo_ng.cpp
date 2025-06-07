@@ -124,5 +124,29 @@ HWTEST_F(GridScrollLayoutTestNg, Remeasure001, TestSize.Level1)
     algo->Layout(AceType::RawPtr(frameNode_));
     EXPECT_TRUE(algo->measuredItems_.empty());
 }
+
+/**
+ * @tc.name: GetTotalHeight002
+ * @tc.desc: Test GetTotalHeight when all items in viewport are irregular item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GetTotalHeight002, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 5, 8, 9, 10 };
+    GridModelNG model = CreateGrid();
+    model.SetLayoutOptions(option);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(0, false);
+    CreateFixedItems(9);
+    CreateFixedHeightItems(1, 350);
+    CreateFixedItems(1);
+    CreateDone();
+
+    ScrollToIndex(10, false, ScrollAlign::START);
+    EXPECT_TRUE(GreatNotEqual(pattern_->GetTotalHeight(), pattern_->info_.lastMainSize_));
+}
 } // namespace OHOS::Ace::NG
  
