@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 template("ace_base_base64") {
@@ -23,6 +24,9 @@ template("ace_base_base64") {
       deps = [ "//third_party/skia:skia_canvaskit_static" ]
     } else {
       external_deps = [ "skia:skia_canvaskit" ]
+    }
+    if (use_new_skia) {
+      defines += [ "USE_NEW_SKIA" ]
     }
 
     # add base source file here

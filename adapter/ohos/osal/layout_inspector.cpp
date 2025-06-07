@@ -15,9 +15,16 @@
 
 #include "core/common/layout_inspector.h"
 
+#ifdef USE_NEW_SKIA
+#include "include/core/SkPixmap.h"
+#include "include/core/SkData.h"
+#include "src/base/SkBase64.h"
+#else
+#include "include/utils/SkBase64.h"
+#endif
+
 #include "include/core/SkImage.h"
 #include "include/core/SkString.h"
-#include "include/utils/SkBase64.h"
 
 #include "connect_server_manager.h"
 
@@ -38,7 +45,9 @@ namespace OHOS::Ace {
 namespace {
 constexpr size_t SNAP_PARTITION_SIZE = 100;
 constexpr int64_t FIND_RSNODE_ERROR = -1;
+#ifndef USE_NEW_SKIA
 constexpr int32_t PNG_ENCODE_QUALITY = 100;
+#endif
 sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
 {
     return SkColorSpace::MakeSRGB();
@@ -360,9 +369,15 @@ void LayoutInspector::BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::
     SkPixmap imagePixmap(
         imageInfo, reinterpret_cast<const void*>(acePixelMap->GetPixels()), acePixelMap->GetRowBytes());
     sk_sp<SkImage> image;
+#ifdef USE_NEW_SKIA
+    image = SkImages::RasterFromPixmap(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
+    CHECK_NULL_VOID(image);
+    auto data = image->refEncodedData();
+#else
     image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
     auto data = image->encodeToData(SkEncodedImageFormat::kPNG, PNG_ENCODE_QUALITY);
+#endif
     CHECK_NULL_VOID(data);
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_VOID(defaultDisplay);
@@ -379,7 +394,11 @@ void LayoutInspector::BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::
     int32_t encodeLength = static_cast<int32_t>(SkBase64::Encode(data->data(), data->size(), nullptr));
     message->Put("size", data->size());
     SkString info(encodeLength);
+#ifdef USE_NEW_SKIA
+    SkBase64::Encode(data->data(), data->size(), info.data());
+#else
     SkBase64::Encode(data->data(), data->size(), info.writable_str());
+#endif
     message->Put("pixelMapBase64", info.c_str());
 }
 
@@ -475,9 +494,15 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     SkPixmap imagePixmap(
         imageInfo, reinterpret_cast<const void*>(acePixelMap->GetPixels()), acePixelMap->GetRowBytes());
     sk_sp<SkImage> image;
+#ifdef USE_NEW_SKIA
+    image = SkImages::RasterFromPixmap(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
+    CHECK_NULL_VOID(image);
+    auto data = image->refEncodedData();
+#else
     image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
     auto data = image->encodeToData(SkEncodedImageFormat::kPNG, 100);
+#endif
     CHECK_NULL_VOID(data);
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_VOID(defaultDisplay);
@@ -496,7 +521,11 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     int32_t encodeLength = static_cast<int32_t>(SkBase64::Encode(data->data(), data->size(), nullptr));
     message->Put("size", data->size());
     SkString info(encodeLength);
+#ifdef USE_NEW_SKIA
+    SkBase64::Encode(data->data(), data->size(), info.data());
+#else
     SkBase64::Encode(data->data(), data->size(), info.writable_str());
+#endif
     message->Put("pixelMapBase64", info.c_str());
 }
 

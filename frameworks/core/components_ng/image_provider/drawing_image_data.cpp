@@ -16,6 +16,9 @@
 #include "core/components_ng/image_provider/drawing_image_data.h"
 
 #include "include/codec/SkCodec.h"
+#ifdef USE_NEW_SKIA
+#include "include/core/SkStream.h"
+#endif
 
 #include "base/image/image_source.h"
 #include "core/components_ng/svg/svg_dom.h"

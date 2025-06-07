@@ -16,7 +16,11 @@
 #include "core/image/image_loader.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#ifdef USE_NEW_SKIA
+#include "src/base/SkBase64.h"
+#else
 #include "include/utils/SkBase64.h"
+#endif
 
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
