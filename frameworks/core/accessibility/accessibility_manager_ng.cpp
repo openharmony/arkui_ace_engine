@@ -22,6 +22,55 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+void GetOffsetToAncestorRevertTransform(const RefPtr<NG::FrameNode>& ancestor, const RefPtr<NG::FrameNode>& endNode,
+    const PointF& pointAncestor, PointF& pointNode)
+{
+    CHECK_NULL_VOID(ancestor);
+    CHECK_NULL_VOID(endNode);
+    auto context = endNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto rect = context->GetPaintRectWithoutTransform();
+    OffsetF offset = rect.GetOffset();
+    VectorF finalScale {1.0f, 1.0f};
+    auto scale = endNode->GetTransformScale();
+    finalScale.x = scale.x;
+    finalScale.y = scale.y;
+    
+    PointF ancestorLeftTopPoint(offset.GetX(), offset.GetY());
+    context->GetPointTransformRotate(ancestorLeftTopPoint);
+    auto parent = endNode->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        if (parentRenderContext) {
+            offset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
+            PointF pointTmp(offset.GetX() + ancestorLeftTopPoint.GetX(), offset.GetY() + ancestorLeftTopPoint.GetY());
+            parentRenderContext->GetPointTransformRotate(pointTmp);
+            ancestorLeftTopPoint.SetX(pointTmp.GetX());
+            ancestorLeftTopPoint.SetY(pointTmp.GetY());
+            auto scale = parent->GetTransformScale();
+            finalScale.x *= scale.x;
+            finalScale.y *= scale.y;
+        }
+
+        if (ancestor && (parent == ancestor)) {
+            break;
+        }
+
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+
+    if ((NearEqual(finalScale.x, 1.0f) && NearEqual(finalScale.y, 1.0f)) ||
+        NearZero(finalScale.x) || NearZero(finalScale.y)) {
+        pointNode.SetX(pointAncestor.GetX() - ancestorLeftTopPoint.GetX());
+        pointNode.SetY(pointAncestor.GetY() - ancestorLeftTopPoint.GetY());
+    } else {
+        pointNode.SetX((pointAncestor.GetX() - ancestorLeftTopPoint.GetX()) / finalScale.x);
+        pointNode.SetY((pointAncestor.GetY() - ancestorLeftTopPoint.GetY()) / finalScale.y);
+    }
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "GetOffsetToAncestorRevertTransform: offsetX %{public}f offsetY %{public}f scaleX %{public}f scaleY %{public}f",
+        pointNode.GetX(), pointNode.GetY(), finalScale.x, finalScale.y);
+}
 
 void AddTouchEventAllFingersInfo(const RefPtr<NG::FrameNode>& node, TouchEventInfo& eventInfo, const TouchEvent& event)
 {
@@ -170,9 +219,6 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
         !IsTouchExplorationEnabled(root) ||
         event.sourceType == SourceType::MOUSE) {
-        return;
-    }
-    if (IsHandlePipelineAccessibilityHoverEnter(root)) {
         return;
     }
     AccessibilityHoverEventType type = AccessibilityHoverEventType::MOVE;
@@ -479,20 +525,7 @@ bool AccessibilityManagerNG::ConvertPointFromAncestorToNode(
     CHECK_NULL_RETURN(ancestor, false);
     CHECK_NULL_RETURN(endNode, false);
     // revert scale from endNode to ancestor
-    std::vector<RefPtr<NG::FrameNode>> path;
-    RefPtr<NG::FrameNode> curr = endNode;
-    while (curr != nullptr && curr->GetId() != ancestor->GetId()) {
-        path.push_back(curr);
-        curr = curr->GetAncestorNodeOfFrame(true);
-    }
-    CHECK_NULL_RETURN(curr, false);
-    pointNode = pointAncestor;
-    for (auto nodePtr = path.rbegin(); nodePtr != path.rend(); ++nodePtr) {
-        auto renderContext = (*nodePtr)->GetRenderContext();
-        renderContext->GetPointWithRevert(pointNode);
-        auto rect = renderContext->GetPaintRectWithoutTransform();
-        pointNode = pointNode - rect.GetOffset();
-    }
+    GetOffsetToAncestorRevertTransform(ancestor, endNode, pointAncestor, pointNode);
     return true;
 }
 
