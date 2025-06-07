@@ -33902,11 +33902,71 @@ Ark_NativePointer impl_FrameNode_getFrameNodeByKey(const KStringPtr& name) {
         return GetAccessors()->getFrameNodeAccessor()->getFrameNodeByKey((const Ark_String*) (&name));
 }
 KOALA_INTEROP_1(FrameNode_getFrameNodeByKey, Ark_NativePointer, KStringPtr)
-Ark_NativePointer impl_FrameNode_getCommonEvent(Ark_NativePointer thisPtr) {
-    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
-    return GetAccessors()->getFrameNodeAccessor()->getCommonEvent(self);
+Ark_String impl_FrameNode_getId(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getId(self);
 }
-KOALA_INTEROP_DIRECT_1(FrameNode_getCommonEvent, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(FrameNode_getId, KStringPtr, Ark_NativePointer)
+Ark_Int32 impl_FrameNode_getUniqueId(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getUniqueId(self);  
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getUniqueId, Ark_Int32, Ark_NativePointer)
+Ark_Boolean impl_FrameNode_isVisible(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->isVisible(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_isVisible, Ark_Boolean, Ark_NativePointer)
+Ark_Boolean impl_FrameNode_isClipToFrame(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+       return GetAccessors()->getFrameNodeAccessor()->isClipToFrame(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_isClipToFrame, Ark_Boolean, Ark_NativePointer)
+Ark_Boolean impl_FrameNode_isAttached(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->isAttached(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_isAttached, Ark_Boolean, Ark_NativePointer)
+Ark_String impl_FrameNode_getInspectorInfo(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getInspectorInfo(self);
+}
+KOALA_INTEROP_1(FrameNode_getInspectorInfo, KStringPtr, Ark_NativePointer)
+Ark_Int32 impl_FrameNode_onDraw(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+         Opt_DrawCallbackFunc callback__value_buf = {};
+        callback__value_buf.value = {
+            thisDeserializer.readCallbackResource(),
+            reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext drawCallback)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_DrawCallback)))),
+            reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_DrawContext drawCallback)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_DrawCallback))))};
+          Opt_DrawCallbackFunc  callback__value = callback__value_buf;
+      GetAccessors()->getFrameNodeAccessor()->onDraw(self, (const Opt_DrawCallbackFunc*)&callback__value);
+     return 0;
+}
+KOALA_INTEROP_DIRECT_3(FrameNode_onDraw, Ark_Int32 ,Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_FrameNode_invalidate(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        GetAccessors()->getFrameNodeAccessor()->invalidate(self);
+}
+KOALA_INTEROP_DIRECT_V1(FrameNode_invalidate, Ark_NativePointer)
+void impl_FrameNode_disposeTree(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        GetAccessors()->getFrameNodeAccessor()->disposeTree(self);
+}
+KOALA_INTEROP_DIRECT_V1(FrameNode_disposeTree, Ark_NativePointer)
+
+Ark_Boolean impl_FrameNode_setCrossLanguageOptions(Ark_NativePointer thisPtr,Ark_Boolean attributeSettings) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        GetAccessors()->getFrameNodeAccessor()->setCrossLanguageOptions(self, attributeSettings);
+        return true;
+}
+KOALA_INTEROP_DIRECT_2(FrameNode_setCrossLanguageOptions, Ark_Boolean, Ark_NativePointer, Ark_Boolean)
+Ark_Boolean impl_FrameNode_getCrossLanguageOptions(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getCrossLanguageOptions(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getCrossLanguageOptions, Ark_Boolean, Ark_NativePointer)
 Ark_Number impl_FrameNode_getIdByFrameNode(Ark_NativePointer thisPtr, Ark_NativePointer node){
     Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
     return GetAccessors()->getFrameNodeAccessor()->getIdByFrameNode(self, static_cast<Ark_FrameNode>(node));

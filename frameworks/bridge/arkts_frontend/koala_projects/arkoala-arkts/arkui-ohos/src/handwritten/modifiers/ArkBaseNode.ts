@@ -446,6 +446,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public id(value: string | undefined): this {
+        this.getPeer().idAttribute(value);
         return this
     }
     public geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {

@@ -59,6 +59,9 @@ class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
     __toRecord(param: Object): Record<string, Object> {
         return this.instance.__toRecord(param)
     }
+    getUniquedId(): number {
+        return -1;
+    }
 
     /** @memo */
     __build(
