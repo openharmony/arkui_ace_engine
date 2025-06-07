@@ -828,7 +828,6 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
 
 void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
 {
-    ResetBundleInfo();
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
@@ -853,6 +852,7 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
     if (IsNeedDisplayInSubwindow() || isDragWithContextMenu_) {
         TransDragWindowToDragFwk(Container::CurrentId());
     }
+    ResetBundleInfo();
     ClearSummary();
     ClearExtraInfo();
     SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
