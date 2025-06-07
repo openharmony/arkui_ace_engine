@@ -49,7 +49,7 @@ bool OnWillDismissEvent(int32_t reason)
 HWTEST_F(DialogModelTest, DialogModelTest001, TestSize.Level1)
 {
     ArkUI_NativeDialogHandle nativeDialogHandle = Create();
-    ASSERT_EQ(nativeDialogHandle, nullptr);
+    ASSERT_NE(nativeDialogHandle, nullptr);
 
     Dispose(nativeDialogHandle);
 }

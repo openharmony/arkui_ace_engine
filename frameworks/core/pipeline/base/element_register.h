@@ -99,10 +99,7 @@ public:
      */
     void Clear();
 
-    ACE_FORCE_EXPORT ElementIdType MakeUniqueId()
-    {
-        return nextUniqueElementId_++;
-    }
+    ACE_FORCE_EXPORT ElementIdType MakeUniqueId();
 
     RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(
         const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
@@ -152,7 +149,7 @@ private:
 
     // ElementID assigned during initial render
     // first to Component, then synced to Element
-    ElementIdType nextUniqueElementId_ = 0;
+    static std::atomic<ElementIdType> nextUniqueElementId_;
 
     ElementIdType lastestElementId_ = 0;
 

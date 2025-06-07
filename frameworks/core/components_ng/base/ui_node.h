@@ -116,7 +116,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false);
+    void DetachFromMainTree(bool recursive = false, bool isRoot = true);
     virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
 
@@ -922,6 +922,47 @@ public:
         return true;
     }
 
+    bool IsFreeNode() const
+    {
+        return isFreeNode_;
+    }
+
+    bool IsFreeState() const
+    {
+        return isFreeState_;
+    }
+
+    bool IsFreeNodeTree()
+    {
+        if (!IsFreeNode()) {
+            return false;
+        }
+        for (const auto& child : GetChildren()) {
+            if (!child->IsFreeNodeTree()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void PostAfterAttachMainTreeTask(std::function<void()>&& task)
+    {
+        if (IsOnMainTree()) {
+            return;
+        }
+        afterAttachMainTreeTasks_.emplace_back(std::move(task));
+    }
+
+    void ExecuteAfterAttachMainTreeTasks()
+    {
+        for (auto& task : afterAttachMainTreeTasks_) {
+            if (task) {
+                task();
+            }
+        }
+        afterAttachMainTreeTasks_.clear();
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1010,6 +1051,7 @@ private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
+    virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
@@ -1027,6 +1069,9 @@ private:
     int32_t themeScopeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
+    bool isFreeNode_ = false;
+    bool isFreeState_ = false;
+    std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;
