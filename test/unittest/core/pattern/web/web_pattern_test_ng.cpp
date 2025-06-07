@@ -3176,4 +3176,27 @@ HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
     MockPipelineContext::TearDown();
 #endif
 }
+
+/**
+ * @tc.name: OnBypassVsyncConditionUpdate_001
+ * @tc.desc: OnBypassVsyncConditionUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnBypassVsyncConditionUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnBypassVsyncConditionUpdate(WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
+    EXPECT_EQ(webPattern->webBypassVsyncCondition_, WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
+#endif
+}
 } // namespace OHOS::Ace::NG
