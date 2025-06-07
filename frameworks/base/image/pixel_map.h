@@ -155,6 +155,14 @@ struct ImageResizableSlice {
         }
     }
 
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = resMap_.find(key);
+        if (iter != resMap_.end()) {
+            resMap_.erase(iter);
+        }
+    }
+
     void ReloadResources()
     {
         for (const auto& [key, resourceUpdater] : resMap_) {

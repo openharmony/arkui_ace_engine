@@ -200,9 +200,9 @@ public:
         ViewAbstract::SetBackgroundColor(color);
     }
 
-    void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override
+    void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) override
     {
-        ViewAbstract::SetBackgroundColorWithResourceObj(resObj);
+        ViewAbstract::SetBackgroundColorWithResourceObj(color, resObj);
     }
 
     void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override
@@ -210,10 +210,10 @@ public:
         ViewAbstract::SetBackgroundImage(src);
     }
 
-    void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject> &resObj, std::string &bundleName,
-        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override
+    void SetBackgroundImageWithResourceObj(
+        const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override
     {
-        ViewAbstract::SetBackgroundImageWithResourceObj(resObj, bundleName, moduleName);
+        ViewAbstract::SetBackgroundImageWithResourceObj(resObj, src);
     }
 
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override
@@ -240,6 +240,11 @@ public:
     void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override
     {
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
+    }
+
+    void ClearResObj(const std::string resObjName) override
+    {
+        ViewAbstract::ClearResObj(resObjName);
     }
 
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override
