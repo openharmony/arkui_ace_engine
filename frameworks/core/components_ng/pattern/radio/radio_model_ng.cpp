@@ -388,4 +388,18 @@ std::string RadioModelNG::ColorTypeToString(const RadioColorType radioColorType)
     }
     return "Unknown";
 }
+
+void RadioModelNG::SetIsUserSetMargin(bool isUserSet)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetIsUserSetMargin(frameNode, isUserSet);
+}
+
+void RadioModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    pattern->SetIsUserSetMargin(isUserSet);
+}
 } // namespace OHOS::Ace::NG

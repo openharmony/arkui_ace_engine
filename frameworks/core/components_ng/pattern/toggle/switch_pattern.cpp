@@ -215,16 +215,39 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
-    MarginProperty margin;
-    margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-    margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-    margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
-    margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+    hotZoneHorizontalPadding_ = switchTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = switchTheme->GetHotZoneVerticalPadding();
+    hotZoneHorizontalSize_ = switchTheme->GetHotZoneHorizontalSize();
+    hotZoneVerticalSize_ = switchTheme->GetHotZoneVerticalSize();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     direction_ = layoutProperty->GetNonAutoLayoutDirection();
+    InitDefaultMargin();
+    if (layoutProperty->GetPositionProperty()) {
+        layoutProperty->UpdateAlignment(
+            layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
+    } else {
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+    }
+}
+
+void SwitchPattern::InitDefaultMargin()
+{
+    if (makeFunc_.has_value()) {
+        ResetDefaultMargin();
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    margin.left = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.right = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.top = CalcLength(hotZoneVerticalPadding_.Value());
+    margin.bottom = CalcLength(hotZoneVerticalPadding_.Value());
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -241,16 +264,19 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
         }
     }
     layoutProperty->UpdateMargin(margin);
-    hotZoneHorizontalPadding_ = switchTheme->GetHotZoneHorizontalPadding();
-    hotZoneVerticalPadding_ = switchTheme->GetHotZoneVerticalPadding();
-    hotZoneHorizontalSize_ = switchTheme->GetHotZoneHorizontalSize();
-    hotZoneVerticalSize_ = switchTheme->GetHotZoneVerticalSize();
-    if (layoutProperty->GetPositionProperty()) {
-        layoutProperty->UpdateAlignment(
-            layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
-    } else {
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
+}
+
+void SwitchPattern::ResetDefaultMargin()
+{
+    if (isUserSetMargin_) {
+        return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    layoutProperty->UpdateMargin(margin);
 }
 
 void SwitchPattern::SetAccessibilityAction()

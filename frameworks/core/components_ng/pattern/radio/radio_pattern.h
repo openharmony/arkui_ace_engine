@@ -159,7 +159,6 @@ public:
     {
         if (makeFunc == nullptr) {
             makeFunc_ = std::nullopt;
-            customNode_ = nullptr;
             OnModifyDone();
             return;
         }
@@ -177,6 +176,11 @@ public:
     void SetIsUserSetUncheckBorderColor(bool isUserSet)
     {
         isUserSetUncheckBorderColor_ = isUserSet;
+    }
+
+    void SetIsUserSetMargin(bool isUserSetMargin)
+    {
+        isUserSetMargin_ = isUserSetMargin;
     }
 
     void DumpInfo() override;
@@ -230,6 +234,8 @@ private:
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     void SetPrePageIdToLastPageId();
+    void InitDefaultMargin();
+    void ResetDefaultMargin();
     RefPtr<FrameNode> BuildContentModifierNode();
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -263,6 +269,7 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;
+    bool isUserSetMargin_ = false;
     std::optional<RadioMakeCallback> makeFunc_;
     RefPtr<RadioModifier> radioModifier_;
     bool focusEventInitialized_ = false;

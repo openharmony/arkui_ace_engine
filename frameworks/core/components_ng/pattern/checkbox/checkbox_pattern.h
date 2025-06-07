@@ -169,6 +169,10 @@ public:
     static int32_t ParseCommand(const std::string& command, bool& selectStatus);
     void ReportChangeEvent(bool selectStatus);
     int32_t OnInjectionEvent(const std::string& command) override;
+    void SetIsUserSetMargin(bool isUserSetMargin)
+    {
+        isUserSetMargin_ = isUserSetMargin;
+    }
 
     void UpdateCheckboxComponentColor(const Color& color, const CheckBoxColorType checkBoxColorType);
     void UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType);
@@ -222,6 +226,8 @@ private:
     void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
     void UpdatePaintPropertyBySettingData(RefPtr<CheckBoxPaintProperty> paintProp);
     void SetNeedAnimation(bool needAnimation);
+    void InitDefaultMargin();
+    void ResetDefaultMargin();
 
     CheckboxSettingData checkboxSettingData_;
 
@@ -243,6 +249,7 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool focusEventInitialized_ = false;
     bool visible_ = true;
+    bool isUserSetMargin_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

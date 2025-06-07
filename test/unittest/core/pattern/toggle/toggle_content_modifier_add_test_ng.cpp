@@ -1279,4 +1279,86 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg035, Test
     SwitchModifier switchModifier(size, offset, ZERO_FLOAT, IS_ON, boardColor, pointColor, ZERO_FLOAT);
     EXPECT_EQ(switchModifier.CalcActualWidth(ONE_FLOAT, TWO_FLOAT, ONE_DOUBLE, TWO_DOUBLE), 3);
 }
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg036
+ * @tc.desc: Test Switch InitDefaultMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+    /**
+     * @tc.steps: step2. make builderFunc
+     */
+    auto buildFunc = [](ToggleConfiguration config) -> RefPtr<FrameNode> { return nullptr; };
+    /**
+     * @tc.steps: step3. set builder func and call InitDefaultMargin.
+     * @tc.expected: step3. margin property is null.
+     */
+    toggleModelNG.SetIsUserSetMargin(true);
+    switchPattern->SetBuilderFunc(buildFunc);
+    switchPattern->InitDefaultMargin();
+    auto layoutProperty = switchFrameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty->GetMarginProperty(), nullptr);
+    /**
+     * @tc.steps: step4. clear builderFunc and call InitDefaultMargin.
+     * @tc.expected: step4. margin property is not null.
+     */
+    toggleModelNG.SetIsUserSetMargin(false);
+    switchPattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+    switchPattern->SetBuilderFunc(nullptr);
+    switchPattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg037
+ * @tc.desc: Test Checkbox InitDefaultMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::CHECKBOX, IS_ON);
+    auto checkboxFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(checkboxFrameNode, nullptr);
+    auto checkboxPattern = checkboxFrameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkboxPattern, nullptr);
+    /**
+     * @tc.steps: step2. make builderFunc
+     */
+    auto buildFunc = [](ToggleConfiguration config) -> RefPtr<FrameNode> { return nullptr; };
+    /**
+     * @tc.steps: step3. set builder func and call InitDefaultMargin.
+     * @tc.expected: step3. margin property is null.
+     */
+    toggleModelNG.SetIsUserSetMargin(true);
+    checkboxPattern->SetToggleBuilderFunc(buildFunc);
+    checkboxPattern->InitDefaultMargin();
+    auto layoutProperty = checkboxFrameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty->GetMarginProperty(), nullptr);
+    /**
+     * @tc.steps: step4. clear builderFunc and call InitDefaultMargin.
+     * @tc.expected: step4. margin property is not null.
+     */
+    toggleModelNG.SetIsUserSetMargin(false);
+    checkboxPattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+    checkboxPattern->SetToggleBuilderFunc(nullptr);
+    checkboxPattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+}
 } // namespace OHOS::Ace::NG
