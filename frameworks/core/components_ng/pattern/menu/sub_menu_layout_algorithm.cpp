@@ -184,6 +184,7 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreenWithPreview(
     float parentMenuBottomY = GetMenuBottomPositionY(parentMenu);
     auto lastItemPositionY = GetLastItemTopPositionY(parentMenu);
     auto containerModalOffsetY = GetContainerModalOffsetY(parentMenu);
+    //correct position when window modal is containerModal
     if (isContainerModal(parentMenu)) {
         firstItemBottomPositionY -= containerModalOffsetY;
         parentMenuBottomY -= containerModalOffsetY;
@@ -232,6 +233,7 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreen(
     float lastMenuItemPositionY = GetLastItemTopPositionY(parentMenu);
     auto containerModalOffsetY = GetContainerModalOffsetY(parentMenu);
     auto parentMenuPositionY = parentMenu->GetPaintRectOffset(false, true).GetY();
+    //correct position when window modal is containerModal
     if (isContainerModal(parentMenu)) {
         firstItemBottomPositionY -= containerModalOffsetY;
         parentMenuBottomY -= containerModalOffsetY;

@@ -1000,6 +1000,7 @@ float MenuLayoutAlgorithm::CalcSubMenuMaxHeightWithPreview(RefPtr<FrameNode> par
     auto isContainerModalBool = isContainerModal(parentMenu);
     auto containerModalOffsetY = GetContainerModalOffsetY(parentMenu);
     auto [previewTopPositionY, previewBottomPositionY] = parentMenuPattern->GetPreviewPositionY();
+    //correct position when window modal is containerModal
     if (isContainerModalBool) {
         previewTopPositionY -= containerModalOffsetY;
         previewBottomPositionY -= containerModalOffsetY;
