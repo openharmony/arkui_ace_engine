@@ -164,7 +164,7 @@ bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
     }
     const float endPos = currentOffset_ + totalHeightOfItemsInView_;
     return !atOrOutOfStart && (endIndex_ == childrenCount_ - 1) &&
-           LessNotEqual(endPos, lastMainSize_ - contentEndPadding_);
+           LessNotEqualCustomPrecision(endPos, lastMainSize_ - contentEndPadding_, -0.01f);
 }
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
