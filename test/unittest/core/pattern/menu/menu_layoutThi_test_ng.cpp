@@ -1952,4 +1952,175 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg066, TestSize.Level1)
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
     EXPECT_FALSE(menuLayoutAlgorithm.CheckChildConstraintCondition(menuPattern));
 }
+
+/**
+ * @tc.name: isContainerModal001
+ * @tc.desc: Verify isContainerModal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, isContainerModal001, TestSize.Level1)
+{
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto menuRootNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, MENU_TAG, MenuType::MENU); });
+    ASSERT_NE(menuRootNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    EXPECT_FALSE(layoutAlgorithm->isContainerModal(menuRootNode));
+}
+ 
+/**
+ * @tc.name: GetContainerModalOffsetY001
+ * @tc.desc: Verify GetContainerModalOffsetY.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, GetContainerModalOffsetY001, TestSize.Level1)
+{
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto menuRootNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, MENU_TAG, MenuType::MENU); });
+    ASSERT_NE(menuRootNode, nullptr);
+    EXPECT_TRUE(NearZero(layoutAlgorithm->GetContainerModalOffsetY(menuRootNode)));
+}
+ 
+/**
+ * @tc.name: CalcSubMenuMaxHeightNoPreview001
+ * @tc.desc: Verify CalcSubMenuMaxHeightNoPreview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, CalcSubMenuMaxHeightNoPreview001, TestSize.Level1)
+{
+    auto menuNode = GetOrCreateMenu(MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+ 
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    
+    MountMenuItemToParent(menuNode, DEFAULT_CHILD_COUNT);
+    auto menuItem = AceType::DynamicCast<FrameNode>(menuNode->GetLastChild());
+    ASSERT_NE(menuItem, nullptr);
+ 
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM_RIGHT);
+    menuAlgorithm->CalcSubMenuMaxHeightNoPreview(menuItem, parentLayoutConstraint, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::BOTTOM_RIGHT);
+ 
+    auto parentItemGeometryNode = menuItem->GetGeometryNode();
+    ASSERT_NE(parentItemGeometryNode, nullptr);
+    parentItemGeometryNode->SetFrameSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->CalcSubMenuMaxHeightNoPreview(menuItem, parentLayoutConstraint, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::BOTTOM_RIGHT);
+ 
+    menuPattern->UpdateLastPlacement(Placement::TOP_RIGHT);
+    menuAlgorithm->CalcSubMenuMaxHeightNoPreview(menuItem, parentLayoutConstraint, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::TOP_RIGHT);
+}
+ 
+/**
+ * @tc.name: CalcSubMenuMaxHeightWithPreview001
+ * @tc.desc: Verify CalcSubMenuMaxHeightWithPreview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, CalcSubMenuMaxHeightWithPreview001, TestSize.Level1)
+{
+    auto menuNode = GetOrCreateMenu(MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+ 
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    
+    MountMenuItemToParent(menuNode, DEFAULT_CHILD_COUNT);
+    auto menuItem = AceType::DynamicCast<FrameNode>(menuNode->GetLastChild());
+    ASSERT_NE(menuItem, nullptr);
+ 
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM_RIGHT);
+    menuAlgorithm->CalcSubMenuMaxHeightWithPreview(menuNode, parentLayoutConstraint, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::BOTTOM_RIGHT);
+ 
+    menuPattern->UpdateLastPlacement(Placement::TOP_RIGHT);
+    menuAlgorithm->CalcSubMenuMaxHeightWithPreview(menuNode, parentLayoutConstraint, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::TOP_RIGHT);
+ 
+    menuPattern->UpdateLastPlacement(Placement::RIGHT);
+    menuAlgorithm->CalcSubMenuMaxHeightWithPreview(menuNode, parentLayoutConstraint, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::RIGHT);
+ 
+    menuPattern->UpdateLastPlacement(Placement::RIGHT);
+    menuAlgorithm->canExpandCurrentWindow_ = false;
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    menuAlgorithm->CalcSubMenuMaxHeightWithPreview(menuNode, parentLayoutConstraint, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::RIGHT);
+}
+ 
+/**
+ * @tc.name: CalcSubMenuMaxHeightConstraint001
+ * @tc.desc: Verify CalcSubMenuMaxHeightConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, CalcSubMenuMaxHeightConstraint001, TestSize.Level1)
+{
+    auto menuNode = GetOrCreateMenu(MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+ 
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    
+    MountMenuItemToParent(menuNode, DEFAULT_CHILD_COUNT);
+    auto menuItem = AceType::DynamicCast<FrameNode>(menuNode->GetLastChild());
+    ASSERT_NE(menuItem, nullptr);
+ 
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM_RIGHT);
+    menuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
+    menuAlgorithm->CalcSubMenuMaxHeightConstraint(parentLayoutConstraint, menuItem);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::BOTTOM_RIGHT);
+ 
+    menuAlgorithm->canExpandCurrentWindow_ = false;
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    menuPattern->UpdateLastPlacement(Placement::RIGHT);
+    menuAlgorithm->CalcSubMenuMaxHeightConstraint(parentLayoutConstraint, menuItem);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::RIGHT);
+}
 } // namespace OHOS::Ace::NG

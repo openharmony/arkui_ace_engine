@@ -284,8 +284,11 @@ private:
     std::string CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow);
     bool UpdateSelectOverlayMenuColumnInfo(
         const RefPtr<MenuPattern>& menuPattern, const RefPtr<GridColumnInfo>& columnInfo);
-    float CalcSubMenuMaxHeightConstraint(LayoutWrapper* layoutWrapper,
-        LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    float CalcSubMenuMaxHeightConstraint(LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    float CalcSubMenuMaxHeightWithPreview(RefPtr<FrameNode> parentMenu, LayoutConstraintF& childConstraint,
+        float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
+    float CalcSubMenuMaxHeightNoPreview(RefPtr<FrameNode> parentItem, LayoutConstraintF& childConstraint,
+        float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
