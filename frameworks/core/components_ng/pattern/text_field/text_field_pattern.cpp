@@ -154,6 +154,7 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 const RefPtr<Curve> MOVE_MAGNIFIER_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
 constexpr int32_t LAND_DURATION = 100;
+constexpr int32_t ENTER_OFFSET = 1;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
     { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
@@ -6714,10 +6715,7 @@ void TextFieldPattern::HandleSelectionParagraghEnd()
         return;
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
-    auto newPos = GetLineEndPosition(originCaretPosition, false);
-    if (newPos == originCaretPosition && originCaretPosition > 0) {
-        newPos = GetLineEndPosition(originCaretPosition + 1, false);
-    }
+    auto newPos = GetLineEndPosition(originCaretPosition, false) + ENTER_OFFSET;
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
         selectController_->MoveSecondHandleByKeyBoard(newPos);
