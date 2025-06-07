@@ -498,16 +498,10 @@ void SliderPattern::ModifyAccessibilityVirtualNode()
     if (pointAccessibilityNodeVec_.empty()) {
         return;
     }
-    AddStepPointsAccessibilityVirtualNode();
     UpdateStepAccessibilityVirtualNode();
-    UpdateParentNodeSize();
-    FrameNode::ProcessOffscreenNode(parentAccessibilityNode_);
+    UpdateStepPointsAccessibilityVirtualNodeSelected();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SaveAccessibilityVirtualNode(parentAccessibilityNode_);
-    UpdateStepPointsAccessibilityVirtualNodeSelected();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
@@ -515,9 +509,7 @@ void SliderPattern::AddStepPointsAccessibilityVirtualNode()
 {
     CHECK_NULL_VOID(parentAccessibilityNode_);
     CHECK_NULL_VOID(sliderContentModifier_);
-    while (!parentAccessibilityNode_->GetChildren().empty()) {
-        parentAccessibilityNode_->RemoveChild(parentAccessibilityNode_->GetChildren().back());
-    }
+    parentAccessibilityNode_->GetRenderContext()->ClearChildren();
     pointAccessibilityNodeVec_.clear();
     pointAccessibilityNodeEventVec_.clear();
     for (uint32_t i = 0; i < sliderContentModifier_->GetStepPointVec().size(); i++) {
