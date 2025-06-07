@@ -308,6 +308,26 @@ public:
         aboutToDisappearCallback_ = aboutToDisappear;
     }
 
+    void RegisterMenuOnWillAppearCallback(const std::function<void()>& onWillAppear)
+    {
+        onWillAppearCallback_ = onWillAppear;
+    }
+
+    void RegisterMenuOnDidAppearCallback(const std::function<void()>& onDidAppear)
+    {
+        onDidAppearCallback_ = onDidAppear;
+    }
+
+    void RegisterMenuOnWillDisappearCallback(const std::function<void()>& onWillDisappear)
+    {
+        onWillDisappearCallback_ = onWillDisappear;
+    }
+
+    void RegisterMenuOnDidDisappearCallback(const std::function<void()>& onDidDisappear)
+    {
+        onDidDisappearCallback_ = onDidDisappear;
+    }
+
     void RegisterMenuStateChangeCallback(const std::function<void(const std::string&)>& callback)
     {
         onStateChangeCallback_ = callback;
@@ -340,6 +360,34 @@ public:
             aboutToDisappearCallback_();
         }
     }
+
+   void CallMenuOnWillAppearCallback()
+   {
+       if (onWillAppearCallback_) {
+           onWillAppearCallback_();
+       }
+   }
+
+   void CallMenuOnDidAppearCallback()
+   {
+       if (onDidAppearCallback_) {
+           onDidAppearCallback_();
+       }
+   }
+
+   void CallMenuOnWillDisappearCallback()
+   {
+       if (onWillDisappearCallback_) {
+           onWillDisappearCallback_();
+       }
+   }
+
+   void CallMenuOnDidDisappearCallback()
+   {
+       if (onDidDisappearCallback_) {
+           onDidDisappearCallback_();
+       }
+   }
 
     void CallMenuStateChangeCallback(const std::string& value)
     {
@@ -677,6 +725,10 @@ private:
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
     std::function<void()> aboutToDisappearCallback_ = nullptr;
+    std::function<void()> onWillAppearCallback_ = nullptr;
+    std::function<void()> onDidAppearCallback_ = nullptr;
+    std::function<void()> onWillDisappearCallback_ = nullptr;
+    std::function<void()> onDidDisappearCallback_ = nullptr;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     RefPtr<TouchEventImpl> onTouch_;
     RefPtr<FrameNode> lastTouchItem_ = nullptr;

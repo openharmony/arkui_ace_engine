@@ -439,6 +439,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController005, TestSize.Level1)
     textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
     textStyle.SetTextDecoration(TEXT_DECORATION_VALUE);
     textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    textStyle.SetLineThicknessScale(TEXT_DECORATION_THICKNESS_SCALE);
     struct UpdateSpanStyle updateSpanStyle;
     updateSpanStyle.updateTextColor = TEXT_COLOR_VALUE;
     updateSpanStyle.updateTextShadows = SHADOWS;
@@ -448,6 +449,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController005, TestSize.Level1)
     updateSpanStyle.updateFontFamily = FONT_FAMILY_VALUE;
     updateSpanStyle.updateTextDecoration = TEXT_DECORATION_VALUE;
     updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
+    updateSpanStyle.updateLineThicknessScale = TEXT_DECORATION_THICKNESS_SCALE;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
     EXPECT_EQ(contentNode->GetChildren().size(), 5);
@@ -461,6 +463,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController005, TestSize.Level1)
     EXPECT_EQ(newSpan1->GetFontFamily(), FONT_FAMILY_VALUE);
     EXPECT_EQ(newSpan1->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(newSpan1->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
+    EXPECT_EQ(newSpan1->GetLineThicknessScale(), TEXT_DECORATION_THICKNESS_SCALE);
 }
 
 /**
@@ -1092,6 +1095,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
     textStyle.SetTextDecoration(TEXT_DECORATION_VALUE);
     textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    textStyle.SetLineThicknessScale(TEXT_DECORATION_THICKNESS_SCALE);
     struct UpdateSpanStyle updateSpanStyle;
     updateSpanStyle.updateTextColor = TEXT_COLOR_VALUE;
     updateSpanStyle.updateTextShadows = SHADOWS;
@@ -1101,6 +1105,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     updateSpanStyle.updateFontFamily = FONT_FAMILY_VALUE;
     updateSpanStyle.updateTextDecoration = TEXT_DECORATION_VALUE;
     updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
+    updateSpanStyle.updateLineThicknessScale = TEXT_DECORATION_THICKNESS_SCALE;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
     EXPECT_EQ(contentNode->GetChildren().size(), 5);
@@ -1114,5 +1119,6 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     EXPECT_EQ(newSpan2->GetFontFamily(), FONT_FAMILY_VALUE);
     EXPECT_EQ(newSpan2->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(newSpan2->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
+    EXPECT_EQ(newSpan2->GetLineThicknessScale(), TEXT_DECORATION_THICKNESS_SCALE);
 }
 }

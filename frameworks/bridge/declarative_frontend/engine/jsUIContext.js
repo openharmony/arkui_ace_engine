@@ -863,6 +863,13 @@ class UIContext {
     isAvailable() {
         return __availableInstanceIds__.has(this.instanceId_);
     }
+
+    setKeyboardAppearanceConfig(uniqueId, config) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByUniqueId(uniqueId);
+        Context.setKeyboardAppearanceConfig(nodePtr, config);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {

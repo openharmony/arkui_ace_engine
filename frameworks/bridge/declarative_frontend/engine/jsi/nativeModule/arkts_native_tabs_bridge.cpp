@@ -298,8 +298,10 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     Color colorObj;
     if (isColorArgInvalid || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj)) {
         color = tabTheme->GetDividerColor().GetValue();
+        GetArkUINodeModifiers()->getTabsModifier()->setDividerColorByUser(nativeNode, false);
     } else {
         color = colorObj.GetValue();
+        GetArkUINodeModifiers()->getTabsModifier()->setDividerColorByUser(nativeNode, true);
     }
     if (isDividerStartMarginArgsInvalid ||
         !ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin, startMarginResObj) ||

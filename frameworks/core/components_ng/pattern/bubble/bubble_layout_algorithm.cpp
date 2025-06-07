@@ -877,7 +877,7 @@ void BubbleLayoutAlgorithm::InitWrapperRect(
     CHECK_NULL_VOID(bubblePattern);
     dumpInfo_.enableHoverMode = enableHoverMode.value_or(false);
     if (isHalfFoldHover_) {
-        auto creaseHeightOffset = static_cast<float>(context->GetCustomTitleHeight().ConvertToPx());
+        auto creaseHeightOffset = context->GetDisplayAvailableRect().Top();
         auto foldCreaseTop = foldCreaseTop_ - creaseHeightOffset;
         auto foldCreaseBottom = foldCreaseBottom_ - creaseHeightOffset;
         if (LessNotEqual(getY, foldCreaseTop)) {

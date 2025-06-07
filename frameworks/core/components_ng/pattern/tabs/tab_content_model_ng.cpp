@@ -81,6 +81,15 @@ void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
     CHECK_NULL_VOID(tabTheme);
     SetTabBar(tabTheme->GetDefaultTabBarName(), "", std::nullopt, nullptr, true); // Set default tab bar.
     ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, tabTheme->GetDefaultTabBarName());
+    if (SystemProperties::ConfigChangePerform()) {
+        auto tabsLayoutProperty = frameNode->GetLayoutProperty<TabContentLayoutProperty>();
+        CHECK_NULL_VOID(tabsLayoutProperty);
+        tabsLayoutProperty->ResetIndicatorColorSetByUser();
+        tabsLayoutProperty->ResetLabelUnselectedColorSetByUser();
+        tabsLayoutProperty->ResetLabelSelectedColorSetByUser();
+        tabsLayoutProperty->ResetIconUnselectedColorSetByUser();
+        tabsLayoutProperty->ResetIconSelectedColorSetByUser();
+    }
 }
 
 void TabContentModelNG::Create()
@@ -547,44 +556,43 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
 }
 
 template<typename T>
-void ParseType(const RefPtr<ResourceObject>& resObj, const std::string& name, T& result)
+bool ParseType(const RefPtr<ResourceObject>& resObj, const std::string& name, T& result)
 {
     if constexpr (std::is_same_v<T, Color>) {
-        ResourceParseUtils::ParseResColor(resObj, result);
+        return ResourceParseUtils::ParseResColor(resObj, result);
     } else if constexpr (std::is_same_v<T, CalcDimension>) {
         if (name == "height" || name == "borderRadius" || name == "width" || name == "marginTop") {
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            return ResourceParseUtils::ParseResDimensionVp(resObj, result);
         } else if (name == "fontSize" || name == "minFontSize" || name == "maxFontSize") {
-            ResourceParseUtils::ParseResDimensionFp(resObj, result);
+            return ResourceParseUtils::ParseResDimensionFp(resObj, result);
         } else {
-            ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::PX);
+            return ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::PX);
         }
     } else if constexpr (std::is_same_v<T, Dimension>) {
-        ResourceParseUtils::ParseResDimensionFpNG(resObj, result);
+        return ResourceParseUtils::ParseResDimensionFpNG(resObj, result);
     } else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
-        ResourceParseUtils::ParseResFontFamilies(resObj, result);
+        return ResourceParseUtils::ParseResFontFamilies(resObj, result);
     } else if constexpr (std::is_same_v<T, std::string>) {
-        ResourceParseUtils::ParseResString(resObj, result);
+        return ResourceParseUtils::ParseResString(resObj, result);
     }
+    return false;
 }
 
 #define REGISTER_RESOURCE_UPDATE_ATTR_FUNC(caseType, attrType, name, resObj, resultType)                          \
     case caseType:                                                                                                \
         do {                                                                                                      \
-            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();                               \
-            CHECK_NULL_VOID(frameNode);                                                                           \
             auto pattern = frameNode->GetPattern<TabContentPattern>();                                            \
             CHECK_NULL_VOID(pattern);                                                                             \
             const std::string key = "tabContent." #attrType #name;                                                \
             pattern->RemoveResObj(key);                                                                           \
             CHECK_NULL_VOID(resObj);                                                                              \
-            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {    \
+            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& theResObj) { \
                 auto frameNode = weak.Upgrade();                                                                  \
                 CHECK_NULL_VOID(frameNode);                                                                       \
                 auto pattern = frameNode->GetPattern<TabContentPattern>();                                        \
                 CHECK_NULL_VOID(pattern);                                                                         \
                 resultType result;                                                                                \
-                ParseType(resObj, #name, result);                                                                 \
+                ParseType(theResObj, #name, result);                                                              \
                 auto attrs = pattern->Get##attrType();                                                            \
                 attrs.name = result;                                                                              \
                 pattern->Set##attrType(attrs);                                                                    \
@@ -593,17 +601,44 @@ void ParseType(const RefPtr<ResourceObject>& resObj, const std::string& name, T&
         } while (false);                                                                                          \
         break
 
+#define REGISTER_RESOURCE_UPDATE_ATTR_FONT_SIZE_FUNC(caseType, attrType, name, resObj, resultType)                \
+    case caseType:                                                                                                \
+        do {                                                                                                      \
+            auto pattern = frameNode->GetPattern<TabContentPattern>();                                            \
+            CHECK_NULL_VOID(pattern);                                                                             \
+            const std::string key = "tabContent." #attrType #name;                                                \
+            pattern->RemoveResObj(key);                                                                           \
+            CHECK_NULL_VOID(resObj);                                                                              \
+            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& theResObj) { \
+                auto frameNode = weak.Upgrade();                                                                  \
+                CHECK_NULL_VOID(frameNode);                                                                       \
+                auto pattern = frameNode->GetPattern<TabContentPattern>();                                        \
+                CHECK_NULL_VOID(pattern);                                                                         \
+                resultType result;                                                                                \
+                if (ParseType(theResObj, #name, result) && NonNegative(result.Value()) &&                         \
+                    result.Unit() != DimensionUnit::PERCENT) {                                                    \
+                    auto attrs = pattern->Get##attrType();                                                        \
+                    attrs.name = result;                                                                          \
+                    pattern->Set##attrType(attrs);                                                                \
+                }                                                                                                 \
+            };                                                                                                    \
+            pattern->AddResObj(key, resObj, std::move(updateFunc));                                               \
+        } while (false);                                                                                          \
+        break
+
 void TabContentModelNG::CreateWithResourceObj(TabContentJsType jsType, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     switch (jsType) {
-        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(TabContentJsType::INDICATOR_COLOR, IndicatorStyle, color, resObj, Color);
-        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(TabContentJsType::FONT_SIZE, LabelStyle, fontSize, resObj, CalcDimension);
+        REGISTER_RESOURCE_UPDATE_ATTR_FONT_SIZE_FUNC(
+            TabContentJsType::FONT_SIZE, LabelStyle, fontSize, resObj, CalcDimension);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
             TabContentJsType::FONT_FAMILY, LabelStyle, fontFamily, resObj, std::vector<std::string>);
-        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+        REGISTER_RESOURCE_UPDATE_ATTR_FONT_SIZE_FUNC(
             TabContentJsType::MIN_FONT_SIZE, LabelStyle, minFontSize, resObj, CalcDimension);
-        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+        REGISTER_RESOURCE_UPDATE_ATTR_FONT_SIZE_FUNC(
             TabContentJsType::MAX_FONT_SIZE, LabelStyle, maxFontSize, resObj, CalcDimension);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
             TabContentJsType::LABEL_SELECT_COLOR, LabelStyle, selectedColor, resObj, Color);
@@ -613,85 +648,47 @@ void TabContentModelNG::CreateWithResourceObj(TabContentJsType jsType, const Ref
             TabContentJsType::ICON_SELECT_COLOR, IconStyle, selectedColor, resObj, Color);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
             TabContentJsType::ICON_UNSELECT_COLOR, IconStyle, unselectedColor, resObj, Color);
-        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
-            TabContentJsType::BORDER_RADIUS, BoardStyle, borderRadius, resObj, CalcDimension);
-        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
-            TabContentJsType::INDICATOR_HEIGHT, IndicatorStyle, height, resObj, CalcDimension);
-        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
-            TabContentJsType::INDICATOR_WIDTH, IndicatorStyle, width, resObj, CalcDimension);
-        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
-            TabContentJsType::INDICATOR_RADIUS, IndicatorStyle, borderRadius, resObj, CalcDimension);
-        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
-            TabContentJsType::INDICATOR_MARGIN_TOP, IndicatorStyle, marginTop, resObj, CalcDimension);
-        case TabContentJsType::PADDING: {
-            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-            CHECK_NULL_VOID(frameNode);
-            auto pattern = frameNode->GetPattern<TabContentPattern>();
-            CHECK_NULL_VOID(pattern);
-            const std::string key = "tabContent.tabBarPadding";
-            pattern->RemoveResObj(key);
-            CreatePaddingLeftWithResourceObj(frameNode, nullptr);
-            CreatePaddingRightWithResourceObj(frameNode, nullptr);
-            CreatePaddingTopWithResourceObj(frameNode, nullptr);
-            CreatePaddingBottomWithResourceObj(frameNode, nullptr);
-            CHECK_NULL_VOID(resObj);
-            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-                auto frameNode = weak.Upgrade();
-                CHECK_NULL_VOID(frameNode);
-                auto pattern = frameNode->GetPattern<TabContentPattern>();
-                CHECK_NULL_VOID(pattern);
-                CalcDimension result;
-                ResourceParseUtils::ParseResDimensionVp(resObj, result);
-                NG::PaddingProperty padding;
-                padding.left = NG::CalcLength(result);
-                padding.right = NG::CalcLength(result);
-                padding.top = NG::CalcLength(result);
-                padding.bottom = NG::CalcLength(result);
-                pattern->SetPadding(padding);
-            };
-            pattern->AddResObj(key, resObj, std::move(updateFunc));
+        default:
+            CreateMoreWithResourceObj(jsType, frameNode, resObj);
+            break;
+    }
+}
+
+void TabContentModelNG::CreateMoreWithResourceObj(TabContentJsType jsType, FrameNode* frameNode,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    switch (jsType) {
+        case TabContentJsType::INDICATOR_COLOR:
+            CreateIndicatorColorWithResourceObj(frameNode, resObj);
+            break;
+        case TabContentJsType::INDICATOR_HEIGHT:
+            CreateIndicatorHeightWithResourceObj(frameNode, resObj);
+            break;
+        case TabContentJsType::INDICATOR_WIDTH:
+            CreateIndicatorWidthWithResourceObj(frameNode, resObj);
+            break;
+        case TabContentJsType::INDICATOR_RADIUS:
+            CreateIndicatorBorderRadiusWithResourceObj(frameNode, resObj);
+            break;
+        case TabContentJsType::INDICATOR_MARGIN_TOP:
+            CreateIndicatorMarginTopWithResourceObj(frameNode, resObj);
+            break;
+        case TabContentJsType::BORDER_RADIUS:
+            CreateBoardStyleBorderRadiusWithResourceObj(frameNode, resObj);
+            break;
+        case TabContentJsType::PADDING:
+            CreatePaddingWithResourceObj(frameNode, resObj);
+            break;
+        case TabContentJsType::TEXT_CONTENT:
+            CreateTextContentWithResourceObj(frameNode, resObj);
+            break;
+        case TabContentJsType::TAB_BAR_OPTIONS_ICON: {
+            CreateIconWithResourceObjWithKey(frameNode, "tabContent.tabBarOptions", resObj);
             break;
         }
-        case TabContentJsType::TEXT_CONTENT: {
-            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-            CHECK_NULL_VOID(frameNode);
-            auto pattern = frameNode->GetPattern<TabContentPattern>();
-            CHECK_NULL_VOID(pattern);
-            const std::string key = "tabContent.tabBarParamText";
-            pattern->RemoveResObj(key);
-            CHECK_NULL_VOID(resObj);
-            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-                auto frameNode = weak.Upgrade();
-                CHECK_NULL_VOID(frameNode);
-                auto pattern = frameNode->GetPattern<TabContentPattern>();
-                CHECK_NULL_VOID(pattern);
-                std::string result;
-                ResourceParseUtils::ParseResString(resObj, result);
-                ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, result, frameNode);
-                pattern->UpdateTabBarParamText(result);
-            };
-            pattern->AddResObj(key, resObj, std::move(updateFunc));
-            break;
-        }
-        case TabContentJsType::ICON: {
-            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-            CHECK_NULL_VOID(frameNode);
-            auto pattern = frameNode->GetPattern<TabContentPattern>();
-            CHECK_NULL_VOID(pattern);
-            const std::string key = "tabContent.tabBarParamIcon";
-            pattern->RemoveResObj(key);
-            CHECK_NULL_VOID(resObj);
-            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-                auto frameNode = weak.Upgrade();
-                CHECK_NULL_VOID(frameNode);
-                auto pattern = frameNode->GetPattern<TabContentPattern>();
-                CHECK_NULL_VOID(pattern);
-                std::string result;
-                ResourceParseUtils::ParseResMedia(resObj, result);
-                ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, result, frameNode);
-                pattern->UpdateTabBarParamIcon(result);
-            };
-            pattern->AddResObj(key, resObj, std::move(updateFunc));
+        case TabContentJsType::BOTTOM_TAB_BAR_STYLE_ICON: {
+            CreateIconWithResourceObjWithKey(frameNode, "tabContent.bottomTabBarStyle", resObj);
             break;
         }
         default:
@@ -699,124 +696,422 @@ void TabContentModelNG::CreateWithResourceObj(TabContentJsType jsType, const Ref
     }
 }
 
-void TabContentModelNG::CreatePaddingWithResourceObj(const RefPtr<ResourceObject>& resObjLeft,
-    const RefPtr<ResourceObject>& resObjRight, const RefPtr<ResourceObject>& resObjTop,
-    const RefPtr<ResourceObject>& resObjBottom)
+bool TabContentModelNG::CreateIconWithResourceObjWithKey(FrameNode* frameNode, const std::string key,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_RETURN(resObj, true);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string result;
+        ResourceParseUtils::ParseResMedia(resObj, result);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, result, frameNode);
+        pattern->UpdateTabBarParamIcon(result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    return true;
+}
+
+void TabContentModelNG::CreatePaddingHorWithResourceObj(const RefPtr<ResourceObject>& resObjLeft,
+    const RefPtr<ResourceObject>& resObjRight, bool isSubTabStyle, bool useLocalizedPadding)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    CreatePaddingLeftWithResourceObj(frameNode, resObjLeft);
-    CreatePaddingRightWithResourceObj(frameNode, resObjRight);
-    CreatePaddingTopWithResourceObj(frameNode, resObjTop);
-    CreatePaddingBottomWithResourceObj(frameNode, resObjBottom);
+    CreatePaddingLeftWithResourceObj(frameNode, resObjLeft, isSubTabStyle, useLocalizedPadding);
+    CreatePaddingRightWithResourceObj(frameNode, resObjRight, isSubTabStyle, useLocalizedPadding);
 }
 
-bool TabContentModelNG::CreatePaddingLeftWithResourceObj(FrameNode* frameNode,
-    const RefPtr<ResourceObject>& resObjLeft)
+void TabContentModelNG::CreatePaddingVerWithResourceObj(const RefPtr<ResourceObject>& resObjTop,
+    const RefPtr<ResourceObject>& resObjBottom, bool isSubTabStyle, bool useLocalizedPadding)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreatePaddingTopWithResourceObj(frameNode, resObjTop, isSubTabStyle, useLocalizedPadding);
+    CreatePaddingBottomWithResourceObj(frameNode, resObjBottom, isSubTabStyle, useLocalizedPadding);
+}
+
+bool TabContentModelNG::CreatePaddingWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    const std::string key = "tabContent.tabBarPadding";
+    pattern->RemoveResObj(key);
+    pattern->RemoveResObj(KEY_PADDING_LEFT);
+    pattern->RemoveResObj(KEY_PADDING_RIGHT);
+    pattern->RemoveResObj(KEY_PADDING_TOP);
+    pattern->RemoveResObj(KEY_PADDING_BOTTOM);
+    CHECK_NULL_RETURN(resObj, true);
 
-    if (resObjLeft) {
-        auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-            auto frameNode = weakNode.Upgrade();
-            CHECK_NULL_VOID(frameNode);
-            auto pattern = frameNode->GetPattern<TabContentPattern>();
-            CHECK_NULL_VOID(pattern);
-            CalcDimension left;
-            CHECK_NULL_VOID(ResourceParseUtils::ParseResDimensionVp(resObj, left));
-            auto padding = pattern->GetPadding();
-            padding.left = NG::CalcLength(left);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, result) && NonNegative(result.Value()) &&
+            result.Unit() != DimensionUnit::PERCENT) {
+            NG::PaddingProperty padding;
+            padding.left = NG::CalcLength(result);
+            padding.right = NG::CalcLength(result);
+            padding.top = NG::CalcLength(result);
+            padding.bottom = NG::CalcLength(result);
             pattern->SetPadding(padding);
-        };
-        pattern->AddResObj(KEY_PADDING_LEFT, resObjLeft, std::move(updateFunc));
-        pattern->RemoveResObj(KEY_PADDING);
-    } else {
-        pattern->RemoveResObj(KEY_PADDING_LEFT);
-    }
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    return true;
+}
+
+bool TabContentModelNG::CreateTextContentWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    const std::string key = "tabContent.tabBarParamText";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_RETURN(resObj, true);
+
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string result;
+        ResourceParseUtils::ParseResString(resObj, result);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, result, frameNode);
+        pattern->UpdateTabBarParamText(result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    return true;
+}
+
+bool TabContentModelNG::CreatePaddingLeftWithResourceObj(FrameNode* frameNode,
+    const RefPtr<ResourceObject>& resObjLeft, bool isSubTabStyle, bool useLocalizedPadding)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    pattern->RemoveResObj(KEY_PADDING);
+    pattern->RemoveResObj(KEY_PADDING_LEFT);
+    CHECK_NULL_RETURN(resObjLeft, true);
+
+    auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
+        const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension left;
+        auto padding = pattern->GetPadding();
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, left)) {
+            padding.left = NG::CalcLength(left);
+        } else {
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            padding.left = (isSubTabStyle) ? NG::CalcLength(tabTheme->GetSubTabHorizontalPadding()) :
+                NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+        }
+        pattern->SetPadding(padding);
+    };
+    pattern->AddResObj(KEY_PADDING_LEFT, resObjLeft, std::move(updateFunc));
     return true;
 }
 
 bool TabContentModelNG::CreatePaddingRightWithResourceObj(FrameNode* frameNode,
-    const RefPtr<ResourceObject>& resObjRight)
+    const RefPtr<ResourceObject>& resObjRight, bool isSubTabStyle, bool useLocalizedPadding)
 {
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    pattern->RemoveResObj(KEY_PADDING);
+    pattern->RemoveResObj(KEY_PADDING_RIGHT);
+    CHECK_NULL_RETURN(resObjRight, true);
 
-    if (resObjRight) {
-        auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-            auto frameNode = weakNode.Upgrade();
-            CHECK_NULL_VOID(frameNode);
-            auto pattern = frameNode->GetPattern<TabContentPattern>();
-            CHECK_NULL_VOID(pattern);
-            CalcDimension right;
-            CHECK_NULL_VOID(ResourceParseUtils::ParseResDimensionVp(resObj, right));
-            auto padding = pattern->GetPadding();
+    auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
+        const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension right;
+        auto padding = pattern->GetPadding();
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, right)) {
             padding.right = NG::CalcLength(right);
-            pattern->SetPadding(padding);
-        };
-        pattern->AddResObj(KEY_PADDING_RIGHT, resObjRight, std::move(updateFunc));
-        pattern->RemoveResObj(KEY_PADDING);
-    } else {
-        pattern->RemoveResObj(KEY_PADDING_RIGHT);
-    }
+        } else {
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            padding.right = (isSubTabStyle) ? NG::CalcLength(tabTheme->GetSubTabHorizontalPadding()) :
+                NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+        }
+        pattern->SetPadding(padding);
+    };
+    pattern->AddResObj(KEY_PADDING_RIGHT, resObjRight, std::move(updateFunc));
     return true;
 }
 
 bool TabContentModelNG::CreatePaddingTopWithResourceObj(FrameNode* frameNode,
-    const RefPtr<ResourceObject>& resObjTop)
+    const RefPtr<ResourceObject>& resObjTop, bool isSubTabStyle, bool useLocalizedPadding)
 {
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    pattern->RemoveResObj(KEY_PADDING);
+    pattern->RemoveResObj(KEY_PADDING_TOP);
+    CHECK_NULL_RETURN(resObjTop, true);
 
-    if (resObjTop) {
-        auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-            auto frameNode = weakNode.Upgrade();
-            CHECK_NULL_VOID(frameNode);
-            auto pattern = frameNode->GetPattern<TabContentPattern>();
-            CHECK_NULL_VOID(pattern);
-            CalcDimension top;
-            CHECK_NULL_VOID(ResourceParseUtils::ParseResDimensionVp(resObj, top));
-            auto padding = pattern->GetPadding();
+    auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
+        const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension top;
+        auto padding = pattern->GetPadding();
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, top)) {
             padding.top = NG::CalcLength(top);
-            pattern->SetPadding(padding);
-        };
-        pattern->AddResObj(KEY_PADDING_TOP, resObjTop, std::move(updateFunc));
-        pattern->RemoveResObj(KEY_PADDING);
-    } else {
-        pattern->RemoveResObj(KEY_PADDING_TOP);
-    }
+        } else {
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            padding.top = (isSubTabStyle) ? NG::CalcLength(tabTheme->GetSubTabTopPadding()) : NG::CalcLength(0.0_vp);
+        }
+        pattern->SetPadding(padding);
+    };
+    pattern->AddResObj(KEY_PADDING_TOP, resObjTop, std::move(updateFunc));
     return true;
 }
 
 bool TabContentModelNG::CreatePaddingBottomWithResourceObj(FrameNode* frameNode,
-    const RefPtr<ResourceObject>& resObjBottom)
+    const RefPtr<ResourceObject>& resObjBottom, bool isSubTabStyle, bool useLocalizedPadding)
 {
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    pattern->RemoveResObj(KEY_PADDING);
+    pattern->RemoveResObj(KEY_PADDING_BOTTOM);
+    CHECK_NULL_RETURN(resObjBottom, true);
 
-    if (resObjBottom) {
-        auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-            auto frameNode = weakNode.Upgrade();
-            CHECK_NULL_VOID(frameNode);
-            auto pattern = frameNode->GetPattern<TabContentPattern>();
-            CHECK_NULL_VOID(pattern);
-            CalcDimension bottom;
-            CHECK_NULL_VOID(ResourceParseUtils::ParseResDimensionVp(resObj, bottom));
-            auto padding = pattern->GetPadding();
+    auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
+        const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension bottom;
+        auto padding = pattern->GetPadding();
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, bottom)) {
             padding.bottom = NG::CalcLength(bottom);
-            pattern->SetPadding(padding);
-        };
-        pattern->AddResObj(KEY_PADDING_BOTTOM, resObjBottom, std::move(updateFunc));
-        pattern->RemoveResObj(KEY_PADDING);
-    } else {
-        pattern->RemoveResObj(KEY_PADDING_BOTTOM);
-    }
+        } else {
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            auto padding = pattern->GetPadding();
+            padding.bottom = (isSubTabStyle) ? NG::CalcLength(tabTheme->GetSubTabBottomPadding()) :
+                NG::CalcLength(0.0_vp);
+        }
+        pattern->SetPadding(padding);
+    };
+    pattern->AddResObj(KEY_PADDING_BOTTOM, resObjBottom, std::move(updateFunc));
+    return true;
+}
+
+bool TabContentModelNG::CreateBoardStyleBorderRadiusWithResourceObj(FrameNode* frameNode,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    const std::string key = "tabContent.BoardStyle.borderRadius";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_RETURN(resObj, true);
+
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension result;
+        auto attrs = pattern->GetIndicatorStyle();
+        if (!ParseType(resObj, "borderRadius", result) || result.Value() < 0.0f ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            attrs.borderRadius = tabTheme->GetFocusIndicatorRadius();
+        } else {
+            attrs.borderRadius = result;
+        }
+        pattern->SetIndicatorStyle(attrs);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    return true;
+}
+
+bool TabContentModelNG::CreateIndicatorColorWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    const std::string key = "tabContent.IndicatorStyle.color";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_RETURN(resObj, true);
+
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        Color result;
+        auto attrs = pattern->GetIndicatorStyle();
+        if (!ParseType(resObj, "color", result)) {
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            attrs.color = tabTheme->GetActiveIndicatorColor();
+        } else {
+            attrs.color = result;
+        }
+        pattern->SetIndicatorStyle(attrs);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    return true;
+}
+
+bool TabContentModelNG::CreateIndicatorHeightWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    const std::string key = "tabContent.IndicatorStyle.height";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_RETURN(resObj, true);
+
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension result;
+        auto attrs = pattern->GetIndicatorStyle();
+        if (!ParseType(resObj, "height", result) || result.Value() < 0.0f ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            attrs.height = tabTheme->GetActiveIndicatorWidth();
+        } else {
+            attrs.height = result;
+        }
+        pattern->SetIndicatorStyle(attrs);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    return true;
+}
+
+bool TabContentModelNG::CreateIndicatorWidthWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    const std::string key = "tabContent.IndicatorStyle.width";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_RETURN(resObj, true);
+
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension result;
+        auto attrs = pattern->GetIndicatorStyle();
+        if (!ParseType(resObj, "width", result) || result.Value() < 0.0f || result.Unit() == DimensionUnit::PERCENT) {
+            attrs.width = 0.0_vp;
+        } else {
+            attrs.width = result;
+        }
+        pattern->SetIndicatorStyle(attrs);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    return true;
+}
+
+bool TabContentModelNG::CreateIndicatorBorderRadiusWithResourceObj(FrameNode* frameNode,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    const std::string key = "tabContent.IndicatorStyle.borderRadius";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_RETURN(resObj, true);
+
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension result;
+        auto attrs = pattern->GetIndicatorStyle();
+        if (!ParseType(resObj, "borderRadius", result) || result.Value() < 0.0f ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            attrs.borderRadius = 0.0_vp;
+        } else {
+            attrs.borderRadius = result;
+        }
+        pattern->SetIndicatorStyle(attrs);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    return true;
+}
+
+bool TabContentModelNG::CreateIndicatorMarginTopWithResourceObj(FrameNode* frameNode,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    const std::string key = "tabContent.IndicatorStyle.marginTop";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_RETURN(resObj, true);
+
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension result;
+        auto attrs = pattern->GetIndicatorStyle();
+        if (!ParseType(resObj, "marginTop", result) || result.Value() < 0.0f ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            attrs.marginTop = tabTheme->GetSubTabIndicatorGap();
+        } else {
+            attrs.marginTop = result;
+        }
+        pattern->SetIndicatorStyle(attrs);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
     return true;
 }
 
@@ -852,6 +1147,11 @@ void TabContentModelNG::SetIndicator(const IndicatorStyle& indicator)
     frameNodePattern->SetIndicatorStyle(indicator);
 }
 
+void TabContentModelNG::SetIndicatorColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, IndicatorColorSetByUser, isByUser);
+}
+
 void TabContentModelNG::SetCustomTabBar(FrameNode* node, FrameNode* tabBar)
 {
     CHECK_NULL_VOID(node);
@@ -883,11 +1183,31 @@ void TabContentModelNG::SetLabelStyle(const LabelStyle& labelStyle)
     frameNodePattern->SetLabelStyle(labelStyle);
 }
 
+void TabContentModelNG::SetLabelUnselectedColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, LabelUnselectedColorSetByUser, isByUser);
+}
+
+void TabContentModelNG::SetLabelSelectedColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, LabelSelectedColorSetByUser, isByUser);
+}
+
 void TabContentModelNG::SetIconStyle(const IconStyle& iconStyle)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetIconStyle(iconStyle);
+}
+
+void TabContentModelNG::SetIconUnselectedColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, IconUnselectedColorSetByUser, isByUser);
+}
+
+void TabContentModelNG::SetIconSelectedColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, IconSelectedColorSetByUser, isByUser);
 }
 
 void TabContentModelNG::SetPadding(const PaddingProperty& padding)

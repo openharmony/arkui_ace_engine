@@ -574,23 +574,23 @@ void MenuLayoutAlgorithm::InitWrapperRect(
 }
 
 void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
-    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, float creaseHeightOffset)
+    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, double creaseHeightOffset)
 {
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
-    float creaseTop = 0;
-    float creaseBottom = 0;
-    float creaseHeight = 0;
+    double creaseTop = 0.0;
+    double creaseBottom = 0.0;
+    double creaseHeight = 0.0;
     if (!foldCreaseRects.empty()) {
         auto foldCrease = foldCreaseRects.front();
         creaseTop = foldCrease.Top() - creaseHeightOffset;
         creaseBottom = foldCrease.Bottom() - creaseHeightOffset;
         creaseHeight = foldCrease.Height();
     }
-    float offsetY = 0;
+    double offsetY = 0.0;
     if (props->GetMenuPlacement().has_value()) {
         offsetY = targetOffset_.GetY();
     } else {
@@ -828,7 +828,8 @@ void MenuLayoutAlgorithm::CalcWrapperRectForHoverMode(const RefPtr<MenuPattern>&
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProperty);
     if (OverlayManager::IsNeedAvoidFoldCrease(menuNode, true, isExpandDisplay_, menuWrapperPattern->GetHoverMode())) {
-        auto creaseHeightOffset = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx());
+        auto creaseHeightOffset =
+            pipelineContext->GetDisplayAvailableRect().Top() + menuNode->GetParentGlobalOffsetWithSafeArea().GetY();
         UpdateWrapperRectForHoverMode(menuLayoutProperty, menuPattern, creaseHeightOffset);
     }
 }
@@ -1879,7 +1880,8 @@ OffsetF MenuLayoutAlgorithm::UpdateMenuPosition(LayoutWrapper* layoutWrapper, co
             placement_ = lastPlacement.value();
             arrowPlacement_ = lastPlacement.value();
         }
-    } else if (menuPattern->IsSelectMenu() && avoidanceMode == AvoidanceMode::AVOID_AROUND_TARGET) {
+    } else if (menuPattern->IsSelectMenu() && avoidanceMode == AvoidanceMode::AVOID_AROUND_TARGET &&
+               !IsSelectMenuShowInSubWindow(layoutWrapper, menuNode)) {
         menuPosition = SelectLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow_, layoutWrapper);
     } else {
         menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow_, layoutWrapper);
@@ -1905,6 +1907,20 @@ OffsetF MenuLayoutAlgorithm::UpdateMenuPosition(LayoutWrapper* layoutWrapper, co
     }
     geometryNode->SetFrameOffset(menuPositionWithArrow);
     return menuPosition;
+}
+
+bool MenuLayoutAlgorithm::IsSelectMenuShowInSubWindow(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    CHECK_NULL_RETURN(menuNode, false);
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto theme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(menuLayoutProperty, false);
+    auto isSelectMenuShowInSubWindow = theme->GetExpandDisplay() && menuLayoutProperty->GetShowInSubWindowValue(false);
+    return isSelectMenuShowInSubWindow;
 }
 
 void MenuLayoutAlgorithm::TranslateOptions(LayoutWrapper* layoutWrapper)
@@ -2467,7 +2483,8 @@ LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layo
     auto childConstraint = menuLayoutProperty->CreateChildConstraint();
     UpdateConstraintWidth(layoutWrapper, childConstraint);
     UpdateConstraintBaseOnOptions(layoutWrapper, childConstraint);
-    if (menuPattern->IsSelectMenu() && avoidanceMode == AvoidanceMode::AVOID_AROUND_TARGET) {
+    if (menuPattern->IsSelectMenu() && avoidanceMode == AvoidanceMode::AVOID_AROUND_TARGET &&
+        !IsSelectMenuShowInSubWindow(layoutWrapper, menuNode)) {
         UpdateConstraintSelectHeight(layoutWrapper, childConstraint);
     } else {
         UpdateConstraintHeight(layoutWrapper, childConstraint);

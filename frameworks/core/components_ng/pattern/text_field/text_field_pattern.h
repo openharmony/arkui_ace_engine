@@ -71,6 +71,7 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -1635,6 +1636,13 @@ public:
         auto isCancelMode = IsShowCancelButtonMode() && !(cleanNodeStyle == CleanNodeStyle::INVISIBLE);
         return IsUnderlineMode() && (isCancelMode || IsInPasswordMode());
     }
+
+    void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config)
+    {
+        imeGradientMode_ = config.gradientMode;
+        imeFluidLightMode_ = config.fluidLightMode;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1676,6 +1684,7 @@ protected:
     // 是否独立控制键盘
     bool independentControlKeyboard_ = false;
     RefPtr<AutoFillController> autoFillController_;
+    virtual IMEClient GetIMEClientInfo();
 
 private:
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
@@ -1947,6 +1956,7 @@ private:
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     std::pair<std::string, std::string> GetTextDiffObscured(const std::string& latestContent);
+    void FireOnWillAttachIME();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2163,6 +2173,8 @@ private:
     bool isFilterChanged_ = false;
     std::optional<bool> showPasswordState_;
     bool cancelButtonTouched_ = false;
+    KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
+    KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
 };
 } // namespace OHOS::Ace::NG
 
