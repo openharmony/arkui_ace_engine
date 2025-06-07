@@ -365,6 +365,9 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     if (Negative(irregularHeight)) {
         irregularHeight = regularHeight;
     }
+    if (Negative(regularHeight)) {
+        regularHeight = irregularHeight;
+    }
     // get line count
     float totalHeight = 0;
     auto lastIndex = -1;
