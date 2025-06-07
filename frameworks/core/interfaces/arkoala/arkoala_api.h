@@ -6557,6 +6557,8 @@ struct ArkUICustomNodeExtModifier {
     void (*setOnDirtyLayoutWrapperSwap)(ArkUINodeHandle node,
         void (*onDirtySwap)(ArkUINodeHandle node, ArkUIDirtySwapConfig config));
     void (*setIsAtomic)(ArkUINodeHandle node, const ArkUI_Bool isAtomic);
+    void (*setBeforeCreateLayoutWrapper)(ArkUINodeHandle node,
+        void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
 };
 
 struct ArkUIThemeModifier {
