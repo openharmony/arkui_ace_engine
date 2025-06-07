@@ -1418,4 +1418,153 @@ HWTEST_F(ArcindexerPatternTestNg, StartBubbleDisappearAnimation001, TestSize.Lev
     EXPECT_EQ(pattern_->selected_, 0);
 }
 
+/**
+ * @tc.name: MoveIndexByOffset001
+ * @tc.desc: Test ArcIndexerPattern::MoveIndexByOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, MoveIndexByOffset001, TestSize.Level1)
+{
+    Create();
+    auto frameNode = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    pattern_->itemCount_ = 3;
+    pattern_->arcCenter_ = OffsetF(3.0, 3.0);
+    pattern_->startAngle_ = 60.0F;
+    pattern_->stepAngle_ = 90.f;
+    pattern_->arcArrayValue_.push_back(std::pair("COLLAPSED", ArcIndexerBarState::COLLAPSED));
+    Offset offset(10.0, 10.0);
+    pattern_->MoveIndexByOffset(offset);
+    EXPECT_TRUE(pattern_->isNewHeightCalculated_);
+}
+
+/**
+ * @tc.name: MoveIndexByOffset002
+ * @tc.desc: Test ArcIndexerPattern::MoveIndexByOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, MoveIndexByOffset002, TestSize.Level1)
+{
+    auto arcIndexerPattern = AceType::MakeRefPtr<ArcIndexerPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    arcIndexerPattern->itemCount_ = 3;
+    arcIndexerPattern->arcCenter_ = OffsetF(3.0, 3.0);
+    arcIndexerPattern->startAngle_ = 60.0F;
+    arcIndexerPattern->stepAngle_ = 90.f;
+    arcIndexerPattern->childPressIndex_ = 0;
+    arcIndexerPattern->atomicAnimateOp_ = false;
+    arcIndexerPattern->contentModifier_ = AceType::MakeRefPtr<ArcIndexerContentModifier>();
+    arcIndexerPattern->arcArrayValue_.push_back(std::pair("COLLAPSED", ArcIndexerBarState::COLLAPSED));
+    arcIndexerPattern->arcArrayValue_.push_back(std::pair("COLLAPSED", ArcIndexerBarState::COLLAPSED));
+    Offset offset(10.0, 10.0);
+    arcIndexerPattern->MoveIndexByOffset(offset);
+    EXPECT_TRUE(arcIndexerPattern->isNewHeightCalculated_);
+    EXPECT_EQ(arcIndexerPattern->currectCollapsingMode_, ArcIndexerCollapsingMode::FOUR);
+}
+
+/**
+ * @tc.name: MoveIndexByOffset003
+ * @tc.desc: Test ArcIndexerPattern::MoveIndexByOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, MoveIndexByOffset003, TestSize.Level1)
+{
+    auto arcIndexerPattern = AceType::MakeRefPtr<ArcIndexerPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    arcIndexerPattern->itemCount_ = 3;
+    arcIndexerPattern->arcCenter_ = OffsetF(3.0, 3.0);
+    arcIndexerPattern->startAngle_ = 60.0F;
+    arcIndexerPattern->stepAngle_ = 90.f;
+    arcIndexerPattern->childPressIndex_ = 0;
+    arcIndexerPattern->atomicAnimateOp_ = false;
+    arcIndexerPattern->contentModifier_ = AceType::MakeRefPtr<ArcIndexerContentModifier>();
+    arcIndexerPattern->currectCollapsingMode_ = ArcIndexerCollapsingMode::INVALID;
+    arcIndexerPattern->arcArrayValue_.push_back(std::pair("EXPANDED", ArcIndexerBarState::EXPANDED));
+    arcIndexerPattern->arcArrayValue_.push_back(std::pair("COLLAPSED", ArcIndexerBarState::COLLAPSED));
+    Offset offset(10.0, 10.0);
+    arcIndexerPattern->MoveIndexByOffset(offset);
+    EXPECT_TRUE(arcIndexerPattern->isNewHeightCalculated_);
+    EXPECT_EQ(arcIndexerPattern->currectCollapsingMode_, ArcIndexerCollapsingMode::NONE);
+}
+
+/**
+ * @tc.name: MoveIndexByOffset004
+ * @tc.desc: Test ArcIndexerPattern::MoveIndexByOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, MoveIndexByOffset004, TestSize.Level1)
+{
+    auto arcIndexerPattern = AceType::MakeRefPtr<ArcIndexerPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    arcIndexerPattern->itemCount_ = 3;
+    arcIndexerPattern->arcCenter_ = OffsetF(3.0, 3.0);
+    arcIndexerPattern->startAngle_ = 60.0F;
+    arcIndexerPattern->stepAngle_ = 90.f;
+    arcIndexerPattern->atomicAnimateOp_ = false;
+    arcIndexerPattern->autoCollapse_ = false;
+    arcIndexerPattern->contentModifier_ = AceType::MakeRefPtr<ArcIndexerContentModifier>();
+    arcIndexerPattern->currectCollapsingMode_ = ArcIndexerCollapsingMode::INVALID;
+    arcIndexerPattern->arcArrayValue_.push_back(std::pair("COLLAPSED", ArcIndexerBarState::COLLAPSED));
+    arcIndexerPattern->arcArrayValue_.push_back(std::pair("COLLAPSED", ArcIndexerBarState::COLLAPSED));
+    Offset offset(10.0, 10.0);
+    arcIndexerPattern->MoveIndexByOffset(offset);
+    EXPECT_TRUE(arcIndexerPattern->isNewHeightCalculated_);
+    EXPECT_EQ(arcIndexerPattern->currectCollapsingMode_, ArcIndexerCollapsingMode::NONE);
+}
+
+/**
+ * @tc.name: MoveIndexByOffset005
+ * @tc.desc: Test ArcIndexerPattern::MoveIndexByOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, MoveIndexByOffset005, TestSize.Level1)
+{
+    auto arcIndexerPattern = AceType::MakeRefPtr<ArcIndexerPattern>();
+    arcIndexerPattern->itemCount_ = 3;
+    arcIndexerPattern->arcCenter_ = OffsetF(3.0, 3.0);
+    arcIndexerPattern->startAngle_ = 60.0F;
+    arcIndexerPattern->stepAngle_ = 90.f;
+    arcIndexerPattern->atomicAnimateOp_ = false;
+    arcIndexerPattern->autoCollapse_ = false;
+    arcIndexerPattern->childPressIndex_ = 0;
+    arcIndexerPattern->contentModifier_ = AceType::MakeRefPtr<ArcIndexerContentModifier>();
+    arcIndexerPattern->currectCollapsingMode_ = ArcIndexerCollapsingMode::INVALID;
+    arcIndexerPattern->arcArrayValue_.push_back(std::pair("INVALID", ArcIndexerBarState::INVALID));
+    Offset offset(10.0, 10.0);
+    arcIndexerPattern->MoveIndexByOffset(offset);
+    EXPECT_FALSE(arcIndexerPattern->isNewHeightCalculated_);
+}
+
+/**
+ * @tc.name: OnTouchUp001
+ * @tc.desc: Test ArcIndexerPattern::OnTouchUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, OnTouchUp001, TestSize.Level1)
+{
+    auto arcIndexerPattern = AceType::MakeRefPtr<ArcIndexerPattern>();
+    arcIndexerPattern->itemCount_ = 3;
+    arcIndexerPattern->childPressIndex_ = 1;
+    TouchEventInfo info("touch");
+    arcIndexerPattern->OnTouchUp(info);
+    EXPECT_EQ(arcIndexerPattern->childPressIndex_, -1);
+}
+
+/**
+ * @tc.name: ArcExpandedAnimation001
+ * @tc.desc: Test ArcIndexerPattern::ArcExpandedAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcExpandedAnimation001, TestSize.Level1)
+{
+    auto arcIndexerPattern = AceType::MakeRefPtr<ArcIndexerPattern>();
+    arcIndexerPattern->itemCount_ = 3;
+    arcIndexerPattern->childPressIndex_ = 1;
+    arcIndexerPattern->startAngle_ = 10.0F;
+    arcIndexerPattern->stepAngle_ = 100.f;
+    RefPtr<AnimatablePropertyFloat> sweepAngle = AceType::MakeRefPtr<AnimatablePropertyFloat>(180.0f);
+    arcIndexerPattern->contentModifier_ = AceType::MakeRefPtr<ArcIndexerContentModifier>();
+    arcIndexerPattern->contentModifier_->sweepAngle_ = sweepAngle;
+    arcIndexerPattern->ArcExpandedAnimation(0);
+    EXPECT_EQ(arcIndexerPattern->contentModifier_->sweepAngle_->Get(), 360.0f);
+}
 } // namespace OHOS::Ace::NG

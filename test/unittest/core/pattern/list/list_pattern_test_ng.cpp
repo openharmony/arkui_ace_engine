@@ -1157,4 +1157,86 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal015, TestSize.Level1)
     EXPECT_EQ(index, 2);
     EXPECT_EQ(result, -1);
 }
+
+/**
+ * @tc.name: HandleDividerList001
+ * @tc.desc: Test ListPaintMethod HandleDividerList
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, HandleDividerList001, TestSize.Level1)
+{
+    V2::ItemDivider divider;
+    RefPtr<ListPaintMethod> listPaintMethod = AceType::MakeRefPtr<ListPaintMethod>(divider, true, true, 2, 2.0f);
+    listPaintMethod->isRTL_ = true;
+    listPaintMethod->adjustOffset_ = 1.0f;
+    ListItemInfo info;
+    info.isGroup = false;
+    info.startPos = 2.0f;
+    listPaintMethod->itemPosition_[1] = info;
+    DividerInfo dividerInfo { 2.0f, 4.0f, 8.0f, 4.0f, 2.0f, 1.0f, 3.0f, 1.0f, 2.0f, 3, 0, Color::RED, true };
+    auto result = listPaintMethod->HandleDividerList(1, false, 3, dividerInfo);
+    EXPECT_EQ(result.offset.GetX(), 5.5f);
+    EXPECT_EQ(result.offset.GetY(), 14.0f);
+}
+
+/**
+ * @tc.name: HandleDividerList002
+ * @tc.desc: Test ListPaintMethod HandleDividerList
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, HandleDividerList002, TestSize.Level1)
+{
+    V2::ItemDivider divider;
+    RefPtr<ListPaintMethod> listPaintMethod = AceType::MakeRefPtr<ListPaintMethod>(divider, true, true, 2, 2.0f);
+    listPaintMethod->isRTL_ = true;
+    listPaintMethod->adjustOffset_ = 1.0f;
+    ListItemInfo info;
+    info.isGroup = false;
+    info.startPos = 2.0f;
+    listPaintMethod->itemPosition_[2] = info;
+    DividerInfo dividerInfo { 2.0f, 4.0f, 8.0f, 6.0f, 2.0f, 1.0f, 3.0f, 1.0f, 2.0f, 3, 0, Color::RED, false };
+    auto result = listPaintMethod->HandleDividerList(2, false, 3, dividerInfo);
+    EXPECT_EQ(result.offset.GetY(), 7.5f);
+}
+
+/**
+ * @tc.name: HandleLastLineIndex001
+ * @tc.desc: Test ListPaintMethod HandleLastLineIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, HandleLastLineIndex001, TestSize.Level1)
+{
+    V2::ItemDivider divider;
+    RefPtr<ListPaintMethod> listPaintMethod = AceType::MakeRefPtr<ListPaintMethod>(divider, true, true, 2, 2.0f);
+    listPaintMethod->isRTL_ = true;
+    listPaintMethod->adjustOffset_ = 1.0f;
+    ListItemInfo info;
+    info.isGroup = false;
+    info.endPos = 5.0f;
+    listPaintMethod->itemPosition_[1] = info;
+    DividerInfo dividerInfo { 2.0f, 4.0f, 8.0f, 4.0f, 2.0f, 1.0f, 3.0f, 1.0f, 2.0f, 3, 0, Color::RED, true };
+    auto result = listPaintMethod->HandleLastLineIndex(1, 3, dividerInfo);
+    EXPECT_EQ(result.offset.GetX(), 1.5f);
+    EXPECT_EQ(result.offset.GetY(), 14.0f);
+}
+
+/**
+ * @tc.name: HandleLastLineIndex002
+ * @tc.desc: Test ListPaintMethod HandleLastLineIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, HandleLastLineIndex002, TestSize.Level1)
+{
+    V2::ItemDivider divider;
+    RefPtr<ListPaintMethod> listPaintMethod = AceType::MakeRefPtr<ListPaintMethod>(divider, true, true, 2, 2.0f);
+    listPaintMethod->isRTL_ = true;
+    listPaintMethod->adjustOffset_ = 1.0f;
+    ListItemInfo info;
+    info.isGroup = false;
+    info.endPos = 6.0f;
+    listPaintMethod->itemPosition_[2] = info;
+    DividerInfo dividerInfo { 2.0f, 4.0f, 8.0f, 6.0f, 2.0f, 1.0f, 3.0f, 1.0f, 2.0f, 3, 0, Color::RED, false };
+    auto result = listPaintMethod->HandleLastLineIndex(2, 3, dividerInfo);
+    EXPECT_EQ(result.offset.GetY(), 12.5f);
+}
 } // namespace OHOS::Ace::NG
