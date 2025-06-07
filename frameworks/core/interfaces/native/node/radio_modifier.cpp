@@ -329,6 +329,12 @@ void ResetRadioOnChange(ArkUINodeHandle node)
     RadioModelNG::SetOnChange(frameNode, nullptr);
 }
 
+void SetIsUserSetMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetIsUserSetMargin(frameNode, true);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -363,6 +369,7 @@ const ArkUIRadioModifier* GetRadioModifier()
         .setRadioOptions = SetRadioOptions,
         .setRadioOnChange = SetRadioOnChange,
         .resetRadioOnChange = ResetRadioOnChange,
+        .setIsUserSetMargin = SetIsUserSetMargin,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

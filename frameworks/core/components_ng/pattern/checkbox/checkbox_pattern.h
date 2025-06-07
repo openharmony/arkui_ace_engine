@@ -164,6 +164,11 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
+    void SetIsUserSetMargin(bool isUserSetMargin)
+    {
+        isUserSetMargin_ = isUserSetMargin;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -211,6 +216,8 @@ private:
         const RefPtr<CheckBoxGroupPaintProperty>& groupPaintProperty, const std::list<RefPtr<FrameNode>>& list);
     void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
     void UpdatePaintPropertyBySettingData(RefPtr<CheckBoxPaintProperty> paintProp);
+    void InitDefaultMargin();
+    void ResetDefaultMargin();
 
     CheckboxSettingData checkboxSettingData_;
 
@@ -231,6 +238,7 @@ private:
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
     bool focusEventInitialized_ = false;
+    bool isUserSetMargin_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

@@ -298,4 +298,19 @@ void RadioModelNG::SetRadioOptions(FrameNode* frameNode, const std::string& valu
     eventHub->SetGroup(group);
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator, frameNode);
 }
+
+void RadioModelNG::SetIsUserSetMargin(bool isUserSet)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetIsUserSetMargin(frameNode, isUserSet);
+}
+
+void RadioModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsUserSetMargin(isUserSet);
+}
 } // namespace OHOS::Ace::NG

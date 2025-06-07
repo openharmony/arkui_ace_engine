@@ -36,6 +36,7 @@ public:
     virtual void SetWidth(const Dimension& width);
     virtual void SetHeight(const Dimension& height);
     virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
+    virtual void SetIsUserSetMargin(bool isUserSet) {};
     virtual void SetCheckedBackgroundColor(const Color& color) {}
     virtual void SetUncheckedBorderColor(const Color& color) {}
     virtual void SetIndicatorColor(const Color& color) {}
