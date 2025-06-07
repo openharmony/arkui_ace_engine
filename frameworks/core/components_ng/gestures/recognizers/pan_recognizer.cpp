@@ -853,7 +853,7 @@ void PanRecognizer::HandleCallbackReports(
     const GestureEvent& info, GestureCallbackType type, PanGestureState panGestureState)
 {
     if (panGestureState == PanGestureState::BEFORE) {
-        HandleGestureAccept(info, type);
+        HandleGestureAccept(info, type, GestureListenerType::PAN);
     } else if (panGestureState == PanGestureState::AFTER) {
         HandleReports(info, type);
     }
