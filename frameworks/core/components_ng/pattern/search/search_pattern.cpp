@@ -1766,6 +1766,8 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(textFieldPattern->GetKeyboardAppearance()), filter);
     json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback() ? "true" : "false", filter);
     textFieldPattern->ToJsonValueForStroke(json, filter);
+    json->PutExtAttr("enableAutoSpacing", std::to_string(
+        textFieldLayoutProperty->GetEnableAutoSpacing().value_or(false)).c_str(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
