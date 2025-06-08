@@ -2247,4 +2247,98 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperHotArea002, TestSize.Level1)
     wrapperPattern->AddFilterHotArea(rects);
     EXPECT_EQ(rects.size(), 2);
 }
+
+/**
+ * @tc.name: MenuWrapperHotArea003
+ * @tc.desc: test Menu hot area
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperHotArea003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode
+     */
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<TextPattern>());
+    /**
+     * @tc.steps: step2. create wrapperNode and menu, call add hot area
+     * @tc.expected: the hot area size meetings expectations.
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto mockContainer = MockContainer::Current();
+    mockContainer->isSubContainer_ = true;
+    auto context = wrapperNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+    AceEngine::Get().containerMap_.emplace(instanceId, mockContainer);
+    wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
+    std::vector<Rect> rects;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    wrapperPattern->AddWrapperChildHotArea(rects, wrapperNode);
+    wrapperPattern->AddFilterHotArea(rects);
+    EXPECT_EQ(rects.size(), 1);
+}
+
+/**
+ * @tc.name: ConvertModalModeToString001
+ * @tc.desc: test ConvertModalModeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, ConvertModalModeToString001, TestSize.Level1)
+{
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->menuParam_.modalMode = std::nullopt;
+    wrapperPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: undefined\n");
+    wrapperPattern->menuParam_.modalMode = ModalMode::AUTO;
+    wrapperPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.AUTO\n");
+    wrapperPattern->menuParam_.modalMode = ModalMode::NONE;
+    wrapperPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.NONE\n");
+    wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
+    wrapperPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.TARGET_WINDOW\n");
+    wrapperPattern->menuParam_.modalMode = static_cast<ModalMode>(999);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    wrapperPattern->DumpInfo();
+    wrapperPattern->DumpInfo(json);
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.AUTO\n");
+}
+
+/**
+ * @tc.name: AddFilterHotArea001
+ * @tc.desc: test AddFilterHotArea001
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, AddFilterHotArea001, TestSize.Level1)
+{
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto menu = wrapperPattern->GetMenu();
+    ASSERT_NE(menu, nullptr);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    menuPattern->previewMode_ = MenuPreviewMode::CUSTOM;
+    wrapperPattern->filterColumnNode_ = AceType::MakeRefPtr<FrameNode>(
+        V2::MENU_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    std::vector<Rect> rects;
+    wrapperPattern->AddFilterHotArea(rects);
+    EXPECT_EQ(rects.size(), 0);
+    wrapperPattern->isFilterInSubWindow_ = true;
+    wrapperPattern->AddFilterHotArea(rects);
+    EXPECT_EQ(rects.size(), 1);
+}
 } // namespace OHOS::Ace::NG
