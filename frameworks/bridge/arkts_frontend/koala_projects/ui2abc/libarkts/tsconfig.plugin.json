@@ -1,0 +1,12 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/plugins",
+        "baseUrl": ".",
+        "rootDir": "./plugins",
+        "module": "esnext"
+    },
+    "include": [
+        "./plugins/src/**/*.ts"
+    ]
+}

@@ -1,0 +1,14 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "baseUrl": ".",
+        "outDir": "./build",
+        "module": "CommonJS"
+    },
+    "include": [
+        "./src/printer-plugin.ts",
+        "./src/print-visitor.ts",
+        "./src/no-visitor.ts"
+    ]
+}
