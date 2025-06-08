@@ -33,6 +33,7 @@ ace_unittest("navigation_test_ng") {
     "navigation_manager_test_ng.cpp",
     "navigation_model_test_ng.cpp",
     "navigation_pattern_test_four_ng.cpp",
+    "navigation_pattern_test_five_ng.cpp",
     "navigation_pattern_test_ng.cpp",
     "navigation_pattern_test_three_ng.cpp",
     "navigation_pattern_test_two_ng.cpp",
