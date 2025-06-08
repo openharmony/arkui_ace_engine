@@ -911,4 +911,90 @@ HWTEST_F(ScrollNestedTestNg, NestTest013, TestSize.Level1)
     EXPECT_EQ(nestStartCount, 1);
     EXPECT_EQ(nestStopCount, 1);
 }
+
+/**
+ * @tc.name: NestTest014
+ * @tc.desc: Test ScrollPage in nested scroll and mode is PARALLEL
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollNestedTestNg, NestTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scroll and the nest scroll
+     */
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::PARALLEL,
+        .backward = NestedScrollMode::PARALLEL,
+    };
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE);
+    ViewStackProcessor::GetInstance()->Pop();
+    ScrollModelNG nestModel = CreateNestScroll();
+    nestModel.SetNestedScroll(nestedOpt);
+    nestModel.SetEnablePaging(true);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step2. Drag up the scroll and Drag down the nest
+     * @tc.expected: CanOverScroll is false
+     */
+    GestureEvent info;
+    auto dragDelta = -100.f;
+    info.SetMainDelta(dragDelta);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragEnd(info);
+    info.SetMainDelta(-dragDelta / 2);
+    auto nestScrollable = nestPattern_->GetScrollableEvent()->GetScrollable();
+    nestScrollable->HandleDragStart(info);
+    nestScrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_FALSE(nestPattern_->GetCanOverScroll());
+}
+
+/**
+ * @tc.name: NestTest015
+ * @tc.desc: Test ScrollPage in nested scroll and mode is SELF_FIRST
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollNestedTestNg, NestTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scroll and the nest scroll
+     */
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE);
+    ViewStackProcessor::GetInstance()->Pop();
+    ScrollModelNG nestModel = CreateNestScroll();
+    nestModel.SetNestedScroll(nestedOpt);
+    nestModel.SetEnablePaging(true);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Drag up the scroll and Drag down the nest
+     * @tc.expected: CanOverScroll is true
+     */
+    GestureEvent info;
+    auto dragDelta = -100.f;
+    info.SetMainDelta(dragDelta);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragEnd(info);
+    info.SetMainDelta(-dragDelta / 2);
+    auto nestScrollable = nestPattern_->GetScrollableEvent()->GetScrollable();
+    nestScrollable->HandleDragStart(info);
+    nestScrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_TRUE(nestPattern_->GetCanOverScroll());
+}
 } // namespace OHOS::Ace::NG
