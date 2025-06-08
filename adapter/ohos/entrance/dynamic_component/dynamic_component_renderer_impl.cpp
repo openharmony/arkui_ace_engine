@@ -271,15 +271,15 @@ void DynamicComponentRendererImpl::OnAccessibilityParentRectInfoUpdate()
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([instanceId] {
-            auto container = Container::GetContainer(instanceId);
-            CHECK_NULL_VOID(container);
-            auto pipeline = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipeline);
-            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-            CHECK_NULL_VOID(ngPipeline);
-            auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
-            CHECK_NULL_VOID(uiExtensionManager);
-            uiExtensionManager->TransferAccessibilityRectInfo();
+        auto container = Container::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        CHECK_NULL_VOID(ngPipeline);
+        auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+        CHECK_NULL_VOID(uiExtensionManager);
+        uiExtensionManager->TransferAccessibilityRectInfo();
         }, TaskExecutor::TaskType::UI, "OnAccessibilityParentRectInfoUpdate");
 }
 
