@@ -733,6 +733,7 @@ void WebSelectOverlay::SelectCancel()
 {
     CHECK_NULL_VOID(quickMenuCallback_);
     quickMenuCallback_->Cancel();
+    isSelectAll_ = false;
     insertHandle_ = nullptr;
     startSelectionHandle_ = nullptr;
     endSelectionHandle_ = nullptr;
