@@ -165,11 +165,23 @@ public:
         pharse_ = pharse;
     }
 
+    void SetStartId(int32_t startId)
+    {
+        startId_ = startId;
+    }
+
+    void SetDropId(int32_t dropId)
+    {
+        dropId_ = dropId;
+    }
+
     std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
 
 private:
     std::string hostName_;
     int64_t actualDuration_;
+    int32_t startId_;
+    int32_t dropId_;
     Point startPoint_;
     Point endPoint_;
     DropResult dropResult_;
