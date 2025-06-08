@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+        "package": "@recheck-bringup",
+        "outDir": "../build/recheck-bringup",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/common": ["../../../incremental/common/src"],
+            "@koalaui/compat": ["../../../incremental/compat/src/arkts"],
+            "@koalaui/harness": ["../../../incremental/harness/src/arkts"],
+            "@koalaui/runtime": ["../../../incremental/runtime/src"],
+            "@koalaui/runtime/annotations": ["../../../incremental/runtime/annotations"]
+        },
+        "plugins": [
+            {
+                "transform": "@koalaui/memo-plugin/ParserTransformer",
+                "stage": "parsed",
+                "name": "memo"
+            },
+            {
+                "transform": "@koalaui/memo-plugin",
+                "stage": "checked",
+                "name": "memo"
+            }
+        ]
+    },
+    "include": [
+        "./input/ets/memo-hello-world.ts"
+    ],
+    "dependencies": {
+        "@koalaui/runtime": ["../../../incremental/runtime/ui2abcconfig.json"]
+    }
+}

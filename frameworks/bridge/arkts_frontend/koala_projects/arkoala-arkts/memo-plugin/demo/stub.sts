@@ -1,4 +1,0 @@
-import { memo, __memo_context_type, __memo_id_type } from "@koalaui/runtime"
-
-@memo export declare function memo_foo(__memo_context: __memo_context_type, __memo_id: __memo_id_type, s: String): void
-@memo export declare function memo_foo(s: String): void
