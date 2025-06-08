@@ -1,0 +1,70 @@
+{
+  "rootElement": {
+    "nodeId": 1038,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1039,
+        "kind": "Column",
+        "children": [
+          {
+            "nodeId": 1040,
+            "kind": "Text",
+            "children": [],
+            "setTextOptions_content": "SearchTest"
+          },
+          {
+            "nodeId": 1041,
+            "kind": "Search",
+            "children": [],
+            "setSearchOptions_options": {
+              "value": "value",
+              "placeholder": "placeholder",
+              "icon": "icon"
+            },
+            "searchButton_value": "search",
+            "searchButton_option": {
+              "fontSize": 14,
+              "fontColor": 16755661
+            },
+            "fontColor_value": 11259375,
+            "searchIcon_value": {
+              "size": "33px",
+              "color": "#aaaaaa",
+              "src": "path/to/search/icon"
+            },
+            "cancelButton_value": {
+              "style": 2,
+              "icon": {
+                "size": "22px",
+                "color": "#bbbbbb",
+                "src": "path/to/cancel/icon"
+              }
+            },
+            "caretStyle_value": {
+              "width": 5,
+              "color": "#cccccc"
+            },
+            "placeholderColor_value": "#bababa",
+            "placeholderFont_value": {
+              "size": "10px",
+              "weight": 1,
+              "family": "Serif, Monospace",
+              "style": 0
+            },
+            "textFont_value": {
+              "size": "20px",
+              "weight": 2,
+              "family": "Arial, Times",
+              "style": 1
+            },
+            "copyOption_value": 2,
+            "textAlign_value": 2,
+            "enableKeyboardOnFocus_value": 1,
+            "selectionMenuHidden_value": 1
+          }
+        ]
+      }
+    ]
+  }
+}

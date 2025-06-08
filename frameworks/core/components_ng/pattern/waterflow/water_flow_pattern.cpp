@@ -27,6 +27,15 @@
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
 namespace OHOS::Ace::NG {
+void WaterFlowPattern::OnAttachToFrameNode()
+{
+    auto* context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (context->GetFrontendType() == FrontendType::ARK_TS) {
+        layoutInfo_ = WaterFlowLayoutInfoBase::Create(LayoutMode::SLIDING_WINDOW);
+    }
+}
+
 SizeF WaterFlowPattern::GetContentSize() const
 {
     auto host = GetHost();
@@ -71,7 +80,9 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     delta = -FireOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (!UpdateOffset(delta)) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     MarkScrollBarProxyDirty();
     return true;
 };
@@ -349,8 +360,11 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->duringPositionCalc_ = false;
     layoutInfo_->targetIndex_.reset();
     layoutInfo_->extraOffset_.reset();
+    RequestReset(layoutInfo_->jumpForRecompose_, -layoutInfo_->storedOffset_);
+    layoutInfo_->jumpForRecompose_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
     UpdateScrollBarOffset();
     CheckScrollable();
+    UpdateLayoutRange(layoutInfo_->axis_, !isInitialized_);
 
     isInitialized_ = true;
 
@@ -575,12 +589,14 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
                 CHECK_NULL_VOID(host);
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             }
+            RequestFillToTarget(index, align, extraOffset.value_or(0.0f));
         } else {
             UpdateStartIndex(index);
             layoutInfo_->duringPositionCalc_ = true;
             if (extraOffset.has_value()) {
                 layoutInfo_->extraOffset_ = -extraOffset.value();
             }
+            RequestJump(index, align, extraOffset.value_or(0.0f));
         }
     }
     FireAndCleanScrollingListener();
@@ -710,6 +726,11 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
 
 void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
 {
+    auto* context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (context->GetFrontendType() == FrontendType::ARK_TS) {
+        return; // fix layout mode to SLIDING_WINDOW in ArkTS
+    }
     if (!layoutInfo_ || mode != layoutInfo_->Mode()) {
         layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
         MarkDirtyNodeSelf();

@@ -1,0 +1,34 @@
+/** @memo */
+function usage(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + ("5___key_id_DIRNAME/compute.test.ts" as __memo_id_type));
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    ArkFlex(__memo_context, __memo_id + ("4___key_id_DIRNAME/compute.test.ts" as __memo_id_type), (__memo_context: __memo_context_type, __memo_id: __memo_id_type, instance: ArkFlexComponent) => {
+        const __memo_scope = __memo_context.scope<void>(__memo_id + ("1___key_id_DIRNAME/compute.test.ts" as __memo_id_type), 1);
+        const __memo_parameter_instance = __memo_scope.param(0, instance);
+        if (__memo_scope.unchanged) {
+            __memo_scope.cached;
+            return;
+        }
+        {
+            __memo_scope.recache();
+            return;
+        }
+    }, (__memo_context: __memo_context_type, __memo_id: __memo_id_type) => {
+        const __memo_scope = __memo_context.scope<void>(__memo_id + ("2___key_id_DIRNAME/compute.test.ts" as __memo_id_type));
+        if (__memo_scope.unchanged) {
+            __memo_scope.cached;
+            return;
+        }
+        {
+            __memo_scope.recache();
+            return;
+        }
+    }, __memo_context.compute(__memo_id + ("3___key_id_DIRNAME/compute.test.ts" as __memo_id_type), () => ({} as FlexOptions)));
+    {
+        __memo_scope.recache();
+        return;
+    }
+}

@@ -46,6 +46,7 @@ ace_unittest("grid_test_ng") {
   sources = COMMON_SRC
   defines = [ "TEST_IRREGULAR_GRID" ]
   sources += [
+    "grid_arkoala_test.cpp",
     "irregular/grid_irregular_filler_test.cpp",
     "irregular/grid_irregular_layout_test.cpp",
     "irregular/grid_layout_range_solver_test.cpp",

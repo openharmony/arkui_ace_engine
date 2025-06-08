@@ -1,0 +1,13 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "../../build/bridges/ohos",
+        "rootDir": "src",
+        "baseUrl": ".",
+        "module": "CommonJS",
+        "paths": {
+            "chai": ["./src/chai"]
+        },
+        "typeRoots": ["./src/mocha/types"]
+    }
+}

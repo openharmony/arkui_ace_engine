@@ -39,6 +39,14 @@ typedef enum {
     ARKUI_SWIPER_ARROW_SHOW_ON_HOVER,
 } SwiperArrow;
 
+namespace {
+static const Dimension& TrimToPositive(const Dimension& val)
+{
+    static Dimension zeroVp(0, DimensionUnit::VP);
+    return val.IsNegative() ? zeroVp : val;
+}
+} // namespace
+
 RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -428,6 +436,20 @@ void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* inf
     });
 }
 
+void SwiperModelNG::SetOnChangeEvent(FrameNode* frameNode,
+    std::function<void(const BaseEventInfo* info)>&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    pattern->UpdateOnChangeEvent([event = std::move(onChangeEvent)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
 void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -626,24 +648,28 @@ void SwiperModelNG::SetDigitalCrownSensitivity(int32_t sensitivity)
 #endif
 }
 
-void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
+void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
+    const std::optional<bool> &ignoreBlank)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, ignoreBlank, frameNode);
     CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, TrimToPositive(nextMargin), frameNode);
+    CHECK_NULL_VOID(ignoreBlank);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, *ignoreBlank, frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetNextMarginIgnoreBlank(ignoreBlank);
+    pattern->SetNextMarginIgnoreBlank(*ignoreBlank);
 }
 
-void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlank)
+void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
+    const std::optional<bool> &ignoreBlank)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, ignoreBlank, frameNode);
     CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, TrimToPositive(prevMargin), frameNode);
+    CHECK_NULL_VOID(ignoreBlank);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, *ignoreBlank, frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
+    pattern->SetPrevMarginIgnoreBlank(*ignoreBlank);
 }
 
 void SwiperModelNG::SetIndex(FrameNode* frameNode, uint32_t index)
@@ -868,6 +894,14 @@ void SwiperModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const B
         SwiperChangeEvent eventInfo(index);
         event(&eventInfo);
     });
+}
+
+void SwiperModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateChangeEvent(std::move(onChange));
 }
 
 void SwiperModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected)

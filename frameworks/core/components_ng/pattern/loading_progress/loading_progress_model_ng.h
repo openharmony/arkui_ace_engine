@@ -42,7 +42,7 @@ public:
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static uint32_t GetColor(FrameNode* frameNode);
-    static void SetColor(FrameNode* frameNode, const Color& value);
+    static void SetColor(FrameNode* frameNode, const std::optional<Color>& valueOpt);
     static bool GetEnableLoading(FrameNode* frameNode);
     static void SetEnableLoading(FrameNode* frameNode, bool enable);
     static void SetForegroundColor(FrameNode* frameNode, const Color& value);

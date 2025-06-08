@@ -505,6 +505,14 @@ void ViewAbstract::SetCustomBackgroundColorWithResourceObj(const RefPtr<Resource
     SetCustomBackgroundColor(backgroundColor);
 }
 
+void ViewAbstract::RequestFrame()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipeline != nullptr) {
+        pipeline->RequestFrame();
+    }
+}
+
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -587,6 +595,15 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, 
     };
     pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+}
+
+void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color)
+{
+    if (color) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
@@ -2089,6 +2106,14 @@ void ViewAbstract::DisableOnHoverMove(FrameNode* frameNode)
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnHoverMove();
+}
+
+void ViewAbstract::DisableOnAccessibilityHover(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAccessibilityHover();
 }
 
 void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
@@ -4687,6 +4712,19 @@ void ViewAbstract::SetClipEdge(FrameNode* frameNode, bool isClip)
     }
 }
 
+void ViewAbstract::SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetClipShape().has_value()) {
+            target->ResetClipShape();
+            target->OnClipShapeUpdate(nullptr);
+        }
+        target->UpdateClipEdge(isClip.value_or(false));
+    }
+}
+
 void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -6525,6 +6563,15 @@ void ViewAbstract::SetOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc &&onHove
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverMoveEvent(std::move(onHoverMoveEventFunc));
+}
+
+void ViewAbstract::SetOnAccessibilityHover(FrameNode* frameNode,
+    OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAccessibilityHoverEvent(std::move(onAccessibilityHoverEventFunc));
 }
 
 void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback)

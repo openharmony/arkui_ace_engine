@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
+#include <ani.h>
+
 #include "auto_fill_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "scene_board_judgement.h"
@@ -46,6 +48,8 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/js_frontend.h"
+#include "bridge/arkts_frontend/arkts_frontend.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
@@ -70,7 +74,6 @@
 #ifdef ACE_ENABLE_VK
 #include "accessibility_config.h"
 #endif
-
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
@@ -338,6 +341,13 @@ void ParseLanguage(ConfigurationChange& configurationChange, const std::string& 
     }
 }
 
+void ReleaseStorageReference(void* sharedRuntime, void* storage)
+{
+    if (sharedRuntime && storage) {
+        auto* env = reinterpret_cast<ani_env*>(sharedRuntime);
+        env->GlobalReference_Delete(reinterpret_cast<ani_object>(storage));
+    }
+}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -631,6 +641,8 @@ void AceContainer::InitializeFrontend()
             frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
             return;
         }
+    } else if (type_ == FrontendType::ARK_TS) {
+        frontend_ = MakeRefPtr<ArktsFrontend>(sharedRuntime_);
     } else {
         LOGE("Frontend type not supported");
         EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);
@@ -2405,6 +2417,27 @@ void AceContainer::SetLocalStorage(
         TaskExecutor::TaskType::JS, "ArkUISetLocalStorage");
 }
 
+void AceContainer::SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
+{
+    ContainerScope scope(instanceId_);
+    taskExecutor_->PostSyncTask([frontend = WeakPtr<Frontend>(frontend_), storage,
+                                    contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context),
+                                    id = instanceId_, sharedRuntime = sharedRuntime_] {
+        auto sp = frontend.Upgrade();
+        auto contextRef = contextWeak.lock();
+        if (!sp || !contextRef) {
+            ReleaseStorageReference(sharedRuntime, storage);
+            return;
+        }
+        auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(sp);
+        if (!arktsFrontend) {
+            ReleaseStorageReference(sharedRuntime, storage);
+            return;
+        }
+        arktsFrontend->RegisterLocalStorage(id, storage);
+    }, TaskExecutor::TaskType::UI, "ArkUISetAniLocalStorage");
+}
+
 void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
     const std::vector<std::string>& paths)
 {
@@ -2467,7 +2500,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
     }
     ContainerScope scope(instanceId);
-    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ) {
+    if (type_ == FrontendType::DECLARATIVE_JS || type_ >= FrontendType::DECLARATIVE_CJ) {
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         taskExecutorImpl->InitJsThread(false);
         InitializeFrontend();

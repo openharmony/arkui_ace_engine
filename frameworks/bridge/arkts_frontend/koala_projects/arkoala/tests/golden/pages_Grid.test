@@ -1,0 +1,42 @@
+{
+  "rootElement": {
+    "nodeId": 1147,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1148,
+        "kind": "Grid",
+        "children": [
+          {
+            "nodeId": 1149,
+            "kind": "Text",
+            "children": [],
+            "setTextOptions_content": "Grid"
+          }
+        ],
+        "columnsTemplate_value": "1fr 2fr 3fr",
+        "rowsTemplate_value": "3fr 2fr 1fr",
+        "columnsGap_value": 5,
+        "rowsGap_value": "10px",
+        "scrollBarWidth_value": "5fp",
+        "scrollBarColor_value": "#abcdef",
+        "scrollBar_value": 2,
+        "cachedCount_value": 10,
+        "editMode_value": 1,
+        "multiSelectable_value": 0,
+        "maxCount_value": 100,
+        "minCount_value": 5,
+        "cellLength_value": 77,
+        "layoutDirection_value": 3,
+        "supportAnimation_value": 1,
+        "edgeEffect_value": 0,
+        "nestedScroll_value": {
+          "scrollForward": 0,
+          "scrollBackward": 1
+        },
+        "enableScrollInteraction_value": 1,
+        "friction_value": 100
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "package": "@ohos.example",
+        "outDir": "build/sts/abc",
+        "baseUrl": ".",
+        "paths": {
+            "@ohos.arkui": ["../../arkui/src/dsts"],
+            "@koalaui/runtime": [
+                "../../memo-plugin/runtime-api"
+            ]
+        }
+    },
+    "include": [
+        "./src/ets/hello.sts"
+    ]
+}

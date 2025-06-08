@@ -1535,8 +1535,8 @@ void ImageModelNGTest001_SetLayoutProperty01(ImageModelNG &image)
     auto autoResize_ = ImageModelNG::GetAutoResize(frameNode);
     EXPECT_EQ(autoResize_, autoResize);
 
-    ImageModelNG::SetImageSourceSize(
-        frameNode, { Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT) });
+    auto pairSize = std::make_pair(Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT));
+    ImageModelNG::SetImageSourceSize(frameNode, pairSize);
     EXPECT_EQ(imageLayoutProperty->GetSourceSize().value(),
         SizeF(static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()),
             static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx())));

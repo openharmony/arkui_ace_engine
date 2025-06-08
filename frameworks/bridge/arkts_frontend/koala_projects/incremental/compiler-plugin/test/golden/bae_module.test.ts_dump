@@ -1,0 +1,23 @@
+/** @memo */
+export function bae(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: string, adv: string) {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + ("20___key_id_DIRNAME/module.test.ts" as __memo_id_type), 2);
+    const __memo_parameter_arg = __memo_scope.param(0, arg);
+    const __memo_parameter_adv = __memo_scope.param(1, adv);
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    kla(__memo_context, __memo_id + ("19___key_id_DIRNAME/module.test.ts" as __memo_id_type), __memo_parameter_arg.value, 
+    /** @memo */
+    function (__memo_context: __memo_context_type, __memo_id: __memo_id_type, s): string {
+        const __memo_scope = __memo_context.scope<string>(__memo_id + ("18___key_id_DIRNAME/module.test.ts" as __memo_id_type), 1);
+        const __memo_parameter_s = __memo_scope.param(0, s);
+        if (__memo_scope.unchanged)
+            return __memo_scope.cached;
+        return __memo_scope.recache(__memo_parameter_s.value + " ui pig " + __memo_parameter_adv.value);
+    }, function (s): string { return s + " non-ui horse " + __memo_parameter_adv.value; });
+    {
+        __memo_scope.recache();
+        return;
+    }
+}

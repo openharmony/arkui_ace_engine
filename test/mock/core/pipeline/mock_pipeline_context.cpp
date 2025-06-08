@@ -14,6 +14,7 @@
  */
 
 #include "mock_pipeline_context.h"
+#include "test/mock/core/common/mock_font_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -170,6 +171,11 @@ void MockPipelineContext::TearDown()
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
+}
+
+void MockPipelineContext::ResetFontManager()
+{
+    pipeline_->fontManager_ = MockFontManager::Create();
 }
 
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
@@ -1278,6 +1284,14 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    if (fontManager_) {
+        return fontManager_->GetSystemFont(fontName, fontInfo);
+    }
+    return false;
+}
+
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
     return false;
@@ -1385,6 +1399,14 @@ std::shared_ptr<Rosen::RSUIDirector> NG::PipelineContext::GetRSUIDirector()
 {
     return nullptr;
 }
+
+void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
+{
+    vsyncListener_ = std::move(vsync);
+}
+
+void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
 

@@ -1149,4 +1149,13 @@ bool ResourceAdapterImplV2::ExistDarkResByName(const std::string& resourceName, 
     return (state == Global::Resource::SUCCESS) &&
         (appResCfg->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK);
 }
+
+uint32_t ResourceAdapterImplV2::GetResId(const std::string &resTypeName) const
+{
+    uint32_t resId = -1;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, -1);
+    manager->GetResId(resTypeName, resId);
+    return resId;
+}
 } // namespace OHOS::Ace
