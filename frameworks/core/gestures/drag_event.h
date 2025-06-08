@@ -358,7 +358,7 @@ public:
         return requestId_;
     }
 
-    void SetDragSource(std::string& bundleName)
+    void SetDragSource(const std::string& bundleName)
     {
         bundleName_ = bundleName;
     }

@@ -1263,14 +1263,14 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0045, TestSize.Level1)
     /**
      * @tc.steps: step1.create DragEvent
      */
-    bool* isRemote = new bool(false);
+    bool isRemote = false;
     ArkUIDragEvent dragEvent;
     auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
 
     /**
      * @tc.steps: step2.set ArkUI_DragEvent null, related function is called.
      */
-    auto ret1 = OH_ArkUI_DragEvent_IsRemote(nullptr, isRemote);
+    auto ret1 = OH_ArkUI_DragEvent_IsRemote(nullptr, &isRemote);
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
@@ -1283,8 +1283,8 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0045, TestSize.Level1)
      * @tc.steps: step3.set isRemote not null, related function is called.
      */
     dragEvent.isRemoteDev = true;
-    auto ret3 = OH_ArkUI_DragEvent_IsRemote(drag_Event, isRemote);
+    auto ret3 = OH_ArkUI_DragEvent_IsRemote(drag_Event, &isRemote);
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(*isRemote, dragEvent.isRemoteDev);
+    EXPECT_EQ(isRemote, dragEvent.isRemoteDev);
 }
 } // namespace OHOS::Ace
