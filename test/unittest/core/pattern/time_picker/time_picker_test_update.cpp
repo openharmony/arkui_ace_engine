@@ -2471,7 +2471,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerColumnPattern003, TestSize.Level
     amPmColumnPattern->UpdateColumnChildPosition(CURRENT_YOFFSET2);
 
     EXPECT_EQ(amPmColumnPattern->yLast_, CURRENT_YOFFSET2);
-    EXPECT_EQ(amPmColumnPattern->offsetCurSet_, DEFAULT_YOFFSET1);
+    EXPECT_EQ(amPmColumnPattern->offsetCurSet_, DEFAULT_YOFFSET2);
     EXPECT_EQ(amPmColumnPattern->GetCurrentIndex(), 0);
 }
 
