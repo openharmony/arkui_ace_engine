@@ -254,7 +254,6 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
     RepeatByArray<T>(arr, keyGen, (ele: T, i: int32) => {
         const ri = new RepeatItemImpl<T>(ele, (i as number));
-        /** @memo */
         itemGenerator(ri);
     });
 }

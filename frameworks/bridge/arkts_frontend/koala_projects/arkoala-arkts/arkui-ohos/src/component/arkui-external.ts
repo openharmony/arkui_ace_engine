@@ -869,7 +869,7 @@ export class GlobalScope_ohos_font {
         const fontName_casted = fontName as (string)
         return GlobalScope_ohos_font.getFontByName_serialize(fontName_casted)
     }
-    public static getUIFontConfig(): UIFontConfig {
+    public static getInternalUIFontConfig(): UIFontConfig {
         return GlobalScope_ohos_font.getUIFontConfig_serialize()
     }
     private static registerFont_serialize(options: FontOptions): void {

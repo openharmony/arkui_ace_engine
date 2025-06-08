@@ -14,7 +14,7 @@
  */
 
 import { Resource } from "global/resource"
-import { GlobalScope_ohos_font } from "./src/component/arkui-external"
+import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 
 export namespace font {
 
@@ -69,7 +69,7 @@ export interface UIFontConfig {
 }
 
 function getUIFontConfig() : UIFontConfig {
-    return GlobalScope_ohos_font.getUIFontConfig();
+    return GlobalScope_ohos_font.getInternalUIFontConfig();
 }
 }
 export type FontOptions = font.FontOptions;

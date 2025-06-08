@@ -14,7 +14,7 @@
  */
 
 export { Observed, observableProxy } from "@koalaui/common"
-export * from "@koalaui/arkui-common"
+
 
 export * from "./component"
 // export * from "./handwritten"

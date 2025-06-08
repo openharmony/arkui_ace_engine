@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/compat",
-    "version": "1.5.8+devel",
+    "version": "1.7.3+devel",
     "description": "",
     "main": "build/src/index.js",
     "types": "build/src/index.d.ts",
@@ -24,11 +24,12 @@
     "scripts": {
         "clean": "rimraf build dist",
         "compile": "ets-tsc -b .",
+        "compile:release": "ets-tsc -b .",
         "compile:ohos": "ets-tsc -b ./tsconfig-ohos.json",
         "compile:all": "npm run compile && npm run compile:ohos",
         "build:compat": "npm run build:compat:inc",
-        "build:compat:inc": "fast-arktsc --input-files ./arktsconfig.json --output-dir ./build --compiler ../tools/panda/arkts/arktsc --link-name compat && ninja ${NINJA_OPTIONS} -f build/build.ninja",
-        "build:compat:inc:capi": "fast-arktsc --input-files ./arktsconfig.json --output-dir ./build --compiler ../tools/panda/arkts/arktsc-capi --file-option --link-name compat && PANDA_SDK_PATH=../tools/panda/node_modules/@panda/sdk ninja ${NINJA_OPTIONS} -f build/build.ninja"
+        "build:compat:inc": "fast-arktsc --config ./arktsconfig.json --compiler ../tools/panda/arkts/arktsc --link-name ./build/compat.abc && ninja ${NINJA_OPTIONS} -f build/abc/build.ninja",
+        "build:compat:inc:ui2abc": "fast-arktsc --config ./arktsconfig.json --compiler ../tools/panda/arkts/ui2abc --link-name ./build/compat.abc && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/abc/build.ninja"
     },
     "keywords": [],
     "dependencies": {},

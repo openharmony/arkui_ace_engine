@@ -32,16 +32,16 @@
                 "../../arkoala/arkui-common/src/arkts/*"
             ],
             "@ohos/arkui": [
-                "./src/component"
+                "arkui/component"
             ],
             "#components": [
-                "./src/component/ts"
+                "arkui/component/ts"
             ],
             "#external": [
-                "./src/external/ts",
+                "arkui/external/ts",
             ],
             "arkui.ani": [
-                "./src/ani/ts"
+                "arkui/ani/ts"
             ],
             "@ohos/animator": [
                 "./ohos.animator.ts"
@@ -89,7 +89,7 @@
         "rootDir": "."
     },
     "include": [
-        "./src/**/*.ts",
+        "arkui/**/*.ts",
         "./ohos.measure.ts",
         "./ohos.font.ts",
         "./ohos.arkui.UIContext.ts",
@@ -106,12 +106,12 @@
         "./ohos.promptAction.ts"
     ],
     "exclude": [
-        "./src/component/arkts",
-        "./src/component/arkts/ArkUIGeneratedNativeModule.ts",
-        "./src/component/test_utils.ts",
-        "./src/component/main.ts",
-        "./src/external/arkts",
-        "./src/ani/arkts",
+        "arkui/component/arkts",
+        "arkui/component/arkts/ArkUIGeneratedNativeModule.ts",
+        "arkui/component/test_utils.ts",
+        "arkui/component/main.ts",
+        "arkui/external/arkts",
+        "arkui/ani/arkts",
     ],
     "files": [
         "../../incremental/tools/panda/arkts/std-lib/global.d.ts"

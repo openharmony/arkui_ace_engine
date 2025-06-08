@@ -27,12 +27,15 @@ const { formatCommand,
 const ARK_BOOT_FILE_SEP = ":"
 const ARK_OBJ_FILE_EXT = ".abc"
 
+ark_path = process.env.ARK_PATH
+ark_path = ark_path ?? path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'ark')
+
 const ARGS_SPEC = [
     {
         flag: '--ark-bin',
         help: 'Path to ark binary',
         domain: 'string',
-        default: path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'ark')
+        default: ark_path
     },
     {
         flag: '--ark-ets-stdlib',
@@ -80,7 +83,7 @@ let cmd = [
 if (args.flag('--driver-log') === 'info') {
     console.log(formatCommand(cmd.join(' '), process.cwd()))
 }
-console.log(`start ${cmd.join(' ')}`)
+// console.log(`start ${cmd.join(' ')}`)
 const child = child_process.spawn(cmd[0], [...cmd.slice(1)])
 child.stdout.on('data', (data) => {
     process.stdout.write(data);

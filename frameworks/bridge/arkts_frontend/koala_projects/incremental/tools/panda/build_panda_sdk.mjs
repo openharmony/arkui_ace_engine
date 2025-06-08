@@ -103,13 +103,16 @@ function makeDir(path) {
 }
 
 function makeSymlink(target, dest) {
-    if (fs.lstatSync(dest).isDirectory()) {
-        fs.rmdirSync(dest, { recursive: true, force: true })
-        fs.cpSync(target, dest, { recursive: true })
-    } else {
-        if (fs.existsSync(dest)) {
+    if (fs.existsSync(dest)) {
+        if (fs.lstatSync(dest).isDirectory()) {
+            fs.rmdirSync(dest, { recursive: true, force: true })
+        } else {
             fs.unlinkSync(dest)
         }
+    }
+    if (fs.lstatSync(target).isDirectory()) {
+        fs.cpSync(target, dest, { recursive: true })
+    } else {
         fs.symlinkSync(target, dest)
     }
 }

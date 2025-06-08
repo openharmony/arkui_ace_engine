@@ -44,7 +44,7 @@ import { PixelMap } from "./arkui-pixelmap"
 import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
-import { memo, NodeAttach, remember } from "@koalaui/runtime"
+import { NodeAttach, remember } from "@koalaui/runtime"
 import { Tuple_Number_Number } from "./arkui-synthetics"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
 import { Callback_Number_Void } from "./alphabetIndexer"
@@ -13487,7 +13487,6 @@ export interface Type_CommonMethod_radialGradient_value {
     colors: Array<[ ResourceColor, number ]>;
     repeating?: boolean;
 }
-export declare function $$<T>(value: T): Bindable<T>;
 export interface Bindable<T> {
     readonly value: T;
     readonly onChange: (value: T) => void;

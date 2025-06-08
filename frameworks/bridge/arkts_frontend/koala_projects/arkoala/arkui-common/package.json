@@ -49,7 +49,9 @@
         "test-gen": "npm run compile && npm run ets:test && mocha --gen-golden=$npm_config_gdir",
         "ets:clean": "rimraf test/generated/*.ts test/ets/js_output",
         "test": "npm run compile && TS_NODE_PROJECT=./test/tsconfig.json mocha -r tsconfig-paths/register",
-        "test:coverage": "nyc mocha"
+        "test:coverage": "nyc mocha",
+        "annotate": "npm run compile --prefix ../../ui2abc/annotate && node ../../ui2abc/annotate",
+        "build:arkui-common:inc:ui2abc": "npm run annotate && node ../../ui2abc/fast-arktsc --config ./ui2abcconfig.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3/arkui-common.abc --restart-stages && ninja ${NINJA_OPTIONS} -f build-m3/build.ninja"
     },
     "keywords": [],
     "dependencies": {
