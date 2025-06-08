@@ -195,7 +195,7 @@ HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest006, TestSize.Level1)
     swipeReport.SetTouchEvents(touchPoints_);
     auto value = swipeReport.GetJsonData();
     std::string JsonStr = value->ToString().c_str();
-    std::string JsonStr1 = "{\"GestureType\":\"Swipe\",\"id\":1,\"upPoint\":[10,10],\"downPoint\":[10,10],"
+    std::string JsonStr1 = "{\"GestureType\":\"Swipe\",\"id\":1,\"upPoint\":[[10,10]],\"downPoint\":[[10,10]],"
                            "\"direction\":2,\"speed\":0,\"actualSpeed\":0}";
     EXPECT_EQ(JsonStr, JsonStr1);
 }
