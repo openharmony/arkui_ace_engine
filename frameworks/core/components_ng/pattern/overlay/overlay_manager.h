@@ -922,7 +922,6 @@ private:
         SheetKey& sheetKey);
 
     bool CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, int32_t targetId);
-    void UpdateModalStyleSafeArea(const RefPtr<FrameNode>& modalNode, const RefPtr<FrameNode>& builder);
     void HandleModalShow(std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode,
