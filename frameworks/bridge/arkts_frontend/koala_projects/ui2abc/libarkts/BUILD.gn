@@ -101,6 +101,8 @@ action("libarkts_install") {
         "--install",
         "--install-path", rebase_path("..")
     ]
+
+    deps = [ "../../arkoala-arkts:install_all" ]
 }
 
 action("es2panda.js") {

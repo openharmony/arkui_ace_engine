@@ -83,7 +83,6 @@ action("arkoala.abc") {
     ]
     deps = [
       ":arkui.abc",
-      "$koala_root/incremental:incremental",
       "$koala_root/interop:interop"
     ]
 
@@ -106,13 +105,9 @@ action("arkui.abc") {
     ]
 
     deps = [
-      ":ui2abc_process",
       "$koala_root/ui2abc:ui2abc",
       "$koala_root/incremental:incremental"
     ]
-
-    external_deps = ets2abc_build_deps
-    external_deps += static_linker_build_deps
 }
 
 group("install_all") {

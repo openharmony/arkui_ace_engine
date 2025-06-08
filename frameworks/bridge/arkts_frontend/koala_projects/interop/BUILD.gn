@@ -47,13 +47,8 @@ action("interop.abc") {
     ]
 
     deps = [
-        "../arkoala-arkts:ui2abc_process",       
-        "../ui2abc:fast_arktsc_build",
         "../ui2abc:ui2abc"
     ]
-
-    external_deps = ets2abc_build_deps
-    external_deps += static_linker_build_deps
 }
 
 group("interop") {
