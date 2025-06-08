@@ -126,7 +126,7 @@ group("install_all") {
 ohos_prebuilt_etc("arkoala_build") {
   source = "$target_out_dir/arkoala.abc"
   deps = [ ":arkoala.abc" ]
-  module_install_dir = "../arkoala/framework"
+  module_install_dir = "framework"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
