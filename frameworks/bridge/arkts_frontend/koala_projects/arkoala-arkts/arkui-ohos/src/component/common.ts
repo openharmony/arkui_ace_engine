@@ -12132,7 +12132,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         this.setDisplayY(displayY_NonNull)
     }
     get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getStopPropagation()
     }
     set stopPropagation(stopPropagation: (() => void)) {
         this.setStopPropagation(stopPropagation)
@@ -12326,8 +12326,17 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayY(this.peer!.ptr, displayY)
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._HoverEvent_getStopPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -12419,7 +12428,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setY(y)
     }
     get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getStopPropagation()
     }
     set stopPropagation(stopPropagation: (() => void)) {
         this.setStopPropagation(stopPropagation)
@@ -12439,7 +12448,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setRawDeltaY(rawDeltaY_NonNull)
     }
     get pressedButtons(): Array<MouseButton> | undefined {
-        throw new Error("Not implemented")
+        return this.getPressedButtons()
     }
     set pressedButtons(pressedButtons: Array<MouseButton> | undefined) {
         const pressedButtons_NonNull  = (pressedButtons as Array<MouseButton>)
@@ -12640,8 +12649,17 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._MouseEvent_setY(this.peer!.ptr, y)
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -12690,8 +12708,26 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._MouseEvent_setRawDeltaY(this.peer!.ptr, rawDeltaY)
     }
     private getPressedButtons_serialize(): Array<MouseButton> | undefined {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getPressedButtons(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getPressedButtons(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : Array<MouseButton> | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            const buffer_length: int32 = retvalDeserializer.readInt32()
+            let buffer: Array<MouseButton> = new Array<MouseButton>(buffer_length)
+            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+                buffer[buffer_i] = (retvalDeserializer.readInt32() as int32) as MouseButton
+            }
+            returnResult = buffer;
+        }
+        return returnResult
     }
     private setPressedButtons_serialize(pressedButtons: Array<MouseButton>): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -12918,7 +12954,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         this.setStopPropagation(stopPropagation)
     }
     get preventDefault(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getPreventDefault();
     }
     set preventDefault(preventDefault: (() => void)) {
         this.setPreventDefault(preventDefault)
@@ -13069,7 +13105,6 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
             exactRetValue.push(new Byte(retval[i]))
         }
         let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
-        
         let returnResult = retvalDeserializer.readCallback_Void(true);
         return returnResult;
     }
@@ -13080,8 +13115,17 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
     private getPreventDefault_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getPreventDefault(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getPreventDefault(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult;
     }
     private setPreventDefault_serialize(preventDefault: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -13364,13 +13408,13 @@ export interface FocusAxisEvent {
 }
 export class FocusAxisEventInternal extends BaseEventInternal implements MaterializedBase,FocusAxisEvent {
     get axisMap(): Map<AxisModel, number> {
-        throw new Error("Not implemented")
+        return this.getAxisMap()
     }
     set axisMap(axisMap: Map<AxisModel, number>) {
         this.setAxisMap(axisMap)
     }
     get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getStopPropagation()
     }
     set stopPropagation(stopPropagation: (() => void)) {
         this.setStopPropagation(stopPropagation)
@@ -13404,12 +13448,18 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
         return
     }
     private getAxisMap_serialize(): Map<AxisModel, number> {
-        const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getAxisMap(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const buffer_size : int32 = retvalDeserializer.readInt32()
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._FocusAxisEvent_getAxisMap(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
         let buffer : Map<AxisModel, number> = new Map<AxisModel, number>()
-        // TODO: TS map resize
-        for (let buffer_i = 0; buffer_i < buffer_size; buffer_i++) {
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
             const buffer_key : AxisModel = TypeChecker.AxisModel_FromNumeric(retvalDeserializer.readInt32())
             const buffer_value : number = (retvalDeserializer.readNumber() as number)
             buffer.set(buffer_key, buffer_value)
@@ -13430,8 +13480,17 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
         thisSerializer.release()
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getStopPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult;
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
