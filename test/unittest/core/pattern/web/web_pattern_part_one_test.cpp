@@ -73,6 +73,9 @@ public:
     MOCK_METHOD(void, Paste, (), (const, override));
     MOCK_METHOD(void, Cut, (), (const, override));
     MOCK_METHOD(void, SelectAll, (), (const, override));
+    MOCK_METHOD(void, Undo, (), (const, override));
+    MOCK_METHOD(void, Redo, (), (const, override));
+    MOCK_METHOD(void, PasteAndMatchStyle, (), (const, override));
 };
 
 class WebPatternPartOneTest : public testing::Test {
