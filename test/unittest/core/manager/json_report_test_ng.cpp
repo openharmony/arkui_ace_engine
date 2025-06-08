@@ -32,6 +32,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const Point globalPoint { 100.0, 100.0 };
 const int32_t id = 1;
+const int32_t startId = 1;
+const int32_t dropId = 2;
 const Offset offset(10, 10);
 const Offset offsetLocal(15, 15);
 const Offset offsetGlobal(20, 20);
@@ -180,10 +182,11 @@ HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest005, TestSize.Level1)
 HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest006, TestSize.Level1)
 {
     std::map<int32_t, TouchEvent> touchPoints_;
+    std::map<int32_t, TouchEvent> touchPointsEmpty_;
     TouchEvent point;
     point.id = 1;
-    point.x = 10;
-    point.y = 10;
+    point.x = 20;
+    point.y = 20;
     touchPoints_[1] = point;
     SwipeJsonReport swipeReport;
     swipeReport.SetPoint(globalPoint);
@@ -195,9 +198,15 @@ HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest006, TestSize.Level1)
     swipeReport.SetTouchEvents(touchPoints_);
     auto value = swipeReport.GetJsonData();
     std::string JsonStr = value->ToString().c_str();
-    std::string JsonStr1 = "{\"GestureType\":\"Swipe\",\"id\":1,\"upPoint\":[[10,10]],\"downPoint\":[[10,10]],"
+    std::string JsonStr1 = "{\"GestureType\":\"Swipe\",\"id\":1,\"upPoint\":[[10,10]],\"downPoint\":[[20,20]],"
                            "\"direction\":2,\"speed\":0,\"actualSpeed\":0}";
     EXPECT_EQ(JsonStr, JsonStr1);
+    swipeReport.SetTouchEvents(touchPointsEmpty_);
+    auto value1 = swipeReport.GetJsonData();
+    std::string JsonUisessionStr = value1->ToString().c_str();
+    std::string JsonUisessionStr1 = "{\"GestureType\":\"Swipe\",\"id\":1,\"upPoint\":[10,10],\"downPoint\":[10,10],"
+                           "\"direction\":2,\"speed\":0,\"actualSpeed\":0}";
+    EXPECT_EQ(JsonUisessionStr, JsonUisessionStr1);
 }
 /**
  * @tc.name: JsonReportTestNgTypeTest007
@@ -228,7 +237,8 @@ HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest008, TestSize.Level1)
     DragJsonReport dragReport;
     dragReport.SetPoint(globalPoint);
     dragReport.SetDragReporterPharse(DragReporterPharse::DRAG_START);
-    dragReport.SetId(id);
+    dragReport.SetStartId(startId);
+    dragReport.SetDropId(dropId);
     dragReport.SetHostName("test");
     dragReport.SetActualDuration(2);
     auto valueDragstart = dragReport.GetJsonData();
@@ -242,7 +252,7 @@ HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest008, TestSize.Level1)
     auto valueDropsuccess = dragReport.GetJsonData();
     std::string JsonStrDropsuccess = valueDropsuccess->ToString().c_str();
     std::string JsonStrDropsuccess1 =
-        "{\"GestureType\":\"DrageEnd\",\"point\":[0,0],\"dropResult\":\"success\",\"id\":1,\"hostName\":\"test\"}";
+        "{\"GestureType\":\"DrageEnd\",\"point\":[0,0],\"dropResult\":\"success\",\"id\":2,\"hostName\":\"test\"}";
     EXPECT_EQ(JsonStrDropsuccess, JsonStrDropsuccess1);
 
     dragReport.SetDragReporterPharse(DragReporterPharse::DRAG_STOP);

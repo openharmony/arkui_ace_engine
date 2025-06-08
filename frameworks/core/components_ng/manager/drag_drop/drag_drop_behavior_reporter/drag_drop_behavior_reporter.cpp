@@ -80,9 +80,14 @@ void DragDropBehaviorReporter::UpdateEndPoint(Point endPoint)
     endPoint_ = endPoint;
 }
 
-void DragDropBehaviorReporter::UpdateFrameNodeId(int32_t id)
+void DragDropBehaviorReporter::UpdateFrameNodeStartId(int32_t startId)
 {
-    id_ = id;
+    startId_ = startId;
+}
+
+void DragDropBehaviorReporter::UpdateFrameNodeDropId(int32_t dropId)
+{
+    dropId_ = dropId;
 }
 
 void DragDropBehaviorReporter::UpdateLongPressDurationStart(int64_t longPressDurationStart)
@@ -162,7 +167,8 @@ void DragDropBehaviorReporter::HandleUISessionReport(DragReporterPharse pharse, 
     int32_t convertToMs = 1000000;
     int64_t longPressDuration = (longPressDurationEnd_ - longPressDurationStart_) / convertToMs;
     DragJsonReport dragJsonReport;
-    dragJsonReport.SetId(id_);
+    dragJsonReport.SetStartId(startId_);
+    dragJsonReport.SetDropId(dropId_);
     dragJsonReport.SetHostName(hostName);
     dragJsonReport.SetActualDuration(longPressDuration);
     dragJsonReport.SetStartPoint(startPoint_);
