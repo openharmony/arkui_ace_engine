@@ -658,4 +658,30 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest011, TestSize.Level1)
     displaySync->DelFromPipelineOnContainer();
     EXPECT_FALSE(displaySync->IsOnPipeline());
 }
+
+/**
+ * @tc.name: DisplaySyncManagerTest012
+ * @tc.desc: DisplaySyncManager sets the vsync period of the pipeline.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+
+    int32_t initSize = 0;
+    EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
+
+    /**
+     * @tc.steps: step2. Set vsyncPeriod1 to 0.
+     * @tc.expected: step2. false.
+     */
+    int64_t vsyncPeriod1 = 0;
+    auto result = displaySyncManager->SetVsyncPeriod(vsyncPeriod1);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
