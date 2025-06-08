@@ -2220,4 +2220,19 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest033, TestSize.Level1)
      */
     EXPECT_NO_FATAL_FAILURE(sliderPattern->UpdateEndsIsShowStepsPosition(testPosition, block, endsSize, 40, true));
 }
+
+/**
+ * @tc.name: PlayHapticFeedbackTest002
+ * @tc.desc: Test PlayHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, PlayHapticFeedbackTest002, TestSize.Level1)
+{
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->SetEnableHapticFeedback(true);
+    sliderPattern->PlayHapticFeedback(false);
+    sliderPattern->PlayHapticFeedback(true);
+    EXPECT_TRUE(sliderPattern->isEnableHaptic_);
+}
 } // namespace OHOS::Ace::NG
