@@ -369,7 +369,7 @@ public:
     }
 
 
-    void SetRemoteDev(const bool isRemoteDev)
+    void SetRemoteDev(bool isRemoteDev)
     {
         isRemoteDev_ = isRemoteDev;
     }
