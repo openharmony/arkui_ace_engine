@@ -2121,6 +2121,53 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuWrapperPaintMethodTestNg003
+ * @tc.desc: PaintDoubleBorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create wrapperPattern、paintMethod、menuPattern
+     * @tc.expected: node is not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->SetHasCustomOutlineWidth(true);
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    auto paintMethod = AceType::DynamicCast<MenuWrapperPaintMethod>(wrapperPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(wrapperNode);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper =
+        new PaintWrapper(renderContext, geometryNode, wrapperPattern->GetPaintProperty<MenuWrapperPaintProperty>());
+    Testing::MockCanvas canvas;
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    MenuPathParams params;
+    params.didNeedArrow = true;
+    menuPattern->UpdateMenuPathParams(params);
+    /**
+     * @tc.steps: step2. Call PaintDoubleBorder.
+     * @tc.expected: Attributes are called successfully.
+     */
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(2));
+    EXPECT_CALL(canvas, ClipPath(_, RSClipOp::INTERSECT, _)).Times(2);
+    EXPECT_CALL(canvas, ClipPath(_, RSClipOp::DIFFERENCE, _)).Times(1);
+    EXPECT_CALL(canvas, DrawPath(_)).Times(5);
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+}
+
+/**
  * @tc.name: MenuWrapperHotArea001
  * @tc.desc: test Menu hot area
  * @tc.type: FUNC
