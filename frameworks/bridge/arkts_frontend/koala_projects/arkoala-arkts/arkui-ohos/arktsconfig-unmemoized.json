@@ -44,22 +44,22 @@
                 "index.ts"
             ],
             "@ohos/animator": [
-                "../ohos.animator.ts"
+                "../@ohos.animator.ts"
             ],
             "@ohos/arkui/componentUtils": [
-                "../ohos.arkui.componentUtils.ts"
+                "../@ohos.arkui.componentUtils.ts"
             ],
             "@ohos/arkui/focusController": [
-                "../ohos.arkui.focusController.ts"
+                "../@ohos.arkui.focusController.ts"
             ],
             "@ohos/arkui/inspector": [
-                "../ohos.arkui.inspector.ts"
+                "../@ohos.arkui.inspector.ts"
             ],
             "@ohos/arkui/UIContext": [
-                "../ohos.arkui.UIContext.ts"
+                "../@ohos.arkui.UIContext.ts"
             ],
             "@ohos.arkui.UIContext": [
-                "../ohos.arkui.UIContext.ts"
+                "../@ohos.arkui.UIContext.ts"
             ],
             "@ohos.arkui.stateManagement": [
                 "./stateManagement/index.ts"
@@ -68,50 +68,50 @@
                 "./ohos.arkui.node.ts"
             ],
             "@ohos/measure": [
-                "../ohos.measure.ts"
+                "../@ohos.measure.ts"
             ],
             "@ohos/font": [
-                "../ohos.font.ts"
+                "../@ohos.font.ts"
             ],
             "global/resource": [
                 "../global/resource/resource.ts"
             ],
             "@ohos/router": [
-                "../ohos.router.ts"
+                "../@ohos.router.ts"
             ],
             "@ohos/arkui/observer": [
-                "../ohos.arkui.observer.ts"
+                "../@ohos.arkui.observer.ts"
             ],
             "@ohos/graphics/common2D": [
-                "../ohos.graphics.common2D.ts"
+                "../@ohos.graphics.common2D.ts"
             ],
             "@ohos/graphics/drawing": [
-                "../ohos.graphics.drawing.ts"
+                "../@ohos.graphics.drawing.ts"
             ],
             "@ohos/arkui/graphics": [
-                "../ohos.arkui.graphics.ts"
+                "../@ohos.arkui.graphics.ts"
             ],
             "@ohos/promptAction": [
-                "../ohos.promptAction.ts"
+                "../@ohos.promptAction.ts"
             ]
         }
     },
     "include": [
         "build/unmemoized/src/**/*.ts",
         "build/unmemoized/src/*.ts",
-        "build/unmemoized/ohos.arkui.UIContext.ts",
-        "build/unmemoized/ohos.measure.ts",
-        "build/unmemoized/ohos.font.ts",
-        "build/unmemoized/ohos.animator.ts",
-        "build/unmemoized/ohos.arkui.componentUtils.ts",
-        "build/unmemoized/ohos.arkui.focusController.ts",
+        "build/unmemoized/@ohos.arkui.UIContext.ts",
+        "build/unmemoized/@ohos.measure.ts",
+        "build/unmemoized/@ohos.font.ts",
+        "build/unmemoized/@ohos.animator.ts",
+        "build/unmemoized/@ohos.arkui.componentUtils.ts",
+        "build/unmemoized/@ohos.arkui.focusController.ts",
         "src/ani/arkts/*.ts",
-        "build/unmemoized/ohos.router.ts",
-        "build/unmemoized/ohos.arkui.observer.ts",
-        "build/unmemoized/ohos.graphics.common2D.ts",
-        "build/unmemoized/ohos.graphics.drawing.ts",
-        "build/unmemoized/ohos.arkui.graphics.ts",
-        "build/unmemoized/ohos.promptAction.ts"
+        "build/unmemoized/@ohos.router.ts",
+        "build/unmemoized/@ohos.arkui.observer.ts",
+        "build/unmemoized/@ohos.graphics.common2D.ts",
+        "build/unmemoized/@ohos.graphics.drawing.ts",
+        "build/unmemoized/@ohos.arkui.graphics.ts",
+        "build/unmemoized/@ohos.promptAction.ts"
     ],
     "exclude": [
         "**/index.ts",

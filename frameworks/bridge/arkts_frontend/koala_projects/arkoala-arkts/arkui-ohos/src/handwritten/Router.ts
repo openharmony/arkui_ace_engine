@@ -27,7 +27,7 @@ import {
 } from "@koalaui/runtime"
 import { ArkUINativeModule } from "#components"
 import { runtimeType, RuntimeType } from "@koalaui/interop"
-import router from "../../@ohos.router"
+import router from "@ohos/router"
 import { EntryPoint, UserView, UserViewBuilder } from "../UserView"
 import { InteropNativeModule, nullptr } from "@koalaui/interop"
 import { PeerNode } from "../PeerNode"

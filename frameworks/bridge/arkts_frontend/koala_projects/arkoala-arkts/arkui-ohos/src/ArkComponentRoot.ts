@@ -19,7 +19,7 @@ import { ArkComponentRootPeer, ArkCustomComponentRootPeer } from "./component";
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { int32 } from "@koalaui/common"
 import { InteropNativeModule } from "@koalaui/interop"
-import router from "../@ohos.router"
+import router from "@ohos/router"
 
 import { CurrentRouterTransitionState, VisibilityHiding, VisibilityShowing, WithRouterTransitionState } from "./handwritten/Router";
 

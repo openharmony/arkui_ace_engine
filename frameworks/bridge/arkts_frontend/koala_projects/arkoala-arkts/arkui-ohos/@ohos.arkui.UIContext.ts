@@ -44,8 +44,8 @@ import { uiObserver } from "@ohos/arkui/observer"
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
 import inspector from "@ohos/arkui/inspector"
-import router from './@ohos.router'
-import promptAction from './@ohos.promptAction';
+import router from '@ohos/router'
+import promptAction from '@ohos/promptAction';
 import { ContextMenu } from 'arkui/component/contextMenu';
 import { GlobalScope } from "arkui/component/GlobalScope"
 

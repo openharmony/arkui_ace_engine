@@ -169,7 +169,7 @@ import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
-import { drawing } from "../../../@ohos.graphics.drawing"
+import { drawing } from "@ohos/graphics/drawing"
 import promptAction from '@ohos/promptAction'
 import { PointerStyle } from '#external'
 export class Deserializer extends DeserializerBase {
