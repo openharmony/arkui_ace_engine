@@ -40,7 +40,7 @@ export function ArkComponentRoot(
 ) {
     InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot enter`)
     NodeAttach<PeerNode>(
-        () => ArkCustomComponentRootPeer.create(component),
+        () => ArkComponentRootPeer.create(undefined),
         (node: PeerNode) => {
             if (_isNeedCreate) {
                 rememberDisposable(() => {
