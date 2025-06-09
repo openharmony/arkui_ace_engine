@@ -2311,6 +2311,23 @@ bool MovingPhotoPattern::IsRefreshMovingPhotoReturn(bool status)
     return false;
 }
 
+void MovingPhotoPattern::SetHdrBrightness(float hdrBrightness)
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "SetHdrBrightness:%{public}f.", hdrBrightness);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto movingPhotoNode = AceType::DynamicCast<MovingPhotoNode>(host);
+    CHECK_NULL_VOID(movingPhotoNode);
+    auto imageNode = AceType::DynamicCast<FrameNode>(movingPhotoNode->GetImage());
+    CHECK_NULL_VOID(imageNode);
+    auto imageRenderContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageRenderContext);
+    imageRenderContext->SetImageHDRBrightness(hdrBrightness);
+    imageRenderContext->SetImageHDRPresent(true);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, hdrBrightness, imageNode);
+    hdrBrightness_ = hdrBrightness;
+}
+
 MovingPhotoPattern::~MovingPhotoPattern()
 {
     if (IsSupportImageAnalyzer()) {

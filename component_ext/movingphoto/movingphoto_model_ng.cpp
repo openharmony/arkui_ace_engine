@@ -97,6 +97,14 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
     SetXmagePosition();
 }
 
+void MovingPhotoModelNG::SetHdrBrightness(float hdrBrightness)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    movingPhotoPattern->SetHdrBrightness(hdrBrightness);
+}
+
 void MovingPhotoModelNG::SetMuted(bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
