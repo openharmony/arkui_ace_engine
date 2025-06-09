@@ -3000,4 +3000,20 @@ HWTEST_F(TextFieldPatternTest, HandleOnPageUpAndPageDownTest, TestSize.Level1)
     int32_t upCaret = pattern_->selectController_->GetCaretIndex();
     EXPECT_EQ(downCaret, upCaret);
 }
+
+/**
+ * @tc.name: AdjustAutoScrollOffset
+ * @tc.desc: test AdjustAutoScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, AdjustAutoScrollOffset, TestSize.Level1)
+{
+    CreateTextField("Hello World\n Hello World\n Hello World\n Hello World\n Hello World\n");
+    pattern_->contentRect_ = RectF(0, 0, 100, 100);
+    auto offset = pattern_->AdjustAutoScrollOffset(Offset(50.0f, -10.0f));
+    EXPECT_EQ(offset, Offset(50.0f, 1.0f));
+
+    offset = pattern_->AdjustAutoScrollOffset(Offset(50.0f, 110.0f));
+    EXPECT_EQ(offset, Offset(50.0f, 99.0f));
+}
 } // namespace OHOS::Ace::NG
