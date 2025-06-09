@@ -8272,6 +8272,13 @@ void WebDelegate::RestoreRenderFit()
     webPattern->RestoreRenderFit();
 }
 
+bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
+}
+
 bool WebDelegate::IsNWebEx()
 {
     if (!nweb_) {
