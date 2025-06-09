@@ -870,7 +870,8 @@ private:
     static void ParseMaskRectHeightWithResourceObj(const JSRef<JSVal>& width, DimensionRect& options);
     static void CompleteResourceObjectInner(
         JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
-    static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(const JSRef<JSArray>& jsSafeAreaEdges);
+    static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(
+        const JSRef<JSArray>& jsSafeAreaEdges, NG::LayoutSafeAreaEdge defaultVal);
     static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);
     static void GetBorderRadiusTopLeft(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
     static void GetBorderRadiusTopRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
