@@ -629,8 +629,8 @@ private:
     std::optional<int32_t> CalcRotateAngleWithDisplayOrientation(
         DisplayOrientation curOri, DisplayOrientation targetOri);
     void GetAllNodes(
-        std::vector<RefPtr<NavDestinationNodeBase>>& invisibleNodes,
-        std::vector<RefPtr<NavDestinationNodeBase>>& visibleNodes);
+        std::vector<WeakPtr<NavDestinationNodeBase>>& invisibleNodes,
+        std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void OnAllTransitionAnimationFinish();
     void UpdatePageLevelConfigForSizeChanged();
     RefPtr<NavDestinationNodeBase> GetLastStandardNodeOrNavBar();
