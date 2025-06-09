@@ -17,11 +17,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 group("arkts_frontend_native_package") {
   deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
 }
-group("arkoala_ui2abc") {
-  deps = [
-    "koala_projects/arkoala-arkts:arkoala"
-  ]
-}
+
 template("arkts_frontend") {
   forward_variables_from(invoker, "*")
 
@@ -30,11 +26,15 @@ template("arkts_frontend") {
     part_name = ace_engine_part
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
-    if (!build_ohos_sdk) {
-      deps = [
+    deps = [
+      ":ArkoalaNative_ark",
+      "arkoala:arkoala_prebuild",
+    ]
+
+    if (build_ohos_sdk) {
+      deps -= [
         ":ArkoalaNative_ark",
-        # "arkoala:arkoala_prebuild",
-        ":arkoala_ui2abc"
+        "arkoala:arkoala_prebuild",
       ]
     }
 

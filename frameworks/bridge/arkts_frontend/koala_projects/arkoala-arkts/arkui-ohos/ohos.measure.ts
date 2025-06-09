@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { SizeOptions } from "arkui/component/units"
-import { GlobalScope_ohos_measure_utils } from "arkui/component/arkui-external"
+import { SizeOptions } from "./src/component/units"
+import { GlobalScope_ohos_measure_utils } from "./src/component/arkui-external"
 import { Resource } from "global/resource"
-import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from "arkui/component/enums"
+import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from "./src/component/enums"
 
 export interface MeasureOptions {
     textContent: string | Resource;

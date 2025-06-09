@@ -25,16 +25,13 @@ export type UIDetachedRootCreator = (
     /** @memo */
     builder: () => void
 ) => PeerNode
-function createUiDetachedRootStub(
+let createUiDetachedRoot: UIDetachedRootCreator = (
     factory: () => PeerNode,
     /** @memo */
     builder: () => void
-): PeerNode {
+): PeerNode => {
     throw new Error("Not implemented")
 }
-
-let createUiDetachedRoot: UIDetachedRootCreator = createUiDetachedRootStub
-
 export function setUIDetachedRootCreator(creator: UIDetachedRootCreator): void {
     createUiDetachedRoot = creator
 }

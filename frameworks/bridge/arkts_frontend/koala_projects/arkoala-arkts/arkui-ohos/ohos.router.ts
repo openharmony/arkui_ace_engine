@@ -1,6 +1,6 @@
 import { InteropNativeModule } from "@koalaui/interop/InteropNativeModule"
-import { Router } from "arkui/handwritten"
-import { PeerNode } from "arkui/PeerNode"
+import { Router } from "./src/handwritten"
+import { PeerNode } from "./src/PeerNode"
 
 namespace router {
     export interface RouterOptions {

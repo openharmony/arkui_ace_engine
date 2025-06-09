@@ -17,7 +17,7 @@
         "../interop"
     ],
     "devDependencies": {
-        "@koalaui/fast-arktsc": "file:../ui2abc/fast-arktsc",
+        "@koalaui/fast-arktsc": "file:../incremental/tools/fast-arktsc",
         "@koalaui/ets-tsc": "file:../incremental/tools/ets-tsc",
         "@types/chai": "^4.3.1",
         "@types/mocha": "^9.1.0",
@@ -71,10 +71,6 @@
         "build:arkoala": "npm run panda:sdk:check-install && npm run build:arkoala:components && npm run link:arkoala",
         "build:arkoala:inc": "npm run build:arkoala:components:inc && npm run link:arkoala",
         "link:arkoala": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui/build/arkui-no-common.abc ../arkoala/arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
-
-        "build:arkoala:m3:gn": "npm run -C ../arkoala/arkui-common build:arkui-common:inc:ui2abc && npm run build:m3:inc:ui2abc",
-        "link:arkoala:m3:gn": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./build/arkui.abc ../arkoala/arkui-common/build-m3/arkui-common.abc ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
-        "build:m3:inc:ui2abc": "node ../ui2abc/fast-arktsc --config ./ui2abcconfig-m3-merged.json --compiler ../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-impl/arkui-m3.abc --restart-stages && ninja ${NINJA_OPTIONS} -f build-m3-impl/build.ninja -k 1200 && mkdir -p ./build && cp ./build-m3-impl/arkui-m3.abc ./build/arkui.abc",
         "aot:host:arkoala": "npm run link:arkoala && npm run -C ../incremental/tools/fast-arktsc compile && npm run aot:host:stdlib && node ../incremental/tools/fast-arktsc --only-aot build/arkoala.abc",
         "aot:arm32:arkoala": "npm run link:arkoala && npm run -C ../incremental/tools/fast-arktsc compile && node ../incremental/tools/fast-arktsc --only-aot build/arkoala.abc --aot-target arm",
         "aot:arm64:arkoala": "npm run link:arkoala && npm run -C ../incremental/tools/fast-arktsc compile && node ../incremental/tools/fast-arktsc --only-aot build/arkoala.abc --aot-target arm64",

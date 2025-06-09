@@ -16,38 +16,38 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { FrameNode, FrameNodeInternal, FrameNodeUtils } from "arkui/FrameNode"
-import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
-import { GlobalScope_ohos_measure_utils } from "arkui/component/arkui-external"
-import { GlobalScopeUicontextFontScale, GlobalScopeUicontextTextMenu } from "arkui/component/arkui-uicontext-text-utils"
-import { UIContextDispatchKeyEvent, UIContextAtomicServiceBar } from "arkui/component/arkui-custom"
+import { FrameNode, FrameNodeInternal, FrameNodeUtils } from "./src/FrameNode"
+import { GlobalScope_ohos_font } from "./src/component/arkui-external"
+import { GlobalScope_ohos_measure_utils } from "./src/component/arkui-external"
+import { GlobalScopeUicontextFontScale, GlobalScopeUicontextTextMenu } from "./src/component/arkui-uicontext-text-utils"
+import { UIContextDispatchKeyEvent, UIContextAtomicServiceBar } from "./src/component/arkui-custom"
 import { FontOptions, FontInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
-import { SizeOptions } from "arkui/component/units"
+import { SizeOptions } from "./src/component/units"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32 } from "@koalaui/common"
 import { nullptr } from "@koalaui/interop"
-import { _animateTo } from "arkui/handwritten/ArkAnimation"
-import { AnimateParam } from 'arkui/component'
+import { _animateTo } from "./src/handwritten/ArkAnimation"
+import { AnimateParam } from './src/component'
 import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
 import { Context, PointerStyle } from "#external"
 import { ArkUIAniModule } from "arkui.ani"
-import { Serializer } from "arkui/component/peers/Serializer"
+import { Serializer } from "./src/component/peers/Serializer"
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { focusController } from "@ohos/arkui/focusController"
-import { Frame } from "arkui/Graphics"
-import { KeyEvent } from "arkui/component/common"
-import { TextMenuOptions } from "arkui/component/textCommon"
-import { Nullable } from "arkui/component/enums"
-import { KeyProcessingMode } from "arkui/component/focus"
+import { Frame } from "./src/Graphics"
+import { KeyEvent } from "./src/component/common"
+import { TextMenuOptions } from "./src/component/textCommon"
+import { Nullable } from "./src/component/enums"
+import { KeyProcessingMode } from "./src/component/focus"
 import { uiObserver } from "@ohos/arkui/observer"
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
-    AlertDialogParamWithOptions }from "arkui/component/alertDialog"
+    AlertDialogParamWithOptions }from "./src/component/alertDialog"
 import inspector from "@ohos/arkui/inspector"
 import router from './ohos.router'
 import promptAction from './ohos.promptAction';
-import { ContextMenu } from 'arkui/component/contextMenu';
-import { GlobalScope } from "arkui/component/GlobalScope"
+import { ContextMenu } from './src/component/contextMenu';
+import { GlobalScope } from "./src/component/GlobalScope"
 
 export class UIInspector {
     instanceId_: int32 = -1;

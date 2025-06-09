@@ -26,17 +26,17 @@ function diagnostics(name: string, file: string, message: string) {
     test(name, () => {
         const result = runTsc(file)
         console.log(result.stdout.toString())
-        assert.isTrue(result.stdout.toString().includes(message), "stdout includes the target diagnostic")
-    });//.timeout(30000);
+        assert.include(result.stdout.toString(), message)
+    }).timeout(30000);
 }
 
 function noDiagnostics(name: string, file: string, message: string) {
     test(name, () => {
         const result = runTsc(file)
         console.log(result.stdout.toString())
-        assert.isFalse(result.stderr.toString().includes(message), "stderr does not include the target diagnostic")
-        assert.isFalse(result.stdout.toString().includes(message), "stdout does not include the target diagnostic")
-    });//.timeout(30000);
+        assert.notInclude(result.stderr.toString(), message)
+        assert.notInclude(result.stdout.toString(), message)
+    }).timeout(30000);
 }
 
 suite("Memo in non-memo context", () => {

@@ -17,7 +17,7 @@ class Y {
     c = this;
     /** @memo */
     methodY(__memo_context: __memo_context_type, __memo_id: __memo_id_type): this {
-        const __memo_scope = __memo_context.scope<void>(__memo_id + ("1___key_id_DIRNAME/memo_stable.ts" as __memo_id_type), 0);
+        const __memo_scope = __memo_context.scope<void>(__memo_id + ("1___key_id_DIRNAME/memo_stable.ts" as __memo_id_type));
         if (__memo_scope.unchanged) {
             __memo_scope.cached;
             return this;
@@ -34,7 +34,7 @@ class Z {
     c = this;
     /** @memo */
     methodZ(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
-        const __memo_scope = __memo_context.scope<void>(__memo_id + ("3___key_id_DIRNAME/memo_stable.ts" as __memo_id_type), 0);
+        const __memo_scope = __memo_context.scope<void>(__memo_id + ("3___key_id_DIRNAME/memo_stable.ts" as __memo_id_type));
         if (__memo_scope.unchanged) {
             __memo_scope.cached;
             return;

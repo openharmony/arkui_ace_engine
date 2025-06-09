@@ -93,7 +93,7 @@ export {
     contextNode,
 } from "./memo/node"
 export {
-    memoize,
+    memo,
     memoLifecycle,
     once,
     remember,

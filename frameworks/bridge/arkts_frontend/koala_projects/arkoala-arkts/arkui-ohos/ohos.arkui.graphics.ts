@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { DrawContext } from "arkui/Graphics";
+import { DrawContext } from "./src/Graphics";
 import { pointer } from "@koalaui/interop";
 
 export declare class Utils {

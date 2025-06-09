@@ -17,12 +17,13 @@ import path from "path"
 import fs from "fs"
 import url from "url"
 
-import { execCmd } from "../../../tools/utils/system.mjs"
-import { ohConf } from "../../../tools/ohos-tools/ohconf.mjs"
+import { execCmd } from "../../../arkoala/ohos-sdk/scripts/utils.mjs"
+import { ohConf } from "../../../arkoala/ohos-sdk/scripts/ohconf.mjs"
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
 
-const HDC = ohConf().hdcPath()
+const OHCONF = ohConf(path.join(__dirname, "../../../arkoala/ohos-sdk/.ohconf.json"))
+const HDC = OHCONF.hdcPath()
 
 async function execHDC(args, options = {}) {
     return execCmd(HDC, [...args], {

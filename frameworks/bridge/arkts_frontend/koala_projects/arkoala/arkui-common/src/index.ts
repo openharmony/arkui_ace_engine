@@ -1,3 +1,1 @@
-export * from "./arkts/Storage"
-export * from "./ArkState"
-
+export * from "#arkcompat/index"

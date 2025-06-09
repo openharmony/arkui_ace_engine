@@ -656,15 +656,6 @@ KStringPtr impl_StdStringToString(KVMContext vmContext, KNativePointer stringPtr
 }
 KOALA_INTEROP_CTX_1(StdStringToString, KStringPtr, KNativePointer)
 
-#if  defined(KOALA_NAPI)  || defined(KOALA_ANI)
-KStringPtr impl_RawUtf8ToString(KVMContext vmContext, KNativePointer data) {
-    auto string = (const char*)data;
-    KStringPtr result(string, strlen(string), false);
-    return result;
-}
-KOALA_INTEROP_CTX_1(RawUtf8ToString, KStringPtr, KNativePointer)
-#endif
-
 KInteropReturnBuffer impl_RawReturnData(KVMContext vmContext, KInt v1, KInt v2) {
     void* data = new int8_t[v1];
     memset(data, v2, v1);
