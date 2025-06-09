@@ -917,7 +917,7 @@ class TextShaderStyleModifier extends ModifierWithKey<{
         this.value.direction, this.value.repeating, this.value.colors);
     }
   }
-  checkObjectDiff() {
+  checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }

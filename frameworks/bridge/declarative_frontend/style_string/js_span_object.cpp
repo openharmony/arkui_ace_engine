@@ -419,12 +419,7 @@ void JSDecorationSpan::Constructor(const JSCallbackInfo& args)
     auto decorationSpan = Referenced::MakeRefPtr<JSDecorationSpan>();
     decorationSpan->IncRefCount();
 
-    RefPtr<DecorationSpan> span;
-    if (args.Length() <= 0 || !args[0]->IsObject()) {
-        span = AceType::MakeRefPtr<DecorationSpan>();
-    } else {
-        span = JSDecorationSpan::ParseJsDecorationSpan(args);
-    }
+    RefPtr<DecorationSpan> span = JSDecorationSpan::ParseJsDecorationSpan(args);
     decorationSpan->decorationSpan_ = span;
     args.SetReturnValue(Referenced::RawPtr(decorationSpan));
 }
@@ -438,6 +433,9 @@ void JSDecorationSpan::Destructor(JSDecorationSpan* decorationSpan)
 
 RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackInfo& args)
 {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
+        return AceType::MakeRefPtr<DecorationSpan>();
+    }
     auto obj = JSRef<JSObject>::Cast(args[0]);
     std::optional<Color> colorOption;
     Color color;
@@ -745,7 +743,7 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
         auto onTouch = [execCtx = args.GetExecutionContext(), func = jsOnTouchWeakFunc](TouchEventInfo& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("SpanString.onTouch");
-            JSRef<JSVal> param = JSRef<JSObject>::Cast(JsTouchFunction::CreateJSEventInfo(info));
+            JSRef<JSVal> param = JsTouchFunction::CreateJSEventInfo(info);
             func->ExecuteJS(1, &param);
         };
         gestureInfo.onTouch = std::move(onTouch);

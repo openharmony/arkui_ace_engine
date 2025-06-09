@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
+#include <cstdint>
 
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
@@ -273,12 +274,12 @@ ArkUINativeModuleValue TextAreaBridge::SetMaxLines(ArkUIRuntimeCallInfo *runtime
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    auto maxLines = INT32_MAX;
+    auto maxLines = static_cast<uint32_t>(INT32_MAX);
     if (maxLinesArg->IsNumber() && maxLinesArg->Int32Value(vm) > NUM_0) {
         maxLines = maxLinesArg->Uint32Value(vm);
     }
 
-    auto overflowMode = NUM_0;
+    uint32_t overflowMode = 0;
 
     if (overflowModeArg->IsNumber() &&
         (overflowModeArg->Int32Value(vm) == NUM_0 || overflowModeArg->Int32Value(vm) == NUM_1)) {
@@ -2662,7 +2663,8 @@ ArkUINativeModuleValue TextAreaBridge::SetTextAreaInitialize(ArkUIRuntimeCallInf
     } else {
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderString(nativeNode, "");
     }
-    std::string text, value;
+    std::string text;
+    std::string value;
     auto changeEventVal = Framework::JSRef<Framework::JSVal>::Make();
     if (textVal->IsString(vm) && ArkTSUtils::ParseJsString(vm, textVal, text)) {
         value = text;

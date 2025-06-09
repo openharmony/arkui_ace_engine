@@ -202,7 +202,8 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     responseAreaWidth += clearNodeResponseArea ? clearNodeResponseArea->GetAreaRect().Width() : 0.0f;
     auto hasResponseArea = GreatNotEqual(responseAreaWidth, 0.0f);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    Point leftPoint, rightPoint;
+    Point leftPoint;
+    Point rightPoint;
     auto host = textFieldPattern->GetHost();
     CHECK_NULL_VOID(host);
     auto isGreatAPI18 = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
