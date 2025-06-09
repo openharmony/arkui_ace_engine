@@ -339,8 +339,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
         // if memory watch register the callback func, then report such information to memory watch
         // when custom node destroyed
-        if (PUV2ViewBaseFinalizationRegisterProxy.callbackFunc_) {
-            PUV2ViewBaseFinalizationRegisterProxy.call({
+        if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
+            ArkUIObjectFinalizationRegisterProxy.call({
                 hash: Utils.getArkTsUtil().getHash(this),
                 name: this.constructor.name,
                 msg: `${this.debugInfo__()} is in the process of destruction`});
