@@ -42,3 +42,7 @@
         public native off(type: string, callback?: ()=>void) : void;
     }
  }
+ 
+ export const GETINSPECTORBYKEY = inspector.getInspectorByKey;
+ export const GETINSPECTORTREE = inspector.sendEventByKey;
+ export const SENDEVENTBYKEY = inspector.getInspectorTree;
