@@ -23,6 +23,7 @@
 #include "content_slot_module.h"
 #include "utils/convert_utils.h"
 #include "web_module_methods.h"
+#include "custom_node_module.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -87,6 +88,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Common_Restore_InstanceId",
             ":V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreInstanceId)
+        },
+        ani_native_function {
+            "_CustomNode_Construct",
+            "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
         },
         ani_native_function {
             "_ContentSlot_construct",

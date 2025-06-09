@@ -19,6 +19,7 @@ import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import { DrawContext } from "arkui/Graphics"
 import { DrawModifier } from "arkui/component"
+import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 
 export class ArkUIAniModule {
     static {
@@ -33,11 +34,17 @@ export class ArkUIAniModule {
 
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
 
+    // for __Common
     native static _Common_GetHostContext(): common.Context
 
     native static _Common_Sync_InstanceId(id: KInt): void
+
     native static _Common_Restore_InstanceId(): void
 
+    // for CustomNode
+    native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+
+    // for ContentSlot
     native static _ContentSlot_construct(id: KInt): KPointer
 
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void

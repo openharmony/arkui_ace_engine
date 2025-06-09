@@ -16,15 +16,16 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
+
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode, RootPeerType } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkCustomComponent } from "./../ArkCustomComponent"
+
+import { ArkUIGeneratedNativeModule } from "#components"
+import { ArkUIAniModule } from "arkui.ani"
+
+import { int32, int64, float32 } from "@koalaui/common"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 
 export class ArkRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -47,6 +48,20 @@ export class ArkComponentRootPeer extends PeerNode {
         const _peerPtr  = ArkUIGeneratedNativeModule._ComponentRoot_construct(peerId, flags)
         const _peer  = new ArkComponentRootPeer(_peerPtr, peerId, "ComponentRoot", flags)
         component?.setPeer(_peer)
+        return _peer
+    }
+}
+export class ArkCustomComponentRootPeer extends PeerNode {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags, RootPeerType)
+    }  
+    public static create(component: ArkCustomComponent, flags: int32 = 0): ArkCustomComponentRootPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIAniModule._CustomNode_Construct(peerId, component)
+        if (!_peerPtr) {
+            throw new Error("create CustomComponent fail"); 
+        }
+        const _peer  = new ArkCustomComponentRootPeer(_peerPtr, peerId, "CustomComponent", flags)
         return _peer
     }
 }
