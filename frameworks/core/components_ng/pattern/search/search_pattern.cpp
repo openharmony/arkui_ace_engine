@@ -1767,6 +1767,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback() ? "true" : "false", filter);
     json->PutExtAttr("enableAutoSpacing", std::to_string(
         textFieldLayoutProperty->GetEnableAutoSpacing().value_or(false)).c_str(), filter);
+    json->PutExtAttr("autoCapitalizationMode", textFieldPattern->AutoCapTypeToString().c_str(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
