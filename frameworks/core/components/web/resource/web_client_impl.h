@@ -303,6 +303,8 @@ public:
 
     void RestoreRenderFit() override;
 
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable) override;
+
     bool OnBeforeUnloadByJSV2(const std::string& url, const std::string& message, bool isReload,
         std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
 

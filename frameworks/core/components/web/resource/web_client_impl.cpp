@@ -1356,6 +1356,15 @@ void WebClientImpl::OnScrollStart(const float x, const float y)
     delegate->OnScrollStart(x, y);
 }
 
+
+bool WebClientImpl::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
+}
+
 bool WebClientImpl::OnBeforeUnloadByJSV2(
     const std::string& url, const std::string& message, bool isReload, std::shared_ptr<NWeb::NWebJSDialogResult> result)
 {
