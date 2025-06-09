@@ -1334,8 +1334,8 @@ HWTEST_F(WaterFlowSegmentCommonTest, CustomNode001, TestSize.Level1)
     secObj->ChangeData(0, 0, newSection);
 
     FlushUITasks();
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? -1 : 9);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, TOP_TO_DOWN ? 0 : Infinity<int32_t>());
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, -1);
     EXPECT_EQ(pattern_->layoutInfo_->childrenCount_, 10);
 }
 } // namespace OHOS::Ace::NG
