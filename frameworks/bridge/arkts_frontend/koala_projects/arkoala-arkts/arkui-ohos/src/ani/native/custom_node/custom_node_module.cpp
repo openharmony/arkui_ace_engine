@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "custom_node_module.h"
 #include "load.h"
 
