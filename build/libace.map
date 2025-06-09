@@ -223,6 +223,7 @@
       OHOS::Ace::NG::PipelineContext::*;
       OHOS::Ace::NG::OverlayManager::*;
       OHOS::Ace::PipelineBase::PostAsyncEvent*;
+      "OHOS::Ace::PipelineBase::GetFrontend() const";
       OHOS::Ace::NG::UINode::*;
       OHOS::Ace::NG::PagePattern::*;
       OHOS::Ace::NG::StageManager::*;
@@ -567,6 +568,7 @@
       "OHOS::Ace::RoundToMaxPrecision(double)";
       OHOS::Ace::NG::SwiperPattern::IsAtStart*;
       OHOS::Ace::NG::SwiperPattern::IsAtEnd*;
+      OHOS::Ace::PipelineBase::GetImageCache*;
     };
   local:
     *;

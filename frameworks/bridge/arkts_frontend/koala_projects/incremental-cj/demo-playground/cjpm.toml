@@ -1,0 +1,14 @@
+[dependencies]
+  KoalaRuntime = { path = "../runtime"}
+[package]
+  cjc-version = "0.53.4"
+  compile-option = "../runtime/CallsiteKey.o"
+  description = "nothing here"
+  link-option = ""
+  name = "DemoPlayground"
+  output-type = "executable"
+  src-dir = ""
+  target-dir = ""
+  version = "0.0.1"
+  package-configuration = {}
+  scripts = {}

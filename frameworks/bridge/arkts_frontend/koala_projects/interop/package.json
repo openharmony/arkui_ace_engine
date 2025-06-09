@@ -1,0 +1,72 @@
+{
+    "name": "@koalaui/interop",
+    "version": "1.5.8+devel",
+    "description": "",
+    "workspaces": [
+        "../incremental/build-common",
+        "../incremental/compat",
+        "../incremental/common"
+    ],
+    "files": [
+        "build/lib/src/**/*.js",
+        "build/lib/src/**/*.d.ts",
+        "src/**/*",
+        "index.ts",
+        "oh-package.json5"
+    ],
+    "main": "./build/lib/src/interop/index.js",
+    "exports": {
+        ".": "./build/lib/src/interop/index.js",
+        "./*.js": "./build/lib/src/interop/*.js",
+        "./*": "./build/lib/src/interop/*.js"
+    },
+    "imports": {
+        "#common/wrappers": {
+            "browser": "./build/lib/src/wasm/wrappers/index.js",
+            "node": "./build/lib/src/napi/wrappers/index.js"
+        },
+        "#common/wrappers/*": {
+            "browser": "./build/lib/src/wasm/wrappers/*.js",
+            "node": "./build/lib/src/napi/wrappers/*.js",
+            "default": "./build/lib/src/napi/wrappers/*.js"
+        }
+    },
+    "types": "./index.d.ts",
+    "typesVersions": {
+        "*": {
+            "*": [
+                "./build/lib/src/interop/*"
+            ]
+        }
+    },
+    "scripts": {
+        "clean": "rimraf dist build types",
+        "compile": "ets-tsc -b .",
+        "build:interop": "npm run build:interop:inc",
+        "build:interop:inc": "fast-arktsc --input-files ./arktsconfig.json --output-dir ./build --compiler ../incremental/tools/panda/arkts/arktsc --link-name interop && ninja ${NINJA_OPTIONS} -f build/build.ninja",
+        "clean:interop": "npm run clean",
+        "lint": "eslint src test components",
+        "test:wasm:coverage": "NODE_OPTIONS='--conditions browser --no-experimental-fetch' nyc mocha",
+        "test:wasm": "NODE_OPTIONS='--conditions browser --no-experimental-fetch' mocha",
+        "test:node:coverage": "nyc mocha",
+        "test:node": "mocha",
+        "test:coverage": "npm run test:node:coverage",
+        "test": "npm run test:node",
+        "watch": "ets-tsc -b . --watch"
+    },
+    "keywords": [],
+    "dependencies": {
+        "@types/node": "^18.0.0",
+        "@koalaui/common": "file:../incremental/common"
+    },
+    "devDependencies": {
+        "@types/node": "^18.0.0",
+        "@typescript-eslint/eslint-plugin": "^5.20.0",
+        "@typescript-eslint/parser": "^5.20.0",
+        "eslint": "^8.13.0",
+        "eslint-plugin-unused-imports": "^2.0.0",
+        "source-map-support": "^0.5.21",
+        "@koalaui/fast-arktsc": "file:../incremental/tools/fast-arktsc",
+        "@koalaui/ets-tsc": "file:../incremental/tools/ets-tsc"
+    }
+}

@@ -4856,7 +4856,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest064, TestSize.Level1)
         ARKUI_ERROR_CODE_PARAM_INVALID);
     ArkUI_NumberValue layoutModeV[] = {{.i32 = ArkUI_WaterFlowLayoutMode::ARKUI_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW}};
     ArkUI_AttributeItem layoutModeAttr = {layoutModeV, 1, nullptr, nullptr};
-        
+            
     auto frameNode = reinterpret_cast<NG::FrameNode*>(rootNode->uiNodeHandle);
     auto context = NG::MockPipelineContext::GetCurrent();
     frameNode->AttachContext(AceType::RawPtr(context));

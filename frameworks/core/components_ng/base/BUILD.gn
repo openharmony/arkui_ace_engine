@@ -26,6 +26,7 @@ build_component_ng("base_ng") {
     "node_render_status_monitor.cpp",
     "observer_handler.cpp",
     "simplified_inspector.cpp",
+    "scroll_window_adapter.cpp",
     "transparent_node_detector.cpp",
     "ui_node.cpp",
     "view_abstract.cpp",

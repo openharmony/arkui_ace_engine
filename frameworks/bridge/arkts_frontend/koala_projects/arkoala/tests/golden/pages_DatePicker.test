@@ -1,0 +1,13 @@
+{
+  "rootElement": {
+    "nodeId": 1248,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1249,
+        "kind": "DatePicker",
+        "children": []
+      }
+    ]
+  }
+}

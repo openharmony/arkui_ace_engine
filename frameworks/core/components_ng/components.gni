@@ -164,6 +164,7 @@ template("build_component_ng") {
           include_dirs += [
             "//foundation/window/window_manager",
             "//foundation/window/window_manager/interfaces/innerkits",
+            "//foundation/window/window_manager/interfaces/kits/ndk/wm",
           ]
         }
       }

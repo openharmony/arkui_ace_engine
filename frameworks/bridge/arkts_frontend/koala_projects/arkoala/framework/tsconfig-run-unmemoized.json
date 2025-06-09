@@ -1,0 +1,26 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/unmemoized",
+        "baseUrl": ".",
+        "types": ["arkoala-runtime"],
+        "paths": {
+            "@koalaui/runtime": ["../../incremental/runtime/unmemoized/src"],
+             "#common/wrappers/*": ["../../interop/src/napi/wrappers/*", "../../interop/src/wasm/wrappers/*"],
+
+        },
+        "plugins": []
+    },
+    "exclude": [
+        "node_modules", "build", "dist", "lib", "src"
+    ],
+    "include": [
+        "unmemoized/src/**/*"
+    ],
+    "references": [
+        { "path": "../../incremental/common" },
+        { "path": "../../interop" },
+        { "path": "../../incremental/compiler-plugin" },
+        { "path": "../../incremental/runtime/tsconfig-run-unmemoized.json" }
+    ]
+}

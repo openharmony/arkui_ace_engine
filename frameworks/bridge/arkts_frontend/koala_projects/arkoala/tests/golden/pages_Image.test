@@ -1,0 +1,52 @@
+{
+  "rootElement": {
+    "nodeId": 1225,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1226,
+        "kind": "Text",
+        "children": [],
+        "setTextOptions_content": "Image test"
+      },
+      {
+        "nodeId": 1227,
+        "kind": "Image",
+        "children": [],
+        "setImageOptions0_src": "/path/to/imageSrc",
+        "alt_value": "/altPath/to/imageSrc",
+        "matchTextDirection_value": 1,
+        "fitOriginalSize_value": 0,
+        "fillColor_value": "0xabcdef",
+        "objectFit_value": 5,
+        "objectRepeat_value": 3,
+        "autoResize_value": 1,
+        "renderMode_value": 1,
+        "interpolation_value": 3,
+        "sourceSize_value": {
+          "width": 123.4000015258789,
+          "height": 567.7999877929688
+        },
+        "syncLoad_value": 0,
+        "copyOption_value": 3,
+        "draggable_value": 1,
+        "edgeAntialiasing_value": 1.2,
+        "enableAnalyzer_value": 0,
+        "analyzerConfig_value": {
+          "types": [
+            0,
+            1
+          ]
+        },
+        "resizable_value": {
+          "slice": {
+            "top": 2,
+            "right": 3,
+            "bottom": 4,
+            "left": 1
+          }
+        }
+      }
+    ]
+  }
+}

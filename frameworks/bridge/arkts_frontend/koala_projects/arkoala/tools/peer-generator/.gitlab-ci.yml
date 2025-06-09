@@ -1,0 +1,198 @@
+<TS> Idlize generate arkoala/arkui (linux):
+    stage: idlize
+    interruptible: true
+    allow_failure: true
+    extends:
+        - .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+    before_script:
+        - !reference [.setup, script]
+        - npm run interface-sdk:download --prefix arkoala/tools/peer-generator
+    script:
+        - npm run generate:ts --prefix arkoala/tools/peer-generator
+    artifacts:
+        paths:
+            - arkoala/arkui
+            - arkoala/framework
+        expire_in: 1 day
+
+<TS> Build generated arkoala/arkui (linux):
+    stage: build-with-idlize
+    interruptible: true
+    allow_failure: true
+    extends:
+        - .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+        - <TS> Idlize generate arkoala/arkui (linux)
+    before_script:
+        - !reference [.setup, script]
+    script:
+        - npm run compile --prefix arkoala/arkui
+    artifacts:
+        paths:
+            - arkoala/arkui/build/lib
+        expire_in: 1 day
+
+<TS> Build generated ArkoalaNative (linux, linux, node):
+    stage: build-with-idlize
+    interruptible: true
+    allow_failure: true
+    extends:
+        - .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+        - <TS> Idlize generate arkoala/arkui (linux)
+    before_script:
+        - !reference [.setup, script]
+    script:
+        - npm run compile:native-node-host --prefix arkoala/framework
+    artifacts:
+        paths:
+            - arkoala/framework/build/ArkoalaNative_linux_arm64.node
+            - arkoala/framework/build/libace_compatible_mock.so
+        expire_in: 1 day
+
+<TS> Build generated ArkoalaNative (linux, ohos-arm64, hzvm):
+    stage: build-with-idlize
+    interruptible: true
+    allow_failure: true
+    extends:
+        - .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+        - <TS> Idlize generate arkoala/arkui (linux)
+    before_script:
+        - !reference [.setup, script]
+    script:
+        - npm run compile:native-hzvm-ohos-arm64 --prefix arkoala/framework
+    artifacts:
+        paths:
+            - arkoala/framework/build/libArkoalaNative.so
+        expire_in: 1 day
+
+<TS> Build generated ArkoalaNative (linux, ohos-arm32, hzvm):
+    stage: build-with-idlize
+    interruptible: true
+    allow_failure: true
+    extends:
+        - .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+        - <TS> Idlize generate arkoala/arkui (linux)
+    before_script:
+        - !reference [.setup, script]
+    script:
+        - npm run compile:native-hzvm-ohos-arm32 --prefix arkoala/framework
+    artifacts:
+        paths:
+            - arkoala/framework/build/libArkoalaNative.so
+        expire_in: 1 day
+
+<ArkTS> Idlize generate arkoala-arkts/arkui (linux):
+    stage: idlize
+    interruptible: true
+    allow_failure: true
+    extends:
+        - .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+    before_script:
+        - !reference [.setup, script]
+        - npm run interface-sdk:download --prefix arkoala/tools/peer-generator
+    script:
+        - npm run generate:arkts --prefix arkoala/tools/peer-generator
+    artifacts:
+        paths:
+            - arkoala-arkts/arkui
+            - arkoala/framework
+        expire_in: 1 day
+
+<ArkTS> Build generated arkoala-arkts/arkui (linux):
+    stage: build-with-idlize
+    interruptible: true
+    allow_failure: true
+    extends:
+        - .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+        - <ArkTS> Idlize generate arkoala-arkts/arkui (linux)
+    before_script:
+        - !reference [.setup, script]
+        - npm run panda:sdk:install --prefix arkoala-arkts
+    script:
+        - npm run build:arkui-no-common --prefix arkoala-arkts/arkui
+    artifacts:
+        paths:
+            - arkoala-arkts/arkui/build/arkui.abc
+        expire_in: 1 day
+
+<ArkTS> Build generated ArkoalaNative (linux, linux, node+panda):
+    stage: build-with-idlize
+    interruptible: true
+    allow_failure: true
+    extends:
+        - .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+        - <ArkTS> Idlize generate arkoala-arkts/arkui (linux)
+    before_script:
+        - !reference [.setup, script]
+    script:
+        - npm run compile:native-panda-with-node-host --prefix arkoala/framework
+    artifacts:
+        paths:
+            - arkoala/framework/native/build-node-host-vmloader/ArkoalaLoader.node
+            - arkoala/framework/native/build-node-host-vmloader/libvmloader.so
+            - arkoala/framework/native/build-panda-host/libArkoalaNative_linux_arm64_ark.so
+            - arkoala/framework/native/build-panda-host/libace_compatible_mock.so
+        expire_in: 1 day
+
+<ArkTS> build generated ArkoalaNative (linux, ohos-arm32, hzvm+panda):
+    stage: build-with-idlize
+    interruptible: true
+    allow_failure: true
+    extends:
+        - .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+        - <ArkTS> Idlize generate arkoala-arkts/arkui (linux)
+    before_script:
+        - !reference [.setup, script]
+    script:
+        - npm run compile:native-panda-with-hzvm-ohos-arm32 --prefix arkoala/framework
+    artifacts:
+        paths:
+            - arkoala/framework/native/build-hzvm-ohos-arm32-vmloader/libArkoalaLoader.so
+            - arkoala/framework/native/build-hzvm-ohos-arm32-vmloader/libvmloader.so
+            - arkoala/framework/native/build-panda-ohos-arm32/libArkoalaNative_ark.so
+            - arkoala/framework/build/libc++.so
+        expire_in: 1 day

@@ -295,6 +295,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     DrivenRender(dirty);
+    UpdateLayoutRange(GetAxis(), !isInitialized_);
 
     SetScrollSource(SCROLL_FROM_NONE);
     MarkSelectedItems();
@@ -981,6 +982,13 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(float delta, bool useChainDel
     return offset;
 }
 
+void ListPattern::UpdateOffsetHelper(float lastDelta)
+{
+    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+    currentDelta_ = lastDelta + userOffset;
+    UpdateOffset(-userOffset);
+}
+
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect
@@ -1002,8 +1010,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         MarkDirtyNodeSelf();
     }
     if (itemPosition_.empty() || !IsOutOfBoundary() || !isScrollable_) {
-        auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
-        currentDelta_ = lastDelta + userOffset;
+        UpdateOffsetHelper(lastDelta);
         return true;
     }
 
@@ -1017,8 +1024,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         currentDelta_ = lastDelta - offset;
     }
 
-    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
-    currentDelta_ = lastDelta + userOffset;
+    UpdateOffsetHelper(lastDelta);
     MarkScrollBarProxyDirty();
     return true;
 }
@@ -1743,6 +1749,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             if (!AnimateToTarget(index, std::nullopt, align)) {
                 targetIndex_ = index;
                 scrollAlign_ = align;
+                RequestFillToTarget(*targetIndex_, scrollAlign_, extraOffset.value_or(0.0f));
             }
         } else {
             if (extraOffset.has_value()) {
@@ -1751,6 +1758,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             jumpIndex_ = index;
             scrollAlign_ = align;
             jumpIndexInGroup_.reset();
+            RequestJump(*jumpIndex_, scrollAlign_, extraOffset.value_or(0.0f));
         }
         MarkDirtyNodeSelf();
     }
@@ -3235,6 +3243,7 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
+    RequestReset(startIndex, contentStartOffset_);
 }
 
 bool ListPattern::CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex)

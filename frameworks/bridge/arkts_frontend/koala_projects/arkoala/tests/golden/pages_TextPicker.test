@@ -1,0 +1,149 @@
+{
+  "rootElement": {
+    "nodeId": 1228,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1229,
+        "kind": "TextPicker",
+        "children": [],
+        "disappearTextStyle_value": {},
+        "textStyle_value": {
+          "color": "#ff008000",
+          "font": {}
+        },
+        "selectedTextStyle_value": {
+          "color": 333,
+          "font": {
+            "family": "Arial",
+            "style": 0
+          }
+        },
+        "defaultPickerItemHeight_value": 25,
+        "canLoop_value": 0,
+        "selectedIndex_value": 33
+      },
+      {
+        "nodeId": 1230,
+        "kind": "TextPicker",
+        "children": [],
+        "disappearTextStyle_value": {
+          "color": "#404040",
+          "font": {
+            "family": "Serif",
+            "style": 1
+          }
+        },
+        "textStyle_value": {
+          "color": "#ff0000ff",
+          "font": {
+            "style": 0
+          }
+        },
+        "selectedTextStyle_value": {
+          "font": {
+            "family": "fontFamily"
+          }
+        },
+        "defaultPickerItemHeight_value": "26vp",
+        "canLoop_value": 1,
+        "selectedIndex_value": [
+          3,
+          5,
+          7,
+          9
+        ]
+      },
+      {
+        "nodeId": 1231,
+        "kind": "TextPicker",
+        "children": [],
+        "setTextPickerOptions_options": {
+          "range": [
+            "string1",
+            "string2",
+            "string3"
+          ],
+          "value": "value1",
+          "selected": 33
+        },
+        "defaultPickerItemHeight_value": "27fp"
+      },
+      {
+        "nodeId": 1232,
+        "kind": "TextPicker",
+        "children": [],
+        "setTextPickerOptions_options": {
+          "range": [
+            "[object Object]",
+            "[object Object]",
+            "[object Object]",
+            "[object Object]",
+            "[object Object]",
+            "[object Object]"
+          ],
+          "value": [
+            "value1",
+            "value2",
+            "value3"
+          ],
+          "selected": [
+            3,
+            5,
+            7,
+            9
+          ]
+        },
+        "defaultPickerItemHeight_value": "28px"
+      },
+      {
+        "nodeId": 1233,
+        "kind": "TextPicker",
+        "children": [],
+        "setTextPickerOptions_options": {
+          "range": [
+            "string1",
+            "string2",
+            "string3"
+          ],
+          "value": "value1"
+        },
+        "defaultPickerItemHeight_value": "29lpx"
+      },
+      {
+        "nodeId": 1234,
+        "kind": "TextPicker",
+        "children": [],
+        "setTextPickerOptions_options": {
+          "range": [
+            "[object Object]",
+            "[object Object]",
+            "[object Object]",
+            "[object Object]",
+            "[object Object]",
+            "[object Object]"
+          ],
+          "selected": [
+            3,
+            5,
+            7,
+            9
+          ]
+        },
+        "defaultPickerItemHeight_value": "30%"
+      },
+      {
+        "nodeId": 1235,
+        "kind": "TextPicker",
+        "children": [],
+        "setTextPickerOptions_options": {
+          "range": [
+            "string1",
+            "string2",
+            "string3"
+          ]
+        }
+      }
+    ]
+  }
+}

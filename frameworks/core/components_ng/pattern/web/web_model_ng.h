@@ -238,14 +238,36 @@ public:
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
     void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
 
+    // static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    // static void SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback);
+    // static void SetHapPathCallback(FrameNode* frameNode, std::function<void(const std::string&)>&& hapPathCallback);
+    // static void SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc);
+    // static void SetRenderMode(FrameNode* frameNode, const std::optional<RenderMode>& renderMode);
+    // static void SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode);
+    // static void SetSharedRenderProcessToken(FrameNode* frameNode,
+    //     const std::optional<std::string>& sharedRenderProcessToken);
+    // static void SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController);
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
+    // static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
     static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
+    // static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);
     static void SetMixedMode(FrameNode* frameNode, MixedModeContent mixedMode);
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    // static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
+    // static void SetForceDarkAccess(FrameNode* frameNode, bool access);
+    // static void SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled);
+    // static void SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled);
+    // static void SetMetaViewport(FrameNode* frameNode, bool enabled);
+    // static void SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeedGestureAccess);
     static void SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode);
     static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
+    // static void SetOverlayScrollbarEnabled(FrameNode* frameNode, bool isEnabled);
+    // static void SetBlockNetwork(FrameNode* frameNode, bool isNetworkBlocked);
+    // static void SetHorizontalScrollBarAccessEnabled(FrameNode* frameNode, bool isHorizontalScrollBarAccessEnabled);
+    // static void SetVerticalScrollBarAccessEnabled(FrameNode* frameNode, bool isVerticalScrollBarAccessEnabled);
+    // static void SetPinchSmoothModeEnabled(FrameNode* frameNode, bool isPinchSmoothModeEnabled);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetKeyboardAvoidMode(FrameNode* frameNode, const WebKeyboardAvoidMode& mode);
     static void SetOnControllerAttached(FrameNode* frameNode, std::function<void()>&& callback);

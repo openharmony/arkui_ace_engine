@@ -263,6 +263,11 @@ public:
     {
         return false;
     }
+
+    virtual uint32_t GetResId(const std::string &resTypeName) const
+    {
+        return -1;
+    }
 };
 
 } // namespace OHOS::Ace

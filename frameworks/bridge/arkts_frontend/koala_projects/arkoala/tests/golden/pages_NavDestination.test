@@ -1,0 +1,20 @@
+{
+  "rootElement": {
+    "nodeId": 1275,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1276,
+        "kind": "NavDestination",
+        "children": [],
+        "hideTitleBar0_value": 1,
+        "title_value": {
+          "main": "main",
+          "sub": "sub"
+        },
+        "mode_value": 1,
+        "backButtonIcon_value": "/path/to/icon"
+      }
+    ]
+  }
+}

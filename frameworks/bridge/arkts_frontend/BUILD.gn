@@ -1,0 +1,84 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+ohos_source_set("arkts_frontend") {
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+  configs = [ "$ace_root:ace_config" ]
+  deps = [
+    ":ArkoalaNative_ark",
+    # "arkoala:arkoala_prebuild",
+  ]
+
+  if (build_ohos_sdk) {
+    deps -= [
+      ":ArkoalaNative_ark",
+      # "arkoala:arkoala_prebuild",
+    ]
+  }
+
+  sources = [
+    "arkts_ani_utils.cpp",
+    "arkts_frontend.cpp",
+    "entry/arkts_entry_loader.cpp",
+  ]
+  external_deps = [
+    "hilog:libhilog",
+    "runtime_core:ani",
+  ]
+}
+
+ohos_shared_library("ArkoalaNative_ark") {
+  include_dirs = [
+    "koala_projects/arkoala/framework/native/src",
+    "koala_projects/arkoala/framework/native/src/generated",
+    "koala_projects/interop/src",
+    "koala_projects/interop/src/cpp",
+    "koala_projects/interop/src/cpp/ets",
+    "koala_projects/interop/src/cpp/types",
+    "koala_projects/interop/src/cpp/ohos",
+  ]
+
+  defines = [
+    "KOALA_OHOS",
+    "__MUSL__",
+    "KOALA_ETS_NAPI",
+    "DKOALA_USE_PANDA_VM",
+  ]
+
+  sources = [
+    "koala_projects/arkoala/framework/native/src/events.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_generated.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_deserialize_call.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_managed_caller.cc",
+    "koala_projects/arkoala/framework/native/src/generated/library.cc",
+    "koala_projects/arkoala/framework/native/src/vsync.cc",
+  ]
+
+  # interop source
+  sources += [
+    "koala_projects/interop/src/cpp/callback-resource.cc",
+    "koala_projects/interop/src/cpp/common-interop.cc",
+    "koala_projects/interop/src/cpp/ets/convertors-ets.cc",
+    "koala_projects/interop/src/cpp/interop-logging.cc",
+    "koala_projects/interop/src/cpp/types/signatures.cc",
+  ]
+
+  external_deps = [ "hilog:hilog_ndk" ]
+
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

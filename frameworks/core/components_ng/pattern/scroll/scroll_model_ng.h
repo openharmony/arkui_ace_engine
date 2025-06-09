@@ -69,6 +69,9 @@ public:
     static ScrollSnapOptions GetScrollSnap(FrameNode* frameNode);
     static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+    static void SetScrollSnap(FrameNode* frameNode, std::optional<ScrollSnapAlign> scrollSnapAlignOpt,
+        const std::optional<Dimension>& intervalSize, const std::vector<Dimension>& snapPaginations,
+        const std::optional<bool>& enableSnapToStart, const std::optional<bool>& enableSnapToEnd);
     static int32_t GetScrollBar(FrameNode* frameNode);
     static void SetScrollBar(FrameNode* frameNode, DisplayMode barState);
     static int32_t GetAxis(FrameNode* frameNode);

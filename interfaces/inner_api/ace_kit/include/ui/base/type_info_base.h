@@ -22,26 +22,17 @@
 
 // Generate 'TypeInfo' for each classes.
 // And using hash code of its name for 'TypeId'.
-#define DECLARE_CLASS_TYPE_INFO(classname)                                                                 \
-public:                                                                                                    \
-    static const char* TypeName()                                                                          \
-    {                                                                                                      \
-        return #classname;                                                                                 \
-    }                                                                                                      \
-    static constexpr TypeInfoBase::IdType TypeId()                                                         \
-    {                                                                                                      \
-        auto fnv1a_hash = [](const char* str) constexpr -> TypeInfoBase::IdType {                          \
-            const std::size_t offset_basis = (sizeof(std::size_t) == 4) ? 0x811C9DC5 : 0xCBF29CE484222325; \
-            const std::size_t fnv_prime = (sizeof(std::size_t) == 4) ? 0x01000193 : 0x100000001B3;         \
-            TypeInfoBase::IdType hash = offset_basis;                                                      \
-            while (*str) {                                                                                 \
-                hash = (hash ^ (*str++)) * fnv_prime;                                                      \
-            }                                                                                              \
-            return hash;                                                                                   \
-        };                                                                                                 \
-        constexpr TypeInfoBase::IdType myTypeId = fnv1a_hash(#classname);                                  \
-        return myTypeId;                                                                                   \
-    }                                                                                                      \
+#define DECLARE_CLASS_TYPE_INFO(classname)                                              \
+public:                                                                                 \
+    static const char* TypeName()                                                       \
+    {                                                                                   \
+        return #classname;                                                              \
+    }                                                                                   \
+    static TypeInfoBase::IdType TypeId()                                                \
+    {                                                                                   \
+        static TypeInfoBase::IdType myTypeId = std::hash<std::string> {}(TypeName());   \
+        return myTypeId;                                                                \
+    }                                                                                   \
     DECLARE_CLASS_TYPE_SIZE(classname)
 
 // Integrate it into class declaration to support 'DynamicCast'.

@@ -1,0 +1,36 @@
+{
+  "rootElement": {
+    "nodeId": 1171,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1172,
+        "kind": "Tabs",
+        "children": [
+          {
+            "nodeId": 1173,
+            "kind": "TabContent",
+            "children": [],
+            "tabBar0_value": "tabBar label"
+          }
+        ],
+        "vertical_value": 1,
+        "barPosition_value": 0,
+        "scrollable_value": 1,
+        "fadingEdge_value": 0,
+        "barOverlap_value": 1,
+        "divider_value": {
+          "strokeWidth": 55,
+          "color": 16711935,
+          "startMargin": "7px",
+          "endMargin": "8vp"
+        },
+        "barBackgroundColor_value": 11259375,
+        "barMode2_value": 1,
+        "barWidth_value": 5,
+        "barHeight_value": "77fp",
+        "animationDuration_value": 8.75
+      }
+    ]
+  }
+}

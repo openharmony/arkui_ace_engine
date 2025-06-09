@@ -1,0 +1,24 @@
+option(
+    'node_modules_dir',
+    type : 'string',
+    value : '../../node_modules/',
+    description : 'path to node_modules'
+)
+option(
+    'interop_src_dir',
+    type : 'string',
+    value : '../../../interop/src/cpp/',
+    description : 'path to koala interop cpp files'
+)
+option(
+    'panda_sdk_dir',
+    type : 'string',
+    value : '../../../incremental/tools/panda/node_modules/@panda/sdk/',
+    description : 'path to panda sdk'
+)
+option(
+    'lib_name',
+    type : 'string',
+    value : 'es2panda',
+    description : 'name of shared library'
+)
