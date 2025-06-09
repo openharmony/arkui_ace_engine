@@ -1108,6 +1108,7 @@ void MovingPhotoPattern::GetXmageHeight()
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV, host);
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto XmageHeight.%{public}f", imageL - bottomV);
     } else {
+        isXmageMode_ = false;
         imageSize = SizeF(imageW, imageL);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize, host);
@@ -1118,6 +1119,8 @@ void MovingPhotoPattern::GetXmageHeight()
 void MovingPhotoPattern::SetXmagePosition()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto SetXmagePosition");
+    isXmageMode_ = false;
+    xmageModeValue_ = 0;
     int32_t fd = GetImageFd();
     CHECK_NULL_VOID(fd >= 0);
     auto imageSrc = ImageSource::Create(fd);

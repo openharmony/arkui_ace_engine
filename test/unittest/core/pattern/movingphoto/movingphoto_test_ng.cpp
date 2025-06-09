@@ -349,7 +349,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest005, TestSize.Level1)
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto movingPhotoPattern = frameNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingPhotoPattern, nullptr);
-
     auto movingPhotoLayoutAlgorithm = movingPhotoPattern->CreateLayoutAlgorithm();
     EXPECT_NE(movingPhotoLayoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(movingPhotoLayoutAlgorithm));
