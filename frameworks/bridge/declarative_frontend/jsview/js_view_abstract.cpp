@@ -12065,7 +12065,8 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 
     // parse background options
     Alignment alignment = Alignment::CENTER;
-    NG::LayoutSafeAreaEdge ignoreLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    NG::LayoutSafeAreaEdge ignoreLayoutSafeAreaEdges =
+        (BackgroundType::COLOR == backgroundType) ? NG::LAYOUT_SAFE_AREA_EDGE_ALL : NG::LAYOUT_SAFE_AREA_EDGE_NONE;
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[1]);
         if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::ALIGN))) {
@@ -12076,12 +12077,8 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
         if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::IGNORES_LAYOUT_SAFE_AREA_EDGES))) {
             auto safeAreaEdgesArray =
                 object->GetProperty(static_cast<int32_t>(ArkUIIndex::IGNORES_LAYOUT_SAFE_AREA_EDGES));
-            ignoreLayoutSafeAreaEdges = ParseJsLayoutSafeAreaEdgeArray(safeAreaEdgesArray);
+            ignoreLayoutSafeAreaEdges = ParseJsLayoutSafeAreaEdgeArray(safeAreaEdgesArray, ignoreLayoutSafeAreaEdges);
         }
-    }
-
-    if (BackgroundType::COLOR == backgroundType && NG::LAYOUT_SAFE_AREA_EDGE_NONE == ignoreLayoutSafeAreaEdges) {
-        ignoreLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
     }
 
     // parameters parsed, set the properties parsed above
@@ -12128,11 +12125,11 @@ bool JSViewAbstract::ParseBackgroundBuilder(
     return true;
 }
 
-NG::LayoutSafeAreaEdge JSViewAbstract::ParseJsLayoutSafeAreaEdgeArray(const JSRef<JSArray>& jsSafeAreaEdges)
+NG::LayoutSafeAreaEdge JSViewAbstract::ParseJsLayoutSafeAreaEdgeArray(
+    const JSRef<JSArray>& jsSafeAreaEdges, NG::LayoutSafeAreaEdge defaultVal)
 {
-    NG::LayoutSafeAreaEdge edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
     if (!jsSafeAreaEdges->IsArray()) {
-        return edges;
+        return defaultVal;
     }
 
     static std::vector<uint32_t> layoutEdgeEnum {
@@ -12145,10 +12142,11 @@ NG::LayoutSafeAreaEdge JSViewAbstract::ParseJsLayoutSafeAreaEdgeArray(const JSRe
         NG::LAYOUT_SAFE_AREA_EDGE_ALL
     };
 
+    NG::LayoutSafeAreaEdge edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
     for (size_t i = 0; i < jsSafeAreaEdges->Length(); ++i) {
         if (!jsSafeAreaEdges->GetValueAt(i)->IsNumber() ||
             jsSafeAreaEdges->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
-            return false;
+            return defaultVal;
         }
         edges |= layoutEdgeEnum[jsSafeAreaEdges->GetValueAt(i)->ToNumber<uint32_t>()];
     }
