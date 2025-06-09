@@ -1610,9 +1610,6 @@ void RichEditorPattern::AfterContentChange(RichEditorChangeValue& changeValue)
 
 void RichEditorPattern::ReportAfterContentChangeEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
     std::string currentContent;
     if (isSpanStringMode_) {
         IF_TRUE(styledString_, currentContent = styledString_->GetString());
@@ -1621,18 +1618,19 @@ void RichEditorPattern::ReportAfterContentChangeEvent()
         GetContentBySpans(u16Str);
         currentContent = UtfUtils::Str16DebugToStr8(u16Str);
     }
-    if(suppressAccessibilityEvent_){
-        auto [addedText, removedText] = DetectTextDiff(currentContent);
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT,  "addedLen=%{public}d, removedLen=%{public}d",
-                 static_cast<int>(addedText.length()), static_cast<int>(removedText.length()));
-        if (!addedText.empty() && removedText.empty()) {
-            OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
-        } else if (!removedText.empty() && addedText.empty()) {
-            OnAccessibilityEventTextChange(TextChangeType::REMOVE, removedText);
-        }
-    }
-    suppressAccessibilityEvent_ = true;
-    textCache_ = currentContent;
+
+    auto weakThis = AceType::WeakClaim(this);
+    auto callback = [weakThis](const std::string& type, const std::string& content) {
+        auto strongThis = weakThis.Upgrade();
+        CHECK_NULL_VOID(strongThis);
+        strongThis->OnAccessibilityEventTextChange(type, content);
+    };
+
+    ProcessAccessibilityTextChange(
+        currentContent,
+        std::move(callback),
+        AceLogTag::ACE_RICH_TEXT
+    );
 }
 
 void RichEditorPattern::SpanNodeFission(RefPtr<SpanNode>& spanNode, bool needLeadingMargin)
@@ -2938,6 +2936,7 @@ void RichEditorPattern::SetAccessibilityEditAction()
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "EditAction cut");
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->suppressAccessibilityEvent_ = false;
         pattern->HandleOnCut();
     });
 
@@ -2945,6 +2944,7 @@ void RichEditorPattern::SetAccessibilityEditAction()
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "EditAction paste");
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->suppressAccessibilityEvent_ = false;
         pattern->HandleOnPaste();
         pattern->CloseSelectionMenu();
     });
@@ -8540,6 +8540,7 @@ void RichEditorPattern::HandleOnPaste()
 {
     if (IsPreviewTextInputting()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Paste blocked during preview text input");
+        suppressAccessibilityEvent_ = true;
         return;
     }
     auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
@@ -8553,10 +8554,10 @@ void RichEditorPattern::HandleOnPaste()
         ResetSelection();
         StartTwinkling();
         RequestKeyboardToEdit();
+        suppressAccessibilityEvent_ = true;
         return;
     }
     CHECK_NULL_VOID(clipboard_);
-    suppressAccessibilityEvent_ = false;
 #ifdef PREVIEW
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& text) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "pasteCallback callback in previewer");
@@ -8625,9 +8626,11 @@ void RichEditorPattern::HandleOnCut()
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "copyOption=%{public}d, textSelector_.IsValid()=%{public}d",
         copyOption_, textSelector_.IsValid());
     if (copyOption_ == CopyOptions::None) {
+        suppressAccessibilityEvent_ = true;
         return;
     }
     if (!textSelector_.IsValid()) {
+        suppressAccessibilityEvent_ = true;
         return;
     }
     auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
@@ -8639,11 +8642,11 @@ void RichEditorPattern::HandleOnCut()
         ResetSelection();
         StartTwinkling();
         RequestKeyboardToEdit();
+        suppressAccessibilityEvent_ = true;
         return;
     }
 
     caretUpdateType_ = CaretUpdateType::NONE;
-    suppressAccessibilityEvent_ = false;
     OnCopyOperation();
     DeleteBackward(1, TextChangeReason::CUT);
 }
