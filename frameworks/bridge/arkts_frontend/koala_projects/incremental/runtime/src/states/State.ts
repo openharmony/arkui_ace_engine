@@ -533,7 +533,7 @@ class StateManagerImpl implements StateManager {
     current: ManagedScope | undefined = undefined
     external: Dependency | undefined = undefined
     updateNeeded = false
-    frozen = false
+    frozen: boolean = false
     private readonly callbacks = markableQueue()
     readonly journal = new Journal()
 

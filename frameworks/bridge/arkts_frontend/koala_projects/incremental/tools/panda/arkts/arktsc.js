@@ -24,9 +24,9 @@ const { formatCommand,
     checkForHelp } = require('./common')
 
 es2panda_path = process.env.ES2PANDA_PATH
-es2panda_path = es2panda_path !== undefined ? es2panda_path : path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'es2panda')
+es2panda_path = es2panda_path ?? path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'es2panda')
 stdlib_path = process.env.ETS_STDLIB_PATH
-stdlib_path = stdlib_path !== undefined ? stdlib_path : path.join(PANDA_SDK, 'ets', 'stdlib')
+stdlib_path = stdlib_path ?? path.join(PANDA_SDK, 'ets', 'stdlib')
 
 const ARGS_SPEC = [
     {

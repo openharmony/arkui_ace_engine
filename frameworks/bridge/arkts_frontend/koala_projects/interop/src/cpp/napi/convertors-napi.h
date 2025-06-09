@@ -200,7 +200,6 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
    do { \
      napi_env env = (napi_env)vmcontext; \
      napi_handle_scope scope = nullptr; \
-     napi_status status = napi_open_handle_scope(env, &scope); \
      napi_throw((napi_env)vmcontext, object); \
      napi_close_handle_scope(env, scope); \
      return __VA_ARGS__;  \

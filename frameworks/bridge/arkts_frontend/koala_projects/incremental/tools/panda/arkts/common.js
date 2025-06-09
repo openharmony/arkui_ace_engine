@@ -17,7 +17,7 @@ const child_process = require('child_process')
 const path = require('node:path')
 
 const TOOLS_PANDA_ROOT = path.join(__dirname, "..")
-const PANDA_SDK = path.join(TOOLS_PANDA_ROOT, "node_modules/@panda/sdk")
+const PANDA_SDK = process.env.PANDA_SDK_PATH ?? path.join(TOOLS_PANDA_ROOT, "node_modules/@panda/sdk")
 const ARCH_TOOLS = (() => {
     const arch = process.arch
     let sdkArch = "";
