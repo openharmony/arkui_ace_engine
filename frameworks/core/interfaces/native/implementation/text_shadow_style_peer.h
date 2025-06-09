@@ -17,8 +17,14 @@
 
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "base/memory/ace_type.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
-struct TextShadowStylePeer {
+struct TextShadowStylePeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::TextShadowSpan> span;
+
+protected:
+    TextShadowStylePeer() = default;
+    ~TextShadowStylePeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_SHADOW_STYLE_PEER_H

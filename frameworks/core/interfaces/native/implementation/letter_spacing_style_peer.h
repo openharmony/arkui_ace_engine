@@ -18,9 +18,15 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
-struct LetterSpacingStylePeer {
+struct LetterSpacingStylePeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::LetterSpacingSpan> span;
+
+protected:
+    LetterSpacingStylePeer() = default;
+    ~LetterSpacingStylePeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_LETTER_SPACING_STYLE_PEER_IMPL_H

@@ -23,33 +23,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextShadowStyleAccessor {
 void DestroyPeerImpl(Ark_TextShadowStyle peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_TextShadowStyle CtorImpl(const Ark_Union_ShadowOptions_Array_ShadowOptions* value)
 {
-    RefPtr<OHOS::Ace::TextShadowSpan> span;
+    auto peer = PeerUtils::CreatePeer<TextShadowStylePeer>();
     if (value) {
         Converter::VisitUnion(*value,
-            [&span](const Array_ShadowOptions& array) {
+            [peer](const Array_ShadowOptions& array) {
                 auto shadowsOpt = Converter::OptConvert<std::vector<Shadow>>(array);
                 if (shadowsOpt) {
-                    span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>(shadowsOpt.value());
+                    peer->span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>(shadowsOpt.value());
                 }
             },
-            [&span](const Ark_ShadowOptions& arkValue) {
+            [peer](const Ark_ShadowOptions& arkValue) {
                 auto shadowOpt = Converter::OptConvert<Shadow>(arkValue);
                 std::vector<Shadow> shadows;
                 if (shadowOpt) {
                     shadows.push_back(shadowOpt.value());
                 }
-                span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>(shadows);
+                peer->span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>(shadows);
             },
             []() {});
     }
-    if (!span) {
-        span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>();
+    if (!peer->span) {
+        peer->span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>();
     }
-    return new TextShadowStylePeer{ .span = span };
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
