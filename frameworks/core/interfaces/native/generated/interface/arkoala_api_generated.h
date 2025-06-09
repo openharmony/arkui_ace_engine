@@ -23944,7 +23944,6 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
     void (*setDynamicDimming)(Ark_UIContext peer,
                               const Ark_String* id,
                               const Ark_Number* value);
-    Ark_Union_String_Undefined (*getWindowName)(Ark_UIContext peer);
     void (*openBindSheet)(Ark_VMContext vmContext,
                           Ark_UIContext peer,
                           Ark_ComponentContent bindSheetContent,
@@ -23962,6 +23961,9 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
                                Ark_UIContext peer);
     Ark_Boolean (*isFollowingSystemFontScale)(Ark_UIContext peer);
     Ark_Number (*getMaxFontScale)(Ark_UIContext peer);
+    Ark_String (*getWindowName)( const Ark_Number* instanceId);
+    Ark_Number (*getWindowWidthBreakpoint)(const Ark_Number* instanceId);
+    Ark_Number (*getWindowHeightBreakpoint)(const Ark_Number* instanceId);
 } GENERATED_ArkUIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIDragDropOpsAccessor {

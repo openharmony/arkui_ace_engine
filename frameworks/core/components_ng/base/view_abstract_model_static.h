@@ -82,6 +82,17 @@ public:
             ViewAbstract::SetMinHeight(frameNode, NG::CalcLength(minHeight));
         }
     }
+
+    static int32_t GetWindowWidthBreakpoint()
+    {
+        return ViewAbstract::GetWindowWidthBreakpoint();
+    }
+
+    static int32_t GetWindowHeightBreakpoint()
+    {
+        return ViewAbstract::GetWindowHeightBreakpoint();
+    }
+    
     static void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
 
     static RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
