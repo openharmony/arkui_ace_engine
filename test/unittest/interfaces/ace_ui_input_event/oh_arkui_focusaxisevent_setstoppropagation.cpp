@@ -24,8 +24,8 @@ namespace OHOS::Ace {
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetStopPropagation_NullEvent, TestSize.Level0)
 {
     int32_t result = OH_ArkUI_PointerEvent_SetStopPropagation(nullptr, true);
-    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID) 
-        << "event is nullptr, expected ERROR_CODE_PARAM_INVALID, got " 
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID)
+        << "event is nullptr, expected ERROR_CODE_PARAM_INVALID, got "
         << result;
 }
 
@@ -38,8 +38,8 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetStopPropagation_UnsupportedT
         &touchEvent
     };
     int32_t result = OH_ArkUI_PointerEvent_SetStopPropagation(&inputEvent, true);
-    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID) 
-        << "Unsupported eventTypeId, expected ERROR_CODE_PARAM_INVALID, got " 
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID)
+        << "Unsupported eventTypeId, expected ERROR_CODE_PARAM_INVALID, got "
         << result;
 }
 
@@ -53,14 +53,14 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetStopPropagation_TouchEvent, 
         &touchEvent
     };
     int32_t result = OH_ArkUI_PointerEvent_SetStopPropagation(&inputEvent, true);
-    EXPECT_EQ(result, ERROR_CODE_NO_ERROR) 
-        << "C_TOUCH_EVENT_ID, expected ERROR_CODE_NO_ERROR, got " 
+    EXPECT_EQ(result, ERROR_CODE_NO_ERROR)
+        << "C_TOUCH_EVENT_ID, expected ERROR_CODE_NO_ERROR, got "
         << result;
     EXPECT_TRUE(touchEvent.stopPropagation) << "stopPropagation should be set to true";
 
     result = OH_ArkUI_PointerEvent_SetStopPropagation(&inputEvent, false);
-    EXPECT_EQ(result, ERROR_CODE_NO_ERROR) 
-        << "C_TOUCH_EVENT_ID, expected ERROR_CODE_NO_ERROR, got " 
+    EXPECT_EQ(result, ERROR_CODE_NO_ERROR)
+        << "C_TOUCH_EVENT_ID, expected ERROR_CODE_NO_ERROR, got "
         << result;
     EXPECT_FALSE(touchEvent.stopPropagation) << "stopPropagation should be set to false";
 }
@@ -75,14 +75,14 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetStopPropagation_MouseEvent, 
         &mouseEvent
     };
     int32_t result = OH_ArkUI_PointerEvent_SetStopPropagation(&inputEvent, true);
-    EXPECT_EQ(result, ERROR_CODE_NO_ERROR) 
-        << "C_MOUSE_EVENT_ID, expected ERROR_CODE_NO_ERROR, got " 
+    EXPECT_EQ(result, ERROR_CODE_NO_ERROR)
+        << "C_MOUSE_EVENT_ID, expected ERROR_CODE_NO_ERROR, got "
         << result;
     EXPECT_TRUE(mouseEvent.stopPropagation) << "stopPropagation should be set to true";
 
     result = OH_ArkUI_PointerEvent_SetStopPropagation(&inputEvent, false);
-    EXPECT_EQ(result, ERROR_CODE_NO_ERROR) 
-        << "C_MOUSE_EVENT_ID, expected ERROR_CODE_NO_ERROR, got " 
+    EXPECT_EQ(result, ERROR_CODE_NO_ERROR)
+        << "C_MOUSE_EVENT_ID, expected ERROR_CODE_NO_ERROR, got "
         << result;
     EXPECT_FALSE(mouseEvent.stopPropagation) << "stopPropagation should be set to false";
 }
@@ -97,14 +97,14 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetStopPropagation_HoverEvent, 
         &hoverEvent
     };
     int32_t result = OH_ArkUI_PointerEvent_SetStopPropagation(&inputEvent, true);
-    EXPECT_EQ(result, ERROR_CODE_NO_ERROR) 
-        << "C_HOVER_EVENT_ID, expected ERROR_CODE_NO_ERROR, got " 
+    EXPECT_EQ(result, ERROR_CODE_NO_ERROR)
+        << "C_HOVER_EVENT_ID, expected ERROR_CODE_NO_ERROR, got "
         << result;
     EXPECT_TRUE(hoverEvent.stopPropagation) << "stopPropagation should be set to true";
 
     result = OH_ArkUI_PointerEvent_SetStopPropagation(&inputEvent, false);
-    EXPECT_EQ(result, ERROR_CODE_NO_ERROR) 
-        << "C_HOVER_EVENT_ID, expected ERROR_CODE_NO_ERROR, got " 
+    EXPECT_EQ(result, ERROR_CODE_NO_ERROR)
+        << "C_HOVER_EVENT_ID, expected ERROR_CODE_NO_ERROR, got "
         << result;
     EXPECT_FALSE(hoverEvent.stopPropagation) << "stopPropagation should be set to false";
 }
