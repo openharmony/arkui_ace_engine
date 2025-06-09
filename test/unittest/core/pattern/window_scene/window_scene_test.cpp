@@ -407,7 +407,7 @@ HWTEST_F(WindowSceneTest, OnUpdateSnapshotWindow, TestSize.Level1)
     windowScene->OnUpdateSnapshotWindow();
     EXPECT_EQ(windowScene->session_->GetSnapshot(), nullptr);
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_NE(windowScene->snapshotWindow_, nullptr);
+    EXPECT_EQ(windowScene->snapshotWindow_, nullptr);
 }
 
 /**

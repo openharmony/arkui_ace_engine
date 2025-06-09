@@ -31,6 +31,53 @@ const int32_t ERROR_INT_CODE = -1;
 std::string g_strValue;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
+ArkUI_Bool GetPickerThemeByFrameNode(FrameNode* frameNode, RefPtr<PickerTheme>& theme)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, false);
+    theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    return true;
+}
+
+void InitDatePickerTextStyle(const char* fontInfo, uint32_t color, int32_t style, NG::PickerTextStyle& textStyle)
+{
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+}
+
+void SetDatePickerTextStyleResObj(NG::PickerTextStyle& textStyle, void* fontSizeRawPtr, void* fontFamilyRawPtr,
+    void* textColorRawPtr)
+{
+    auto* fontSizePtr = reinterpret_cast<ResourceObject*>(fontSizeRawPtr);
+    if (fontSizePtr) {
+        textStyle.fontSizeResObj = AceType::Claim(fontSizePtr);
+    }
+
+    auto* fontFamilyPtr = reinterpret_cast<ResourceObject*>(fontFamilyRawPtr);
+    if (fontFamilyPtr) {
+        textStyle.fontFamilyResObj = AceType::Claim(fontFamilyPtr);
+    }
+
+    auto* textColorPtr = reinterpret_cast<ResourceObject*>(textColorRawPtr);
+    if (textColorPtr) {
+        textStyle.textColorResObj = AceType::Claim(textColorPtr);
+    }
+}
+
 ArkUI_CharPtr GetSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -63,26 +110,28 @@ void SetSelectedTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t c
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-
-    NG::PickerTextStyle textStyle;
-    std::vector<std::string> res;
-    std::string fontValues = std::string(fontInfo);
-    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
-    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
-        textStyle.fontStyle = FONT_STYLES[style];
-    } else {
-        textStyle.fontStyle = FONT_STYLES[0];
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
     }
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
-    textStyle.textColor = Color(color);
+    NG::PickerTextStyle textStyle;
+    InitDatePickerTextStyle(fontInfo, color, style, textStyle);
+    DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
+}
+
+void SetSelectedTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    InitDatePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
+        textStyle);
+    SetDatePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
+        textStyleStruct->textColorRawPtr);
     DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
 
@@ -137,27 +186,28 @@ void SetDatePickerTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-
-    NG::PickerTextStyle textStyle;
-    std::vector<std::string> res;
-    std::string fontValues = std::string(fontInfo);
-    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-
-    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
-    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
-        textStyle.fontStyle = FONT_STYLES[style];
-    } else {
-        textStyle.fontStyle = FONT_STYLES[0];
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
     }
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
-    textStyle.textColor = Color(color);
+    NG::PickerTextStyle textStyle;
+    InitDatePickerTextStyle(fontInfo, color, style, textStyle);
+    DatePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
+}
+
+void SetDatePickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    InitDatePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
+        textStyle);
+    SetDatePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
+        textStyleStruct->textColorRawPtr);
     DatePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
 
@@ -212,27 +262,28 @@ void SetDisappearTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-
-    NG::PickerTextStyle textStyle;
-    std::vector<std::string> res;
-    std::string fontValues = std::string(fontInfo);
-    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-
-    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
-    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
-        textStyle.fontStyle = FONT_STYLES[style];
-    } else {
-        textStyle.fontStyle = FONT_STYLES[0];
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
     }
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
-    textStyle.textColor = Color(color);
+    NG::PickerTextStyle textStyle;
+    InitDatePickerTextStyle(fontInfo, color, style, textStyle);
+    DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+}
+
+void SetDisappearTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    InitDatePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
+        textStyle);
+    SetDatePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
+        textStyleStruct->textColorRawPtr);
     DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
 
@@ -516,12 +567,15 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
     static const ArkUIDatePickerModifier modifier = {
         .getSelectedTextStyle = GetSelectedTextStyle,
         .setSelectedTextStyle = SetSelectedTextStyle,
+        .setSelectedTextStyleWithResObj = SetSelectedTextStyleWithResObj,
         .resetSelectedTextStyle = ResetSelectedTextStyle,
         .getDatePickerTextStyle = GetDatePickerTextStyle,
         .setDatePickerTextStyle = SetDatePickerTextStyle,
+        .setDatePickerTextStyleWithResObj = SetDatePickerTextStyleWithResObj,
         .resetDatePickerTextStyle = ResetDatePickerTextStyle,
         .getDisappearTextStyle = GetDisappearTextStyle,
         .setDisappearTextStyle = SetDisappearTextStyle,
+        .setDisappearTextStyleWithResObj = SetDisappearTextStyleWithResObj,
         .resetDisappearTextStyle = ResetDisappearTextStyle,
         .getLunar = GetLunar,
         .setLunar = SetLunar,

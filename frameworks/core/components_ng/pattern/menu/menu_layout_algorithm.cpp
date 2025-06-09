@@ -971,52 +971,116 @@ float MenuLayoutAlgorithm::GetMenuBottomPositionY(const RefPtr<FrameNode>& menu)
     return menu->GetPaintRectOffset(false, true).GetY() + geometryNode->GetMarginFrameSize().Height();
 }
 
-float MenuLayoutAlgorithm::CalcSubMenuMaxHeightConstraint(LayoutWrapper* layoutWrapper,
-    LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem)
+bool MenuLayoutAlgorithm::isContainerModal(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
-    CHECK_NULL_RETURN(parentItem, 0.0f);
-    auto parentItemPattern = parentItem->GetPattern<MenuItemPattern>();
-    CHECK_NULL_RETURN(parentItemPattern, 0.0f);
-    auto parentMenu = parentItemPattern->GetMenu(true);
-    CHECK_NULL_RETURN(parentMenu, 0.0f);
+    CHECK_NULL_RETURN(node, false);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return (!canExpandCurrentWindow_) && pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL;
+}
+
+float MenuLayoutAlgorithm::GetContainerModalOffsetY(const RefPtr<FrameNode>& node)
+{
+    float defaultOffset = 0.0f;
+    CHECK_NULL_RETURN(node, defaultOffset);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_RETURN(pipeline, defaultOffset);
+    return static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx())
+        + static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+}
+
+float MenuLayoutAlgorithm::CalcSubMenuMaxHeightWithPreview(RefPtr<FrameNode> parentMenu,
+    LayoutConstraintF& childConstraint,
+    float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY)
+{
+    float subMenuMaxHeight = childConstraint.maxSize.Height();
+    CHECK_NULL_RETURN(parentMenu, subMenuMaxHeight);
     auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(parentMenuPattern, 0.0f);
+    CHECK_NULL_RETURN(parentMenuPattern, subMenuMaxHeight);
     auto parentPlacement = parentMenuPattern->GetLastPlacement().value_or(Placement::NONE);
-    float subMenuMaxHeight = 0.0f;
-    auto parentFirstMenuItemPositionY = GetFirstItemBottomPositionY(parentMenu);
-    if (parentMenuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
-        auto [previewTopPositionY, previewBottomPositionY] = parentMenuPattern->GetPreviewPositionY();
-        if (parentPlacement == Placement::TOP_LEFT || parentPlacement == Placement::TOP ||
-            parentPlacement == Placement::TOP_RIGHT) {
-            float lastMenuItemPositionY = GetLastItemTopPositionY(parentMenu);
-            subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity
-                - (previewBottomPositionY - lastMenuItemPositionY);
-        } else if (parentPlacement == Placement::BOTTOM_LEFT || parentPlacement == Placement::BOTTOM ||
-               parentPlacement == Placement::BOTTOM_RIGHT) {
-            subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity
-                - (parentFirstMenuItemPositionY - previewTopPositionY);
-        } else {
-            subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity
-                - (parentFirstMenuItemPositionY - parentMenu->GetPaintRectOffset(false, true).GetY());
-        }
+    auto isContainerModalBool = isContainerModal(parentMenu);
+    auto containerModalOffsetY = GetContainerModalOffsetY(parentMenu);
+    auto [previewTopPositionY, previewBottomPositionY] = parentMenuPattern->GetPreviewPositionY();
+    //correct position when window modal is containerModal
+    if (isContainerModalBool) {
+        previewTopPositionY -= containerModalOffsetY;
+        previewBottomPositionY -= containerModalOffsetY;
+    }
+    if (parentPlacement == Placement::TOP_LEFT || parentPlacement == Placement::TOP ||
+        parentPlacement == Placement::TOP_RIGHT) {
+        subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity
+            - (previewBottomPositionY - lastItemTopPositionY);
+    } else if (parentPlacement == Placement::BOTTOM_LEFT || parentPlacement == Placement::BOTTOM ||
+            parentPlacement == Placement::BOTTOM_RIGHT) {
+        subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity
+            - (firstItemBottomPositionY - previewTopPositionY);
     } else {
-        if (parentPlacement == Placement::TOP_LEFT || parentPlacement == Placement::TOP ||
-               parentPlacement == Placement::TOP_RIGHT) {
-            auto parentMenuBottomY = GetMenuBottomPositionY(parentMenu);
-            subMenuMaxHeight = parentMenuBottomY - parentFirstMenuItemPositionY;
-            if (subMenuMaxHeight < parentItem->GetGeometryNode()->GetMarginFrameSize().Height()) {
-                subMenuMaxHeight = parentMenu->GetGeometryNode()->GetMarginFrameSize().Height();
-            }
-        } else {
-            subMenuMaxHeight = wrapperRect_.Bottom() + param_.windowsOffsetY - parentFirstMenuItemPositionY
-                - param_.bottomSecurity;
-            if (subMenuMaxHeight < parentItem->GetGeometryNode()->GetMarginFrameSize().Height()) {
-                subMenuMaxHeight = wrapperRect_.Bottom() + param_.windowsOffsetY
-                    - param_.bottomSecurity
-                    - parentMenu->GetPaintRectOffset(false, true).GetY();
-            }
+        subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity
+            - (firstItemBottomPositionY - parentMenuPositionY);
+    }
+    return subMenuMaxHeight;
+}
+
+float MenuLayoutAlgorithm::CalcSubMenuMaxHeightNoPreview(RefPtr<FrameNode> parentItem,
+    LayoutConstraintF& childConstraint,
+    float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY)
+{
+    float subMenuMaxHeight = childConstraint.maxSize.Height();
+    CHECK_NULL_RETURN(parentItem, subMenuMaxHeight);
+    auto parentItemGeometryNode = parentItem->GetGeometryNode();
+    CHECK_NULL_RETURN(parentItemGeometryNode, subMenuMaxHeight);
+    auto parentItemPattern = parentItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_RETURN(parentItemPattern, subMenuMaxHeight);
+    auto parentMenu = parentItemPattern->GetMenu(true);
+    CHECK_NULL_RETURN(parentMenu, subMenuMaxHeight);
+    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(parentMenuPattern, subMenuMaxHeight);
+    auto parentPlacement = parentMenuPattern->GetLastPlacement().value_or(Placement::NONE);
+    if (parentPlacement == Placement::TOP_LEFT || parentPlacement == Placement::TOP ||
+            parentPlacement == Placement::TOP_RIGHT) {
+        auto parentMenuBottomY = GetMenuBottomPositionY(parentMenu);
+        auto parentItemBottomY = parentItem->GetPaintRectOffset(false, true).GetY()
+            + parentItemGeometryNode->GetMarginFrameSize().Height();
+        float bottomSpace1 = parentMenuBottomY - parentItemBottomY;
+        float bottomSpace2 = lastItemTopPositionY - wrapperRect_.Top() - param_.topSecurity;
+        subMenuMaxHeight = std::max(bottomSpace1, bottomSpace2);
+    } else {
+        subMenuMaxHeight = wrapperRect_.Bottom() - param_.bottomSecurity - firstItemBottomPositionY;
+        if (subMenuMaxHeight < parentItemGeometryNode->GetMarginFrameSize().Height()) {
+            subMenuMaxHeight = wrapperRect_.Bottom() - param_.bottomSecurity - parentMenuPositionY;
         }
+    }
+    return subMenuMaxHeight;
+}
+
+float MenuLayoutAlgorithm::CalcSubMenuMaxHeightConstraint(LayoutConstraintF& childConstraint,
+    RefPtr<FrameNode> parentItem)
+{
+    float subMenuMaxHeight = childConstraint.maxSize.Height();
+    CHECK_NULL_RETURN(parentItem, subMenuMaxHeight);
+    auto parentItemPattern = parentItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_RETURN(parentItemPattern, subMenuMaxHeight);
+    auto parentMenu = parentItemPattern->GetMenu(true);
+    CHECK_NULL_RETURN(parentMenu, subMenuMaxHeight);
+    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(parentMenuPattern, subMenuMaxHeight);
+ 
+    auto parentFirstMenuItemPositionY = GetFirstItemBottomPositionY(parentMenu);
+    auto lastMenuItemPositionY = GetLastItemTopPositionY(parentMenu);
+    auto parentMenuPositionY = parentMenu->GetPaintRectOffset(false, true).GetY();
+    auto containerModalOffsetY = GetContainerModalOffsetY(parentItem);
+    if (isContainerModal(parentItem)) {
+        parentMenuPositionY -= containerModalOffsetY;
+        parentFirstMenuItemPositionY -= containerModalOffsetY;
+        lastMenuItemPositionY -= containerModalOffsetY;
+    }
+ 
+    if (parentMenuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+        subMenuMaxHeight = CalcSubMenuMaxHeightWithPreview(parentMenu, childConstraint, lastMenuItemPositionY,
+            parentFirstMenuItemPositionY, parentMenuPositionY);
+    } else {
+        subMenuMaxHeight = CalcSubMenuMaxHeightNoPreview(parentItem, childConstraint, lastMenuItemPositionY,
+            parentFirstMenuItemPositionY, parentMenuPositionY);
     }
     return subMenuMaxHeight;
 }
@@ -1037,7 +1101,7 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
             childConstraint.minSize.SetWidth(parentWidth);
             childConstraint.maxSize.SetWidth(parentWidth);
             childConstraint.selfIdealSize.SetWidth(parentWidth);
-            auto subMenuMaxHeight = CalcSubMenuMaxHeightConstraint(layoutWrapper, childConstraint, parentItem);
+            auto subMenuMaxHeight = CalcSubMenuMaxHeightConstraint(childConstraint, parentItem);
             childConstraint.maxSize.SetHeight(std::min(subMenuMaxHeight, childConstraint.maxSize.Height()));
         }
     }

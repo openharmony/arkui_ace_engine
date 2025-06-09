@@ -730,7 +730,7 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     draggedFrameNode_ = preTargetFrameNode_;
     preMovePoint_ = point;
     parentHitNodes_.emplace(frameNode->GetId());
-    DragDropBehaviorReporter::GetInstance().UpdateFrameNodeId(frameNode->GetId());
+    DragDropBehaviorReporter::GetInstance().UpdateFrameNodeStartId(frameNode->GetId());
     DragDropBehaviorReporter::GetInstance().UpdateStartPoint(point);
     DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationEnd(GetSysTimestamp());
     DragDropBehaviorReporter::GetInstance().UpdateDropResult(DropResult::DROP_FAIL);
@@ -828,7 +828,6 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
 
 void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
 {
-    ResetBundleInfo();
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
@@ -853,6 +852,7 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
     if (IsNeedDisplayInSubwindow() || isDragWithContextMenu_) {
         TransDragWindowToDragFwk(Container::CurrentId());
     }
+    ResetBundleInfo();
     ClearSummary();
     ClearExtraInfo();
     SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
@@ -1102,6 +1102,7 @@ void DragDropManager::ResetPreTargetFrameNode(int32_t instanceId)
 void DragDropManager::ResetDragEndOption(
     const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent, int32_t currentId)
 {
+    ResetBundleInfo();
     SetDragResult(notifyMessage, dragEvent);
     SetDragBehavior(notifyMessage, dragEvent);
     DoDragReset();
@@ -1111,6 +1112,8 @@ void DragDropManager::ResetDragEndOption(
     ResetDragPreviewInfo();
     HideDragPreviewWindow(currentId);
     CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetDragSource(dragBundleInfo_.bundleName);
+    dragEvent->SetRemoteDev(dragBundleInfo_.isRemoteDev);
     dragEvent->SetPressedKeyCodes(GetDragDropPointerEvent().pressedKeyCodes);
 }
 
@@ -1150,7 +1153,6 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     const RefPtr<FrameNode>& dragFrameNode)
 {
     CHECK_NULL_VOID(dragFrameNode);
-    NotifyDragSpringLoadingIntercept(extraInfo);
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -1192,6 +1194,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
 void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& node, const bool keyEscape)
 {
+    NotifyDragSpringLoadingIntercept(extraInfo);
     RemoveDeadlineTimer();
     Point point = pointerEvent.GetPoint();
     DragDropBehaviorReporter::GetInstance().UpdateEndPoint(point);
@@ -1201,12 +1204,10 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
     auto container = Container::Current();
     auto containerId = container->GetInstanceId();
     DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
-    if (container && container->IsSceneBoardWindow()) {
-        if (IsDragged() && IsWindowConsumed()) {
-            TAG_LOGD(AceLogTag::ACE_DRAG, "DragDropManager is dragged or window consumed. WindowId is %{public}d",
-                container->GetWindowId());
-            return;
-        }
+    if (container && container->IsSceneBoardWindow() && (IsDragged() && IsWindowConsumed())) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragDropManager is dragged or window consumed. WindowId is %{public}d",
+            container->GetWindowId());
+        return;
     }
     UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
@@ -1409,6 +1410,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     UpdateDragEvent(event, pointerEvent);
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    DragDropBehaviorReporter::GetInstance().UpdateFrameNodeDropId(dragFrameNode->GetId());
     DragDropBehaviorReporter::GetInstance().UpdateDropResult(DropResult::DROP_SUCCESS);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
     if (event->IsDragEndPending() && event->GetRequestIdentify() != -1) {

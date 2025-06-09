@@ -68,8 +68,9 @@ int32_t OH_ArkUI_DragEvent_SetData(ArkUI_DragEvent* event, OH_UdmfData* data)
 ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* bundleName, int32_t length)
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
-    
-    if (!event || !bundleName || !dragEvent || static_cast<int32_t>(strlen(dragEvent->bundleName)) > length) {
+
+    if (!event || !bundleName || !dragEvent || !dragEvent->bundleName ||
+        static_cast<int32_t>(strlen(dragEvent->bundleName)) >= length) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int32_t err = strcpy_s(bundleName, length, dragEvent->bundleName);

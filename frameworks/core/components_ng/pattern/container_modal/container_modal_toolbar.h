@@ -60,6 +60,7 @@ public:
 
 protected:
     void UpdateTitleAfterRemove();
+    void RemoveAllToolbarItem();
     void RemoveToolbarItem(const RefPtr<FrameNode>& frameNode);
     void UpdateTitleLayout();
 
@@ -86,7 +87,7 @@ private:
 
     void AdjustTitleNodeWidth();
     void AdjustNavbarRowWidth();
-    void SetcustomTitleRowBlurStyle(BlurStyle& blurStyle);
+    void SetCustomTitleRowBlurStyle(BlurStyle& blurStyle);
     void UpdateSidebarMargin();
     void UpdateNavbarTitlebarMargin();
     void UpdateNavDestinationTitlebarMargin();
@@ -129,6 +130,7 @@ private:
     bool hasNavOrSideBarNodes_ = false;
     bool hasSetOnchangeCallback_ = false;
 
+    bool hasSetNavigationModeChangeCallback_ = false;
     bool hasSetUpdateSideTitleBgColor_ = false;
     bool isUpdateTargetNode_ = false;
     bool isTitleShow_ = true;

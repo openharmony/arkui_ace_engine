@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
+enum class NavigationMode;
 struct ToolbarInfo {
     bool isShow;
     float width;
@@ -134,6 +135,8 @@ public:
     void OnChange();
     void SetModifyDoneCallback(const std::function<void()>&& callback);
     void OnToolBarManagerModifyDone();
+    void SetNavigationModeChangeCallback(const std::function<void()>&& callback);
+    void OnNavigationModeChange();
 
     WeakPtr<FrameNode> GetSiderBar()
     {
@@ -225,6 +228,17 @@ public:
         isMoveUp_ = isMoveUp;
     }
 
+    NavigationMode GetNavigationMode()
+    {
+        return navigationMode_;
+    }
+
+    void SetNavigationMode(NavigationMode mode)
+    {
+        navigationMode_ = mode;
+        OnNavigationModeChange();
+    }
+
 private:
     bool hasSideBar_ = false;
     bool hasNavBar_ = false;
@@ -239,9 +253,11 @@ private:
     ToolbarInfo navBarInfo_;
     ToolbarInfo navBarDividerInfo_;
     ToolbarInfo navDestInfo_;
+    NavigationMode navigationMode_;
     std::function<void(const Color&, const Color&, const BlurStyle&)> sideBarColorChangeCallbackFunc_;
     std::list<std::function<void()>> onChangeCallbackFuncs_;
     std::list<std::function<void()>> modifyDoneCallbackFuncs_;
+    std::list<std::function<void()>> navigationModeChangeCallbackFuncs_;
 
     WeakPtr<FrameNode> navigation_;
     WeakPtr<FrameNode> siderBar_;

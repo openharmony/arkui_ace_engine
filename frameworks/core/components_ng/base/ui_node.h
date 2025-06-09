@@ -1066,16 +1066,6 @@ public:
         afterAttachMainTreeTasks_.emplace_back(std::move(task));
     }
 
-    void ExecuteAfterAttachMainTreeTasks()
-    {
-        for (auto& task : afterAttachMainTreeTasks_) {
-            if (task) {
-                task();
-            }
-        }
-        afterAttachMainTreeTasks_.clear();
-    }
-
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1175,6 +1165,16 @@ private:
             child->ClearObserverParentForDrawChildren();
         }
     }
+    
+    void ExecuteAfterAttachMainTreeTasks()
+    {
+        for (auto& task : afterAttachMainTreeTasks_) {
+            if (task) {
+                task();
+            }
+        }
+        afterAttachMainTreeTasks_.clear();
+    }
     virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
@@ -1194,7 +1194,7 @@ private:
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool isFreeNode_ = false;
-    bool isFreeState_ = false;
+    bool isFreeState_ = false; // the free node in free state can be operated by non UI threads
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;

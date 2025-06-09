@@ -33,7 +33,7 @@ void ReporterImpl::HandleUISessionReporting(const JsonReport& report) const
     if (value->IsNull()) {
         return;
     }
-    LOGD("UISession JsonString %{public}s", value->ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "UISession JsonString %{public}s", value->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(report.GetId(), "event", value);
 }
 } // namespace OHOS::Ace::NG

@@ -1102,6 +1102,7 @@ UIContentErrorCode UIContentImpl::InitializeInner(
     RunIntentPageIfNeeded();
     if (!restoreNavDestinationInfo_.empty()) {
         RestoreNavDestinationInfoInner(std::move(restoreNavDestinationInfo_), true);
+        restoreNavDestinationInfo_ = "";
     }
     LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_, startUrl_.c_str());
@@ -5773,7 +5774,6 @@ void UIContentImpl::RestoreNavDestinationInfoInner(const std::string& navDestina
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "will restore navDestination info, isColdStart? %{public}s", isColdStart ? "yes" : "no");
-    restoreNavDestinationInfo_ = "";
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);

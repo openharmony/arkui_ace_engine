@@ -33,24 +33,22 @@ bool BackgroundTaskHelperOhos::HasBackgroundTask()
     int32_t creatorUid = AceApplicationInfo::GetInstance().GetUid();
     uint32_t backgroundMode = BackgroundTaskMgr::BackgroundMode::AUDIO_PLAYBACK;
 
-    std::vector<std::shared_ptr<BackgroundTaskMgr::ContinuousTaskCallbackInfo>> continuousTaskList;
-    ErrCode code = BackgroundTaskMgr::BackgroundTaskMgrHelper::GetContinuousTaskApps(continuousTaskList);
+    std::vector<std::shared_ptr<BackgroundTaskMgr::ContinuousTaskInfo>> continuousTaskList;
+    ErrCode code = BackgroundTaskMgr::BackgroundTaskMgrHelper::RequestGetContinuousTasksByUidForInner(
+        creatorUid, continuousTaskList);
     if (code != OHOS::ERR_OK) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "uid=%{public}d no continuous task list, code=%{public}d", creatorUid, code);
         return false;
     }
 
     for (const auto &task : continuousTaskList) {
-        TAG_LOGW(AceLogTag::ACE_VIDEO, "uid=%{public}d taskCreatorUid=%{public}d", creatorUid, task->GetCreatorUid());
-        if (task->GetCreatorUid() != creatorUid) {
-            continue;
-        }
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "uid=%{public}d taskCreatorUid=%{public}d", creatorUid, task->GetUid());
 
-        std::vector<uint32_t> bgModeIds = task->GetTypeIds();
-        auto it = std::find_if(bgModeIds.begin(), bgModeIds.end(), [ backgroundMode ](auto mode) {
+        std::vector<uint32_t> bgMode = task->GetBackgroundModes();
+        auto it = std::find_if(bgMode.begin(), bgMode.end(), [ backgroundMode ](auto mode) {
             return (mode == backgroundMode);
         });
-        if (it != bgModeIds.end()) {
+        if (it != bgMode.end()) {
             TAG_LOGW(AceLogTag::ACE_VIDEO, "uid=%{public}d is audio playback", creatorUid);
             return true;
         }

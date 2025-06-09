@@ -15,7 +15,12 @@
 
 #include "gtest/gtest.h"
 
+#define protected public
+#define private public
+
 #include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,5 +49,12 @@ HWTEST_F(MultiThreadBuildManagerTest, CheckNodeOnValidThread001, TestSize.Level1
 {
     bool result = MultiThreadBuildManager::CheckNodeOnValidThread(nullptr);
     EXPECT_FALSE(result);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    auto frameNode =
+        NG::FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<NG::Pattern>(), true);
+    MultiThreadBuildManager::isUIThread_ = true;
+    result = MultiThreadBuildManager::CheckNodeOnValidThread(AceType::RawPtr(frameNode));
+    EXPECT_TRUE(result);
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
 }
 } // namespace OHOS::Ace

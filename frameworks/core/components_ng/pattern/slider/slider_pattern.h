@@ -401,6 +401,7 @@ private:
     void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
     uint32_t GetCurrentStepIndex();
+    int32_t GetOffsetStepIndex(uint32_t index);
     SizeF GetStepPointAccessibilityVirtualNodeSize();
     void UpdateStepPointsAccessibilityVirtualNodeSelected();
     void SetStepPointsAccessibilityVirtualNodeEvent(

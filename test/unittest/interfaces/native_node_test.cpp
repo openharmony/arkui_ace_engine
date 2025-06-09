@@ -7330,4 +7330,54 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_GetNodeHandleByUniqueId_003, TestSize.Le
     OH_ArkUI_NodeUtils_GetNodeUniqueId(button, &buttonId);
     EXPECT_EQ(buttonId, -1);
 }
+
+/**
+ * @tc.name: NativeNodeTest145
+ * @tc.desc: Test IsValidArkUINode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest145, TestSize.Level1)
+{
+    EXPECT_EQ(NodeModel::IsValidArkUINode(nullptr), false);
+
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto notFreeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(notFreeNode), true);
+    nodeAPI->disposeNode(notFreeNode);
+
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto freeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(freeNode), true);
+    nodeAPI2->disposeNode(freeNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest146
+ * @tc.desc: Test GetNativeNodeEventType
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest146, TestSize.Level1)
+{
+    ArkUINodeEvent event;
+    event.extraParam = reinterpret_cast<ArkUI_Int64>(nullptr);
+    EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event), -1);
+
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto notFreeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ArkUINodeEvent event1;
+    event1.extraParam = reinterpret_cast<ArkUI_Int64>(notFreeNode);
+    EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event1), -1);
+    nodeAPI->disposeNode(notFreeNode);
+
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto freeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    ArkUINodeEvent event2;
+    event2.extraParam = reinterpret_cast<ArkUI_Int64>(freeNode);
+    EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event2), -1);
+    nodeAPI2->disposeNode(freeNode);
+}
 } // namespace OHOS::Ace

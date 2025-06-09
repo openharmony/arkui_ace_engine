@@ -36,6 +36,8 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -233,9 +235,9 @@ HWTEST_F(ContainerModelToolBarTestNg, ParsePlacementType, TestSize.Level1)
     titleMgr_->itemsWillOnTree_[navbarNode].push_back(toolbarItem);
     titleMgr_->ParsePlacementType();
     size = titleMgr_->itemsWillOnTree_[navbarNode].size();
-    EXPECT_EQ(size, 0);
-    size = titleMgr_->itemWillAdd_[ItemPlacementType::NAV_BAR_START].size();
     EXPECT_EQ(size, 1);
+    size = titleMgr_->itemWillAdd_[ItemPlacementType::NAV_BAR_START].size();
+    EXPECT_EQ(size, 0);
 }
 
 /**
@@ -1211,5 +1213,220 @@ HWTEST_F(ContainerModelToolBarTestNg, FocusEventTest_002, TestSize.Level1)
 
     auto focusAlgorithm = toolBarRowPattern->GetScopeFocusAlgorithm();
     ASSERT_NE(focusAlgorithm.getNextFocusNode, nullptr);
+}
+
+/**
+ * @tc.name: UpdateSideTitleBgColor
+ * @tc.desc: Test ContainerModalToolBar UpdateSideTitleBgColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, UpdateSideTitleBgColor, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    Color otherColor = Color::RED;
+    Color baseColor = Color::GREEN;
+    BlurStyle blurStyle = BlurStyle::THIN;
+    Color blendColor = baseColor.BlendColorWithAlpha(otherColor);
+    titleMgr_->UpdateSideTitleBgColor(otherColor, baseColor, blurStyle);
+    auto title = titleMgr_->title_;
+    ASSERT_NE(title, nullptr);
+    auto titleNode = AceType::DynamicCast<FrameNode>(title->GetChildren().front());
+    ASSERT_NE(titleNode, nullptr);
+    auto ctx = titleNode->GetRenderContext();
+    ASSERT_NE(ctx, nullptr);
+    auto titleColor = ctx->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(titleColor, blendColor);
+}
+
+/**
+ * @tc.name: UpdateTargetNodesBarMargin_001
+ * @tc.desc: Test ContainerModalToolBar UpdateTargetNodesBarMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, UpdateTargetNodesBarMargin_001, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    auto toolbarMgr = titleMgr_->toolbarManager_;
+    toolbarMgr->SetTitleHeight(Dimension(60.0f));
+    titleMgr_->isUpdateTargetNode_ = false;
+    titleMgr_->UpdateTargetNodesBarMargin(true);
+    auto titleHeight = toolbarMgr->GetTitleHeight().ConvertToPx();
+    EXPECT_TRUE(NearEqual(titleHeight, 60.0f));
+    titleMgr_->isUpdateTargetNode_ = true;
+    titleMgr_->UpdateTargetNodesBarMargin(true);
+    titleHeight = toolbarMgr->GetTitleHeight().ConvertToPx();
+    EXPECT_TRUE(NearEqual(titleHeight, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateTargetNodesBarMargin_002
+ * @tc.desc: Test ContainerModalToolBar UpdateTargetNodesBarMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, UpdateTargetNodesBarMargin_002, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->activeColor_ = Color::TRANSPARENT;
+    pattern_->inactiveColor_ = Color::TRANSPARENT;
+    pattern_->isHaveToolBar_ = true;
+    pattern_->isTitleShow_ = true;
+    pattern_->isCustomColor_ = true;
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->isUpdateTargetNode_ = false;
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    auto toolbarMgr = titleMgr_->toolbarManager_;
+    titleMgr_->UpdateTargetNodesBarMargin();
+    auto isMoveUp = toolbarMgr->GetIsMoveUp();
+    EXPECT_TRUE(isMoveUp);
+    auto titleHeight = toolbarMgr->GetTitleHeight().ConvertToPx();
+    EXPECT_TRUE(NearEqual(titleHeight, pattern_->titleHeight_.ConvertToPx()));
+}
+
+/**
+ * @tc.name: ExpandStackNodeLayout
+ * @tc.desc: Test ContainerModalToolBar ExpandStackNodeLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ExpandStackNodeLayout, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->ExpandStackNodeLayout();
+    auto stackNode = pattern_->GetStackNode();
+    ASSERT_NE(stackNode, nullptr);
+    auto ctx = stackNode->GetRenderContext();
+    ASSERT_NE(ctx, nullptr);
+    auto zIndex = ctx->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+    ASSERT_EQ(zIndex, -1);
+    titleMgr_->ExpandStackNodeLayout(true);
+    zIndex = ctx->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+    ASSERT_EQ(zIndex, ZINDEX_DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: ResetExpandStackNode
+ * @tc.desc: Test ContainerModalToolBar ResetExpandStackNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ResetExpandStackNode, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    titleMgr_->isUpdateTargetNode_ = true;
+    titleMgr_->ResetExpandStackNode();
+    EXPECT_FALSE(titleMgr_->isUpdateTargetNode_);
+    auto isMoveUp = titleMgr_->toolbarManager_->GetIsMoveUp();
+    EXPECT_FALSE(isMoveUp);
+}
+
+/**
+ * @tc.name: SetCustomTitleRowBlurStyle
+ * @tc.desc: Test ContainerModalToolBar SetCustomTitleRowBlurStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, SetCustomTitleRowBlurStyle, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(titleMgr_, nullptr);
+    auto title = titleMgr_->title_;
+    ASSERT_NE(title, nullptr);
+    auto ctx = title->GetRenderContext();
+    ASSERT_NE(ctx, nullptr);
+    auto ret = ctx->GetBackBlurStyle().has_value();
+    EXPECT_FALSE(ret);
+    BlurStyle blurStyle = BlurStyle::THIN;
+    titleMgr_->SetCustomTitleRowBlurStyle(blurStyle);
+    ret = ctx->GetBackBlurStyle().has_value();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: UpdateSidebarMargin
+ * @tc.desc: Test ContainerModalToolBar UpdateSidebarMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, UpdateSidebarMargin, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    auto toolbarMgr = titleMgr_->toolbarManager_;
+    ASSERT_NE(toolbarMgr, nullptr);
+    toolbarMgr->SetIsMoveUp(true);
+    auto sideBarContainerNode = FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    toolbarMgr->SetSideBarContainerModel(sideBarContainerNode);
+    titleMgr_->UpdateSidebarMargin();
+    EXPECT_TRUE(titleMgr_->isUpdateTargetNode_);
+}
+
+/**
+ * @tc.name: UpdateNavbarTitlebarMargin
+ * @tc.desc: Test ContainerModalToolBar UpdateNavbarTitlebarMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, UpdateNavbarTitlebarMargin, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    auto toolbarMgr = titleMgr_->toolbarManager_;
+    ASSERT_NE(toolbarMgr, nullptr);
+    toolbarMgr->SetIsMoveUp(true);
+    auto navigation = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto navBar = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    navigation->AddChild(navBar);
+    toolbarMgr->SetNavBarNode(navBar);
+    titleMgr_->UpdateNavbarTitlebarMargin();
+    EXPECT_TRUE(titleMgr_->isUpdateTargetNode_);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationTitlebarMargin
+ * @tc.desc: Test ContainerModalToolBar UpdateNavDestinationTitlebarMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, UpdateNavDestinationTitlebarMargin, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    auto toolbarMgr = titleMgr_->toolbarManager_;
+    ASSERT_NE(toolbarMgr, nullptr);
+    toolbarMgr->SetIsMoveUp(true);
+
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto pattern = navigation->GetPattern<NavigationPattern>();
+    auto layoutProperty = pattern->GetLayoutProperty<NavigationLayoutProperty>();
+    navigation->contentNode_ = contentNode;
+    navigation->navBarNode_ = navBarNode;
+    navigation->AddChild(contentNode);
+    navigation->AddChild(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(AceType::MakeRefPtr<NavigationStack>());
+    navigationPattern->navigationStack_->Add("contentNode", contentNode);
+
+    toolbarMgr->SetNavDestNode(contentNode);
+    titleMgr_->UpdateNavDestinationTitlebarMargin();
+    EXPECT_TRUE(titleMgr_->isUpdateTargetNode_);
 }
 } // namespace OHOS::Ace::NG

@@ -4842,6 +4842,15 @@ void NavigationPattern::NavigationModifyDoneToolBarManager()
     toolbarManager_->OnToolBarManagerModifyDone();
 }
 
+void NavigationPattern::SetToolbarManagerNavigationMode(NavigationMode mode)
+{
+    CHECK_NULL_VOID(toolbarManager_);
+    auto navigationMode = toolbarManager_->GetNavigationMode();
+    if (navigationMode != mode) {
+        toolbarManager_->SetNavigationMode(mode);
+    }
+}
+
 bool NavigationPattern::HandleIntent(bool needTransition)
 {
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());

@@ -22,13 +22,16 @@
 #endif
 
 namespace OHOS::Ace::NG {
-std::unordered_map<std::string, WeakPtr<RenderContext>> XComponentInnerSurfaceController::SurfaceRenderContextMap;
+std::unordered_map<std::string, WeakPtr<RenderContext>> XComponentInnerSurfaceController::surfaceRenderContextMap;
+
+std::mutex XComponentInnerSurfaceController::mutex;
 
 int32_t XComponentInnerSurfaceController::SetRenderFitBySurfaceId(
     const std::string& surfaceId, RenderFit renderFit, bool isRenderFitNewVersionEnabled)
 {
-    auto it = SurfaceRenderContextMap.find(surfaceId);
-    if (it == SurfaceRenderContextMap.end()) {
+    std::lock_guard<std::mutex> lock(mutex);
+    auto it = surfaceRenderContextMap.find(surfaceId);
+    if (it == surfaceRenderContextMap.end()) {
         return 1;
     }
     auto weakRenderContext = it->second;
@@ -52,8 +55,9 @@ int32_t XComponentInnerSurfaceController::SetRenderFitBySurfaceId(
 int32_t XComponentInnerSurfaceController::GetRenderFitBySurfaceId(
     const std::string& surfaceId, int32_t& renderFitNumber, bool& isRenderFitNewVersionEnabled)
 {
-    auto it = SurfaceRenderContextMap.find(surfaceId);
-    if (it == SurfaceRenderContextMap.end()) {
+    std::lock_guard<std::mutex> lock(mutex);
+    auto it = surfaceRenderContextMap.find(surfaceId);
+    if (it == surfaceRenderContextMap.end()) {
         return 1;
     }
     auto weakRenderContext = it->second;
@@ -77,13 +81,15 @@ int32_t XComponentInnerSurfaceController::GetRenderFitBySurfaceId(
 void XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
     const std::string& surfaceId, const WeakPtr<RenderContext>& renderContext)
 {
+    std::lock_guard<std::mutex> lock(mutex);
     if (!renderContext.Invalid()) {
-        SurfaceRenderContextMap[surfaceId] = renderContext;
+        surfaceRenderContextMap[surfaceId] = renderContext;
     }
 }
 
 void XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(const std::string& surfaceId)
 {
-    SurfaceRenderContextMap.erase(surfaceId);
+    std::lock_guard<std::mutex> lock(mutex);
+    surfaceRenderContextMap.erase(surfaceId);
 }
 } // namespace OHOS::Ace::NG

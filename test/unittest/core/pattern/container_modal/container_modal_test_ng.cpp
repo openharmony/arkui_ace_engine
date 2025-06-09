@@ -945,4 +945,37 @@ HWTEST_F(ContainerModelTestNg, ConfigCustomWindowMask, TestSize.Level1)
     EXPECT_TRUE(ContainerModalView::ConfigCustomWindowMask(pipeline, true));
     EXPECT_TRUE(ContainerModalView::ConfigCustomWindowMask(pipeline, false));
 }
+
+/**
+ * @tc.name: SetToolbarBuilder
+ * @tc.desc: Test SetToolbarBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, SetToolbarBuilder, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 100, AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
+    ASSERT_NE(pattern_->titleMgr_, nullptr);
+    ASSERT_NE(pattern_->floatTitleMgr_, nullptr);
+}
+
+/**
+ * @tc.name: IsContainerModalTransparent
+ * @tc.desc: Test IsContainerModalTransparent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, IsContainerModalTransparent, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    auto ret = pattern_->IsContainerModalTransparent();
+    EXPECT_FALSE(ret);
+    pattern_->activeColor_ = Color::TRANSPARENT;
+    pattern_->inactiveColor_ = Color::TRANSPARENT;
+    pattern_->isCustomColor_ = true;
+    ret = pattern_->IsContainerModalTransparent();
+    EXPECT_TRUE(ret);
+}
 } // namespace OHOS::Ace::NG

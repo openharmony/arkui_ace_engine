@@ -92,6 +92,8 @@ protected:
     float GetFirstItemBottomPositionY(const RefPtr<FrameNode>& menu);
     float GetLastItemTopPositionY(const RefPtr<FrameNode>& menu);
     float GetMenuBottomPositionY(const RefPtr<FrameNode>& menu);
+    bool isContainerModal(const RefPtr<FrameNode>& node);
+    float GetContainerModalOffsetY(const RefPtr<FrameNode>& node);
 
     // position input is relative to main window left top point,
     // menu show position is relative to menuWrapper.
@@ -283,8 +285,11 @@ private:
     std::string CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow);
     bool UpdateSelectOverlayMenuColumnInfo(
         const RefPtr<MenuPattern>& menuPattern, const RefPtr<GridColumnInfo>& columnInfo);
-    float CalcSubMenuMaxHeightConstraint(LayoutWrapper* layoutWrapper,
-        LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    float CalcSubMenuMaxHeightConstraint(LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    float CalcSubMenuMaxHeightWithPreview(RefPtr<FrameNode> parentMenu, LayoutConstraintF& childConstraint,
+        float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
+    float CalcSubMenuMaxHeightNoPreview(RefPtr<FrameNode> parentItem, LayoutConstraintF& childConstraint,
+        float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
