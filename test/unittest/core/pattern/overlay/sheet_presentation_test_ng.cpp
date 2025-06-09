@@ -124,7 +124,7 @@ HWTEST_F(SheetPresentationTestNg, OnScrollStartRecursive001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->animation_ = nullptr;
     EXPECT_EQ(sheetPattern->animation_, nullptr);
-    sheetPattern->UpdateSheetObject(SheetType::SHEET_BOTTOM);
+    sheetPattern->InitSheetObject();
     auto sheetObject = sheetPattern->GetSheetObject();
     ASSERT_NE(sheetObject, nullptr);
     sheetObject->OnScrollStartRecursive(0.0f, 0.0f);
@@ -154,8 +154,9 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet001, TestSize.Level1)
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    sheetPattern->UpdateSheetObject(SheetType::SHEET_BOTTOM);
-    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
+    sheetPattern->InitSheetObject();
+    auto object = sheetPattern->sheetObject_;
+    ASSERT_NE(object, nullptr);
     float scrollOffset = 0.0f;
     PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
     sheetPattern->sheetDetentHeight_.emplace_back(1);
@@ -165,25 +166,33 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet001, TestSize.Level1)
     sheetPattern->sheetMaxHeight_ = 0.0f;
     sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
     EXPECT_FALSE(NearZero(sheetPattern->currentOffset_));
-    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
+    object->HandleScrollWithSheet(scrollOffset);
 
     scrollOffset = 0.0f;
     sheetPattern->currentOffset_ = 0.0f;
     EXPECT_TRUE(NearZero(sheetPattern->currentOffset_));
-    EXPECT_FALSE(LessNotEqual(scrollOffset, 0.0f));
     sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
 
     scrollOffset = -1.0f;
     sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    EXPECT_TRUE(LessNotEqual(scrollOffset, 0.0f));
-    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
-
+    object->HandleScrollWithSheet(scrollOffset);
     sheetPattern->sheetDetentHeight_.emplace_back(0);
-    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
+    object->HandleScrollWithSheet(scrollOffset);
 
+    scrollOffset = -20.0f;
+    sheetPattern->height_ = 100.0f;
+    sheetPattern->pageHeight_ = 100.0f;
+    sheetPattern->sheetOffsetY_ = 100.0f;
+    sheetPattern->sheetMaxHeight_ = 50.0f;
+    sheetPattern->currentOffset_ = 1.0f;
+    object->HandleScrollWithSheet(scrollOffset);
+    EXPECT_TRUE(object->isSheetPosChanged_);
+    EXPECT_FALSE(NearZero(sheetPattern->currentOffset_));
     sheetPattern->sheetDetentHeight_.clear();
     EXPECT_EQ(sheetPattern->sheetDetentHeight_.size(), 0);
-    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
+    auto ret = object->HandleScrollWithSheet(scrollOffset);
+    EXPECT_FLOAT_EQ(ret.remain, scrollOffset);
+    EXPECT_FALSE(object->isSheetNeedScroll_);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -201,7 +210,7 @@ HWTEST_F(SheetPresentationTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -338,7 +347,7 @@ HWTEST_F(SheetPresentationTestNg, InitPanEvent001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->InitPanEvent();
     GestureEvent event;
@@ -365,7 +374,7 @@ HWTEST_F(SheetPresentationTestNg, HandleDragStart001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->animation_ = nullptr;
     EXPECT_EQ(sheetPattern->animation_, nullptr);
@@ -756,7 +765,7 @@ HWTEST_F(SheetPresentationTestNg, OnScrollEndRecursive001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     auto sheetObject = sheetPattern->GetSheetObject();
     ASSERT_NE(sheetObject, nullptr);
     sheetObject->isSheetPosChanged_ = false;
@@ -783,7 +792,7 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollVelocity001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     auto sheetObject = sheetPattern->GetSheetObject();
     ASSERT_NE(sheetObject, nullptr);
     sheetObject->isSheetPosChanged_ = false;
@@ -948,7 +957,7 @@ HWTEST_F(SheetPresentationTestNg, HandleFitContontChange001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->height_ = sheetPattern->sheetFitContentHeight_ + 1.0f;
     float height = sheetPattern->sheetFitContentHeight_;
@@ -985,7 +994,7 @@ HWTEST_F(SheetPresentationTestNg, DismissTransition001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     sheetPattern->overlayManager_ = AceType::WeakClaim(AceType::RawPtr(pipelineContext->overlayManager_));
@@ -2158,7 +2167,7 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -2225,7 +2234,7 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition002, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -2556,7 +2565,7 @@ HWTEST_F(SheetPresentationTestNg, CalculateSheetRadius001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);

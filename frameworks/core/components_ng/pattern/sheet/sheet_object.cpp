@@ -441,10 +441,8 @@ ScrollResult SheetObject::HandleScroll(float scrollOffset, int32_t source, Neste
         if (scrollState == ScrollState::SCROLL) {
             return HandleScrollWithSheet(scrollOffset);
         }
-        if (isSheetPosChanged_) {
-            HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
-            isSheetPosChanged_ = false;
-        }
+        HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
+        isSheetPosChanged_ = false;
     } else if (state == NestedState::CHILD_OVER_SCROLL) {
         isSheetNeedScroll_ = false;
         return {scrollOffset, true};
