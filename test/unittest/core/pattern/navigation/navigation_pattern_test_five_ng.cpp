@@ -66,6 +66,8 @@ RefPtr<NavigationBarTheme> CreateAndBindNavigationBarTheme()
 }
 } // namespace
 
+using SwitchHandleFunc = std::function<void(const AbilityContextInfo&, NavDestinationSwitchInfo&)>;
+
 class NavigationPatternTestFiveNg : public testing::Test {
 public:
     static RefPtr<DialogTheme> dialogTheme_;
@@ -75,7 +77,17 @@ public:
     static RefPtr<FrameNode> CreateDialogNode();
     static void RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
     void MockPipelineContextGetTheme();
+
+    static void TestNavSwitchHandleFunc(const AbilityContextInfo& ctxInfo, NavDestinationSwitchInfo& switchInfo)
+    {
+        if (innerHandleFunc_) {
+            innerHandleFunc_(ctxInfo, switchInfo);
+        }
+    }
+    static SwitchHandleFunc innerHandleFunc_;
 };
+
+SwitchHandleFunc NavigationPatternTestFiveNg::innerHandleFunc_;
 
 void NavigationPatternTestFiveNg::RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width)
 {
@@ -891,5 +903,522 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded009, TestSize.L
     pattern->needSyncWithJsStack_ = true;
     pattern->ClearSecondaryNodesIfNeeded(std::move(preList));
     EXPECT_FALSE(pattern->needSyncWithJsStack_);
+}
+
+/**
+ * @tc.name: RecognizeHomePageIfNeeded001
+ * @tc.desc: Branch: if (!IsForceSplitSupported(context)) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, RecognizeHomePageIfNeeded001, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitSupported_ = false;
+
+    pattern->homeNode_ = nullptr;
+    pattern->RecognizeHomePageIfNeeded();
+    EXPECT_EQ(pattern->homeNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: RecognizeHomePageIfNeeded002
+ * @tc.desc: Branch: if (!IsForceSplitSupported(context)) { => false
+ *                   if (homeNode) { => true
+ *                   if (node == homeNode) { => true
+ *                   if (!homeNodeExistInCurStack) { => false
+ *                   if (homeNode) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, RecognizeHomePageIfNeeded002, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    manager->isForceSplitSupported_ = true;
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair);
+
+    pattern->homeNode_ = WeakPtr(dest);
+    pattern->RecognizeHomePageIfNeeded();
+    EXPECT_EQ(pattern->homeNode_.Upgrade(), dest);
+}
+
+/**
+ * @tc.name: RecognizeHomePageIfNeeded003
+ * @tc.desc: Branch: if (!IsForceSplitSupported(context)) { => false
+ *                   if (homeNode) { => false
+ *                   if (homeNode) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, RecognizeHomePageIfNeeded003, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.clear();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    manager->isForceSplitSupported_ = true;
+    pattern->homeNode_ = nullptr;
+    pattern->RecognizeHomePageIfNeeded();
+    EXPECT_EQ(pattern->homeNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: RecognizeHomePageIfNeeded004
+ * @tc.desc: Branch: if (!IsForceSplitSupported(context)) { => false
+ *                   if (homeNode) { => false
+ *                   if (homeNode) { => false
+ *                   if (ForceSplitUtils::IsNavDestinationHomePage(node)) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, RecognizeHomePageIfNeeded004, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    manager->isForceSplitSupported_ = true;
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair);
+
+    pattern->homeNode_ = nullptr;
+    pattern->RecognizeHomePageIfNeeded();
+    EXPECT_EQ(pattern->homeNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: RecognizeHomePageIfNeeded005
+ * @tc.desc: Branch: if (!IsForceSplitSupported(context)) { => false
+ *                   if (homeNode) { => false
+ *                   if (homeNode) { => false
+ *                   if (ForceSplitUtils::IsNavDestinationHomePage(node)) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, RecognizeHomePageIfNeeded005, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    manager->isForceSplitSupported_ = true;
+    manager->homePageName_ = "one";
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    auto destPattern = dest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(destPattern, nullptr);
+    destPattern->SetName("one");
+    dest->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair);
+
+    pattern->homeNode_ = nullptr;
+    pattern->RecognizeHomePageIfNeeded();
+    EXPECT_EQ(pattern->homeNode_.Upgrade(), dest);
+}
+
+/**
+ * @tc.name: RecognizeHomePageIfNeeded006
+ * @tc.desc: Branch: if (!IsForceSplitSupported(context)) { => false
+ *                   if (homeNode) { => true
+ *                   if (node == homeNode) { => false
+ *                   if (!homeNodeExistInCurStack) { => true
+ *                   if (homeNode) { => false
+ *                   if (ForceSplitUtils::IsNavDestinationHomePage(node)) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, RecognizeHomePageIfNeeded006, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    manager->isForceSplitSupported_ = true;
+
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair1{"one", dest1};
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair2{"two", dest2};
+    pattern->homeNode_ = WeakPtr(dest1);
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair2);
+
+    pattern->RecognizeHomePageIfNeeded();
+    EXPECT_EQ(pattern->homeNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: RecognizeHomePageIfNeeded007
+ * @tc.desc: Branch: if (!IsForceSplitSupported(context)) { => false
+ *                   if (homeNode) { => true
+ *                   if (node == homeNode) { => false
+ *                   if (!homeNodeExistInCurStack) { => true
+ *                   if (homeNode) { => false
+ *                   if (ForceSplitUtils::IsNavDestinationHomePage(node)) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, RecognizeHomePageIfNeeded007, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    manager->isForceSplitSupported_ = true;
+    manager->homePageName_ = "two";
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair1{"one", dest1};
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    auto destPattern2 = dest2->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(destPattern2, nullptr);
+    destPattern2->SetName("two");
+    std::pair<std::string, RefPtr<UINode>> testPair2{"two", dest2};
+    pattern->homeNode_ = WeakPtr(dest1);
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair2);
+
+    pattern->RecognizeHomePageIfNeeded();
+    EXPECT_EQ(pattern->homeNode_.Upgrade(), dest2);
+}
+
+/**
+ * @tc.name: CheckIfNeedHideOrShowPrimaryNodes001
+ * @tc.desc: Branch: if (!pattern->GetHomeNode()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, CheckIfNeedHideOrShowPrimaryNodes001, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->homeNode_ = nullptr;
+    EXPECT_FALSE(NavigationPattern::CheckIfNeedHideOrShowPrimaryNodes(pattern, 0));
+}
+
+/**
+ * @tc.name: CheckIfNeedHideOrShowPrimaryNodes002
+ * @tc.desc: Branch: if (!pattern->GetHomeNode()) { => false
+ *                   if (primaryNodes.empty()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, CheckIfNeedHideOrShowPrimaryNodes002, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    pattern->homeNode_ = WeakPtr(dest1);
+    pattern->primaryNodes_.clear();
+    EXPECT_FALSE(NavigationPattern::CheckIfNeedHideOrShowPrimaryNodes(pattern, 0));
+}
+
+/**
+ * @tc.name: CheckIfNeedHideOrShowPrimaryNodes003
+ * @tc.desc: Branch: if (!pattern->GetHomeNode()) { => false
+ *                   if (primaryNodes.empty()) { => false
+ *                   if (homeIndex >= lastStandardIndex) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, CheckIfNeedHideOrShowPrimaryNodes003, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    dest1->SetIndex(1);
+    pattern->homeNode_ = WeakPtr(dest1);
+    pattern->primaryNodes_.clear();
+    pattern->primaryNodes_.push_back(WeakPtr(dest1));
+    EXPECT_FALSE(NavigationPattern::CheckIfNeedHideOrShowPrimaryNodes(pattern, 0));
+}
+
+/**
+ * @tc.name: CheckIfNeedHideOrShowPrimaryNodes004
+ * @tc.desc: Branch: if (!pattern->GetHomeNode()) { => false
+ *                   if (primaryNodes.empty()) { => false
+ *                   if (homeIndex >= lastStandardIndex) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, CheckIfNeedHideOrShowPrimaryNodes004, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    dest1->SetIndex(1);
+    pattern->homeNode_ = WeakPtr(dest1);
+    pattern->primaryNodes_.clear();
+    pattern->primaryNodes_.push_back(WeakPtr(dest1));
+    EXPECT_TRUE(NavigationPattern::CheckIfNeedHideOrShowPrimaryNodes(pattern, 5));
+}
+
+/**
+ * @tc.name: NotifyNavDestinationSwitch001
+ * @tc.desc: Branch: if (IsForceSplitSupported(context) && forceSplitSuccess_ && from) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, NotifyNavDestinationSwitch001, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    auto destPattern = dest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(destPattern, nullptr);
+    auto destCtx = AceType::MakeRefPtr<NavDestinationContext>();
+    ASSERT_NE(destCtx, nullptr);
+    destPattern->SetNavDestinationContext(destCtx);
+
+    std::optional<NavDestinationState> fromState;
+    auto backupFunc = UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_;
+    UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_ =
+        NavigationPatternTestFiveNg::TestNavSwitchHandleFunc;
+    NavigationPatternTestFiveNg::innerHandleFunc_ =
+        [&fromState](const AbilityContextInfo& ctxInfo, NavDestinationSwitchInfo& switchInfo) {
+            fromState = std::nullopt;
+            if (switchInfo.from.has_value()) {
+                fromState = switchInfo.from.value().state;
+            }
+        };
+
+    manager->isForceSplitSupported_ = false;
+    fromState = std::nullopt;
+    pattern->NotifyNavDestinationSwitch(destCtx, nullptr, NavigationOperation::PUSH);
+    ASSERT_TRUE(fromState.has_value());
+    ASSERT_EQ(fromState.value(), NavDestinationState::ON_HIDDEN);
+
+    manager->isForceSplitSupported_ = true;
+    pattern->forceSplitSuccess_ = false;
+    fromState = std::nullopt;
+    pattern->NotifyNavDestinationSwitch(destCtx, nullptr, NavigationOperation::PUSH);
+    ASSERT_TRUE(fromState.has_value());
+    ASSERT_EQ(fromState.value(), NavDestinationState::ON_HIDDEN);
+
+    manager->isForceSplitSupported_ = true;
+    pattern->forceSplitSuccess_ = true;
+    fromState = std::nullopt;
+    pattern->NotifyNavDestinationSwitch(nullptr, nullptr, NavigationOperation::PUSH);
+    ASSERT_FALSE(fromState.has_value());
+
+    UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_ = backupFunc;
+}
+
+/**
+ * @tc.name: NotifyNavDestinationSwitch002
+ * @tc.desc: Branch: if (IsForceSplitSupported(context) && forceSplitSuccess_ && from) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, NotifyNavDestinationSwitch002, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    auto destPattern = dest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(destPattern, nullptr);
+    auto destCtx = AceType::MakeRefPtr<NavDestinationContext>();
+    ASSERT_NE(destCtx, nullptr);
+    destPattern->SetNavDestinationContext(destCtx);
+    destPattern->SetIsOnShow(true);
+
+    std::optional<NavDestinationState> fromState;
+    auto backupFunc = UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_;
+    UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_ =
+        NavigationPatternTestFiveNg::TestNavSwitchHandleFunc;
+    NavigationPatternTestFiveNg::innerHandleFunc_ =
+        [&fromState](const AbilityContextInfo& ctxInfo, NavDestinationSwitchInfo& switchInfo) {
+            fromState = std::nullopt;
+            if (switchInfo.from.has_value()) {
+                fromState = switchInfo.from.value().state;
+            }
+        };
+
+    manager->isForceSplitSupported_ = true;
+    pattern->forceSplitSuccess_ = true;
+    fromState = std::nullopt;
+    pattern->NotifyNavDestinationSwitch(destCtx, nullptr, NavigationOperation::PUSH);
+    ASSERT_TRUE(fromState.has_value());
+    ASSERT_EQ(fromState.value(), NavDestinationState::ON_SHOWN);
+
+    UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_ = backupFunc;
 }
 } // namespace OHOS::Ace::NG
