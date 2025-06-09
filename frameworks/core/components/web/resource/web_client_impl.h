@@ -197,6 +197,7 @@ public:
         bool isAlert,
         bool isUserTrigger,
         std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
+    void OnActivateContentByJS() override;
     void OnWindowExitByJS() override;
     void OnPageVisible(const std::string& url) override;
     void OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler) override;

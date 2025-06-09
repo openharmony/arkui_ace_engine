@@ -791,6 +791,18 @@ void WebModelNG::SetWindowNewEvent(std::function<void(const std::shared_ptr<Base
     webEventHub->SetOnWindowNewEvent(std::move(jsCallback));
 }
 
+void WebModelNG::SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnActivateContentEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;

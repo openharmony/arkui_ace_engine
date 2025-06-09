@@ -339,6 +339,17 @@ public:
         }
     }
 
+    void SetActivateContentEventId(const EventMarker& activateContentEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetActivateContentEventId(activateContentEventId);
+    }
+
+    const EventMarker& GetActivateContentEventId() const
+    {
+        return declaration_->GetActivateContentEventId();
+    }
+
     void SetWindowExitEventId(const EventMarker& windowExitEventId)
     {
         CHECK_NULL_VOID(declaration_);
