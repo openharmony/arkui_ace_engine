@@ -4046,9 +4046,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
+        WebModel::GetInstance()->SetDefaultBackgroundColor();
+    } else {
+        WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
     }
-    WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 void JSWeb::InitialScale(float scale)
