@@ -14,13 +14,14 @@
  */
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/property/templates_parser.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
 
@@ -150,7 +151,7 @@ void LazyGridLayoutAlgorithm::UpdateGap(const RefPtr<LazyGridLayoutProperty>& la
         cross.first = { crossSize_ };
     }
     crossLens_ = std::move(cross.first);
-    lanes_ = crossLens_.size();
+    lanes_ = static_cast<int32_t>(crossLens_.size());
     crossPos_.resize(lanes_);
     double crossPos = 0.0;
     int32_t index = 0;
