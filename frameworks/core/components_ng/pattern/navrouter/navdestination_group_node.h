@@ -172,6 +172,10 @@ public:
     void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
     void InitSystemTransitionPop(bool isTransitionIn);
     void StartSystemTransitionPop(bool transitionIn);
+    void InitSoftTransitionPush(bool transitionIn);
+    void StartSoftTransitionPush(bool transitionIn);
+    void InitSoftTransitionPop(bool isTransitionIn);
+    void StartSoftTransitionPop(bool transitionIn);
     bool CheckTransitionPop(const int32_t animationId);
     bool SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent = true);
     void InitDialogTransition(bool isZeroY);
