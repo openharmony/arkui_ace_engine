@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_COMPONENT_SNAPSHOT_ANI_MODIFIER
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_COMPONENT_SNAPSHOT_ANI_MODIFIER
 
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+#include "core/interfaces/ani/ani_api.h"
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { BusinessError } from "#external"
-export type ErrorCallback = (err: BusinessError) => void;
-export type AsyncCallback<T, E = void> = (err: BusinessError<E>, data: T)=> void;
+namespace OHOS::Ace::NG {
+const ArkUIAniComponentSnapshotModifier* GetComponentSnapshotAniModifier();
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_COMPONENT_SNAPSHOT_ANI_MODIFIER

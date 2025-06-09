@@ -14,6 +14,7 @@
  */
 
 #include "common_ani_modifier.h"
+#include "component_snapshot_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
 #include "web_ani_modifier.h"
@@ -32,6 +33,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getCustomNodeAniModifier = OHOS::Ace::NG::GetCustomNodeAniModifier,
         .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
+        .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
     };
     return &impl;
 }

@@ -132,6 +132,7 @@ template("ace_core_interfaces_native_node") {
 
     sources += [
       "ani/common_ani_modifier.cpp",
+      "ani/component_snapshot_ani_modifier.cpp",
       "ani/content_slot_ani_modifier.cpp",
       "ani/drag_ani_modifier.cpp",
       "ani/image_ani_modifier.cpp",

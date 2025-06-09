@@ -21,10 +21,11 @@ import { _animateTo } from "arkui/handwritten/ArkAnimation"
 import { AnimateParam } from 'arkui/component'
 import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
-    FrameCallback, UIInspector, UIObserver, PromptAction, AtomicServiceBar, Router, CursorController, MediaQuery }
+    FrameCallback, UIInspector, UIObserver, PromptAction, AtomicServiceBar, Router, CursorController, MediaQuery,
+    ComponentSnapshot }
     from "@ohos/arkui/UIContext"
 import { StateManager } from "@koalaui/runtime"
-import { Context, PointerStyle } from "#external"
+import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable } from "arkui/component/enums"
 import { KeyEvent } from "arkui/component/common"
 import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
@@ -44,11 +45,15 @@ import { TextMenuOptions } from "arkui/component/textCommon"
 import { focusController } from "@ohos/arkui/focusController"
 import { KeyProcessingMode } from "arkui/component/focus"
 import { componentUtils } from "@ohos/arkui/componentUtils"
+import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { UIContextDispatchKeyEvent, UIContextAtomicServiceBar } from "arkui/component/arkui-custom"
 import { Serializer } from "arkui/component/peers/Serializer"
 import { GlobalScopeUicontextFontScale, GlobalScopeUicontextTextMenu } from "arkui/component/arkui-uicontext-text-utils"
 import { GlobalScope } from "arkui/component/GlobalScope"
 import { mediaquery } from '@ohos/mediaquery'
+import { AsyncCallback, CustomBuilder, ArkComponentRootPeer } from 'arkui/component'
+import { createUiDetachedRoot, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
+import { PeerNode } from 'arkui/PeerNode'
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -204,6 +209,83 @@ export class ComponentUtilsImpl extends ComponentUtils {
     }
 }
 
+export class ComponentSnapshotImpl extends ComponentSnapshot {
+    instanceId_: int32
+    constructor(instanceId: int32) {
+        super()
+        this.instanceId_ = instanceId;
+    }
+
+    //@ts-ignore
+    public get(id: string, callback: AsyncCallback<PixelMap>, options?: componentSnapshot.SnapshotOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        componentSnapshot.get(id, callback, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    // @ts-ignore
+    public get(id: string, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let pixmap = componentSnapshot.get(id, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
+
+    // @ts-ignore
+    public createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<PixelMap>,
+                             delay?: number, checkImageStatus?: boolean,
+                             options?: componentSnapshot.SnapshotOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const peerNode = createUiDetachedRoot((): PeerNode => {
+            return ArkComponentRootPeer.create(undefined);
+        }, builder);
+        let rootNode = peerNode.peer.ptr;
+        const destroyCallback = (): void => {
+            destroyUiDetachedRoot(peerNode);
+        }
+        ArkUIAniModule._ComponentSnapshot_createFromBuilderWithCallback(
+            rootNode, destroyCallback, callback, delay, checkImageStatus);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    // @ts-ignore
+    public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
+                             options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const peerNode = createUiDetachedRoot((): PeerNode => {
+            return ArkComponentRootPeer.create(undefined);
+        }, builder);
+        let rootNode = peerNode.peer.ptr;
+        const destroyCallback = (): void => {
+            destroyUiDetachedRoot(peerNode);
+        }
+        let pixmap = ArkUIAniModule._ComponentSnapshot_createFromBuilderWithPromise(
+            rootNode, destroyCallback, delay, checkImageStatus);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
+
+    public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let pixmap = componentSnapshot.getSync(id, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
+    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let pixmap = componentSnapshot.getWithUniqueId(uniqueId, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
+
+    public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let pixmap = componentSnapshot.getSyncWithUniqueId(uniqueId, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
+}
+
 export class RouterImpl extends Router {
     public pushUrl(options: router.RouterOptions): Promise<void> {
         return new Promise<void>((resolve, reject) => {
@@ -275,6 +357,7 @@ export class UIContextImpl extends UIContext {
     router_: Router = new RouterImpl()
     focusController_: FocusControllerImpl;
     componentUtils_: ComponentUtilsImpl;
+    componentSnapshot_: ComponentSnapshotImpl;
     atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspectorImpl | null = null;
     contextMenuController_: ContextMenuControllerImpl;
@@ -289,6 +372,7 @@ export class UIContextImpl extends UIContext {
         this.instanceId_ = instanceId;
         this.focusController_ = new FocusControllerImpl(instanceId);
         this.componentUtils_ = new ComponentUtilsImpl(instanceId);
+        this.componentSnapshot_ = new ComponentSnapshotImpl(instanceId);
         this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
         this.contextMenuController_ = new ContextMenuControllerImpl(instanceId);
         this.cursorController_ = new CursorControllerImpl(instanceId);
@@ -402,6 +486,10 @@ export class UIContextImpl extends UIContext {
 
     public getComponentUtils(): ComponentUtils {
         return this.componentUtils_;
+    }
+
+    public getComponentSnapshot(): ComponentSnapshot {
+        return this.componentSnapshot_;
     }
 
     public getCursorController(): CursorController {
