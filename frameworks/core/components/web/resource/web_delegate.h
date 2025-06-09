@@ -859,6 +859,7 @@ public:
     void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
+    void UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled);
     void UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);

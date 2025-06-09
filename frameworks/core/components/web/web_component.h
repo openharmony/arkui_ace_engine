@@ -676,6 +676,11 @@ public:
         isIntrinsicSize_ = isEnabled;
     }
 
+    void SetCssDisplayChangeEnabled(bool isEnabled)
+    {
+        isCssDisplayChangeEnabled_ = isEnabled;
+    }
+
     const std::tuple<bool, bool>& GetNativeVideoPlayerConfig() const
     {
         return native_video_player_config_;
@@ -1226,6 +1231,7 @@ private:
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
     bool isIntrinsicSize_ = false;
+    bool isCssDisplayChangeEnabled_ = false;
     std::string tag_;
     std::string tag_type_;
     OnDragFunc onDragStartId_;
