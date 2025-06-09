@@ -14490,7 +14490,13 @@ class TextAreaCaretStyleModifier extends ModifierWithKey {
         }
     }
     checkObjectDiff() {
-        return this.stageValue !== this.value;
+      if (isObject(this.stageValue) && isObject(this.value)) {
+        return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+          !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+      }
+      else {
+        return true;
+      }
     }
 }
 TextAreaCaretStyleModifier.identity = Symbol('textAreaCaretStyle');
