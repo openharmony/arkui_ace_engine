@@ -364,6 +364,12 @@ void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
     if (callback_) {
         callback_->OnReceiveValue(result);
     }
+    auto delegate = delegate_.Upgrade();
+    if (!delegate) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "HandleFileList SetFileSelectorClosed Failed");
+        return;
+    }
+    delegate->SetIsFileSelectorShow(false);
 }
 
 void WebPermissionRequestOhos::Deny() const
@@ -5809,6 +5815,7 @@ bool WebDelegate::OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info)
 
     if (!result) {
         TAG_LOGI(AceLogTag::ACE_WEB, "default file selector show handled");
+        isFileSelectorShow_ = true;
         auto jsTaskExecutor = SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
         jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
             auto delegate = weak.Upgrade();
