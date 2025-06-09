@@ -1950,6 +1950,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest027, TestSize.Level1)
     /**
      * @tc.steps: step2. set attribute and call function.
      */
+    sliderPattern->endsInitFlag_ = false;
     RefPtr<NG::UINode> prefix;
     prefix = NG::ViewStackProcessor::GetInstance()->Finish();
     SliderPrefixOptions options;
@@ -1963,10 +1964,13 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest027, TestSize.Level1)
     sliderPattern->SetSuffix(suffix, SuffixOptions);
 
     ASSERT_TRUE(sliderPattern->suffixNodeStack_);
+    
+    sliderPattern->CreateNodePaintMethod();
 
     /**
      * @tc.steps: step3. Check the param value.
      */
+    EXPECT_EQ(sliderPattern->endsInitFlag_, true);
     EXPECT_EQ(sliderPattern->prefixNodeStack_->GetChildren().size(), 1);
     EXPECT_EQ(sliderPattern->prefixNodeStack_->GetChildren().front(), prefix);
     EXPECT_EQ(sliderPattern->suffixNodeStack_->GetChildren().size(), 1);
@@ -2182,6 +2186,39 @@ HWTEST_F(SliderPatternTestNg, PlayHapticFeedbackTest001, TestSize.Level1)
     sliderPattern->valueRatio_ = 1.0f;
     sliderPattern->PlayHapticFeedback(true);
     EXPECT_TRUE(sliderPattern->isEnableHaptic_);
+}
+
+/**
+ * @tc.name: SliderPatternTest032
+ * @tc.desc: SliderPattern::CreateNodePaintMethod&endsInitFlag_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    sliderPattern->endsInitFlag_ = false;
+    sliderPattern->CreateNodePaintMethod();
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_EQ(sliderPattern->endsInitFlag_, false);
 }
 
 /**
