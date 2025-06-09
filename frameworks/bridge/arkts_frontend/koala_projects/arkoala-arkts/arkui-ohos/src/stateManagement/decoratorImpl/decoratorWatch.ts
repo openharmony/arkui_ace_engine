@@ -12,11 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { int32 } from "@koalaui/common";
-
-export type WatchFuncType = ((propertyName: string) => void);
-
-export type WatchIdType = int32;
+import { WatchFuncType, WatchIdType, ISubscribedWatches } from "../decorator";
+import { StateMgmtConsole } from "../tools/stateMgmtDFX";
 
 // WatchFunc: Representaton of a @Watch function isnide V1 decorator class
 export class WatchFunc {
@@ -70,10 +67,10 @@ export class WatchFunc {
     // register to given object 
     // when object changes it will call Execute 
     // for each subscriber
-    registerMeTo(obj: IWatchTrigger) {
+    registerMeTo(obj: ISubscribedWatches) {
         obj.addWatchSubscriber(this.id_);
     }
-    unregisterMeFrom(obj: IWatchTrigger) {
+    unregisterMeFrom(obj: ISubscribedWatches) {
         obj.removeWatchSubscriber(this.id_);
     }
     execute(propertyName: string): void {
@@ -81,14 +78,8 @@ export class WatchFunc {
     }
 }
 
-export interface IWatchTrigger {
-    addWatchSubscriber(watchId: WatchIdType): void;
-    removeWatchSubscriber(watchId: WatchIdType): boolean;
-    executeOnSubscribingWatches(propertyName: string): void;
-}
-
 // IObserveObject object instances also need to implement WatchTrigger
-export class SubscribedWatches implements IWatchTrigger {
+export class SubscribedWatches implements ISubscribedWatches {
     private subscribers_: Set<WatchIdType> = new Set<WatchIdType>();
     public addWatchSubscriber(id: WatchIdType): void {
         this.subscribers_.add(id);

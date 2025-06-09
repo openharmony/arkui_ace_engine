@@ -15,17 +15,22 @@
 
 import { int32 } from '@koalaui/common';
 import { MutableState, mutableState } from '@koalaui/runtime';
-
+import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
+import { RenderIdType } from '../decorator';
+import { ObserveSingleton } from './observeSingleton';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 class MutableStateMetaBase {
-    public readonly decorator: string;
+    public readonly info_: string;
 
-    constructor(decorator: string) {
-        this.decorator = decorator;
+    constructor(info: string) {
+        this.info_ = info;
     }
 }
 
-
+export interface IBindingSource {
+    clearBinding(id: RenderIdType): void;
+}
 /**
 * manage one meta MutableState
 * 
@@ -33,55 +38,68 @@ class MutableStateMetaBase {
 * addRef(obj, propName) records dependency, 
 * fireChange(obj, propName) marks all dependencies for this prop need update
 */
-export class MutableStateMeta extends MutableStateMetaBase {
+export class MutableStateMeta extends MutableStateMetaBase implements IMutableStateMeta, IBindingSource {
     // meta MutableState to record dependencies in addRef
     // and mutate in fireChange
-    private __metaDependency: MutableState<int32> = mutableState<int32>(0);
+    protected __metaDependency: MutableState<int32> = mutableState<int32>(0);
+    private bindings_?: Set<RenderIdType>;
 
-    constructor(decorator: string) {
-        super(decorator);
+    constructor(info: string) {
+        super(info);
     }
 
     public addRef(): void {
-        this.__metaDependency.value;
+        if (false) {
+            // for Monitor & Computed
+        } else {
+            this.__metaDependency!.value;
+        }
     }
 
     public fireChange(): void {
-        this.__metaDependency.value += 1;
+        if (this.bindings_) {
+            // for Monitor & Computed
+        }
+        this.__metaDependency!.value += 1;
+    }
+
+    clearBinding(id: RenderIdType): void {
+        this.bindings_?.delete(id);
     }
 }
 
-/**
-* manage several meta MutableState
-* This class is used by WrappedArray/Map/Set
-* to record dependency for each Array item, map, Set entry
-* 
-* V2 equivalent: sym_ref sub-object
-* addRef(obj, propName) records dependency on given propName
-* fireChange(obj, propName) marks all dependencies for this prop need update
-*/
-export class MutableKeyedStateMeta extends MutableStateMetaBase {
-    public static readonly OB_LENGTH = "__OB_LENGTH";
-    private readonly __metaDependencies = new Map<string, MutableState<int32>>();
+export class MutableKeyedStateMeta extends MutableStateMetaBase
+    implements IMutableKeyedStateMeta {
 
+    protected readonly __metaDependencies = new Map<string, MutableStateMeta>();
+
+    constructor(info: string = "") {
+        super(info);
+    }
 
     public addRef(key: string): void {
-        let metaDependency: MutableState<int32> | undefined = this.__metaDependencies.get(key);
+        let metaDependency: MutableStateMeta | undefined = this.__metaDependencies.get(key);
         if (!metaDependency) {
-            metaDependency = mutableState<int32>(0);
+            metaDependency = new MutableStateMeta(key); // incremental engine does not allow create mutableState while building tree
             this.__metaDependencies.set(key, metaDependency);
         }
-        metaDependency.value;
+        metaDependency.addRef();
     }
 
+    // public addRef(index: int32): void {
+    //     // FIXME is there a faster way to convert int32 to string?
+    //     this.addRef(String(index));
+    // }
+
     public fireChange(key: string): void {
-        let metaDependency: MutableState<int32> | undefined = this.__metaDependencies.get(key);
+        let metaDependency: MutableStateMeta | undefined = this.__metaDependencies.get(key);
         if (metaDependency) {
-            metaDependency.value += 1;
+            metaDependency.fireChange();
         }
     }
 
-    constructor(decorator: string) {
-        super(decorator);
-    }
+    // public fireChange(index: int32): void {
+    //     // FIXME is there a faster way to convert int32 to string?
+    //     this.fireChange(String(index));
+    // }
 }

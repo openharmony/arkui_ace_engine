@@ -22,7 +22,7 @@ from collections import defaultdict
 def get_ts_files(directory):
     return set(
         f for f in os.listdir(directory)
-        if os.path.isfile(os.path.join(directory, f)) and f.endswith('.ts')
+        if os.path.isfile(os.path.join(directory, f)) and f.endswith(('.ts', '.ets'))
     )
 
 

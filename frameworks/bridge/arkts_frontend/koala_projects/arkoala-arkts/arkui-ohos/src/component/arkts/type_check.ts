@@ -160,7 +160,6 @@ import { MenuItemOptions } from "./../menuItem"
 import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
-import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
 import promptAction from '@ohos/promptAction'
 import { PointerStyle } from '#external'
 export class TypeChecker {
@@ -5689,12 +5688,6 @@ export class TypeChecker {
     }
     static isArray_CustomObject(value: Object | string | number | undefined): boolean {
         return value instanceof Array<number>
-    }
-    static isIObservedObject<T>(value: T): boolean {
-        return value instanceof IObservedObject;
-    }
-    static isIWatchTrigger<T>(value: T): boolean {
-        return value instanceof IWatchTrigger;
     }
     static isPopupButton(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PopupButton

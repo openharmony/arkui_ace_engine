@@ -158,7 +158,6 @@ import { MenuItemOptions } from "./../menuItem"
 import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
-import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
 import { PointerStyle } from '#external'
 import promptAction from "@ohos/promptAction"
 
@@ -21713,12 +21712,6 @@ export class TypeChecker {
     }
     static isArray_CustomObject(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
-    }
-    static isIObservedObject<T>(value: T): boolean {
-        return true;
-    }
-    static isIWatchTrigger<T>(value: T): boolean {
-        return true;
     }
     static isPopupButton(value: Object | string | number | undefined | boolean, duplicated_value: boolean, duplicated_action: boolean): boolean {
         if ((!duplicated_value) && (value?.hasOwnProperty("value"))) {

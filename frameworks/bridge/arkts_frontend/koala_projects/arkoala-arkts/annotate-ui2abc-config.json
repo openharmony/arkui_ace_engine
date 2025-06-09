@@ -10,7 +10,8 @@
 		"./arkui-ohos/src/component/ts/*.ts",
 		"./arkui-ohos/src/stateManagement/runtime/index-ts.ts",
 		"./arkui-ohos/src/external/ts/**/*.ts",
-		"./arkui-ohos/build/**/*.ts"
+		"./arkui-ohos/build/**/*.ts",
+		"./arkui-ohos/src/stateManagement/tools/ts/*.ts"
 	],
 	"fileExtension": ".ets"
 }
