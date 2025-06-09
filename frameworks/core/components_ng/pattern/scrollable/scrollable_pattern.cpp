@@ -2326,7 +2326,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     offset -= overOffset;
     auto result = parent->HandleScroll(overOffset + remainOffset, source, NestedState::CHILD_SCROLL, GetVelocity());
     if (NearZero(result.remain)) {
-        SetCanOverScroll(!InstanceOf<ScrollablePattern>(parent) || result.reachEdge);
+        SetCanOverScroll(!InstanceOf<ScrollablePattern>(parent) || result.reachEdge || IsEnablePagingValid());
         return { 0, GetCanOverScroll() };
     }
     if (state == NestedState::CHILD_SCROLL) {
@@ -2352,7 +2352,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
     remainOffset += overOffset;
     if (NearZero(remainOffset)) {
         SetCanOverScroll(false);
-        return { 0, IsEnablePagingValid() };
+        return { 0, false };
     }
     bool canOverScroll = false;
     if (state == NestedState::CHILD_SCROLL) {
