@@ -48,7 +48,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     ani_class cls;
-    auto ani_status = env->FindClass("Larkui/ani/ArkUIAniModule/ArkUIAniModule;", &cls);
+    auto ani_status = env->FindClass("Larkui/ani/arkts/ArkUIAniModule/ArkUIAniModule;", &cls);
     if (ani_status != ANI_OK) {
         return ANI_ERROR;
     }
