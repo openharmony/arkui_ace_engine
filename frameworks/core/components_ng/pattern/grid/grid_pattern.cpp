@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
-const std::string WHITE_BLOCK_PARAM = "performance.enhance.whiteblock";
+const std::string WHITE_BLOCK_PARAM = "presist.resourceschedule.whiteblock";
 const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
 const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
 const int32_t MAX_NUM_SIZE = 4;

@@ -26,11 +26,11 @@ public:
     WhiteBlockManager() = default;
     ~WhiteBlockManager() = default;
     ScrollState ChangeScrollStateIfNeed(ScrollState scrollState);
-    int32_t AdjustEndIndex(int32_t endIndex)
-    int32_t AdjustCachedCount(int32_t cachedCount)
+    int32_t AdjustEndIndex(int32_t endIndex);
+    int32_t AdjustCachedCount(int32_t cachedCount);
 private:
     bool idle_ = true;
     bool GetSwitch();
 };
 } //namespace OHOS::ACE:NG
-#endif FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_WHITEBLOCK_WHITEBLOCK_MANAGER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_WHITEBLOCK_WHITEBLOCK_MANAGER_H

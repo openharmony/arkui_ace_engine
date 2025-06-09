@@ -65,7 +65,7 @@ const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
 const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
 const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
-const std::string WHITE_BLOCK_PARAM = "performance.enhance.whiteblock";
+const std::string WHITE_BLOCK_PARAM = "presist.resourceschedule.whiteblock";
 const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
 const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
 } // namespace

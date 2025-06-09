@@ -49,7 +49,7 @@ constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr int DEFAULT_HEADER_VALUE = 2;
 constexpr int DEFAULT_FOOTER_VALUE = 3;
-const std::string WHITE_BLOCK_PARAM = "performance.enhance.whiteblock";
+const std::string WHITE_BLOCK_PARAM = "presist.resourceschedule.whiteblock";
 const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
 const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
 #ifdef SUPPORT_DIGITAL_CROWN
