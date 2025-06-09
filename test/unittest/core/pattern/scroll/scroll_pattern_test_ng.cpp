@@ -911,7 +911,7 @@ HWTEST_F(ScrollPatternTestNg, GetChildrenExpandedSize01, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
     frameNode->layoutProperty_ = layoutProperty;
@@ -934,7 +934,7 @@ HWTEST_F(ScrollPatternTestNg, GetChildrenExpandedSize02, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
     frameNode->layoutProperty_ = layoutProperty;
@@ -957,7 +957,7 @@ HWTEST_F(ScrollPatternTestNg, GetChildrenExpandedSize03, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
     frameNode->layoutProperty_ = layoutProperty;
@@ -980,7 +980,7 @@ HWTEST_F(ScrollPatternTestNg, GetChildrenExpandedSize04, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
     frameNode->layoutProperty_ = layoutProperty;
@@ -1004,7 +1004,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval001, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(2.0f, 4.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1034,7 +1034,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval002, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(2.0f, 4.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1064,7 +1064,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval003, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(2.0f, 4.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1094,7 +1094,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval004, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(5.0f, 1.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1124,7 +1124,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval005, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(5.0f, 1.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1154,7 +1154,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval006, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(5.0f, 1.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1184,7 +1184,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval007, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(5.0f, 1.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1214,7 +1214,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval008, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(5.0f, 1.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1244,7 +1244,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval009, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(5.0f, 1.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1274,7 +1274,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval010, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(5.0f, 1.0f);
     scrollPattern->viewPort_ = viewPort;
@@ -1306,7 +1306,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval011, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     SizeF viewPort(5.0f, 1.0f);
     scrollPattern->viewPort_ = viewPort;
