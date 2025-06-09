@@ -744,6 +744,16 @@ void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonSty
 }
 
 template<>
+void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit& src)
+{
+    switch (src) {
+        case ARK_LENGTH_METRICS_UNIT_DEFAULT: dst = Ace::CanvasUnit::DEFAULT ; break;
+        case ARK_LENGTH_METRICS_UNIT_PX: dst = Ace::CanvasUnit::PX; break;
+        default: LOGE("Unexpected enum value in Ark_LengthMetricsUnit: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src)
 {
     switch (src) {

@@ -170,7 +170,7 @@ HWTEST_F(FormComponentModifierTest, setSizeTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setSizeTestSizeWidthValidValues, TestSize.Level1)
 {
     Ark_SizeOptions initValueSize;
 
@@ -201,7 +201,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeHeightValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setSizeTestSizeHeightValidValues, TestSize.Level1)
 {
     Ark_SizeOptions initValueSize;
     // Initial setup
