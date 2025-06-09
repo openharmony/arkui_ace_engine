@@ -247,4 +247,38 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea002, TestSize.Level1)
     EXPECT_EQ(frameNode->GetChildByIndex(EIGHTH_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 124.0f);
     EXPECT_EQ(frameNode->GetChildByIndex(EIGHTH_CHILD)->GetGeometryNode()->GetFrameOffset().GetY(), 310.0f);
 }
+
+/**
+ * @tc.name: Create001
+ * @tc.desc: Test Create001 of GridRow
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowBaseTestNG, Create001, TestSize.Level1)
+{
+    GridRowModelNG gridRowModelNG;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    auto gutter = AceType::MakeRefPtr<V2::Gutter>();
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+        Dimension dimen(2.0);
+        gutter->xXs = dimen;
+    };
+    gutter->AddResource("gridrow.gutter.xXs", resObj, std::move(updateFunc));
+    auto col = Referenced::MakeRefPtr<V2::GridContainerSize>(NG::DEFAULT_COLUMN_NUMBER);
+    auto breakpoints = Referenced::MakeRefPtr<V2::BreakPoints>();
+    auto direction = V2::GridRowDirection::Row;
+    gridRowModelNG.Create(col, gutter, breakpoints, direction);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridRowLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnColorModeChange(1);
+    pattern->RemoveResObj("gridrow.gutter");
+    auto layoutProperty = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto gutterValue = layoutProperty->GetGutterValue();
+    Dimension dimen(2.0);
+    EXPECT_EQ(gutterValue.xXs, dimen);
+}
 } // namespace OHOS::Ace::NG

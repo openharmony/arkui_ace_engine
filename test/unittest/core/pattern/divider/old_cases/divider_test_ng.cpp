@@ -329,14 +329,17 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest004, TestSize.Level1)
  */
 HWTEST_F(DividerTestNg, ResObjDividerColorTest1, TestSize.Level1)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<Pattern>();
-    CHECK_NULL_VOID(pattern);
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
-    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
-    updateFunc(resObj);
-    pattern->AddResObj("divider.Color", resObj, std::move(updateFunc));
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.vertical = VERTICAL_TRUE;
+    auto frameNode = CreateDividerNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DividerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    DividerModelNG dividerModelNG;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    dividerModelNG.DividerColor(resObj);
     std::string divider = pattern->GetResCacheMapByKey("divider.Color");
     EXPECT_EQ(divider, "");
 }

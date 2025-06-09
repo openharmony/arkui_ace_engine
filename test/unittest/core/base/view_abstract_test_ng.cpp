@@ -14,8 +14,10 @@
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "test/mock/base/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2418,7 +2420,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0045, TestSize.Level1)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
     updateFunc(resObj);
     pattern->AddResObj("foregroundColor", resObj, std::move(updateFunc));
@@ -2469,6 +2471,999 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0047, TestSize.Level1)
     Gradient result = ViewAbstract::GetSweepGradient(AceType::RawPtr(FRAME_NODE_REGISTER));
     EXPECT_EQ(result.GetColors().front().GetColor().GetColorSpace(), p3Red.GetColorSpace());
     EXPECT_EQ(result.GetColors().back().GetColor().GetColorSpace(), p3Blue.GetColorSpace());
+}
+
+/**
+ * @tc.name: SetLinearGradient
+ * @tc.desc: Test SetLinearGradient of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0048, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    NG::Gradient gradient;
+    ViewAbstract::SetLinearGradient(gradient);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string gradientStr = pattern->GetResCacheMapByKey("LinearGradient.gradient");
+    EXPECT_EQ(gradientStr, "");
+}
+
+/**
+ * @tc.name: CreateWithForegroundColorResourceObj
+ * @tc.desc: Test CreateWithForegroundColorResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0049, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string foregroundColor = pattern->GetResCacheMapByKey("foregroundColor");
+    EXPECT_EQ(foregroundColor, "");
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::CreateWithForegroundColorResourceObj(resObj);
+    Color result;
+    ResourceParseUtils::ParseResColor(resObj, result);
+    foregroundColor = pattern->GetResCacheMapByKey("foregroundColor");
+    EXPECT_EQ(foregroundColor, result.ColorToString());
+}
+
+/**
+ * @tc.name: CreateWithOuterBorderColorResourceObj
+ * @tc.desc: Test CreateWithOuterBorderColorResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0050, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string colorStr = pattern->GetResCacheMapByKey("outerBorderColorRes");
+    EXPECT_EQ(colorStr, "");
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::CreateWithOuterBorderColorResourceObj(resObj);
+    Color result;
+    ResourceParseUtils::ParseResColor(resObj, result);
+    colorStr = pattern->GetResCacheMapByKey("outerBorderColorRes");
+    EXPECT_EQ(colorStr, result.ColorToString());
+}
+
+/**
+ * @tc.name: CreateWithOuterBorderRadiusResourceObj
+ * @tc.desc: Test CreateWithOuterBorderRadiusResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0051, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string radiusStr = pattern->GetResCacheMapByKey("outerBorderRadiusRes");
+    EXPECT_EQ(radiusStr, "");
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::CreateWithOuterBorderRadiusResourceObj(resObj);
+    CalcDimension result;
+    ResourceParseUtils::ParseResDimensionVp(resObj, result);
+    radiusStr = pattern->GetResCacheMapByKey("outerBorderRadiusRes");
+    EXPECT_EQ(radiusStr, result.ToString());
+}
+
+/**
+ * @tc.name: CreateWithLightColorResourceObj
+ * @tc.desc: Test CreateWithLightColorResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0052, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string colorStr = pattern->GetResCacheMapByKey("LightColorRes");
+    EXPECT_EQ(colorStr, "");
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::CreateWithLightColorResourceObj(resObj);
+    Color result;
+    ResourceParseUtils::ParseResColor(resObj, result);
+    colorStr = pattern->GetResCacheMapByKey("LightColorRes");
+    EXPECT_EQ(colorStr, result.ColorToString());
+}
+
+/**
+ * @tc.name: CreateWithOuterBorderWidthResourceObj
+ * @tc.desc: Test CreateWithOuterBorderWidthResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0053, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string widthStr = pattern->GetResCacheMapByKey("outerBorderWidthRes");
+    EXPECT_EQ(widthStr, "");
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::CreateWithOuterBorderWidthResourceObj(resObj);
+    CalcDimension result;
+    ResourceParseUtils::ParseResDimensionVp(resObj, result);
+    widthStr = pattern->GetResCacheMapByKey("outerBorderWidthRes");
+    EXPECT_EQ(widthStr, result.ToString());
+}
+
+/**
+ * @tc.name: CreateWithColorBlendResourceObj
+ * @tc.desc: Test CreateWithColorBlendResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0054, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string colorStr = pattern->GetResCacheMapByKey("viewAbstract.colorBlend");
+    EXPECT_EQ(colorStr, "");
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::CreateWithColorBlendResourceObj(resObj);
+    Color result;
+    ResourceParseUtils::ParseResColor(resObj, result);
+    colorStr = pattern->GetResCacheMapByKey("viewAbstract.colorBlend");
+    EXPECT_EQ(colorStr, result.ToString());
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+}
+
+/**
+ * @tc.name: CreateWithOpacityResourceObj
+ * @tc.desc: Test CreateWithOpacityResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0055, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string opacityStr = pattern->GetResCacheMapByKey("viewAbstract.opacity");
+    EXPECT_EQ(opacityStr, "");
+    std::string bundleName = "app.float.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+
+    ViewAbstract::CreateWithOpacityResourceObj(resObj);
+    double result;
+    ResourceParseUtils::ParseResDouble(resObj, result);
+    opacityStr = pattern->GetResCacheMapByKey("viewAbstract.opacity");
+    EXPECT_EQ(opacityStr, std::to_string(result));
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+}
+
+/**
+ * @tc.name: SetSweepGradient
+ * @tc.desc: Test SetSweepGradient of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0056, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    ViewAbstract::SetSweepGradient(gradient);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string gradientStr = pattern->GetResCacheMapByKey("SweepGradient.gradient");
+    EXPECT_EQ(gradientStr, "");
+}
+
+/**
+ * @tc.name: SetRadialGradient
+ * @tc.desc: Test SetRadialGradient of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0057, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    ViewAbstract::SetRadialGradient(gradient);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string gradientStr = pattern->GetResCacheMapByKey("RadialGradient.gradient");
+    EXPECT_EQ(gradientStr, "");
+}
+
+/**
+ * @tc.name: SetClipShape
+ * @tc.desc: Test SetClipShape of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0058, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetClipEdge(frameNode, true);
+    auto basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::CIRCLE);
+    ViewAbstract::SetClipShape(basicShape);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string shapeStr = pattern->GetResCacheMapByKey("clipShape");
+    EXPECT_EQ(shapeStr, "");
+}
+
+/**
+ * @tc.name: SetBackgroundBlurStyle
+ * @tc.desc: Test SetBackgroundBlurStyle of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0059, TestSize.Level1)
+{
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    blurStyleOption.colorMode = ThemeColorMode::SYSTEM;
+    blurStyleOption.adaptiveColor = AdaptiveColor::DEFAULT;
+    blurStyleOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetBackgroundBlurStyle(blurStyleOption);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    
+    std::string blurStyleStr = pattern->GetResCacheMapByKey("backgroundBlurStyle.backgroundBlurStyleOptions");
+    EXPECT_EQ(blurStyleStr, "");
+}
+
+/**
+ * @tc.name: SetBackgroundEffect
+ * @tc.desc: Test SetBackgroundEffect of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0060, TestSize.Level1)
+{
+    EffectOption option;
+    Color color = Color::TRANSPARENT;
+    option.color = color;
+    option.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetBackgroundEffect(option);
+    
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string effectStr = pattern->GetResCacheMapByKey("backgroundEffect");
+    EXPECT_EQ(effectStr, "");
+}
+
+/**
+ * @tc.name: SetPixelStretchEffect
+ * @tc.desc: Test SetPixelStretchEffect of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0061, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    PixStretchEffectOption option;
+    option.ResetValue();
+    ViewAbstract::SetPixelStretchEffect(option);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string effectStr = pattern->GetResCacheMapByKey("pixelStretchEffect");
+    EXPECT_EQ(effectStr, "");
+}
+
+/**
+ * @tc.name: SetOuterBorderRadius
+ * @tc.desc: Test SetOuterBorderRadius of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0062, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.multiValued = true;
+    ViewAbstract::SetOuterBorderRadius(borderRadius);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string borderRadiusStr = pattern->GetResCacheMapByKey("outerBorderRadius");
+    EXPECT_EQ(borderRadiusStr, "");
+}
+
+/**
+ * @tc.name: SetOuterBorderColor
+ * @tc.desc: Test SetOuterBorderColor of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0063, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    BorderColorProperty borderColor;
+    ViewAbstract::SetOuterBorderColor(borderColor);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string borderColorStr = pattern->GetResCacheMapByKey("outerBorderColor");
+    EXPECT_EQ(borderColorStr, "");
+}
+
+/**
+ * @tc.name: SetOuterBorderWidth
+ * @tc.desc: Test SetOuterBorderWidth of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0064, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    BorderWidthProperty borderWidth;
+    ViewAbstract::SetOuterBorderWidth(borderWidth);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string borderWidthStr = pattern->GetResCacheMapByKey("outerBorderWidth");
+    EXPECT_EQ(borderWidthStr, "");
+}
+
+/**
+ * @tc.name: SetProgressMask
+ * @tc.desc: Test SetProgressMask of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0065, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    RefPtr<BasicShape> basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::CIRCLE);
+    RefPtr<NG::ProgressMaskProperty> progressMaskProperty = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+    progressMaskProperty->SetMaxValue(200.0f);
+    progressMaskProperty->SetColor(Color(0xffff0000));
+    progressMaskProperty->SetValue(1.0f);
+    auto target = frameNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    target->UpdateClipMask(basicShape);
+    ViewAbstract::SetProgressMask(progressMaskProperty);
+
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string maskShape = pattern->GetResCacheMapByKey("ProgressMask");
+    EXPECT_EQ(maskShape, "");
+}
+
+/**
+ * @tc.name: SetLightPosition
+ * @tc.desc: Test SetLightPosition of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0066, TestSize.Level1)
+{
+    NG::TranslateOptions option;
+    CalcDimension dimPositionX(30, DimensionUnit::VP);
+    CalcDimension dimPositionY(20, DimensionUnit::VP);
+    CalcDimension dimPositionZ(10, DimensionUnit::VP);
+    option.x = dimPositionX;
+    option.y = dimPositionY;
+    option.z = dimPositionZ;
+    g_isConfigChangePerform = true;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    ViewAbstract::SetLightPosition(option);
+    bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
+    EXPECT_TRUE(result);
+
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    std::string lightSource = pattern->GetResCacheMapByKey("pointLight.LightSource");
+    EXPECT_EQ(lightSource, "");
+
+    auto state = static_cast<VisualState>(INDEX);
+    ViewStackProcessor::GetInstance()->SetVisualState(state);
+    ViewStackProcessor::GetInstance()->ClearStack();
+    ViewAbstract::SetLightPosition(option);
+    g_isConfigChangePerform = false;
+    result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetBackShadow
+ * @tc.desc: Test SetBackShadow of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0067, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    Shadow shadow;
+    ViewAbstract::SetBackShadow(shadow);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string shadowStr = pattern->GetResCacheMapByKey("shadow");
+    EXPECT_EQ(shadowStr, "");
+}
+
+/**
+ * @tc.name: SetMask
+ * @tc.desc: Test SetMask of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0068, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<BasicShape> basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::CIRCLE);
+    RefPtr<NG::ProgressMaskProperty> progressMaskProperty = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+    progressMaskProperty->SetMaxValue(200.0f);
+    progressMaskProperty->SetColor(Color(0xffff0000));
+    progressMaskProperty->SetValue(1.0f);
+    auto target = frameNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    ViewAbstract::SetProgressMask(frameNode, progressMaskProperty);
+    g_isConfigChangePerform = true;
+    
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    ViewAbstract::SetMask(basicShape);
+    bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
+    EXPECT_TRUE(result);
+
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string maskShape = pattern->GetResCacheMapByKey("maskShape");
+    EXPECT_EQ(maskShape, "");
+}
+
+/**
+ * @tc.name: ViewAbstractTest069
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest069, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Using static methods to set component properties
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::SetWidth(resObj);
+    ViewAbstract::SetHeight(resObj);
+    ViewAbstract::SetMinWidth(resObj);
+    ViewAbstract::SetMinHeight(resObj);
+    ViewAbstract::SetMaxWidth(resObj);
+    ViewAbstract::SetMaxHeight(resObj);
+    pattern->OnColorModeChange(1);
+    ViewAbstract::ResetAspectRatio();
+    ViewAbstract::SetDrawModifier(nullptr);
+
+    /**
+     * @tc.expected: Successfully set various properties of the top node on the stack
+     */
+    CalcDimension result;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+    EXPECT_EQ(pattern->GetResCacheMapByKey("width"), result.ToString());
+    EXPECT_EQ(pattern->GetResCacheMapByKey("height"), result.ToString());
+    EXPECT_EQ(pattern->GetResCacheMapByKey("constraintSize.minWidth"), result.ToString());
+    EXPECT_EQ(pattern->GetResCacheMapByKey("constraintSize.minHeight"), result.ToString());
+    EXPECT_EQ(pattern->GetResCacheMapByKey("constraintSize.maxWidth"), result.ToString());
+    EXPECT_EQ(pattern->GetResCacheMapByKey("constraintSize.maxHeight"), result.ToString());
+    pattern->RemoveResObj("width");
+    pattern->RemoveResObj("height");
+    pattern->RemoveResObj("constraintSize.minWidth");
+    pattern->RemoveResObj("constraintSize.minHeight");
+    pattern->RemoveResObj("constraintSize.maxWidth");
+    pattern->RemoveResObj("constraintSize.maxHeight");
+}
+
+/**
+ * @tc.name: ViewAbstractTest070
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest070, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::SetPadding(resObj);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    EXPECT_EQ(pattern->GetResCacheMapByKey("padding"), "0.00px");
+    pattern->RemoveResObj("padding");
+    NG::PaddingProperty paddings;
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
+        paddings.bottom = NG::CalcLength(BOTTOM);
+    };
+    paddings.AddResource("bottom", resObj, std::move(updateFunc));
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetPadding(paddings);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    pattern->RemoveResObj("padding");
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto& padding = layoutProperty->GetPaddingProperty();
+    ASSERT_NE(padding, nullptr);
+    EXPECT_EQ(padding->bottom, NG::CalcLength(BOTTOM));
+}
+
+/**
+ * @tc.name: ViewAbstractTest071
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest071, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::SetMargin(resObj);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    EXPECT_EQ(pattern->GetResCacheMapByKey("margin"), "0.00px");
+    pattern->RemoveResObj("margin");
+    NG::MarginProperty margins;
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MarginProperty& margins) {
+        margins.bottom = NG::CalcLength(BOTTOM);
+    };
+    margins.AddResource("margin.bottom", resObj, std::move(updateFunc));
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetMargin(margins);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    pattern->RemoveResObj("margin");
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto& margin = layoutProperty->GetMarginProperty();
+    ASSERT_NE(margin, nullptr);
+    EXPECT_EQ(margin->bottom, NG::CalcLength(BOTTOM));
+}
+
+/**
+ * @tc.name: ViewAbstractTest072
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest072, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::SetBorderRadius(resObj);
+    pattern->OnColorModeChange(1);
+    EXPECT_EQ(pattern->GetResCacheMapByKey("borderRadius"), "0.00px");
+    pattern->RemoveResObj("borderRadius");
+    NG::BorderRadiusProperty borderRadius;
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+        borderRadius.radiusBottomLeft = BOTTOM;
+    };
+    borderRadius.AddResource("borderRadius.radiusBottomLeft", resObj, std::move(updateFunc));
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetBorderRadius(borderRadius);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+    pattern->RemoveResObj("borderRadius");
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    Dimension defaultDimension(0);
+    BorderRadiusProperty defaultBorderRadius = { defaultDimension, defaultDimension, defaultDimension,
+        defaultDimension };
+    auto borderRadiusValue = context->GetBorderRadiusValue(defaultBorderRadius);
+    EXPECT_EQ(borderRadiusValue.radiusBottomLeft, BOTTOM);
+}
+
+
+/**
+ * @tc.name: ViewAbstractTest073
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest073, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::SetBorderColor(resObj);
+    pattern->OnColorModeChange(1);
+    EXPECT_EQ(pattern->GetResCacheMapByKey("borderColor"), "#FF000000");
+    pattern->RemoveResObj("borderColor");
+    NG::BorderColorProperty borderColor;
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColor) {
+        borderColor.bottomColor = BLUE;
+    };
+    borderColor.AddResource("borderColor.bottomColor", resObj, std::move(updateFunc));
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetBorderColor(borderColor);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+    pattern->RemoveResObj("borderColor");
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    Color defaultColor(0xff000000);
+    BorderColorProperty defaultBorderColor = { defaultColor, defaultColor, defaultColor, defaultColor, std::nullopt,
+        std::nullopt };
+    auto borderColorValue = context->GetBorderColorValue(defaultBorderColor);
+    EXPECT_EQ(borderColorValue.bottomColor, BLUE);
+}
+
+/**
+ * @tc.name: ViewAbstractTest074
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest074, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::SetBorderWidth(resObj);
+    pattern->OnColorModeChange(1);
+    EXPECT_EQ(pattern->GetResCacheMapByKey("borderWidth"), "0.00px");
+    pattern->RemoveResObj("borderWidth");
+    NG::BorderWidthProperty borderWidth;
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+        borderWidth.bottomDimen = BOTTOM;
+    };
+    borderWidth.AddResource("borderWidth.bottomDimen", resObj, std::move(updateFunc));
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetBorderWidth(borderWidth);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+    pattern->RemoveResObj("borderWidth");
+
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto& layoutBorderWidth = layoutProperty->GetBorderWidthProperty();
+    ASSERT_NE(layoutBorderWidth, nullptr);
+    EXPECT_EQ(layoutBorderWidth->bottomDimen, BOTTOM);
+
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    Dimension defaultDimension(0);
+    BorderWidthProperty defaultBorderWidth = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    auto contextBorderWidth = context->GetBorderWidthValue(defaultBorderWidth);
+    EXPECT_EQ(contextBorderWidth.bottomDimen, BOTTOM);
+}
+
+/**
+ * @tc.name: ViewAbstractTest075
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest075, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::BorderWidthProperty borderWidth;
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+        borderWidth.bottomDimen = BOTTOM;
+    };
+    borderWidth.AddResource("borderWidth.bottomDimen", resObj, std::move(updateFunc));
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetDashGap(borderWidth);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+    pattern->RemoveResObj("borderWidth");
+
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto& layoutBorderWidth = layoutProperty->GetBorderWidthProperty();
+    ASSERT_NE(layoutBorderWidth, nullptr);
+    EXPECT_EQ(layoutBorderWidth->bottomDimen, BOTTOM);
+
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    Dimension defaultDimension(0);
+    BorderWidthProperty defaultBorderWidth = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    auto contextBorderWidth = context->GetDashGapValue(defaultBorderWidth);
+    EXPECT_EQ(contextBorderWidth.bottomDimen, BOTTOM);
+}
+
+/**
+ * @tc.name: ViewAbstractTest076
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest076, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.bottomDimen = BOTTOM;
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetDashWidth(borderWidth);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    Dimension defaultDimension(0);
+    BorderWidthProperty defaultBorderWidth = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    auto contextBorderWidth = context->GetDashWidthValue(defaultBorderWidth);
+    EXPECT_EQ(contextBorderWidth.bottomDimen, BOTTOM);
+}
+
+/**
+ * @tc.name: ViewAbstractTest077
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest077, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::SetPosition(ZERO, ZERO, resObj, resObj);
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetPosition(ZERO, ZERO, resObj, resObj);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    OffsetT<Dimension> defaultDimension = { WIDTH, HEIGHT };
+    auto positionValue = context->GetPositionValue(OffsetT<Dimension>(defaultDimension));
+    EXPECT_EQ(positionValue.GetX(), ZERO);
+    EXPECT_EQ(positionValue.GetY(), ZERO);
+}
+
+/**
+ * @tc.name: ViewAbstractTest078
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest078, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::SetOffset(ZERO, ZERO, resObj, resObj);
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetOffset(ZERO, ZERO, resObj, resObj);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    OffsetT<Dimension> defaultDimension = { WIDTH, HEIGHT };
+    auto offsetValue = context->GetOffsetValue(OffsetT<Dimension>(defaultDimension));
+    EXPECT_EQ(offsetValue.GetX(), ZERO);
+    EXPECT_EQ(offsetValue.GetY(), ZERO);
+}
+
+/**
+ * @tc.name: ViewAbstractTest079
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest079, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::MarkAnchor(ZERO, ZERO, resObj, resObj);
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::MarkAnchor(ZERO, ZERO, resObj, resObj);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    OffsetT<Dimension> defaultDimension = { WIDTH, HEIGHT };
+    auto anchorValue = context->GetAnchorValue(OffsetT<Dimension>(defaultDimension));
+    EXPECT_EQ(anchorValue.GetX(), ZERO);
+    EXPECT_EQ(anchorValue.GetY(), ZERO);
+}
+
+/**
+ * @tc.name: ViewAbstractTest080
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest080, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::PaddingProperty paddings;
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
+        paddings.bottom = NG::CalcLength(BOTTOM);
+    };
+    paddings.AddResource("paddings.bottom", resObj, std::move(updateFunc));
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetSafeAreaPadding(paddings);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+    pattern->RemoveResObj("paddings");
+
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto& safeAreaPaddingProperty = layoutProperty->GetSafeAreaPaddingProperty();
+    ASSERT_NE(safeAreaPaddingProperty, nullptr);
+    EXPECT_EQ(safeAreaPaddingProperty->bottom, NG::CalcLength(BOTTOM));
+}
+
+/**
+ * @tc.name: ViewAbstractTest081
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest081, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    EdgesParam edgesParam;
+    edgesParam.bottom = BOTTOM;
+
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetPositionEdges(edgesParam);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+    pattern->RemoveResObj("edgesParam");
+
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    Dimension defaultDimension(0);
+    EdgesParam defaultEdgesParam = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt };
+    auto positionEdges = context->GetPositionEdgesValue(defaultEdgesParam);
+    EXPECT_EQ(positionEdges.bottom, BOTTOM);
+}
+
+/**
+ * @tc.name: ViewAbstractTest082
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest082, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    EdgesParam edgesParam;
+    edgesParam.bottom = BOTTOM;
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetOffsetEdges(edgesParam);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    Dimension defaultDimension(0);
+    EdgesParam defaultEdgesParam = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt };
+    auto positionEdges = context->GetOffsetEdgesValue(defaultEdgesParam);
+    EXPECT_EQ(positionEdges.bottom, BOTTOM);
 }
 
 /**
