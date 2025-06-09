@@ -1374,6 +1374,11 @@ void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
     // cross platform is not support now;
 }
 
+void WebPattern::OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::StartVibraFeedback(const std::string& vibratorType)
 {
     // cross platform is not support now;
