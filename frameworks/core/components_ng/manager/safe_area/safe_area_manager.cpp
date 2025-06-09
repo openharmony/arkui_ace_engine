@@ -338,7 +338,7 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess, LayoutS
             auto bottomLength = GetSafeArea().bottom_.Length();
             auto distance = bottomLength - GetKeyboardOffset(withoutProcess);
             if (GreatNotEqual(keyboardHeight, 0.0f) && distance <= keyboardHeight) {
-                combinedSafeArea.bottom_ = GetSafeArea().bottom_;
+                combinedSafeArea = combinedSafeArea.Combine(navSafeArea_);
             }
         }
     }
