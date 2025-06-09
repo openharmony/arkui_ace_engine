@@ -108,6 +108,8 @@ void DynamicComponentRendererImpl::NotifyUieDump(const std::vector<std::string>&
 
 void DynamicComponentRendererImpl::SetBackgroundTransparent(bool backgroundTransparent) {}
 
+void DynamicComponentRendererImpl::OnAccessibilityParentRectInfoUpdate() {}
+
 bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
 {
     return true;

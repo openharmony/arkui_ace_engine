@@ -74,6 +74,7 @@ public:
         const std::vector<std::string>& params, std::vector<std::string>& info) const override;
     void TransferAccessibilityRectInfo(bool isForce = false);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void OnAccessibilityParentRectInfoUpdate() override;
 
     void InitializeAccessibility();
     void ResetAccessibilityChildTreeCallback();
