@@ -21614,6 +21614,11 @@ if (globalThis.Toggle !== undefined) {
     component.setNodePtr(nativeNode);
     component.setContentModifier(modifier);
   };
+
+  globalThis.Toggle.onChange = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().toggle.setOnChange(nodePtr, value);
+  };
 }
 
 /// <reference path='./import.ts' />
@@ -22319,6 +22324,11 @@ if (globalThis.Select !== undefined) {
     });
     component.menuItemContentModifier(modifier);
   };
+
+  globalThis.Select.onSelect = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().select.setOnSelect(nodePtr, value);
+  };
 }
 class AvoidanceModifier extends ModifierWithKey {
   constructor(value) {
@@ -22699,6 +22709,11 @@ if (globalThis.Radio !== undefined) {
       return new ArkRadioComponent(nativeNode);
     });
     component.setContentModifier(modifier);
+  };
+
+  globalThis.Radio.onChange = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().radio.setRadioOnChange(nodePtr, value);
   };
 }
 
@@ -24135,6 +24150,11 @@ if (globalThis.Rating !== undefined) {
     });
     component.setContentModifier(modifier);
   };
+
+  globalThis.Rating.onChange = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().rating.setOnChange(nodePtr, value);
+  };
 }
 
 /// <reference path='./import.ts' />
@@ -24526,6 +24546,11 @@ if (globalThis.Checkbox !== undefined) {
       return new ArkCheckboxComponent(nativeNode);
     });
     component.setContentModifier(modifier);
+  };
+
+  globalThis.Checkbox.onChange = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().checkbox.setCheckboxOnChange(nodePtr, value);
   };
 }
 
@@ -25479,6 +25504,11 @@ if (globalThis.CheckboxGroup !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.CheckboxGroupModifier(nativePtr, classType);
     });
+  };
+
+  globalThis.CheckboxGroup.onChange = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().checkboxgroup.setCheckboxGroupOnChange(nodePtr, value);
   };
 }
 
@@ -29018,6 +29048,11 @@ if (globalThis.MenuItem !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.MenuItemModifier(nativePtr, classType);
     });
+  };
+
+  globalThis.MenuItem.onChange = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().menuitem.setOnChange(nodePtr, value);
   };
 }
 
