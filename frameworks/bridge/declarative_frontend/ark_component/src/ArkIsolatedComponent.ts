@@ -19,7 +19,7 @@ class ArkIsolatedComponent extends ArkComponent implements IsolatedComponentAttr
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onError(callback: any): IsolatedComponentAttribute {
+  onError(callback: any): this {
     throw new Error('Method not implemented.');
   }
 }

@@ -1266,7 +1266,7 @@ declare class ArkEmbeddedComponent extends ArkComponent implements EmbeddedCompo
 }
 declare class ArkIsolatedComponent extends ArkComponent implements IsolatedComponentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    onError(callback: any): IsolatedComponentAttribute;
+    onError(callback: any): this;
 }
 declare class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
