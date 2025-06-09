@@ -39,6 +39,7 @@ export * from "./arkts-api/peers/Context"
 export * from "./arkts-api/peers/ExternalSource"
 export * from "./arkts-api/peers/ImportPathManager"
 export { global as arktsGlobal } from "./arkts-api/static/global"
+export { Profiler } from "./arkts-api/static/profiler"
 export * as arkts from "./arkts-api"
 
 export { runTransformer, RunTransformerContext, RunTransformerHooks } from "./plugin-utils"

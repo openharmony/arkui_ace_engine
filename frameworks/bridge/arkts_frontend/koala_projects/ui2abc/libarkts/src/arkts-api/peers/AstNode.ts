@@ -22,7 +22,6 @@ import { ArktsObject } from "./ArktsObject"
 
 export abstract class AstNode extends ArktsObject {
     protected constructor(peer: KNativePointer) {
-        global.profiler.nodeCreated()
         if (isNullPtr(peer)) {
             throwError(`attempted to create AstNode from nullptr`)
         }

@@ -19,7 +19,6 @@ import { initEs2panda, Es2pandaNativeModule, initGeneratedEs2panda } from "../..
 import { Es2pandaNativeModule as GeneratedEs2pandaNativeModule } from "../../generated/Es2pandaNativeModule"
 import { initInterop, InteropNativeModule } from "../../InteropNativeModule"
 import { Context } from "../peers/Context"
-import { Profiler } from "./profiler"
 
 export class global {
     public static filePath: string = "./plugins/input/main.ets"
@@ -74,5 +73,5 @@ export class global {
 
     }
 
-    public static profiler = new Profiler()
+    public static enableReport: boolean = false
 }
