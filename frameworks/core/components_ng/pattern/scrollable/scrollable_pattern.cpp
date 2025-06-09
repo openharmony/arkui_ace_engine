@@ -2892,7 +2892,7 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     auto offsetPX = Dimension(finalOffset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
     auto scrollState = GetScrollState();
-    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
         scrollState = WhiteBlockManager::GetInstance().ChangeScrollStateIfNeed(scrollState);
     }
     bool isTriggered = false;

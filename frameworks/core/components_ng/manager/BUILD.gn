@@ -65,6 +65,6 @@ build_component_ng("manager_ng") {
     "whiteblock/whiteblock_manager.cpp"
   ]
   external_deps = [
-    init:libbegetutil",
+    "init:libbegetutil",
   ]
 }

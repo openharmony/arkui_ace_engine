@@ -405,7 +405,7 @@ void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& on
 {
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
     int32_t endIndex = info_.endIndex_;
-    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
         endIndex = WhiteBlockManager::GetInstance().AdjustEndIndex(info_.endIndex_);
     }
     onScrollIndex(info_.startIndex_, endIndex);

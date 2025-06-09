@@ -348,7 +348,7 @@ void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFun
     itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
     CHECK_NULL_VOID(onScrollIndex);
     int32_t endIndex = layoutInfo_->endIndex_;
-    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
         endIndex = WhiteBlockManager::GetInstance().AdjustEndIndex(layoutInfo_->endIndex_);
     }
     onScrollIndex(layoutInfo_->FirstIdx(), endIndex);

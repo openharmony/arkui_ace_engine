@@ -144,7 +144,7 @@ void GridModelNG::SetScrollBarWidth(const std::string& value)
 void GridModelNG::SetCachedCount(int32_t value, bool show)
 {
     int count = value;
-    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
         count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count);
@@ -473,7 +473,7 @@ void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
     if (cachedCount >= 0) {
         int count = cachedCount;
-        if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+        if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
             count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count, frameNode);

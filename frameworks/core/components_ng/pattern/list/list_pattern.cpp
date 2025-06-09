@@ -587,7 +587,7 @@ void ListPattern::FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent&
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
     int32_t startIndex = startIndex_ == -1 ? 0 : startIndex_;
     int32_t endIndex = endIndex_ == -1 ? 0 : endIndex_;
-    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
         endIndex = WhiteBlockManager::GetInstance().AdjustEndIndex(endIndex);
     }
     onScrollIndex(startIndex, endIndex, centerIndex_);

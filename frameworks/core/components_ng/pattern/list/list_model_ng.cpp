@@ -226,7 +226,7 @@ void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
 void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 {
     int count = cachedCount;
-    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
         count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count);
@@ -569,7 +569,7 @@ void ListModelNG::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
 void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
     int32_t count = cachedCount;
-    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
         count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count, frameNode);

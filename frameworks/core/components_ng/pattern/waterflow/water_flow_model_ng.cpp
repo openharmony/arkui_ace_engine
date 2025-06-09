@@ -303,7 +303,7 @@ void WaterFlowModelNG::SetFriction(double friction)
 void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 {
     int count = value;
-    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
         count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count);
@@ -313,11 +313,11 @@ void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, const std::optional<int32_t>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    int count = value.value();
-    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
-        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
-    }
     if (value) {
+        int count = value.value();
+        if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+            count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+        }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, frameNode);

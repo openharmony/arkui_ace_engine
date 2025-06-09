@@ -37,20 +37,20 @@ WhiteBlockManager& WhiteBlockManager::GetInstance()
 
 ScrollState WhiteBlockManager::ChangeScrollStateIfNeed(ScrollState scrollState)
 {
-    if(!GetSwitch()) {
+    if (!GetSwitch()) {
         return scrollState;
     }
-    if((scrollState == ScrollState::SCROLL && !idle_) ||
-        (scrollState == ScrollState::FLING && idle_) ||
+    if ((scrollState == ScrollState::SCROLL && !idle_) || 
+        (scrollState == ScrollState::FLING && idle_) || 
         (scrollState == ScrollState::IDLE && idle_)) {
         return  scrollState;
     }
-    if(scrollState == ScrollState::SCROLL && idle_) {
+    if (scrollState == ScrollState::SCROLL && idle_) {
         LOGD("WhiteBlockManager ChangeScrollStateIfNeed return IDLE");
         idle_ = false;
         return ScrollState::IDLE;
     }
-    if((scrollState == ScrollState::FLING && !idle_) ||
+    if ((scrollState == ScrollState::FLING && !idle_) || 
         (scrollState == ScrollState::IDLE && !idle_)) {
         idle_ = true;
     }
@@ -70,7 +70,8 @@ int32_t WhiteBlockManager::AdjustEndIndex(int32_t endIndex)
 
 int32_t WhiteBlockManager::AdjustCachedCount(int32_t cachedCount)
 {
-    return cachedCount + std::stoi(OHOS::system::GetParameter(WHITE_BLOCK_PARAM_CACHED_COUNT, WHITE_BLOCK_PARAM_INDEX_DEFAULT));
+    return cachedCount + std::stoi(OHOS::system::GetParameter(WHITE_BLOCK_PARAM_CACHED_COUNT, 
+    WHITE_BLOCK_PARAM_INDEX_DEFAULT));
 }
 
 }
