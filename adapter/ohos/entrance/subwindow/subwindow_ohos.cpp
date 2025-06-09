@@ -272,10 +272,12 @@ void SubwindowOhos::InitContainer()
         std::string windowTag = "";
         bool isAppSubwindow = false;
         bool needFollowScreen = false;
+        std::string windowName = "";
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
             windowTag = "TOAST_SYSTEM_";
             needFollowScreen = true;
+            windowName = "ARK_APP_SUBWINDOW_" + windowTag + parentWindowName + std::to_string(windowId_);
         } else if (GetAboveApps()) {
             auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
             isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
@@ -283,24 +285,30 @@ void SubwindowOhos::InitContainer()
             auto mainWindowId = isSelectOverlay ? parentWindowId : GetMainWindowId();
             SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
             windowTag = isSelectOverlay ? "TEXT_MENU_" : "TOAST_TOPMOST_";
-        } else if (parentContainer->IsSceneBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-            needFollowScreen = true;
-        } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
-            auto hostWindowId = parentPipeline->GetFocusWindowId();
-            windowOption->SetIsUIExtFirstSubWindow(true);
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-            windowOption->SetParentId(hostWindowId);
-            SetUIExtensionHostWindowId(hostWindowId);
-            isAppSubwindow = true;
-        } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
-            windowOption->SetParentId(parentWindowId);
-            needFollowScreen = true;
+            windowName = "ARK_APP_SUBWINDOW_" + windowTag + parentWindowName + std::to_string(windowId_);
         } else {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-            windowOption->SetParentId(parentWindowId);
-            isAppSubwindow = true;
+            windowName = "ARK_APP_SUBWINDOW_" + windowTag + parentWindowName + std::to_string(windowId_);
+            Rosen::WindowType subwindowType = Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+            OHOS::Rosen::WMError ret = OHOS::Rosen::Window::GetAndVerifyWindowTypeForArkUI(parentWindowId, windowName,
+                windowType, subwindowType);
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "get and verify window type, ret= %{public}d,"
+                "windowType= %{public}d, subwindowType= %{public}d", static_cast<int32_t>(ret),
+                static_cast<int32_t>(windowType), static_cast<int32_t>(subwindowType)); 
+            if (ret != OHOS::Rosen::WMError::WM_OK) {
+                return;
+            }
+            windowOption->SetWindowType(subwindowType);
+            needFollowScreen = parentContainer->IsSceneBoardWindow() ||
+                windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE;
+            isAppSubwindow = subwindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+            bool isUIExt = windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
+            if (isAppSubwindow || subwindowType == Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
+                windowOption->SetParentId(isUIExt ? parentPipeline->GetFocusWindowId() : parentWindowId);
+            }
+            if (isUIExt) {
+                windowOption->SetIsUIExtFirstSubWindow(true);
+                SetUIExtensionHostWindowId(parentPipeline->GetFocusWindowId());
+            }
         }
         auto displayId = parentContainer->GetCurrentDisplayId();
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
@@ -321,8 +329,7 @@ void SubwindowOhos::InitContainer()
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
         windowOption->SetDisplayId(displayId);
         OHOS::Rosen::WMError ret;
-        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
-            std::to_string(windowId_), windowOption, parentWindow->GetContext(), ret);
+        window_ = OHOS::Rosen::Window::Create(, windowOption, parentWindow->GetContext(), ret);
         if (!window_ || ret != OHOS::Rosen::WMError::WM_OK) {
             SetIsRosenWindowCreate(false);
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);
