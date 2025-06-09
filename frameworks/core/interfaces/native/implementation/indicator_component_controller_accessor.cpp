@@ -51,7 +51,7 @@ void ChangeIndexImpl(Ark_IndicatorComponentController peer,
     CHECK_NULL_VOID(index);
     auto idx = Converter::Convert<int32_t>(*index);
     idx = idx < 0 ? 0 : idx;
-    auto useAnim = useAnimation ? Converter::OptConvert<bool>(*useAnimation).value_or(false) : false;
+    auto useAnim = Converter::OptConvertPtr<bool>(useAnimation).value_or(false);
     peer->ChangeIndex(idx, useAnim);
 }
 } // IndicatorComponentControllerAccessor
