@@ -247,12 +247,16 @@ class FileSelectorResultOhos : public FileSelectorResult {
     DECLARE_ACE_TYPE(FileSelectorResultOhos, FileSelectorResult)
 
 public:
-    FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback) : callback_(callback) {}
+    FileSelectorResultOhos(
+        std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback, const WeakPtr<WebDelegate>& delegate)
+        : callback_(callback), delegate_(delegate)
+    {}
 
     void HandleFileList(std::vector<std::string>& result) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback_;
+    WeakPtr<WebDelegate> delegate_;
 };
 
 class ContextMenuParamOhos : public WebContextMenuParam {
@@ -1111,6 +1115,9 @@ public:
 
     void SetNativeInnerWeb(bool isInnerWeb);
 
+    void SetIsFileSelectorShow(bool isFileSelectorShow) { isFileSelectorShow_ = isFileSelectorShow; }
+    bool IsFileSelectorShow() { return isFileSelectorShow_; }
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1332,6 +1339,8 @@ private:
     bool isDragResizeStart_ = false;
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
+    bool isFileSelectorShow_ = false;
+
 #endif
 };
 } // namespace OHOS::Ace

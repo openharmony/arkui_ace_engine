@@ -1327,6 +1327,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
             "Set cursor to pointer when mouse pointer is hover exit.");
         isHoverExit_ = true;
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
+
+        if (delegate_->IsFileSelectorShow()) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "WebPattern::WebSendMouseEvent blocked when FileSelector show.");
+            return;
+        }
     }
 
     if (!HandleDoubleClickEvent(info)) {

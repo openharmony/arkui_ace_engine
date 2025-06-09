@@ -487,7 +487,7 @@ bool WebClientImpl::OnFileSelectorShow(
     ContainerScope scope(delegate->GetInstanceId());
     bool jsResult = false;
     auto param = std::make_shared<FileSelectorEvent>(AceType::MakeRefPtr<FileSelectorParamOhos>(params),
-        AceType::MakeRefPtr<FileSelectorResultOhos>(callback));
+    AceType::MakeRefPtr<FileSelectorResultOhos>(callback, delegate));
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
         return false;
