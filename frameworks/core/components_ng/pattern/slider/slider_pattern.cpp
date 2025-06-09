@@ -471,6 +471,15 @@ bool SliderPattern::InitAccessibilityVirtualNode()
     }
     UpdateStepPointsAccessibilityVirtualNodeSelected();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    CHECK_NULL_RETURN(sliderContentModifier_, false);
+    if (sliderContentModifier_) {
+        sliderContentModifier_->SetUpdateAccessibilityCallback([weak = WeakClaim(this)]() {
+            auto sliderPattern = weak.Upgrade();
+            CHECK_NULL_VOID(sliderPattern);
+            sliderPattern->UpdateStepAccessibilityVirtualNode();
+            sliderPattern->UpdateStepPointsAccessibilityVirtualNodeSelected();
+        });
+    }
     return true;
 }
 
