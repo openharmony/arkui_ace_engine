@@ -1766,6 +1766,10 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 
 void WebPattern::WebSendMouseEvent(const MouseInfo& info, int32_t clickNum)
 {
+    if (delegate_->IsFileSelectorShow() && info.GetAction == MouseAction::HOVER_EXIT) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "WebPattern::WebSendMouseEvent blocked when FileSelector show.");
+        return;
+    }
     std::vector<int32_t> pressedCodes {};
     std::vector<KeyCode> keyCode = info.GetPressedKeyCodes();
     for (auto pCode : keyCode) {

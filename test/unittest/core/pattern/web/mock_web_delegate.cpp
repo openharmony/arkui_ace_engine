@@ -1270,5 +1270,6 @@ void WebDelegate::SetPipNativeWindow(int delegate_id,
     int child_id, int frame_routing_id, void* window) {}
 void WebDelegate::SendPipEvent(int delegate_id,
     int child_id, int frame_routing_id, int event) {}
+void WebDelegate::SetFileSelectorClosed() {}
 
 } // namespace OHOS::Ace
