@@ -15,14 +15,21 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include "parameters.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string WHITE_BLOCK_PARAM = "performance.enhance.whiteblock";
+const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
+const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
+} // namespace
 
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 
@@ -218,7 +225,11 @@ void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
 
 void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
+    int count = cachedCount;
+    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
 }
 
@@ -557,7 +568,11 @@ void ListModelNG::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
 
 void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount, frameNode);
+    int32_t count = cachedCount;
+    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count, frameNode);
 }
 
 void ListModelNG::SetShowCached(FrameNode* frameNode, bool show)

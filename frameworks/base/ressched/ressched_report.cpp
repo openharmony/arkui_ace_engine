@@ -564,7 +564,7 @@ void ResSchedReport::OnAxisEvent(const AxisEvent& axisEvent)
 void ResSchedReport::HandlePageTransition(const std::string& fromPage,
     const std::string& toPage, const std::string& mode)
 {
-    if (fromPage.empty() || toPage.empty()) {
+    if (fromPage.empty() && toPage.empty()) {
         TAG_LOGD(AceLogTag::ACE_ROUTER, "rss report page transition empty info:%{public}s, %{public}s",
             fromPage.c_str(), toPage.c_str());
         return;

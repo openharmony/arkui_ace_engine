@@ -15,11 +15,18 @@
 
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
+#include "parameters.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string WHITE_BLOCK_PARAM = "performance.enhance.whiteblock";
+const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
+const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
+} // namespace
 
 void GridModelNG::Create(const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollProxy)
 {
@@ -136,7 +143,11 @@ void GridModelNG::SetScrollBarWidth(const std::string& value)
 
 void GridModelNG::SetCachedCount(int32_t value, bool show)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, value);
+    int count = value;
+    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, show);
 }
 
@@ -461,7 +472,11 @@ void GridModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Co
 void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
     if (cachedCount >= 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, cachedCount, frameNode);
+        int count = cachedCount;
+        if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+            count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, frameNode);
     }

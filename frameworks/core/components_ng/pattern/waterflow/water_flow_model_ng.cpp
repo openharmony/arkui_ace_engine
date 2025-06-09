@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 #include <string>
-
+#include "parameters.h"
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -24,8 +24,15 @@
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string WHITE_BLOCK_PARAM = "performance.enhance.whiteblock";
+const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
+const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
+} // namespace
+
 void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -295,15 +302,23 @@ void WaterFlowModelNG::SetFriction(double friction)
 
 void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
+    int count = value;
+    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show);
 }
 
 void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, const std::optional<int32_t>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    int count = value.value();
+    if(OHOS::system::GetParameter(WHITE_BLOCK_PARAM,WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+    }
     if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, frameNode);
     }
