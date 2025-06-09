@@ -868,4 +868,125 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverEventBySurfaceId0
 
     MockPipelineContext::TearDown();
 }
+
+/**
+ * @tc.name: HandleAccessibilityHoverEventInner001
+ * @tc.desc: HandleAccessibilityHoverEventInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverEventInner001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto pipe = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipe, nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "testNode",
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->context_ = AceType::RawPtr(pipe);
+
+    AccessibilityManagerNG manager;
+    auto& hoverState = manager.hoverStateManager_.GetHoverState(frameNode->GetAccessibilityId());
+    TouchEvent touchEvent;
+    PointF point(10.0f, 20.0f);
+    TimeStamp baseTime((std::chrono::milliseconds(100)));
+
+    hoverState.idle = true;
+    HandleHoverEventParam param1 {
+        .point = point,
+        .time = baseTime,
+        .sourceType = SourceType::MOUSE,
+        .eventType = AccessibilityHoverEventType::ENTER
+    };
+    auto ret = manager.HandleAccessibilityHoverEventInner(frameNode, param1, touchEvent);
+    EXPECT_TRUE(ret == HandleHoverRet::HOVER_FAIL);
+
+    hoverState.idle = false;
+    hoverState.time = baseTime;
+    hoverState.eventType = AccessibilityHoverEventType::MOVE;
+    HandleHoverEventParam param2 = param1;
+    param2.eventType = AccessibilityHoverEventType::MOVE;
+    param2.time = baseTime + std::chrono::milliseconds(5);
+    ret = manager.HandleAccessibilityHoverEventInner(frameNode, param2, touchEvent);
+    EXPECT_EQ(ret, HandleHoverRet::IN_TIME_LIMIT);
+
+    hoverState.idle = false;
+    hoverState.time = baseTime;
+    hoverState.eventType = AccessibilityHoverEventType::MOVE;
+    HandleHoverEventParam param3 = param1;
+    param3.eventType = AccessibilityHoverEventType::EXIT;
+    param3.time = baseTime + std::chrono::milliseconds(5);
+    ret = manager.HandleAccessibilityHoverEventInner(frameNode, param3, touchEvent);
+    EXPECT_TRUE(ret == HandleHoverRet::HOVER_FAIL);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: HandleAccessibilityHoverEventInner002
+ * @tc.desc: HandleAccessibilityHoverEventInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverEventInner002, TestSize.Level1)
+{
+    // Step 1: Set up the mock pipeline context.
+    MockPipelineContext::SetUp();
+    auto pipe = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipe, nullptr);
+    // Step 2: Create a FrameNode and set its context.
+    auto frameNode = FrameNode::CreateFrameNode("testNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->context_ = AceType::RawPtr(pipe);
+
+    AccessibilityManagerNG manager;
+    // Step 3: Get the hover state for the frame node.
+    auto& hoverState = manager.hoverStateManager_.GetHoverState(frameNode->GetAccessibilityId());
+    TouchEvent touchEvent;
+    PointF point(10.0f, 20.0f);
+    TimeStamp baseTime((std::chrono::milliseconds(100)));
+    // Step 4: Prepare a hover event param with idle state.
+    hoverState.idle = true;
+    HandleHoverEventParam param1 {
+        .point = point,
+        .time = baseTime,
+        .sourceType = SourceType::MOUSE,
+        .eventType = AccessibilityHoverEventType::ENTER
+    };
+    // Step 5: Simulate previous event from TOUCH, current event from MOUSE, interval 2000ms.
+    hoverState.idle = false;
+    hoverState.source = SourceType::TOUCH;
+    hoverState.time = baseTime;
+    HandleHoverEventParam param5 = param1;
+    param5.sourceType = SourceType::MOUSE;
+    param5.eventType = AccessibilityHoverEventType::MOVE;
+    param5.time = baseTime + std::chrono::milliseconds(2000);
+
+    auto ret = manager.HandleAccessibilityHoverEventInner(frameNode, param5, touchEvent);
+    EXPECT_TRUE(ret == HandleHoverRet::HOVER_FAIL);
+    // Step 6: Previous event from MOUSE, current event ENTER, interval 50ms.
+    hoverState.idle = false;
+    hoverState.source = SourceType::MOUSE;
+    hoverState.time = baseTime;
+    HandleHoverEventParam param6 = param1;
+    param6.eventType = AccessibilityHoverEventType::ENTER;
+    param6.time = baseTime + std::chrono::milliseconds(50);
+    ret = manager.HandleAccessibilityHoverEventInner(frameNode, param6, touchEvent);
+    EXPECT_TRUE(ret == HandleHoverRet::HOVER_FAIL);
+    // Step 7: Pass nullptr as frameNode, expect HOVER_FAIL.
+    ret = manager.HandleAccessibilityHoverEventInner(nullptr, param1, touchEvent);
+    EXPECT_EQ(ret, HandleHoverRet::HOVER_FAIL);
+    // Step 8: Previous event from TOUCH, current event from MOUSE, interval 500ms.
+    hoverState.idle = false;
+    hoverState.source = SourceType::TOUCH;
+    hoverState.time = baseTime;
+    HandleHoverEventParam param4 = param1;
+    param4.sourceType = SourceType::MOUSE;
+    param4.eventType = AccessibilityHoverEventType::MOVE;
+    param4.time = baseTime + std::chrono::milliseconds(500);
+    ret = manager.HandleAccessibilityHoverEventInner(frameNode, param4, touchEvent);
+    EXPECT_EQ(ret, HandleHoverRet::IN_TIME_LIMIT);
+    MockPipelineContext::TearDown();
+}
 } // namespace OHOS::Ace::NG

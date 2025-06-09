@@ -2276,8 +2276,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager042, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, GetWebAccessibilityIdBySurfaceId001, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
-
     auto mainFrameNode = FrameNode::CreateFrameNode(
         "main", 1, AceType::MakeRefPtr<NodeContainerPattern>(), true);
     ViewStackProcessor::GetInstance()->Push(mainFrameNode);
@@ -2313,20 +2311,16 @@ HWTEST_F(JsAccessibilityManagerTest, GetWebAccessibilityIdBySurfaceId001, TestSi
 
     auto accessibilityId2 = jsAccessibilityManager->GetWebAccessibilityIdBySurfaceId("not_exist_id");
     EXPECT_EQ(accessibilityId2, -1);
-
-    MockPipelineContext::TearDown();
 }
 #endif
 
 /**
- * @tc.name: CheckAndGetEmbedFrameNode
+ * @tc.name: CheckAndGetEmbedFrameNode001
  * @tc.desc: Test CheckAndGetEmbedFrameNode with normal and nullptr node
  * @tc.type: FUNC
  */
 HWTEST_F(JsAccessibilityManagerTest, CheckAndGetEmbedFrameNode001, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
-
     auto frameNode = FrameNode::CreateFrameNode(
         "embedNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNode, nullptr);
@@ -2345,8 +2339,6 @@ HWTEST_F(JsAccessibilityManagerTest, CheckAndGetEmbedFrameNode001, TestSize.Leve
     RefPtr<NG::FrameNode> nullNode;
     ret = jsAccessibilityManager->CheckAndGetEmbedFrameNode(nullNode);
     EXPECT_EQ(ret, -1);
-
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -2356,7 +2348,6 @@ HWTEST_F(JsAccessibilityManagerTest, CheckAndGetEmbedFrameNode001, TestSize.Leve
  */
 HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoBySurfaceId001, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     auto context = NG::PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
 
@@ -2392,7 +2383,6 @@ HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoBySurfaceId001, TestSize.L
     EXPECT_TRUE(infos.empty());
 
     rootElement->RemoveChild(embedNode);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -2431,4 +2421,196 @@ HWTEST_F(JsAccessibilityManagerTest, IsTagInEmbedComponent003, TestSize.Level1)
     EXPECT_FALSE(result);
 }
 
+
+/**
+ * @tc.name: SearchElementInfoBySurfaceId002
+ * @tc.desc: Test SearchElementInfoBySurfaceId with valid surfaceId and different types
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoBySurfaceId002, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto embedNode = FrameNode::CreateFrameNode(
+        "embedNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(embedNode, nullptr);
+    embedNode->context_ = AceType::RawPtr(context);
+    embedNode->isActive_ = true;
+
+    uint64_t surfaceId = embedNode->GetId();
+    ElementRegister::GetInstance()->RegisterEmbedNode(surfaceId, embedNode);
+
+    auto rootElement = context->GetRootElement();
+    ASSERT_NE(rootElement, nullptr);
+    rootElement->AddChild(embedNode);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->SetWindowId(1);
+
+    std::list<AccessibilityElementInfo> infos;
+    auto ret = jsAccessibilityManager->SearchElementInfoBySurfaceId(
+        std::to_string(surfaceId), 1, Framework::SearchSurfaceIdType::SEARCH_TAIL, infos);
+    EXPECT_EQ(ret, Framework::SearchSurfaceIdRet::SEARCH_SUCCESS);
+    EXPECT_EQ(infos.size(), 1);
+
+    rootElement->RemoveChild(embedNode);
+}
+
+/**
+ * @tc.name: UpdateChildrenNodeInCache001
+ * @tc.desc: Test UpdateChildrenNodeInCache Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateChildrenNodeInCache001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PipelineContext
+     */
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode and add child
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->context_ = AceType::RawPtr(context);
+    rootNode->isActive_ = true;
+    auto embedNode = FrameNode::CreateFrameNode(
+        "embedNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(embedNode, nullptr);
+    embedNode->context_ = AceType::RawPtr(context);
+    embedNode->isActive_ = true;
+    rootNode->AddChild(embedNode);
+
+    /**
+     * @tc.steps: step3. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->SetWindowId(1);
+
+    /**
+     * @tc.steps: step4. construct the parameters required to test the UpdateChildrenNodeInCache function.
+     */
+    std::list<AccessibilityElementInfo> infos;
+    auto mainContext = context;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->GenerateCommonProperty(context, commonProperty, mainContext, rootNode);
+    auto mode = 1 << 3;
+    Framework::SearchParameter param {-1, "", mode, NG::UI_EXTENSION_OFFSET_MAX};
+    std::list<RefPtr<NG::FrameNode>> children {rootNode};
+
+    /**
+     * @tc.steps: step4. test UpdateChildrenNodeInCache
+     */
+    jsAccessibilityManager->UpdateChildrenNodeInCache(infos, commonProperty, context, param, children);
+    EXPECT_EQ(infos.size(), 2);
+
+    infos.clear();
+    commonProperty.checkGetFunc = nullptr;
+    commonProperty.checkEmbedNode = false;
+    children = {rootNode};
+    jsAccessibilityManager->UpdateChildrenNodeInCache(infos, commonProperty, context, param, children);
+    EXPECT_EQ(infos.size(), 2);
+}
+
+/**
+ * @tc.name: SearchElementInfoByAccessibilityIdNG001
+ * @tc.desc: Test SearchElementInfoByAccessibilityIdNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoByAccessibilityIdNG001, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto embedNode = FrameNode::CreateFrameNode(
+        "embedNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(embedNode, nullptr);
+    embedNode->context_ = AceType::RawPtr(context);
+    embedNode->isActive_ = true;
+
+    uint64_t surfaceId = embedNode->GetId();
+    ElementRegister::GetInstance()->RegisterEmbedNode(surfaceId, embedNode);
+
+    auto rootElement = context->GetRootElement();
+    ASSERT_NE(rootElement, nullptr);
+    rootElement->AddChild(embedNode);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<OHOS::Ace::Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    std::list<OHOS::Ace::Framework::AccessibilityElementInfo> infos;
+    int64_t elementId = embedNode->GetAccessibilityId();
+    jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(
+        elementId, 0, infos, context, UI_EXTENSION_OFFSET_MAX);
+
+    EXPECT_FALSE(infos.empty());
+    EXPECT_NE(infos.front().GetParentNodeId(), -1);
+
+    rootElement->RemoveChild(embedNode);
+}
+
+/**
+ * @tc.name: UpdateElementInfoTreeId001
+ * @tc.desc: Test UpdateElementInfoTreeId with different treeId, parentId, childIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTreeId001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Accessibility::AccessibilityElementInfo info;
+
+    info.SetBelongTreeId(0);
+    info.SetAccessibilityId(100);
+    info.SetParent(200);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    EXPECT_EQ(info.GetBelongTreeId(), 0);
+    EXPECT_EQ(info.GetAccessibilityId(), 100);
+    EXPECT_EQ(info.GetParentNodeId(), 200);
+
+    info.SetBelongTreeId(10);
+    info.SetAccessibilityId(101);
+    info.SetParent(-1);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    EXPECT_EQ(info.GetBelongTreeId(), 10);
+    EXPECT_EQ(info.GetParentNodeId(), -1);
+
+    info.SetBelongTreeId(20);
+    info.SetAccessibilityId(102);
+    int64_t parentId = 202;
+    info.SetParent(parentId);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    int64_t expectedParentId = parentId;
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(20, expectedParentId);
+    EXPECT_EQ(info.GetBelongTreeId(), 20);
+    EXPECT_EQ(info.GetParentNodeId(), expectedParentId);
+
+    info.SetBelongTreeId(30);
+    info.SetAccessibilityId(103);
+    info.SetParent(203);
+    info.AddChild(301);
+    info.AddChild(302);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    EXPECT_EQ(info.GetBelongTreeId(), 30);
+    auto childIds = info.GetChildIds();
+    int64_t childId1 = 301;
+    int64_t childId2 = 302;
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(30, childId1);
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(30, childId2);
+    EXPECT_NE(std::find(childIds.begin(), childIds.end(), childId1), childIds.end());
+    EXPECT_NE(std::find(childIds.begin(), childIds.end(), childId2), childIds.end());
+}
 } // namespace OHOS::Ace::NG
