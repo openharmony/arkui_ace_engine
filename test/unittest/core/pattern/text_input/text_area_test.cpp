@@ -1781,7 +1781,7 @@ HWTEST_F(TextFieldUXTest, TextAreaMaxFontScale001, TestSize.Level1)
 HWTEST_F(TextFieldUXTest, TextFieldEnableAutoSpacing, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node with default text and placeholder
+     * @tc.steps: Create Text filed node with default text and placeholder.
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetEnableAutoSpacing(true);
