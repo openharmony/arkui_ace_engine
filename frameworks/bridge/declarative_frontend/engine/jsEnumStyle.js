@@ -1820,6 +1820,7 @@ let SheetKeyboardAvoidMode;
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.RESIZE_ONLY = 2] = 'RESIZE_ONLY';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_SCROLL = 3] = 'TRANSLATE_AND_SCROLL';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.POPUP_SHEET = 4] = 'POPUP_SHEET';
 })(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
 
 let FunctionKey;

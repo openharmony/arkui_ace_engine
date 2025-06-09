@@ -1591,12 +1591,14 @@ void SheetPresentationPattern::FireCommonCallback()
 
 void SheetPresentationPattern::PopupSheetChanged()
 {
-    if (SheetHeightNeedChanged() || SheetWidthNeedChanged() || typeChanged_) {
+    // when sheet height and width not change, but sheetOffsetY changed because of avoiding keyboard, update offsetY.
+    if (SheetHeightNeedChanged() || SheetWidthNeedChanged() || typeChanged_ || sheetOffsetYChanged_) {
         FireCommonCallback();
         auto renderContext = GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
         typeChanged_ = false;
+        sheetOffsetYChanged_ = false;
     }
 }
 
