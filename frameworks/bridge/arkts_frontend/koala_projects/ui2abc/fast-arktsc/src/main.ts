@@ -37,6 +37,7 @@ export const options = program
     .option('--aot-libs <libs>', 'Comma-separated AOT libraries to include')
     .option('--only-aot <file>', 'AOT an .abc taking --aot-libs into account')
     .option('--aot-target <arm|arm64|x86|x86_64>', 'Compilation target for AOT')
+    .option('--enable-report', 'Enable profiler report')
 
     .parse()
     .opts()
@@ -70,6 +71,7 @@ function produceNinjafile(
     let basename = path.basename(compiler)
     let linker = compiler.replace(basename, 'arklink')
     const stages = intermediateOutDirs.length
+    const enableReport = options.enableReport ? "--enable-report" : ""
 
     for (var i = 0; i < stages; i++) {
         all.push([])
@@ -78,7 +80,7 @@ function produceNinjafile(
     let compilerPrefix = [...Array(stages).keys()].map((i) => `
 rule arkts_compiler_stage${i}
     command = ${tools_prefix}${compiler} --ets-module --arktsconfig ${path.resolve(config)} --output $out ${options.restartStages ? `--restart-stages` : ``} ${stages > 1 ? `--stage ${i}` : ``} $in
-    description = "Compiling ARKTS ${stages > 1 ? `(stage ${i})` : ``} $in"
+    description = "Compiling ARKTS ${stages > 1 ? `(stage ${i})` : ``} ${enableReport} $in"
 `).join('')
 
     let linker_prefix = `

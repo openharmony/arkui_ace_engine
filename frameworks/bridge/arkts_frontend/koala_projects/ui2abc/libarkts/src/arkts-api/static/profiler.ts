@@ -85,10 +85,6 @@ export class Profiler implements PerformanceData {
         return this.pluginsByName[pluginName]
     }
 
-    get enableReport(): boolean {
-        return global.enableReport
-    }
-
     nodeCreated() {
         this.createdNodes++
         if (this.curPlugin) this.getPluginData(this.curPlugin, this.curContextState).createdNodes++
@@ -151,8 +147,6 @@ export class Profiler implements PerformanceData {
     }
 
     reportToFile(withSummary: boolean = false) {
-        if (!this.enableReport) return
-
         const outDir = path.resolve(global.outDir, "./performance-results/")
         if (!fs.existsSync(outDir)) fs.mkdirSync(outDir)
         const outFilePath = path.resolve(outDir, path.basename(this.filePath)) + ".json"

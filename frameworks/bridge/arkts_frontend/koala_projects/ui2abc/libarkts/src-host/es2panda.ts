@@ -32,6 +32,7 @@ function parseCommandLineArgs() {
         .option('--dump-plugin-ast', 'Dump ast before and after each plugin')
         .option('--restart-stages', 'Restart the compiler to proceed to next stage')
         .option('--stage <int>', 'Stage of multistage compilation (from 0 to number of plugins in arktsconfig + 1)')
+        .option('--enable-report', 'Enable profiler report')
         .parse(process.argv)
 
     const cliOptions = commander.opts()
@@ -53,8 +54,9 @@ function parseCommandLineArgs() {
     const dumpAst = cliOptions.dumpPluginAst ?? false
     const restartStages = cliOptions.restartStages ?? false
     const stage = cliOptions.stage ?? 0
+    const enableReport = cliOptions.enableReport ?? false
 
-    return { filePath, configPath, outputPath, dumpAst, restartStages, stage }
+    return { filePath, configPath, outputPath, dumpAst, restartStages, stage, enableReport }
 }
 
 function insertPlugin(
@@ -162,8 +164,8 @@ function invokeWithPlugins(
     restart: boolean,
     stage: number,
     pluginNames: string[],
+    profiler?: Profiler
 ): void {
-    const profiler = global.enableReport ? new Profiler() : undefined
     profiler?.compilationStarted(filePath)
 
     const source = fs.readFileSync(filePath).toString()
@@ -316,7 +318,7 @@ function readAndSortPlugins(configDir: string, plugins: any[]) {
 
 export function main() {
     checkSDK()
-    const { filePath, configPath, outputPath, dumpAst, restartStages, stage } = parseCommandLineArgs()
+    const { filePath, configPath, outputPath, dumpAst, restartStages, stage, enableReport } = parseCommandLineArgs()
     const arktsconfig = JSON.parse(fs.readFileSync(configPath).toString())
     const configDir = path.dirname(configPath)
     const compilerOptions = arktsconfig.compilerOptions ?? throwError(`arktsconfig should specify compilerOptions`)
@@ -328,7 +330,7 @@ export function main() {
 
     const pluginsByState = readAndSortPlugins(configDir, plugins)
 
-    invokeWithPlugins(configPath, packageName, baseUrl, outDir, filePath, outputPath, pluginsByState, dumpAst, restartStages, stage, pluginNames)
+    invokeWithPlugins(configPath, packageName, baseUrl, outDir, filePath, outputPath, pluginsByState, dumpAst, restartStages, stage, pluginNames, enableReport ? new Profiler() : undefined)
 }
 
 function reportErrorAndExit(message: string): never {

@@ -72,6 +72,4 @@ export class global {
         return this._interop
 
     }
-
-    public static enableReport: boolean = false
 }
