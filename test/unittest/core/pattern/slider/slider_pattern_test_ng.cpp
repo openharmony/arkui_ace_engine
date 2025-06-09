@@ -2272,4 +2272,80 @@ HWTEST_F(SliderPatternTestNg, PlayHapticFeedbackTest002, TestSize.Level1)
     sliderPattern->PlayHapticFeedback(true);
     EXPECT_TRUE(sliderPattern->isEnableHaptic_);
 }
+
+/**
+ * @tc.name: SliderPatternTest034
+ * @tc.desc: SliderPattern::UpdateEndsIsShowStepsPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    sliderPattern->stepPoints_.clear();
+    sliderPattern->GetPaintProperty<SliderPaintProperty>()->UpdateShowSteps(true);
+
+    PointF testPosition(0, 0);
+    PointF block(0, 0);
+    SizeF endsSize(0, 0);
+    bool side = true;
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_NO_FATAL_FAILURE(sliderPattern->UpdateEndsIsShowStepsPosition(testPosition, block, endsSize, 0, side));
+}
+
+/**
+ * @tc.name: SliderPatternTest035
+ * @tc.desc: SliderPattern::UpdateEndsIsShowStepsPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    sliderPattern->stepPoints_.clear();
+    sliderPattern->GetPaintProperty<SliderPaintProperty>()->UpdateShowSteps(true);
+
+    PointF testPosition(0, 0);
+    PointF block(0, 0);
+    SizeF endsSize(0, 0);
+    bool side = false;
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_NO_FATAL_FAILURE(sliderPattern->UpdateEndsIsShowStepsPosition(testPosition, block, endsSize, 0, side));
+}
 } // namespace OHOS::Ace::NG

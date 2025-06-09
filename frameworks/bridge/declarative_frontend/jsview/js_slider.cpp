@@ -647,7 +647,7 @@ void JSSlider::SetEnableHapticFeedback(const JSCallbackInfo& info)
 RefPtr<NG::UINode> SetPrefix_SuffixWithFrameNode(const JSRef<JSObject>& sliderJsObject)
 {
     JSRef<JSVal> builderNodeParam = sliderJsObject->GetProperty("builderNode_");
-    if (!builderNodeParam->IsEmpty()) {
+    if (builderNodeParam->IsObject()) {
         auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
         JSRef<JSVal> nodePtr = builderNodeObject->GetProperty("nodePtr_");
         if (!nodePtr.IsEmpty()) {
@@ -672,8 +672,9 @@ void JSSlider::SetPrefix(const JSCallbackInfo& args)
     }
 
     RefPtr<NG::UINode> refPtrUINode = nullptr;
-    auto sliderContentObject = JSRef<JSObject>::Cast(args[0]);
-    if (!sliderContentObject->IsEmpty()) {
+    JSRef<JSObject> sliderContentObject;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        sliderContentObject = JSRef<JSObject>::Cast(args[0]);
         refPtrUINode = SetPrefix_SuffixWithFrameNode(sliderContentObject);
     }
 
@@ -718,8 +719,9 @@ void JSSlider::SetSuffix(const JSCallbackInfo& args)
     }
 
     RefPtr<NG::UINode> refPtrUINode = nullptr;
-    auto sliderContentObject = JSRef<JSObject>::Cast(args[0]);
-    if (!sliderContentObject->IsEmpty()) {
+    JSRef<JSObject> sliderContentObject;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        sliderContentObject = JSRef<JSObject>::Cast(args[0]);
         refPtrUINode = SetPrefix_SuffixWithFrameNode(sliderContentObject);
     }
 
