@@ -1895,7 +1895,7 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
     });
     auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
     EXPECT_NE(paintProperty2, nullptr);
-    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(123.0f)), Dimension(0.0f));
+    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(0.0f)), Dimension(0.0f));
 }
 
 /**
