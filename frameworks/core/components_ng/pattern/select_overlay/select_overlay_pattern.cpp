@@ -676,7 +676,7 @@ void SelectOverlayPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrappe
     CHECK_NULL_VOID(GetIsMenuShowInSubWindow());
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    if (!IsMenuShow()) {
+    if (!IsMenuShow() || !host->IsOnMainTree()) {
         SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(GetContainerId(), host->GetId());
         return;
     }
