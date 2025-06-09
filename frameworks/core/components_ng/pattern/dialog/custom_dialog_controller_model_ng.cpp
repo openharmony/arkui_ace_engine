@@ -50,6 +50,10 @@ void CustomDialogControllerModelNG::SetOpenDialogInTask(const RefPtr<OverlayMana
     const WeakPtr<AceType>& controller, RefPtr<NG::FrameNode>& dialog, DialogProperties& dialogProperties,
     std::function<void()>&& func, bool& isShown)
 {
+    if (!overlayManager || !container) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "set open dialog in task, manager or container is null.");
+        return;
+    }
     dialogProperties.onStatusChanged = [&isShown](bool isShownStatus) {
         if (!isShownStatus) {
             isShown = isShownStatus;
@@ -58,7 +62,7 @@ void CustomDialogControllerModelNG::SetOpenDialogInTask(const RefPtr<OverlayMana
     dialogProperties.isUserCreatedDialog = true;
     auto controllerPtr = controller.Upgrade();
     if (!controllerPtr) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "CustomDialogController is null.");
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "set open dialog in task, controller is null.");
         return;
     }
     if (dialogProperties.isShowInSubWindow) {
@@ -84,7 +88,13 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
 {
     auto task = [currentId, controller, &dialogProperties, &dialogs, func = std::move(buildFunc),
             &hasBind, isShown]() mutable {
+        auto controllerPtr = controller.Upgrade();
+        if (!controllerPtr) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "parse open dialog, controller is null.");
+            return;
+        }
         auto container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
         auto isSubContainer = container->IsSubContainer();
         auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
         if (!expandDisplay && isSubContainer && dialogProperties.isShowInSubWindow) {
