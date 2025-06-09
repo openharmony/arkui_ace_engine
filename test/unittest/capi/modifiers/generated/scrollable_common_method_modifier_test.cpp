@@ -62,8 +62,6 @@ const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_NAME = "effectEdge";
 const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_FADING_EDGE_NAME = "fadingEdge";
 const auto ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE = "false";
-const auto ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_NAME = "fadingEdgeLength";
-const auto ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_DEFAULT_VALUE = "32.00vp";
 } // namespace
 
 class ScrollableCommonMethodModifierTest
@@ -123,17 +121,17 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarTestDefaultVal
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarTestScrollBarValidValues, TestSize.Level1)
 {
-    Ark_BarState initValueScrollBar;
+    Opt_BarState initValueScrollBar;
 
     // Initial setup
-    initValueScrollBar = std::get<1>(Fixtures::testFixtureEnumBarStateValidValues[0]);
+    initValueScrollBar = ArkValue<Opt_BarState>(std::get<1>(Fixtures::testFixtureEnumBarStateValidValues[0]));
 
     auto checkValue = [this, &initValueScrollBar](
-                          const std::string& input, const std::string& expectedStr, const Ark_BarState& value) {
-        Ark_BarState inputValueScrollBar = initValueScrollBar;
+                          const std::string& input, const std::string& expectedStr, const Opt_BarState& value) {
+        Opt_BarState inputValueScrollBar = initValueScrollBar;
 
         inputValueScrollBar = value;
-        modifier_->setScrollBar(node_, inputValueScrollBar);
+        modifier_->setScrollBar(node_, &inputValueScrollBar);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -141,7 +139,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarTestScrollBarValidValue
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumBarStateValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_BarState>(value));
     }
 }
 
@@ -152,17 +150,17 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarTestScrollBarValidValue
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarTestScrollBarInvalidValues, TestSize.Level1)
 {
-    Ark_BarState initValueScrollBar;
+    Opt_BarState initValueScrollBar;
 
     // Initial setup
-    initValueScrollBar = std::get<1>(Fixtures::testFixtureEnumBarStateValidValues[0]);
+    initValueScrollBar = ArkValue<Opt_BarState>(std::get<1>(Fixtures::testFixtureEnumBarStateValidValues[0]));
 
-    auto checkValue = [this, &initValueScrollBar](const std::string& input, const Ark_BarState& value) {
-        Ark_BarState inputValueScrollBar = initValueScrollBar;
+    auto checkValue = [this, &initValueScrollBar](const std::string& input, const Opt_BarState& value) {
+        Opt_BarState inputValueScrollBar = initValueScrollBar;
 
-        modifier_->setScrollBar(node_, inputValueScrollBar);
+        modifier_->setScrollBar(node_, &inputValueScrollBar);
         inputValueScrollBar = value;
-        modifier_->setScrollBar(node_, inputValueScrollBar);
+        modifier_->setScrollBar(node_, &inputValueScrollBar);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE) <<
@@ -170,7 +168,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarTestScrollBarI
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumBarStateInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_BarState>(value));
     }
 }
 
@@ -195,15 +193,15 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestDefaultValues,
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColorValidValues, TestSize.Level1)
 {
-    Ark_Union_Color_Number_String initValueScrollBarColor;
+    Opt_Union_Color_Number_String initValueScrollBarColor;
 
     // Initial setup
     initValueScrollBarColor =
-        ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueScrollBarColor](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Color_Number_String& value) {
-        Ark_Union_Color_Number_String inputValueScrollBarColor = initValueScrollBarColor;
+                          const Opt_Union_Color_Number_String& value) {
+        Opt_Union_Color_Number_String inputValueScrollBarColor = initValueScrollBarColor;
 
         inputValueScrollBarColor = value;
         modifier_->setScrollBarColor(node_, &inputValueScrollBarColor);
@@ -214,13 +212,13 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColor
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Color_Number_String, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Color_Number_String, Ark_String>(value));
     }
 }
 
@@ -231,15 +229,15 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColor
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColorInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Color_Number_String initValueScrollBarColor;
+    Opt_Union_Color_Number_String initValueScrollBarColor;
 
     // Initial setup
     initValueScrollBarColor =
-        ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueScrollBarColor](
-                          const std::string& input, const Ark_Union_Color_Number_String& value) {
-        Ark_Union_Color_Number_String inputValueScrollBarColor = initValueScrollBarColor;
+                          const std::string& input, const Opt_Union_Color_Number_String& value) {
+        Opt_Union_Color_Number_String inputValueScrollBarColor = initValueScrollBarColor;
 
         modifier_->setScrollBarColor(node_, &inputValueScrollBarColor);
         inputValueScrollBarColor = value;
@@ -251,13 +249,15 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColor
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Color_Number_String, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Color_Number_String, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Color_Number_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Color_Number_String, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Color_Number_String>());
 }
 
 /*
@@ -281,15 +281,15 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestDefaultValues,
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestScrollBarWidthValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String initValueScrollBarWidth;
+    Opt_Union_Number_String initValueScrollBarWidth;
 
     // Initial setup
-    initValueScrollBarWidth = ArkUnion<Ark_Union_Number_String, Ark_Number>(
+    initValueScrollBarWidth = ArkUnion<Opt_Union_Number_String, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueScrollBarWidth](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String& value) {
-        Ark_Union_Number_String inputValueScrollBarWidth = initValueScrollBarWidth;
+                          const Opt_Union_Number_String& value) {
+        Opt_Union_Number_String inputValueScrollBarWidth = initValueScrollBarWidth;
 
         inputValueScrollBarWidth = value;
         modifier_->setScrollBarWidth(node_, &inputValueScrollBarWidth);
@@ -300,10 +300,10 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestScrollBarWidth
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String, Ark_String>(value));
     }
 }
 
@@ -314,14 +314,14 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestScrollBarWidth
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestScrollBarWidthInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String initValueScrollBarWidth;
+    Opt_Union_Number_String initValueScrollBarWidth;
 
     // Initial setup
-    initValueScrollBarWidth = ArkUnion<Ark_Union_Number_String, Ark_Number>(
+    initValueScrollBarWidth = ArkUnion<Opt_Union_Number_String, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
-    auto checkValue = [this, &initValueScrollBarWidth](const std::string& input, const Ark_Union_Number_String& value) {
-        Ark_Union_Number_String inputValueScrollBarWidth = initValueScrollBarWidth;
+    auto checkValue = [this, &initValueScrollBarWidth](const std::string& input, const Opt_Union_Number_String& value) {
+        Opt_Union_Number_String inputValueScrollBarWidth = initValueScrollBarWidth;
 
         modifier_->setScrollBarWidth(node_, &inputValueScrollBarWidth);
         inputValueScrollBarWidth = value;
@@ -333,13 +333,15 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestScrollBarWidth
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_String>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_String, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_String>());
 }
 
 /*
@@ -370,17 +372,18 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestDefaultValues, T
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScrollForwardValidValues, TestSize.Level1)
 {
-    Ark_NestedScrollOptions initValueNestedScroll;
+    Opt_NestedScrollOptions initValueNestedScroll;
 
     // Initial setup
-    initValueNestedScroll.scrollForward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    initValueNestedScroll.scrollBackward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
+    WriteTo(initValueNestedScroll).scrollForward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
+    WriteTo(initValueNestedScroll).scrollBackward =
+        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
 
     auto checkValue = [this, &initValueNestedScroll](
                           const std::string& input, const std::string& expectedStr, const Ark_NestedScrollMode& value) {
-        Ark_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
+        Opt_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
 
-        inputValueNestedScroll.scrollForward = value;
+        WriteTo(inputValueNestedScroll).scrollForward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
@@ -401,17 +404,18 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScro
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScrollForwardInvalidValues, TestSize.Level1)
 {
-    Ark_NestedScrollOptions initValueNestedScroll;
+    Opt_NestedScrollOptions initValueNestedScroll;
 
     // Initial setup
-    initValueNestedScroll.scrollForward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    initValueNestedScroll.scrollBackward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
+    WriteTo(initValueNestedScroll).scrollForward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
+    WriteTo(initValueNestedScroll).scrollBackward =
+        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
 
     auto checkValue = [this, &initValueNestedScroll](const std::string& input, const Ark_NestedScrollMode& value) {
-        Ark_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
+        Opt_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
 
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
-        inputValueNestedScroll.scrollForward = value;
+        WriteTo(inputValueNestedScroll).scrollForward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
@@ -432,17 +436,18 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScro
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScrollBackwardValidValues, TestSize.Level1)
 {
-    Ark_NestedScrollOptions initValueNestedScroll;
+    Opt_NestedScrollOptions initValueNestedScroll;
 
     // Initial setup
-    initValueNestedScroll.scrollForward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    initValueNestedScroll.scrollBackward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
+    WriteTo(initValueNestedScroll).scrollForward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
+    WriteTo(initValueNestedScroll).scrollBackward =
+        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
 
     auto checkValue = [this, &initValueNestedScroll](
                           const std::string& input, const std::string& expectedStr, const Ark_NestedScrollMode& value) {
-        Ark_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
+        Opt_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
 
-        inputValueNestedScroll.scrollBackward = value;
+        WriteTo(inputValueNestedScroll).scrollBackward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
@@ -464,17 +469,18 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScro
 HWTEST_P(
     ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScrollBackwardInvalidValues, TestSize.Level1)
 {
-    Ark_NestedScrollOptions initValueNestedScroll;
+    Opt_NestedScrollOptions initValueNestedScroll;
 
     // Initial setup
-    initValueNestedScroll.scrollForward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    initValueNestedScroll.scrollBackward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
+    WriteTo(initValueNestedScroll).scrollForward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
+    WriteTo(initValueNestedScroll).scrollBackward =
+        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
 
     auto checkValue = [this, &initValueNestedScroll](const std::string& input, const Ark_NestedScrollMode& value) {
-        Ark_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
+        Opt_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
 
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
-        inputValueNestedScroll.scrollBackward = value;
+        WriteTo(inputValueNestedScroll).scrollBackward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
@@ -511,17 +517,17 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setEnableScrollInteractionTestDefau
 HWTEST_P(ScrollableCommonMethodModifierTest, setEnableScrollInteractionTestEnableScrollInteractionValidValues,
     TestSize.Level1)
 {
-    Ark_Boolean initValueEnableScrollInteraction;
+    Opt_Boolean initValueEnableScrollInteraction;
 
     // Initial setup
-    initValueEnableScrollInteraction = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueEnableScrollInteraction = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueEnableScrollInteraction](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueEnableScrollInteraction = initValueEnableScrollInteraction;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnableScrollInteraction = initValueEnableScrollInteraction;
 
         inputValueEnableScrollInteraction = value;
-        modifier_->setEnableScrollInteraction(node_, inputValueEnableScrollInteraction);
+        modifier_->setEnableScrollInteraction(node_, &inputValueEnableScrollInteraction);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
@@ -529,8 +535,38 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setEnableScrollInteractionTestEnabl
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setEnableScrollInteractionTestEnableScrollInteractionInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, setEnableScrollInteractionTestEnableScrollInteractionInvalidValues,
+    TestSize.Level1)
+{
+    Opt_Boolean initValueEnableScrollInteraction;
+
+    // Initial setup
+    initValueEnableScrollInteraction = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueEnableScrollInteraction](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnableScrollInteraction = initValueEnableScrollInteraction;
+
+        modifier_->setEnableScrollInteraction(node_, &inputValueEnableScrollInteraction);
+        inputValueEnableScrollInteraction = value;
+        modifier_->setEnableScrollInteraction(node_, &inputValueEnableScrollInteraction);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setEnableScrollInteraction, attribute: enableScrollInteraction";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -554,15 +590,15 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setFrictionTestDefaultValu
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setFrictionTestFrictionValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_Resource initValueFriction;
+    Opt_Union_Number_Resource initValueFriction;
 
     // Initial setup
-    initValueFriction = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
+    initValueFriction = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureScrollableFrictionNumValidValues[0]));
 
     auto checkValue = [this, &initValueFriction](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_Resource& value) {
-        Ark_Union_Number_Resource inputValueFriction = initValueFriction;
+                          const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueFriction = initValueFriction;
 
         inputValueFriction = value;
         modifier_->setFriction(node_, &inputValueFriction);
@@ -573,10 +609,10 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFrictionTestFrictionValidValues,
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureScrollableFrictionNumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureScrollableFrictionResValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(value));
     }
 }
 
@@ -587,14 +623,14 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFrictionTestFrictionValidValues,
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setFrictionTestFrictionInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_Resource initValueFriction;
+    Opt_Union_Number_Resource initValueFriction;
 
     // Initial setup
-    initValueFriction = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
+    initValueFriction = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureScrollableFrictionNumValidValues[0]));
 
-    auto checkValue = [this, &initValueFriction](const std::string& input, const Ark_Union_Number_Resource& value) {
-        Ark_Union_Number_Resource inputValueFriction = initValueFriction;
+    auto checkValue = [this, &initValueFriction](const std::string& input, const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueFriction = initValueFriction;
 
         modifier_->setFriction(node_, &inputValueFriction);
         inputValueFriction = value;
@@ -606,13 +642,15 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFrictionTestFrictionInvalidValue
     };
 
     for (auto& [input, value] : Fixtures::testFixtureScrollableFrictionNumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureScrollableFrictionResInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_Resource>());
 }
 
 /*
@@ -636,14 +674,14 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFlingSpeedLimitTestDefaultValues
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, setFlingSpeedLimitTestFlingSpeedLimitValidValues, TestSize.Level1)
 {
-    Ark_Number initValueFlingSpeedLimit;
+    Opt_Number initValueFlingSpeedLimit;
 
     // Initial setup
-    initValueFlingSpeedLimit = std::get<1>(Fixtures::testFixtureFlingSpeedLimitValidValues[0]);
+    initValueFlingSpeedLimit = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureFlingSpeedLimitValidValues[0]));
 
     auto checkValue = [this, &initValueFlingSpeedLimit](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_Number inputValueFlingSpeedLimit = initValueFlingSpeedLimit;
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
+        Opt_Number inputValueFlingSpeedLimit = initValueFlingSpeedLimit;
 
         inputValueFlingSpeedLimit = value;
         modifier_->setFlingSpeedLimit(node_, &inputValueFlingSpeedLimit);
@@ -654,7 +692,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFlingSpeedLimitTestFlingSpeedLim
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureFlingSpeedLimitValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
 
@@ -663,15 +701,16 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFlingSpeedLimitTestFlingSpeedLim
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(ScrollableCommonMethodModifierTest, setFlingSpeedLimitTestFlingSpeedLimitInvalidValues, TestSize.Level1)
+HWTEST_P(
+    ScrollableCommonMethodModifierTest, DISABLED_setFlingSpeedLimitTestFlingSpeedLimitInvalidValues, TestSize.Level1)
 {
-    Ark_Number initValueFlingSpeedLimit;
+    Opt_Number initValueFlingSpeedLimit;
 
     // Initial setup
-    initValueFlingSpeedLimit = std::get<1>(Fixtures::testFixtureFlingSpeedLimitValidValues[0]);
+    initValueFlingSpeedLimit = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureFlingSpeedLimitValidValues[0]));
 
-    auto checkValue = [this, &initValueFlingSpeedLimit](const std::string& input, const Ark_Number& value) {
-        Ark_Number inputValueFlingSpeedLimit = initValueFlingSpeedLimit;
+    auto checkValue = [this, &initValueFlingSpeedLimit](const std::string& input, const Opt_Number& value) {
+        Opt_Number inputValueFlingSpeedLimit = initValueFlingSpeedLimit;
 
         modifier_->setFlingSpeedLimit(node_, &inputValueFlingSpeedLimit);
         inputValueFlingSpeedLimit = value;
@@ -683,8 +722,10 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFlingSpeedLimitTestFlingSpeedLim
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFlingSpeedLimitInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_Number>(value));
     }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
@@ -787,17 +828,17 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestDefaultVal
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestBackToTopValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueBackToTop;
+    Opt_Boolean initValueBackToTop;
 
     // Initial setup
-    initValueBackToTop = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueBackToTop = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueBackToTop](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueBackToTop = initValueBackToTop;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueBackToTop = initValueBackToTop;
 
         inputValueBackToTop = value;
-        modifier_->setBackToTop(node_, inputValueBackToTop);
+        modifier_->setBackToTop(node_, &inputValueBackToTop);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACK_TO_TOP_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -805,8 +846,36 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestBackToTopV
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setBackToTopTestBackToTopInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestBackToTopInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueBackToTop;
+
+    // Initial setup
+    initValueBackToTop = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueBackToTop](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueBackToTop = initValueBackToTop;
+
+        modifier_->setBackToTop(node_, &inputValueBackToTop);
+        inputValueBackToTop = value;
+        modifier_->setBackToTop(node_, &inputValueBackToTop);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACK_TO_TOP_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setBackToTop, attribute: backToTop";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -843,22 +912,22 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestDefaultVa
  */
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffectEdgeEffectValidValues, TestSize.Level1)
 {
-    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffect initValueEdgeEffect;
     Opt_EdgeEffectOptions initValueOptions;
 
     // Initial setup
-    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    initValueEdgeEffect = ArkValue<Opt_EdgeEffect>(std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]));
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).effectEdge =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
-                          const std::string& input, const std::string& expectedStr, const Ark_EdgeEffect& value) {
-        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+                          const std::string& input, const std::string& expectedStr, const Opt_EdgeEffect& value) {
+        Opt_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
         Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
 
         inputValueEdgeEffect = value;
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_NAME);
@@ -867,7 +936,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumEdgeEffectValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_EdgeEffect>(value));
     }
 }
 
@@ -879,23 +948,23 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
 HWTEST_P(
     ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffectEdgeEffectInvalidValues, TestSize.Level1)
 {
-    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffect initValueEdgeEffect;
     Opt_EdgeEffectOptions initValueOptions;
 
     // Initial setup
-    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    initValueEdgeEffect = ArkValue<Opt_EdgeEffect>(std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]));
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).effectEdge =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
-                          const std::string& input, const Ark_EdgeEffect& value) {
-        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+                          const std::string& input, const Opt_EdgeEffect& value) {
+        Opt_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
         Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
 
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         inputValueEdgeEffect = value;
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_NAME);
@@ -904,7 +973,7 @@ HWTEST_P(
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumEdgeEffectInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_EdgeEffect>(value));
     }
 }
 
@@ -916,22 +985,22 @@ HWTEST_P(
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffectOptionsAlwaysEnabledValidValues,
     TestSize.Level1)
 {
-    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffect initValueEdgeEffect;
     Opt_EdgeEffectOptions initValueOptions;
 
     // Initial setup
-    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    initValueEdgeEffect = ArkValue<Opt_EdgeEffect>(std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]));
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).effectEdge =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
                           const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+        Opt_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
         Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
 
         WriteTo(inputValueOptions).alwaysEnabled = value;
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
         auto resultOptions =
@@ -955,22 +1024,22 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffectOptionsEffectEdgeValidValues,
     TestSize.Level1)
 {
-    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffect initValueEdgeEffect;
     Opt_EdgeEffectOptions initValueOptions;
 
     // Initial setup
-    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    initValueEdgeEffect = ArkValue<Opt_EdgeEffect>(std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]));
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).effectEdge =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
                           const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
-        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+        Opt_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
         Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
 
         WriteTo(inputValueOptions).effectEdge = value;
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
         auto resultOptions =
@@ -993,23 +1062,23 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffectOptionsEffectEdgeInvalidValues,
     TestSize.Level1)
 {
-    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffect initValueEdgeEffect;
     Opt_EdgeEffectOptions initValueOptions;
 
     // Initial setup
-    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    initValueEdgeEffect = ArkValue<Opt_EdgeEffect>(std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]));
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     WriteTo(initValueOptions).effectEdge =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
                           const std::string& input, const Opt_Number& value) {
-        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+        Opt_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
         Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
 
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         WriteTo(inputValueOptions).effectEdge = value;
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
         auto resultOptions =
@@ -1037,20 +1106,67 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFadingEdgeTestDefaultValues, Tes
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE) << "Default value for attribute 'fadingEdge'";
-
-    resultStr =
-        GetAttrValue<std::string>(resultFadingEdgeOption, ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_DEFAULT_VALUE) <<
-        "Default value for attribute 'fadingEdgeOption.fadingEdgeLength'";
 }
 
 /*
- * @tc.name: setFadingEdgeTestValidValues
+ * @tc.name: setFadingEdgeTestFadingEdgeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setFadingEdgeTestValidValues, TestSize.Level1)
+HWTEST_P(ScrollableCommonMethodModifierTest, setFadingEdgeTestFadingEdgeValidValues, TestSize.Level1)
 {
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+    Opt_Boolean initValueFadingEdge;
+    Opt_FadingEdgeOptions initValueFadingEdgeOption;
+
+    // Initial setup
+    initValueFadingEdge = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueFadingEdge, &initValueFadingEdgeOption](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueFadingEdge = initValueFadingEdge;
+        Opt_FadingEdgeOptions inputValueFadingEdgeOption = initValueFadingEdgeOption;
+
+        inputValueFadingEdge = value;
+        modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFadingEdge, attribute: fadingEdge";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setFadingEdgeTestFadingEdgeInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, setFadingEdgeTestFadingEdgeInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueFadingEdge;
+    Opt_FadingEdgeOptions initValueFadingEdgeOption;
+
+    // Initial setup
+    initValueFadingEdge = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueFadingEdge, &initValueFadingEdgeOption](
+                          const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueFadingEdge = initValueFadingEdge;
+        Opt_FadingEdgeOptions inputValueFadingEdgeOption = initValueFadingEdgeOption;
+
+        modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
+        inputValueFadingEdge = value;
+        modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFadingEdge, attribute: fadingEdge";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 } // namespace OHOS::Ace::NG

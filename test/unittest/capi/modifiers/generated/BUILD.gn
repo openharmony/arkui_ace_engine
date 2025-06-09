@@ -19,10 +19,10 @@ ace_unittest("capi_generated_modifiers_test") {
   type = "new"
   module_output = "capi"
   sources = [
-#    "test_fixtures.cpp",
-#    "test_fixtures_enums.cpp",
+    "test_fixtures.cpp",
+    "test_fixtures_enums.cpp",
   ]
-  #sources += generated_sources
+  sources += generated_sources
   extra_deps = []
   extra_deps += [
     "..:capi_deps",

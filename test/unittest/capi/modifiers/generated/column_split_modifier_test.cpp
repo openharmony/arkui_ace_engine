@@ -73,17 +73,17 @@ HWTEST_F(ColumnSplitModifierTest, setResizeableTestDefaultValues, TestSize.Level
  */
 HWTEST_F(ColumnSplitModifierTest, setResizeableTestResizeableValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueResizeable;
+    Opt_Boolean initValueResizeable;
 
     // Initial setup
-    initValueResizeable = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueResizeable = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueResizeable](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueResizeable = initValueResizeable;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueResizeable = initValueResizeable;
 
         inputValueResizeable = value;
-        modifier_->setResizeable(node_, inputValueResizeable);
+        modifier_->setResizeable(node_, &inputValueResizeable);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -91,8 +91,36 @@ HWTEST_F(ColumnSplitModifierTest, setResizeableTestResizeableValidValues, TestSi
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setResizeableTestResizeableInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColumnSplitModifierTest, DISABLED_setResizeableTestResizeableInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueResizeable;
+
+    // Initial setup
+    initValueResizeable = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueResizeable](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueResizeable = initValueResizeable;
+
+        modifier_->setResizeable(node_, &inputValueResizeable);
+        inputValueResizeable = value;
+        modifier_->setResizeable(node_, &inputValueResizeable);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setResizeable, attribute: resizeable";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -127,12 +155,12 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginValidValues, T
 
     // Initial setup
     WriteTo(initValueDivider).startMargin =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkUnion<Opt_Dimension, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueDivider).endMargin =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkUnion<Opt_Dimension, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueDivider](
-                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Dimension& value) {
         Opt_ColumnSplitDividerStyle inputValueDivider = initValueDivider;
 
         WriteTo(inputValueDivider).startMargin = value;
@@ -144,8 +172,14 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginValidValues, T
             "Input value is: " << input << ", method: setDivider, attribute: divider.startMargin";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Dimension, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResAnyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Dimension, Ark_Resource>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Dimension, Ark_String>(value));
     }
 }
 
@@ -160,11 +194,11 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginInvalidValues,
 
     // Initial setup
     WriteTo(initValueDivider).startMargin =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkUnion<Opt_Dimension, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueDivider).endMargin =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkUnion<Opt_Dimension, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
-    auto checkValue = [this, &initValueDivider](const std::string& input, const Opt_Length& value) {
+    auto checkValue = [this, &initValueDivider](const std::string& input, const Opt_Dimension& value) {
         Opt_ColumnSplitDividerStyle inputValueDivider = initValueDivider;
 
         modifier_->setDivider(node_, &inputValueDivider);
@@ -177,8 +211,10 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginInvalidValues,
             "Input value is: " << input << ", method: setDivider, attribute: divider.startMargin";
     };
 
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Dimension, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Length>());
+    checkValue("undefined", ArkValue<Opt_Dimension>());
 }
 
 /*
@@ -192,12 +228,12 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginValidValues, Tes
 
     // Initial setup
     WriteTo(initValueDivider).startMargin =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkUnion<Opt_Dimension, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueDivider).endMargin =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkUnion<Opt_Dimension, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueDivider](
-                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Dimension& value) {
         Opt_ColumnSplitDividerStyle inputValueDivider = initValueDivider;
 
         WriteTo(inputValueDivider).endMargin = value;
@@ -209,8 +245,14 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginValidValues, Tes
             "Input value is: " << input << ", method: setDivider, attribute: divider.endMargin";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Dimension, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResAnyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Dimension, Ark_Resource>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Dimension, Ark_String>(value));
     }
 }
 
@@ -225,11 +267,11 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginInvalidValues, T
 
     // Initial setup
     WriteTo(initValueDivider).startMargin =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkUnion<Opt_Dimension, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueDivider).endMargin =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
+        ArkUnion<Opt_Dimension, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
-    auto checkValue = [this, &initValueDivider](const std::string& input, const Opt_Length& value) {
+    auto checkValue = [this, &initValueDivider](const std::string& input, const Opt_Dimension& value) {
         Opt_ColumnSplitDividerStyle inputValueDivider = initValueDivider;
 
         modifier_->setDivider(node_, &inputValueDivider);
@@ -242,7 +284,9 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginInvalidValues, T
             "Input value is: " << input << ", method: setDivider, attribute: divider.endMargin";
     };
 
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Dimension, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Length>());
+    checkValue("undefined", ArkValue<Opt_Dimension>());
 }
 } // namespace OHOS::Ace::NG

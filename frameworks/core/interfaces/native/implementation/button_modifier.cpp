@@ -149,7 +149,7 @@ void StateEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
-    ButtonModelStatic::SetStateEffect(frameNode, *convValue);
+    ButtonModelStatic::SetStateEffect(frameNode, convValue);
 }
 void ButtonStyleImpl(Ark_NativePointer node,
                      const Opt_ButtonStyleMode* value)

@@ -18,26 +18,135 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::Slider;
 /*
+ * @tc.name: setEnableHapticFeedbackTestEnableHapticFeedbackInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueEnableHapticFeedback;
+
+    // Initial setup
+    initValueEnableHapticFeedback = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueEnableHapticFeedback](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
+
+        modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
+        inputValueEnableHapticFeedback = value;
+        modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
+ * @tc.name: setShowTipsTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setShowTipsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_TIPS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_TIPS_DEFAULT_VALUE) << "Default value for attribute 'showTips'";
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) << "Default value for attribute 'content'";
+}
+
+/*
+ * @tc.name: setShowTipsTestShowTipsValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setShowTipsTestShowTipsValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueShowTips;
+    Opt_ResourceStr initValueContent;
+
+    // Initial setup
+    initValueShowTips = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    initValueContent = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+
+    auto checkValue = [this, &initValueShowTips, &initValueContent](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueShowTips = initValueShowTips;
+        Opt_ResourceStr inputValueContent = initValueContent;
+
+        inputValueShowTips = value;
+        modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_TIPS_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setShowTips, attribute: showTips";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setShowTipsTestShowTipsInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, DISABLED_setShowTipsTestShowTipsInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueShowTips;
+    Opt_ResourceStr initValueContent;
+
+    // Initial setup
+    initValueShowTips = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    initValueContent = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+
+    auto checkValue = [this, &initValueShowTips, &initValueContent](
+                          const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueShowTips = initValueShowTips;
+        Opt_ResourceStr inputValueContent = initValueContent;
+
+        modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
+        inputValueShowTips = value;
+        modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_TIPS_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_TIPS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setShowTips, attribute: showTips";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
  * @tc.name: setShowTipsTestContentValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(SliderModifierTest, setShowTipsTestContentValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueShowTips;
+    Opt_Boolean initValueShowTips;
     Opt_ResourceStr initValueContent;
 
     // Initial setup
-    initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueShowTips = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     initValueContent = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueShowTips, &initValueContent](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
-        Ark_Boolean inputValueShowTips = initValueShowTips;
+        Opt_Boolean inputValueShowTips = initValueShowTips;
         Opt_ResourceStr inputValueContent = initValueContent;
 
         inputValueContent = value;
-        modifier_->setShowTips(node_, inputValueShowTips, &inputValueContent);
+        modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setShowTips, attribute: content";
@@ -58,21 +167,21 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentValidValues, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTest, setShowTipsTestContentInvalidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueShowTips;
+    Opt_Boolean initValueShowTips;
     Opt_ResourceStr initValueContent;
 
     // Initial setup
-    initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueShowTips = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     initValueContent = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueShowTips, &initValueContent](
                           const std::string& input, const Opt_ResourceStr& value) {
-        Ark_Boolean inputValueShowTips = initValueShowTips;
+        Opt_Boolean inputValueShowTips = initValueShowTips;
         Opt_ResourceStr inputValueContent = initValueContent;
 
-        modifier_->setShowTips(node_, inputValueShowTips, &inputValueContent);
+        modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
         inputValueContent = value;
-        modifier_->setShowTips(node_, inputValueShowTips, &inputValueContent);
+        modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) <<

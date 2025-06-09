@@ -431,7 +431,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
     auto originMax = layoutConstraint_->maxSize;
-    
+
     CheckCalcLayoutConstraint(parentConstraint);
     CheckSelfIdealSize(originMax);
     CheckBorderAndPadding();
@@ -821,7 +821,7 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
     float paddingVerticalDefault, float borderHorizontalDefault, float borderVerticalDefault)
 {
     auto safeAreaPadding = GetOrCreateSafeAreaPadding();
-    DefaultPaddingBorderParam defaultParem = { .horizontalPadding = paddingHorizontalDefault,
+    DefaultPaddingBorderParam defaultParam = { .horizontalPadding = paddingHorizontalDefault,
         .verticalPadding = paddingVerticalDefault,
         .horizontalBorder = borderHorizontalDefault,
         .verticalBorder = borderVerticalDefault };
@@ -830,13 +830,13 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
             padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
         auto borderWidth = ConvertToBorderWidthPropertyF(
             borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
-        return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParem);
+        return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
     }
     auto padding = ConvertToPaddingPropertyF(
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
     auto borderWidth = ConvertToBorderWidthPropertyF(
         borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
-    return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParem);
+    return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
 }
 
 PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstraint, bool roundPixel)
@@ -1086,6 +1086,9 @@ void LayoutProperty::UpdateLayoutWeight(float value)
 
 void LayoutProperty::UpdateChainWeight(const ChainWeightPair& value)
 {
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
     if (flexItemProperty_->UpdateChainWeight(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }

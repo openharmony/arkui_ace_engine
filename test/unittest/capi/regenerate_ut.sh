@@ -37,7 +37,12 @@ if [[ ! -d $IDLIZE_PATH ]]; then
     GENERATOR=${GENERATOR_ARG:=npx --yes @azanat/idlize@$IDLIZE_VER --dts2peer}
 else
     # Use the below to run generator from your idlize workspace
-    GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/lib/index.js --dts2peer}
+    GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/arkgen/lib/index.js --idl2peer}
+    if [[ ! -d $IDLIZE_PATH/etsgen/out/idl ]]; then
+        echo "Please generated IDL files in Idlize folder: $IDLIZE_PATH/etsgen/out/idl"
+        exit 1
+    fi
+    INPUT_FILES=$(find $IDLIZE_PATH/etsgen/out/idl -type f)
 fi
 
 API_VER=${API_VER:=99}
@@ -55,19 +60,21 @@ echo "Preprocessing SDK..."
 rm -rf ${TMP_DIR}
 mkdir -p ${TMP_DIR}
 
-${PREPROCESSOR} \
-    --path ${OHOS_DIR}/interface/sdk-js --output ${INT_INF}
+#${PREPROCESSOR} \
+#    --path ${OHOS_DIR}/interface/sdk-js --output ${INT_INF}
 #    --input-dir ${OHOS_DIR}/interface/sdk-js --output-dir ${INT_INF}
 
 echo "Generating C API from ${DTS_DIR} to ${DEST_DIR} with ${GENERATOR}"
 
+#--idl2peer --reference-names generation-config/references/ets-sdk.refs.json --no-type-checker --input-files $(find ../etsgen/out/idl -type f | tr '\\n' ' ') --output-dir out/ets-arkts-peers/generated --language arkts",
 ${GENERATOR} \
-    --ace-types ace_types.json5 \
+    --options-file-unittest ace_types.json5 \
     --output-dir ${TMP_DIR} \
-    --input-dir ${DTS_DIR} \
+    --input-files ${INPUT_FILES} \
     --generator-target libaceut \
-    --libace-destination ${OUT_DIR} \
-    --api-version ${API_VER}
+    --libace-destination ${OUT_DIR}
+
+#    --input-dir ${DTS_DIR} \
 
 # Re-format everything
 cp ../../../.clang-format ${OUT_DIR}

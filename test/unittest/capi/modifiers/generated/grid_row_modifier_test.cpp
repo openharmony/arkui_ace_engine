@@ -77,17 +77,17 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestDefaultValues, TestSize.
  */
 HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsValidValues, TestSize.Level1)
 {
-    Ark_ItemAlign initValueAlignItems;
+    Opt_ItemAlign initValueAlignItems;
 
     // Initial setup
-    initValueAlignItems = std::get<1>(Fixtures::testFixtureEnumItemAlignValidValues[0]);
+    initValueAlignItems = ArkValue<Opt_ItemAlign>(std::get<1>(Fixtures::testFixtureEnumItemAlignValidValues[0]));
 
     auto checkValue = [this, &initValueAlignItems](
-                          const std::string& input, const std::string& expectedStr, const Ark_ItemAlign& value) {
-        Ark_ItemAlign inputValueAlignItems = initValueAlignItems;
+                          const std::string& input, const std::string& expectedStr, const Opt_ItemAlign& value) {
+        Opt_ItemAlign inputValueAlignItems = initValueAlignItems;
 
         inputValueAlignItems = value;
-        modifier_->setAlignItems(node_, inputValueAlignItems);
+        modifier_->setAlignItems(node_, &inputValueAlignItems);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -95,7 +95,7 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsValidValues, T
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumItemAlignValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_ItemAlign>(value));
     }
 }
 
@@ -106,17 +106,17 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsValidValues, T
  */
 HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsInvalidValues, TestSize.Level1)
 {
-    Ark_ItemAlign initValueAlignItems;
+    Opt_ItemAlign initValueAlignItems;
 
     // Initial setup
-    initValueAlignItems = std::get<1>(Fixtures::testFixtureEnumItemAlignValidValues[0]);
+    initValueAlignItems = ArkValue<Opt_ItemAlign>(std::get<1>(Fixtures::testFixtureEnumItemAlignValidValues[0]));
 
-    auto checkValue = [this, &initValueAlignItems](const std::string& input, const Ark_ItemAlign& value) {
-        Ark_ItemAlign inputValueAlignItems = initValueAlignItems;
+    auto checkValue = [this, &initValueAlignItems](const std::string& input, const Opt_ItemAlign& value) {
+        Opt_ItemAlign inputValueAlignItems = initValueAlignItems;
 
-        modifier_->setAlignItems(node_, inputValueAlignItems);
+        modifier_->setAlignItems(node_, &inputValueAlignItems);
         inputValueAlignItems = value;
-        modifier_->setAlignItems(node_, inputValueAlignItems);
+        modifier_->setAlignItems(node_, &inputValueAlignItems);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE) <<
@@ -124,7 +124,7 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsInvalidValues,
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumItemAlignInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_ItemAlign>(value));
     }
 }
 } // namespace OHOS::Ace::NG

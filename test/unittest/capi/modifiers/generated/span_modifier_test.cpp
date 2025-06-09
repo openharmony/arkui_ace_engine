@@ -207,21 +207,23 @@ HWTEST_F(SpanModifierTest, setFontTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontTestFontSizeValidValues, TestSize.Level1)
 {
-    Ark_Font initValueFont;
+    Opt_Font initValueFont;
 
     // Initial setup
-    initValueFont.size = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    initValueFont.weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    initValueFont.family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(initValueFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    initValueFont.style = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteTo(initValueFont).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_Font inputValueFont = initValueFont;
+        Opt_Font inputValueFont = initValueFont;
 
-        inputValueFont.size = value;
+        WriteTo(inputValueFont).size = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
@@ -229,8 +231,14 @@ HWTEST_F(SpanModifierTest, setFontTestFontSizeValidValues, TestSize.Level1)
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setFont, attribute: font.size";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
 
@@ -241,21 +249,23 @@ HWTEST_F(SpanModifierTest, setFontTestFontSizeValidValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontTestFontSizeInvalidValues, TestSize.Level1)
 {
-    Ark_Font initValueFont;
+    Opt_Font initValueFont;
 
     // Initial setup
-    initValueFont.size = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    initValueFont.weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    initValueFont.family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(initValueFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    initValueFont.style = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteTo(initValueFont).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](const std::string& input, const Opt_Length& value) {
-        Ark_Font inputValueFont = initValueFont;
+        Opt_Font inputValueFont = initValueFont;
 
         modifier_->setFont(node_, &inputValueFont);
-        inputValueFont.size = value;
+        WriteTo(inputValueFont).size = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
@@ -265,8 +275,16 @@ HWTEST_F(SpanModifierTest, setFontTestFontSizeInvalidValues, TestSize.Level1)
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
     }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Length>());
 }
@@ -278,21 +296,23 @@ HWTEST_F(SpanModifierTest, setFontTestFontSizeInvalidValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontTestFontWeightValidValues, TestSize.Level1)
 {
-    Ark_Font initValueFont;
+    Opt_Font initValueFont;
 
     // Initial setup
-    initValueFont.size = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    initValueFont.weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    initValueFont.family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(initValueFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    initValueFont.style = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteTo(initValueFont).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_FontWeight_Number_String& value) {
-        Ark_Font inputValueFont = initValueFont;
+        Opt_Font inputValueFont = initValueFont;
 
-        inputValueFont.weight = value;
+        WriteTo(inputValueFont).weight = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
@@ -318,22 +338,24 @@ HWTEST_F(SpanModifierTest, setFontTestFontWeightValidValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontTestFontWeightInvalidValues, TestSize.Level1)
 {
-    Ark_Font initValueFont;
+    Opt_Font initValueFont;
 
     // Initial setup
-    initValueFont.size = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    initValueFont.weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    initValueFont.family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(initValueFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    initValueFont.style = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteTo(initValueFont).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](
                           const std::string& input, const Opt_Union_FontWeight_Number_String& value) {
-        Ark_Font inputValueFont = initValueFont;
+        Opt_Font inputValueFont = initValueFont;
 
         modifier_->setFont(node_, &inputValueFont);
-        inputValueFont.weight = value;
+        WriteTo(inputValueFont).weight = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
@@ -364,21 +386,23 @@ HWTEST_F(SpanModifierTest, setFontTestFontWeightInvalidValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, DISABLED_setFontTestFontFamilyValidValues, TestSize.Level1)
 {
-    Ark_Font initValueFont;
+    Opt_Font initValueFont;
 
     // Initial setup
-    initValueFont.size = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    initValueFont.weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    initValueFont.family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(initValueFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    initValueFont.style = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteTo(initValueFont).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_String_Resource& value) {
-        Ark_Font inputValueFont = initValueFont;
+        Opt_Font inputValueFont = initValueFont;
 
-        inputValueFont.family = value;
+        WriteTo(inputValueFont).family = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
@@ -401,21 +425,23 @@ HWTEST_F(SpanModifierTest, DISABLED_setFontTestFontFamilyValidValues, TestSize.L
  */
 HWTEST_F(SpanModifierTest, setFontTestFontFamilyInvalidValues, TestSize.Level1)
 {
-    Ark_Font initValueFont;
+    Opt_Font initValueFont;
 
     // Initial setup
-    initValueFont.size = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    initValueFont.weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    initValueFont.family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(initValueFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    initValueFont.style = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteTo(initValueFont).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](const std::string& input, const Opt_Union_String_Resource& value) {
-        Ark_Font inputValueFont = initValueFont;
+        Opt_Font inputValueFont = initValueFont;
 
         modifier_->setFont(node_, &inputValueFont);
-        inputValueFont.family = value;
+        WriteTo(inputValueFont).family = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
@@ -443,21 +469,23 @@ HWTEST_F(SpanModifierTest, setFontTestFontFamilyInvalidValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontTestFontStyleValidValues, TestSize.Level1)
 {
-    Ark_Font initValueFont;
+    Opt_Font initValueFont;
 
     // Initial setup
-    initValueFont.size = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    initValueFont.weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    initValueFont.family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(initValueFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    initValueFont.style = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteTo(initValueFont).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](
                           const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
-        Ark_Font inputValueFont = initValueFont;
+        Opt_Font inputValueFont = initValueFont;
 
-        inputValueFont.style = value;
+        WriteTo(inputValueFont).style = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
@@ -477,21 +505,23 @@ HWTEST_F(SpanModifierTest, setFontTestFontStyleValidValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontTestFontStyleInvalidValues, TestSize.Level1)
 {
-    Ark_Font initValueFont;
+    Opt_Font initValueFont;
 
     // Initial setup
-    initValueFont.size = ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    initValueFont.weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    initValueFont.family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(initValueFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    initValueFont.style = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
+    WriteTo(initValueFont).style =
+        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](const std::string& input, const Opt_FontStyle& value) {
-        Ark_Font inputValueFont = initValueFont;
+        Opt_Font inputValueFont = initValueFont;
 
         modifier_->setFont(node_, &inputValueFont);
-        inputValueFont.style = value;
+        WriteTo(inputValueFont).style = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
@@ -526,15 +556,15 @@ HWTEST_F(SpanModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1)
 {
-    Ark_ResourceColor initValueFontColor;
+    Opt_ResourceColor initValueFontColor;
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](
-                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueFontColor = initValueFontColor;
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Opt_ResourceColor inputValueFontColor = initValueFontColor;
 
         inputValueFontColor = value;
         modifier_->setFontColor(node_, &inputValueFontColor);
@@ -545,16 +575,16 @@ HWTEST_F(SpanModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -565,14 +595,14 @@ HWTEST_F(SpanModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1
  */
 HWTEST_F(SpanModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Level1)
 {
-    Ark_ResourceColor initValueFontColor;
+    Opt_ResourceColor initValueFontColor;
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueFontColor](const std::string& input, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueFontColor = initValueFontColor;
+    auto checkValue = [this, &initValueFontColor](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_ResourceColor inputValueFontColor = initValueFontColor;
 
         modifier_->setFontColor(node_, &inputValueFontColor);
         inputValueFontColor = value;
@@ -584,13 +614,15 @@ HWTEST_F(SpanModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Leve
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
 }
 
 /*
@@ -614,15 +646,15 @@ HWTEST_F(SpanModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueFontSize;
+    Opt_Union_Number_String_Resource initValueFontSize;
 
     // Initial setup
-    initValueFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
+                          const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
 
         inputValueFontSize = value;
         modifier_->setFontSize(node_, &inputValueFontSize);
@@ -633,13 +665,13 @@ HWTEST_F(SpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
 }
 
@@ -650,15 +682,15 @@ HWTEST_F(SpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueFontSize;
+    Opt_Union_Number_String_Resource initValueFontSize;
 
     // Initial setup
-    initValueFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](
-                          const std::string& input, const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
+                          const std::string& input, const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
 
         modifier_->setFontSize(node_, &inputValueFontSize);
         inputValueFontSize = value;
@@ -670,16 +702,18 @@ HWTEST_F(SpanModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_String_Resource>());
 }
 
 /*
@@ -703,17 +737,17 @@ HWTEST_F(SpanModifierTest, setFontStyleTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontStyleTestFontStyleValidValues, TestSize.Level1)
 {
-    Ark_FontStyle initValueFontStyle;
+    Opt_FontStyle initValueFontStyle;
 
     // Initial setup
-    initValueFontStyle = std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]);
+    initValueFontStyle = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFontStyle](
-                          const std::string& input, const std::string& expectedStr, const Ark_FontStyle& value) {
-        Ark_FontStyle inputValueFontStyle = initValueFontStyle;
+                          const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
+        Opt_FontStyle inputValueFontStyle = initValueFontStyle;
 
         inputValueFontStyle = value;
-        modifier_->setFontStyle(node_, inputValueFontStyle);
+        modifier_->setFontStyle(node_, &inputValueFontStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -721,7 +755,7 @@ HWTEST_F(SpanModifierTest, setFontStyleTestFontStyleValidValues, TestSize.Level1
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontStyleValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_FontStyle>(value));
     }
 }
 
@@ -732,17 +766,17 @@ HWTEST_F(SpanModifierTest, setFontStyleTestFontStyleValidValues, TestSize.Level1
  */
 HWTEST_F(SpanModifierTest, setFontStyleTestFontStyleInvalidValues, TestSize.Level1)
 {
-    Ark_FontStyle initValueFontStyle;
+    Opt_FontStyle initValueFontStyle;
 
     // Initial setup
-    initValueFontStyle = std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]);
+    initValueFontStyle = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
-    auto checkValue = [this, &initValueFontStyle](const std::string& input, const Ark_FontStyle& value) {
-        Ark_FontStyle inputValueFontStyle = initValueFontStyle;
+    auto checkValue = [this, &initValueFontStyle](const std::string& input, const Opt_FontStyle& value) {
+        Opt_FontStyle inputValueFontStyle = initValueFontStyle;
 
-        modifier_->setFontStyle(node_, inputValueFontStyle);
+        modifier_->setFontStyle(node_, &inputValueFontStyle);
         inputValueFontStyle = value;
-        modifier_->setFontStyle(node_, inputValueFontStyle);
+        modifier_->setFontStyle(node_, &inputValueFontStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE) <<
@@ -750,7 +784,7 @@ HWTEST_F(SpanModifierTest, setFontStyleTestFontStyleInvalidValues, TestSize.Leve
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFontStyleInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_FontStyle>(value));
     }
 }
 
@@ -775,15 +809,15 @@ HWTEST_F(SpanModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_FontWeight_String initValueFontWeight;
+    Opt_Union_Number_FontWeight_String initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_FontWeight_String& value) {
-        Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
+                          const Opt_Union_Number_FontWeight_String& value) {
+        Opt_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
 
         inputValueFontWeight = value;
         modifier_->setFontWeight(node_, &inputValueFontWeight);
@@ -794,13 +828,13 @@ HWTEST_F(SpanModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Leve
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(value));
     }
 }
 
@@ -811,15 +845,15 @@ HWTEST_F(SpanModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Leve
  */
 HWTEST_F(SpanModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_FontWeight_String initValueFontWeight;
+    Opt_Union_Number_FontWeight_String initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](
-                          const std::string& input, const Ark_Union_Number_FontWeight_String& value) {
-        Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
+                          const std::string& input, const Opt_Union_Number_FontWeight_String& value) {
+        Opt_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
 
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         inputValueFontWeight = value;
@@ -831,16 +865,18 @@ HWTEST_F(SpanModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Le
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_FontWeight_String>());
 }
 
 /*
@@ -864,15 +900,15 @@ HWTEST_F(SpanModifierTest, setFontFamilyTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource initValueFontFamily;
+    Opt_Union_String_Resource initValueFontFamily;
 
     // Initial setup
-    initValueFontFamily = ArkUnion<Ark_Union_String_Resource, Ark_Resource>(
+    initValueFontFamily = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
 
     auto checkValue = [this, &initValueFontFamily](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_String_Resource& value) {
-        Ark_Union_String_Resource inputValueFontFamily = initValueFontFamily;
+                          const Opt_Union_String_Resource& value) {
+        Opt_Union_String_Resource inputValueFontFamily = initValueFontFamily;
 
         inputValueFontFamily = value;
         modifier_->setFontFamily(node_, &inputValueFontFamily);
@@ -883,10 +919,10 @@ HWTEST_F(SpanModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues, Test
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyResourceValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyStringValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
     }
 }
 
@@ -897,14 +933,14 @@ HWTEST_F(SpanModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues, Test
  */
 HWTEST_F(SpanModifierTest, setFontFamilyTestFontFamilyInvalidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource initValueFontFamily;
+    Opt_Union_String_Resource initValueFontFamily;
 
     // Initial setup
-    initValueFontFamily = ArkUnion<Ark_Union_String_Resource, Ark_Resource>(
+    initValueFontFamily = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
 
-    auto checkValue = [this, &initValueFontFamily](const std::string& input, const Ark_Union_String_Resource& value) {
-        Ark_Union_String_Resource inputValueFontFamily = initValueFontFamily;
+    auto checkValue = [this, &initValueFontFamily](const std::string& input, const Opt_Union_String_Resource& value) {
+        Opt_Union_String_Resource inputValueFontFamily = initValueFontFamily;
 
         modifier_->setFontFamily(node_, &inputValueFontFamily);
         inputValueFontFamily = value;
@@ -916,13 +952,15 @@ HWTEST_F(SpanModifierTest, setFontFamilyTestFontFamilyInvalidValues, TestSize.Le
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontFamilyResourceInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureFontFamilyStringInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_String_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_String_Resource>());
 }
 
 /*
@@ -956,20 +994,20 @@ HWTEST_F(SpanModifierTest, setDecorationTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setDecorationTestDecorationTypeValidValues, TestSize.Level1)
 {
-    Ark_DecorationStyleInterface initValueDecoration;
+    Opt_DecorationStyleInterface initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const std::string& expectedStr,
                           const Ark_TextDecorationType& value) {
-        Ark_DecorationStyleInterface inputValueDecoration = initValueDecoration;
+        Opt_DecorationStyleInterface inputValueDecoration = initValueDecoration;
 
-        inputValueDecoration.type = value;
+        WriteTo(inputValueDecoration).type = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -990,20 +1028,20 @@ HWTEST_F(SpanModifierTest, setDecorationTestDecorationTypeValidValues, TestSize.
  */
 HWTEST_F(SpanModifierTest, setDecorationTestDecorationTypeInvalidValues, TestSize.Level1)
 {
-    Ark_DecorationStyleInterface initValueDecoration;
+    Opt_DecorationStyleInterface initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const Ark_TextDecorationType& value) {
-        Ark_DecorationStyleInterface inputValueDecoration = initValueDecoration;
+        Opt_DecorationStyleInterface inputValueDecoration = initValueDecoration;
 
         modifier_->setDecoration(node_, &inputValueDecoration);
-        inputValueDecoration.type = value;
+        WriteTo(inputValueDecoration).type = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1024,20 +1062,20 @@ HWTEST_F(SpanModifierTest, setDecorationTestDecorationTypeInvalidValues, TestSiz
  */
 HWTEST_F(SpanModifierTest, setDecorationTestDecorationColorValidValues, TestSize.Level1)
 {
-    Ark_DecorationStyleInterface initValueDecoration;
+    Opt_DecorationStyleInterface initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
-        Ark_DecorationStyleInterface inputValueDecoration = initValueDecoration;
+        Opt_DecorationStyleInterface inputValueDecoration = initValueDecoration;
 
-        inputValueDecoration.color = value;
+        WriteTo(inputValueDecoration).color = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1067,20 +1105,20 @@ HWTEST_F(SpanModifierTest, setDecorationTestDecorationColorValidValues, TestSize
  */
 HWTEST_F(SpanModifierTest, setDecorationTestDecorationColorInvalidValues, TestSize.Level1)
 {
-    Ark_DecorationStyleInterface initValueDecoration;
+    Opt_DecorationStyleInterface initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const Opt_ResourceColor& value) {
-        Ark_DecorationStyleInterface inputValueDecoration = initValueDecoration;
+        Opt_DecorationStyleInterface inputValueDecoration = initValueDecoration;
 
         modifier_->setDecoration(node_, &inputValueDecoration);
-        inputValueDecoration.color = value;
+        WriteTo(inputValueDecoration).color = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1108,20 +1146,20 @@ HWTEST_F(SpanModifierTest, setDecorationTestDecorationColorInvalidValues, TestSi
  */
 HWTEST_F(SpanModifierTest, setDecorationTestDecorationStyleValidValues, TestSize.Level1)
 {
-    Ark_DecorationStyleInterface initValueDecoration;
+    Opt_DecorationStyleInterface initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const std::string& expectedStr,
                           const Opt_TextDecorationStyle& value) {
-        Ark_DecorationStyleInterface inputValueDecoration = initValueDecoration;
+        Opt_DecorationStyleInterface inputValueDecoration = initValueDecoration;
 
-        inputValueDecoration.style = value;
+        WriteTo(inputValueDecoration).style = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1142,20 +1180,20 @@ HWTEST_F(SpanModifierTest, setDecorationTestDecorationStyleValidValues, TestSize
  */
 HWTEST_F(SpanModifierTest, setDecorationTestDecorationStyleInvalidValues, TestSize.Level1)
 {
-    Ark_DecorationStyleInterface initValueDecoration;
+    Opt_DecorationStyleInterface initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const Opt_TextDecorationStyle& value) {
-        Ark_DecorationStyleInterface inputValueDecoration = initValueDecoration;
+        Opt_DecorationStyleInterface inputValueDecoration = initValueDecoration;
 
         modifier_->setDecoration(node_, &inputValueDecoration);
-        inputValueDecoration.style = value;
+        WriteTo(inputValueDecoration).style = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1190,15 +1228,15 @@ HWTEST_F(SpanModifierTest, setLetterSpacingTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setLetterSpacingTestLetterSpacingValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String initValueLetterSpacing;
+    Opt_Union_Number_String initValueLetterSpacing;
 
     // Initial setup
     initValueLetterSpacing =
-        ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String& value) {
-        Ark_Union_Number_String inputValueLetterSpacing = initValueLetterSpacing;
+                          const Opt_Union_Number_String& value) {
+        Opt_Union_Number_String inputValueLetterSpacing = initValueLetterSpacing;
 
         inputValueLetterSpacing = value;
         modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
@@ -1209,10 +1247,10 @@ HWTEST_F(SpanModifierTest, setLetterSpacingTestLetterSpacingValidValues, TestSiz
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonPercValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String, Ark_String>(value));
     }
 }
 
@@ -1223,14 +1261,14 @@ HWTEST_F(SpanModifierTest, setLetterSpacingTestLetterSpacingValidValues, TestSiz
  */
 HWTEST_F(SpanModifierTest, setLetterSpacingTestLetterSpacingInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String initValueLetterSpacing;
+    Opt_Union_Number_String initValueLetterSpacing;
 
     // Initial setup
     initValueLetterSpacing =
-        ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
-    auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const Ark_Union_Number_String& value) {
-        Ark_Union_Number_String inputValueLetterSpacing = initValueLetterSpacing;
+    auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const Opt_Union_Number_String& value) {
+        Opt_Union_Number_String inputValueLetterSpacing = initValueLetterSpacing;
 
         modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
         inputValueLetterSpacing = value;
@@ -1242,10 +1280,12 @@ HWTEST_F(SpanModifierTest, setLetterSpacingTestLetterSpacingInvalidValues, TestS
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonPercInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_String>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_String, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_String>());
 }
 
 /*
@@ -1269,17 +1309,17 @@ HWTEST_F(SpanModifierTest, setTextCaseTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setTextCaseTestTextCaseValidValues, TestSize.Level1)
 {
-    Ark_TextCase initValueTextCase;
+    Opt_TextCase initValueTextCase;
 
     // Initial setup
-    initValueTextCase = std::get<1>(Fixtures::testFixtureEnumTextCaseValidValues[0]);
+    initValueTextCase = ArkValue<Opt_TextCase>(std::get<1>(Fixtures::testFixtureEnumTextCaseValidValues[0]));
 
     auto checkValue = [this, &initValueTextCase](
-                          const std::string& input, const std::string& expectedStr, const Ark_TextCase& value) {
-        Ark_TextCase inputValueTextCase = initValueTextCase;
+                          const std::string& input, const std::string& expectedStr, const Opt_TextCase& value) {
+        Opt_TextCase inputValueTextCase = initValueTextCase;
 
         inputValueTextCase = value;
-        modifier_->setTextCase(node_, inputValueTextCase);
+        modifier_->setTextCase(node_, &inputValueTextCase);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_CASE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1287,7 +1327,7 @@ HWTEST_F(SpanModifierTest, setTextCaseTestTextCaseValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextCaseValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_TextCase>(value));
     }
 }
 
@@ -1298,17 +1338,17 @@ HWTEST_F(SpanModifierTest, setTextCaseTestTextCaseValidValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setTextCaseTestTextCaseInvalidValues, TestSize.Level1)
 {
-    Ark_TextCase initValueTextCase;
+    Opt_TextCase initValueTextCase;
 
     // Initial setup
-    initValueTextCase = std::get<1>(Fixtures::testFixtureEnumTextCaseValidValues[0]);
+    initValueTextCase = ArkValue<Opt_TextCase>(std::get<1>(Fixtures::testFixtureEnumTextCaseValidValues[0]));
 
-    auto checkValue = [this, &initValueTextCase](const std::string& input, const Ark_TextCase& value) {
-        Ark_TextCase inputValueTextCase = initValueTextCase;
+    auto checkValue = [this, &initValueTextCase](const std::string& input, const Opt_TextCase& value) {
+        Opt_TextCase inputValueTextCase = initValueTextCase;
 
-        modifier_->setTextCase(node_, inputValueTextCase);
+        modifier_->setTextCase(node_, &inputValueTextCase);
         inputValueTextCase = value;
-        modifier_->setTextCase(node_, inputValueTextCase);
+        modifier_->setTextCase(node_, &inputValueTextCase);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_CASE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_CASE_DEFAULT_VALUE) <<
@@ -1316,7 +1356,7 @@ HWTEST_F(SpanModifierTest, setTextCaseTestTextCaseInvalidValues, TestSize.Level1
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumTextCaseInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_TextCase>(value));
     }
 }
 
@@ -1341,14 +1381,15 @@ HWTEST_F(SpanModifierTest, setLineHeightTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SpanModifierTest, setLineHeightTestLineHeightValidValues, TestSize.Level1)
 {
-    Ark_Length initValueLineHeight;
+    Opt_Length initValueLineHeight;
 
     // Initial setup
-    initValueLineHeight = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
+    initValueLineHeight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueLineHeight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
-        Ark_Length inputValueLineHeight = initValueLineHeight;
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
+        Opt_Length inputValueLineHeight = initValueLineHeight;
 
         inputValueLineHeight = value;
         modifier_->setLineHeight(node_, &inputValueLineHeight);
@@ -1358,8 +1399,14 @@ HWTEST_F(SpanModifierTest, setLineHeightTestLineHeightValidValues, TestSize.Leve
             "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegValidValues) {
-        checkValue(input, expected, value);
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
 
@@ -1370,13 +1417,14 @@ HWTEST_F(SpanModifierTest, setLineHeightTestLineHeightValidValues, TestSize.Leve
  */
 HWTEST_F(SpanModifierTest, setLineHeightTestLineHeightInvalidValues, TestSize.Level1)
 {
-    Ark_Length initValueLineHeight;
+    Opt_Length initValueLineHeight;
 
     // Initial setup
-    initValueLineHeight = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
+    initValueLineHeight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
-    auto checkValue = [this, &initValueLineHeight](const std::string& input, const Ark_Length& value) {
-        Ark_Length inputValueLineHeight = initValueLineHeight;
+    auto checkValue = [this, &initValueLineHeight](const std::string& input, const Opt_Length& value) {
+        Opt_Length inputValueLineHeight = initValueLineHeight;
 
         modifier_->setLineHeight(node_, &inputValueLineHeight);
         inputValueLineHeight = value;
@@ -1387,9 +1435,19 @@ HWTEST_F(SpanModifierTest, setLineHeightTestLineHeightInvalidValues, TestSize.Le
             "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(input, value);
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
     }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Length>());
 }
 
 /*
@@ -1436,28 +1494,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsRadiusValidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
                           const Ark_Union_Number_Resource& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).radius = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).radius = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1479,28 +1537,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsRadi
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsRadiusInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Ark_Union_Number_Resource& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         modifier_->setTextShadow(node_, &inputValueTextShadow);
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).radius = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).radius = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1521,28 +1579,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsRadi
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsTypeValidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](
                           const std::string& input, const std::string& expectedStr, const Opt_ShadowType& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).type = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).type = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1563,28 +1621,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsType
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsTypeInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_ShadowType& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         modifier_->setTextShadow(node_, &inputValueTextShadow);
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).type = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).type = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1605,28 +1663,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsType
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsColorValidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_Color_String_Resource_ColoringStrategy& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).color = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).color = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1655,29 +1713,29 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsColo
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsColorInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](
                           const std::string& input, const Opt_Union_Color_String_Resource_ColoringStrategy& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         modifier_->setTextShadow(node_, &inputValueTextShadow);
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).color = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).color = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1706,28 +1764,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsColo
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffsetXValidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_Number_Resource& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetX = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).offsetX = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1749,28 +1807,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffs
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffsetXInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         modifier_->setTextShadow(node_, &inputValueTextShadow);
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetX = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).offsetX = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1793,28 +1851,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffs
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffsetYValidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_Number_Resource& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetY = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).offsetY = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1836,28 +1894,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffs
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffsetYInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         modifier_->setTextShadow(node_, &inputValueTextShadow);
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetY = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).offsetY = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1880,28 +1938,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffs
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsFillValidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](
                           const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).fill = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).fill = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
@@ -1922,28 +1980,28 @@ HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsFill
  */
 HWTEST_F(SpanModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsFillInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
+    Opt_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).radius =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureEnumColorValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetY =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
+    WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Boolean& value) {
-        Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
+        Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         modifier_->setTextShadow(node_, &inputValueTextShadow);
-        WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).fill = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).fill = value;
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);

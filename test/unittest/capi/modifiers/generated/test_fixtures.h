@@ -53,6 +53,21 @@ enum ResID {
     RES_DATA_FOR_LENGTH_9_ID,
     RES_DATA_FOR_LENGTH_10_ID,
     RES_DATA_FOR_LENGTH_11_ID,
+    DIMENSIONS_RES_ANY_0_ID,
+    DIMENSIONS_RES_ANY_1_ID,
+    DIMENSIONS_RES_ANY_2_ID,
+    DIMENSIONS_RES_ANY_3_ID,
+    DIMENSIONS_RES_ANY_4_ID,
+    DIMENSIONS_RES_ANY_5_ID,
+    DIMENSIONS_RES_ANY_6_ID,
+    DIMENSIONS_RES_ANY_7_ID,
+    DIMENSIONS_RES_ANY_8_ID,
+    DIMENSIONS_RES_ANY_9_ID,
+    DIMENSIONS_RES_ANY_10_ID,
+    DIMENSIONS_RES_ANY_11_ID,
+    DIMENSIONS_RES_ANY_12_ID,
+    DIMENSIONS_RES_ANY_13_ID,
+    DIMENSIONS_RES_ANY_14_ID,
     DIMENSIONS_RES_NON_NEG_0_ID,
     DIMENSIONS_RES_NON_NEG_1_ID,
     DIMENSIONS_RES_NON_NEG_2_ID,
@@ -164,6 +179,21 @@ inline constexpr auto RES_DATA_FOR_LENGTH_8_STR = "RES_DATA_FOR_LENGTH_8_STR";
 inline constexpr auto RES_DATA_FOR_LENGTH_9_STR = "RES_DATA_FOR_LENGTH_9_STR";
 inline constexpr auto RES_DATA_FOR_LENGTH_10_STR = "RES_DATA_FOR_LENGTH_10_STR";
 inline constexpr auto RES_DATA_FOR_LENGTH_11_STR = "RES_DATA_FOR_LENGTH_11_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_0_STR = "DIMENSIONS_RES_ANY_0_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_1_STR = "DIMENSIONS_RES_ANY_1_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_2_STR = "DIMENSIONS_RES_ANY_2_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_3_STR = "DIMENSIONS_RES_ANY_3_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_4_STR = "DIMENSIONS_RES_ANY_4_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_5_STR = "DIMENSIONS_RES_ANY_5_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_6_STR = "DIMENSIONS_RES_ANY_6_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_7_STR = "DIMENSIONS_RES_ANY_7_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_8_STR = "DIMENSIONS_RES_ANY_8_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_9_STR = "DIMENSIONS_RES_ANY_9_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_10_STR = "DIMENSIONS_RES_ANY_10_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_11_STR = "DIMENSIONS_RES_ANY_11_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_12_STR = "DIMENSIONS_RES_ANY_12_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_13_STR = "DIMENSIONS_RES_ANY_13_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_14_STR = "DIMENSIONS_RES_ANY_14_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_0_STR = "DIMENSIONS_RES_NON_NEG_0_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_1_STR = "DIMENSIONS_RES_NON_NEG_1_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_2_STR = "DIMENSIONS_RES_NON_NEG_2_STR";
@@ -363,39 +393,35 @@ extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation, std::stri
     testFixtureImageRotateOrientationValidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation>> testFixtureImageRotateOrientationInvalidValues;
 
-// Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctInvalidValues;
+// Fixture 'LengthNonNegNonPct' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthNonNegNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthNonNegNonPctInvalidValues;
 
-// Fixture 'LengthPositivel' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPositivelValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositivelInvalidValues;
+// Fixture 'LengthPositivel' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthPositivelValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthPositivelInvalidValues;
 
-// Fixture 'LengthPosNonPct' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPosNonPctValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPosNonPctInvalidValues;
+// Fixture 'LengthPosNonPct' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthPosNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthPosNonPctInvalidValues;
 
-// Fixture 'LengthNonPct' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonPctValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonPctInvalidValues;
+// Fixture 'LengthNonPct' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthNonPctInvalidValues;
 
-// Fixture 'LengthNonNeg' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegInvalidValues;
+// Fixture 'LengthNonNeg' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthNonNegValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthNonNegInvalidValues;
 
-// Fixture 'LengthPositive' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPositiveValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositiveInvalidValues;
+// Fixture 'LengthPositive' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthPositiveValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthPositiveInvalidValues;
 
 // Fixture 'ResDataForLength' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureResDataForLengthValidValues;
 
-// Fixture 'LengthResPositive' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthResPositiveValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthResPositiveInvalidValues;
-
-// Fixture 'LengthAny' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthAnyValidValues;
+// Fixture 'LengthAny' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthAnyValidValues;
 
 // Fixture 'LengthMetricsNonNeg_' for type 'Ark_LengthMetrics'
 extern std::vector<std::tuple<std::string, Ark_LengthMetrics, std::string>> testFixtureLengthMetricsNonNeg_ValidValues;
@@ -440,6 +466,9 @@ extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStr
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonNegNonPctInvalidValues;
 
+// Fixture 'DimensionsResAny' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResAnyValidValues;
+
 // Fixture 'DimensionsResNonNeg' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegValidValues;
 extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonNegInvalidValues;
@@ -475,6 +504,10 @@ extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixture
 
 // Fixture 'NumberFloatAnything' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatAnythingValidValues;
+
+// Fixture 'StringFloatAnything' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringFloatAnythingValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureStringFloatAnythingInvalidValues;
 
 // Fixture 'NumberFloatPositive' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatPositiveValidValues;
@@ -562,9 +595,13 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtu
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTimeFormatValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureTimeFormatInvalidValues;
 
-// Fixture 'FontFeature' for type 'Ark_String'
-extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureValidValues;
-extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureInvalidValues;
+// Fixture 'FontFeatureNum' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureNumValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureNumInvalidValues;
+
+// Fixture 'FontFeatureStr' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureStrValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureStrInvalidValues;
 
 // Fixture 'TextInputCaretPosition' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextInputCaretPositionValidValues;
