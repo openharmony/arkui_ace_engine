@@ -16,7 +16,8 @@ enum ResourceType {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    SYMBOL = 40000
 }
 
 class ArkResource implements Resource {
@@ -91,6 +92,8 @@ class ArkResource implements Resource {
                 return ResourceType.MEDIA;
             case 'RAWFILE':
                 return ResourceType.RAWFILE;
+            case 'symbol':
+                return ResourceType.SYMBOL;
         }
         return ResourceType.STRING;
     }
