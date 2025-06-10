@@ -14,21 +14,22 @@
  */
 
 import { PropDecoratedVariable } from './decoratorProp';
-import { WatchFuncType } from './decoratorWatch';
+import { WatchFuncType } from '../decorator';
 
 import { NullableObject } from '../base/types';
-import { DecoratedV1VariableBase, IDecoratedMutableVariable } from '../base/decoratorBase';
-import { setObservationDepth } from '../base/iObservedObject';
+import { DecoratedV1VariableBase } from './decoratorBase';
 
-import { AppStorage } from '../storages/appStorage';
-
+import { AppStorage } from '../storage/appStorage';
+import { ExtendableComponent } from '../../component/extendableComponent';
+import { IStoragePropDecoratedVariable } from '../decorator';
+import { ObserveSingleton } from '../base/observeSingleton';
 
 export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T> {
+    implements IStoragePropDecoratedVariable<T> {
 
     private asProp : PropDecoratedVariable<NullableObject> | undefined;
-    constructor(propName: string, varName:string, localVal: T, watchFunc?: WatchFuncType) {
-        super('StorageProp', varName, undefined as T, undefined);
+    constructor(owningView: ExtendableComponent, propName: string, varName:string, localVal: T, watchFunc?: WatchFuncType) {
+        super('StorageProp', owningView, varName, undefined);
         this.asProp = AppStorage.createProp<T>(propName, localVal);
         const value : T = this.asProp!.get() as T;
         this.registerWatchForObservedObjectChanges(value);
@@ -41,16 +42,17 @@ export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
     public get(): T {
         const value = this.asProp!.get() as T;
-        setObservationDepth(value, 1);
+        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
         return value;
     }
 
     public set(newValue: T): void {
         const oldValue : T = this.asProp!.get() as T;
-        if ( oldValue !== newValue) {
-            this.unregisterWatchFromObservedObjectChanges(oldValue);
-            this.registerWatchForObservedObjectChanges(newValue);
-            this.asProp!.set(newValue as NullableObject);
+        if (oldValue === newValue) {
+            return;
         }
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        this.registerWatchForObservedObjectChanges(newValue);
+        this.asProp!.set(newValue as NullableObject);
     }
 }

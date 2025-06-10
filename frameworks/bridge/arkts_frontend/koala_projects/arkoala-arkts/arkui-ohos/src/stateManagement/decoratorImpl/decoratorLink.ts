@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-import { DecoratedV1VariableBase, IDecoratedMutableVariable } from '../base/decoratorBase';
-import { setObservationDepth } from '../base/iObservedObject';
-import { WatchFunc, WatchFuncType } from './decoratorWatch';
+import { ExtendableComponent } from '../../component/extendableComponent';
+import { DecoratedV1VariableBase } from './decoratorBase';
+import { WatchFuncType } from '../decorator';
+import { ILinkDecoratedVariable } from '../decorator';
+import { ObserveSingleton } from '../base/observeSingleton';
+import { NullableObject } from '../base/types';
 /** 
 * implementation of V1 @Link
 * 
@@ -29,27 +32,27 @@ import { WatchFunc, WatchFuncType } from './decoratorWatch';
 * manage dependencies of the @link: LinkDecoratedVariable does not use its meta
 */
 export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T> {
+    implements ILinkDecoratedVariable<T> {
 
-    private sourceGet_: () => T;
-    private sourceSet_?: (newValue: T) => void;
+    private readonly sourceGet_: () => T;
+    private readonly sourceSet_?: (newValue: T) => void;
 
     // localInitValue is the rhs of @state variable : type = localInitialValue;
     // caller ensure it is IObseredObject, eg. by wrapping
-    constructor(varName: string, source: DecoratedV1VariableBase<T>, watchFunc?: WatchFuncType) {
-        super("@Link", varName, undefined as T, watchFunc);
-        const initValue = source.get()
+    constructor(owningView: ExtendableComponent | null, varName: string, sourceGet: () => T, sourceSet: (newValue: T) => void, watchFunc?: WatchFuncType) {
+        super("@Link", owningView, varName, watchFunc);
+        const initValue = sourceGet()
         // if (this.validateValue(localInitValue) === false) {
         //     throw new Error("@State Object-type Value must be ObservedObject")
         // }
-        this.sourceGet_ = () => source.get();
-        this.sourceSet_ = (newValue: T) => {source.set(newValue)};
+        this.sourceGet_ = sourceGet;
+        this.sourceSet_ = sourceSet;
 
         // @Watch
         // if initial value is object, register so that property changes trigger
         // @Watch function exec
         this.registerWatchForObservedObjectChanges(initValue);
-        source.registerWatchToSource(this);
+        // registerWatchtoSource is done in factory
     }
 
     public getInfo(): string {
@@ -59,7 +62,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     public get(): T {
         const value = this.sourceGet_();
         // @Link V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1
-        setObservationDepth(value, 1);
+        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
 
         // a @Link get triggers a meta.addRef of the Link source XXXXDecoratedVariable
         // therefore, when the source changes (its meta.fireChabge), the bindings using 

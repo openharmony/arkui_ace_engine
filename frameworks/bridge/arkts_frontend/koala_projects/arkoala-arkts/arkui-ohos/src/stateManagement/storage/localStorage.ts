@@ -14,12 +14,12 @@
  */
 
 import { NullableObject } from '../base/types';
-import { AbstractProperty, SubscribedAbstractProperty } from '../base/decoratorBase';
+import { AbstractProperty, SubscribedAbstractProperty } from '../decorator';
 
-import { __MkPropReturnType, StateDecoratedVariable } from '../decorators/decoratorState';
-import { LinkDecoratedVariable } from '../decorators/decoratorLink';
-import { PropDecoratedVariable } from '../decorators/decoratorProp';
-import { WatchIdType } from '../decorators/decoratorWatch';
+import { __MkPropReturnType, StateDecoratedVariable } from '../decoratorImpl/decoratorState';
+import { LinkDecoratedVariable } from '../decoratorImpl/decoratorLink';
+import { PropDecoratedVariable } from '../decoratorImpl/decoratorProp';
+import { WatchFuncType, WatchIdType } from '../decorator';
 
 import { int32 } from '@koalaui/common';
 
@@ -102,7 +102,7 @@ export class LocalStorage {
     }
 
     private addNewPropertyInternal<T>(propName: string, value: T): StateDecoratedVariable<NullableObject> {
-        const newProp = new StateDecoratedVariable<NullableObject>(propName, value as NullableObject);
+        const newProp = new StateDecoratedVariable<NullableObject>(null, propName, value as NullableObject);
         this.storage_.set(propName, newProp);
         return newProp;
     }

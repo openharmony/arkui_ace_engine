@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 
-import { DecoratedV1VariableBase, IDecoratedMutableVariable } from '../base/decoratorBase';
+import { DecoratedV1VariableBase } from './decoratorBase';
+import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable } from '../decorator';
+import { ExtendableComponent } from '../../component/extendableComponent';
+import { WatchFuncType, WatchIdType } from '../decorator';
+import { IBackingValue } from '../base/iBackingValue';
+import { FactoryInternal } from '../base/iFactoryInternal';
+import { ObserveSingleton } from '../base/observeSingleton';
 import { LinkDecoratedVariable } from './decoratorLink';
 import { PropDecoratedVariable } from './decoratorProp';
-import { WatchFuncType, WatchFunc, WatchIdType } from './decoratorWatch';
-import { setObservationDepth } from '../base/iObservedObject';
-import { BackingValue } from '../base/backingValue';
-
+import { WatchFunc } from './decoratorWatch';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { NullableObject } from '../base/types';
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
     watchId: WatchIdType;
@@ -33,20 +38,20 @@ export interface __MkPropReturnType<T> {
 *
 */
 export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T> {
-
+    implements IStateDecoratedVariable<T> {
+    public readonly backing_: IBackingValue<T>;
     // @state can init from parent @Component
     // initValue is either value provided by parent or localInit value
-    constructor(varName: string, initValue: T, watchFunc?: WatchFuncType) {
-        super("@State", varName, initValue, watchFunc);
+    constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
+        super("@State", owningView, varName, watchFunc);
         // if (this.validateValue(localInitValue) === false) {
         //     throw new Error("@State Object-type Value must be ObservedObject")
         // }
-
+        this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         // @Watch
         // if initial value is object, register so that property changes trigger
         // @Watch function exec
-        this.registerWatchForObservedObjectChanges(this.__backing.value);
+        this.registerWatchForObservedObjectChanges(initValue);
     }
 
     public getInfo(): string {
@@ -54,34 +59,30 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     }
 
     public get(): T {
-        // @State V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1
-        const value = this.__backing.value;
-        setObservationDepth(value, 1);
-        this.meta_.addRef();
+        const value = this.backing_.get(this.shouldAddRef());
+        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
         return value;
     }
 
     public set(newValue: T): void {
-        const value = this.__backing.value
-        if (value !== newValue) {
-            // if (this.validateValue(locanewValueInitValue) === false) {
-            //     throw new Error("@State Object-type Value must be ObservedObject")
-            // }
-
+        const value = this.backing_.get(false)
+        if (value === newValue) {
+            return;
+        }
+        // if (this.validateValue(locanewValueInitValue) === false) {
+        //     throw new Error("@State Object-type Value must be ObservedObject")
+        // }
+        if (this.backing_.set(newValue)) {
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec
             // unregister if old value is an object
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
-
-            this.__backing.value = newValue;
-
             // TODO unregister Watch from old value object, add to new value object
-
-            this.meta_.fireChange();
             this.execWatchFuncs();
         }
+
     }
 
     /** 
@@ -89,7 +90,9 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
      * used by LocalStorage
      */
     public mkLink(varName: string): LinkDecoratedVariable<T> {
-        return new LinkDecoratedVariable<T>(varName, this);
+        const link = new LinkDecoratedVariable<T>(null, varName, ()=>this.get(), (newValue: T)=>this.set(newValue));
+        this.registerWatchToSource(link);
+        return link;
     }
 
     /** 
@@ -97,7 +100,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     * used by LocalStorage
     */
     public mkProp(varName: string): __MkPropReturnType<T> {
-        const prop = new PropDecoratedVariable<T>(varName, this.get());
+        const prop = new PropDecoratedVariable<T>(null, varName, this.get());
         // the WatchFunc must not hold a strong reference on prop
         const weakProp = new WeakRef<PropDecoratedVariable<T>>(prop);
         // when this StateDecoratedVariable changes, the watchFunc is called,

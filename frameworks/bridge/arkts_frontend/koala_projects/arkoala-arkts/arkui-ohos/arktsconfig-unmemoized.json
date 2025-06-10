@@ -93,6 +93,9 @@
             ],
             "@ohos/promptAction": [
                 "../@ohos.promptAction.ts"
+            ],
+            "#stateMgmtTool": [
+                "./stateManagement/tools/arkts"
             ]
         }
     },
@@ -118,6 +121,7 @@
         "build/unmemoized/src/component/ts/*.ts",
         "build/unmemoized/src/component/main.ts",
         "build/unmemoized/src/external/ts/**/*.ts",
-        "build/unmemoized/src/ani/ts/**/*.ts"
+        "build/unmemoized/src/ani/ts/**/*.ts",
+        "build/unmemoized/src/stateManagement/tools/ts/*.ts"
     ]
 }

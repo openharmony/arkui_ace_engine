@@ -80,17 +80,23 @@ function insertPlugin(
     }
 
     
-   
+    global.profiler.curPlugin = pluginName
+    global.profiler.transformStarted()
 
     runTransformer(global.compilerContext.program, state, transform, context, {
         onProgramTransformStart(ctx: RunTransformerContext) {
+            if (!ctx.isMainProgram) global.profiler.transformDepStarted()
         },
         onProgramTransformEnd(ctx: RunTransformerContext) {
             if (!ctx.isMainProgram) {
+                global.profiler.transformDepEnded(state, pluginName)
             }
             return !restart
         }
     })
+    
+    global.profiler.transformEnded(state, pluginName)
+    global.profiler.curPlugin = ""
 
     if (dumpAst) {
         console.log(`AFTER ${stateName(state)}:`)
@@ -222,6 +228,7 @@ function invokeWithPlugins(
             const after = Date.now()
             configPath = newConfigPath
             filePath = newFilePath
+            global.profiler.restarted(after - before)
         }
     }
 
@@ -229,20 +236,24 @@ function invokeWithPlugins(
 
     context.setParameter("restart", restart)
 
+    global.profiler.curContextState = Es2pandaContextState.ES2PANDA_STATE_PARSED
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_PARSED)?.forEach(plugin => {
         insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, pluginNames[pluginsApplied], dumpAst, restart, context)
         restartProcedure(Es2pandaContextState.ES2PANDA_STATE_PARSED)
     })
 
+    global.profiler.curContextState = Es2pandaContextState.ES2PANDA_STATE_BOUND
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_BOUND)?.forEach(plugin => {
         insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, pluginNames[pluginsApplied], dumpAst, restart, context, rebindSubtree)
         restartProcedure(Es2pandaContextState.ES2PANDA_STATE_BOUND)
     })
 
+    global.profiler.curContextState = Es2pandaContextState.ES2PANDA_STATE_CHECKED
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_CHECKED)?.forEach(plugin => {
         insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, pluginNames[pluginsApplied], dumpAst, restart, context, recheckSubtree)
         restartProcedure(Es2pandaContextState.ES2PANDA_STATE_CHECKED)
     })
+    global.profiler.curContextState = Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED
     proceedToState(Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED)
 }
 
@@ -261,7 +272,9 @@ function generateDeclFromCurrentContext(filePath: string): never {
     ].join('\n')
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
     fs.writeFileSync(filePath, out)
-
+    global.profiler.compilationEnded()
+    global.profiler.report()
+    global.profiler.reportToFile()
     process.exit(0)
 }
 
@@ -321,8 +334,11 @@ export function main() {
 
     const pluginsByState = readAndSortPlugins(configDir, plugins)
 
+    global.profiler.compilationStarted(filePath)
     invokeWithPlugins(configPath, packageName, baseUrl, outDir, filePath, outputPath, pluginsByState, dumpAst, restartStages, stage, pluginNames)
- 
+    global.profiler.compilationEnded()
+    global.profiler.report()
+    global.profiler.reportToFile(true)
 }
 
 function reportErrorAndExit(message: string): never {

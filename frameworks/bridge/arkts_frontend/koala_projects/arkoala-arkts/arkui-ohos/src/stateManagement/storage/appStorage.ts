@@ -16,10 +16,10 @@
 import { LocalStorage } from './localStorage';
 
 import { NullableObject } from '../base/types';
-import { AbstractProperty, SubscribedAbstractProperty } from '../base/decoratorBase';
+import { AbstractProperty, SubscribedAbstractProperty } from '../decorator';
 
-import { LinkDecoratedVariable } from '../decorators/decoratorLink';
-import { PropDecoratedVariable } from '../decorators/decoratorProp';
+import { LinkDecoratedVariable } from '../decoratorImpl/decoratorLink';
+import { PropDecoratedVariable } from '../decoratorImpl/decoratorProp';
 
 export class AppStorage extends LocalStorage {
     public static createSingleton(/*initializingPropersties?: Object */): void {

@@ -84,6 +84,9 @@
             ],
             "@ohos/promptAction": [
                 "./@ohos.promptAction.ts"
+            ],
+            "#stateMgmtTool": [
+                "arkui/stateManagement/tools/ts"
             ]
         },
         "rootDir": "."
@@ -112,6 +115,7 @@
         "arkui/component/main.ts",
         "arkui/external/arkts",
         "arkui/ani/arkts",
+        "arkui/stateManagement/tools/arkts"
     ],
     "files": [
         "../../incremental/tools/panda/arkts/std-lib/global.d.ts"

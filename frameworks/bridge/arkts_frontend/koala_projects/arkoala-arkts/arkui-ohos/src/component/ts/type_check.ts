@@ -158,7 +158,6 @@ import { MenuItemOptions } from "./../menuItem"
 import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
-import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
 import { PointerStyle } from '#external'
 import promptAction from "@ohos/promptAction"
 
@@ -19248,6 +19247,12 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof WebNavigationType")
         }
     }
+    static isBindableString(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<String>")
+    }
+    static isBindableResourceStr(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<ResourceStr>")
+    }
     static isWebOptions(value: Object | string | number | undefined | boolean, duplicated_src: boolean, duplicated_controller: boolean, duplicated_renderMode: boolean, duplicated_incognitoMode: boolean, duplicated_sharedRenderProcessToken: boolean): boolean {
         if ((!duplicated_src) && (value?.hasOwnProperty("src"))) {
             return true
@@ -21713,12 +21718,6 @@ export class TypeChecker {
     }
     static isArray_CustomObject(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
-    }
-    static isIObservedObject<T>(value: T): boolean {
-        return true;
-    }
-    static isIWatchTrigger<T>(value: T): boolean {
-        return true;
     }
     static isPopupButton(value: Object | string | number | undefined | boolean, duplicated_value: boolean, duplicated_action: boolean): boolean {
         if ((!duplicated_value) && (value?.hasOwnProperty("value"))) {

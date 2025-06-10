@@ -20,6 +20,8 @@ import { ArkPageTransitionEnter, ArkPageTransitionExit } from "./handwritten/Ark
 import { PageTransitionOptions } from "./component";
 import { ArkComponentRoot } from "./ArkComponentRoot"
 import { ArkColumnPeer } from "./component";
+import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
+import { OBSERVE } from "./stateManagement";
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl {
@@ -67,7 +69,9 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
     ): void {
         ArkComponentRoot(this, () => {
             this.__updateStruct(initializers);
+            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
             this.__build(attributes, content, initializers);
+            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponent;
             remember(() => {
                 this.onDidBuild();
             });
