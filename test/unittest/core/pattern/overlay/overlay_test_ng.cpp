@@ -2885,4 +2885,38 @@ HWTEST_F(OverlayTestNg, DialogWithNodeTest001, TestSize.Level1)
     EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(10.0), Dimension(10.0)));
     EXPECT_EQ(dialogLayoutProp->propAutoCancel_, true);
 }
+
+/**
+ * @tc.name: OverlayManagerContetx001
+ * @tc.desc: Test OverlayManager GetPipelineContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, OverlayManagerContetx001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto geometryNode = stageNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1.0, 1.0));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->stageManager_->stageNode_ = stageNode;
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    EXPECT_NE(overlayManager->context_.Upgrade(), nullptr);
+    auto context = overlayManager->GetPipelineContext();
+    ASSERT_NE(context, nullptr);
+
+    overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_EQ(overlayManager->context_.Upgrade(), nullptr);
+    context = overlayManager->GetPipelineContext();
+    ASSERT_NE(context, nullptr);
+}
 } // namespace OHOS::Ace::NG

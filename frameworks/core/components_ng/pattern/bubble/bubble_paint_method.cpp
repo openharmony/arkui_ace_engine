@@ -45,6 +45,18 @@ constexpr int16_t P3INDEX = 2;
 constexpr int16_t P4INDEX = 3;
 constexpr double TOP_ARROW_LEFT_OFFSET = 3.0;
 constexpr double TOP_ARROW_RIGHT_OFFSET = 4.5;
+
+static RefPtr<PopupTheme> GetPopupTheme(PaintWrapper* paintWrapper)
+{
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    return popupTheme;
+}
 } // namespace
 
 float ModifyBorderRadius(float borderRadius, float halfChildHeight)
@@ -239,13 +251,7 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
 void BubblePaintMethod::PaintSingleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto renderContext = paintWrapper->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto host = renderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_VOID(popupTheme);
     float borderWidth = popupTheme->GetBorderWidth().ConvertToPx();
     if (GreatNotEqual(static_cast<double>(borderWidth), 0.0)) {
@@ -564,13 +570,7 @@ RSRoundRect BubblePaintMethod::MakeRRect()
 void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto renderContext = paintWrapper->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto host = renderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_VOID(popupTheme);
     BuildCompletePath(path_, popupTheme);
     canvas.Save();
@@ -585,13 +585,7 @@ void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* pai
 void BubblePaintMethod::PaintDoubleBorderWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto renderContext = paintWrapper->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto host = renderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_VOID(popupTheme);
     BuildDoubleBorderPath(path_, popupTheme);
     canvas.Save();

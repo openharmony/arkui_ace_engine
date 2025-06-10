@@ -128,7 +128,7 @@ class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
 
 public:
-    explicit OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
+    explicit OverlayManager(const RefPtr<FrameNode>& rootNode);
     ~OverlayManager() override;
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
@@ -765,6 +765,7 @@ public:
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
 
 private:
+    RefPtr<PipelineContext> GetPipelineContext() const;
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
         const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -996,6 +997,7 @@ private:
     WeakPtr<FrameNode> lastModalNode_; // Previous Modal Node
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
+    WeakPtr<PipelineContext> context_;
     int32_t dialogCount_ = 0;
     DismissTarget dismissTarget_;
     int32_t dismissSheetId_ = 0;
