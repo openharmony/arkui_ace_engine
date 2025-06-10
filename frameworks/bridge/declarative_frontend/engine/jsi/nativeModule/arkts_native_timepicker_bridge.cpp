@@ -19,6 +19,7 @@
 #include "core/components/picker/picker_base_component.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 const std::string DEFAULT_ERR_CODE = "-1";
 const std::string FORMAT_FONT = "%s|%s|%s";
 constexpr int NUM_0 = 0;
@@ -30,6 +31,37 @@ constexpr int NUM_5 = 5;
 constexpr uint32_t DEFAULT_TIME_PICKER_TEXT_COLOR = 0xFF182431;
 constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF0A59F7;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
+
+std::string ParseFontSize(const EcmaVM* vm, const Local<JSValueRef>& fontSizeArg,
+    RefPtr<ResourceObject>& fontSizeResObj)
+{
+    CalcDimension fontSizeData;
+    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
+        fontSizeData = Dimension(-1);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, fontSizeData, DimensionUnit::FP, fontSizeResObj, false)) {
+            fontSizeData = Dimension(-1);
+        }
+    }
+    return fontSizeData.ToString();
+}
+
+std::string ParseFontWeight(const EcmaVM* vm, const Local<JSValueRef>& fontWeightArg)
+{
+    std::string weight = DEFAULT_ERR_CODE;
+    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
+        if (fontWeightArg->IsNumber()) {
+            weight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else {
+            if (!ArkTSUtils::ParseJsString(vm, fontWeightArg, weight) || weight.empty()) {
+                weight = DEFAULT_ERR_CODE;
+            }
+        }
+    }
+    return weight;
+}
+
+} // namespace
 
 ArkUINativeModuleValue TimepickerBridge::SetTimepickerBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -65,40 +97,40 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> textColorResObj;
+    if (colorArg->IsNull() || colorArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj)) {
         color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
     }
-    CalcDimension size;
-    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
-        size = Dimension(-1);
-    } else {
-        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, size, DimensionUnit::FP, false)) {
-            size = Dimension(-1);
-        }
-    }
-    std::string weight = DEFAULT_ERR_CODE;
-    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
-        if (fontWeightArg->IsNumber()) {
-            weight = std::to_string(fontWeightArg->Int32Value(vm));
-        } else {
-            if (!ArkTSUtils::ParseJsString(vm, fontWeightArg, weight) || weight.empty()) {
-                weight = DEFAULT_ERR_CODE;
-            }
-        }
-    }
+
+    RefPtr<ResourceObject> fontSizeResObj;
+    std::string fontSizeStr = ParseFontSize(vm, fontSizeArg, fontSizeResObj);
+
+    std::string weight = ParseFontWeight(vm, fontWeightArg);
+
     std::string fontFamily;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
+    RefPtr<ResourceObject> fontFamilyResObj;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily, fontFamilyResObj) ||
+        fontFamily.empty()) {
         fontFamily = DEFAULT_ERR_CODE;
     }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
-    std::string fontSizeStr = size.ToString();
+
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
-    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerTextStyle(
-        nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
+
+    ArkUIPickerTextStyleStruct textStyleStruct;
+    textStyleStruct.textColor = color.GetValue();
+    textStyleStruct.fontStyle = styleVal;
+    textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
+    textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerTextStyleWithResObj(
+        nativeNode, &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -114,40 +146,40 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> textColorResObj;
+    if (colorArg->IsNull() || colorArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj)) {
         color.SetValue(DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR);
     }
-    CalcDimension size;
-    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
-        size = Dimension(-1);
-    } else {
-        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, size, DimensionUnit::FP, false)) {
-            size = Dimension(-1);
-        }
-    }
-    std::string weight = DEFAULT_ERR_CODE;
-    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
-        if (fontWeightArg->IsNumber()) {
-            weight = std::to_string(fontWeightArg->Int32Value(vm));
-        } else {
-            if (!ArkTSUtils::ParseJsString(vm, fontWeightArg, weight) || weight.empty()) {
-                weight = DEFAULT_ERR_CODE;
-            }
-        }
-    }
+
+    RefPtr<ResourceObject> fontSizeResObj;
+    std::string fontSizeStr = ParseFontSize(vm, fontSizeArg, fontSizeResObj);
+
+    std::string weight = ParseFontWeight(vm, fontWeightArg);
+
     std::string fontFamily;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
+    RefPtr<ResourceObject> fontFamilyResObj;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily, fontFamilyResObj) ||
+        fontFamily.empty()) {
         fontFamily = DEFAULT_ERR_CODE;
     }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
-    std::string fontSizeStr = size.ToString();
+
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
-    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerSelectedTextStyle(
-        nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
+
+    ArkUIPickerTextStyleStruct textStyleStruct;
+    textStyleStruct.textColor = color.GetValue();
+    textStyleStruct.fontStyle = styleVal;
+    textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
+    textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerSelectedTextStyleWithResObj(
+        nativeNode, &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -163,40 +195,40 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> textColorResObj;
+    if (colorArg->IsNull() || colorArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj)) {
         color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
     }
-    CalcDimension size;
-    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
-        size = Dimension(-1);
-    } else {
-        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, size, DimensionUnit::FP, false)) {
-            size = Dimension(-1);
-        }
-    }
-    std::string weight = DEFAULT_ERR_CODE;
-    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
-        if (fontWeightArg->IsNumber()) {
-            weight = std::to_string(fontWeightArg->Int32Value(vm));
-        } else {
-            if (!ArkTSUtils::ParseJsString(vm, fontWeightArg, weight) || weight.empty()) {
-                weight = DEFAULT_ERR_CODE;
-            }
-        }
-    }
+
+    RefPtr<ResourceObject> fontSizeResObj;
+    std::string fontSizeStr = ParseFontSize(vm, fontSizeArg, fontSizeResObj);
+
+    std::string weight = ParseFontWeight(vm, fontWeightArg);
+
     std::string fontFamily;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
+    RefPtr<ResourceObject> fontFamilyResObj;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily, fontFamilyResObj) ||
+        fontFamily.empty()) {
         fontFamily = DEFAULT_ERR_CODE;
     }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
-    std::string fontSizeStr = size.ToString();
+
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
-    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerDisappearTextStyle(
-        nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
+
+    ArkUIPickerTextStyleStruct textStyleStruct;
+    textStyleStruct.textColor = color.GetValue();
+    textStyleStruct.fontStyle = styleVal;
+    textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
+    textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerDisappearTextStyleWithResObj(
+        nativeNode, &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 

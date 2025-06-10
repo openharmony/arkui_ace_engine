@@ -397,7 +397,11 @@ void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
     if (info.Length() > 0) {
-        ConvertFromJSValue(info[0], backgroundColor, resObj);
+        if (ConvertFromJSValue(info[0], backgroundColor, resObj)) {
+            TabsModel::GetInstance()->SetBarBackgroundColorByUser(true);
+        } else {
+            TabsModel::GetInstance()->SetBarBackgroundColorByUser(false);
+        }
     }
     if (SystemProperties::ConfigChangePerform()) {
         TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_BACKGROUND_COLOR, resObj);
@@ -462,6 +466,9 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
             if (!dividerInfo->IsObject() ||
                 !ConvertFromJSValue(obj->GetProperty("color"), divider.color, colorResObj)) {
                 divider.color = tabTheme->GetDividerColor();
+                TabsModel::GetInstance()->SetDividerColorByUser(false);
+            } else {
+                TabsModel::GetInstance()->SetDividerColorByUser(true);
             }
             if (!dividerInfo->IsObject() ||
                 !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin, startMarginResObj) ||

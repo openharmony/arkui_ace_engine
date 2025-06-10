@@ -61,6 +61,12 @@ public:
         value->propIsPopup_ = CloneIsPopup();
         value->propAdaptiveWidth_ = CloneAdaptiveWidth();
         value->propEnableHapticFeedback_ = CloneEnableHapticFeedback();
+        value->propSetColorByUser_ = CloneSetColorByUser();
+        value->propSetSelectedColorByUser_ = CloneSetSelectedColorByUser();
+        value->propSetPopupColorByUser_ = CloneSetPopupColorByUser();
+        value->propSetSelectedBGColorByUser_ = CloneSetSelectedBGColorByUser();
+        value->propSetPopupUnselectedColorByUser_ = CloneSetPopupUnselectedColorByUser();
+        value->propSetPopupTitleBackgroundByUser_ = CloneSetPopupTitleBackgroundByUser();
         return value;
     }
 
@@ -88,6 +94,12 @@ public:
         ResetIsPopup();
         ResetAdaptiveWidth();
         ResetEnableHapticFeedback();
+        ResetSetColorByUser();
+        ResetSetSelectedColorByUser();
+        ResetSetPopupColorByUser();
+        ResetSetSelectedBGColorByUser();
+        ResetSetPopupUnselectedColorByUser();
+        ResetSetPopupTitleBackgroundByUser();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -113,6 +125,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsPopup, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptiveWidth, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHapticFeedback, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetColorByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetSelectedColorByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetPopupColorByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetSelectedBGColorByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetPopupUnselectedColorByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetPopupTitleBackgroundByUser, bool, PROPERTY_UPDATE_NORMAL);
 
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);

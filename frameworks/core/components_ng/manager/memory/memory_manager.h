@@ -47,7 +47,7 @@ private:
     void RecycleImageByPage(const RefPtr<FrameNode>& node);
 
     std::list<WeakPtr<FrameNode>> pageNodes_;
-    bool isTrimMemWork_ = true;
+    bool isTrimMemWork_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -239,7 +239,7 @@ void WebModelNG::SetOnRequestFocus(std::function<void(const BaseEventInfo* info)
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent([info, func]() { func(info.get()); }, "ArkUIWebRequestFocusCallback");
     };
@@ -328,7 +328,7 @@ void WebModelNG::SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&&
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&keyEventInfo, func]() { func(keyEventInfo); }, "ArkUIWebKeyEventCallback");
     };
@@ -639,7 +639,7 @@ void WebModelNG::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallba
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&info, func]() { func(info); }, "ArkUIWebMouseEventCallback");
     };
@@ -719,6 +719,13 @@ void WebModelNG::SetBackgroundColor(Color backgroundColor)
     webPattern->UpdateBackgroundColor(backgroundColor.GetValue());
 }
 
+void WebModelNG::SetDefaultBackgroundColor()
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetDefaultBackgroundColor();
+}
+
 void WebModelNG::InitialScale(float scale)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -789,6 +796,18 @@ void WebModelNG::SetWindowNewEvent(std::function<void(const std::shared_ptr<Base
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnWindowNewEvent(std::move(jsCallback));
+}
+
+void WebModelNG::SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnActivateContentEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
@@ -921,7 +940,7 @@ void WebModelNG::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo&
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         bool result = false;
         CHECK_NULL_RETURN(context, result);
         context->PostSyncEvent(
@@ -1094,7 +1113,7 @@ void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
 
 void WebModelNG::AddDragFrameNodeToManager()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -1117,6 +1136,12 @@ void WebModelNG::SetAudioExclusive(bool audioExclusive)
     webPattern->UpdateAudioExclusive(audioExclusive);
 }
 
+void WebModelNG::SetAudioSessionType(WebAudioSessionType audioSessionType)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioSessionType(audioSessionType);
+}
 void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -1987,6 +2012,14 @@ void WebModelNG::SetOnNavigationEntryCommitted(
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnNavigationEntryCommittedEvent(std::move(navigationEntryCommitted));
+}
+
+void WebModelNG::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebModelNG::SetBypassVsyncCondition condition:%{public}d", condition);
+    webPattern->UpdateBypassVsyncCondition(condition);
 }
 
 void WebModelNG::SetOnSearchResultReceive(

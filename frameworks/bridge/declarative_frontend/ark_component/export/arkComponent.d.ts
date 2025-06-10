@@ -1266,7 +1266,7 @@ declare class ArkEmbeddedComponent extends ArkComponent implements EmbeddedCompo
 }
 declare class ArkIsolatedComponent extends ArkComponent implements IsolatedComponentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    onError(callback: any): IsolatedComponentAttribute;
+    onError(callback: any): this;
 }
 declare class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1610,6 +1610,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         viewportFit: ViewportFit;
     }) => void): this;
     onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
+    onActivateContent(callback: () => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;

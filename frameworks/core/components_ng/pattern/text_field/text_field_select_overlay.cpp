@@ -266,6 +266,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    menuInfo.hasOnPrepareMenuCallback = onPrepareMenuCallback_ ? true : false;
     auto hasText = pattern->HasText();
     if ((dirtyFlag & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM) {
         menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
@@ -457,10 +458,15 @@ int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOf
     return pattern->ConvertTouchOffsetToCaretPosition(offset);
 }
 
-int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& localOffset, bool isFirst)
+int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& offset, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, 0);
+    auto localOffset = offset;
+    if (pattern->GetContentScrollerIsScrolling()) {
+        auto adjustOffset = pattern->AdjustAutoScrollOffset(Offset(offset.GetX(), offset.GetY()));
+        localOffset = OffsetF(adjustOffset.GetX(), adjustOffset.GetY());
+    }
     if (pattern->IsTextArea()) {
         return GetTextAreaCaretPosition(localOffset);
     }

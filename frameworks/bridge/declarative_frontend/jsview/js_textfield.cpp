@@ -2046,8 +2046,10 @@ void JSTextField::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
-    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void JSTextField::SetEnablePreviewText(const JSCallbackInfo& info)
@@ -2181,5 +2183,67 @@ void JSTextField::SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth)
         auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
         ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, isWidth);
     }
+}
+
+NG::KeyboardAppearanceConfig JSTextField::ParseKeyboardAppearanceConfig(const JSRef<JSObject>& obj)
+{
+    NG::KeyboardAppearanceConfig config;
+    auto gradientModeJsVal = obj->GetProperty("gradientMode");
+    if (gradientModeJsVal->IsNull() || gradientModeJsVal->IsUndefined() || !gradientModeJsVal->IsNumber()) {
+        config.gradientMode = NG::KeyboardGradientMode::NONE;
+    } else {
+        int32_t value = gradientModeJsVal->ToNumber<int32_t>();
+        if (value <= static_cast<int32_t>(NG::KeyboardGradientMode::BEGIN) ||
+            value > static_cast<int32_t>(NG::KeyboardGradientMode::END)) {
+            config.gradientMode = NG::KeyboardGradientMode::NONE;
+        } else {
+            config.gradientMode = static_cast<NG::KeyboardGradientMode>(value);
+        }
+    }
+    auto fluidLightModeJsVal = obj->GetProperty("fluidLightMode");
+    if (fluidLightModeJsVal->IsNull() || fluidLightModeJsVal->IsUndefined() || !fluidLightModeJsVal->IsNumber()) {
+        config.fluidLightMode = NG::KeyboardFluidLightMode::NONE;
+    } else {
+        int32_t value = fluidLightModeJsVal->ToNumber<int32_t>();
+        if (value <= static_cast<int32_t>(NG::KeyboardFluidLightMode::BEGIN) ||
+            value > static_cast<int32_t>(NG::KeyboardFluidLightMode::END)) {
+            config.fluidLightMode = NG::KeyboardFluidLightMode::NONE;
+        } else {
+            config.fluidLightMode = static_cast<NG::KeyboardFluidLightMode>(value);
+        }
+    }
+    return config;
+}
+
+void JSTextField::SetOnWillAttachIME(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsOnWillAttachIMEFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
+    auto onWillAttachIME = [execCtx = info.GetExecutionContext(), func = std::move(jsOnWillAttachIMEFunc)](
+        const IMEClient& imeClientInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onWillAttachIME");
+        JSRef<JSObject> imeClientObj = JSRef<JSObject>::New();
+        imeClientObj->SetProperty<int32_t>("nodeId", imeClientInfo.nodeId);
+        JSRef<JSVal> argv[] = { imeClientObj };
+        func->ExecuteJS(1, argv);
+    };
+    TextFieldModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));
+}
+
+void JSTextField::SetKeyboardAppearanceConfig(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    NG::KeyboardAppearanceConfig config = ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
+    NG::TextFieldModelNG::SetKeyboardAppearanceConfig(frameNode, config);
 }
 } // namespace OHOS::Ace::Framework

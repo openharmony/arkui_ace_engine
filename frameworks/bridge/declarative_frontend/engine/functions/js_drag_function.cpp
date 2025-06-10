@@ -24,7 +24,9 @@
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 
+#include "core/common/interaction/interaction_interface.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -133,6 +135,7 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("executeDropAnimation", &JsDragEvent::ExecuteDropAnimation);
     JSClass<JsDragEvent>::CustomMethod("startDataLoading", &JsDragEvent::StartDataLoading);
     JSClass<JsDragEvent>::CustomMethod("getDisplayId", &JsDragEvent::GetDisplayId);
+    JSClass<JsDragEvent>::CustomMethod("enableInternalDropAnimation", &JsDragEvent::EnableInternalDropAnimation);
     JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
 }
 
@@ -170,12 +173,14 @@ void JsDragEvent::GetScreenY(const JSCallbackInfo& args)
 
 void JsDragEvent::GetDragSource(const JSCallbackInfo& args)
 {
+    CHECK_NULL_VOID(dragEvent_);
     JSRef<JSVal> dragSource = JSRef<JSVal>::Make(ToJSValue(dragEvent_->GetDragSource()));
     args.SetReturnValue(dragSource);
 }
 
 void JsDragEvent::IsRemote(const JSCallbackInfo& args)
 {
+    CHECK_NULL_VOID(dragEvent_);
     JSRef<JSVal> isRemoteDev = JSRef<JSVal>::Make(ToJSValue(dragEvent_->isRemoteDev()));
     args.SetReturnValue(isRemoteDev);
 }
@@ -255,6 +260,52 @@ void JsDragEvent::StartDataLoading(const JSCallbackInfo& args)
     auto jsUdKey = JSVal(ToJSValue(udKey));
     auto jsUdKeyRef = JSRef<JSVal>::Make(jsUdKey);
     args.SetReturnValue(jsUdKeyRef);
+}
+
+void JsDragEvent::EnableInternalDropAnimation(const JSCallbackInfo& args)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+
+    if (!NG::DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        NapiThrow(engine, ERROR_CODE_DRAG_DATA_NOT_ONDROP, "Operation no allowed for current pharse.");
+        return;
+    }
+    if (!args[0]->IsString()) {
+        NapiThrow(engine, ERROR_CODE_PARAM_INVALID, "Invalid input parameter.");
+        return;
+    }
+    std::string configuration = args[0]->ToString();
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Internal drop animation configuration is: %{public}s", configuration.c_str());
+    auto configurationJson = JsonUtil::ParseJsonString(configuration);
+    if (!configurationJson || configurationJson->IsNull() || !configurationJson->IsObject()) {
+        NapiThrow(engine, ERROR_CODE_PARAM_INVALID, "Invalid input parameter.");
+        return;
+    }
+
+    auto interactionInterface = OHOS::Ace::InteractionInterface::GetInstance();
+    CHECK_NULL_VOID(interactionInterface);
+    int32_t ret = interactionInterface->EnableInternalDropAnimation(configuration);
+    if (ret == 0) {
+        CHECK_NULL_VOID(dragEvent_);
+        dragEvent_->SetNeedDoInternalDropAnimation(true);
+        return;
+    }
+
+    switch (ret) {
+        case ERROR_CODE_PARAM_INVALID:
+            NapiThrow(engine, ERROR_CODE_PARAM_INVALID, "Invalid input parameter.");
+            break;
+        case ERROR_CODE_VERIFICATION_FAILED:
+            NapiThrow(engine, ERROR_CODE_VERIFICATION_FAILED, "Permission verification failed.");
+            break;
+        case ERROR_CODE_SYSTEMCAP_ERROR:
+            NapiThrow(engine, ERROR_CODE_SYSTEMCAP_ERROR, "Capability not supported.");
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Enable internal drop animation failed, return value is %{public}d", ret);
+            break;
+    }
 }
 
 void JsDragEvent::GetData(const JSCallbackInfo& args)

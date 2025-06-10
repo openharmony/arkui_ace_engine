@@ -223,6 +223,10 @@ void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper,
                                     itemStartIndex_ + totalItemCount_ - itemPosition_.rbegin()->first - 1;
     auto end = !isStackFromEnd_ ? itemStartIndex_ + itemPosition_.rbegin()->first :
                                   itemStartIndex_ + totalItemCount_ - itemPosition_.begin()->first - 1;
+    if (draggingIndex_ >= 0) {
+        start = std::min(start, draggingIndex_);
+        end = std::max(end, draggingIndex_);
+    }
     layoutWrapper->SetActiveChildRange(start, end, cacheStart, cacheEnd, show);
 }
 
@@ -877,24 +881,22 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             scrollAlign_ = ScrollAlign::END;
         }
         UpdateSnapCenterContentOffset(layoutWrapper);
-        auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        CHECK_NULL_VOID(listLayoutProperty);
-        auto scrollSnapAlign = listLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
-        if (IsScrollSnapAlignCenter(layoutWrapper)) {
+        if (IsScrollSnapAlignCenter(layoutWrapper) && draggingIndex_ < 0) {
             midIndex = GetMidIndex(layoutWrapper, true);
             midItemMidPos = (itemPosition_[midIndex].startPos + itemPosition_[midIndex].endPos) / 2.0f -
                             prevContentMainSize_ / 2.0f + contentMainSize_ / 2.0f;
             midIndex = std::min(midIndex, totalItemCount_ - 1);
-        } else if (scrollSnapAlign == ScrollSnapAlign::START && pattern->GetScrollState() == ScrollState::IDLE) {
+        } else if (scrollSnapAlign_ == ScrollSnapAlign::START && pattern->GetScrollState() == ScrollState::IDLE) {
             auto res = GetSnapStartIndexAndPos();
             startIndex = res.first;
             startPos = res.second;
-        } else if (scrollSnapAlign == ScrollSnapAlign::END && pattern->GetScrollState() == ScrollState::IDLE) {
+        } else if (scrollSnapAlign_ == ScrollSnapAlign::END && pattern->GetScrollState() == ScrollState::IDLE) {
             auto res = GetSnapEndIndexAndPos();
             needLayoutBackward = res.first != -1;
             endIndex = needLayoutBackward ? res.first : endIndex;
             endPos = needLayoutBackward ? res.second : endPos;
         }
+        needLayoutBackward = needLayoutBackward || (draggingIndex_ >= 0 && revertIndex(draggingIndex_) <= startIndex);
         OffScreenLayoutDirection(layoutWrapper);
         itemPosition_.clear();
     }
@@ -941,7 +943,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             (endIndex == totalItemCount_ - 1) &&
             LessNotEqual(endPos + GetChainOffset(totalItemCount_ - 1), prevContentMainSize_ - prevContentEndOffset_);
         float midItemHeight = 0.0f;
-        if (IsScrollSnapAlignCenter(layoutWrapper)) {
+        if (IsScrollSnapAlignCenter(layoutWrapper) && draggingIndex_ < 0) {
             midItemHeight = childrenSize_ ?
                 GetChildHeight(layoutWrapper, midIndex) : MeasureAndGetChildHeight(layoutWrapper, midIndex);
             startIndex = midIndex;
@@ -952,7 +954,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             if (overScrollTop && !canOverScrollStart_) {
                 startPos = startMainPos_ + contentStartOffset_;
             }
-            if (IsScrollSnapAlignCenter(layoutWrapper)) {
+            if (IsScrollSnapAlignCenter(layoutWrapper) && draggingIndex_ < 0) {
                 startPos = midItemMidPos - midItemHeight / 2.0f;
             }
             if (overScrollBottom && GreatNotEqual(contentMainSize_, prevContentMainSize_) &&
@@ -972,7 +974,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             if (needLayoutBackward) {
                 endPos += contentMainSize_ - prevContentMainSize_;
             }
-            if (IsScrollSnapAlignCenter(layoutWrapper)) {
+            if (IsScrollSnapAlignCenter(layoutWrapper) && draggingIndex_ < 0) {
                 endPos = midItemMidPos + midItemHeight / 2.0f;
             }
             if (childrenSize_) {
@@ -1173,7 +1175,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     }
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
-    if (LessNotEqual(currentEndPos, endMainPos - contentEndOffset_) && !itemPosition_.empty()) {
+    if (LessNotEqual(currentEndPos, endMainPos - contentEndOffset_) && !itemPosition_.empty() &&
+        itemPosition_.rbegin()->first == totalItemCount_ - 1) {
         endMainPos_ = currentEndPos + contentEndOffset_;
         startMainPos_ = endMainPos_ - contentMainSize_;
         ReMeasureListItemGroup(layoutWrapper, true);
@@ -1251,7 +1254,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     currentStartPos += chainOffset;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     UpdateSnapCenterContentOffset(layoutWrapper);
-    if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_) && !itemPosition_.empty()) {
+    if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_) && !itemPosition_.empty() &&
+        itemPosition_.begin()->first == 0) {
         auto itemTotalSize = GetEndPosition() - currentStartPos + contentEndOffset_ + contentStartOffset_;
         bool overBottom = (GetEndIndex() == totalItemCount_ - 1) && (LessNotEqual(itemTotalSize, contentMainSize_));
         if (overBottom && !mainSizeIsDefined_ && GreatNotEqual(contentMainSize_, itemTotalSize)) {
@@ -1615,7 +1619,7 @@ int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrappe
 
 bool ListLayoutAlgorithm::IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const
 {
-    bool syncLoad = property->GetSyncLoad().value_or(true);
+    bool syncLoad = property->GetSyncLoad().value_or(SystemProperties::IsSyncLoadEnabled());
     return (syncLoad && NearZero(currentDelta_) && !targetIndex_.has_value() && mainSizeIsDefined_);
 }
 
@@ -2544,7 +2548,7 @@ int32_t ListLayoutAlgorithm::FindPredictSnapEndIndexInItemPositions(
         if (scrollSnapVelocity_ < -SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
             endIndex = std::min(GetEndIndex(), endIndex + 1);
         } else if (scrollSnapVelocity_ > SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
-            endIndex = std::min(GetStartIndex(), endIndex - 1);
+            endIndex = std::max(GetStartIndex(), endIndex - 1);
         }
     }
     return endIndex;

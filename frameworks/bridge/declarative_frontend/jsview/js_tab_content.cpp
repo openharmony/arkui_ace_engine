@@ -94,6 +94,9 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     }
     auto tabBarInfo = info[0];
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TAB_BAR_OPTIONS_ICON, nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::BOTTOM_TAB_BAR_STYLE_ICON, nullptr);
     RefPtr<ResourceObject> resTextObj;
     std::string infoStr;
     if (ParseJsString(tabBarInfo, infoStr, resTextObj)) {
@@ -183,13 +186,11 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
         if (ParseJsMedia(iconParam, icon, resIconObj)) {
             iconOpt = icon;
         }
-        if (SystemProperties::ConfigChangePerform()) {
-            TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON, resIconObj);
-        }
     }
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, std::nullopt, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TAB_BAR_OPTIONS_ICON, resIconObj);
 }
 
 void JSTabContent::Pop()
@@ -221,6 +222,9 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
         if (tabTheme) {
             indicator.color = tabTheme->GetActiveIndicatorColor();
         }
+        TabContentModel::GetInstance()->SetIndicatorColorByUser(false);
+    } else {
+        TabContentModel::GetInstance()->SetIndicatorColorByUser(true);
     }
     if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("height"), indicatorHeight, indicatorHightResObj) ||
         indicatorHeight.Value() < 0.0f || indicatorHeight.Unit() == DimensionUnit::PERCENT) {
@@ -404,6 +408,8 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info, bool isSubTabStyle)
 void JSTabContent::SetIconStyle(const JSRef<JSVal>& info)
 {
     IconStyle iconStyle;
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON_SELECT_COLOR, nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON_UNSELECT_COLOR, nullptr);
     if (info->IsObject()) {
         RefPtr<ResourceObject> unselectedColorResObj;
         RefPtr<ResourceObject> selectedColorResObj;
@@ -412,12 +418,18 @@ void JSTabContent::SetIconStyle(const JSRef<JSVal>& info)
         JSRef<JSVal> unselectedColorValue = obj->GetProperty("unselectedColor");
         if (ConvertFromJSValue(unselectedColorValue, unselectedColor, unselectedColorResObj)) {
             iconStyle.unselectedColor = unselectedColor;
+            TabContentModel::GetInstance()->SetIconUnselectedColorByUser(true);
+        } else {
+            TabContentModel::GetInstance()->SetIconUnselectedColorByUser(false);
         }
 
         Color selectedColor;
         JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
         if (ConvertFromJSValue(selectedColorValue, selectedColor, selectedColorResObj)) {
             iconStyle.selectedColor = selectedColor;
+            TabContentModel::GetInstance()->SetIconSelectedColorByUser(true);
+        } else {
+            TabContentModel::GetInstance()->SetIconSelectedColorByUser(false);
         }
         if (SystemProperties::ConfigChangePerform()) {
             TabContentModel::GetInstance()->CreateWithResourceObj(
@@ -435,6 +447,9 @@ void JSTabContent::GetLabelUnselectedContent(const JSRef<JSVal> unselectedColorV
     RefPtr<ResourceObject> unselectColorResObj;
     if (ConvertFromJSValue(unselectedColorValue, unselectedColor, unselectColorResObj)) {
         labelStyle.unselectedColor = unselectedColor;
+        TabContentModel::GetInstance()->SetLabelUnselectedColorByUser(true);
+    } else {
+        TabContentModel::GetInstance()->SetLabelUnselectedColorByUser(false);
     }
     if (SystemProperties::ConfigChangePerform()) {
         TabContentModel::GetInstance()->CreateWithResourceObj(
@@ -448,6 +463,9 @@ void JSTabContent::GetLabelSelectedContent(const JSRef<JSVal> selectedColorValue
     RefPtr<ResourceObject> selectColorResObj;
     if (ConvertFromJSValue(selectedColorValue, selectedColor, selectColorResObj)) {
         labelStyle.selectedColor = selectedColor;
+        TabContentModel::GetInstance()->SetLabelSelectedColorByUser(true);
+    } else {
+        TabContentModel::GetInstance()->SetLabelSelectedColorByUser(false);
     }
     if (SystemProperties::ConfigChangePerform()) {
         TabContentModel::GetInstance()->CreateWithResourceObj(
@@ -575,7 +593,10 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
     }
     TabContentModel::GetInstance()->SetPadding(padding);
     TabContentModel::GetInstance()->SetUseLocalizedPadding(useLocalizedPadding);
-    TabContentModel::GetInstance()->CreatePaddingWithResourceObj(resObjLeft, resObjRight, resObjTop, resObjBottom);
+    TabContentModel::GetInstance()->CreatePaddingHorWithResourceObj(resObjLeft, resObjRight,
+        isSubTabStyle, useLocalizedPadding);
+    TabContentModel::GetInstance()->CreatePaddingVerWithResourceObj(resObjTop, resObjBottom,
+        isSubTabStyle, useLocalizedPadding);
 }
 
 void JSTabContent::SetId(const JSRef<JSVal>& info)
@@ -752,10 +773,6 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
             tabBarSymbol = symbolApply;
         }
     }
-    if (SystemProperties::ConfigChangePerform()) {
-        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
-        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON, resIconObj);
-    }
 
     JSRef<JSVal> paddingParam = paramObject->GetProperty("padding");
     SetPadding(paddingParam, false);
@@ -777,6 +794,8 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
     JSRef<JSVal> idParam = paramObject->GetProperty("id");
     SetId(idParam);
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::BOTTOM_TAB_BAR_STYLE_ICON, resIconObj);
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, tabBarSymbol, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);

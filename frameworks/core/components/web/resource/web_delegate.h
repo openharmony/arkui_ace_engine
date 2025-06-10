@@ -208,7 +208,7 @@ public:
     AllSslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result) : result_(result) {}
 
     void HandleConfirm() override;
-    void HandleCancel() override;
+    void HandleCancel(bool abortLoading) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result_;
@@ -296,6 +296,9 @@ public:
     void Paste() const override;
     void Cut() const override;
     void SelectAll() const override;
+    void Undo() const override;
+    void Redo() const override;
+    void PasteAndMatchStyle() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
@@ -825,6 +828,7 @@ public:
     void UpdateForceDarkAccess(const bool& access);
     void UpdateAudioResumeInterval(const int32_t& resumeInterval);
     void UpdateAudioExclusive(const bool& audioExclusive);
+    void UpdateAudioSessionType(const WebAudioSessionType& audioSessionType);
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
@@ -855,6 +859,7 @@ public:
     void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
+    void UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
@@ -1010,6 +1015,7 @@ public:
     NWeb::NWebDragData::DragOperation op_ = NWeb::NWebDragData::DragOperation::DRAG_OPERATION_NONE;
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
+    void OnActivateContent();
     void OnWindowExit();
     void OnPageVisible(const std::string& url);
     void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
@@ -1065,6 +1071,7 @@ public:
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1261,6 +1268,7 @@ private:
     bool ZoomOut();
     int ConverToWebHitTestType(int hitType);
     void GetHitTestValue(HitTestResult& result);
+    int GetProgress();
     int GetPageHeight();
     std::string GetTitle();
     std::string GetDefaultUserAgent();
@@ -1358,6 +1366,7 @@ private:
     EventCallbackV2 onScrollV2_;
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
+    EventCallbackV2 onActivateContentV2_;
     EventCallbackV2 onWindowExitV2_;
     EventCallbackV2 onPageVisibleV2_;
     EventCallbackV2 onTouchIconUrlV2_;

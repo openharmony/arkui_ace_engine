@@ -1081,18 +1081,21 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest042, TestSize.Level1)
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create node and check basic information.
+     */
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     const Color value = Color::RED;
-    rosenRenderContext->OnBackgroundColorUpdate(value);
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
-    OHOS::Rosen::RSColor rsColor = OHOS::Rosen::RSColor::FromArgbInt(value.GetValue());
-    GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
-    if (ColorSpace::DISPLAY_P3 == value.GetColorSpace()) {
-        colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
-    }
-    rsColor.SetColorSpace(colorSpace);
+    OHOS::Rosen::RSColor rsColor;
+    /**
+     * @tc.steps: step2. Call OnBackgroundColorUpdate function with value (RED), and convert it to rsColor.
+     * @tc.expected: step2. The backgroundColorVal value on node should match rsColor value.
+     */
+    rosenRenderContext->OnBackgroundColorUpdate(value);
+    rosenRenderContext->ColorToRSColor(value, rsColor);
     rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
     rosenRenderContext->PaintBackground();
     auto backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
@@ -1100,6 +1103,20 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
     EXPECT_EQ(backgroundColorVal.GetGreen(), rsColor.GetGreen());
     EXPECT_EQ(backgroundColorVal.GetBlue(), rsColor.GetBlue());
     EXPECT_EQ(backgroundColorVal.GetAlpha(), rsColor.GetAlpha());
+    EXPECT_EQ(backgroundColorVal.GetColorSpace(), rsColor.GetColorSpace());
+    /**
+     * @tc.steps: step3. Call OnBackgroundColorUpdate function with p3Color (RED with DISPLAY_P3 color space),
+     * and convert it to rsColor.
+     * @tc.expected: step3. The colorSpace of p3BackgroundColorVal on node should match colorSpace of rsColor.
+     */
+    Color p3Color = Color::RED;
+    p3Color.SetColorSpace(ColorSpace::DISPLAY_P3);
+    rosenRenderContext->OnBackgroundColorUpdate(p3Color);
+    rosenRenderContext->ColorToRSColor(p3Color, rsColor);
+    rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
+    rosenRenderContext->PaintBackground();
+    auto p3BackgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    EXPECT_EQ(p3BackgroundColorVal.GetColorSpace(), rsColor.GetColorSpace());
 }
 
 /**
@@ -1216,6 +1233,42 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
     EXPECT_EQ(rotationYValue, -rotateY);
     EXPECT_EQ(rotationZValue, rotateZ);
     EXPECT_EQ(cameraDistanceValue, perspective);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest048
+ * @tc.desc: Test BlendBgColor Func and ResetBlendBgColor Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and check basic information.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    /**
+     * @tc.steps: step2. Call the BlendBgColor function and ResetBlendBgColor function.
+     * @tc.expected: step2. The current colorSpace value on the node should match the original colorSpace value.
+     */
+    Color bgColor = Color::RED;
+    OHOS::Rosen::RSColor rsColor;
+    rosenRenderContext->OnBackgroundColorUpdate(bgColor);
+    rosenRenderContext->ColorToRSColor(bgColor, rsColor);
+    rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
+    rosenRenderContext->PaintBackground();
+    Color blendColor = Color::FromRGB(6, 7, 8);
+    auto originBackgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    rosenRenderContext->BlendBgColor(blendColor);
+    auto backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    EXPECT_EQ(backgroundColorVal.GetColorSpace(), originBackgroundColorVal.GetColorSpace());
+    rosenRenderContext->ResetBlendBgColor();
+    backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    EXPECT_EQ(backgroundColorVal.GetColorSpace(), originBackgroundColorVal.GetColorSpace());
 }
 
 /**
@@ -1483,6 +1536,283 @@ HWTEST_F(RosenRenderContextTest, SetAlwaysSnapshot001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetWithRange001
+ * @tc.desc: Test GetWithRange Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetWithRange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    NodeIdentity endID;
+    startID.first = "test1";
+    endID.first = "test2";
+    bool isStartRect = true;
+    int32_t errorCode = 0;
+    ComponentSnapshot::JsCallback callback = [&](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode,
+        std::function<void()> finishCallback) {
+        errorCode = errCode;
+    };
+    SnapshotOptions options{};
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetWithRange.
+     * @tc.expected: Check error code.
+     */
+    ComponentSnapshot snapshot;
+    snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+    ASSERT_NE(callback, nullptr);
+    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: GetWithRange002
+ * @tc.desc: Test GetWithRange Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetWithRange002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    NodeIdentity endID;
+    startID.second = 0;
+    endID.second = 0;
+    bool isStartRect = true;
+    int32_t errorCode = 0;
+    ComponentSnapshot::JsCallback callback = [&](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode,
+        std::function<void()> finishCallback) {
+        errorCode = errCode;
+    };
+    SnapshotOptions options{};
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetWithRange.
+     * @tc.expected: Check error code.
+     */
+    ComponentSnapshot snapshot;
+    snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+    ASSERT_NE(callback, nullptr);
+    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: GetWithRange003
+ * @tc.desc: Test GetWithRange Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetWithRange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    NodeIdentity endID;
+    startID.first = "test";
+    endID.second = 0;
+    bool isStartRect = true;
+    int32_t errorCode = 0;
+    ComponentSnapshot::JsCallback callback = [&](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode,
+        std::function<void()> finishCallback) {
+        errorCode = errCode;
+    };
+    SnapshotOptions options{};
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetWithRange.
+     * @tc.expected: Check error code.
+     */
+    ComponentSnapshot snapshot;
+    snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+    ASSERT_NE(callback, nullptr);
+    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: GetWithRange004
+ * @tc.desc: Test GetWithRange Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetWithRange004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    NodeIdentity endID;
+    startID.second = 0;
+    endID.first = "test";
+    bool isStartRect = true;
+    int32_t errorCode = 0;
+    ComponentSnapshot::JsCallback callback = [&](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode,
+        std::function<void()> finishCallback) {
+        errorCode = errCode;
+    };
+    SnapshotOptions options{};
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetWithRange.
+     * @tc.expected: Check error code.
+     */
+    ComponentSnapshot snapshot;
+    snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+    ASSERT_NE(callback, nullptr);
+    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: GetWithRange005
+ * @tc.desc: Test GetWithRange Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetWithRange005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    NodeIdentity endID;
+    startID.first = "test1";
+    startID.second = 0;
+    endID.first = "test2";
+    endID.second = 0;
+    bool isStartRect = true;
+    int32_t errorCode = 0;
+    ComponentSnapshot::JsCallback callback = [&](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode,
+        std::function<void()> finishCallback) {
+        errorCode = errCode;
+    };
+    SnapshotOptions options{};
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetWithRange.
+     * @tc.expected: Check error code.
+     */
+    ComponentSnapshot snapshot;
+    snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+    ASSERT_NE(callback, nullptr);
+    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: GetRangeIDNode001
+ * @tc.desc: Test GetRangeIDNode Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetRangeIDNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    startID.first = "test1";
+    startID.second = 0;
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetRangeIDNode.
+     * @tc.expected: Check result.
+     */
+    ComponentSnapshot snapshot;
+    auto startNode = snapshot.GetRangeIDNode(startID);
+    EXPECT_EQ(startNode, nullptr);
+}
+
+/**
+ * @tc.name: GetRangeIDNode002
+ * @tc.desc: Test GetRangeIDNode Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetRangeIDNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    startID.first = "";
+    startID.second = 1;
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetRangeIDNode.
+     * @tc.expected: Check result.
+     */
+    ComponentSnapshot snapshot;
+    auto startNode = snapshot.GetRangeIDNode(startID);
+    EXPECT_EQ(startNode, nullptr);
+}
+
+/**
+ * @tc.name: GetRangeIDStr001
+ * @tc.desc: Test GetRangeIDStr Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetRangeIDStr001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    startID.first = "test1";
+    startID.second = 0;
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetRangeIDStr.
+     * @tc.expected: Check result.
+     */
+    ComponentSnapshot snapshot;
+    auto startNode = snapshot.GetRangeIDStr(startID);
+    EXPECT_EQ(startNode, "test1");
+}
+
+/**
+ * @tc.name: GetRangeIDStr002
+ * @tc.desc: Test GetRangeIDStr Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetRangeIDStr002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    startID.first = "";
+    startID.second = 1;
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetRangeIDStr.
+     * @tc.expected: Check result.
+     */
+    ComponentSnapshot snapshot;
+    auto startNode = snapshot.GetRangeIDStr(startID);
+    EXPECT_EQ(startNode, "1");
+}
+
+/**
+ * @tc.name: GetRangeIDStr003
+ * @tc.desc: Test GetRangeIDStr Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetRangeIDStr003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    NodeIdentity startID;
+    startID.first = "";
+    startID.second = 0;
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetRangeIDStr.
+     * @tc.expected: Check result.
+     */
+    ComponentSnapshot snapshot;
+    auto startNode = snapshot.GetRangeIDStr(startID);
+    EXPECT_EQ(startNode, "0");
+}
+
+/**
  * @tc.name: OnCustomBackgroundColorUpdate001
  * @tc.desc: Test OnCustomBackgroundColorUpdate Func.
  * @tc.type: FUNC
@@ -1543,6 +1873,52 @@ HWTEST_F(RosenRenderContextTest, OnBuilderBackgroundFlagUpdate001, TestSize.Leve
     rosenRenderContext->rsNode_ = nullptr;
     rosenRenderContext->OnBuilderBackgroundFlagUpdate(false);
     EXPECT_TRUE(transitionModifier->isBuilderBackground_);
+}
+
+/**
+ * @tc.name: OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate001
+ * @tc.desc: Test OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
+    ASSERT_NE(transitionModifier, nullptr);
+    /**
+     * @tc.steps: step1. Call ignoresLayoutSafeAreaEdges to true.
+     * @tc.expected: step1. The transitionModifier->Modify() should be called.
+     */
+    uint32_t ignoresLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    transitionModifier->Modify();
+    bool flag = transitionModifier->flag_->Get();
+    rosenRenderContext->UpdateIsTransitionBackground(true);
+    rosenRenderContext->UpdateBuilderBackgroundFlag(false);
+    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
+    EXPECT_NE(transitionModifier->flag_->Get(), flag);
+
+    /**
+     * @tc.steps: step2. Set ignoresLayoutSafeAreaEdges to false.
+     * @tc.expected: step2. The transitionModifier->Modify() should not be called.
+     */
+    flag = transitionModifier->flag_->Get();
+    rosenRenderContext->UpdateBuilderBackgroundFlag(true);
+    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
+    EXPECT_EQ(flag, transitionModifier->flag_->Get());
+
+    /**
+     * @tc.steps: step3. Set ignoresLayoutSafeAreaEdges while rsNode_ is null.
+     * @tc.expected: step3. The transitionModifier->Modify() should not be called.
+     */
+    rosenRenderContext->rsNode_ = nullptr;
+    rosenRenderContext->UpdateBuilderBackgroundFlag(true);
+    flag = transitionModifier->flag_->Get();
+    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
+    EXPECT_EQ(flag, transitionModifier->flag_->Get());
 }
 
 /**
@@ -1668,5 +2044,88 @@ HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
     EXPECT_EQ(quaternionValue[1], 0);
     EXPECT_EQ(quaternionValue[2], 0);
     EXPECT_NE(quaternionValue[3], 0);
+}
+
+/**
+ * @tc.name: ClearModifiers001
+ * @tc.desc: Test cast to RosenRenderContextTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ClearModifiers001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    auto rsNode = rosenRenderContext->rsNode_;
+    ASSERT_NE(rsNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set rotateZ is 90.
+     * @tc.expected: GetRotation is 90.
+     */
+    auto angle = 90;
+    rosenRenderContext->SetRotation(0, 0, angle);
+    auto rotateZ = rsNode->GetStagingProperties().GetRotation();
+    EXPECT_EQ(rotateZ, angle);
+
+    /**
+     * @tc.steps: step3. ClearModifiers.
+     * @tc.expected: GetRotation is default value.
+     */
+    rosenRenderContext->ClearModifiers();
+    rotateZ = rsNode->GetStagingProperties().GetRotation();
+    EXPECT_EQ(rotateZ, 0);
+}
+
+/**
+ * @tc.name: RemoveFromTreeTest001
+ * @tc.desc: Test RosenRenderContext RemoveFromTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RemoveFromTreeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a rosenRenderContext
+     */
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+
+     /**
+     * @tc.steps: step2. test RemoveFromTree function
+     */
+    rosenRenderContext->RemoveFromTree();
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+}
+
+/**
+ * @tc.name: RemoveFromTreeTest002
+ * @tc.desc: Test RosenRenderContext RemoveFromTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RemoveFromTreeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a RemoveFromTree
+     */
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+    std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
+    rosenRenderContext->InitContext(true, contextParamValue);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+
+    /**
+     * @tc.steps: step2. test RemoveFromTree function
+     */
+    rosenRenderContext->RemoveFromTree();
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+    EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTreeInit_, true);
+    EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTree_, false);
 }
 } // namespace OHOS::Ace::NG

@@ -103,6 +103,7 @@ public:
     static void JsOnDrop(const JSCallbackInfo& info);
     static void PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     static void OnWindowNew(const JSCallbackInfo& args);
+    static void OnActivateContent(const JSCallbackInfo& args);
     static void OnWindowExit(const JSCallbackInfo& args);
     static void MultiWindowAccessEnabled(bool isMultiWindowAccessEnable);
     static void AllowWindowOpenMethod(bool isAllowWindowOpenMethod);
@@ -151,6 +152,7 @@ public:
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void OptimizeParserBudgetEnabled(bool enable);
+    static void BypassVsyncCondition(int32_t webBypassVsyncCondition);
     static void RunJavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);

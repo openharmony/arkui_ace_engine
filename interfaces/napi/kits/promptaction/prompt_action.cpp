@@ -1904,6 +1904,85 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     return result;
 }
 
+void CreateActionMenuLifeCycleCallback(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->onDidAppear, &valueType);
+    if (valueType == napi_function) {
+        napi_create_reference(env, asyncContext->onDidAppear, 1, &asyncContext->onDidAppearRef);
+    }
+    napi_typeof(env, asyncContext->onDidDisappear, &valueType);
+    if (valueType == napi_function) {
+        napi_create_reference(env, asyncContext->onDidDisappear, 1, &asyncContext->onDidDisappearRef);
+    }
+    napi_typeof(env, asyncContext->onWillAppear, &valueType);
+    if (valueType == napi_function) {
+        napi_create_reference(env, asyncContext->onWillAppear, 1, &asyncContext->onWillAppearRef);
+    }
+    napi_typeof(env, asyncContext->onWillDisappear, &valueType);
+    if (valueType == napi_function) {
+        napi_create_reference(env, asyncContext->onWillDisappear, 1, &asyncContext->onWillDisappearRef);
+    }
+}
+
+void GetActionMenuAppearLifeCycleCallback(napi_env env,
+    const std::shared_ptr<PromptAsyncContext>& asyncContext, PromptDialogAttr& promptDialogAttr)
+{
+    auto onDidAppear = [env = asyncContext->env, onDidAppearRef = asyncContext->onDidAppearRef]() {
+        if (onDidAppearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
+            napi_value onDidAppearFunc = nullptr;
+            napi_get_reference_value(env, onDidAppearRef, &onDidAppearFunc);
+            napi_call_function(env, nullptr, onDidAppearFunc, 0, nullptr, nullptr);
+            napi_delete_reference(env, onDidAppearRef);
+            napi_close_handle_scope(env, scope);
+        }
+    };
+    auto onWillAppear = [env = asyncContext->env, onWillAppearRef = asyncContext->onWillAppearRef]() {
+        if (onWillAppearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
+            napi_value onWillAppearFunc = nullptr;
+            napi_get_reference_value(env, onWillAppearRef, &onWillAppearFunc);
+            napi_call_function(env, nullptr, onWillAppearFunc, 0, nullptr, nullptr);
+            napi_delete_reference(env, onWillAppearRef);
+            napi_close_handle_scope(env, scope);
+        }
+    };
+    promptDialogAttr.onDidAppear = std::move(onDidAppear);
+    promptDialogAttr.onWillAppear = std::move(onWillAppear);
+}
+
+void GetActionMenuDisappearLifeCycleCallback(napi_env env,
+    const std::shared_ptr<PromptAsyncContext>& asyncContext, PromptDialogAttr& promptDialogAttr)
+{
+    auto onDidDisappear = [env = asyncContext->env, onDidDisappearRef = asyncContext->onDidDisappearRef]() {
+        if (onDidDisappearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
+            napi_value onDidDisappearFunc = nullptr;
+            napi_get_reference_value(env, onDidDisappearRef, &onDidDisappearFunc);
+            napi_call_function(env, nullptr, onDidDisappearFunc, 0, nullptr, nullptr);
+            napi_delete_reference(env, onDidDisappearRef);
+            napi_close_handle_scope(env, scope);
+        }
+    };
+    auto onWillDisappear = [env = asyncContext->env, onWillDisappearRef = asyncContext->onWillDisappearRef]() {
+        if (onWillDisappearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
+            napi_value onWillDisappearFunc = nullptr;
+            napi_get_reference_value(env, onWillDisappearRef, &onWillDisappearFunc);
+            napi_call_function(env, nullptr, onWillDisappearFunc, 0, nullptr, nullptr);
+            napi_delete_reference(env, onWillDisappearRef);
+            napi_close_handle_scope(env, scope);
+        }
+    };
+    promptDialogAttr.onDidDisappear = std::move(onDidDisappear);
+    promptDialogAttr.onWillDisappear = std::move(onWillDisappear);
+}
+
 napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "js prompt show action menu enter");
@@ -1933,6 +2012,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
+
+    PromptDialogAttr lifeCycleAttr;
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -1941,6 +2022,14 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 DeleteContextAndThrowError(env, asyncContext, "The type of parameters is incorrect.");
                 return nullptr;
             }
+
+            napi_get_named_property(env, argv[0], "onDidAppear", &asyncContext->onDidAppear);
+            napi_get_named_property(env, argv[0], "onDidDisappear", &asyncContext->onDidDisappear);
+            napi_get_named_property(env, argv[0], "onWillAppear", &asyncContext->onWillAppear);
+            napi_get_named_property(env, argv[0], "onWillDisappear", &asyncContext->onWillDisappear);
+            CreateActionMenuLifeCycleCallback(env, asyncContext);
+            GetActionMenuAppearLifeCycleCallback(env, asyncContext, lifeCycleAttr);
+            GetActionMenuDisappearLifeCycleCallback(env, asyncContext, lifeCycleAttr);
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
             napi_get_named_property(env, argv[0], "showInSubWindow", &asyncContext->showInSubWindow);
             napi_get_named_property(env, argv[0], "isModal", &asyncContext->isModal);
@@ -2057,6 +2146,10 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     rect.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
 
     PromptDialogAttr promptDialogAttr = {
+        .onDidAppear = std::move(lifeCycleAttr.onDidAppear),
+        .onDidDisappear = std::move(lifeCycleAttr.onDidDisappear),
+        .onWillAppear = std::move(lifeCycleAttr.onWillAppear),
+        .onWillDisappear = std::move(lifeCycleAttr.onWillDisappear),
         .title = asyncContext->titleString,
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,

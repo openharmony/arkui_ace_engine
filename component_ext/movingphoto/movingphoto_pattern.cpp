@@ -774,7 +774,7 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo());
     CHECK_NULL_RETURN(video, false);
     video->GetRenderContext()->SetClipToBounds(true);
-    if (currentPlayStatus_ == PlaybackStatus::STARTED) {
+    if (currentPlayStatus_ != PlaybackStatus::STARTED) {
         video->GetRenderContext()->UpdateOpacity(0.0);
     }
     return false;

@@ -85,9 +85,6 @@ public:
     virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) {};
     virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
     virtual void UpdateUserSetSelectColor() = 0;
-    virtual void ParseDisappearTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
-    virtual void ParseSelectedTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
-    virtual void ParseNormalTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
     static std::once_flag onceFlag_;

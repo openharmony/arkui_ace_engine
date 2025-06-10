@@ -322,6 +322,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 SyncGeometry(wrapper);
             }
+            measuredItems_.erase(itemIdex);
             auto frameNode = DynamicCast<FrameNode>(wrapper);
             if (frameNode) {
                 frameNode->MarkAndCheckNewOpIncNode(axis_);
@@ -340,12 +341,14 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (startIndex == -1 && endIndex == -1) {
         startIndex = endIndex = info_.GetChildrenCount();
     }
+    ClearUnlayoutedItems(layoutWrapper);
     if (!info_.hasMultiLineItem_) {
         if (!showCached || !info_.reachEnd_) {
             auto cache = CalculateCachedCount(layoutWrapper, cacheCount);
             cacheStart = cache.first;
             cacheEnd = cache.second; // only use counting method when last line not completely filled
         }
+        LostChildFocusToSelf(layoutWrapper, startIndex - cacheStart, endIndex + cacheEnd);
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
         info_.times_ = (info_.times_ + 1) % GRID_CHECK_INTERVAL;
         if (info_.times_ == 0) {
@@ -353,6 +356,21 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     UpdateOverlay(layoutWrapper);
+}
+
+void GridScrollLayoutAlgorithm::ClearUnlayoutedItems(LayoutWrapper* layoutWrapper)
+{
+    for (int32_t itemIndex : measuredItems_) {
+        auto wrapper = layoutWrapper->GetChildByIndex(itemIndex);
+        if (!wrapper) {
+            continue;
+        }
+
+        auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
+        if (frameNode) {
+            frameNode->ClearSubtreeLayoutAlgorithm();
+        }
+    }
 }
 
 void GridScrollLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
@@ -720,6 +738,7 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
                 --currentIndex;
                 break;
             }
+            measuredItems_.emplace(currentIndex);
             i += static_cast<uint32_t>(childState) - 1;
             // Step3. Measure [GridItem]
             LargeItemLineHeight(itemWrapper);
@@ -1130,6 +1149,7 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
         } else {
             MeasureChildPlaced(frameSize_, idx, crossStart, wrapper_, item);
         }
+        measuredItems_.emplace(idx);
         // Record end index. When fill new line, the [endIndex_] will be the first item index to request
         LargeItemLineHeight(item);
         endIdx = std::max(idx, endIdx);
@@ -1351,6 +1371,7 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
         } else {
             MeasureChildPlaced(frameSize, currentIndex, crossStart, layoutWrapper, itemWrapper);
         }
+        measuredItems_.emplace(currentIndex);
         // Step3. Measure [GridItem]
         LargeItemLineHeight(itemWrapper);
         info_.startIndex_ = currentIndex;
@@ -1497,6 +1518,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             --currentIndex;
             break;
         }
+        measuredItems_.emplace(currentIndex);
         i = static_cast<uint32_t>(lastCross_ - 1);
         // Step3. Measure [GridItem]
         LargeItemLineHeight(itemWrapper);

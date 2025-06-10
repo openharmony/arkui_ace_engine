@@ -85,6 +85,7 @@ public:
     void SetEnableHapticFeedback(bool state) override {};
     void SetEnableAutoSpacing(bool enabled) override {};
     void SetLineThicknessScale(float value) override {};
+    void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override {};
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

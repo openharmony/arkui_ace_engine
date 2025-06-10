@@ -59,6 +59,7 @@ const int32_t PARAM_ONE = 1;
 const int32_t PARAM_TWO = 2;
 constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
 constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
+const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 
 void EraseSpace(std::string& data)
 {
@@ -434,8 +435,12 @@ public:
 
     void HandleCancel(const JSCallbackInfo& args)
     {
+        bool abortLoading = false;
+        if (args.Length() >= 1 && args[0]->IsBoolean()) {
+            abortLoading = args[0]->ToBoolean();
+        }
         if (result_) {
-            result_->HandleCancel();
+            result_->HandleCancel(abortLoading);
         }
     }
 
@@ -1770,6 +1775,9 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("paste", &JSContextMenuResult::Paste);
         JSClass<JSContextMenuResult>::CustomMethod("cut", &JSContextMenuResult::Cut);
         JSClass<JSContextMenuResult>::CustomMethod("selectAll", &JSContextMenuResult::SelectAll);
+        JSClass<JSContextMenuResult>::CustomMethod("undo", &JSContextMenuResult::Undo);
+        JSClass<JSContextMenuResult>::CustomMethod("redo", &JSContextMenuResult::Redo);
+        JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -1818,6 +1826,27 @@ public:
     {
         if (result_) {
             result_->SelectAll();
+        }
+    }
+
+    void Undo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Undo();
+        }
+    }
+
+    void Redo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Redo();
+        }
+    }
+
+    void PasteAndMatchStyle(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->PasteAndMatchStyle();
         }
     }
 
@@ -1969,6 +1998,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSWeb>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
+    JSClass<JSWeb>::StaticMethod("onActivateContent", &JSWeb::OnActivateContent);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
     JSClass<JSWeb>::StaticMethod("allowWindowOpenMethod", &JSWeb::AllowWindowOpenMethod);
@@ -2037,6 +2067,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
     JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
+    JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -4015,9 +4046,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
+        WebModel::GetInstance()->SetDefaultBackgroundColor();
+    } else {
+        WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
     }
-    WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 void JSWeb::InitialScale(float scale)
@@ -4288,6 +4320,36 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetWindowNewEvent(jsCallback);
+}
+
+JSRef<JSVal> ActivateContentEventToJSValue(const WebActivateContentEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnActivateContent(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebActivateContentEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ActivateContentEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebActivateContentEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetActivateContentEventId(jsCallback);
 }
 
 JSRef<JSVal> WindowExitEventToJSValue(const WebWindowExitEvent& eventInfo)
@@ -4738,6 +4800,22 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
         bool audioExclusive = audioExclusiveObj->ToBoolean();
         WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
+    auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
+    auto audioSessionType = WebAudioSessionType::AUTO;
+    if (audioSessionTypeObj->IsNumber()) {
+        int32_t audioSessionTypeIntValue = audioSessionTypeObj->ToNumber<int32_t>();
+        switch (audioSessionTypeIntValue) {
+            case 0:
+                audioSessionType = WebAudioSessionType::AUTO;
+                break;
+            case WEB_AUDIO_SESSION_TYPE_AMBIENT:
+                audioSessionType = WebAudioSessionType::AMBIENT;
+                break;
+            default:
+                audioSessionType = WebAudioSessionType::AUTO;
+        }
+    }
+    WebModel::GetInstance()->SetAudioSessionType(audioSessionType);
 }
 
 JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)
@@ -5757,7 +5835,8 @@ void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
     WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
@@ -5808,6 +5887,23 @@ void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
         return;
     }
     WebModel::GetInstance()->SetDataDetectorConfig(textDetectConfig);
+}
+
+void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
+{
+    auto condition = WebBypassVsyncCondition::NONE;
+    switch (webBypassVsyncCondition) {
+        case 0:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+        case 1:
+            condition = WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET;
+            break;
+        default:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+    }
+    WebModel::GetInstance()->SetBypassVsyncCondition(condition);
 }
 
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)

@@ -79,6 +79,8 @@ namespace OHOS::NWeb {
     class NWebMessage;
     class NWebKeyEvent;
     class NWebSelectMenuBound;
+    class NWebUpdateScrollUpdateData;
+    class NWebNestedScrollUpdateDataImpl;
     enum class CursorType;
 }
 namespace OHOS::Ace::NG {
@@ -118,7 +120,6 @@ struct PipInfo {
 };
 
 using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
-
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
                    public Magnifier,
@@ -229,6 +230,17 @@ public:
         if (webSrc_ != webSrc_) {
             OnWebSrcUpdate();
             webSrc_ = webSrc;
+        }
+        if (webPaintProperty_) {
+            webPaintProperty_->SetWebPaintData(webSrc);
+        }
+    }
+
+    void SetWebSrcStatic(const std::string& webSrc)
+    {
+        if (webSrc_ != webSrc) {
+            webSrc_ = webSrc;
+            OnWebSrcUpdate();
         }
         if (webPaintProperty_) {
             webPaintProperty_->SetWebPaintData(webSrc);
@@ -446,6 +458,10 @@ public:
     {
         return nestedScroll_;
     }
+    WebBypassVsyncCondition GetWebBypassVsyncCondition() const
+    {
+        return webBypassVsyncCondition_;
+    }
     void OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent);
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
@@ -486,6 +502,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceDarkAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioResumeInterval, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioExclusive, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioSessionType, WebAudioSessionType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
@@ -495,6 +512,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BypassVsyncCondition, WebBypassVsyncCondition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
@@ -636,6 +654,7 @@ public:
         return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeById(int64_t accessibilityId);
     std::shared_ptr<NG::TransitionalNodeInfo> GetFocusedAccessibilityNode(int64_t accessibilityId,
         bool isAccessibilityFocus);
@@ -805,6 +824,7 @@ public:
     void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
     void SendPipEvent(int delegateId, int childId, int frameRoutingId, int event);
+    void SetDefaultBackgroundColor();
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -892,6 +912,7 @@ private:
     void OnForceDarkAccessUpdate(bool access);
     void OnAudioResumeIntervalUpdate(int32_t resumeInterval);
     void OnAudioExclusiveUpdate(bool audioExclusive);
+    void OnAudioSessionTypeUpdate(WebAudioSessionType value);
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
@@ -901,6 +922,7 @@ private:
     void OnMetaViewportUpdate(bool value);
     void OnNativeEmbedModeEnabledUpdate(bool value);
     void OnIntrinsicSizeEnabledUpdate(bool value);
+    void OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
@@ -1043,6 +1065,7 @@ private:
     bool CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool FilterScrollEventHandlevVlocity(const float velocity);
+    void CheckAndSetWebNestedScrollExisted();
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
@@ -1294,6 +1317,9 @@ private:
 
     bool isRotating_ {false};
     int32_t rotationEndCallbackId_ = 0;
+
+    WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
+    bool needSetDefaultBackgroundColor_ = false;
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;

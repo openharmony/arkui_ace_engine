@@ -829,11 +829,21 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
-        HandlePanGestureAccept(info, PanGestureState::BEFORE, callback);
+        HandleCallbackReports(info, type, PanGestureState::BEFORE);
         callbackFunction(info);
-        HandleReports(info, type);
-        HandlePanGestureAccept(info, PanGestureState::AFTER, callback);
+        HandleCallbackReports(info, type, PanGestureState::AFTER);
     }
+}
+
+void PanRecognizer::HandleCallbackReports(
+    const GestureEvent& info, GestureCallbackType type, PanGestureState panGestureState)
+{
+    if (panGestureState == PanGestureState::BEFORE) {
+        HandleGestureAccept(info, type);
+    } else if (panGestureState == PanGestureState::AFTER) {
+        HandleReports(info, type);
+    }
+    HandlePanGestureAccept(info, panGestureState, type);
 }
 
 void PanRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
@@ -1194,14 +1204,14 @@ void PanRecognizer::DumpVelocityInfo(int32_t fingerId)
 }
 
 void PanRecognizer::HandlePanGestureAccept(
-    const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback)
+    const GestureEvent& info, PanGestureState panGestureState, GestureCallbackType type)
 {
-    if (callback == onActionStart_) {
+    if (type == GestureCallbackType::START) {
         currentCallbackState_ = CurrentCallbackState::START;
         auto node = GetAttachedNode().Upgrade();
         UIObserverHandler::GetInstance().NotifyPanGestureStateChange(
             info, Claim(this), node, { panGestureState, currentCallbackState_ });
-    } else if (callback == onActionEnd_) {
+    } else if (type == GestureCallbackType::END) {
         currentCallbackState_ = CurrentCallbackState::END;
         auto node = GetAttachedNode().Upgrade();
         UIObserverHandler::GetInstance().NotifyPanGestureStateChange(

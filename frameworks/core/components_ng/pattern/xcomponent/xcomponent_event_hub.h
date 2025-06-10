@@ -43,6 +43,7 @@ public:
 
     void FireLoadEvent(const std::string& xcomponentId) const
     {
+        ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent[%d]", xcomponentId.c_str(), !!loadEvent_);
         CHECK_NULL_VOID(loadEvent_);
         loadEvent_(xcomponentId);
     }
@@ -54,6 +55,7 @@ public:
 
     void FireDestroyEvent(const std::string& xcomponentId) const
     {
+        ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent[%d]", xcomponentId.c_str(), !!destroyEvent_);
         CHECK_NULL_VOID(destroyEvent_);
         destroyEvent_(xcomponentId);
     }
@@ -87,6 +89,8 @@ public:
 
     void FireControllerCreatedEvent(const std::string& surfaceId, const std::string& xcomponentId) const
     {
+        ACE_SCOPED_TRACE(
+            "XComponent[%s] FireControllerCreatedEvent[%d]", xcomponentId.c_str(), !!controllerCreatedEvent_);
         CHECK_NULL_VOID(controllerCreatedEvent_);
         controllerCreatedEvent_(surfaceId, xcomponentId);
     }
@@ -96,8 +100,11 @@ public:
         controllerChangedEvent_ = std::move(controllerChangedEvent);
     }
 
-    void FireControllerChangedEvent(const std::string& surfaceId, const RectF& rect) const
+    void FireControllerChangedEvent(
+        const std::string& surfaceId, const RectF& rect, const std::string& xcomponentId) const
     {
+        ACE_SCOPED_TRACE("XComponent[%s] FireControllerChangedEvent[w:%f,h:%f][%d]", xcomponentId.c_str(), rect.Width(),
+            rect.Height(), !!controllerChangedEvent_);
         CHECK_NULL_VOID(controllerChangedEvent_);
         controllerChangedEvent_(surfaceId, rect);
     }
@@ -109,6 +116,8 @@ public:
 
     void FireControllerDestroyedEvent(const std::string& surfaceId, const std::string& xcomponentId) const
     {
+        ACE_SCOPED_TRACE(
+            "XComponent[%s] FireControllerDestroyedEvent[%d]", xcomponentId.c_str(), !!controllerDestroyedEvent_);
         CHECK_NULL_VOID(controllerDestroyedEvent_);
         controllerDestroyedEvent_(surfaceId, xcomponentId);
     }

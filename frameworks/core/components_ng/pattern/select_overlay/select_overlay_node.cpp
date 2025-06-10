@@ -1410,6 +1410,44 @@ RefPtr<FrameNode> GetMenuWrapper(std::vector<OptionParam>& params, const RefPtr<
     }
     return menuWrapper;
 }
+
+std::vector<MenuOptionsParam> GetMenuOptionsParamsWithEditMenuOption(
+    const std::shared_ptr<SelectOverlayInfo>& info, const std::vector<MenuItemParam> systemMenuItemParams)
+{
+    std::vector<MenuOptionsParam> createMenuItems;
+    CHECK_NULL_RETURN(info, createMenuItems);
+    if (info->onCreateCallback.onCreateMenuCallback) {
+        createMenuItems = info->onCreateCallback.onCreateMenuCallback(systemMenuItemParams);
+    }
+    CHECK_NULL_RETURN(info->onCreateCallback.onPrepareMenuCallback, createMenuItems);
+    std::vector<MenuItemParam> menuItemParams;
+    for (const auto& optionsParamItem : createMenuItems) {
+        MenuItemParam menuItemParam;
+        menuItemParam.menuOptionsParam = optionsParamItem;
+        menuItemParams.push_back(menuItemParam);
+    }
+    createMenuItems = info->onCreateCallback.onPrepareMenuCallback(menuItemParams);
+    return createMenuItems;
+}
+
+RefPtr<UINode> FindAccessibleFocusNodeInExtMenu(const RefPtr<FrameNode>& extensionMenu)
+{
+    CHECK_NULL_RETURN(extensionMenu, nullptr);
+    auto child = extensionMenu->GetFirstChild();
+    CHECK_NULL_RETURN(child, nullptr);
+    while (child) {
+        if (child->GetTag() == V2::OPTION_ETS_TAG) {
+            bool isPasteOption = SelectContentOverlayManager::IsPasteOption(child);
+            auto row = child->GetFirstChild();
+            if (isPasteOption && row) {
+                return row->GetFirstChild();
+            }
+            return child;
+        }
+        child = child->GetFirstChild();
+    }
+    return nullptr;
+}
 } // namespace
 
 SelectOverlayNode::SelectOverlayNode(const RefPtr<Pattern>& pattern)
@@ -1704,16 +1742,11 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
         selectOverlay->SetAnimationStatus(false);
         auto extensionMenu = weakExtensionMenu.Upgrade();
         CHECK_NULL_VOID(extensionMenu);
-        auto child = extensionMenu->GetFirstChild();
-        while (child) {
-            if (child->GetTag() == V2::OPTION_ETS_TAG) {
-                auto target = AceType::DynamicCast<FrameNode>(child);
-                CHECK_NULL_VOID(target);
-                target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
-                break;
-            }
-            child = child->GetFirstChild();
-        }
+        auto child =  FindAccessibleFocusNodeInExtMenu(extensionMenu);
+        CHECK_NULL_VOID(child);
+        auto target = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(target);
+        target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     };
     AnimationOption selectOption;
     selectOption.SetDuration(ANIMATION_DURATION1);
@@ -1800,7 +1833,7 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
         selectOverlay->SetAnimationStatus(false);
         auto child = selectOverlay->GetFirstChild();
         while (child) {
-            if (child->GetTag() == "SelectMenuButton") {
+            if (child->GetTag() == "SelectMenuButton" || child->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
                 auto target = AceType::DynamicCast<FrameNode>(child);
                 CHECK_NULL_VOID(target);
                 target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
@@ -2604,9 +2637,9 @@ bool SelectOverlayNode::IsShowTranslateOnTargetAPIVersion()
 void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth)
 {
     CHECK_NULL_VOID(info);
-    CHECK_NULL_VOID(info->onCreateCallback.onCreateMenuCallback);
+    CHECK_NULL_VOID((info->onCreateCallback.onCreateMenuCallback || info->onCreateCallback.onPrepareMenuCallback));
     auto systemItemParams = GetSystemMenuItemParams(info);
-    auto createMenuItems = info->onCreateCallback.onCreateMenuCallback(systemItemParams);
+    std::vector<MenuOptionsParam> createMenuItems = GetMenuOptionsParamsWithEditMenuOption(info, systemItemParams);
     auto extensionOptionStartIndex = AddCreateMenuItems(createMenuItems, info, maxWidth) + 1;
     if (backButton_) {
         isExtensionMenu_ = false;
@@ -2830,7 +2863,7 @@ void SelectOverlayNode::UpdateMenuOptions(const std::shared_ptr<SelectOverlayInf
 {
     float maxWidth = 0.0f;
     GetDefaultButtonAndMenuWidth(maxWidth);
-    if (info->onCreateCallback.onCreateMenuCallback) {
+    if (info->onCreateCallback.onCreateMenuCallback || info->onCreateCallback.onPrepareMenuCallback) {
         AddMenuItemByCreateMenuCallback(info, maxWidth);
         return;
     }
@@ -2947,9 +2980,9 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
 {
     RefPtr<FrameNode> menuWrapper = nullptr;
     std::vector<OptionParam> params;
-    if (info->onCreateCallback.onCreateMenuCallback) {
+    if (info->onCreateCallback.onCreateMenuCallback || info->onCreateCallback.onPrepareMenuCallback) {
         auto systemItemParams = GetSystemMenuItemParams(info);
-        auto createMenuItems = info->onCreateCallback.onCreateMenuCallback(systemItemParams);
+        auto createMenuItems = GetMenuOptionsParamsWithEditMenuOption(info, systemItemParams);
         params = GetCreateMenuOptionsParams(createMenuItems, info, 0);
     } else {
         params = GetOptionsParams(info);

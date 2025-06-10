@@ -188,6 +188,7 @@ void SetAlphabetIndexerColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetColor(frameNode, Color(color));
+    IndexerModelNG::SetColorByUser(frameNode, true);
 }
 
 void ResetAlphabetIndexerColor(ArkUINodeHandle node)
@@ -200,6 +201,7 @@ void ResetAlphabetIndexerColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetDefaultTextColor();
     IndexerModelNG::SetColor(frameNode, color);
+    IndexerModelNG::SetColorByUser(frameNode, false);
 }
 
 void SetPopupColor(ArkUINodeHandle node, uint32_t color)
@@ -207,6 +209,7 @@ void SetPopupColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupColor(frameNode, Color(color));
+    IndexerModelNG::SetPopupColorByUser(frameNode, true);
 }
 
 void ResetPopupColor(ArkUINodeHandle node)
@@ -219,6 +222,7 @@ void ResetPopupColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupTextColor();
     IndexerModelNG::SetPopupColor(frameNode, color);
+    IndexerModelNG::SetPopupColorByUser(frameNode, false);
 }
 
 void SetAlphabetIndexerSelectedColor(ArkUINodeHandle node, uint32_t color)
@@ -226,6 +230,7 @@ void SetAlphabetIndexerSelectedColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelectedColor(frameNode, Color(color));
+    IndexerModelNG::SetSelectedColorByUser(frameNode, true);
 }
 
 void ResetAlphabetIndexerSelectedColor(ArkUINodeHandle node)
@@ -238,6 +243,7 @@ void ResetAlphabetIndexerSelectedColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetSelectedTextColor();
     IndexerModelNG::SetSelectedColor(frameNode, color);
+    IndexerModelNG::SetSelectedColorByUser(frameNode, false);
 }
 
 void SetPopupBackground(ArkUINodeHandle node, uint32_t color)
@@ -264,6 +270,7 @@ void SetSelectedBackgroundColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
+    IndexerModelNG::SetSelectedBGColorByUser(frameNode, true);
 }
 
 void ResetSelectedBackgroundColor(ArkUINodeHandle node)
@@ -276,6 +283,7 @@ void ResetSelectedBackgroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetSelectedBackgroundColor();
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, color);
+    IndexerModelNG::SetSelectedBGColorByUser(frameNode, false);
 }
 
 void SetPopupUnselectedColor(ArkUINodeHandle node, uint32_t color)
@@ -283,6 +291,7 @@ void SetPopupUnselectedColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupUnselectedColor(frameNode, Color(color));
+    IndexerModelNG::SetPopupUnselectedColorByUser(frameNode, true);
 }
 
 void ResetPopupUnselectedColor(ArkUINodeHandle node)
@@ -295,6 +304,7 @@ void ResetPopupUnselectedColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupUnselectedTextColor();
     IndexerModelNG::SetPopupUnselectedColor(frameNode, color);
+    IndexerModelNG::SetPopupUnselectedColorByUser(frameNode, false);
 }
 
 void SetAlignStyle(ArkUINodeHandle node, int32_t value)
@@ -471,6 +481,7 @@ void SetPopupTitleBackground(ArkUINodeHandle node, ArkUI_Uint32 color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupTitleBackground(frameNode, Color(color));
+    IndexerModelNG::SetPopupTitleBackgroundByUser(frameNode, true);
 }
 void ResetPopupTitleBackground(ArkUINodeHandle node)
 {
@@ -482,6 +493,7 @@ void ResetPopupTitleBackground(ArkUINodeHandle node)
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupTitleBackground();
     IndexerModelNG::SetPopupTitleBackground(frameNode, color);
+    IndexerModelNG::SetPopupTitleBackgroundByUser(frameNode, false);
 }
 
 void SetAdaptiveWidth(ArkUINodeHandle node)

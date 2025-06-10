@@ -77,6 +77,7 @@ class RenderPropertyNode;
 class FrameNode;
 class InspectorFilter;
 class Modifier;
+class PipelineContext;
 
 struct PaintFocusExtraInfo final {
     PaintFocusExtraInfo() = default;
@@ -227,6 +228,8 @@ public:
     virtual void ResetBlendBorderColor() {}
 
     virtual void BlendBorderColor(const Color& color) {}
+
+    virtual void SetRSUIContext(PipelineContext* context) {}
 
     // Paint focus state by component's setting. It will paint along the paintRect
     virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
@@ -618,6 +621,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, CustomBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, IsTransitionBackground, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BuilderBackgroundFlag, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundIgnoresLayoutSafeAreaEdges, uint32_t);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -822,7 +826,7 @@ public:
 
     virtual void SyncRSPropertyToRenderContext(AnimationPropertyType property) {}
 
-    virtual void UpdateCustomBackground() {}
+    virtual void RemoveFromTree() {}
 
 protected:
     RenderContext() = default;
@@ -850,6 +854,7 @@ protected:
     virtual void OnCustomBackgroundColorUpdate(const Color& color) {}
     virtual void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) {}
     virtual void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) {}
+    virtual void OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}

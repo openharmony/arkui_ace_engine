@@ -419,8 +419,8 @@ struct CJUICommonModifier {
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
     void (*resetMask)(ArkUINodeHandle node);
     ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
-    void (*setBackgroundImageResizable)(ArkUINodeHandle node, ArkUIStringAndFloat* options,  ArkUI_Int32 optionsSize,
-        std::vector<void*>& bgImageResizableArray);
+    void (*setBackgroundImageResizable)(
+        ArkUINodeHandle node, ArkUIStringAndFloat* options, ArkUI_Int32 optionsSize, void* bgImageResizableResObjs);
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
     void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
         ArkUI_Int32 unit);
@@ -1323,6 +1323,7 @@ struct CJUITabsModifier {
     void (*setTabBarPosition)(ArkUINodeHandle node, ArkUI_Int32 barVal);
     void (*setTabsOptionsIndex)(ArkUINodeHandle node, ArkUI_Int32 indexVal);
     void (*setTabsOptionsController)(ArkUINodeHandle node, ArkUINodeHandle tabsController);
+    void (*setTabsOptionsBarModifier)(ArkUINodeHandle node, void* callback);
     void (*setScrollable)(ArkUINodeHandle node, ArkUI_Bool scrollable);
     void (*setTabBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setTabBarHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
@@ -1339,6 +1340,7 @@ struct CJUITabsModifier {
     void (*resetIsVertical)(ArkUINodeHandle node);
     void (*resetTabBarPosition)(ArkUINodeHandle node);
     void (*resetTabsOptionsIndex)(ArkUINodeHandle node);
+    void (*resetTabsOptionsBarModifier)(ArkUINodeHandle node);
     void (*resetScrollable)(ArkUINodeHandle node);
     void (*resetTabBarWidth)(ArkUINodeHandle node);
     void (*resetTabBarHeight)(ArkUINodeHandle node);
@@ -2229,7 +2231,7 @@ struct CJUIWaterFlowModifier {
     void (*resetLayoutDirection)(ArkUINodeHandle node);
     void (*setWaterFlowNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 scrollForward, ArkUI_Int32 scrollBackward);
     void (*resetWaterFlowNestedScroll)(ArkUINodeHandle node);
-    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
+    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction, void* frictionRawPtr);
     void (*resetWaterFlowFriction)(ArkUINodeHandle node);
     ArkUI_Int32 (*getLayoutDirection)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getColumnsTemplate)(ArkUINodeHandle node);

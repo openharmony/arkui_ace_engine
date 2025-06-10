@@ -31,6 +31,10 @@
 
 typedef struct _ArkUINode* ArkUINodeHandle;
 
+namespace OHOS::Rosen {
+class Filter;
+} // namespace OHOS::Rosen
+
 namespace OHOS::Ace::NG {
 class LayoutProperty;
 template<class T>
@@ -88,11 +92,13 @@ public:
     virtual void ResetSafeAreaPadding() = 0;
     virtual void SetLinearGradient(const NG::Gradient& gradient) = 0;
     virtual void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara) = 0;
+    virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) = 0;
 
     virtual RefPtr<UIContext> GetUIContext() const = 0;
     virtual void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) = 0;
     virtual int32_t GetMeasureWidth() = 0;
     virtual int32_t GetMeasureHeight() = 0;
+    virtual NodeHandle GetParentHandle() = 0;
 };
 } // namespace OHOS::Ace::Kit
 

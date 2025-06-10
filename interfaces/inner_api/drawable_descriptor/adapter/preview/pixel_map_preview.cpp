@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <string>
 #include "base/pixel_map.h"
 
 namespace OHOS {
@@ -29,6 +30,7 @@ public:
     void* GetRawPixelMapPtr() const override;
     std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override;
     bool IsHdr() const override;
+    void SetMemoryName(std::string pixelMapName) const override;
 };
 
 std::shared_ptr<PixelMap> Create(const std::shared_ptr<Media::PixelMap>& pixmap)
@@ -85,6 +87,8 @@ std::shared_ptr<Media::PixelMap> PixelMapPreview::GetPixelMapSharedPtr()
 {
     return nullptr;
 }
+
+void PixelMapPreview::SetMemoryName(std::string pixelMapName) const {}
 } // namespace Drawable
 } // namespace Ace
 } // namespace OHOS

@@ -278,6 +278,9 @@ enum class PlaceholderAlignment {
     /// placeholder is very tall, the extra space will grow equally from
     /// the top and bottom of the line.
     MIDDLE,
+
+    /// Same alignment as Text.
+    FOLLOW_PARAGRAPH,
 };
 
 namespace StringUtils {
@@ -290,6 +293,7 @@ inline std::string ToString(const PlaceholderAlignment& placeholderAlignment)
         { PlaceholderAlignment::TOP, "TOP" },
         { PlaceholderAlignment::BOTTOM, "BOTTOM" },
         { PlaceholderAlignment::MIDDLE, "MIDDLE" },
+        { PlaceholderAlignment::FOLLOW_PARAGRAPH, "FOLLOW_PARAGRAPH" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), placeholderAlignment);
     return iter != -1 ? table[iter].value : "";
@@ -704,6 +708,8 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextVerticalAlign, VerticalAlign, VerticalAlign::NONE, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
+        ParagraphVerticalAlign, TextVerticalAlign, TextVerticalAlign::BASELINE, ParagraphStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         WordBreak, WordBreak, WordBreak::BREAK_WORD, ParagraphStyleAttribute::WORD_BREAKTYPE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(TextCase, TextCase, TextCase::NORMAL, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(TextShadows, std::vector<Shadow>, TextStyleAttribute::SHADOWS);
@@ -724,7 +730,8 @@ public:
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         OptimizeTrailingSpace, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(EnableAutoSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(LineThicknessScale, float, 1.0f, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
+        LineThicknessScale, float, 1.0f, TextStyleAttribute::DECORATION_THICKNESS_SCALE);
 
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         StrokeWidth, Dimension, Dimension(0.0f, DimensionUnit::PX), TextStyleAttribute::RE_CREATE);

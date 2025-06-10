@@ -17,7 +17,9 @@
 #include <list>
 
 #include "gtest/gtest.h"
+#ifndef USE_NEW_SKIA
 #include "src/core/SkVM.h"
+#endif
 #define protected public
 #define private public
 #include "foundation/arkui/ace_engine/frameworks/core/common/ai/image_analyzer_manager.h"

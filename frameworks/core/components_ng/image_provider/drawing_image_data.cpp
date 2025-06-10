@@ -16,6 +16,9 @@
 #include "core/components_ng/image_provider/drawing_image_data.h"
 
 #include "include/codec/SkCodec.h"
+#ifdef USE_NEW_SKIA
+#include "include/core/SkStream.h"
+#endif
 
 #include "base/image/image_source.h"
 #include "core/components_ng/svg/svg_dom.h"
@@ -78,21 +81,21 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
     auto skData = SkData::MakeWithProc(rsData_->GetData(), rsData_->GetSize(), RSDataWrapperReleaseProc, wrapper);
     if (!skData) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "skData in MakeSvgDom is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
+            "skData is null, %{public}d-%{public}d-%{public}lld.",
             static_cast<int32_t>(rsData_->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
         return nullptr;
     }
     const auto svgStream = std::make_unique<SkMemoryStream>(skData);
     if (!svgStream) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "svgStream in MakeSvgDom is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
+            "svgStream is null, %{public}d-%{public}d-%{public}lld.",
             static_cast<int32_t>(rsData_->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
         return nullptr;
     }
     auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, src);
     if (!svgDom_) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "svgDom in MakeSvgDom is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
+            "svgDom is null, %{public}d-%{public}d-%{public}lld.",
             static_cast<int32_t>(rsData_->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
         return nullptr;
     }
@@ -100,7 +103,7 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
         [pipeline = WeakPtr(PipelineContext::GetCurrentContext())](const Dimension& value) -> double {
             auto context = pipeline.Upgrade();
             if (!context) {
-                TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg Get Value Failed.(Reason: pipline is null).");
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "SVG value missing, null pipeline.");
                 return 0.0;
             }
             return context->NormalizeToPx(value);

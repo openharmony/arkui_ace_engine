@@ -1149,6 +1149,7 @@ HWTEST_F(MenuViewTestNg, SetWordBreak002, TestSize.Level1)
 HWTEST_F(MenuViewTestNg, UpdateMenuProperties001, TestSize.Level1)
 {
     MenuParam menuParam;
+    menuParam.outlineWidth = std::make_optional<BorderWidthProperty>();
     menuParam.outlineWidth->SetBorderWidth(Dimension(10));
     menuParam.enableArrow = true;
     ASSERT_NE(wrapperNode_, nullptr);
@@ -1411,5 +1412,99 @@ HWTEST_F(MenuViewTestNg, RegisterAccessibilityChildActionNotify001, TestSize.Lev
     ASSERT_NE(menuwrapperAccessibilityProperty, nullptr);
     auto callback = menuwrapperAccessibilityProperty->GetNotifyChildActionFunc();
     ASSERT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.name: Create001
+ * @tc.desc: MenuView Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, Create001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API version to VERSION_ELEVEN and disable arrow
+     * @tc.expected: Objects are created successfully.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+    MockPipelineContextGetTheme();
+
+    std::vector<OptionParam> optionParams;
+    OptionParam param1;
+    optionParams.emplace_back(param1);
+
+    MenuParam menuParam;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHasCustomOutlineWidth(true);
+    menuParam.enableArrow = false;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    /**
+     * @tc.steps: step2. Set API version to VERSION_ELEVEN and enable arrow
+     * @tc.expected: Objects are created successfully.
+     */
+    menuParam.enableArrow = true;
+    menuWrapperNode = MenuView::Create(std::move(optionParams), 2, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    /**
+     * @tc.steps: step3. Set API version to VERSION_EIGHT and disable arrow
+     * @tc.expected: Objects are created successfully.
+     */
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHT);
+    menuParam.enableArrow = false;
+    menuWrapperNode = MenuView::Create(std::move(optionParams), 3, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    /**
+     * @tc.steps: step4. Set API version to VERSION_EIGHT and enable arrow
+     * @tc.expected: Objects are created successfully.
+     */
+    menuParam.enableArrow = true;
+    menuWrapperNode = MenuView::Create(std::move(optionParams), 4, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: Create002
+ * @tc.desc: MenuView Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, Create002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Mock theme manager and configure double-border enable
+     * @tc.expected: The conditions are set correctly.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+    MockPipelineContextGetTheme();
+
+    std::vector<OptionParam> optionParams;
+    OptionParam param1;
+    optionParams.emplace_back(param1);
+    MenuParam menuParam;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHasCustomOutlineWidth(false);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<MenuTheme>();
+    theme->doubleBorderEnable_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    menuParam.enableArrow = false;
+    /**
+     * @tc.steps: step1. create menu wrapper node
+     * @tc.expected: Objects are created successfully.
+     */
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
 } // namespace OHOS::Ace::NG

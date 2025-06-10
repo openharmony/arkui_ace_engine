@@ -40,6 +40,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
@@ -53,6 +54,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/unittest/core/event/frame_node_on_tree.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1801,7 +1803,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternUpdateBackgroundColorTest00
     ASSERT_NE(dialogContext, nullptr);
 
     pipelineContext->isSystemColorChange_ = true;
-
+    EXPECT_TRUE(pipelineContext->isSystemColorChange_);
     std::string colorStr = "#FF0000";
     /**
      * @tc.steps: step2. Call UpdateBackGroundColor and check the result.
@@ -1809,5 +1811,31 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternUpdateBackgroundColorTest00
      */
     pattern->UpdateBackGroundColor(colorStr);
     EXPECT_EQ(dialogContext->GetBackgroundColor().value(), Color::ColorFromString(colorStr));
+}
+
+/**
+ * @tc.name: DialogPatternTestRegisterButtonOnKeyEvent
+ * @tc.desc: Test RegisterButtonOnKeyEventRegisterButtonOnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestRegisterButtonOnKeyEvent, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step0. create dialog node.
+    * @tc.expected: the dialog node created successfully.
+    */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    RefPtr<FrameNode> button = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(dialog, nullptr);
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ButtonInfo buttonInfo = { .text = TITLE };
+    pattern->RegisterButtonOnKeyEvent(buttonInfo, button, -1);
+    auto focusHub = button->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -153,7 +153,7 @@ enum AceLogTag : uint8_t {
     ACE_TEXT_FIELD = 20,           // C03914
     ACE_SWIPER = 21,               // C03915
     ACE_TABS = 22,                 // C03916
-    ACE_BLANK = 23,                // C03917
+    ACE_SAFE_AREA = 23,            // C03917
     ACE_GRIDROW = 24,              // C03918
     ACE_INPUTTRACKING = 25,        // C03919
     ACE_RICH_TEXT = 26,            // C0391A

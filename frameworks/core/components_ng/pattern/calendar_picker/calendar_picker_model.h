@@ -33,8 +33,7 @@ public:
 
     virtual void Create(const NG::CalendarSettingData& settingData) = 0;
     virtual void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset) = 0;
-    virtual void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset,
-        const std::vector<RefPtr<ResourceObject>>& resArray);
+    virtual void ParseEdgeAlignResObj(const std::vector<RefPtr<ResourceObject>>& resArray);
     virtual void SetTextStyle(const NG::PickerTextStyle& textStyle) = 0;
     virtual void SetOnChange(NG::SelectedChangeEvent&& onChange) = 0;
     virtual void SetChangeEvent(NG::SelectedChangeEvent&& onChange) = 0;
@@ -46,7 +45,6 @@ public:
     virtual void ClearBorderWidth() = 0;
     virtual void ClearPadding() = 0;
     virtual void SetMarkToday(bool isMarkToday) = 0;
-    virtual void ParseNormalTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
 
 private:
     static std::unique_ptr<CalendarPickerModel> instance_;

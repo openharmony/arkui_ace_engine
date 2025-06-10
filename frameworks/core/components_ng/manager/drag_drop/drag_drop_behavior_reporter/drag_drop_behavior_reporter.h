@@ -73,7 +73,8 @@ public:
     void UpdateSummaryType(const std::string& summaryType);
     void UpdateStartPoint(Point startPoint);
     void UpdateEndPoint(Point endPoint);
-    void UpdateFrameNodeId(int32_t frameNodeId);
+    void UpdateFrameNodeStartId(int32_t startId);
+    void UpdateFrameNodeDropId(int32_t dropId);
     void UpdateLongPressDurationStart(int64_t longPressDurationStart);
     void UpdateLongPressDurationEnd(int64_t longPressDurationEnd);
     void UpdateDropResult(DropResult dropResult);
@@ -97,7 +98,8 @@ private:
     std::set<std::string> allowDropType_;
     Point startPoint_;
     Point endPoint_;
-    int32_t id_;
+    int32_t startId_;
+    int32_t dropId_;
     int64_t longPressDurationStart_ = 0;
     int64_t longPressDurationEnd_ = 500;
     DropResult dropResult_ = DropResult::DROP_FAIL;

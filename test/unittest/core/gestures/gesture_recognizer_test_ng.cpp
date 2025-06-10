@@ -691,4 +691,311 @@ HWTEST_F(GestureRecognizerTestNg, LongPressGestureJudgeTest001, TestSize.Level1)
     auto result = longPressRecognizerPtr->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::REJECT);
 }
+
+/**
+ * @tc.name: HandleGestureAcceptTest001
+ * @tc.desc: Test function: HandleGestureAccept for PanRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    PanDirection direction;
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(SINGLE_FINGER_NUMBER, direction, 0);
+    ASSERT_NE(panRecognizerPtr, nullptr);
+    panRecognizerPtr->AttachFrameNode(frameNode);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto action = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    panRecognizerPtr->SetOnActionStart(start);
+    panRecognizerPtr->SetOnAction(action);
+    panRecognizerPtr->SetOnActionEnd(end);
+    panRecognizerPtr->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    auto startCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                             const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                             GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_START);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::PAN);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
+    panRecognizerPtr->SendCallbackMsg(panRecognizerPtr->onActionStart_, GestureCallbackType::START);
+    auto actionCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                              const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                              GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::PAN);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(actionCallback);
+    panRecognizerPtr->SendCallbackMsg(panRecognizerPtr->onAction_, GestureCallbackType::ACTION);
+    auto endCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                           const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                           GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_END);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::PAN);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(endCallback);
+    panRecognizerPtr->SendCallbackMsg(panRecognizerPtr->onActionEnd_, GestureCallbackType::END);
+    auto endCallbackError = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                           const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                           GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::PAN);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(endCallbackError);
+    panRecognizerPtr->SendCallbackMsg(panRecognizerPtr->onActionEnd_, GestureCallbackType::UPDATE);
+}
+
+/**
+ * @tc.name: HandleGestureAcceptTest002
+ * @tc.desc: Test function: HandleGestureAccept for ClickRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizerPtr, nullptr);
+    clickRecognizerPtr->AttachFrameNode(frameNode);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto action = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    clickRecognizerPtr->SetOnActionStart(start);
+    clickRecognizerPtr->SetOnAction(action);
+    clickRecognizerPtr->SetOnActionEnd(end);
+    clickRecognizerPtr->SetRecognizerType(GestureTypeName::TAP_GESTURE);
+
+    auto startCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                             const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                             GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::TAP);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
+    clickRecognizerPtr->SendCallbackMsg(clickRecognizerPtr->onActionStart_, GestureCallbackType::START);
+
+    auto actionCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                              const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                              GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_START);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::TAP);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(actionCallback);
+    clickRecognizerPtr->SendCallbackMsg(clickRecognizerPtr->onAction_, GestureCallbackType::ACTION);
+
+    auto endCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                           const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                           GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::TAP);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(endCallback);
+    clickRecognizerPtr->SendCallbackMsg(clickRecognizerPtr->onActionEnd_, GestureCallbackType::END);
+    clickRecognizerPtr->SetRecognizerType(GestureTypeName::CLICK);
+    clickRecognizerPtr->SendCallbackMsg(clickRecognizerPtr->onActionEnd_, GestureCallbackType::END);
+}
+
+/**
+ * @tc.name: HandleGestureAcceptTest003
+ * @tc.desc: Test function: HandleGestureAccept for LongPressRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LongPressRecognizer> longPressRecognizerPtr = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    ASSERT_NE(longPressRecognizerPtr, nullptr);
+    longPressRecognizerPtr->AttachFrameNode(frameNode);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto action = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    longPressRecognizerPtr->SetOnActionStart(start);
+    longPressRecognizerPtr->SetOnAction(action);
+    longPressRecognizerPtr->SetOnActionEnd(end);
+    longPressRecognizerPtr->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
+
+    auto startCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                             const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                             GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_START);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::LONG_PRESS);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
+    longPressRecognizerPtr->SendCallbackMsg(longPressRecognizerPtr->onActionStart_, false, GestureCallbackType::START);
+
+    auto actionCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                              const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                              GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::LONG_PRESS);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(actionCallback);
+    longPressRecognizerPtr->SendCallbackMsg(longPressRecognizerPtr->onAction_, false, GestureCallbackType::ACTION);
+
+    auto endCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                           const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                           GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_END);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::LONG_PRESS);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(endCallback);
+    longPressRecognizerPtr->SendCallbackMsg(longPressRecognizerPtr->onActionEnd_, false, GestureCallbackType::END);
+}
+
+/**
+ * @tc.name: HandleGestureAcceptTest004
+ * @tc.desc: Test function: HandleGestureAccept for PinchRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<PinchRecognizer> pinchRecognizerPtr = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
+        PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizerPtr, nullptr);
+    pinchRecognizerPtr->AttachFrameNode(frameNode);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto action = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    pinchRecognizerPtr->SetOnActionStart(start);
+    pinchRecognizerPtr->SetOnAction(action);
+    pinchRecognizerPtr->SetOnActionEnd(end);
+    pinchRecognizerPtr->SetRecognizerType(GestureTypeName::PINCH_GESTURE);
+
+    auto startCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                             const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                             GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_START);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::PINCH);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
+    pinchRecognizerPtr->SendCallbackMsg(pinchRecognizerPtr->onActionStart_, GestureCallbackType::START);
+
+    auto actionCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                              const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                              GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::PINCH);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(actionCallback);
+    pinchRecognizerPtr->SendCallbackMsg(pinchRecognizerPtr->onAction_, GestureCallbackType::ACTION);
+
+    auto endCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                           const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                           GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_END);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::PINCH);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(endCallback);
+    pinchRecognizerPtr->SendCallbackMsg(pinchRecognizerPtr->onActionEnd_, GestureCallbackType::END);
+}
+
+/**
+ * @tc.name: HandleGestureAcceptTest005
+ * @tc.desc: Test function: HandleGestureAccept for RotationRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RotationRecognizer> rotationRecognizerPtr =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    ASSERT_NE(rotationRecognizerPtr, nullptr);
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto action = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    rotationRecognizerPtr->SetOnActionStart(start);
+    rotationRecognizerPtr->SetOnAction(action);
+    rotationRecognizerPtr->SetOnActionEnd(end);
+    rotationRecognizerPtr->SetRecognizerType(GestureTypeName::ROTATION_GESTURE);
+
+    auto startCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                             const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                             GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_START);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::ROTATION);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
+    rotationRecognizerPtr->SendCallbackMsg(rotationRecognizerPtr->onActionStart_, GestureCallbackType::START);
+
+    auto actionCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                              const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                              GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::ROTATION);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(actionCallback);
+    rotationRecognizerPtr->SendCallbackMsg(rotationRecognizerPtr->onAction_, GestureCallbackType::ACTION);
+
+    auto endCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                           const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                           GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_END);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::ROTATION);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(endCallback);
+    rotationRecognizerPtr->SendCallbackMsg(rotationRecognizerPtr->onActionEnd_, GestureCallbackType::END);
+}
+
+/**
+ * @tc.name: HandleGestureAcceptTest006
+ * @tc.desc: Test function: HandleGestureAccept for SwipeRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest006, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    ASSERT_NE(swipeRecognizerPtr, nullptr);
+    swipeRecognizerPtr->AttachFrameNode(frameNode);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto action = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    swipeRecognizerPtr->SetOnActionStart(start);
+    swipeRecognizerPtr->SetOnAction(action);
+    swipeRecognizerPtr->SetOnActionEnd(end);
+    swipeRecognizerPtr->SetRecognizerType(GestureTypeName::SWIPE_GESTURE);
+
+    auto startCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                             const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                             GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::SWIPE);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
+    swipeRecognizerPtr->SendCallbackMsg(swipeRecognizerPtr->onActionStart_, GestureCallbackType::START);
+
+    auto actionCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                              const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                              GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::WILL_START);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::SWIPE);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(actionCallback);
+    swipeRecognizerPtr->SendCallbackMsg(swipeRecognizerPtr->onAction_, GestureCallbackType::ACTION);
+
+    auto endCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                           const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                           GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_EQ(gestureListenerType, GestureListenerType::SWIPE);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(endCallback);
+    swipeRecognizerPtr->SendCallbackMsg(swipeRecognizerPtr->onActionEnd_, GestureCallbackType::END);
+}
 } // namespace OHOS::Ace::NG

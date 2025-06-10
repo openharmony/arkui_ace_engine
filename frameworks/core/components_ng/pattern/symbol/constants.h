@@ -29,6 +29,15 @@ enum class SymbolEffectType {
     BOUNCE,
     PULSE,
     REPLACE,
+    Disable,
+    QuickReplace,
+};
+
+// need check
+enum class RenderingStrategy {
+    SINGLE = 0,
+    MULTIPLE_COLOR,
+    MULTIPLE_OPACITY
 };
 
 enum class CommonSubType {

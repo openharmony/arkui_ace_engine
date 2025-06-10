@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
@@ -88,6 +89,7 @@ public:
     }
 
     virtual void ResetSections() {}
+    virtual void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<WaterFlowModel> instance_;

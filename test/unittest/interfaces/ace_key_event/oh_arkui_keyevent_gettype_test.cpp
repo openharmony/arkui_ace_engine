@@ -70,4 +70,5 @@ HWTEST_F(KeyEventTest, KeyEvent_GetType003, TestSize.Level0)
         count++;
     }
 }
+
 } // namespace OHOS::Ace

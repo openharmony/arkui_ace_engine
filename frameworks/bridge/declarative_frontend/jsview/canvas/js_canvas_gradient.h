@@ -32,7 +32,7 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSCanvasGradient* scroller);
 
-    void addColorStop(const JSCallbackInfo& args);
+    void AddColorStop(const JSCallbackInfo& args);
 
     std::shared_ptr<Gradient> GetGradient() const
     {
@@ -46,8 +46,11 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasGradient);
 
 private:
+    void AddColorTransparent();
+
     std::shared_ptr<Gradient> gradient_;
-    bool isColorStopValid_ = false;
+    bool isColorStopValid_ = true;
+    ColorSpace colorSpace_ = ColorSpace::SRGB;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -26,6 +26,7 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
@@ -242,6 +243,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     bubblePattern->SetMessageColor(textColor.has_value());
     bubblePattern->SetHasTransition(param->GetHasTransition());
     bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
+    bubblePattern->SetAvoidTarget(param->GetAvoidTarget());
+    bubblePattern->SetHasWidth(param->GetChildWidth().has_value());
+    bubblePattern->SetHasPlacement(param->HasPlacement());
     bubblePattern->SetOutlineLinearGradient(param->GetOutlineLinearGradient());
     bubblePattern->SetOutlineWidth(param->GetOutlineWidth());
     bubblePattern->SetInnerBorderLinearGradient(param->GetInnerBorderLinearGradient());
@@ -285,6 +289,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
         textPadding.right = CalcLength(padding.Right());
         textPadding.top = CalcLength(padding.Top());
         textPadding.bottom = CalcLength(padding.Bottom());
+        bubblePattern->SetTextPadding(textPadding);
         layoutProps->UpdatePadding(textPadding);
         layoutProps->UpdateAlignment(Alignment::CENTER);
         UpdateTextProperties(param, layoutProps, columnNode);
@@ -354,8 +359,14 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
             renderContext->UpdateBackShadow(param->GetShadow().value());
         }
         if (param->IsTips()) {
-            auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
-            renderContext->UpdateBackShadow(shadow);
+            do {
+                auto pipelineContext = popupNode->GetContextRefPtr();
+                CHECK_NULL_BREAK(pipelineContext);
+                auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+                CHECK_NULL_BREAK(shadowTheme);
+                Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, Container::CurrentColorMode());
+                renderContext->UpdateBackShadow(shadow);
+            } while (false);
         }
     }
     if (spanString) {
@@ -427,6 +438,9 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     }
     popupPattern->SetHasTransition(param->GetHasTransition());
     popupPattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
+    popupPattern->SetAvoidTarget(param->GetAvoidTarget());
+    popupPattern->SetHasWidth(param->GetChildWidth().has_value());
+    popupPattern->SetHasPlacement(param->HasPlacement());
     popupPattern->SetOutlineLinearGradient(param->GetOutlineLinearGradient());
     popupPattern->SetOutlineWidth(param->GetOutlineWidth());
     popupPattern->SetInnerBorderLinearGradient(param->GetInnerBorderLinearGradient());
@@ -666,8 +680,7 @@ void BubbleView::GetPopupMaxWidthAndHeight(
         if (isExpandDisplay) {
             maxHeight = SystemProperties::GetDeviceHeight();
         } else if (container->IsUIExtensionWindow()) {
-            auto focusWindowId = pipelineContext->GetFocusWindowId();
-            auto rect = container->GetUIExtensionHostWindowRect(focusWindowId);
+            auto rect = container->GetUIExtensionHostWindowRect();
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup GetUIExtensionHostWindowRect: %{public}s",
                 rect.ToString().c_str());
             maxHeight = rect.Height();
@@ -775,12 +788,21 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
                 popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor()));
         }
         if (param->IsTips()) {
-            auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
-            renderContext->UpdateBackShadow(shadow);
+            do {
+                auto pipelineContext = popupNode->GetContextRefPtr();
+                CHECK_NULL_BREAK(pipelineContext);
+                auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+                CHECK_NULL_BREAK(shadowTheme);
+                Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, Container::CurrentColorMode());
+                renderContext->UpdateBackShadow(shadow);
+            } while (false);
         }
     }
     RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();
     bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
+    bubblePattern->SetAvoidTarget(param->GetAvoidTarget());
+    bubblePattern->SetHasWidth(param->GetChildWidth().has_value());
+    bubblePattern->SetHasPlacement(param->HasPlacement());
 
     if (!(param->GetIsPartialUpdate().has_value())) {
         bubblePattern->SetHasTransition(param->GetHasTransition());
@@ -882,6 +904,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         textPadding.left = CalcLength(popupTheme->GetAgingTextLeftPadding());
         textPadding.right = CalcLength(popupTheme->GetAgingTextRightPadding());
     }
+    bubblePattern->SetTextPadding(textPadding);
     textLayoutProps->UpdatePadding(textPadding);
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
     UpdateTextProperties(param, textLayoutProps, columnNode);

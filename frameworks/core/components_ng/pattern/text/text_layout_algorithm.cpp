@@ -168,7 +168,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             return std::nullopt;
         }
     }
-    UpdateRelayoutShaderStyle(pattern, textLayoutProperty);
+    UpdateRelayoutShaderStyle(layoutWrapper);
     baselineOffset_ = textStyle_.GetBaselineOffset().ConvertToPxDistribute(
         textStyle_.GetMinFontScale(), textStyle_.GetMaxFontScale(), textStyle_.IsAllowScale());
     if (NearZero(contentConstraint.maxSize.Height()) || NearZero(contentConstraint.maxSize.Width()) ||
@@ -207,15 +207,16 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     return SizeF(maxWidth, heightFinal);
 }
 
-void TextLayoutAlgorithm::UpdateRelayoutShaderStyle(
-    const RefPtr<TextPattern>& pattern, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+void TextLayoutAlgorithm::UpdateRelayoutShaderStyle(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
     if (textStyle_.GetGradient().has_value() && !pattern->GetExternalParagraph()) {
-        auto gradient = textStyle_.GetGradient().value();
-        OHOS::Ace::GradientType type = gradient.GetType();
-        if (type == OHOS::Ace::GradientType::LINEAR) {
-            RelayoutShaderStyle(textLayoutProperty);
-        }
+        RelayoutShaderStyle(textLayoutProperty);
     }
 }
 
@@ -890,6 +891,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
         if (!CreateParagraph(textStyle, content, layoutWrapper)) {
             return std::nullopt;
         }
+        textStyle.ResetReCreateAndReLayoutBitmap();
     } else {
         if (!AdaptMinTextSize(textStyle, content, contentConstraint, layoutWrapper)) {
             return std::nullopt;
@@ -908,6 +910,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     }
     paragraphWidth = std::ceil(paragraphWidth);
     paragraph->Layout(paragraphWidth);
+    UpdateRelayoutShaderStyle(layoutWrapper);
 
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     // calculate the content size

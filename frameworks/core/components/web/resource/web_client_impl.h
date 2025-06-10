@@ -197,6 +197,7 @@ public:
         bool isAlert,
         bool isUserTrigger,
         std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
+    void OnActivateContentByJS() override;
     void OnWindowExitByJS() override;
     void OnPageVisible(const std::string& url) override;
     void OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler) override;
@@ -304,7 +305,10 @@ public:
 
     void RestoreRenderFit() override;
 
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable) override;
+
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id, int width, int height) override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

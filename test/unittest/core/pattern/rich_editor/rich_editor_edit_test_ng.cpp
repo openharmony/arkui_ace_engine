@@ -762,6 +762,7 @@ HWTEST_F(RichEditorEditTestNg, GetTextSpansInfo, TestSize.Level1)
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
     style1.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
+    style1.paragraphSpacing = Dimension(20.0f, DimensionUnit::PX);
     richEditorPattern->UpdateParagraphStyle(0, 6, style1);
 
     auto info = richEditorController->GetSpansInfo(0, 6);
@@ -773,7 +774,17 @@ HWTEST_F(RichEditorEditTestNg, GetTextSpansInfo, TestSize.Level1)
     EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
     EXPECT_EQ(textStyle.leadingMarginSize[0], "5.00px");
     EXPECT_EQ(textStyle.leadingMarginSize[1], "10.00px");
+    EXPECT_TRUE(textStyle.paragraphSpacing.has_value());
 
+    struct UpdateParagraphStyle style2;
+    style2.textAlign = TextAlign::END;
+    richEditorPattern->UpdateParagraphStyle(0, 6, style2);
+
+    info = richEditorController->GetSpansInfo(0, 6);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
+    EXPECT_EQ(info.selection_.resultObjects.size(), 1);
+    textStyle = info.selection_.resultObjects.begin()->textStyle;
+    EXPECT_FALSE(textStyle.paragraphSpacing.has_value());
     ClearSpan();
 }
 

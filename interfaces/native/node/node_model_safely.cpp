@@ -227,6 +227,7 @@ void UnregisterOnEventSafely()
 
 int32_t SetUserDataSafely(ArkUI_NodeHandle node, void* userData)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return SetUserData(node, userData);
@@ -236,6 +237,7 @@ int32_t SetUserDataSafely(ArkUI_NodeHandle node, void* userData)
 
 void* GetUserDataSafely(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_RETURN(node, nullptr);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return GetUserData(node);
@@ -245,6 +247,7 @@ void* GetUserDataSafely(ArkUI_NodeHandle node)
 
 int32_t SetLengthMetricUnitSafely(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
 {
+    CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nodePtr->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;

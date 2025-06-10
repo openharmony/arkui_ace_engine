@@ -1,0 +1,5 @@
+{
+    "ohos_sdk_version": "5.0.0.24",
+    "ohos_sdk_path": "./ohos-sdk",
+    "ohos_sdk_prebuilt_path": "./ohos-sdk-prebuilt"
+}

@@ -895,16 +895,16 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
 }
 
 /**
-* @tc.name: IntervalSnap004
-* @tc.desc: Test snap set intervalSize percent
-* @tc.type: FUNC
-*/
+ * @tc.name: IntervalSnap004
+ * @tc.desc: Test snap set intervalSize percent
+ * @tc.type: FUNC
+ */
 HWTEST_F(ScrollTestNg, IntervalSnap004, TestSize.Level1)
 {
     /**
-    * @tc.steps: set snap intervalSize percent
-    * @tc.expected: CalcPredictSnapOffset has value
-    */
+     * @tc.steps: set snap intervalSize percent
+     * @tc.expected: CalcPredictSnapOffset has value
+     */
     Dimension intervalSize = Dimension(0.1f, DimensionUnit::PERCENT);
     std::vector<Dimension> snapPaginations = {};
     std::pair<bool, bool> enableSnapToSide = { true, true };
@@ -917,19 +917,19 @@ HWTEST_F(ScrollTestNg, IntervalSnap004, TestSize.Level1)
 }
 
 /**
-* @tc.name: IntervalSnap005
-* @tc.desc: Test snap set snapPaginations percent
-* @tc.type: FUNC
-*/
+ * @tc.name: IntervalSnap005
+ * @tc.desc: Test snap set snapPaginations percent
+ * @tc.type: FUNC
+ */
 HWTEST_F(ScrollTestNg, IntervalSnap005, TestSize.Level1)
 {
     /**
-    * @tc.steps: set snap snapPaginations percent
-    * @tc.expected: CalcPredictSnapOffset has value
-    */
+     * @tc.steps: set snap snapPaginations percent
+     * @tc.expected: CalcPredictSnapOffset has value
+     */
     Dimension intervalSize = Dimension(0.f, DimensionUnit::PERCENT);
-    std::vector<Dimension> snapPaginations = {Dimension(0.1f, DimensionUnit::PERCENT),
-            Dimension(0.2f, DimensionUnit::PERCENT)};
+    std::vector<Dimension> snapPaginations = { Dimension(0.1f, DimensionUnit::PERCENT),
+        Dimension(0.2f, DimensionUnit::PERCENT) };
     std::pair<bool, bool> enableSnapToSide = { true, true };
     ScrollModelNG model = CreateScroll();
     model.SetScrollSnap(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
@@ -1664,6 +1664,33 @@ HWTEST_F(ScrollEventTestNg, EnablePaging006, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_EQ(state, ScrollState::IDLE);
+}
+
+/**
+ * @tc.name: GetPagingOffset001
+ * @tc.desc: Test GetPagingOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, GetPagingOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll and set enablePaging true.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    CreateContent();
+    CreateScrollDone();
+    /**
+     * @tc.steps: step2. simulate the scene of scrolling the last page
+     * @tc.expected: pagingOffset is scrollableDistance_
+     */
+    float contentMainSize = 900.f;
+    float pageLength = 400.f;
+    pattern_->lastPageLength_ = fmod(contentMainSize, pageLength);;
+    pattern_->scrollableDistance_ = -(contentMainSize - pageLength);
+    pattern_->viewPortLength_ = pageLength;
+    pattern_->currentOffset_ = -550.f;
+    EXPECT_EQ(pattern_->GetPagingOffset(0.f, 0.f, 0.f), -(contentMainSize - pageLength));
 }
 
 /**

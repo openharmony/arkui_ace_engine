@@ -818,6 +818,14 @@ void WebClientImpl::OnWindowNewByJS(
     delegate->OnWindowNew(targetUrl, isAlert, isUserTrigger, handler);
 }
 
+void WebClientImpl::OnActivateContentByJS()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnActivateContent();
+}
+
 void WebClientImpl::OnWindowExitByJS()
 {
     auto delegate = webDelegate_.Upgrade();
@@ -928,6 +936,7 @@ void WebClientImpl::OnFirstMeaningfulPaint(
     CHECK_NULL_VOID(details);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnFirstMeaningfulPaint(details);
+    delegate->RemoveSnapshotFrameNode();
 }
 
 void WebClientImpl::OnLargestContentfulPaint(
@@ -1366,6 +1375,14 @@ void WebClientImpl::OnScrollStart(const float x, const float y)
     delegate->OnScrollStart(x, y);
 }
 
+bool WebClientImpl::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
+}
+
 void WebClientImpl::OnPip(int status, int delegate_id, int child_id,
     int frame_routing_id, int width, int height)
 {
@@ -1375,4 +1392,5 @@ void WebClientImpl::OnPip(int status, int delegate_id, int child_id,
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnPip(status, delegate_id, child_id, frame_routing_id, width, height);
 }
+
 } // namespace OHOS::Ace

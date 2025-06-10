@@ -403,17 +403,15 @@ void StateStyleManager::HandleScrollingParent()
     };
 
     auto scrollingListener = MakeRefPtr<ScrollingListener>(std::move(scrollingEventCallback));
-
+    isFastScrolling_ = false;
     auto parent = node->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto pattern = parent->GetPattern();
         CHECK_NULL_VOID(pattern);
         if (pattern->ShouldDelayChildPressedState()) {
             hasScrollingParent_ = true;
-            isFastScrolling_ = pattern->ShouldPreventChildPressedState();
-            if (!isFastScrolling_) {
-                pattern->RegisterScrollingListener(scrollingListener);
-            }
+            pattern->RegisterScrollingListener(scrollingListener);
+            isFastScrolling_ = isFastScrolling_ || pattern->ShouldPreventChildPressedState();
         }
         parent = parent->GetAncestorNodeOfFrame(false);
     }

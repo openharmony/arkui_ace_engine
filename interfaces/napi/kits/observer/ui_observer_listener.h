@@ -50,6 +50,8 @@ public:
         const RefPtr<NG::FrameNode> frameNode);
     void OnPanGestureStateChange(const GestureEvent& gestureEventInfo, const RefPtr<NG::PanRecognizer>& current,
         const RefPtr<NG::FrameNode> frameNode);
+    void OnGestureStateChange(const GestureEvent& gestureEventInfo, const RefPtr<NG::NGGestureRecognizer>& current,
+        const RefPtr<NG::FrameNode> frameNode, NG::GestureActionPhase phase);
     void OnTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
     void OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
@@ -60,6 +62,7 @@ private:
     napi_value CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo);
     napi_value CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info);
     napi_value GetNapiCallback();
+    napi_value GetFrameNodeObject(const RefPtr<NG::FrameNode>& frameNode);
     static napi_valuetype GetValueType(napi_env env, napi_value value);
     static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
     void AddBaseEventInfo(napi_value objValueEvent, const BaseEventInfo& baseEventInfo);
@@ -73,7 +76,6 @@ private:
     void AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddClickEventInfoTwo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddFingerObjectInfo(napi_value napiFinger, const FingerInfo& finger);
-    void AddGestureRecognizerInfo(napi_value objValueGestureRecognizer, const RefPtr<NG::PanRecognizer>& current);
     void AddTargetObject(napi_value objValueEvent, const BaseEventInfo& baseEventInfo);
     napi_env env_ = nullptr;
     napi_ref callback_ = nullptr;

@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
@@ -64,6 +65,7 @@ constexpr int32_t MAX_SIZE_OF_LOG = 2000;
 }
 
 class InspectorFilter;
+class PreviewMenuController;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
@@ -278,6 +280,7 @@ public:
             CHECK_NULL_VOID(host);
             host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
         }
+        dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
     }
     void ModifyAISpanStyle(TextStyle& aiSpanStyle)
     {
@@ -698,9 +701,9 @@ public:
         RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
-    void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
-    
+    void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
+
     void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
     {
         selectOverlay_->OnCreateMenuCallbackUpdate(std::move(onCreateMenuCallback));
@@ -709,6 +712,11 @@ public:
     void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
     {
         selectOverlay_->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+    }
+
+    void OnPrepareMenuCallbackUpdate(const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+    {
+        selectOverlay_->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
     }
     
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
@@ -833,6 +841,17 @@ public:
         return true;
     }
 
+    bool IsAiSelected();
+    RefPtr<FrameNode> CreateAIEntityMenu(const std::function<void()>& onMenuDisappear);
+    void InitAiSelection(const Offset& globalOffset);
+    bool CanAIEntityDrag() override;
+    RefPtr<PreviewMenuController> GetOrCreatePreviewMenuController();
+    void ResetAISelected(AIResetSelectionReason reason) override;
+
+    void ShowAIEntityMenuForCancel() override;
+    AISpan GetSelectedAIData();
+    std::pair<bool, bool> GetCopyAndSelectable();
+    std::pair<int32_t, int32_t> GetSelectedStartAndEnd();
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -863,6 +882,7 @@ protected:
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
+    Offset GetIndexByOffset(const Offset& pos, int32_t& extend);
     void StartVibratorByLongPress();
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
@@ -941,6 +961,7 @@ protected:
     virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     void HandleSpanStringTouchEvent(TouchEventInfo& info);
+    void ShowAIEntityPreviewMenuTimer();
     bool enabled_ = true;
     Status status_ = Status::NONE;
     bool contChange_ = false;
@@ -1078,6 +1099,7 @@ private:
     virtual void ResetAfterTextChange();
     bool GlobalOffsetInSelectedArea(const Offset& globalOffset);
     bool LocalOffsetInSelectedArea(const Offset& localOffset);
+    bool LocalOffsetInRange(const Offset& localOffset, int32_t start, int32_t end);
     void HandleOnCopyWithoutSpanString(const std::string& pasteData);
     void CheckPressedSpanPosition(const Offset& textOffset);
     void EncodeTlvNoChild(const std::string& pasteData, std::vector<uint8_t>& buff);
@@ -1086,11 +1108,11 @@ private:
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
     RefPtr<SpanItem> FindSpanItemByOffset(const PointF& textOffset);
     void UpdateMarqueeStartPolicy();
-    void ProcessVisibleAreaCallback();
     void PauseSymbolAnimation();
     void ResumeSymbolAnimation();
     bool IsLocationInFrameRegion(const Offset& localOffset) const;
     void RegisterFormVisibleChangeCallback();
+    void RegisterVisibleAreaChangeCallback();
     void HandleFormVisibleChange(bool visible);
     void RemoveFormVisibleChangeCallback(int32_t id);
     void GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
@@ -1129,6 +1151,7 @@ private:
     double distanceThreshold_ = std::numeric_limits<double>::infinity();
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
+    RefPtr<PreviewMenuController> previewController_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     SourceTool lastDragTool_ = SourceTool::UNKNOWN;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
@@ -1160,6 +1183,7 @@ private:
     bool isTryEntityDragging_ = false;
     bool isShowAIMenuOption_ = false;
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
+    bool isRegisteredAreaCallback_ = false;
 };
 } // namespace OHOS::Ace::NG
 

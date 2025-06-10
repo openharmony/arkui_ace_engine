@@ -72,8 +72,63 @@ HWTEST_F(RichEditorPatternTestFourNg, AddImageSpan001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ImageSpanOptions options;
-    int32_t res = richEditorPattern->AddImageSpan(options, true, 0, false);
+    int32_t res = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, true, 0, false);
     ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: SetMenuParam001
+ * @tc.desc: test SetMenuParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMenuParam001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    AddImageSpan();
+    std::function<void()> tempFunc = []() { };
+    std::function<void()>& func = tempFunc;
+    SelectMenuParam menuParam;
+    richEditorPattern->SetPreviewMenuParam(TextSpanType::IMAGE, func, menuParam);
+    EXPECT_TRUE(static_cast<bool>(richEditorPattern->oneStepDragController_));
+}
+
+/**
+ * @tc.name: AddImageSpan002
+ * @tc.desc: test AddImageSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, AddImageSpan002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    ImageSpanOptions options;
+    options.image = IMAGE_VALUE;
+    options.bundleName = BUNDLE_NAME;
+    options.moduleName = MODULE_NAME;
+    ImageSpanAttribute imageStyle;
+    imageStyle.verticalAlign = VerticalAlign::FOLLOW_PARAGRAPH;
+    options.imageAttribute = imageStyle;
+    auto index = richEditorController->AddImageSpan(options);
+    EXPECT_EQ(index, 0);
+    auto spanItem = richEditorPattern->spans_.front();
+    auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(spanItem);
+    ASSERT_NE(imageSpanItem, nullptr);
+    auto imageAttribute = imageSpanItem->options.imageAttribute;
+    bool hasImageAttribute = imageAttribute.has_value();
+    EXPECT_TRUE(hasImageAttribute);
+    auto verticalAlign = imageAttribute.value().verticalAlign;
+    auto hasVerticalAlign = verticalAlign.has_value();
+    EXPECT_TRUE(hasVerticalAlign);
+    EXPECT_EQ(verticalAlign.value(), VerticalAlign::FOLLOW_PARAGRAPH);
 }
 
 /**

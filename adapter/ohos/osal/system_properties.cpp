@@ -691,6 +691,7 @@ bool SystemProperties::formSkeletonBlurEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
+bool SystemProperties::syncLoadEnabled_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -853,6 +854,7 @@ void SystemProperties::InitDeviceInfo(
     formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
     formSharedImageCacheThreshold_ =
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
+    syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -987,6 +989,11 @@ bool SystemProperties::GetResourceDecoupling()
 bool SystemProperties::ConfigChangePerform()
 {
     return configChangePerform_;
+}
+
+void SystemProperties::SetConfigChangePerform()
+{
+    configChangePerform_ = true;
 }
 
 bool SystemProperties::GetTitleStyleEnabled()

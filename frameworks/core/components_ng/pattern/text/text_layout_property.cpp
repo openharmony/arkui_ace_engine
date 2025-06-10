@@ -151,9 +151,12 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         std::to_string(static_cast<int32_t>(GetBaselineOffset().value_or(0.0_vp).Value())).c_str(), filter);
     json->PutExtAttr("textAlign",
         V2::ConvertWrapTextAlignToString(GetTextAlign().value_or(TextAlign::START)).c_str(), filter);
+    json->PutExtAttr("textVerticalAlign", V2::ConvertWrapTextVerticalAlignToString(
+        GetTextVerticalAlign().value_or(TextVerticalAlign::BASELINE)).c_str(), filter);
     json->PutExtAttr("textOverflow",
         V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
     json->PutExtAttr("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
+    json->PutExtAttr("enableAutoSpacing", std::to_string(GetEnableAutoSpacing().value_or(false)).c_str(), filter);
 
     ToJsonValueForOption(json, filter);
 }
@@ -189,6 +192,7 @@ void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     UpdateTextColor(Color::ColorFromString(json->GetString("fontColor")));
     UpdateFontWeight(V2::ConvertWrapStringToFontWeight(json->GetString("fontWeight")));
     UpdateTextAlign(V2::ConvertWrapStringToTextAlign(json->GetString("textAlign")));
+    UpdateTextVerticalAlign(V2::ConvertWrapStringToTextVerticalAlign(json->GetString("textAlign")));
     UpdateTextOverflow(V2::ConvertWrapStringToTextOverflow(json->GetString("textOverflow")));
     UpdateMaxLines(StringUtils::StringToUint(json->GetString("maxLines")));
     UpdateMarqueeOptionsFromJson(json->GetObject("marqueeOptions"));

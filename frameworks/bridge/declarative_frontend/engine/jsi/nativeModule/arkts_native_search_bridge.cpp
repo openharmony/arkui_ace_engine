@@ -1879,12 +1879,15 @@ ArkUINativeModuleValue SearchBridge::SetSelectionMenuOptions(ArkUIRuntimeCallInf
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClickCallback;
-    if (!ArkTSUtils::ParseSelectionMenuOptions(runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback)) {
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    if (!ArkTSUtils::ParseSelectionMenuOptions(
+        runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback, onPrepareMenuCallback)) {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchSelectionMenuOptions(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchSelectionMenuOptions(
-        nativeNode, reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback));
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchSelectionMenuOptions(nativeNode,
+        reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback),
+        reinterpret_cast<void*>(&onPrepareMenuCallback));
     return panda::JSValueRef::Undefined(vm);
 }
 

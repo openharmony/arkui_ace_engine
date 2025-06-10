@@ -295,7 +295,7 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
 void ImageAnimatorPattern::DisablePreAnimatedImageAnimation(uint32_t index)
 {
     if (index >= static_cast<uint32_t>(images_.size())) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnimator get index error, index: %{public}d, size: %{public}zu", index,
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Index error, %{public}d-%{public}zu", index,
             images_.size());
         return;
     }

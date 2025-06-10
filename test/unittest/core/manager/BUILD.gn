@@ -47,6 +47,7 @@ ace_unittest("drag_drop_manager_test_ng") {
     "drag_drop_manager_test_ng.cpp",
     "drag_drop_manager_test_ng_coverage.cpp",
     "drag_drop_manager_test_ng_property_config.cpp",
+    "drag_drop_manager_test_ng_plus.cpp",
   ]
 }
 
@@ -80,6 +81,12 @@ ace_unittest("full_screen_manager_test_ng") {
   type = "new"
   module_output = "manager"
   sources = [ "full_screen_manager_test_ng.cpp" ]
+}
+
+ace_unittest("json_report_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "json_report_test_ng.cpp" ]
 }
 
 ace_unittest("post_event_manager_test_ng") {
@@ -167,6 +174,12 @@ ace_unittest("theme_manager_test_ng") {
   ]
 }
 
+ace_unittest("drag_drop_spring_loading_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "./drag_drop/drag_drop_spring_loading_test_ng.cpp" ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [
@@ -180,10 +193,12 @@ group("core_manager_unittest") {
     ":drag_drop_manager_test_ng",
     ":drag_drop_proxy_test_ng",
     ":drag_drop_report_test_ng",
+    ":drag_drop_spring_loading_test_ng",
     ":focus_manager_test_ng",
     ":focus_view_test_ng",
     ":frame_rate_manager_test_ng",
     ":full_screen_manager_test_ng",
+    ":json_report_test_ng",
     ":navigation_manager_test_ng",
     ":post_event_manager_test_ng",
     ":safe_area_manager_test_ng",

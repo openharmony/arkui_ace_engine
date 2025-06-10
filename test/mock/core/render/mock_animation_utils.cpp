@@ -69,6 +69,14 @@ bool AnimationUtils::CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& co
     return true;
 }
 
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context)
+{
+#ifdef ENHANCED_ANIMATION
+    AnimManager::GetInstance().CloseAnimation();
+#endif
+    return CancelAnimationStatus::SUCCESS;
+}
+
 bool AnimationUtils::IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context)
 {
     return false;

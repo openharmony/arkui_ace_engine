@@ -25,8 +25,7 @@ class ACE_EXPORT CalendarPickerModelNG : public CalendarPickerModel {
 public:
     void Create(const CalendarSettingData& settingData) override;
     void SetEdgeAlign(const CalendarEdgeAlign& alignType, const DimensionOffset& offset) override;
-    void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset,
-        const std::vector<RefPtr<ResourceObject>>& resArray) override;
+    void ParseEdgeAlignResObj(const std::vector<RefPtr<ResourceObject>>& resArray) override;
     void SetTextStyle(const PickerTextStyle& textStyle) override;
     void SetOnChange(SelectedChangeEvent&& onChange) override;
     void SetChangeEvent(SelectedChangeEvent&& onChange) override;
@@ -38,7 +37,6 @@ public:
     void ClearBorderWidth() override;
     void ClearPadding() override;
     void SetMarkToday(bool isMarkToday) override;
-    void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
 
     static RefPtr<FrameNode> CreateNode(int32_t nodeId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -81,10 +79,13 @@ public:
     static void SetDisabledDateRange(
         FrameNode* frameNode, const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange);
     static std::string GetDisabledDateRange(FrameNode* frameNode);
+    static void ParseEdgeAlignResObj(FrameNode* frameNode, const std::vector<RefPtr<ResourceObject>>& resArray);
+    static void CalendarPickerRemoveResObj(FrameNode* frameNode, const std::string& key);
 
 private:
     static void UpdateSelectedDateContent(FrameNode* frameNode, const PickerDate& selectedDate);
     static std::string AddLeadingZeroToYear(uint32_t year);
+    static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H

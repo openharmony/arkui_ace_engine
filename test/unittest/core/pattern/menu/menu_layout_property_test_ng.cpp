@@ -567,6 +567,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, ToJsonValue002, TestSize.Level1)
     auto item2 = itemArray->GetArrayItem(1);
     EXPECT_EQ(item2->GetString("value"), "MenuItem2");
     EXPECT_EQ(item2->GetString("icon"), "");
+    EXPECT_EQ(json->GetString("uniRender"), "true");
 }
 
 

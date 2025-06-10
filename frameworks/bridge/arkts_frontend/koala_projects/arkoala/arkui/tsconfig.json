@@ -1,0 +1,36 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/lib",
+        "lib": ["ES2020"],
+        "rootDirs": ["src", "test"],
+        "baseUrl": ".",
+        "types": ["arkoala-arkui"],
+        "paths": {
+            "#arkcompat/*": [
+                "../arkui-common/src/typescript/*"
+            ],
+            "#arkcompat": [
+                "../arkui-common/src/typescript"
+            ],
+            "@koalaui/arkui-common": [
+                "../../arkoala/arkui-common/src/typescript"
+            ],
+        },
+        "module": "ESNext",
+        "experimentalDecorators": true,
+        "plugins": [
+            { "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js", "trace": false }
+        ]
+    },
+    "include": ["src/**/*", ],
+    "exclude": ["src/NativeModuleRecorder.ts"],
+    "references": [
+        { "path": "../../incremental/compiler-plugin" },
+        { "path": "../../interop" },
+        { "path": "../../incremental/runtime" },
+        { "path": "../arkui-common" },
+        { "path": "../framework" },
+        { "path": "../arkui-common/tsconfig-unmemoize-ts.json" }
+    ]
+}

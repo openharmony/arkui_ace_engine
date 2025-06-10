@@ -70,6 +70,7 @@ private:
     std::shared_ptr<AppExecFwk::DataAbilityHelper> dataAbilityHelper_;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
     std::weak_ptr<OHOS::AppExecFwk::Context> context_;
+    mutable std::shared_mutex dataShareHelperLock_;
 #ifdef MEDIA_LIBRARY_EXISTS
     OHOS::Media::MediaLibraryManager mgr_;
 #endif

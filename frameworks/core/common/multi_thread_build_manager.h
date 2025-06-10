@@ -42,7 +42,7 @@ public:
     bool PostUITaskAndWait(int32_t contextId, std::function<void()>&& uiTask);
 private:
     MultiThreadBuildManager();
-    void InitAysncUITaskQueue();
+    void InitAsyncUITaskQueue();
     static thread_local bool isFreeNodeScope_;
     static thread_local bool isUIThread_;
     ACE_DISALLOW_COPY_AND_MOVE(MultiThreadBuildManager);

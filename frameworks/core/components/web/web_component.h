@@ -339,6 +339,17 @@ public:
         }
     }
 
+    void SetActivateContentEventId(const EventMarker& activateContentEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetActivateContentEventId(activateContentEventId);
+    }
+
+    const EventMarker& GetActivateContentEventId() const
+    {
+        return declaration_->GetActivateContentEventId();
+    }
+
     void SetWindowExitEventId(const EventMarker& windowExitEventId)
     {
         CHECK_NULL_VOID(declaration_);
@@ -474,6 +485,11 @@ public:
     void SetMixedMode(MixedModeContent mixedModeNum)
     {
         mixedContentMode_ = mixedModeNum;
+    }
+
+    void SetBypassVsyncCondition(WebBypassVsyncCondition webBypassVsyncCondition)
+    {
+        webBypassVsyncCondition_ = webBypassVsyncCondition;
     }
 
     bool GetZoomAccessEnabled() const
@@ -1189,6 +1205,7 @@ private:
     bool isDomStorageAccessEnabled_ = false;
     bool isImageAccessEnabled_ = true;
     MixedModeContent mixedContentMode_ = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
+    WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
     bool isZoomAccessEnabled_ = true;
     bool isGeolocationAccessEnabled_ = true;
     bool isOverviewModeAccessEnabled_ = true;

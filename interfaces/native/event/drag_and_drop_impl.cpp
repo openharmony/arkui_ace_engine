@@ -69,22 +69,26 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* b
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
 
-    if (!event || !bundleName || !dragEvent || length >= 128) {
+    if (!event || !bundleName || !dragEvent || !dragEvent->bundleName ||
+        static_cast<int32_t>(strlen(dragEvent->bundleName)) >= length) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    bundleName = dragEvent->bundleName;
+    int32_t err = strcpy_s(bundleName, length, dragEvent->bundleName);
+    if (err != 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
 
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_DragEvent_IsRemote(ArkUI_DragEvent* event, bool* inRemote)
+ArkUI_ErrorCode OH_ArkUI_DragEvent_IsRemote(ArkUI_DragEvent* event, bool* isRemote)
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
 
-    if (!event || !inRemote || !dragEvent) {
+    if (!event || !isRemote || !dragEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    inRemote = dragEvent->isRemoteDev;
+    *isRemote = dragEvent->isRemoteDev;
 
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

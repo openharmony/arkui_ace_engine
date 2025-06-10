@@ -17,6 +17,8 @@
 
 #include <atomic>
 #include <cinttypes>
+#include <ani.h>
+#include <optional>
 
 #include "ability_context.h"
 #include "ability_info.h"
@@ -62,6 +64,7 @@
 #include "adapter/ohos/entrance/rs_adapter.h"
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
+#include "render_service_client/core/transaction/rs_sync_transaction_handler.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
@@ -98,6 +101,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "bridge/arkts_frontend/arkts_frontend.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
 #include "core/common/asset_manager_impl.h"
@@ -114,6 +118,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
+#include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
@@ -146,6 +151,7 @@ const std::string START_PARAMS_KEY = "__startParams";
 const std::string PARAM_QUERY_KEY = "query";
 const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+const std::string ACTION_APPDETAIL = "ohos.want.action.appdetail";
 const std::string USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
@@ -378,11 +384,12 @@ private:
     ContentStartAbilityCallback onStartAbility_;
 };
 
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime, int32_t vmType)
 {
     LOGI("CreateUIContent.");
     Recorder::Init();
-    return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
+    return new UIContentImpl(
+        reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime, static_cast<VMType>(vmType));
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateFormContent(void* context, void* runtime, bool isCard)
@@ -497,6 +504,19 @@ void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
     safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
     ParseAvoidAreasUpdate(context, avoidAreas, config);
     AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+}
+
+void ClearAllMenuPopup(int32_t instanceId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto overlay = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->HideAllMenusWithoutAnimation(false);
+    overlay->HideAllPopupsWithoutAnimation();
+    SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
 }
 
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
@@ -873,7 +893,7 @@ public:
                 auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
                 context->OnFoldStatusChanged(aceFoldStatus);
                 if (SystemProperties::IsSuperFoldDisplayDevice()) {
-                    SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
+                    ClearAllMenuPopup(instanceId);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged");
@@ -975,15 +995,7 @@ public:
             [instanceId = instanceId_, isWindowSizeChanged] {
                 CHECK_EQUAL_VOID(isWindowSizeChanged, false);
                 ContainerScope scope(instanceId);
-                auto container = Platform::AceContainer::GetContainer(instanceId);
-                CHECK_NULL_VOID(container);
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-                CHECK_NULL_VOID(pipeline);
-                auto overlay = pipeline->GetOverlayManager();
-                CHECK_NULL_VOID(overlay);
-                overlay->HideAllMenusWithoutAnimation(false);
-                overlay->HideAllPopupsWithoutAnimation();
-                SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
+                ClearAllMenuPopup(instanceId);
             },
             TaskExecutor::TaskType::UI, "ArkUIWindowRectChange");
     }
@@ -998,7 +1010,37 @@ private:
     OHOS::Rosen::Rect lastRect_;
 };
 
-UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
+class DisplayIdChangeListener : public OHOS::Rosen::IDisplayIdChangeListener {
+public:
+    explicit DisplayIdChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~DisplayIdChangeListener() = default;
+
+    void OnDisplayIdChanged(OHOS::Rosen::DisplayId displayId)
+    {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "DisplayId is changed, displayId id is %{public}d, instanceId: %{public}d",
+            static_cast<int32_t>(displayId), instanceId_);
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        bool isDisplayIdChanged = displayId != lastDisplayId_;
+        lastDisplayId_ = displayId;
+        taskExecutor->PostTask(
+            [instanceId = instanceId_, isDisplayIdChanged] {
+                CHECK_EQUAL_VOID(isDisplayIdChanged, false);
+                ContainerScope scope(instanceId);
+                ClearAllMenuPopup(instanceId);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIDisplayIdChange");
+    }
+
+private:
+    int32_t instanceId_ = -1;
+    OHOS::Rosen::DisplayId lastDisplayId_;
+};
+
+UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType)
+    : runtime_(runtime), vmType_(vmType)
 {
     MultiThreadBuildManager::InitOnUIThread();
     CHECK_NULL_VOID(context);
@@ -1068,7 +1110,7 @@ void UIContentImpl::DestroyCallback() const
 }
 
 UIContentErrorCode UIContentImpl::InitializeInner(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, bool isNamedRouter)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     if (window && StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
@@ -1091,18 +1133,13 @@ UIContentErrorCode UIContentImpl::InitializeInner(
         errorCode = CommonInitializeForm(window, contentInfo, storage);
         CHECK_ERROR_CODE_RETURN(errorCode);
     }
-    if (!intentInfoSerialized_.empty()) {
-        auto container = Platform::AceContainer::GetContainer(instanceId_);
-        if (container) {
-            TAG_LOGI(AceLogTag::ACE_ROUTER, "intentInfo exist, will distribute intentInfo");
-            ContainerScope scope(instanceId_);
-            container->DistributeIntentInfo(intentInfoSerialized_, true, std::move(loadPageCallback_));
-            intentInfoSerialized_ = "";
-            loadPageCallback_ = nullptr;
-        }
+    RunIntentPageIfNeeded();
+    if (!restoreNavDestinationInfo_.empty()) {
+        RestoreNavDestinationInfoInner(std::move(restoreNavDestinationInfo_), true);
+        restoreNavDestinationInfo_ = "";
     }
-    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s", bundleName_.c_str(), moduleName_.c_str(),
+        instanceId_, startUrl_.c_str());
     // run page.
     errorCode = Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
     CHECK_ERROR_CODE_RETURN(errorCode);
@@ -1150,11 +1187,24 @@ void UIContentImpl::UnSubscribeEventsPassThroughMode()
 
 void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
     // ArkTSCard need no window
     if (isFormRender_ && !window) {
         LOGI("[%{public}s][%{public}s][%{public}d]: InitializeForm: %{public}s", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, url.c_str());
-        CommonInitializeForm(window, url, storage);
+        CommonInitializeForm(window, url, storageWrapper);
+        AddWatchSystemParameter();
+    }
+}
+
+void UIContentImpl::PreInitializeFormAni(OHOS::Rosen::Window* window, const std::string& url, ani_object storage)
+{
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    // ArkTSCard need no window
+    if (isFormRender_ && !window) {
+        LOGI("[%{public}s][%{public}s][%{public}d]: InitializeForm: %{public}s", bundleName_.c_str(),
+            moduleName_.c_str(), instanceId_, url.c_str());
+        CommonInitializeForm(window, url, storageWrapper);
         AddWatchSystemParameter();
     }
 }
@@ -1177,25 +1227,27 @@ void UIContentImpl::RunFormPage()
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
-    auto errorCode = InitializeInner(window, url, storage, false);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    auto errorCode = InitializeInner(window, url, storageWrapper, false);
     AddWatchSystemParameter();
     UpdateWindowBlur();
     RegisterLinkJumpCallback();
     return errorCode;
 }
 
-UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window,
-    const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
-    {
-        std::string contentName = "";
-        return Initialize(window, content, storage, contentName);
-    }
+UIContentErrorCode UIContentImpl::Initialize(
+    OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+{
+    std::string contentName = "";
+    return Initialize(window, content, storage, contentName);
+}
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window,
     const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage, const std::string& contentName)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
-    errorCode = CommonInitialize(window, "", storage);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    errorCode = CommonInitialize(window, "", storageWrapper);
     CHECK_ERROR_CODE_RETURN(errorCode);
     AddWatchSystemParameter();
     if (content) {
@@ -1218,7 +1270,8 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window,
 UIContentErrorCode UIContentImpl::InitializeByName(
     OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
-    auto errorCode = InitializeInner(window, name, storage, true);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    auto errorCode = InitializeInner(window, name, storageWrapper, true);
     AddWatchSystemParameter();
     RegisterLinkJumpCallback();
     UpdateWindowBlur();
@@ -1237,7 +1290,8 @@ void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config)
     CHECK_NULL_VOID(env);
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
-    CommonInitializeForm(nullptr, config.abcPath, nullptr);
+    StorageWrapper storageWrapper { .napiStorage_ = nullptr };
+    CommonInitializeForm(nullptr, config.abcPath, storageWrapper);
     AddWatchSystemParameter();
 
     LOGI("[%{public}s][%{public}s][%{public}d]: InitializeDynamic, startUrl"
@@ -1269,7 +1323,8 @@ void UIContentImpl::Initialize(
             bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
         return;
     }
-    auto errorCode = CommonInitialize(window, url, storage, focusWindowId);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    auto errorCode = CommonInitialize(window, url, storageWrapper, focusWindowId);
     if (errorCode != UIContentErrorCode::NO_ERRORS) {
         return;
     }
@@ -1303,7 +1358,8 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window *window,
         return;
     }
 
-    auto errorCode = CommonInitialize(window, name, storage, focusWindowId);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    auto errorCode = CommonInitialize(window, name, storageWrapper, focusWindowId);
     if (errorCode != UIContentErrorCode::NO_ERRORS) {
         TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "CommonInitialize failed when InitializeByName");
@@ -1349,13 +1405,49 @@ napi_value UIContentImpl::GetUINapiContext()
     return result;
 }
 
+ani_object UIContentImpl::GetUIAniContext()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    ContainerScope scope(instanceId_);
+    ani_object result = nullptr;
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, result);
+    auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
+    CHECK_NULL_RETURN(arktsFrontend, result);
+    result = arktsFrontend->CallGetUIContextFunc();
+    return result;
+}
+
 UIContentErrorCode UIContentImpl::Restore(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type)
 {
     LOGI("Restore with contentInfo size: %{public}d, ContentInfotype: %{public}d",
         static_cast<int32_t>(contentInfo.size()), static_cast<int32_t>(type));
     auto errorCode = UIContentErrorCode::NO_ERRORS;
-    errorCode = CommonInitialize(window, contentInfo, storage);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    errorCode = CommonInitialize(window, contentInfo, storageWrapper);
+    CHECK_ERROR_CODE_RETURN(errorCode);
+    RouterRecoverRecord record;
+    std::tie(record, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo, type);
+    startUrl_ = record.url;
+    CHECK_ERROR_CODE_RETURN(errorCode);
+    if (startUrl_.empty()) {
+        LOGW("Restore start url is empty");
+    }
+    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl: %{public}s, isNamedRouter: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str(),
+        (record.isNamedRouter ? "yes" : "no"));
+    return Platform::AceContainer::RunPage(instanceId_, startUrl_, record.params, record.isNamedRouter);
+}
+
+UIContentErrorCode UIContentImpl::Restore(
+    OHOS::Rosen::Window* window, const std::string& contentInfo, ani_object storage, ContentInfoType type)
+{
+    LOGI("Restore with contentInfo size: %{public}d, ContentInfotype: %{public}d",
+        static_cast<int32_t>(contentInfo.size()), static_cast<int32_t>(type));
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    errorCode = CommonInitialize(window, contentInfo, storageWrapper);
     CHECK_ERROR_CODE_RETURN(errorCode);
     RouterRecoverRecord record;
     std::tie(record, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo, type);
@@ -1379,7 +1471,7 @@ std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 
 // ArkTSCard start
 UIContentErrorCode UIContentImpl::CommonInitializeForm(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storageWrapper)
 {
     ACE_FUNCTION_TRACE();
     window_ = window;
@@ -1802,6 +1894,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     }
     if (runtime_ && !isFormRender_) { // ArkTSCard not support inherit local strorage from context
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+        auto storage = storageWrapper.napiStorage_.value();
         if (!storage) {
             container->SetLocalStorage(nullptr, context);
         } else {
@@ -2031,7 +2124,7 @@ RefPtr<Platform::AceContainer> UIContentImpl::CreateContainer(
 }
 
 UIContentErrorCode UIContentImpl::CommonInitialize(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storageWrapper, uint32_t focusWindowId)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     window_ = window;
@@ -2101,6 +2194,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
 #endif
     SetDeviceProperties();
+    bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";
+    });
+    if (configChangePerform) {
+        SystemProperties::SetConfigChangePerform();
+    }
     // Initialize performance check parameters
     AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
@@ -2259,6 +2358,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     auto container = CreateContainer(info, frontendType, useNewPipe);
+    if (vmType_ == VMType::ARK_NATIVE) {
+        frontendType = FrontendType::ARK_TS;
+    }
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetUIContentType(uIContentType_);
     container->SetWindowName(window_->GetWindowName());
@@ -2347,6 +2449,34 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
+    container->SetAbilityOnInstallAppInStore([context = context_](const std::string& appName) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        want.SetAction(ACTION_APPDETAIL);
+        auto urlPrefix = NG::ExpandedMenuPluginLoader::GetInstance().GetStoreUrlFront();
+        auto url = urlPrefix + appName;
+        want.SetUri(url);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+
+    container->SetAbilityOnJumpBrowser([context = context_](const std::string& address) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        want.SetAction(ACTION_VIEWDATA);
+        want.SetUri(address);
+        auto appName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::URL);
+        want.SetBundle(appName);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+
     if (window_->IsDecorEnable()) {
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
@@ -2371,6 +2501,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         windowRectChangeListener_ = new WindowRectChangeListener(instanceId_);
         window_->RegisterWindowRectChangeListener(windowRectChangeListener_);
     }
+    displayIdChangeListener_ = new DisplayIdChangeListener(instanceId_);
+    window_->RegisterDisplayIdChangeListener(displayIdChangeListener_);
 
     // create ace_view
     auto aceView =
@@ -2446,12 +2578,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // Use metadata to control the center-alignment of text at line height.
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
-    bool visibleAreaRealTime =
-        std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-            return metaDataItem.name == "ArkTSVisibleAreaRealTime" && metaDataItem.value == "true";
-        });
     pipeline->SetHalfLeading(halfLeading);
-    pipeline->SetVisibleAreaRealTime(visibleAreaRealTime);
     bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(),
         [pipelineWeak = AceType::WeakClaim(AceType::RawPtr(pipeline))](const auto& metaDataItem) {
                 if (metaDataItem.name == "can_preview_text") {
@@ -2501,7 +2628,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
-    if (runtime_) {
+    if (runtime_ && storageWrapper.napiStorage_.has_value()) {
+        auto storage = storageWrapper.napiStorage_.value();
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
             container->SetLocalStorage(nullptr, context);
@@ -2510,6 +2638,17 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             napi_ref ref = nullptr;
             napi_create_reference(env, storage, 1, &ref);
             container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
+        }
+    }
+    if (runtime_ && storageWrapper.aniStorage_.has_value()) {
+        auto storage = storageWrapper.aniStorage_.value();
+        if (!storage) {
+            container->SetLocalStorage(nullptr, context);
+        } else {
+            auto* env = reinterpret_cast<ani_env*>(runtime_);
+            ani_ref ref;
+            env->GlobalReference_Create(storage, &ref);
+            container->SetAniLocalStorage(reinterpret_cast<void*>(ref), context);
         }
     }
 
@@ -2570,7 +2709,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
             pipeline->UpdateSystemSafeAreaWithoutAnimation(systemInsets);
             pipeline->UpdateCutoutSafeAreaWithoutAnimation(cutoutInsets);
             pipeline->UpdateNavSafeAreaWithoutAnimation(navInsets);
-            TAG_LOGI(ACE_LAYOUT,
+            TAG_LOGI(ACE_SAFE_AREA,
                 "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s",
                 systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
         }
@@ -2723,6 +2862,7 @@ void UIContentImpl::Destroy()
 
     if (window_) {
         window_->UnregisterWaterfallModeChangeListener(waterfallModeChangeListener_);
+        window_->UnregisterDisplayIdChangeListener(displayIdChangeListener_);
         if (windowRectChangeListener_) {
             if (window_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
                 window_->UnregisterHostWindowRectChangeListener(windowRectChangeListener_);
@@ -3226,18 +3366,50 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 
     if (cachedAnimateFlag_.load()) {
         const uint32_t delay = 50;
+        auto pipeline = container->GetPipelineContext();
         auto task = [cachedConfig = cachedConfig_, cachedReason = cachedReason_,
             cachedRsTransaction = cachedRsTransaction_, cachedAvoidAreas = cachedAvoidAreas_,
-            UICONTENT_IMPL_HELPER(content)] () {
+            weak = WeakPtr<PipelineBase>(pipeline), UICONTENT_IMPL_HELPER(content)] () {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
             UICONTENT_IMPL_HELPER_GUARD(content, return);
             TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache");
             UICONTENT_IMPL_PTR(content)->UpdateViewportConfig(cachedConfig, cachedReason,
                 cachedRsTransaction, cachedAvoidAreas);
+            pipeline->RequestFrame();
         };
         taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay,
             "ArkUIExecKeyFrameCachedAnimateTask", PriorityType::HIGH);
     }
     cachedAnimateFlag_.store(false);
+}
+
+void UIContentImpl::SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
+    std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler, const RefPtr<NG::PipelineContext>& context)
+{
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        CHECK_NULL_VOID(context);
+        auto window = context->GetWindow();
+        CHECK_NULL_VOID(window);
+        auto rsUIDirector = window->GetRSUIDirector();
+        CHECK_NULL_VOID(rsUIDirector);
+        auto rsUIContext = rsUIDirector->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        transactionHandler = rsUIContext->GetSyncTransactionHandler();
+    } else {
+        auto rsSyncTransactionController = Rosen::RSSyncTransactionController::GetInstance();
+        *transactionController = rsSyncTransactionController;
+    }
+}
+
+void UIContentImpl::CloseSyncTransaction(OHOS::Rosen::RSSyncTransactionController* transactionController,
+    std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler)
+{
+    if (transactionController) {
+        transactionController->CloseSyncTransaction();
+    } else if (transactionHandler) {
+        transactionHandler->CloseSyncTransaction();
+    }
 }
 
 void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
@@ -3246,19 +3418,28 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         TAG_LOGE(AceLogTag::ACE_WINDOW, "context is null.");
         return;
     }
-
-    auto transactionController =  Rosen::RSSyncTransactionController::GetInstance();
-    CHECK_NULL_VOID(transactionController);
-    transactionController->OpenSyncTransaction();
-    auto rsTransaction = transactionController->GetRSTransaction();
+    OHOS::Rosen::RSSyncTransactionController* transactionController = nullptr;
+    std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionHandler;
+    SetRSSyncTransaction(&transactionController, transactionHandler, context);
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction;
+    if (transactionController) {
+        transactionController->OpenSyncTransaction();
+        rsTransaction = transactionController->GetRSTransaction();
+    } else if (transactionHandler) {
+        transactionHandler->OpenSyncTransaction();
+        rsTransaction = transactionHandler->GetRSTransaction();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WINDOW, "transactionController and handler invalid");
+        return;
+    }
     auto rootElement = context->GetRootElement();
     if (!rootElement) {
-        transactionController->CloseSyncTransaction();
+        CloseSyncTransaction(transactionController, transactionHandler);
         return;
     }
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
     if (!rosenRenderContext) {
-        transactionController->CloseSyncTransaction();
+        CloseSyncTransaction(transactionController, transactionHandler);
         return;
     }
     rosenRenderContext->CreateCanvasNode();
@@ -3267,8 +3448,7 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
         addNodeCallback_(canvasNode_, rsTransaction);
     }
-    transactionController->CloseSyncTransaction();
-
+    CloseSyncTransaction(transactionController, transactionHandler);
     std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
     CHECK_NULL_VOID(callbackCachedAnimation);
     rosenRenderContext->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
@@ -3324,7 +3504,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     return false;
 }
 
-void UIContentImpl::SetUIExtensionImeShow(const Rect& keyboardRect, int32_t instanceId)
+void SetUIExtensionImeShow(const Rect& keyboardRect, int32_t instanceId)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId);
     CHECK_NULL_VOID(container);
@@ -3349,7 +3529,7 @@ void UIContentImpl::SetUIExtensionImeShow(const Rect& keyboardRect, int32_t inst
     }
 }
 
-bool UIContentImpl::UIExtensionKeyboardAvoid(const RefPtr<PipelineBase>& pipelineContext,
+bool UIExtensionKeyboardAvoid(const RefPtr<PipelineBase>& pipelineContext,
     int32_t instanceId, const Rect keyboardRect, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
@@ -3422,7 +3602,7 @@ bool UIContentImpl::LaterAvoid(const Rect& keyboardRect, double positionY, doubl
     return false;
 }
 
-void UIContentImpl::SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext, float height)
+void SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext, float height)
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(pipeline);
@@ -3431,9 +3611,9 @@ void UIContentImpl::SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext,
     safeAreaManager->SetKeyboardInfo(height);
 }
 
-void UIContentImpl::KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceId,
+void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceId,
     const RefPtr<PipelineBase>& pipelineContext, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
-    const RefPtr<Platform::AceContainer>& container, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+    const RefPtr<Platform::AceContainer>& container)
 {
     CHECK_NULL_VOID(info);
     if (reason != OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
@@ -3455,12 +3635,7 @@ void UIContentImpl::KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, in
     double textFieldHeight = info->textFieldHeight_;
     textFieldPositionY -= curWindow.Top();
     ContainerScope scope(instanceId);
-    if (LaterAvoid(keyboardRect, textFieldPositionY, textFieldHeight)) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Keyboard later avoid and return");
-        ACE_LAYOUT_SCOPED_TRACE("Keyboard later avoid and return");
-        return;
-    }
-    pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight, rsTransaction);
+    pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight);
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
@@ -3626,9 +3801,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
-        TAG_LOGI(ACE_LAYOUT, "UpdateViewportConfig return in advance");
-        taskExecutor->PostTask([this, context, config, avoidAreas, reason, instanceId = instanceId_,
-            pipelineContext, info, container, rsTransaction] {
+        TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
+        taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
+            pipelineContext, info, container] {
                 if (avoidAreas.empty() && !info) {
                     return;
                 }
@@ -3637,8 +3812,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 }
                 AvoidAreasUpdateOnUIExtension(context, avoidAreas);
                 if (pipelineContext) {
-                    TAG_LOGI(ACE_KEYBOARD, "KeyboardAvoid in advance");
-                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container, rsTransaction);
+                    TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in advance");
+                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
@@ -3646,9 +3821,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
 
     auto taskId = viewportConfigMgr_->MakeTaskId();
-    auto task = [this, config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, info,
-                    isDynamicRender = isDynamicRender_, animationOpt, avoidAreas, taskId,
-                    viewportConfigMgr = viewportConfigMgr_]() mutable {
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
+                    instanceId = instanceId_, info, isDynamicRender = isDynamicRender_, animationOpt, avoidAreas,
+                    taskId, viewportConfigMgr = viewportConfigMgr_]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
@@ -3692,8 +3867,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             static_cast<WindowSizeChangeReason>(reason));
         viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
         if (pipelineContext) {
-            TAG_LOGI(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
-            KeyboardAvoid(reason, instanceId_, pipelineContext, info, container, rsTransaction);
+            TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
+            KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
         }
     };
     auto changeBrightnessTask = [container]() {
@@ -3757,7 +3932,7 @@ void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config
 
 void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
 {
-    TAG_LOGI(ACE_LAYOUT, "[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u",
+    TAG_LOGI(ACE_SAFE_AREA, "[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, ignoreViewSafeArea);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -5681,5 +5856,136 @@ void UIContentImpl::SetIntentParam(const std::string& intentInfoSerialized,
     }
     intentInfoSerialized_ = intentInfoSerialized;
     loadPageCallback_ = std::move(loadPageCallback);
+}
+
+std::string UIContentImpl::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    std::string serializedEmpty = "{}";
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, serializedEmpty);
+    ContainerScope scope(instanceId_);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, serializedEmpty);
+    return frontend->GetTopNavDestinationInfo(onlyFullScreen, needParam);
+}
+
+void UIContentImpl::RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart)
+{
+    if (isColdStart) {
+        restoreNavDestinationInfo_ = navDestinationInfo;
+        return;
+    }
+    RestoreNavDestinationInfoInner(navDestinationInfo, false);
+}
+
+void UIContentImpl::RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "will restore navDestination info, isColdStart? %{public}s", isColdStart ? "yes" : "no");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->RestoreNavDestinationInfo(navDestinationInfo, isColdStart);
+}
+
+void UIContentImpl::RunIntentPageIfNeeded()
+{
+    if (!intentInfoSerialized_.empty()) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        if (container) {
+            TAG_LOGI(AceLogTag::ACE_ROUTER, "intentInfo exist, will distribute intentInfo");
+            ContainerScope scope(instanceId_);
+            container->DistributeIntentInfo(intentInfoSerialized_, true, std::move(loadPageCallback_));
+            intentInfoSerialized_ = "";
+            loadPageCallback_ = nullptr;
+        }
+    }
+}
+
+UIContentErrorCode UIContentImpl::InitializeWithAniStorage(
+    OHOS::Rosen::Window* window, const std::string& url, ani_object storage)
+{
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    auto errorCode = InitializeInner(window, url, storageWrapper, false);
+    AddWatchSystemParameter();
+    return errorCode;
+}
+
+UIContentErrorCode UIContentImpl::InitializeWithAniStorage(
+    OHOS::Rosen::Window* window, const std::string& url, ani_object storage, uint32_t focusWindowId)
+{
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    if (window == nullptr) {
+        LOGE("UIExtensionAbility [%{public}s][%{public}s][%{public}d][%{public}s] initialize ui instance failed, the"
+             "window is invalid",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+        return errorCode;
+    }
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    errorCode = CommonInitialize(window, url, storageWrapper, focusWindowId);
+    if (errorCode != UIContentErrorCode::NO_ERRORS) {
+        return errorCode;
+    }
+    AddWatchSystemParameter();
+
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[%{public}s][%{public}s][%{public}d]: StartUIExtension: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+#if !defined(ACE_UNITTEST)
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, errorCode);
+    auto rootNode = pipelineContext->GetRootElement();
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
+#endif
+    return errorCode;
+}
+
+UIContentErrorCode UIContentImpl::InitializeWithAniStorage(
+    OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage)
+{
+    std::string contentName = "";
+    return InitializeWithAniStorage(window, content, storage, contentName);
+}
+
+UIContentErrorCode UIContentImpl::InitializeWithAniStorage(OHOS::Rosen::Window* window,
+    const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage, const std::string& contentName)
+{
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    errorCode = CommonInitialize(window, "", storageWrapper);
+    CHECK_ERROR_CODE_RETURN(errorCode);
+    AddWatchSystemParameter();
+    if (content) {
+        LOGI("Initialize by buffer, size:%{public}zu", content->size());
+        // run page.
+        errorCode = Platform::AceContainer::RunPage(instanceId_, content, contentName);
+        CHECK_ERROR_CODE_RETURN(errorCode);
+    } else {
+        LOGE("Initialize failed, buffer is null");
+    }
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionSubWindow(isUIExtensionSubWindow_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityHost(isUIExtensionAbilityHost_);
+    return errorCode;
+}
+
+UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
+    OHOS::Rosen::Window* window, const std::string& name, ani_object storage)
+{
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    auto errorCode = InitializeInner(window, name, storageWrapper, true);
+    AddWatchSystemParameter();
+    return errorCode;
 }
 } // namespace OHOS::Ace

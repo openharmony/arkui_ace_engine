@@ -211,7 +211,8 @@ void CustomPaintPaintMethod::UpdateFontFamilies()
     }
 }
 
-std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(const Ace::Gradient& gradient)
+std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(
+    const Ace::Gradient& gradient, std::shared_ptr<RSColorSpace> colorSpace)
 {
     std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
     if (gradient.GetType() == Ace::GradientType::CONIC) {
@@ -226,18 +227,18 @@ std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(const 
         std::stable_sort(gradientColors.begin(), gradientColors.end(),
             [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
         uint32_t colorsSize = gradientColors.size();
-        std::vector<RSColorQuad> colors(gradientColors.size(), 0);
-        std::vector<RSScalar> pos(gradientColors.size(), 0);
+        std::vector<RSColor4f> colors(colorsSize, { 0, 0, 0, 0 });
+        std::vector<RSScalar> pos(colorsSize, 0);
         double angle = gradient.GetConicGradient().startAngle->Value() / M_PI * 180.0;
         RSScalar startAngle = static_cast<RSScalar>(angle);
         matrix.PreRotate(startAngle, centerX, centerY);
         for (uint32_t i = 0; i < colorsSize; ++i) {
             const auto& gradientColor = gradientColors[i];
-            colors.at(i) = gradientColor.GetColor().GetValue();
+            colors.at(i) = RSColor(gradientColor.GetColor().GetValue()).GetColor4f();
             pos.at(i) = gradientColor.GetDimension().Value();
         }
         auto mode = RSTileMode::CLAMP;
-        shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, pos, mode,
+        shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, colorSpace, pos, mode,
             static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE), &matrix);
     }
     return shaderEffect;
@@ -247,35 +248,44 @@ void CustomPaintPaintMethod::UpdatePaintShader(RSPen* pen, RSBrush* brush, const
 {
     RSPoint beginPoint = RSPoint(static_cast<RSScalar>(gradient.GetBeginOffset().GetX()),
         static_cast<RSScalar>(gradient.GetBeginOffset().GetY()));
-    RSPoint endPoint = RSPoint(static_cast<RSScalar>(gradient.GetEndOffset().GetX()),
-        static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
+    RSPoint endPoint = RSPoint(
+        static_cast<RSScalar>(gradient.GetEndOffset().GetX()), static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
     std::vector<RSPoint> pts = { beginPoint, endPoint };
     auto gradientColors = gradient.GetColors();
     std::stable_sort(gradientColors.begin(), gradientColors.end(),
         [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
     uint32_t colorsSize = gradientColors.size();
-    std::vector<RSColorQuad> colors(gradientColors.size(), 0);
-    std::vector<RSScalar> pos(gradientColors.size(), 0);
+    std::vector<RSColor4f> colors(colorsSize, { 0, 0, 0, 0 });
+    std::vector<RSScalar> pos(colorsSize, 0);
     for (uint32_t i = 0; i < colorsSize; ++i) {
         const auto& gradientColor = gradientColors[i];
-        colors.at(i) = gradientColor.GetColor().GetValue();
+        colors.at(i) = RSColor(gradientColor.GetColor().GetValue()).GetColor4f();
         pos.at(i) = gradientColor.GetDimension().Value();
     }
 
     auto mode = RSTileMode::CLAMP;
 
+    std::shared_ptr<RSColorSpace> colorSpace = RSColorSpace::CreateSRGB();
+    ColorSpace colorSpaceType = ColorSpace::SRGB;
+    if (colorsSize > 0) {
+        colorSpaceType = gradientColors.back().GetColor().GetColorSpace();
+    }
+    if (ColorSpace::DISPLAY_P3 == colorSpaceType) {
+        colorSpace = RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3);
+    }
     std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
     if (gradient.GetType() == Ace::GradientType::LINEAR) {
-        shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, pos, mode);
+        shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, colorSpace, pos, mode);
     } else if (gradient.GetType() == Ace::GradientType::CONIC) {
-        shaderEffect = MakeConicGradient(gradient);
+        shaderEffect = MakeConicGradient(gradient, colorSpace);
     } else {
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
-            shaderEffect = RSShaderEffect::CreateRadialGradient(endPoint, gradient.GetOuterRadius(), colors, pos, mode);
+            shaderEffect = RSShaderEffect::CreateRadialGradient(
+                endPoint, gradient.GetOuterRadius(), colors, colorSpace, pos, mode);
         } else {
             RSMatrix matrix;
             shaderEffect = RSShaderEffect::CreateTwoPointConical(beginPoint, gradient.GetInnerRadius(), endPoint,
-                gradient.GetOuterRadius(), colors, pos, mode, &matrix);
+                gradient.GetOuterRadius(), colors, colorSpace, pos, mode, &matrix);
         }
     }
     if (pen != nullptr) {

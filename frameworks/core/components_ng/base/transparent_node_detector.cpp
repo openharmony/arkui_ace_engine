@@ -78,7 +78,6 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         std::string bundleName = container ? container->GetBundleName() : "";
         std::string moduleName = container ? container->GetModuleName() : "";
         EventReport::ReportUiExtensionTransparentEvent(pageUrl, bundleName, moduleName);
-        window->NotifyExtensionTimeout(ERROR_CODE_UIEXTENSION_TRANSPARENT);
     };
     executor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME, "ExtensionTransparentDetector");
 }

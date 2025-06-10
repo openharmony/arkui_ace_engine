@@ -273,7 +273,7 @@ ArkUINativeModuleValue TextAreaBridge::SetMaxLines(ArkUIRuntimeCallInfo *runtime
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    auto maxLines = NUM_3;
+    auto maxLines = INT32_MAX;
     if (maxLinesArg->IsNumber() && maxLinesArg->Int32Value(vm) > NUM_0) {
         maxLines = maxLinesArg->Uint32Value(vm);
     }
@@ -2623,12 +2623,15 @@ ArkUINativeModuleValue TextAreaBridge::SetSelectionMenuOptions(ArkUIRuntimeCallI
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClickCallback;
-    if (!ArkTSUtils::ParseSelectionMenuOptions(runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback)) {
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    if (!ArkTSUtils::ParseSelectionMenuOptions(
+        runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback, onPrepareMenuCallback)) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaSelectionMenuOptions(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaSelectionMenuOptions(
-        nativeNode, reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback));
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaSelectionMenuOptions(nativeNode,
+        reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback),
+        reinterpret_cast<void*>(&onPrepareMenuCallback));
     return panda::JSValueRef::Undefined(vm);
 }
 

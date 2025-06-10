@@ -160,6 +160,9 @@ void UIExtensionModelNG::CreateIsolatedComponent(const UIExtensionConfig& config
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& config)

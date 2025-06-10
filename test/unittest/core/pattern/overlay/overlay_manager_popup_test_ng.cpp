@@ -1775,7 +1775,7 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest035, TestSize.Level1)
      */
     std::vector<RefPtr<FrameNode>> targetNodes;
     std::vector<PopupInfo> popups;
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < POPUP_NODE_2; i++) {
         auto targetNode = CreateTargetNode();
         ASSERT_NE(targetNode, nullptr);
         targetNodes.emplace_back(targetNode);

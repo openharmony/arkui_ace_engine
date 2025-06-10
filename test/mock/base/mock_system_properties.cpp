@@ -91,11 +91,13 @@ int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 bool SystemProperties::multiInstanceEnabled_ = false;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
+bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
+bool g_isResourceDecoupling = true;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
@@ -283,7 +285,7 @@ bool SystemProperties::IsNeedSymbol()
 
 bool SystemProperties::GetResourceDecoupling()
 {
-    return true;
+    return g_isResourceDecoupling;
 }
 
 bool SystemProperties::ConfigChangePerform()

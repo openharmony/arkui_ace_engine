@@ -171,7 +171,7 @@ public:
         std::function<void(int32_t, int32_t)>&& napiCallback, const std::set<std::string>& dialogCallbacks);
     ACE_FORCE_EXPORT void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
-    void CloseDialog(int32_t instanceId);
+    void CloseDialog(int32_t parentInstanceId);
     ACE_FORCE_EXPORT void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);

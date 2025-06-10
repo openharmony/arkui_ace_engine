@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("../../../build/uicast.gni")
@@ -98,6 +99,9 @@ template("build_component_ng") {
       if (ohos_indep_compiler_enable) {
         include_dirs += indep_compile_includes
       }
+      if (use_new_skia) {
+        defines += [ "USE_NEW_SKIA" ]
+      }
       if (is_arkui_x) {
         include_dirs += [
           "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
@@ -160,6 +164,7 @@ template("build_component_ng") {
           include_dirs += [
             "//foundation/window/window_manager",
             "//foundation/window/window_manager/interfaces/innerkits",
+            "//foundation/window/window_manager/interfaces/kits/ndk/wm",
           ]
         }
       }

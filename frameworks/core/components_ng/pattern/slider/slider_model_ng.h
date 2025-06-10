@@ -94,27 +94,33 @@ public:
 #endif
 
     static void SetShowTips(FrameNode* frameNode, bool value, const std::optional<std::string>& content);
-    static void SetThickness(FrameNode* frameNode, const Dimension& value);
-    static void SetStepSize(FrameNode* frameNode, const Dimension& value);
-    static void SetBlockType(FrameNode* frameNode, BlockStyleType value);
+    static void SetThickness(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetStepSize(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetBlockType(FrameNode* frameNode, const std::optional<BlockStyleType>& value);
     static void SetBlockShape(FrameNode* frameNode, const RefPtr<BasicShape>& value);
-    static void SetBlockSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
-    static void SetTrackBorderRadius(FrameNode* frameNode, const Dimension& value);
-    static void SetStepColor(FrameNode* frameNode, const Color& value);
-    static void SetBlockBorderColor(FrameNode* frameNode, const Color& value);
-    static void SetBlockBorderWidth(FrameNode* frameNode, const Dimension& value);
-    static void SetBlockColor(FrameNode* frameNode, const Color& value);
-    static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
-    static void SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
+    static void SetBlockSize(
+        FrameNode* frameNode, const std::optional<Dimension>& width, const std::optional<Dimension>& height);
+    static void SetTrackBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetStepColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetBlockBorderColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetBlockBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetBlockColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetTrackBackgroundColor(
+        FrameNode* frameNode, const std::optional<Gradient>& value, bool isResourceColor = false);
+        static void SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
     static void SetShowSteps(FrameNode* frameNode, bool value);
-    static void SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode);
-    static void SetMinResponsiveDistance(FrameNode* frameNode, float value);
-    static void SetValidSlideRange(FrameNode* frameNode, float fromValue, float toValue);
+    // static void SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode);
+    // static void SetMinResponsiveDistance(FrameNode* frameNode, float value);
+    // static void SetValidSlideRange(FrameNode* frameNode, float fromValue, float toValue);
     static void SetPrefix(FrameNode* frameNode, const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options);
     static void SetSuffix(FrameNode* frameNode, const RefPtr<UINode>& content, const NG::SliderSuffixOptions& options);
+    static void SetSliderInteractionMode(FrameNode* frameNode, const std::optional<SliderInteraction>& mode);
+    static void SetMinResponsiveDistance(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetValidSlideRange(
+        FrameNode* frameNode, const std::optional<float>& fromValue, const std::optional<float>& toValue);
     static void SetBlockImage(
         FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName);
-    static void SetSelectedBorderRadius(FrameNode* frameNode, const Dimension& value);
+    static void SetSelectedBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity);
 #endif
@@ -143,13 +149,15 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange);
+    static void SetOnChangeEvent(FrameNode* frameNode, SliderOnValueChangeEvent&& onChangeEvent);
     static void SetSliderValue(FrameNode* frameNode, float value);
-    static void SetMinLabel(FrameNode* frameNode, float value);
-    static void SetMaxLabel(FrameNode* frameNode, float value);
-    static void SetDirection(FrameNode* frameNode, Axis value);
-    static void SetStep(FrameNode* frameNode, float value);
-    static void SetReverse(FrameNode* frameNode, bool value);
-    static void SetSliderMode(FrameNode* frameNode, const SliderMode& value);
+    static void SetSliderValue(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetMinLabel(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetMaxLabel(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetDirection(FrameNode* frameNode, const std::optional<Axis>& value);
+    static void SetStep(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetReverse(FrameNode* frameNode, const std::optional<bool>& value);
+    static void SetSliderMode(FrameNode* frameNode, const std::optional<SliderMode>& value);
 
     static Color GetBlockColor(FrameNode* frameNode);
     static Gradient GetTrackBackgroundColor(FrameNode* frameNode);

@@ -198,6 +198,8 @@ HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode003, TestSize.Level1)
     auto pipelineContext = sheetNode->GetContext();
     ASSERT_NE(pipelineContext, nullptr);
     pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 16.0_vp;
+    SheetOthersTestNg::sheetTheme_->sheetTitleAreaMargin_ = 0.0_vp;
 
     auto operationColumn = SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     ASSERT_NE(operationColumn, nullptr);
@@ -205,7 +207,7 @@ HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode003, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty, nullptr);
     ASSERT_NE(columnLayoutProperty->GetCalcLayoutConstraint(), nullptr);
     ASSERT_TRUE(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
-    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(0.0_px));
+    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(0.0_vp));
     SheetOthersTestNg::TearDownTestCase();
 }
 
@@ -236,6 +238,8 @@ HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode004, TestSize.Level1)
     auto pipelineContext = sheetNode->GetContext();
     ASSERT_NE(pipelineContext, nullptr);
     pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 16.0_vp;
+    SheetOthersTestNg::sheetTheme_->sheetTitleAreaMargin_ = 0.0_vp;
 
     auto operationColumn = SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     ASSERT_NE(operationColumn, nullptr);
@@ -243,7 +247,7 @@ HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode004, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty, nullptr);
     ASSERT_NE(columnLayoutProperty->GetCalcLayoutConstraint(), nullptr);
     ASSERT_TRUE(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
-    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(0.0_px));
+    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(0.0_vp));
     SheetOthersTestNg::TearDownTestCase();
 }
 
@@ -281,7 +285,7 @@ HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode005, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty, nullptr);
     ASSERT_NE(columnLayoutProperty->GetCalcLayoutConstraint(), nullptr);
     ASSERT_TRUE(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
-    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(72.0_vp));
+    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(56.0_vp));
     SheetOthersTestNg::TearDownTestCase();
 }
 
@@ -313,11 +317,7 @@ HWTEST_F(SheetOthersTestNg, CreateDragBarNode001, TestSize.Level1)
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
 
     SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
-    ASSERT_EQ(operationColumn->children_.size(), 1);
-    auto dragBarNode = AceType::DynamicCast<FrameNode>(operationColumn->children_.front());
-    ASSERT_NE(dragBarNode, nullptr);
-    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
-    EXPECT_EQ(dragBarLayoutProperty->propVisibility_, VisibleType::GONE);
+    ASSERT_EQ(operationColumn->children_.size(), 0);
 }
 
 /**
@@ -351,11 +351,7 @@ HWTEST_F(SheetOthersTestNg, CreateDragBarNode002, TestSize.Level1)
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
 
     SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
-    ASSERT_EQ(operationColumn->children_.size(), 1);
-    auto dragBarNode = AceType::DynamicCast<FrameNode>(operationColumn->children_.front());
-    ASSERT_NE(dragBarNode, nullptr);
-    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
-    EXPECT_EQ(dragBarLayoutProperty->propVisibility_, VisibleType::INVISIBLE);
+    ASSERT_EQ(operationColumn->children_.size(), 0);
 }
 
 /**
@@ -393,15 +389,12 @@ HWTEST_F(SheetOthersTestNg, CreateDragBarNode003, TestSize.Level1)
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
 
     SheetView::CreateDragBarNode(nullptr, operationColumn, sheetStyle, sheetNode);
-    ASSERT_EQ(operationColumn->children_.size(), 2);
-    auto childIterator = operationColumn->children_.begin();
+    ASSERT_EQ(operationColumn->children_.size(), 1);
+    auto childIterator = sheetNode->children_.begin();
     auto dragBarNode = AceType::DynamicCast<FrameNode>(*childIterator);
     ASSERT_NE(dragBarNode, nullptr);
     auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
     EXPECT_EQ(dragBarLayoutProperty->propVisibility_, VisibleType::INVISIBLE);
-    auto titleColumnNode = AceType::DynamicCast<FrameNode>(*(++childIterator));
-    ASSERT_NE(titleColumnNode, nullptr);
-    EXPECT_EQ(titleColumnNode->children_.size(), 0);
     SheetOthersTestNg::TearDownTestCase();
 }
 
@@ -437,13 +430,14 @@ HWTEST_F(SheetOthersTestNg, CreateDragBarNode004, TestSize.Level1)
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
 
     SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
-    ASSERT_EQ(operationColumn->children_.size(), 2);
-    auto childIterator = operationColumn->children_.begin();
+    ASSERT_EQ(operationColumn->children_.size(), 1);
+    auto childIterator = sheetNode->children_.begin();
     auto dragBarNode = AceType::DynamicCast<FrameNode>(*childIterator);
     ASSERT_NE(dragBarNode, nullptr);
     auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
     EXPECT_EQ(dragBarLayoutProperty->propVisibility_, VisibleType::INVISIBLE);
-    auto titleColumnNode = AceType::DynamicCast<FrameNode>(*(++childIterator));
+    auto operationColumnChildIterator = operationColumn->children_.begin();
+    auto titleColumnNode = AceType::DynamicCast<FrameNode>(*operationColumnChildIterator);
     ASSERT_NE(titleColumnNode, nullptr);
     EXPECT_EQ(titleColumnNode->children_.size(), 1);
     EXPECT_EQ(titleColumnNode->children_.front(), titleBuilder);
@@ -1713,6 +1707,99 @@ HWTEST_F(SheetOthersTestNg, CreateSheetMaskShowInSubwindowTest005, TestSize.Leve
     // Set nullptr in advance, otherwise it will become a wild pointer and cause a crash.
     maskNode->context_ = nullptr;
     MockContainer::TearDown();
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnBindSheet001
+ * @tc.desc: Branch: if (sheetStyle.enableFloatingDragBar.value_or(false))
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, OnBindSheet001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetOthersTestNg::SetUpTestCase();
+    auto targetNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create builder.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode =
+            FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> { return nullptr; };
+
+    /**
+     * @tc.steps: step3. create sheet node, set showDragBar false.
+     * @tc.expected: enableFloatingDragBar is false.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.enableFloatingDragBar = true;
+    sheetStyle.showDragBar = false;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->overlayManager_ = overlayManager;
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_EQ(sheetStyle.enableFloatingDragBar, false);
+
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetDragBarHeight001
+ * @tc.desc: Branch: (dragBarLayoutProperty->GetVisibility() == VisibleType::GONE)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, GetDragBarHeight001, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle sheetStyle;
+    sheetStyle.detents = { SheetHeight({ 300.0_vp }), SheetHeight({ 700.0_vp }) };
+    sheetStyle.isTitleBuilder = true;
+    sheetStyle.enableFloatingDragBar = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, titleBuilder, std::move(callback), sheetStyle);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+    auto childIterator = sheetNode->children_.begin();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(*childIterator);
+    ASSERT_NE(dragBarNode, nullptr);
+
+    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
+    ASSERT_NE(dragBarLayoutProperty, nullptr);
+
+    dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    EXPECT_EQ(sheetPattern->GetDragBarHeight(dragBarNode), 0.0_vp);
+
+    dragBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    EXPECT_EQ(sheetPattern->GetDragBarHeight(dragBarNode), 16.0_vp);
     SheetOthersTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

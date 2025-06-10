@@ -71,14 +71,8 @@ void ModalPresentationPattern::BeforeCreateLayoutWrapper()
         inset.top_ = { 0, 0 };
         inset.bottom_ = { 0, 0 };
         modalNodeLayoutProperty->UpdateSafeAreaInsets(inset);
-    } else {
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto inset = context->GetSafeAreaWithoutProcess();
-        inset.top_ = { 0, 0 };
-        modalNodeLayoutProperty->UpdateSafeAreaInsets(inset);
-        inset.bottom_ = { 0, 0 };
-        builderLayoutProperty->UpdateSafeAreaInsets(inset);
+        return;
     }
+    ContentRootPattern::BeforeCreateLayoutWrapper();
 }
 } // namespace OHOS::Ace::NG

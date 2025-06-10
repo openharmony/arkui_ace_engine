@@ -1708,16 +1708,96 @@ const __creatorMap__ = new Map([
         }],
 ]);
 const __attributeMap__ = new Map([
-    ['Scroll', (node) => {
-            if (node._componentAttribute) {
-                return node._componentAttribute;
-            }
-            if (!node.getNodePtr()) {
-                return undefined;
-            }
-            node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+    ['Swiper', (node) => {
+        if (node._componentAttribute) {
             return node._componentAttribute;
-        }],
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkSwiperComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Scroll', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['List', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkListComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['ListItem', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkListItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['ListItemGroup', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkListItemGroupComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['WaterFlow', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['FlowItem', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Grid', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkGridComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['GridItem', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }]
 ]);
 const __eventMap__ = new Map(
     [
@@ -1771,6 +1851,25 @@ const __eventMap__ = new Map(
       }]
     ]
   )
+const __bindControllerCallbackMap__ = new Map(
+    [
+        ['Swiper', (node, controller) => {
+            getUINativeModule().swiper.setSwiperInitialize(node.getNodePtr(), controller);
+        }],
+        ['Scroll', (node, controller) => {
+            getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
+        }],
+        ['List', (node, controller) => {
+            getUINativeModule().list.setInitialScroller(node.getNodePtr(), controller);
+        }],
+        ['WaterFlow', (node, controller) => {
+            getUINativeModule().waterFlow.setWaterFlowScroller(node.getNodePtr(), controller);
+        }],
+        ['Grid', (node, controller) => {
+            getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller);
+        }]
+    ]
+)
 class typeNode {
     static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
@@ -1805,12 +1904,20 @@ class typeNode {
     static bindController(node, controller, nodeType) {
         if (node === undefined || node === null || controller === undefined || controller === null ||
             node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
-            throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+            if (nodeType === undefined || nodeType === null || nodeType === 'Scroll') {
+                throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+            } else {
+                throw { message: 'Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.', code: 100023 };
+            }
         }
         if (!node.checkIfCanCrossLanguageAttributeSetting()) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
-        getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
+        let callback = __bindControllerCallbackMap__.get(nodeType);
+        if (callback === undefined || callback === null) {
+            return;
+        }
+        callback(node, controller);
     }
 }
 /*

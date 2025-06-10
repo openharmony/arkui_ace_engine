@@ -1023,7 +1023,7 @@ HWTEST_F(GridCommonTestNg, FocusWrapMode003, TestSize.Level1)
     CreateFocusableBigItem(2, 2, 1, 1);
 
     /**
-     * @tc.steps: step1. Set the focusWrapMode property to non wrap directional keys
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
      */
     model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
     CreateDone();
@@ -1085,7 +1085,7 @@ HWTEST_F(GridCommonTestNg, FocusWrapMode004, TestSize.Level1)
     CreateFocusableBigItem(2, 2, 0, 0);
 
     /**
-     * @tc.steps: step1. Set the focusWrapMode property to non wrap directional keys
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
      */
     model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
     CreateDone();
@@ -1166,7 +1166,7 @@ HWTEST_F(GridCommonTestNg, FocusWrapMode005, TestSize.Level1)
     CreateFocusableBigItem(2, 2, 1, 1);
 
     /**
-     * @tc.steps: step1. Set the focusWrapMode property to non wrap directional keys
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
      */
     model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
     CreateDone();
@@ -1219,6 +1219,104 @@ HWTEST_F(GridCommonTestNg, FocusWrapMode005, TestSize.Level1)
      */
     currentIndex = 7;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+}
+
+/**
+ * @tc.name: FocusWrapMode006
+ * @tc.desc: Test GetNextFocusNode func in the rule grid for line wrapping and focusing scenes with directional keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode006, TestSize.Level1)
+{
+    /**
+     * 0: [3], [2], [1], [0]
+     * 1: [7], [6], [5], [4]
+     * 2: [9], [8]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetIsRTL(TextDirection::RTL);
+    CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to non wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::DEFAULT);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the node with index 5
+     */
+    int32_t currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+
+    /**
+     * @tc.steps: step3. Press the right arrow key from the node with index 4
+     */
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step4. Set the focusWrapMode property to allow wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step5. Press the right arrow key from the node with index 5
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+
+    /**
+     * @tc.steps: step6. Press the right arrow key from the node with index 4
+     */
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
+}
+
+/**
+ * @tc.name: FocusWrapMode007
+ * @tc.desc: Test GetNextFocusNode func in irregular grid for line wrapping and focusing scenes with directional keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode007, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1], [2], [3]
+     * 1: [0], [4], [5], [6]
+     * 2: [7]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableBigItem(0, 1, 0, 0);
+    CreateFocusableBigItem(0, 0, 1, 1);
+    CreateFocusableBigItem(0, 0, 2, 2);
+    CreateFocusableBigItem(0, 0, 3, 3);
+    CreateFocusableBigItem(1, 1, 1, 1);
+    CreateFocusableBigItem(1, 1, 2, 2);
+    CreateFocusableBigItem(1, 1, 3, 3);
+    CreateFocusableBigItem(2, 2, 0, 0);
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the node with index 6
+     */
+    int32_t currentIndex = 6;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 7));
+
+    /**
+     * @tc.steps: step3. Press the left arrow key from the node with index 7
+     */
+    currentIndex = 7;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 6));
 }
 
 /**

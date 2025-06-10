@@ -97,11 +97,16 @@ void ScreenPattern::OnAttachToFrameNode()
 
 void ScreenPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(screenSession_);
-    auto instance = WindowSceneLayoutManager::GetInstance();
-    if (instance) {
-        instance->UnregisterScreenNode(screenSession_->GetScreenId());
+    if (screenSession_) {
+        auto instance = WindowSceneLayoutManager::GetInstance();
+        if (instance) {
+            instance->UnregisterScreenNode(screenSession_->GetScreenId());
+        }
     }
+    CHECK_NULL_VOID(frameNode);
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    context->ClearModifiers();
 }
 
 void ScreenPattern::UpdateDisplayInfo()

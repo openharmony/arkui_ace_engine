@@ -162,6 +162,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent UpdatePointers() const;
     bool IsPenHoverEvent() const;
     std::shared_ptr<MMI::PointerEvent> GetTouchEventPointerEvent() const;
+    int32_t GetEventIdentity() const;
 };
 
 namespace Platform {

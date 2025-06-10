@@ -594,6 +594,24 @@ void GetScrollContentSize(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
     (*values)[0] = Dimension(size.Width(), DimensionUnit::PX).ConvertToVp();
     (*values)[1] = Dimension(size.Height(), DimensionUnit::PX).ConvertToVp();
 }
+
+void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ScrollModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
+}
+
+void CreateWithResourceObjSnapPaginations(ArkUINodeHandle node, void* resObjs)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObjs);
+    auto* resourceObj = reinterpret_cast<std::vector<RefPtr<ResourceObject>>*>(resObjs);
+    ScrollModelNG::CreateWithResourceObjSnapPaginations(frameNode, *resourceObj);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -669,6 +687,8 @@ const ArkUIScrollModifier* GetScrollModifier()
         .getScrollFadingEdge = GetScrollFadingEdge,
         .setScrollFling = SetScrollFling,
         .getScrollContentSize = GetScrollContentSize,
+        .createWithResourceObjFriction = CreateWithResourceObjFriction,
+        .createWithResourceObjSnapPaginations = CreateWithResourceObjSnapPaginations,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     /* clang-format on */

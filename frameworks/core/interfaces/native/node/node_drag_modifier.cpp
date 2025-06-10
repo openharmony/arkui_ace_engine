@@ -107,6 +107,8 @@ void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
 
         event.dragEvent.unifiedData = unifiedData;
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
+        event.dragEvent.bundleName = strdup(info->GetDragSource().c_str());
+        event.dragEvent.isRemoteDev = info->isRemoteDev();
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
         info->UseCustomAnimation(event.dragEvent.useCustomDropAnimation);
@@ -139,6 +141,8 @@ void SetOnDragStart(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        event.dragEvent.bundleName = strdup(info->GetDragSource().c_str());
+        event.dragEvent.isRemoteDev = info->isRemoteDev();
         SendArkUISyncEvent(&event);
         RefPtr<UnifiedData> udData =
             UdmfClient::GetInstance()->TransformUnifiedDataForNative(event.dragEvent.unifiedData);
@@ -172,6 +176,8 @@ void SetOnDragEnter(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         event.dragEvent.unifiedData = unifiedData;
         event.dragEvent.isSuitGetData = false;
+        event.dragEvent.bundleName = strdup(info->GetDragSource().c_str());
+        event.dragEvent.isRemoteDev = info->isRemoteDev();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -203,6 +209,8 @@ void SetOnDragMove(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         event.dragEvent.unifiedData = unifiedData;
         event.dragEvent.isSuitGetData = false;
+        event.dragEvent.bundleName = strdup(info->GetDragSource().c_str());
+        event.dragEvent.isRemoteDev = info->isRemoteDev();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -235,6 +243,8 @@ void SetOnDragLeave(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         event.dragEvent.unifiedData = unifiedData;
         event.dragEvent.isSuitGetData = false;
+        event.dragEvent.bundleName = strdup(info->GetDragSource().c_str());
+        event.dragEvent.isRemoteDev = info->isRemoteDev();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -282,6 +292,8 @@ void SetOnDragEnd(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.dragResult = static_cast<ArkUI_Int32>(info->GetResult());
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(info->GetDragBehavior());
         event.dragEvent.displayId = static_cast<ArkUI_Int32>(info->GetDisplayId());
+        event.dragEvent.bundleName = strdup(info->GetDragSource().c_str());
+        event.dragEvent.isRemoteDev = info->isRemoteDev();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);

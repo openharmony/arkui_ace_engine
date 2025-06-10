@@ -303,6 +303,41 @@ HWTEST_F(RichEditorControllerTest, RichEditorModel016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel017
+ * @tc.desc: test paragraph style textVerticalAlign attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorControllerTest, RichEditorModel017, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+
+    // test paragraph style linebreakstrategy default value
+    richEditorController->AddTextSpan(options);
+    auto info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    auto hasTextVerticalAlign = info[0].textVerticalAlign.has_value();
+    EXPECT_FALSE(hasTextVerticalAlign);
+
+    std::vector strategies = { TextVerticalAlign::BASELINE, TextVerticalAlign::BOTTOM,
+    TextVerticalAlign::CENTER, TextVerticalAlign::TOP};
+    struct UpdateParagraphStyle style;
+    for (TextVerticalAlign strategy : strategies) {
+        // test paragraph style textVerticalAlign
+        style.textVerticalAlign = strategy;
+        richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+        info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+        hasTextVerticalAlign = info[0].textVerticalAlign.has_value();
+        EXPECT_TRUE(hasTextVerticalAlign);
+        EXPECT_EQ(static_cast<TextVerticalAlign>(info[0].textVerticalAlign.value()), strategy);
+    }
+}
+
+/**
  * @tc.name: PreventDefault001
  * @tc.desc: test PreventDefault001 in ImageSpan and TextSpan
  * @tc.type: FUNC
@@ -404,6 +439,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController005, TestSize.Level1)
     textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
     textStyle.SetTextDecoration(TEXT_DECORATION_VALUE);
     textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    textStyle.SetLineThicknessScale(TEXT_DECORATION_THICKNESS_SCALE);
     struct UpdateSpanStyle updateSpanStyle;
     updateSpanStyle.updateTextColor = TEXT_COLOR_VALUE;
     updateSpanStyle.updateTextShadows = SHADOWS;
@@ -413,6 +449,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController005, TestSize.Level1)
     updateSpanStyle.updateFontFamily = FONT_FAMILY_VALUE;
     updateSpanStyle.updateTextDecoration = TEXT_DECORATION_VALUE;
     updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
+    updateSpanStyle.updateLineThicknessScale = TEXT_DECORATION_THICKNESS_SCALE;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
     EXPECT_EQ(contentNode->GetChildren().size(), 5);
@@ -426,6 +463,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController005, TestSize.Level1)
     EXPECT_EQ(newSpan1->GetFontFamily(), FONT_FAMILY_VALUE);
     EXPECT_EQ(newSpan1->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(newSpan1->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
+    EXPECT_EQ(newSpan1->GetLineThicknessScale(), TEXT_DECORATION_THICKNESS_SCALE);
 }
 
 /**
@@ -1019,7 +1057,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController021, TestSize.Level1)
     /**
      * @tc.steps: step4. test AddTextSpan
      */
-    auto index = richEditorPattern->AddTextSpan(options, true, 5);
+    auto index = richEditorPattern->AddTextSpan(options, TextChangeReason::UNKNOWN, true, 5);
     EXPECT_EQ(index, 5);
     auto info = richEditorController->GetSpansInfo(5, sizeof(INIT_VALUE_1));
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
@@ -1057,6 +1095,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
     textStyle.SetTextDecoration(TEXT_DECORATION_VALUE);
     textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    textStyle.SetLineThicknessScale(TEXT_DECORATION_THICKNESS_SCALE);
     struct UpdateSpanStyle updateSpanStyle;
     updateSpanStyle.updateTextColor = TEXT_COLOR_VALUE;
     updateSpanStyle.updateTextShadows = SHADOWS;
@@ -1066,6 +1105,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     updateSpanStyle.updateFontFamily = FONT_FAMILY_VALUE;
     updateSpanStyle.updateTextDecoration = TEXT_DECORATION_VALUE;
     updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
+    updateSpanStyle.updateLineThicknessScale = TEXT_DECORATION_THICKNESS_SCALE;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
     EXPECT_EQ(contentNode->GetChildren().size(), 5);
@@ -1079,5 +1119,6 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     EXPECT_EQ(newSpan2->GetFontFamily(), FONT_FAMILY_VALUE);
     EXPECT_EQ(newSpan2->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(newSpan2->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
+    EXPECT_EQ(newSpan2->GetLineThicknessScale(), TEXT_DECORATION_THICKNESS_SCALE);
 }
 }

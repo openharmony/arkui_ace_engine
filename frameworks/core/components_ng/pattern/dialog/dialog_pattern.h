@@ -453,6 +453,7 @@ private:
     void OnDetachFromMainTree() override;
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
+    void RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;

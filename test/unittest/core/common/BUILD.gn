@@ -34,6 +34,8 @@ ace_unittest("common_test") {
     "others/thread_checker_test.cpp",
     "recorder/event_recorder_test.cpp",
     "resource/resource_manager_test.cpp",
+    "resource/resource_parse_utils_test.cpp",
+    "resource/pattern_resource_manager_test.cpp",
     "rosen/rosen_test.cpp",
     "sharedata/sharedata_test.cpp",
     "storage/storage_test.cpp",

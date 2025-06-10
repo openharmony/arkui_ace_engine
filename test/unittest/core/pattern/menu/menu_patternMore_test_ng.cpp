@@ -1120,8 +1120,14 @@ HWTEST_F(MenuPattern2TestNg, GetMenuOffset002, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
             []() { return AceType::MakeRefPtr<MenuPattern>(2, "", TYPE); });
     ASSERT_NE(subMenuNode, nullptr);
-    auto [originOffset, endOffset] = menuPattern->GetMenuOffset(outerMenuNode, subMenuNode, true);
+    auto [originOffset, endOffset] = menuPattern->GetMenuOffset(outerMenuNode, subMenuNode, false);
     ASSERT_NE(originOffset, OffsetF());
+
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    auto [originOffset1, endOffset1] = menuPattern->GetMenuOffset(outerMenuNode, subMenuNode, true);
+    ASSERT_NE(originOffset1, OffsetF());
 }
 
 /**
@@ -1330,6 +1336,33 @@ HWTEST_F(MenuPattern2TestNg, GetFirstMenuItem001, TestSize.Level1)
 
     auto menuPattern = outterMenuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
+    ASSERT_NE(menuPattern->GetFirstMenuItem(), nullptr);
     EXPECT_EQ(menuPattern->GetFirstMenuItem(), menuItemNode);
+}
+
+/**
+ * @tc.name: GetLastMenuItem001
+ * @tc.desc: Verify GetLastMenuItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, GetLastMenuItem001, TestSize.Level1)
+{
+    auto outterMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(outterMenuNode, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(outterMenuNode);
+    auto innerMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(scrollNode);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+ 
+    auto menuPattern = outterMenuNode->GetPattern<MenuPattern>();
+    EXPECT_EQ(menuPattern->GetLastMenuItem(), menuItemNode);
 }
 } // namespace OHOS::Ace::NG

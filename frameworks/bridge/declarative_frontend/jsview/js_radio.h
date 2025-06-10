@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,6 @@ public:
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void JsSize(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& args);
-    static void OnChange(const JSCallbackInfo& info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static NG::PaddingPropertyF GetOldPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);

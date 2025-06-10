@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextModelNG : public TextModel {
+    inline static const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 public:
     void Create(const std::u16string& content) override;
     void Create(const std::string& content) override;
@@ -83,7 +84,8 @@ public:
     void SetMarqueeOptions(const TextMarqueeOptions& options) override;
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) override;
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
@@ -91,42 +93,62 @@ public:
     void SetEnableAutoSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
+    void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
-    static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
-    static void SetVariableFontWeight(FrameNode* frameNode, int32_t value);
-    static void SetEnableVariableFontWeight(FrameNode* frameNode, bool value);
-    static void SetMinFontScale(FrameNode* frameNode, const float value);
-    static void SetMaxFontScale(FrameNode* frameNode, const float value);
-    static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
-    static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
-    static void SetTextColor(FrameNode* frameNode, const Color& value);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>&);
+    static void SetVariableFontWeight(FrameNode* frameNode, const std::optional<int32_t>& value);
+    static void SetEnableVariableFontWeight(FrameNode* frameNode, const std::optional<bool>& value);
+    static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
+    static void SetTextAlign(FrameNode* frameNode, const std::optional<Ace::TextAlign>& value);
+    static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void ResetTextColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
-    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    // static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines);
-    static void SetTextOverflow(FrameNode* frameNode, TextOverflow value);
-    static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
-    static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
-    static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
-    static void SetTextCase(FrameNode* frameNode, TextCase value);
-    static void SetMaxLines(FrameNode* frameNode, uint32_t value);
-    static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
-    static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
-    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
-    static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
-    static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
-    static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
-    static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
-    static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
-    static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
+    // static void SetTextOverflow(FrameNode* frameNode, TextOverflow value);
+    // static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
+    // static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
+    // static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
+    // static void SetTextCase(FrameNode* frameNode, TextCase value);
+    // static void SetMaxLines(FrameNode* frameNode, uint32_t value);
+    // static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
+    // static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
+    // static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    // static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
+    // static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
+    // static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
+    // static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
+    // static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
+    // static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetLineSpacing(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetTextOverflow(FrameNode* frameNode, const std::optional<TextOverflow>& value);
+    static void SetTextDecoration(FrameNode* frameNode, const std::optional<TextDecoration>& value);
+    static void SetTextDecorationColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetTextDecorationStyle(FrameNode* frameNode, const std::optional<TextDecorationStyle>& value);
+    static void SetTextCase(FrameNode* frameNode, const std::optional<TextCase>& value);
+    static void SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& value);
+    static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value);
+    static void SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOption);
+    static void SetTextShadow(FrameNode* frameNode, const std::optional<std::vector<Shadow>>& value);
+    static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& value);
+    static void SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetBaselineOffset(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
-    static void SetWordBreak(FrameNode* frameNode, WordBreak value);
-    static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
-    static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
+    static void SetFont(FrameNode* frameNode, const std::optional<Font>& value);
+    static void SetWordBreak(FrameNode* frameNode, const std::optional<WordBreak>& value);
+    static void SetLineBreakStrategy(FrameNode* frameNode, const std::optional<LineBreakStrategy>& value);
+    static void SetEllipsisMode(FrameNode* frameNode, const std::optional<EllipsisMode>& value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options);
@@ -137,8 +159,8 @@ public:
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
     static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
-    static void SetCaretColor(FrameNode* frameNode, const Color& value);
-    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
@@ -179,13 +201,15 @@ public:
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
-    static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
+    static void SetTextSelectableMode(FrameNode* frameNode, const std::optional<TextSelectableMode>& value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void OnPrepareMenuCallbackUpdate(
+        FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
@@ -198,6 +222,10 @@ public:
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
     static NG::Gradient GetGradientStyle(FrameNode* frameNode);
     static void ResetTextGradient(FrameNode* frameNode);
+    static void SetTextVerticalAlign(FrameNode* frameNode, TextVerticalAlign verticalAlign);
+    static TextVerticalAlign GetTextVerticalAlign(FrameNode* frameNode);
+    static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
+        std::function<void()>&& buildFunc, SelectMenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 

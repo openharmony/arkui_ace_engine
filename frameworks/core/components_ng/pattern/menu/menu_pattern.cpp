@@ -20,6 +20,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/ui_node.h"
@@ -1522,6 +1523,10 @@ void MenuPattern::ShowStackMenuAppearAnimation()
     auto subMenuPattern = host->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(subMenuPattern);
 
+    auto mainMenuAccessibilityProps = mainMenu->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(mainMenuAccessibilityProps);
+    mainMenuAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
+
     auto [originOffset, endOffset] = GetMenuOffset(mainMenu, host);
     if (originOffset ==  OffsetF()) {
         TAG_LOGW(AceLogTag::ACE_MENU, "not found parent MenuItem when show stack sub menu");
@@ -1682,6 +1687,11 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, const Ref
             }
             menuItemInfo.originOffset = offset - OffsetF(PADDING.ConvertToPx(), PADDING.ConvertToPx());
             menuItemInfo.endOffset = subMenu->GetPaintRectOffset(false, true);
+            if (isContainerModal) {
+                menuItemInfo.endOffset -= OffsetF(0.0f,
+                    static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx())
+                    + static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
+            }
             menuItemInfo.isFindTargetId = true;
             if (isNeedRestoreNodeId) {
                 menuItemPattern->SetClickMenuItemId(-1);
@@ -1821,12 +1831,16 @@ void MenuPattern::ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuN
     });
 
     CHECK_NULL_VOID(menuNode);
+    auto menuNodeAccessibilityProps = menuNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(menuNodeAccessibilityProps);
+    menuNodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+
     CHECK_NULL_VOID(subMenuNode);
     auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
 
-    option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
+    option.SetCurve(STACK_SUB_MENU_ANIMATION_CURVE);
     auto subImageNode = GetArrowNode(subMenuNode);
     auto menuWarpper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWarpper);

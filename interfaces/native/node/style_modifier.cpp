@@ -134,12 +134,13 @@ const std::vector<int32_t> OBJECT_FIT_ARRAY = { OBJECT_FIT_CONTAIN, OBJECT_FIT_C
     OBJECT_FIT_NONE_ALIGN_TOP_START, OBJECT_FIT_NONE_ALIGN_TOP, OBJECT_FIT_NONE_ALIGN_TOP_END,
     OBJECT_FIT_NONE_ALIGN_START, OBJECT_FIT_NONE_ALIGN_CENTER, OBJECT_FIT_NONE_ALIGN_END,
     OBJECT_FIT_NONE_ALIGN_BOTTOM_START, OBJECT_FIT_NONE_ALIGN_BOTTOM, OBJECT_FIT_NONE_ALIGN_BOTTOM_END };
+constexpr int32_t IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH = 5;
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_BASELINE = 4;
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_BOTTOM = 3;
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_CENTER = 2;
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_TOP = 1;
 const std::vector<int32_t> IMAGE_SPAN_ALIGNMENT_ARRAY = { IMAGE_SPAN_ALIGNMENT_BASELINE, IMAGE_SPAN_ALIGNMENT_BOTTOM,
-    IMAGE_SPAN_ALIGNMENT_CENTER, IMAGE_SPAN_ALIGNMENT_TOP };
+    IMAGE_SPAN_ALIGNMENT_CENTER, IMAGE_SPAN_ALIGNMENT_TOP, IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH };
 const std::vector<std::string> CURVE_ARRAY = { "linear", "ease", "ease-in", "ease-out", "ease-in-out",
     "fast-out-slow-in", "linear-out-slow-in", "fast-out-linear-in", "extreme-deceleration", "sharp", "rhythm", "smooth",
     "friction" };
@@ -1040,10 +1041,10 @@ int32_t SetBackgroundImageResizableWithSlice(ArkUI_NodeHandle node, const ArkUI_
         options[i * NUM_3 + NUM_2] = { GetDefaultUnit(node, UNIT_VP), nullptr };
     }
 
-    std::vector<void*> bgImageResizableArray;
+    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjs;
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageResizable(
-        node->uiNodeHandle, options, static_cast<ArkUI_Int32>(NUM_12), bgImageResizableArray);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageResizable(node->uiNodeHandle, options,
+        static_cast<ArkUI_Int32>(NUM_12), static_cast<void*>(&bgImageResizableResObjs));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5627,7 +5628,7 @@ int32_t SetScrollFriction(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollFriction(node->uiNodeHandle, friction);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
-        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowFriction(node->uiNodeHandle, friction);
+        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowFriction(node->uiNodeHandle, friction, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -6466,7 +6467,7 @@ const ArkUI_AttributeItem* GetScrollBarMargin(ArkUI_NodeHandle node)
     ArkUIInt32orFloat32 values[NUM_2];
     GetFullImpl()->getNodeModifiers()->getScrollableModifier()->getScrollBarMargin(node->uiNodeHandle, &values);
     int index = 0;
-    g_numberValues[index++].f32 = values[NUM_0].i32;
+    g_numberValues[index++].f32 = values[NUM_0].f32;
     g_numberValues[index++].f32 = values[NUM_1].f32;
     g_attributeItem.size = index;
     return &g_attributeItem;
@@ -11515,6 +11516,34 @@ void ResetHalfLeading(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextModifier()->resetTextHalfLeading(node->uiNodeHandle);
 }
 
+int32_t SetTextVerticalAlign(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || !InRegion(static_cast<uint32_t>(TextVerticalAlign::BASELINE),
+        static_cast<uint32_t>(TextVerticalAlign::TOP), item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextVerticalAlign(
+        node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextVerticalAlign(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextModifier()->getTextVerticalAlign(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetTextVerticalAlign(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextVerticalAlign(node->uiNodeHandle);
+}
+
 const ArkUI_AttributeItem* GetTextEllipsisMode(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
@@ -11726,7 +11755,8 @@ int32_t SetVerticalAlign(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < 0 || item->value[0].i32 > static_cast<int32_t>(ARKUI_IMAGE_SPAN_ALIGNMENT_TOP)) {
+    if (item->value[0].i32 < 0 ||
+        item->value[0].i32 > static_cast<int32_t>(ARKUI_IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanVerticalAlign(
@@ -15754,7 +15784,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetTextHeightAdaptivePolicy, SetTextIndent, SetTextWordBreak, SetTextEllipsisMode, SetLineSpacing,
         SetFontFeature, SetTextEnableDateDetector, SetTextDataDetectorConfig, SetTextSelectedBackgroundColor,
         SetTextContentWithStyledString, SetHalfLeading, SetImmutableFontWeight, SetLineCount, SetOptimizeTrailingSpace,
-        SetTextLinearGradient, SetTextRadialGradient };
+        SetTextLinearGradient, SetTextRadialGradient, SetTextVerticalAlign };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -15770,7 +15800,7 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetTextHeightAdaptivePolicy, GetTextIndent, GetTextWordBreak, GetTextEllipsisMode, GetLineSpacing,
         GetFontFeature, GetTextEnableDateDetector, GetTextDataDetectorConfig, GetTextSelectedBackgroundColor, nullptr,
         GetHalfLeading, GetFontWeight, GetLineCount, GetOptimizeTrailingSpace, GetTextLinearGradient,
-        GetTextRadialGradient };
+        GetTextRadialGradient, GetTextVerticalAlign };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -15788,7 +15818,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextWordBreak, ResetTextEllipsisMode, ResetLineSpacing, ResetFontFeature, ResetTextEnableDateDetector,
         ResetTextDataDetectorConfig, ResetTextSelectedBackgroundColor, ResetTextContentWithStyledString,
         ResetHalfLeading, ResetFontWeight, ResetLineCount, ResetOptimizeTrailingSpace, ResetTextLinearGradient, 
-        ResetTextRadialGradient };
+        ResetTextRadialGradient, ResetTextVerticalAlign };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

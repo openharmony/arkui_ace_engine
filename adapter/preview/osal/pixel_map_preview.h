@@ -53,6 +53,7 @@ public:
     {
         return false;
     }
+    void SetMemoryName(std::string pixelMapName) const override;
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;

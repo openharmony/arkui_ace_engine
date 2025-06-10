@@ -279,12 +279,24 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest004, TestSize.Level1)
     options.style = style;
     auto index = controller->AddTextSpan(options);
     EXPECT_EQ(index, 0);
+
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::DRAG);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    model.SetOnWillChange(std::move(onWillChange));
+
     pattern->dragRange_.first = 0;
     pattern->caretPosition_ = options.value.length();
     pattern->HandleOnDragDropTextOperation(INIT_VALUE_1, true);
+    EXPECT_EQ(changeReason, TextChangeReason::DRAG);
     pattern->dragRange_.first = options.value.length();
     pattern->caretPosition_ = 0;
+    changeReason = TextChangeReason::UNKNOWN;
     pattern->HandleOnDragDropTextOperation(INIT_VALUE_1, true);
+    EXPECT_EQ(changeReason, TextChangeReason::DRAG);
     EXPECT_EQ(pattern->status_, Status::NONE);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();

@@ -335,6 +335,9 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
     stepPointVec_.clear();
     AddStepPoint(startX, startY, endX, endY, canvas);
     canvas.DetachBrush();
+    if (updateAccessibilityVirtualNode_) {
+        updateAccessibilityVirtualNode_();
+    }
 }
 
 void SliderContentModifier::DrawSelect(DrawingContext& context)

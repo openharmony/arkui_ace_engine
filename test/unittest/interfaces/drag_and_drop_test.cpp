@@ -1207,4 +1207,84 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0043, TestSize.Level1)
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(displayId, DISPLAYID);
 }
+
+/**
+ * @tc.name: DragAndDropTest0044
+ * @tc.desc: Test the OH_ArkUI_DragEvent_GetDragSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent
+     */
+    char bundleNameError[10];
+    int32_t lengthError = 10;
+    ArkUIDragEvent dragEvent;
+    char dragEventBundleName[] = "com.example.tdd";
+    dragEvent.bundleName = dragEventBundleName;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+
+    /**
+     * @tc.steps: step2.set bundleNameError length shorter than dragEventBundleName, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragEvent_GetDragSource(drag_Event, bundleNameError, lengthError);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.set ArkUI_DragEvent null, related function is called.
+     */
+    char bundleName[200];
+    int32_t length = 200;
+    auto ret2 = OH_ArkUI_DragEvent_GetDragSource(nullptr, bundleNameError, lengthError);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.set bundleName null, related function is called.
+     */
+    auto ret3 = OH_ArkUI_DragEvent_GetDragSource(drag_Event, nullptr, length);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step4.set bundleName not null, related function is called.
+     */
+    auto ret4 = OH_ArkUI_DragEvent_GetDragSource(drag_Event, bundleName, length);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(*bundleName, *dragEventBundleName);
+}
+
+/**
+ * @tc.name: DragAndDropTest0045
+ * @tc.desc: Test the OH_ArkUI_DragEvent_IsRemote.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent
+     */
+    bool isRemote = false;
+    ArkUIDragEvent dragEvent;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+
+    /**
+     * @tc.steps: step2.set ArkUI_DragEvent null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragEvent_IsRemote(nullptr, &isRemote);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2.set isRemote null, related function is called.
+     */
+    auto ret2 = OH_ArkUI_DragEvent_IsRemote(drag_Event, nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.set isRemote not null, related function is called.
+     */
+    dragEvent.isRemoteDev = true;
+    auto ret3 = OH_ArkUI_DragEvent_IsRemote(drag_Event, &isRemote);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(isRemote, dragEvent.isRemoteDev);
+}
 } // namespace OHOS::Ace

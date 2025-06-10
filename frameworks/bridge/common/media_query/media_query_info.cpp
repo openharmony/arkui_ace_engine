@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 
-#include "core/common/container.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -47,12 +46,15 @@ std::string MediaQueryInfo::GetDeviceType()
     }
 }
 
-std::string MediaQueryInfo::GetOrientation()
+std::string MediaQueryInfo::GetOrientation(const RefPtr<OHOS::Ace::Container>& container)
 {
-    switch (SystemProperties::GetDeviceOrientation()) {
-        case DeviceOrientation::PORTRAIT:
+    CHECK_NULL_RETURN(container, "");
+    switch (container->GetCurrentDisplayOrientation()) {
+        case DisplayOrientation::PORTRAIT:
+        case DisplayOrientation::PORTRAIT_INVERTED:
             return "portrait";
-        case DeviceOrientation::LANDSCAPE:
+        case DisplayOrientation::LANDSCAPE:
+        case DisplayOrientation::LANDSCAPE_INVERTED:
             return "landscape";
         default:
             break;
@@ -93,7 +95,7 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
     json->Put("device-width", SystemProperties::GetDeviceWidth());
     json->Put("device-height", SystemProperties::GetDeviceHeight());
     json->Put("resolution", PipelineBase::GetCurrentDensity());
-    json->Put("orientation", GetOrientation().c_str());
+    json->Put("orientation", GetOrientation(container).c_str());
     json->Put("device-type", GetDeviceType().c_str());
     json->Put("dark-mode", PipelineBase::GetCurrentColorMode() == ColorMode::DARK);
     json->Put("api-version", StringUtils::StringToInt(SystemProperties::GetApiVersion()));

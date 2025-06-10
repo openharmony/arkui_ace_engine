@@ -1678,9 +1678,11 @@ ArkUINativeModuleValue RichEditorBridge::SetEditMenuOptions(ArkUIRuntimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClickCallback;
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseSelectionMenuOptions(runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback)) {
+    if (!ArkTSUtils::ParseSelectionMenuOptions(
+        runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback, onPrepareMenuCallback)) {
         nodeModifiers->getRichEditorModifier()->resetRichEditorEditMenuOptions(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }

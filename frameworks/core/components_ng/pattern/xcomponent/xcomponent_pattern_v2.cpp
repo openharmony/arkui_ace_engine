@@ -23,7 +23,13 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #ifdef ENABLE_ROSEN_BACKEND
+#include "transaction/rs_transaction.h"
+#include "transaction/rs_transaction_handler.h"
 #include "transaction/rs_transaction_proxy.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_sync_transaction_handler.h"
+#include "ui/rs_ui_context.h"
+#include "ui/rs_ui_director.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -312,9 +318,47 @@ void XComponentPatternV2::DisposeSurface()
     renderContext->RemoveChild(renderContextForSurface_);
     renderContextForSurface_ = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
+    FlushImplicitTransaction(host);
+#endif
+}
+
+std::shared_ptr<Rosen::RSTransactionHandler> XComponentPatternV2::GetRSTransactionHandler(
+    const RefPtr<FrameNode>& frameNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        return nullptr;
+    }
+    auto rsUIContext = GetRSUIContext(frameNode);
+    CHECK_NULL_RETURN(rsUIContext, nullptr);
+    return rsUIContext->GetRSTransaction();
+#endif
+    return nullptr;
+}
+
+std::shared_ptr<Rosen::RSUIContext> XComponentPatternV2::GetRSUIContext(const RefPtr<FrameNode>& frameNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    return rsUIContext;
+#endif
+    return nullptr;
+}
+
+void XComponentPatternV2::FlushImplicitTransaction(const RefPtr<FrameNode>& frameNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (auto transactionHandler = GetRSTransactionHandler(frameNode)) {
+        transactionHandler->FlushImplicitTransaction();
+    } else {
+        Rosen::RSTransactionProxy::GetInstance()->FlushImplicitTransaction();
     }
 #endif
 }

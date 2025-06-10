@@ -1194,7 +1194,7 @@ float ScrollPattern::GetPagingOffset(float delta, float dragDistance, float velo
     // handle last page
     if (GreatNotEqual(lastPageLength_, 0.f) &&
         LessNotEqual(currentOffset_, -scrollableDistance_ + lastPageLength_)) {
-        auto offset = fmod(currentOffset_, lastPageLength_);
+        auto offset = fmod(currentOffset_, viewPortLength_);
         return currentOffset_ - offset + GetPagingDelta(offset, velocity, lastPageLength_);
     }
     // handle other pages

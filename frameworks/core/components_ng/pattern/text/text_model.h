@@ -45,6 +45,7 @@ struct TextDetectConfig {
     TextDecoration entityDecorationType = TextDecoration::UNDERLINE;
     Color entityDecorationColor;
     TextDecorationStyle entityDecorationStyle = TextDecorationStyle::SOLID;
+    bool enablePreviewMenu = false;
 
     TextDetectConfig()
     {
@@ -149,8 +150,9 @@ public:
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
     virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
-    virtual void SetSelectionMenuOptions(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) {};
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
     virtual void SetHalfLeading(bool halfLeading) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
@@ -158,6 +160,7 @@ public:
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
     virtual void SetLineThicknessScale(float value) = 0;
     virtual void SetGradientShaderStyle(NG::Gradient& gradient) = 0;
+    virtual void SetTextVerticalAlign(TextVerticalAlign verticalAlign) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

@@ -552,6 +552,14 @@ void WebModelImpl::SetWindowNewEvent(std::function<void(const std::shared_ptr<Ba
     webComponent->SetWindowNewEvent(std::move(jsCallback));
 }
 
+void WebModelImpl::SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+    webComponent->SetActivateContentEventId(eventMarker);
+}
+
 void WebModelImpl::SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -697,5 +705,12 @@ void WebModelImpl::SetOptimizeParserBudgetEnabled(bool enable)
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetOptimizeParserBudgetEnabled(enable);
+}
+
+void WebModelImpl::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetBypassVsyncCondition(condition);
 }
 } // namespace OHOS::Ace::Framework

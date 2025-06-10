@@ -1056,4 +1056,115 @@ HWTEST_F(SubMenuTestNg, GetSubMenuPosition002, TestSize.Level1)
 
     EXPECT_FLOAT_EQ(subMenuLayoutAlgorithm.GetSubMenuPosition(menuItemNode, SubMenuExpandingMode::EMBEDDED).x_, TWENTY);
 }
+
+/**
+ * @tc.name: CalcStackSubMenuPositionYHalfScreen001
+ * @tc.desc: Verify CalcStackSubMenuPositionYHalfScreen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, CalcStackSubMenuPositionYHalfScreen001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(
+        "test1", NODE_ID, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    auto menuGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemGeometryNode = menuItemNode->GetGeometryNode();
+    ASSERT_NE(menuItemGeometryNode, nullptr);
+    menuItemNode->MountToParent(frameNode);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    ASSERT_NE(layoutWrapper->GetHostNode(), nullptr);
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    menuPattern->type_ = MenuType::SUB_MENU;
+    menuPattern->UpdateLastPlacement(Placement::TOP_RIGHT);
+ 
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeT(HORIZONTAL_WRAPPER_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    subMenuLayoutAlgorithm.position_ = OffsetF(0.0f, 0.0f);
+ 
+    SizeF size = SizeF(100.0f, 100.0f);
+    subMenuLayoutAlgorithm.CalcStackSubMenuPositionYHalfScreen(size, frameNode, menuItemNode);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::TOP_RIGHT);
+ 
+    menuGeometryNode->SetFrameSize(SizeF(100.0f, 200.0f));
+    EXPECT_EQ(subMenuLayoutAlgorithm.CalcStackSubMenuPositionYHalfScreen(size, frameNode, menuItemNode), 0.0f);
+ 
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM_RIGHT);
+    subMenuLayoutAlgorithm.CalcStackSubMenuPositionYHalfScreen(size, frameNode, menuItemNode);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::BOTTOM_RIGHT);
+ 
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    subMenuLayoutAlgorithm.canExpandCurrentWindow_ = false;
+    context->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    subMenuLayoutAlgorithm.wrapperRect_ = Rect(0.0f, 200.0f, 100.0f, 300.0f);
+    subMenuLayoutAlgorithm.CalcStackSubMenuPositionYHalfScreen(size, frameNode, menuItemNode);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::BOTTOM_RIGHT);
+}
+ 
+/**
+ * @tc.name: CalcStackSubMenuPositionYHalfScreenWithPreview001
+ * @tc.desc: Verify CalcStackSubMenuPositionYHalfScreenWithPreview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, CalcStackSubMenuPositionYHalfScreenWithPreview001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(
+        "test1", NODE_ID, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(frameNode);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    ASSERT_NE(layoutWrapper->GetHostNode(), nullptr);
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    menuPattern->type_ = MenuType::SUB_MENU;
+ 
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeT(HORIZONTAL_WRAPPER_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    subMenuLayoutAlgorithm.position_ = OffsetF(0.0f, 0.0f);
+ 
+    SizeF size = SizeF(100.0f, 100.0f);
+    menuPattern->UpdateLastPlacement(Placement::TOP_RIGHT);
+    subMenuLayoutAlgorithm.CalcStackSubMenuPositionYHalfScreenWithPreview(size, frameNode, layoutWrapper);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::TOP_RIGHT);
+ 
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM_RIGHT);
+    subMenuLayoutAlgorithm.CalcStackSubMenuPositionYHalfScreenWithPreview(size, frameNode, layoutWrapper);
+    EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::BOTTOM_RIGHT);
+}
+ 
+/**
+ * @tc.name: UpdateHoverRegion001
+ * @tc.desc: Verify UpdateHoverRegion.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, UpdateHoverRegion001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.canExpandCurrentWindow_ = false;
+    auto pipelineContext = menuItemNode->GetContextWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->windowModal_ = WindowModal::CONTAINER_MODAL;
+    subMenuLayoutAlgorithm.UpdateHoverRegion(menuItemNode, OffsetF(0.0f, 0.0f), size);
+ 
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    ASSERT_FALSE(menuItemPattern->hoverRegions_.empty());
+}
 } // namespace OHOS::Ace::NG

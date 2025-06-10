@@ -2408,60 +2408,83 @@ typedef enum {
     NODE_TEXT_OPTIMIZE_TRAILING_SPACE = 1032,
 
     /**
-     * @brief 设置文本颜色渐变效果，支持属性设置，属性重置和属性获取接口。
+     * @brief Sets a linear gradient effect for text.
+     * This attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：线性渐变的起始角度。
-     * 当direction属性设置为ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM时，angle属性生效；否则，以direction属性为主要布局方式。
-     * 0点方向顺时针旋转为正向角度，默认值：180 \n
-     * .value[1].i32：线性渐变的方向。设置除ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM之外的线性渐变方向后，angle不生效。
-     * 数据类型{@link ArkUI_LinearGradientDirection}。 \n
-     * .value[2].i32：为渐变的颜色重复着色，默认值：false \n
-     * .object: 参数类型为{@link ArkUI_ColorStop}。指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * colors：渐变色颜色颜色。 \n
-     * stops：渐变位置。 \n
-     * size：颜色个数。 \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * The setting takes effect only when <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>.
+     * A positive value indicates a clockwise rotation from the origin, (0, 0). The default value is <b>180</b>. \n
+     * .value[1].i32: direction of the linear gradient. When a direction other than
+     * <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b> is set, the <b>angle</b> property is ignored.
+     * The parameter type is {@link ArkUI_LinearGradientDirection}. \n
+     * .value[2].i32: whether the colors are repeated. The default value is <b>false</b>.
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：线性渐变的起始角度。
-     * 当direction属性设置为ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM时，angle为设置值，其他情况angle均为默认值。\n
-     * .value[1].i32：线性渐变的方向。\n
-     * .value[2].i32：为渐变的颜色重复着色。\n
-     * .object: 参数类型为{@link ArkUI_ColorStop}。指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * colors：渐变色颜色颜色。 \n
-     * stops：渐变位置。 \n
-     * size：颜色个数。 \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * When <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>, <b>angle</b> at the set value;
+     * otherwise, it is at default value. \n
+     * .value[1].i32: direction of the linear gradient. \n
+     * .value[2].i32: whether the colors are repeated. \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
      *
      * @since 20
      */
     NODE_TEXT_LINEAR_GRADIENT = 1033,
 
     /**
-     * @brief 设置文本径向渐变渐变效果，支持属性设置，属性重置和属性获取接口。
+     * @brief Sets a radial gradient effect for text.
+     * This attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0]?.f32：为径向渐变的中心点，即相对于当前文本左上角的X轴坐标。 \n
-     * .value[1]?.f32：为径向渐变的中心点，即相对于当前文本左上角的Y轴坐标。 \n
-     * .value[2]?.f32：径向渐变的半径，默认值0。 \n
-     * .value[3]?.i32：为渐变的颜色重复着色，0表示不重复着色，1表示重复着色。 \n
-     * .object：参数类型为{@link ArkUI_ColorStop}。指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
-     * colors：渐变色颜色颜色。 \n
-     * stops：渐变位置。 \n
-     * size：颜色个数。 \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0]?.f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1]?.f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2]?.f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3]?.i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.\n \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：为径向渐变的中心点，即相对于当前文本左上角的X轴坐标。 \n
-     * .value[1].f32：为径向渐变的中心点，即相对于当前文本左上角的Y轴坐标。 \n
-     * .value[2].f32：径向渐变的半径，默认值0。 \n
-     * .value[3].i32：为渐变的颜色重复着色，0表示不重复着色，1表示重复着色。 \n
-     * .object：参数类型为{@link ArkUI_ColorStop}。指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
-     * colors：渐变色颜色颜色。 \n
-     * stops：渐变位置。 \n
-     * size：颜色个数。 \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1].f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2].f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3].i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.  \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
      *
      * @since 20
      */
     NODE_TEXT_RADIAL_GRADIENT = 1034,
+
+    /**
+     * @brief 设置文本内容垂直对齐方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextVerticalAlignment}，默认值：ARKUI_TEXT_VERTICAL_ALIGNMENT_BASELINE \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextVerticalAlignment}。 \n
+     *
+     * @since 20
+     */
+    NODE_TEXT_VERTICAL_ALIGN = 1035,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -5311,6 +5334,22 @@ typedef enum {
      * @since 15
      */
     NODE_SCROLL_BACK_TO_TOP = 1002021,
+
+    /**
+     * @brief Defines the margin of the scrollbar.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: start margin of the scrollbar, in vp. The default value is <b>0</b>. \n
+     * .value[1].f32: end margin of the scrollbar, in vp. The default value is <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: start margin of the scrollbar, in vp. \n
+     * .value[1].f32: end margin of the scrollbar, in vp. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_BAR_MARGIN = 1002022,
     
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
@@ -9262,6 +9301,32 @@ int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node);
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node);
+
+/**
+ * @brief Get the node handle by uniqueId.
+ *
+ * @param uniqueId The uniqueId of the target node handle.
+ * @param node The handle of target node handle.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 20
+ */
+int32_t OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId(const uint32_t uniqueId, ArkUI_NodeHandle* node);
+
+/**
+ * @brief Get the uniqueId of the target node handle.
+ *
+ * @param node The ArkUI-NodeHandle pointer.
+ * @param uniqueId The uniqueId of the target node handle, default value is -1.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 20
+ */
+int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqueId);
 
 /**
  * @brief Get info of the window to which the node belongs.

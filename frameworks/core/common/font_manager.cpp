@@ -18,6 +18,7 @@
 #include "base/i18n/localization.h"
 #include "core/components/text/render_text.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/render/font_collection.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
 #include "texgine/src/font_config.h"
@@ -356,10 +357,21 @@ bool FontManager::RegisterCallbackNG(
     const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
     CHECK_NULL_RETURN(callback, false);
+    auto hasRegistered = false;
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoadedNG(node, callback);
+            hasRegistered = true;
         }
+    }
+    // Register callbacks for non-system fonts that are loaded through the graphic2d.
+    FontInfo fontInfo;
+    if (!hasRegistered && !GetSystemFont(familyName, fontInfo)) {
+        externalLoadCallbacks_.emplace(node, std::make_pair(familyName, callback));
+    }
+    if (!hasRegisterLoadFontCallback_) {
+        RegisterLoadFontCallbacks();
+        hasRegisterLoadFontCallback_ = true;
     }
     return false;
 }
@@ -381,6 +393,7 @@ void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node)
     for (auto& fontLoader : fontLoaders_) {
         fontLoader->RemoveCallbackNG(node);
     }
+    externalLoadCallbacks_.erase(node);
 }
 
 void FontManager::AddVariationNodeNG(const WeakPtr<NG::UINode>& node)
@@ -410,6 +423,57 @@ void FontManager::RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node)
 std::vector<std::string> FontManager::GetFontNames()
 {
     return fontNames_;
+}
+
+void FontManager::RegisterLoadFontCallbacks()
+{
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    NG::FontCollection::Current()->RegisterLoadFontFinishCallback(
+        [weakContext = WeakPtr(context), weak = WeakClaim(this)](const std::string& fontName) {
+            auto fontManager = weak.Upgrade();
+            CHECK_NULL_VOID(fontManager);
+            fontManager->OnLoadFontChanged(weakContext, fontName);
+        });
+    NG::FontCollection::Current()->RegisterUnloadFontFinishCallback(
+        [weakContext = WeakPtr(context), weak = WeakClaim(this)](const std::string& fontName) {
+            auto fontManager = weak.Upgrade();
+            CHECK_NULL_VOID(fontManager);
+            fontManager->OnLoadFontChanged(weakContext, fontName);
+        });
+}
+
+void FontManager::OnLoadFontChanged(const WeakPtr<PipelineBase>& weakContext, const std::string& fontName)
+{
+    auto context = weakContext.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this), fontName] {
+            auto fontManager = weak.Upgrade();
+            CHECK_NULL_VOID(fontManager);
+            for (const auto& element : fontManager->externalLoadCallbacks_) {
+                if (element.second.first == fontName && element.second.second) {
+                    element.second.second();
+                }
+            }
+        },
+        TaskExecutor::TaskType::UI, "NotifyFontLoadUITask");
+}
+
+void FontManager::StartAbilityOnJumpBrowser(const std::string& address) const
+{
+    if (startAbilityOnJumpBrowserHandler_) {
+        startAbilityOnJumpBrowserHandler_(address);
+    }
+}
+
+void FontManager::StartAbilityOnInstallAppInStore(const std::string& appName) const
+{
+    if (startAbilityOnInstallAppInStoreHandler_) {
+        startAbilityOnInstallAppInStoreHandler_(appName);
+    }
 }
 
 #ifdef ACE_ENABLE_VK

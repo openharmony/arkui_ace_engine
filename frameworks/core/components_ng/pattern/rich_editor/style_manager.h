@@ -44,6 +44,7 @@ public:
         spanNode->UpdateTextAlign(style.textAlign.value_or(TextAlign::START));
         spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
         spanNode->UpdateLineBreakStrategy(style.lineBreakStrategy.value_or(LineBreakStrategy::GREEDY));
+        spanNode->UpdateTextVerticalAlign(style.textVerticalAlign.value_or(TextVerticalAlign::BASELINE));
         if (style.paragraphSpacing.has_value()) {
             spanNode->UpdateParagraphSpacing(style.paragraphSpacing.value());
         } else {
@@ -292,12 +293,18 @@ public:
         spanParagraphStyle.wordBreak = typingParagraphStyle.wordBreak;
         spanParagraphStyle.leadingMargin = typingParagraphStyle.leadingMargin;
         spanParagraphStyle.paragraphSpacing = typingParagraphStyle.paragraphSpacing;
+        spanParagraphStyle.textVerticalAlign = typingParagraphStyle.textVerticalAlign;
         spans.push_back(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, length));
     }
 
     std::optional<struct UpdateParagraphStyle> GetTypingParagraphStyle()
     {
         return typingParagraphStyle_;
+    }
+
+    bool HasTypingParagraphStyle()
+    {
+        return typingParagraphStyle_.has_value();
     }
 
 private:

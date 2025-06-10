@@ -40,7 +40,6 @@
 #include <cstdint>
 #else
 #include <stdint.h>
-#include <stdbool.h>
 #endif
 
 #ifdef __cplusplus
@@ -1153,6 +1152,23 @@ int32_t OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(
  * @since 15
  */
 int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Obtains the result code of the most recent API call related to an <b>ArkUI_UIInputEvent</b> object.
+ * This API is typically unnecessary for normal operations, but can be used to verify ambiguous return values
+ * (for example, when <b>0.0</b> might be either a valid float result or an error).
+ *      float x = OH_ArkUI_PointerEvent_GetX(event);
+ *      if (ARKUI_ERROR_CODE_NO_ERROR != OH_Arkui_UIInputEvent_GetlatestStatus()) {
+ *          // error
+ *          return;
+ *      }
+ * The system automatically clears the previous status before each API call related to an <b>ArkUI_UIInputEvent</b>
+ * object, ensuring that this API always returns the latest execution status.
+ *
+ * @return Result code of the most recent API call related to the <b>ArkUI_UIInputEvent</b> object.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_UIInputEvent_GetLatestStatus();
 
 #ifdef __cplusplus
 };

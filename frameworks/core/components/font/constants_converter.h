@@ -68,6 +68,8 @@ OHOS::Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
 
 OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
 
+Rosen::TextVerticalAlign ConvertTxtTextVerticalAlign(TextVerticalAlign textVerticalAlign);
+
 OHOS::Rosen::TextRectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle);
 
 OHOS::Rosen::TextRectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle);
@@ -91,15 +93,7 @@ OHOS::Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(Placeholde
 void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderSpan& txtSpan);
 
 SkColor ConvertSkColor(Color color);
-void UpdateShaderStyle(const TextStyle& textStyle, OHOS::Rosen::TextStyle& txtStyle);
 void ConvertForegroundPaint(const TextStyle& textStyle, double width, double height, Rosen::TextStyle& txtStyle);
-void UpdateOffset(Offset& firstPoint, Offset& secondPoint, LinearGradient& linearGradient, const Rect& rect);
-void EndPointsFromAngle(float angle, const Rect& rect, Offset& firstPoint, Offset& secondPoint);
-Offset DirectionToPoint(const std::optional<OHOS::Ace::GradientDirection>& x,
-    const std::optional<OHOS::Ace::GradientDirection>& y, const Rect& rect);
-float Deg2rad(float deg);
-float Rad2deg(float rad);
-
 float GetVariableFontWeight(FontWeight fontWeight);
 } // namespace Constants
 

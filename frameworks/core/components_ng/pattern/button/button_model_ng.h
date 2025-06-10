@@ -62,14 +62,14 @@ public:
     void SetMinFontScale(float minFontScale) override;
     void SetMaxFontScale(float maxFontScale) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
-    static void SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight);
-    static void SetFontStyle(FrameNode* frameNode, const Ace::FontStyle& fontStyle);
-    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& fontFamily);
-    static void SetFontColor(FrameNode* frameNode, const Color& textColor);
-    static void SetType(FrameNode* frameNode, const int value);
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>& fontWeight);
+    static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& fontStyle);
+    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamily);
+    static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& textColor);
+    static void SetType(FrameNode* frameNode, const std::optional<int> value);
     static void SetStateEffect(FrameNode* frameNode, const bool stateEffect);
-    static void SetLabelStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters);
+    static void SetLabelStyle(FrameNode* frameNode, const std::optional<ButtonParameters>& buttonParameters);
     static void BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& radius);
     static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,

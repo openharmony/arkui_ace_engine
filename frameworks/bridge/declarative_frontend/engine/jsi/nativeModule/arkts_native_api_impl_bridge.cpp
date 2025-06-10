@@ -1656,6 +1656,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetShaderStyle));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShaderStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetShaderStyle));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextVerticalAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextVerticalAlign));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextVerticalAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextVerticalAlign));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);
@@ -4875,6 +4879,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOptionsController));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOptionsController"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOptionsController));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOptionsBarModifier"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOptionsBarModifier));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOptionsBarModifier"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOptionsBarModifier));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetScrollable));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollable"),
@@ -5270,6 +5278,8 @@ void ArkUINativeModule::RegisterWaterFlowAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::SetOnWaterFlowScrollIndex));
     waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnScrollIndex"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::ResetOnWaterFlowScrollIndex));
+    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWaterFlowScroller"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::SetWaterFlowScroller));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "waterFlow"), waterflow);
 }
 

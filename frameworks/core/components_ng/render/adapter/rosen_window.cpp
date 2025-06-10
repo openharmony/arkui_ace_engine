@@ -23,6 +23,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "render_service_client/core/ui/rs_root_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
@@ -94,7 +95,11 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         rsUIDirector_->Init();
     } else {
         auto rsUIDirector = window->GetRSUIDirector();
-        rsUIDirector_ = rsUIDirector;
+        if (rsUIDirector) {
+            rsUIDirector_ = rsUIDirector;
+        } else {
+            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+        }
         if (window && window->GetSurfaceNode()) {
             rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
         }
@@ -212,6 +217,9 @@ void RosenWindow::OnShow()
     Window::OnShow();
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoForeground();
+    if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector_) {
+        FlushImplicitTransaction(rsUIDirector_);
+    }
 }
 
 void RosenWindow::OnHide()
@@ -220,6 +228,17 @@ void RosenWindow::OnHide()
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoBackground();
     rsUIDirector_->SendMessages();
+}
+
+void RosenWindow::FlushImplicitTransaction(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
+{
+    auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    auto rsUIContext = surfaceNode->GetRSUIContext();
+    CHECK_NULL_VOID(rsUIContext);
+    auto rsTransaction = rsUIContext->GetRSTransaction();
+    CHECK_NULL_VOID(rsTransaction);
+    rsTransaction->FlushImplicitTransaction();
 }
 
 void RosenWindow::Destroy()
