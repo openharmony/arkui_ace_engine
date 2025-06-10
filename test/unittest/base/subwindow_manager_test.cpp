@@ -72,4 +72,19 @@ HWTEST_F(SubwindowManagerTest, HidePreviewNG001, TestSize.Level1)
      */
     manager->HidePreviewNG();
 }
+
+/**
+ * @tc.name: SubwindowManagerTest_CloseDialog001
+ * @tc.desc: Test frame node method CloseDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, CloseDialog001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager, and CloseDialog.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+    manager->CloseDialog(100000);
+}
 }
