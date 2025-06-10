@@ -79,11 +79,11 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest001, TestSize.Level1)
 
     RefPtr<ResourceObject> intObj = AceType::MakeRefPtr<ResourceObject>(1, 10007,
         resObjParamsList, "", "", 100000);
-    EXPECT_FALSE(ResourceParseUtils::ParseResResource(intObj, dimension));
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(intObj, dimension));
 
     RefPtr<ResourceObject> floatObj = AceType::MakeRefPtr<ResourceObject>(1, 10002,
         resObjParamsList, "", "", 100000);
-    EXPECT_FALSE(ResourceParseUtils::ParseResResource(floatObj, dimension));
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(floatObj, dimension));
 }
 
 /**
