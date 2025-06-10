@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "gtest/gtest.h"
 #include "list_test_ng.h"
+
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
@@ -807,5 +810,382 @@ HWTEST_F(ListItemGroupPatternTestNg, CheckDataChangeOutOfStart002, TestSize.Leve
     listItemGroupPattern->isStackFromEnd_ = true;
     result = listItemGroupPattern->CheckDataChangeOutOfStart(0, -1, 0, -1);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetCurrentFocusIndices001
+ * @tc.desc: Test ListItemGroupPattern GetCurrentFocusIndices
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetCurrentFocusIndices001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set curItemPattern to listpattern and header_ and footer_ to customnode
+     */
+    auto curPattern = AceType::MakeRefPtr<ListPattern>();
+    auto node = CustomNode::CreateCustomNode(2, "test");
+    ASSERT_NE(node, nullptr);
+    listItemGroupPattern->header_ = node;
+    listItemGroupPattern->footer_ = node;
+
+    /**
+     * @tc.steps: step3. Set curIndexInGroup to 2
+     * @tc.expected: The result of calling the function is false and curIndexInGroup has not changed
+     */
+    int32_t curIndexInGroup = 2;
+    auto result = listItemGroupPattern->GetCurrentFocusIndices(curFrame, curPattern, curIndexInGroup);
+    EXPECT_EQ(curIndexInGroup, 2);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AdjustFocusStepForRtl001
+ * @tc.desc: Test ListItemGroupPattern AdjustFocusStepForRtl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, AdjustFocusStepForRtl001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set listItemGroupPattern's layoutDirection_ to RTL and isStackFromEnd_ to false
+     */
+    listItemGroupPattern->layoutDirection_ = TextDirection::RTL;
+    listItemGroupPattern->isStackFromEnd_ = false;
+
+    /**
+     * @tc.steps: step3. Set step to LEFT and isVertical to false
+     * @tc.expected: The step return RIGHT
+     */
+    FocusStep step = FocusStep::LEFT;
+    listItemGroupPattern->AdjustFocusStepForRtl(step, false);
+    EXPECT_EQ(step, FocusStep::RIGHT);
+}
+
+/**
+ * @tc.name: AdjustFocusStepForRtl002
+ * @tc.desc: Test ListItemGroupPattern AdjustFocusStepForRtl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, AdjustFocusStepForRtl002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set listItemGroupPattern's layoutDirection_ to RTL and isStackFromEnd_ to false
+     */
+    listItemGroupPattern->layoutDirection_ = TextDirection::RTL;
+    listItemGroupPattern->isStackFromEnd_ = false;
+
+    /**
+     * @tc.steps: step3. Set step to RIGHT and isVertical to true
+     * @tc.expected: The step return LEFT
+     */
+    FocusStep step = FocusStep::RIGHT;
+    listItemGroupPattern->AdjustFocusStepForRtl(step, true);
+    EXPECT_EQ(step, FocusStep::LEFT);
+}
+
+/**
+ * @tc.name: AdjustFocusStepForRtl003
+ * @tc.desc: Test ListItemGroupPattern AdjustFocusStepForRtl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, AdjustFocusStepForRtl003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set listItemGroupPattern's layoutDirection_ to LTR and isStackFromEnd_ to true
+     */
+    listItemGroupPattern->layoutDirection_ = TextDirection::LTR;
+    listItemGroupPattern->isStackFromEnd_ = true;
+
+    /**
+     * @tc.steps: step3. Set step to UP and isVertical to false
+     * @tc.expected: The step return DOWN
+     */
+    FocusStep step = FocusStep::UP;
+    listItemGroupPattern->AdjustFocusStepForRtl(step, false);
+    EXPECT_EQ(step, FocusStep::DOWN);
+}
+
+/**
+ * @tc.name: AdjustFocusStepForRtl004
+ * @tc.desc: Test ListItemGroupPattern AdjustFocusStepForRtl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, AdjustFocusStepForRtl004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set listItemGroupPattern's layoutDirection_ to RTL and isStackFromEnd_ to true
+     */
+    listItemGroupPattern->layoutDirection_ = TextDirection::RTL;
+    listItemGroupPattern->isStackFromEnd_ = true;
+
+    /**
+     * @tc.steps: step3. Set step to DOWN and isVertical to false
+     * @tc.expected: The step return UP
+     */
+    FocusStep step = FocusStep::DOWN;
+    listItemGroupPattern->AdjustFocusStepForRtl(step, false);
+    EXPECT_EQ(step, FocusStep::UP);
+}
+
+/**
+ * @tc.name: AdjustFocusStepForRtl005
+ * @tc.desc: Test ListItemGroupPattern AdjustFocusStepForRtl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, AdjustFocusStepForRtl005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set listItemGroupPattern's layoutDirection_ to LTR and isStackFromEnd_ to false
+     */
+    listItemGroupPattern->layoutDirection_ = TextDirection::LTR;
+    listItemGroupPattern->isStackFromEnd_ = false;
+
+    /**
+     * @tc.steps: step3. Set step to NONE and isVertical to false
+     * @tc.expected: The step is not changed
+     */
+    FocusStep step = FocusStep::NONE;
+    listItemGroupPattern->AdjustFocusStepForRtl(step, false);
+    EXPECT_EQ(step, FocusStep::NONE);
+}
+
+/**
+ * @tc.name: AdjustFocusStepForRtl006
+ * @tc.desc: Test ListItemGroupPattern AdjustFocusStepForRtl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, AdjustFocusStepForRtl006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set listItemGroupPattern's layoutDirection_ to RTL and isStackFromEnd_ to true
+     */
+    listItemGroupPattern->layoutDirection_ = TextDirection::RTL;
+    listItemGroupPattern->isStackFromEnd_ = true;
+
+    /**
+     * @tc.steps: step3. Set step to RIGHT and isVertical to true
+     * @tc.expected: The step is not changed
+     */
+    FocusStep step = FocusStep::RIGHT;
+    listItemGroupPattern->AdjustFocusStepForRtl(step, true);
+    EXPECT_EQ(step, FocusStep::RIGHT);
+}
+
+/**
+ * @tc.name: HandleForwardStep001
+ * @tc.desc: Test ListItemGroupPattern HandleForwardStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, HandleForwardStep001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set header_ and footer_ to customnode and isStackFromEnd_ to true
+     * set lanes_ to 3 and itemTotalCount_ to 4
+     */
+    auto node = CustomNode::CreateCustomNode(2, "test");
+    ASSERT_NE(node, nullptr);
+    listItemGroupPattern->header_ = node;
+    listItemGroupPattern->footer_ = node;
+    listItemGroupPattern->isStackFromEnd_ = true;
+    listItemGroupPattern->lanes_ = 3;
+    listItemGroupPattern->itemTotalCount_ = 4;
+
+    /**
+     * @tc.steps: step3. Set curIndexInGroup to 3, moveStep to 1 and nextIndex to 2
+     * @tc.expected: The moveStep to be 3 and nextIndex to be 5
+     */
+    int32_t moveStep = 1;
+    int32_t nextIndex = 2;
+    listItemGroupPattern->HandleForwardStep(curFrame, 3, moveStep, nextIndex);
+    EXPECT_EQ(moveStep, 3);
+    EXPECT_EQ(nextIndex, 5);
+}
+
+/**
+ * @tc.name: HandleForwardStep002
+ * @tc.desc: Test ListItemGroupPattern HandleForwardStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, HandleForwardStep002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set header_ and footer_ to customnode and isStackFromEnd_ to false
+     * set lanes_ to 2 and itemTotalCount_ to 5
+     */
+    auto node = CustomNode::CreateCustomNode(1, "test");
+    ASSERT_NE(node, nullptr);
+    listItemGroupPattern->header_ = node;
+    listItemGroupPattern->footer_ = node;
+    listItemGroupPattern->isStackFromEnd_ = false;
+    listItemGroupPattern->lanes_ = 2;
+    listItemGroupPattern->itemTotalCount_ = 5;
+
+    /**
+     * @tc.steps: step3. Set curIndexInGroup to 2, moveStep to 1 and nextIndex to 6
+     * @tc.expected: The moveStep to be 2 and nextIndex to be 4
+     */
+    int32_t moveStep = 1;
+    int32_t nextIndex = 6;
+    listItemGroupPattern->HandleForwardStep(curFrame, 2, moveStep, nextIndex);
+    EXPECT_EQ(moveStep, 2);
+    EXPECT_EQ(nextIndex, 4);
+}
+
+/**
+ * @tc.name: HandleBackwardStep001
+ * @tc.desc: Test ListItemGroupPattern HandleBackwardStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, HandleBackwardStep001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set header_ and footer_ to customnode and isStackFromEnd_ to true
+     * set lanes_ to 3 and itemTotalCount_ to 4
+     */
+    auto node = CustomNode::CreateCustomNode(2, "test");
+    ASSERT_NE(node, nullptr);
+    listItemGroupPattern->header_ = node;
+    listItemGroupPattern->footer_ = node;
+    listItemGroupPattern->isStackFromEnd_ = true;
+    listItemGroupPattern->lanes_ = 3;
+    listItemGroupPattern->itemTotalCount_ = 4;
+
+    /**
+     * @tc.steps: step3. Set curIndexInGroup to 2, moveStep to 1 and nextIndex to 2
+     * @tc.expected: The moveStep to be -3 and nextIndex to be 0
+     */
+    int32_t moveStep = 1;
+    int32_t nextIndex = 2;
+    listItemGroupPattern->HandleBackwardStep(curFrame, 2, moveStep, nextIndex);
+    EXPECT_EQ(moveStep, -3);
+    EXPECT_EQ(nextIndex, 0);
+}
+
+/**
+ * @tc.name: HandleBackwardStep002
+ * @tc.desc: Test ListItemGroupPattern HandleBackwardStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, HandleBackwardStep002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+
+    /**
+     * @tc.steps: step2. Set header_ and footer_ to customnode and isStackFromEnd_ to false
+     * set lanes_ to 3 and itemTotalCount_ to 5
+     */
+    auto node = CustomNode::CreateCustomNode(1, "test");
+    ASSERT_NE(node, nullptr);
+    listItemGroupPattern->header_ = node;
+    listItemGroupPattern->footer_ = node;
+    listItemGroupPattern->isStackFromEnd_ = false;
+    listItemGroupPattern->lanes_ = 3;
+    listItemGroupPattern->itemTotalCount_ = 5;
+
+    /**
+     * @tc.steps: step3. Set curIndexInGroup to 3, moveStep to 1 and nextIndex to 2
+     * @tc.expected: The moveStep to be -3 and nextIndex to be 0
+     */
+    int32_t moveStep = 1;
+    int32_t nextIndex = 2;
+    listItemGroupPattern->HandleBackwardStep(curFrame, 3, moveStep, nextIndex);
+    EXPECT_EQ(moveStep, -3);
+    EXPECT_EQ(nextIndex, 0);
 }
 } // namespace OHOS::Ace::NG
