@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { ArkCommonMethodPeer, Bindable, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { ResourceColor, Dimension, Font, ResourceStr, PX, VP, FP, LPX, Percentage, Length } from "./units"
 import { SymbolGlyphModifier } from "./arkui-external"
 import { Callback_Boolean_Void } from "./navigation"
@@ -37,6 +37,8 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 import { Deserializer } from "./peers/Deserializer"
+import { SearchOpsHandWritten } from "./../handwritten"
+
 export class ArkSearchPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -860,7 +862,7 @@ export enum SearchType {
     URL = 13
 }
 export interface SearchOptions {
-    value?: string;
+    value?: string | Bindable<string>;
     placeholder?: ResourceStr;
     icon?: string;
     controller?: SearchController;
@@ -1134,11 +1136,24 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
     getPeer(): ArkSearchPeer {
         return (this.peer as ArkSearchPeer)
     }
+    SearchOptionsValueIsBindable(value?: SearchOptions) : boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(value)) {
+            const value_text  = value!.value;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(value_text))) {
+                const value_text_value  = value_text!;
+                return TypeChecker.isBindableString(value_text_value);
+            }
+        }
+        return false;
+    }
     public setSearchOptions(options?: SearchOptions): this {
         if (this.checkPriority("setSearchOptions")) {
             const options_casted = options as (SearchOptions | undefined)
             this.getPeer()?.setSearchOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.SearchOptionsValueIsBindable(options)) {
+            SearchOpsHandWritten.hookSearchInputValueImpl(this.getPeer().peer.ptr,
+                (options!.value as Bindable<string>));
         }
         return this
     }

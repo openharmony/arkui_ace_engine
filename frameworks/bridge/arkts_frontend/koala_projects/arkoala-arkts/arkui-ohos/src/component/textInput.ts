@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, TextDecorationOptions, InputCounterOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { ArkCommonMethodPeer, Bindable, CommonMethod, CustomBuilder, TextDecorationOptions, InputCounterOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { ResourceColor, Dimension, Font, Length, ResourceStr, PX, VP, FP, LPX, Percentage } from "./units"
 import { TextOverflow, FontStyle, FontWeight, CopyOptions, TextAlign, TextContentStyle, BarState, WordBreak, LineBreakStrategy, TextHeightAdaptivePolicy, EllipsisMode, Color } from "./enums"
 import { Callback_Boolean_Void } from "./navigation"
@@ -36,6 +36,7 @@ import { CancelButtonOptions, CancelButtonSymbolOptions, Callback_InsertValue_Bo
 import { Resource } from "global/resource"
 import { Callback_ResourceStr_Void } from "./textArea"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { TextFieldOpsHandWritten } from "./../handwritten"
 
 export interface SubmitEvent {
     text: string
@@ -1356,7 +1357,7 @@ export interface UnderlineColor {
 }
 export interface TextInputOptions {
     placeholder?: ResourceStr;
-    text?: ResourceStr;
+    text?: ResourceStr | Bindable<ResourceStr>;
     controller?: TextInputController;
 }
 export enum TextInputStyle {
@@ -1743,11 +1744,24 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
     getPeer(): ArkTextInputPeer {
         return (this.peer as ArkTextInputPeer)
     }
+    TextInputOptionsValueIsBindable(value?: TextInputOptions) : boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(value)) {
+            const value_text  = value!.text;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(value_text))) {
+                const value_text_value  = value_text!;
+                return TypeChecker.isBindableResourceStr(value_text_value)
+            }
+        }
+        return false;
+    }
     public setTextInputOptions(value?: TextInputOptions): this {
         if (this.checkPriority("setTextInputOptions")) {
             const value_casted = value as (TextInputOptions | undefined)
             this.getPeer()?.setTextInputOptionsAttribute(value_casted)
-            return this
+        }
+        if (this.TextInputOptionsValueIsBindable(value)) {
+            TextFieldOpsHandWritten.hookTextFieldInputValueImpl(this.getPeer().peer.ptr,
+                (value!.text as Bindable<ResourceStr>));
         }
         return this
     }
