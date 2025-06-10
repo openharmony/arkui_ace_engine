@@ -88,6 +88,9 @@
             ],
             "@ohos/arkui/focusController": [
                 "ohos.arkui.focusController.ets"
+            ],
+            "#stateMgmtTool": [
+                "./arkui/stateManagement/tools/arkts"
             ]
         },
         "plugins": [

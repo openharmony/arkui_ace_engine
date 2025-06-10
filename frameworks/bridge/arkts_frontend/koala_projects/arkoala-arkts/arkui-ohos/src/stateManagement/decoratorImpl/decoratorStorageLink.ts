@@ -14,25 +14,30 @@
  */
 
 import { LinkDecoratedVariable } from './decoratorLink';
-import { WatchFunc, WatchFuncType } from './decoratorWatch';
+import { WatchFuncType } from '../decorator';
 
 import { NullableObject } from '../base/types';
-import { DecoratedV1VariableBase, IDecoratedMutableVariable } from '../base/decoratorBase';
-import { setObservationDepth } from '../base/iObservedObject';
-
-import { AppStorage } from '../storages/appStorage';
+import { DecoratedV1VariableBase } from './decoratorBase';
+import { AppStorage } from '../storage/appStorage';
+import { ExtendableComponent } from '../../component/extendableComponent';
+import { IStorageLinkDecoratedVariable } from '../decorator';
+import { ObserveSingleton } from '../base/observeSingleton';
 
 
 export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T> {
+    implements IStorageLinkDecoratedVariable<T> {
 
-    private asLink : LinkDecoratedVariable<NullableObject> | undefined;
-    constructor(propName: string, varName: string, localValue: T, watchFunc?: WatchFuncType) {
-        super('@StorageLink', varName, undefined as T, watchFunc);
+    private asLink : LinkDecoratedVariable<NullableObject>;
+    private readonly propertyName_: string;
+
+    constructor(owningView: ExtendableComponent, propName: string, varName: string, localValue: T, watchFunc?: WatchFuncType) {
+        super('@StorageLink', owningView, varName, watchFunc);
+        this.propertyName_ = propName;
         this.asLink = AppStorage.createLink<T>(propName, localValue);
         const value : T = this.asLink!.get() as T;
         this.registerWatchForObservedObjectChanges(value);
         this.asLink!.addWatch(watchFunc)
+        // registerWatchToSource in mkLink
     }
 
     public getInfo(): string {
@@ -41,16 +46,17 @@ export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
     public get(): T {
         const value = this.asLink!.get() as T;
-        setObservationDepth(value, 1);
+        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
         return value;
     }
 
     public set(newValue: T): void {
         const oldValue : T = this.asLink!.get() as T;
-        if ( oldValue !== newValue) {
-            this.unregisterWatchFromObservedObjectChanges(oldValue);
-            this.registerWatchForObservedObjectChanges(newValue);
-            this.asLink!.set(newValue as NullableObject);
+        if (oldValue === newValue) {
+            return;
         }
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        this.registerWatchForObservedObjectChanges(newValue);
+        this.asLink!.set(newValue as NullableObject);
     }
 }

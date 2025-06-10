@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-import { DecoratedV1VariableBase, IDecoratedMutableVariable, IDecoratedUpdatableVariable } from '../base/decoratorBase';
-import { setObservationDepth } from '../base/iObservedObject';
-import { WatchFunc, WatchFuncType } from './decoratorWatch';
-import { BackingValue } from '../base/backingValue';
+import { DecoratedV1VariableBase } from './decoratorBase';
 import { propDeepCopy } from '@koalaui/common';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
-
+import { ExtendableComponent } from '../../component/extendableComponent';
+import { IPropDecoratedVariable } from '../decorator';
+import { WatchFuncType } from '../decorator';
+import { IBackingValue } from '../base/iBackingValue';
+import { DecoratorBackingValue } from '../base/backingValue';
+import { ObserveSingleton } from '../base/observeSingleton';
+import { NullableObject } from '../base/types';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 /** 
 * implementation of V1 @Prop
 *
@@ -51,20 +55,21 @@ function deepCopy<T>(value: T): T {
 }
  
 export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T>, IDecoratedUpdatableVariable<T> {
-    private __soruceValue: BackingValue<T>;
+    implements IPropDecoratedVariable<T> {
+    private __soruceValue: IBackingValue<T>;
+    private __localValue: IBackingValue<T>;
     // initValue is the init value either from parent @Component or local initialized value
     // constructor takes a copy of it
-    constructor(varName: string, initValue: T, watchFunc?: WatchFuncType) {
-        super("@Prop", varName, undefined as T, watchFunc);
+    constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
+        super("@Prop", owningView, varName, watchFunc);
         // if (this.validateValue(localInitValue) === false) {
         //     throw new Error("@State Object-type Value must be ObservedObject")
         // }
         const deepCopyValue = deepCopy<T>(initValue);
-        this.__backing.value = deepCopyValue;
+        this.__localValue = new DecoratorBackingValue<T>(varName, deepCopyValue)
         // if initValue not from parent, this __sourceValue should never changed
-        this.__soruceValue = new BackingValue<T>(initValue); 
-        this.registerWatchForObservedObjectChanges(this.__backing.value);
+        this.__soruceValue = new DecoratorBackingValue<T>(varName, initValue); 
+        this.registerWatchForObservedObjectChanges(initValue);
     }
 
     public getInfo(): string {
@@ -73,13 +78,15 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
     public get(): T {
         // @State V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1
-        setObservationDepth(this.__backing.value, 1);
-        this.meta_.addRef();
-        return this.__backing.value;
+        const value = this.__localValue.get(this.shouldAddRef());
+        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+
+        return value;
     }
 
     public set(newValue: T): void {
-        if (this.__backing.value !== newValue) {
+        const value = this.__localValue.get(false);
+        if (value !== newValue) {
             // if (this.validateValue(locanewValueInitValue) === false) {
             //     throw new Error("@State Object-type Value must be ObservedObject")
             // }
@@ -88,38 +95,39 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             // if new value is object, register so that property changes trigger
             // Watch function exec
             // unregister if old value is an object
-            this.unregisterWatchFromObservedObjectChanges(this.__backing.value);
+            this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
 
-            this.__backing.value = newValue;
-            this.meta_.fireChange();
-            this.execWatchFuncs();
+            if (this.__localValue.set(newValue)) {
+                this.execWatchFuncs();
+            }
         }
     }
 
     // @Prop updates from parent, value from parent needs to be copied
     public update(newValue: T): void {
-        this.meta_.addRef(); // TODO: is it needed?
-        if (this.__soruceValue.value !== newValue) {
-            this.unregisterWatchFromObservedObjectChanges(this.__backing.value);
+        const sourceValue = this.__soruceValue.get(false);
+        if (sourceValue !== newValue) {
+            this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
             // TODO: this order need to be checked again
-            this.__backing.value = deepCopy<T>(newValue);
-            this.__soruceValue.value = newValue;
+
+            this.__soruceValue.setSilently(newValue);
             StateUpdateLoop.add(() => {
-                this.meta_.fireChange();
-                this.execWatchFuncs();
+                if (this.__localValue.set(deepCopy<T>(newValue))) {
+                    this.execWatchFuncs();
+                }
             });
         }
     }
 
     public updateForStorage(newValue: T): void {
-        if (this.__soruceValue.value !== newValue) {
-            this.unregisterWatchFromObservedObjectChanges(this.__backing.value);
+        const sourceValue = this.__soruceValue.get(false);
+        if (sourceValue !== newValue) {
+            this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
-            this.__backing.value = deepCopy<T>(newValue);
-            this.__soruceValue.value = newValue;
-            this.meta_.fireChange();
+            this.__soruceValue.setSilently(newValue);
+            this.__localValue.set(deepCopy<T>(newValue));
             this.execWatchFuncs();
         }
     }
