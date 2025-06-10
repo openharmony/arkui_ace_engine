@@ -246,6 +246,7 @@ void RosenWindow::Destroy()
     LOGI("RosenWindow destroyed");
     rsWindow_ = nullptr;
     vsyncCallback_.reset();
+    rsUIDirector_->SendMessages();
     rsUIDirector_->Destroy();
     rsUIDirector_.reset();
     callbacks_.clear();
