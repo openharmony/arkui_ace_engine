@@ -463,6 +463,49 @@ RefPtr<ListItemDragManager> ListCommonTestNg::GetRepeatItemDragManager(int32_t i
 }
 
 /**
+* @tc.name: OnMoveDragManager001
+* @tc.desc: Test ListItemDragManager IsNeedMove
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, OnMoveDragManager001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List
+     */
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    CreateForEachList(3, 1, onMoveEvent);
+    CreateDone();
+    auto manager = GetForEachItemDragManager(0);
+
+    /**
+     * @tc.steps: step2. Test IsNeedMove
+     */
+    RectF nearRect = RectF(0.f, 0.f, 100.f, 400.f);
+    RectF rect = RectF(0.f, 400.f, 100.f, 100.f);
+    Axis axis = Axis::VERTICAL;
+
+    float axisDelta = -100.f;
+    bool needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, false);
+
+    axisDelta = -300.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, true);
+
+    nearRect = RectF(0.f, 100.f, 100.f, 400.f);
+    rect = RectF(0.f, 0.f, 100.f, 100.f);
+    axis = Axis::VERTICAL;
+
+    axisDelta = 100.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, false);
+
+    axisDelta = 300.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, true);
+}
+
+/**
  * @tc.name: FocusStep001
  * @tc.desc: Test GetNextFocusNode func
  * @tc.type: FUNC

@@ -80,6 +80,7 @@ private:
     int32_t GetIndex() const;
     int32_t GetLanes() const;
     bool IsInHotZone(int32_t index, const RectF& frameRect) const;
+    bool IsNeedMove(const RectF& nearRect, const RectF& rect, Axis axis, float axisDelta);
     RefPtr<FrameNode> GetListFrameNode() const;
     OffsetF GetParentPaddingOffset();
     
