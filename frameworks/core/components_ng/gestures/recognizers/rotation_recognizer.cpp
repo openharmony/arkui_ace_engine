@@ -61,6 +61,7 @@ void RotationRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Rotation accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
 }
@@ -68,6 +69,7 @@ void RotationRecognizer::OnAccepted()
 void RotationRecognizer::OnRejected()
 {
     if (refereeState_ != RefereeState::SUCCEED) {
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::FAIL;
     }
     SendRejectMsg();
@@ -102,6 +104,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS) {
         initialAngle_ = ComputeAngle();
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
 }
@@ -121,6 +124,7 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     UpdateTouchPointWithAxisEvent(event);
     if (refereeState_ == RefereeState::READY) {
         initialAngle_ = event.rotateAxisAngle;
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
 }
@@ -292,6 +296,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::SUCCEED &&
         static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
         SendCancelMsg();
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     }
 }

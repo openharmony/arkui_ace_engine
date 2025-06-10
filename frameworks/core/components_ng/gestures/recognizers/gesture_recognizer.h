@@ -86,6 +86,7 @@ public:
     // Called when request of handling gesture sequence is pending by gesture referee.
     virtual void OnPending()
     {
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::PENDING;
     }
 
@@ -93,9 +94,11 @@ public:
     virtual void OnBlocked()
     {
         if (disposal_ == GestureDisposal::ACCEPT) {
+            lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::SUCCEED_BLOCKED;
         }
         if (disposal_ == GestureDisposal::PENDING) {
+            lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::PENDING_BLOCKED;
         }
     }
@@ -244,6 +247,7 @@ public:
         if (isBlocked && refereeState_ == RefereeState::SUCCEED) {
             OnSucceedCancel();
         }
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         currentFingers_ = 0;
@@ -257,6 +261,7 @@ public:
     // called to reset status manually without rejected callback.
     void ResetStatus()
     {
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         OnResetStatus();
         SetBridgeMode(false);
@@ -441,6 +446,7 @@ protected:
     virtual void OnSucceedCancel() {}
     virtual void RemoveUnsupportEvent(int32_t touchId) {}
     bool ShouldResponse() override;
+    bool CheckoutDownFingers(int32_t fingerId) const;
 
     void HandleWillAccept();
     void HandleDidAccept();
@@ -452,6 +458,8 @@ protected:
     void HandleTouchCancel(const TouchEvent& point);
 
     RefereeState refereeState_ = RefereeState::READY;
+
+    RefereeState lastRefereeState_ = RefereeState::READY;
 
     GestureDisposal disposal_ = GestureDisposal::NONE;
 

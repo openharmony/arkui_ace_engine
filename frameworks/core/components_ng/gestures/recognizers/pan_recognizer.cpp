@@ -125,6 +125,7 @@ void PanRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pan accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_, GestureCallbackType::START);
     // only report the pan gesture starting for touch event
@@ -145,6 +146,7 @@ void PanRecognizer::OnRejected()
 {
     // fix griditem drag interrupted by click while pull moving
     if (refereeState_ != RefereeState::SUCCEED) {
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::FAIL;
     }
     SendRejectMsg();
@@ -244,6 +246,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         if (refereeState_ == RefereeState::READY) {
             panVelocity_.Reset(event.id);
             UpdateTouchPointInVelocityTracker(event);
+            lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::DETECTING;
         } else {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture refereeState is not READY");
@@ -292,6 +295,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     pesudoTouchEvent.x = revertAxisValue.first;
     pesudoTouchEvent.y = revertAxisValue.second;
     panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, false);
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::DETECTING;
 }
 
@@ -334,6 +338,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
             averageDistance_.Reset();
             AddOverTimeTrace();
+            lastRefereeState_ = RefereeState::READY;
             refereeState_ = RefereeState::READY;
         }
     }
@@ -538,6 +543,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         // AxisEvent is single one.
         SendCancelMsg();
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     }
 }
