@@ -273,7 +273,7 @@ ArkUINativeModuleValue TextAreaBridge::SetMaxLines(ArkUIRuntimeCallInfo *runtime
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    auto maxLines = NUM_3;
+    auto maxLines = INT32_MAX;
     if (maxLinesArg->IsNumber() && maxLinesArg->Int32Value(vm) > NUM_0) {
         maxLines = maxLinesArg->Uint32Value(vm);
     }

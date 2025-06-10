@@ -719,6 +719,13 @@ void WebModelNG::SetBackgroundColor(Color backgroundColor)
     webPattern->UpdateBackgroundColor(backgroundColor.GetValue());
 }
 
+void WebModelNG::SetDefaultBackgroundColor()
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetDefaultBackgroundColor();
+}
+
 void WebModelNG::InitialScale(float scale)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1073,6 +1080,13 @@ void WebModelNG::SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
+}
+
+void WebModelNG::SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateCssDisplayChangeEnabled(isCssDisplayChangeEnabled);
 }
 
 void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)

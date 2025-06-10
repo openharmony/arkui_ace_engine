@@ -163,6 +163,7 @@ public:
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;
     virtual void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) = 0;
+    virtual void SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) = 0;
     virtual void RegisterNativeEmbedRule(const std::string&, const std::string&) = 0;
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
@@ -213,6 +214,7 @@ public:
     virtual void SetDataDetectorConfig(const TextDetectConfig& config) {};
     virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
     virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
+    virtual void SetDefaultBackgroundColor() {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

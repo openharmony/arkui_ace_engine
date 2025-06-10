@@ -840,4 +840,211 @@ HWTEST_F(PostEventManagerTestNg, PostAxisEventTest001, TestSize.Level1)
 
     EXPECT_FALSE(postEventManager_->passThroughResult_);
 }
+
+/**
+ * @tc.name: CheckTouchEventTest001
+ * @tc.desc: test CheckTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest001, TestSize.Level1)
+{
+    Init();
+    auto gestureEventHub = root_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    gestureEventHub->AddGesture(gesture);
+
+    TouchEvent touchUpEvent;
+    touchUpEvent.type = TouchType::DOWN;
+    touchUpEvent.x = 15;
+    touchUpEvent.y = 15;
+    touchUpEvent.id = 2;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanosecondsUp(currentTime);
+    TimeStamp timeUp(nanosecondsUp);
+    touchUpEvent.time = timeUp;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+    PostEventAction eventAction;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchUpEvent;
+    postEventManager_->postInputEventAction_.clear();
+    auto result = postEventManager_->CheckTouchEvent(UInode, touchUpEvent);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest002
+ * @tc.desc: test CheckTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest002, TestSize.Level1)
+{
+    Init();
+    auto gestureEventHub = root_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    gestureEventHub->AddGesture(gesture);
+
+    TouchEvent touchUpEvent;
+    touchUpEvent.type = TouchType::DOWN;
+    touchUpEvent.x = 15;
+    touchUpEvent.y = 15;
+    touchUpEvent.id = 2;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanosecondsUp(currentTime);
+    TimeStamp timeUp(nanosecondsUp);
+    touchUpEvent.time = timeUp;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+    PostEventAction eventAction;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchUpEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+    auto result = postEventManager_->CheckTouchEvent(UInode, touchUpEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest003
+ * @tc.desc: test CheckTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest003, TestSize.Level1)
+{
+    Init();
+    auto gestureEventHub = root_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    gestureEventHub->AddGesture(gesture);
+
+    TouchEvent firstTouchEvent;
+    firstTouchEvent.type = TouchType::DOWN;
+    firstTouchEvent.x = 15;
+    firstTouchEvent.y = 15;
+    firstTouchEvent.id = 2;
+    TouchEvent secondTouchEvent;
+    secondTouchEvent.type = TouchType::DOWN;
+    secondTouchEvent.x = 15;
+    secondTouchEvent.y = 15;
+    secondTouchEvent.id = 2;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanosecondsUp(currentTime);
+    TimeStamp timeUp(nanosecondsUp);
+    firstTouchEvent.time = timeUp;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+    PostEventAction eventAction;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = firstTouchEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+    auto result = postEventManager_->CheckTouchEvent(UInode, secondTouchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest004
+ * @tc.desc: test CheckTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest004, TestSize.Level1)
+{
+    Init();
+    auto gestureEventHub = root_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    gestureEventHub->AddGesture(gesture);
+
+    TouchEvent firstTouchEvent;
+    firstTouchEvent.type = TouchType::CANCEL;
+    firstTouchEvent.x = 15;
+    firstTouchEvent.y = 15;
+    firstTouchEvent.id = 2;
+    TouchEvent secondTouchEvent;
+    secondTouchEvent.type = TouchType::CANCEL;
+    secondTouchEvent.x = 15;
+    secondTouchEvent.y = 15;
+    secondTouchEvent.id = 2;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanosecondsUp(currentTime);
+    TimeStamp timeUp(nanosecondsUp);
+    firstTouchEvent.time = timeUp;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+    PostEventAction eventAction;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = firstTouchEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+    auto result = postEventManager_->CheckTouchEvent(UInode, secondTouchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest005
+ * @tc.desc: test CheckTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest005, TestSize.Level1)
+{
+    Init();
+    auto gestureEventHub = root_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    gestureEventHub->AddGesture(gesture);
+
+    TouchEvent firstTouchEvent;
+    firstTouchEvent.type = TouchType::UP;
+    firstTouchEvent.x = 15;
+    firstTouchEvent.y = 15;
+    firstTouchEvent.id = 2;
+    TouchEvent secondTouchEvent;
+    secondTouchEvent.type = TouchType::UP;
+    secondTouchEvent.x = 15;
+    secondTouchEvent.y = 15;
+    secondTouchEvent.id = 2;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanosecondsUp(currentTime);
+    TimeStamp timeUp(nanosecondsUp);
+    firstTouchEvent.time = timeUp;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+    PostEventAction eventAction;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = firstTouchEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+    auto result = postEventManager_->CheckTouchEvent(UInode, secondTouchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest006
+ * @tc.desc: test CheckTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest006, TestSize.Level1)
+{
+    Init();
+    auto gestureEventHub = root_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    gestureEventHub->AddGesture(gesture);
+
+    TouchEvent touchUpEvent;
+    touchUpEvent.type = TouchType::MOVE;
+    touchUpEvent.x = 15;
+    touchUpEvent.y = 15;
+    touchUpEvent.id = 2;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanosecondsUp(currentTime);
+    TimeStamp timeUp(nanosecondsUp);
+    touchUpEvent.time = timeUp;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+    PostEventAction eventAction;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchUpEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+    auto result = postEventManager_->CheckTouchEvent(UInode, touchUpEvent);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG

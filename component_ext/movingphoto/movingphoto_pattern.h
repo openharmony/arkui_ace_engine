@@ -115,6 +115,11 @@ public:
         isPlayWithMask_ = enabled;
     }
 
+    bool GetWaterMask()
+    {
+        return isPlayWithMask_;
+    }
+
     int64_t GetCurrentDateModified()
     {
         return currentDateModified_;

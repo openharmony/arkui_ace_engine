@@ -415,7 +415,13 @@ void JSWaterFlow::SetScrollEnabled(const JSCallbackInfo& args)
 void JSWaterFlow::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
-    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDouble(info[0], friction, resObj)) {
+            friction = -1.0;
+        }
+        WaterFlowModel::GetInstance()->ParseResObjFriction(resObj);
+    } else if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
         LOGW("Friction params invalid,can not convert to double");
         friction = -1.0;
     }

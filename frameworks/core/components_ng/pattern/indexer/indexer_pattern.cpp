@@ -808,7 +808,8 @@ void IndexerPattern::UpdateChildTextStyle(RefPtr<IndexerLayoutProperty>& layoutP
     CHECK_NULL_VOID(pipelineContext);
     auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    TextStyle unselectedFontStyle, selectedFontStyle;
+    TextStyle unselectedFontStyle;
+    TextStyle selectedFontStyle;
     UpdateFontStyle(layoutProperty, indexerTheme, unselectedFontStyle, selectedFontStyle);
     Color unselectedTextColor = layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor());
     auto total = host->GetTotalChildCount();

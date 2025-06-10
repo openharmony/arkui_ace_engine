@@ -74,6 +74,7 @@ public:
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
+    void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
 
     DisplayMode GetDisplayMode() const override;
 
@@ -136,6 +137,7 @@ public:
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
+    static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);

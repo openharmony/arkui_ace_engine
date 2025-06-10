@@ -121,6 +121,7 @@ public:
     void SetPermissionRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetBackgroundColor(Color backgroundColor) override;
+    void SetDefaultBackgroundColor() override;
     void InitialScale(float scale) override;
     void SetSearchResultReceiveEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled) override;
@@ -194,6 +195,7 @@ public:
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
     void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) override;
+    void SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) override;
     void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;

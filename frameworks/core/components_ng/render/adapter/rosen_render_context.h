@@ -517,6 +517,7 @@ public:
     void CancelPropertyAnimation(AnimationPropertyType property) override;
     std::vector<float> GetRenderNodePropertyValue(AnimationPropertyType property) override;
     void SyncRSPropertyToRenderContext(AnimationPropertyType property) override;
+    void RemoveFromTree() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

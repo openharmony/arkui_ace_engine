@@ -419,8 +419,8 @@ struct CJUICommonModifier {
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
     void (*resetMask)(ArkUINodeHandle node);
     ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
-    void (*setBackgroundImageResizable)(ArkUINodeHandle node, ArkUIStringAndFloat* options,  ArkUI_Int32 optionsSize,
-        std::vector<void*>& bgImageResizableArray);
+    void (*setBackgroundImageResizable)(
+        ArkUINodeHandle node, ArkUIStringAndFloat* options, ArkUI_Int32 optionsSize, void* bgImageResizableResObjs);
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
     void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
         ArkUI_Int32 unit);
@@ -2231,7 +2231,7 @@ struct CJUIWaterFlowModifier {
     void (*resetLayoutDirection)(ArkUINodeHandle node);
     void (*setWaterFlowNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 scrollForward, ArkUI_Int32 scrollBackward);
     void (*resetWaterFlowNestedScroll)(ArkUINodeHandle node);
-    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
+    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction, void* frictionRawPtr);
     void (*resetWaterFlowFriction)(ArkUINodeHandle node);
     ArkUI_Int32 (*getLayoutDirection)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getColumnsTemplate)(ArkUINodeHandle node);

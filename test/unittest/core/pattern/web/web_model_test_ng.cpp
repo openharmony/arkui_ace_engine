@@ -3865,6 +3865,28 @@ HWTEST_F(WebModelTestNg, SetOnInterceptKeyEvent003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetCssDisplayChangeEnabled001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetCssDisplayChangeEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetCssDisplayChangeEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckCssDisplayChangeEnabled(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetBypassVsyncCondition001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -3883,6 +3905,28 @@ HWTEST_F(WebModelTestNg, SetBypassVsyncCondition001, TestSize.Level1)
     WebModelNG webModelNG;
     webModelNG.SetBypassVsyncCondition(WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
     EXPECT_EQ(webPattern->webBypassVsyncCondition_, WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
+#endif
+}
+
+/**
+ * @tc.name: SetDefaultBackgroundColor001
+ * @tc.desc: Test Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetDefaultBackgroundColor001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetDefaultBackgroundColor();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
 #endif
 }
 } // namespace OHOS::Ace::NG

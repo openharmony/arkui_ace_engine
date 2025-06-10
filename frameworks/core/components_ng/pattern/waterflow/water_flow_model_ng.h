@@ -64,6 +64,7 @@ public:
 
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections() override;
     void ResetSections() override;
+    void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
@@ -123,6 +124,7 @@ public:
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
     static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
     static WaterFlowLayoutMode GetLayoutMode(FrameNode* frameNode);
+    static void ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetFooter(FrameNode* frameNode, std::function<void()>&& footer);
 };
 } // namespace OHOS::Ace::NG

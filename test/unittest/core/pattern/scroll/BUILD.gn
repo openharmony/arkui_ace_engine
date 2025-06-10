@@ -29,6 +29,7 @@ ace_unittest("scroll_test_ng") {
     "scroll_model_test_ng.cpp",
     "scroll_nested_test_ng.cpp",
     "scroll_pattern_test_ng.cpp",
+    "scroll_pattern_test_ng_two.cpp",
     "scroll_test_ng.cpp",
   ]
 

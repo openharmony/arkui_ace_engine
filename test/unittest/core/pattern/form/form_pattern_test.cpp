@@ -53,6 +53,8 @@ RequestFormInfo formInfo;
 const std::string INIT_VALUE_1 = "hello1";
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double TRANSPARENT_VAL = 0;
+constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
+constexpr char APP_LOCKED_RESOURCE_NAME[] = "form_disable_app_locked";
 }
 class FormPatternTest : public testing::Test {
 public:
@@ -2047,5 +2049,26 @@ HWTEST_F(FormPatternTest, GetRectRelativeToWindow001, TestSize.Level1)
     pattern->GetRectRelativeToWindow(parentRectInfo);
     auto rectInfoDegree = parentRectInfo.rotateTransform.rotateDegree;
     EXPECT_EQ(rectInfoDegree, static_cast<int32_t>(Rotation::ROTATION_0));
+}
+
+/**
+ * @tc.name: FormPatternTest_056
+ * @tc.desc: LoadFormSkeleton
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_056, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    pattern->frameNode_ = formNode;
+    EXPECT_NE(pattern, nullptr);
+    auto textNode = pattern->CreateForbiddenTextNode(TIME_LIMIT_RESOURCE_NAME, true);
+    EXPECT_NE(textNode, nullptr);
+    textNode = pattern->CreateForbiddenTextNode(TIME_LIMIT_RESOURCE_NAME, false);
+    EXPECT_NE(textNode, nullptr);
+    textNode = pattern->CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, true);
+    EXPECT_NE(textNode, nullptr);
+    textNode = pattern->CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, false);
+    EXPECT_NE(textNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

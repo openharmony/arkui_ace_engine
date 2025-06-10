@@ -1116,7 +1116,7 @@ bool ResourceAdapterImplV2::ExistDarkResById(const std::string& resourceId)
         UpdateColorMode(ColorMode::DARK);
         colorChanged = true;
     }
-    auto appResCfg = Global::Resource::CreateResConfig();
+    std::shared_ptr<Global::Resource::ResConfig> appResCfg(Global::Resource::CreateResConfig());
     auto state = manager->GetResConfigById(resId, *appResCfg);
     if (colorChanged) {
         UpdateColorMode(ColorMode::LIGHT);
@@ -1141,7 +1141,7 @@ bool ResourceAdapterImplV2::ExistDarkResByName(const std::string& resourceName, 
         UpdateColorMode(ColorMode::DARK);
         colorChanged = true;
     }
-    auto appResCfg = Global::Resource::CreateResConfig();
+    std::shared_ptr<Global::Resource::ResConfig> appResCfg(Global::Resource::CreateResConfig());
     auto state = manager->GetResConfigByName(resourceName, type, *appResCfg);
     if (colorChanged) {
         UpdateColorMode(ColorMode::LIGHT);

@@ -2079,4 +2079,223 @@ HWTEST_F(GestureEventHubTestNg, GetGestureEventInfo001, TestSize.Level1)
     EXPECT_EQ(eventInfo.GetPointerEventId(), 0);
     EXPECT_EQ(clickInfo.GetFingerId(), -1);
 }
+
+/**
+ * @tc.name: CheckLastInnerRecognizerCollected001
+ * @tc.desc: Test CheckLastInnerRecognizerCollected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->node_ = frameNode;
+    std::vector<RefPtr<NGGestureRecognizer>> subRecognizers = { clickRecognizer };
+    auto parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(subRecognizers);
+    gestureEventHub->externalParallelRecognizer_.clear();
+    gestureEventHub->externalParallelRecognizer_.push_back(parallelRecognizer);
+    auto res = gestureEventHub->CheckLastInnerRecognizerCollected(GesturePriority::Parallel, parallelIndex_1);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: CheckLastInnerRecognizerCollected002
+ * @tc.desc: Test CheckLastInnerRecognizerCollected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->node_ = frameNode;
+    std::vector<RefPtr<NGGestureRecognizer>> subRecognizers = { clickRecognizer };
+    auto parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(subRecognizers);
+    gestureEventHub->externalParallelRecognizer_.clear();
+    gestureEventHub->externalParallelRecognizer_.push_back(parallelRecognizer);
+    auto res = gestureEventHub->CheckLastInnerRecognizerCollected(GesturePriority::Parallel, parallelIndex_2);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: CheckLastInnerRecognizerCollected003
+ * @tc.desc: Test CheckLastInnerRecognizerCollected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected003, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->node_ = frameNode;
+    std::vector<RefPtr<NGGestureRecognizer>> subRecognizers = { clickRecognizer };
+    auto parallelRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(subRecognizers);
+    gestureEventHub->externalExclusiveRecognizer_.clear();
+    gestureEventHub->externalExclusiveRecognizer_.push_back(parallelRecognizer);
+    auto res = gestureEventHub->CheckLastInnerRecognizerCollected(GesturePriority::High, parallelIndex_1);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: CheckLastInnerRecognizerCollected004
+ * @tc.desc: Test CheckLastInnerRecognizerCollected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected004, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->node_ = frameNode;
+    std::vector<RefPtr<NGGestureRecognizer>> subRecognizers = { clickRecognizer };
+    auto parallelRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(subRecognizers);
+    gestureEventHub->externalExclusiveRecognizer_.clear();
+    gestureEventHub->externalExclusiveRecognizer_.push_back(parallelRecognizer);
+    auto res = gestureEventHub->CheckLastInnerRecognizerCollected(GesturePriority::High, parallelIndex_2);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: CheckLastInnerRecognizerCollected005
+ * @tc.desc: Test CheckLastInnerRecognizerCollected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected005, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    std::vector<RefPtr<NGGestureRecognizer>> subRecognizers = { clickRecognizer };
+    auto parallelRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(subRecognizers);
+    gestureEventHub->externalExclusiveRecognizer_.clear();
+    gestureEventHub->externalExclusiveRecognizer_.push_back(parallelRecognizer);
+    auto res = gestureEventHub->CheckLastInnerRecognizerCollected(GesturePriority::High, parallelIndex_2);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: GestureEventHubSetPanEvent001
+ * @tc.desc: Verify SetPanEvent (Dimension version) with new actuator creation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubSetPanEvent001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    RefPtr<PanEvent> panEvent = AceType::MakeRefPtr<PanEvent>(
+        [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, []() {});
+
+    PanDirection direction;
+    direction.type = PanDirection::ALL;
+
+    gestureEventHub->SetPanEvent(panEvent, direction, 1, 10.0_px); // 10.0_px is initial distance threshold
+    auto panEventActuator = gestureEventHub->panEventActuator_;
+    ASSERT_NE(panEventActuator, nullptr);
+    EXPECT_EQ(panEventActuator->userCallback_, panEvent);
+}
+
+/**
+ * @tc.name: GestureEventHubSetPanEvent002
+ * @tc.desc: Verify SetPanEvent when actuator already exists (Dimension version)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubSetPanEvent002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    auto initialEvent = AceType::MakeRefPtr<PanEvent>(
+        [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, []() {});
+    PanDirection direction { PanDirection::VERTICAL };
+    gestureEventHub->SetPanEvent(initialEvent, direction, 1, 10.0_px); // 10.0_px is initial distance threshold
+
+    auto newPanEvent = AceType::MakeRefPtr<PanEvent>(
+        [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, []() {});
+
+    gestureEventHub->SetPanEvent(newPanEvent, direction, 1, 10.0_px); // 10.0_px is initial distance threshold
+    auto panEventActuator = gestureEventHub->panEventActuator_;
+    ASSERT_NE(panEventActuator, nullptr);
+    EXPECT_EQ(panEventActuator->userCallback_, newPanEvent);
+}
+
+/**
+ * @tc.name: GestureEventHubSetPanEvent003
+ * @tc.desc: Verify SetPanEvent (PanDistanceMap version) with new actuator creation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubSetPanEvent003, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(
+        [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, []() {});
+
+    PanDirection direction { PanDirection::HORIZONTAL };
+    PanDistanceMap distanceMap;
+    distanceMap[SourceTool::FINGER] = 10.0; // 10.0 is initial distance threshold for FINGER source
+
+    gestureEventHub->SetPanEvent(panEvent, direction, 1, distanceMap);
+
+    auto panEventActuator = gestureEventHub->panEventActuator_;
+    ASSERT_NE(panEventActuator, nullptr);
+    EXPECT_EQ(panEventActuator->userCallback_, panEvent);
+}
+
+/**
+ * @tc.name: GestureEventHubSetPanEvent004
+ * @tc.desc: Verify SetPanEvent when actuator already exists (PanDistanceMap version)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubSetPanEvent004, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    auto initialEvent = AceType::MakeRefPtr<PanEvent>(
+        [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, []() {});
+    PanDistanceMap initMap;
+    initMap[SourceTool::FINGER] = 10.0; // 10.0 is initial distance threshold for FINGER source
+
+    PanDirection direction { PanDirection::ALL };
+    gestureEventHub->SetPanEvent(initialEvent, direction, 1, initMap);
+
+    auto newPanEvent = AceType::MakeRefPtr<PanEvent>(
+        [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, [](GestureEvent& /*info*/) {}, []() {});
+    gestureEventHub->SetPanEvent(newPanEvent, direction, 1, initMap);
+
+    auto panEventActuator = gestureEventHub->panEventActuator_;
+    ASSERT_NE(panEventActuator, nullptr);
+    EXPECT_EQ(panEventActuator->userCallback_, newPanEvent);
+}
 } // namespace OHOS::Ace::NG

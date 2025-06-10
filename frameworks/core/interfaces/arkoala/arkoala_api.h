@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <stddef.h>
-#include <vector>
 #include <functional>
 #include <unordered_map>
 #include <string>
@@ -2504,8 +2503,7 @@ struct ArkUICommonModifier {
     void (*resetMask)(ArkUINodeHandle node);
     ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
     void (*setBackgroundImageResizable)(
-        ArkUINodeHandle node, ArkUIStringAndFloat* options, ArkUI_Int32 optionsSize,
-        std::vector<void*>& bgImageResizableArray);
+        ArkUINodeHandle node, ArkUIStringAndFloat* options, ArkUI_Int32 optionsSize, void* bgImageResizableResObjs);
     ArkUIImageResizableSlice (*getBackgroundImageResizable)(ArkUINodeHandle node);
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
     void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
@@ -3182,6 +3180,13 @@ struct ArkUIListModifier {
     void (*resetOnListDidScroll)(ArkUINodeHandle node);
     void (*resetOnListReachStart)(ArkUINodeHandle node);
     void (*resetOnListReachEnd)(ArkUINodeHandle node);
+    void (*createWithResourceObjFriction)(ArkUINodeHandle node, void* resObj);
+    void (*parseResObjDividerStrokeWidth)(ArkUINodeHandle node, void* resObj);
+    void (*parseResObjDividerColor)(ArkUINodeHandle node, void* resObj);
+    void (*parseResObjDividerStartMargin)(ArkUINodeHandle node, void* resObj);
+    void (*parseResObjDividerEndMargin)(ArkUINodeHandle node, void* resObj);
+    void (*createWithResourceObjLaneConstrain)(
+        ArkUINodeHandle node, void* resObjMinLengthValue, void* resObjMaxLengthValue);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -3202,6 +3207,10 @@ struct ArkUIListItemGroupModifier {
     ArkUI_Int32 (*setListItemGroupNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
     void (*resetListItemGroupNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getListItemGroupNodeAdapter)(ArkUINodeHandle node);
+    void (*parseResObjDividerStrokeWidth)(ArkUINodeHandle node, void* resObj);
+    void (*parseResObjDividerColor)(ArkUINodeHandle node, void* resObj);
+    void (*parseResObjDividerStartMargin)(ArkUINodeHandle node, void* resObj);
+    void (*parseResObjDividerEndMargin)(ArkUINodeHandle node, void* resObj);
 };
 
 struct ArkUIParticleModifier {
@@ -3573,6 +3582,7 @@ struct ArkUIGridModifier {
     void (*resetOnGridItemDragLeave)(ArkUINodeHandle node);
     void (*setOnGridItemDrop)(ArkUINodeHandle node, void* callback);
     void (*resetOnGridItemDrop)(ArkUINodeHandle node);
+    void (*createWithResourceObjFriction)(ArkUINodeHandle node, void* resObj);
 };
 
 struct ArkUIGridItemModifier {
@@ -3704,6 +3714,8 @@ struct ArkUIScrollModifier {
     void (*getScrollFadingEdge)(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2]);
     void (*setScrollFling)(ArkUINodeHandle node, ArkUI_Float64 value);
     void (*getScrollContentSize)(ArkUINodeHandle node, ArkUI_Float32 (*values)[2]);
+    void (*createWithResourceObjFriction)(ArkUINodeHandle node, void* resObj);
+    void (*createWithResourceObjSnapPaginations)(ArkUINodeHandle node, void* resObjs);
 };
 
 struct ArkUIListItemModifier {
@@ -4949,7 +4961,7 @@ struct ArkUIWaterFlowModifier {
     void (*resetLayoutDirection)(ArkUINodeHandle node);
     void (*setWaterFlowNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 scrollForward, ArkUI_Int32 scrollBackward);
     void (*resetWaterFlowNestedScroll)(ArkUINodeHandle node);
-    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
+    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction, void* frictionRawPtr);
     void (*resetWaterFlowFriction)(ArkUINodeHandle node);
     ArkUI_Int32 (*getLayoutDirection)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getColumnsTemplate)(ArkUINodeHandle node);
@@ -6614,6 +6626,8 @@ struct ArkUICustomNodeExtModifier {
     void (*setOnDirtyLayoutWrapperSwap)(ArkUINodeHandle node,
         void (*onDirtySwap)(ArkUINodeHandle node, ArkUIDirtySwapConfig config));
     void (*setIsAtomic)(ArkUINodeHandle node, const ArkUI_Bool isAtomic);
+    void (*setBeforeCreateLayoutWrapper)(ArkUINodeHandle node,
+        void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
 };
 
 struct ArkUIThemeModifier {

@@ -21,10 +21,12 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -45,6 +47,7 @@ public:
     virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL) = 0;
     virtual void SetEditMode(bool editMode) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
+    virtual void SetDividerColorByUser(bool isByUser) = 0;
     virtual void SetChainAnimation(bool enableChainAnimation) = 0;
     virtual void SetChainAnimationOptions(const ChainAnimationOptions& options) = 0;
     virtual void SetLanes(int32_t lanes) = 0;
@@ -91,6 +94,14 @@ public:
 
     virtual DisplayMode GetDisplayMode() const = 0;
     virtual void SetHeader(const RefPtr<NG::FrameNode>& headerNode) {}
+    virtual void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjLaneConstrain(
+        const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue) {};
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
 #endif

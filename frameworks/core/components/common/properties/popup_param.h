@@ -29,6 +29,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/pattern/select/select_model.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
 
@@ -92,6 +93,16 @@ public:
     bool HasAction() const
     {
         return hasAction_;
+    }
+
+    void SetHasPlacement(bool hasPlacement)
+    {
+        hasPlacement_ = hasPlacement;
+    }
+
+    bool HasPlacement() const
+    {
+        return hasPlacement_;
     }
 
     void SetPlacement(const Placement& placement)
@@ -570,6 +581,16 @@ public:
         return keyboardAvoidMode_;
     }
 
+    void SetAvoidTarget(AvoidanceMode avoidTarget)
+    {
+        avoidTarget_ = avoidTarget;
+    }
+    
+    AvoidanceMode GetAvoidTarget() const
+    {
+        return avoidTarget_;
+    }
+
     StateChangeFunc GetDoubleBindCallback()
     {
         return doubleBindCallback_;
@@ -702,6 +723,7 @@ public:
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
+    bool hasPlacement_ = false;
     bool enableArrow_ = true;
     bool isMaskColorSetted_ = false;
     bool isBackgroundColorSetted_ = false;
@@ -757,6 +779,7 @@ private:
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
     StateChangeFunc doubleBindCallback_;
     PopupKeyboardAvoidMode keyboardAvoidMode_ = PopupKeyboardAvoidMode::NONE;
+    AvoidanceMode avoidTarget_ = AvoidanceMode::COVER_TARGET;
     std::optional<Dimension> outlineWidth_;
     std::optional<Dimension> innerBorderWidth_;
     PopupLinearGradientProperties outlineLinearGradient_;

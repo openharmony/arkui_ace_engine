@@ -44,7 +44,13 @@ void StaticImageObject::MakeCanvasImage(
     CHECK_NULL_VOID(ctx);
     RefPtr<CanvasImage> cachedImage = QueryCanvasFromCache(src_, targetSize);
     if (cachedImage) {
-        ctx->SuccessCallback(cachedImage);
+        auto notifyMakeCanvasImageSuccess = [ctx, cachedImage]() { ctx->SuccessCallback(cachedImage); };
+        if (syncLoad) {
+            notifyMakeCanvasImageSuccess();
+        } else {
+            ImageUtils::PostToUI(
+                std::move(notifyMakeCanvasImageSuccess), "ArkUIMakePixelmapSuccess", ctx->GetContainerId());
+        }
         return;
     }
     ImageProvider::MakeCanvasImage(Claim(this), ctx, targetSize,

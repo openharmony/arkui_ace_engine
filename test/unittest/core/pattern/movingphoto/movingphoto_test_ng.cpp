@@ -1220,4 +1220,30 @@ HWTEST_F(MovingphotoTestNg, RefreshMovingPhoto001, TestSize.Level1)
     EXPECT_FALSE(movingphotoPattern->isRefreshMovingPhoto_);
 }
 
+/**
+ * @tc.name: MovingPhotoPatternTest025
+ * @tc.desc: Test setWaterMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. setWaterMask
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. set watermask
+     * @tc.expected: step2. get watermask status is equeals to expected
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+    pattern->SetWaterMask(true);
+    EXPECT_EQ(pattern->GetWaterMask(), true);
+}
 } //namespace OHOS::Ace::NG
