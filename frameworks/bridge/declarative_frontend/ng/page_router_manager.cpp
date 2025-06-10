@@ -209,6 +209,283 @@ void PageRouterManager::Push(const RouterPageInfo& target)
     StartPush(target);
 }
 
+RefPtr<FrameNode> PageRouterManager::PushExtender(const RouterPageInfo& target)
+{
+    CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, nullptr);
+        context->PostAsyncEvent(
+            [weak = WeakClaim(this), target]() {
+                auto router = weak.Upgrade();
+                CHECK_NULL_VOID(router);
+                router->Push(target);
+            },
+            "ArkUIPageRouterPush", TaskExecutor::TaskType::JS);
+        return nullptr;
+    }
+    RouterOptScope scope(this);
+    if (target.url.empty()) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "push url is empty");
+        return nullptr;
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "StartPush exceeds maxStackSize.");
+        if (target.errorCallback != nullptr) {
+            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+        }
+        return nullptr;
+    }
+    RouterPageInfo info = target;
+    info.path = info.url + ".js";
+    if (info.path.empty()) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in StartPush with url: %{public}s", info.url.c_str());
+        if (info.errorCallback != nullptr) {
+            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+        }
+        return nullptr;
+    }
+
+    CleanPageOverlay();
+    UpdateSrcPage();
+
+    if (info.routerMode == RouterMode::SINGLE) {
+        auto pageInfo = FindPageInStack(info.url);
+        if (pageInfo.second) {
+            // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
+            MovePageToFront(pageInfo.first, pageInfo.second, info, true);
+            return pagePattern->GetHost();
+        }
+        auto index = FindPageInRestoreStack(info.url);
+        if (index != INVALID_PAGE_INDEX) {
+            // find page in restore page, create page, move position and update params.
+            RestorePageWithTarget(index, false, info, RestorePageDestination::TOP);
+            return pageInfo.second;
+        }
+    }
+    auto pageId = GenerateNextPageId();
+    auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(
+        pageId, info.url, info.path, info.params, info.recoverable, info.isNamedRouterMode);
+    auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
+    std::unordered_map<std::string, std::string> reportData { { "pageUrl", info.url } };
+    ResSchedReportScope reportScope("push_page", reportData);
+    auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageNode->SetHostPageId(pageId);
+
+    TaskDependencyManager::GetInstance()->Sync();
+
+    if (!pageNode) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
+        return nullptr;
+    }
+
+    pageRouterStack_.emplace_back(pageNode);
+    if (!OnPageReady(pageNode, true, true)) {
+        pageRouterStack_.pop_back();
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "LoadPage OnPageReady Failed");
+        return nullptr;
+    }
+    return pageNode;
+}
+
+RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback)
+{
+    LogBacktrace();
+    CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, nullptr);
+        context->PostAsyncEvent(
+            [weak = WeakClaim(this), target]() {
+                auto router = weak.Upgrade();
+                CHECK_NULL_VOID(router);
+                router->Replace(target);
+            },
+            "ArkUIPageRouterReplace", TaskExecutor::TaskType::JS);
+        return nullptr;
+    }
+    RouterOptScope scope(this);
+    CleanPageOverlay();
+    if (target.url.empty()) {
+        return nullptr;
+    }
+
+    RouterPageInfo info = target;
+    info.path = info.url + ".js";
+    if (info.path.empty()) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in StartReplace with url: %{public}s", info.url.c_str());
+        if (info.errorCallback != nullptr) {
+            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR_LITE);
+        }
+        return nullptr;
+    }
+    UpdateSrcPage();
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+#if defined(ENABLE_SPLIT_MODE)
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, nullptr);
+#endif
+    TAG_LOGI(AceLogTag::ACE_ROUTER,
+        "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
+        static_cast<int32_t>(info.routerMode), info.url.c_str());
+    auto popNode = GetCurrentPageNode();
+    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size()) - 1;
+    bool findPage = false;
+    if (info.routerMode == RouterMode::SINGLE) {
+        auto pageInfo = FindPageInStack(info.url);
+        // haven't find page by named route's name. Try again with its page path.
+        if (pageInfo.second == nullptr && info.isNamedRouterMode) {
+            std::string pagePath = Framework::JsiDeclarativeEngine::GetPagePath(info.url);
+            pageInfo = FindPageInStack(pagePath);
+        }
+        auto replacePageNode = pageInfo.second;
+        if (pageInfo.first == popIndex) {
+            // replace top self in SINGLE mode, do nothing.
+            CHECK_NULL_RETURN(replacePageNode, nullptr);
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
+            return replacePageNode;
+        }
+        if (replacePageNode) {
+            // find page in stack, move position and update params.
+#if defined(ENABLE_SPLIT_MODE)
+            stageManager->SetIsNewPageReplacing(true);
+#endif
+            MovePageToFront(pageInfo.first, replacePageNode, info, false, true, false);
+#if defined(ENABLE_SPLIT_MODE)
+            stageManager->SetIsNewPageReplacing(false);
+#endif
+            popIndex = popIndex - 1;
+            findPage = true;
+            auto pagePattern = replacePageNode->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
+        } else {
+            auto index = FindPageInRestoreStack(info.url);
+            if (index != INVALID_PAGE_INDEX) {
+                // find page in restore page, create page, move position and update params.
+                RestorePageWithTarget(index, false, info, RestorePageDestination::BELLOW_TOP, false);
+                return replacePageNode;
+            }
+        }
+    }
+    RefPtr<FrameNode> pageNode = nullptr;
+    if (!findPage) {
+        isNewPageReplacing_ = true;
+#if defined(ENABLE_SPLIT_MODE)
+        stageManager->SetIsNewPageReplacing(true);
+#endif
+        auto pageId = GenerateNextPageId();
+        auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(
+        pageId, target.url, target.path, target.params, target.recoverable, target.isNamedRouterMode);
+        auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
+
+        std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
+        ResSchedReportScope reportScope("push_page", reportData);
+        pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+        pageNode->SetHostPageId(pageId);
+        TaskDependencyManager::GetInstance()->Sync();
+        if (!pageNode) {
+            TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
+            return nullptr;
+        }
+
+        pageRouterStack_.emplace_back(pageNode);
+        if (!OnPageReady(pageNode, true, false)) {
+            pageRouterStack_.pop_back();
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "LoadPage OnPageReady Failed");
+            return nullptr;
+        }
+        AccessibilityEventType type = AccessibilityEventType::CHANGE;
+        pageNode->OnAccessibilityEvent(type);
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "LoadPage Success");
+#if defined(ENABLE_SPLIT_MODE)
+        stageManager->SetIsNewPageReplacing(false);
+#endif
+        isNewPageReplacing_ = false;
+    }
+    if (popIndex < 0 || popNode == GetCurrentPageNode()) {
+        return pageNode;
+    }
+    auto pagePattern = popNode->GetPattern<PagePattern>();
+    pagePattern->SetOnNodeDisposeCallback(std::move(finishCallback));
+    auto iter = pageRouterStack_.begin();
+    std::advance(iter, popIndex);
+    auto lastIter = pageRouterStack_.erase(iter);
+    pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
+    popNode->MovePosition(GetLastPageIndex());
+    for (auto iter = lastIter; iter != pageRouterStack_.end(); ++iter, ++popIndex) {
+        auto page = iter->Upgrade();
+        if (!page) {
+            continue;
+        }
+        if (page == popNode) {
+            // do not change index of page that will be replaced.
+            continue;
+        }
+        auto pagePattern = page->GetPattern<NG::PagePattern>();
+        pagePattern->GetPageInfo()->SetPageIndex(popIndex + 1);
+    }
+#if defined(ENABLE_SPLIT_MODE)
+    stageManager->SetIsNewPageReplacing(true);
+#endif
+    PopPage("", false, false);
+#if defined(ENABLE_SPLIT_MODE)
+    stageManager->SetIsNewPageReplacing(false);
+#endif
+    return pageNode;
+}
+
+RefPtr<FrameNode> PageRouterManager::RunPageExtender(const RouterPageInfo& target)
+{
+    PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
+    CHECK_RUN_ON(JS);
+    RouterPageInfo info = target;
+    info.path = info.url + ".js";
+    auto pageId = GenerateNextPageId();
+    auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(
+        pageId, info.url, info.path, info.params, info.recoverable, info.isNamedRouterMode);
+    auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
+
+    std::unordered_map<std::string, std::string> reportData { { "pageUrl", info.url } };
+    ResSchedReportScope reportScope("push_page", reportData);
+    auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageNode->SetHostPageId(pageId);
+    // !!! must push_back first for UpdateRootComponent
+    pageRouterStack_.emplace_back(pageNode);
+
+    auto pageInfo = pagePattern->GetPageInfo();
+    if (!pageInfo) {
+        pageRouterStack_.pop_back();
+        return nullptr;
+    }
+
+    TaskDependencyManager::GetInstance()->Sync();
+
+    if (!OnPageReady(pageNode, true, true)) {
+        pageRouterStack_.pop_back();
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "LoadPage OnPageReady Failed");
+        return nullptr;
+    }
+
+    AccessibilityEventType type = AccessibilityEventType::CHANGE;
+    pageNode->OnAccessibilityEvent(type);
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "LoadPage Success");
+    return pageNode;
+}
+
 bool PageRouterManager::TryPreloadNamedRouter(const std::string& name, std::function<void()>&& finishCallback)
 {
     /**

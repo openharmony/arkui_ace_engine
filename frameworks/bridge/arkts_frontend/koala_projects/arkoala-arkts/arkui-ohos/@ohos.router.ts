@@ -1,6 +1,8 @@
 import { InteropNativeModule } from "@koalaui/interop/InteropNativeModule"
 import { Router } from "arkui/handwritten"
 import { PeerNode } from "arkui/PeerNode"
+import { UserViewBuilder } from "./src/UserView"
+import { ComputableState, State } from "@koalaui/runtime"
 
 namespace router {
     export interface RouterOptions {
@@ -13,8 +15,11 @@ namespace router {
         Single
     }
 
-    export function registerPage(page: string, className: string): void {
-        pageEntries.set(page, className)
+    export interface RouterState {
+        index: number;
+        name: string;
+        path: string;
+        params: Object;
     }
 
     export function error(prefix: string, e: Object|null|undefined): string {
@@ -29,41 +34,64 @@ namespace router {
     let globalRouterImp: Router | undefined
 
     export function setRouter(routerImp: Router): void {
-        pageEntries = new Map<string, string>();
-        InteropNativeModule._NativeLog("AceRouter:enter set router")
         globalRouterImp = routerImp
-        routerImp.provideClassNameResolver((page:string) => pageEntries?.get(page))
     }
 
-    export function getParams(): Object | undefined {
-        return globalRouterImp!.getParam("arkuiOptions")
+    export function getParams(): Object {
+        return globalRouterImp!.getParams()
     }
 
     export function clear(): void {
-        InteropNativeModule._NativeLog("AceRouter:enter ohos clear")
         globalRouterImp!.clear()
+    }
+
+    export function getLength(): string {
+        return globalRouterImp!.getLength();
+    }
+
+    export function getState(): RouterState {
+        return globalRouterImp!.getState();
+    }
+
+    export function getStateByIndex(index: number): RouterState | undefined {
+        return globalRouterImp!.getStateByIndex(index);
+    }
+
+    export function getStateByUrl(url: string): Array<router.RouterState> {
+        return globalRouterImp!.getStateByUrl(url);
     }
 
     export function pushUrl(options: RouterOptions): void {
         InteropNativeModule._NativeLog("AceRouter:enter ohos pushUrl " + options.url)
-        globalRouterImp!.push(options.url)
+        globalRouterImp!.push(options)
+    }
+
+    export function replaceUrl(options: RouterOptions): void {
+        InteropNativeModule._NativeLog("AceRouter:enter ohos replaceUrl " + options.url)
+        globalRouterImp!.replace(options)
     }
 
     export function push(options: RouterOptions): void {
         InteropNativeModule._NativeLog("AceRouter:enter ohos push " + options.url)
-        globalRouterImp!.push(options.url)
-            .catch((e: Object|null|undefined) => InteropNativeModule._NativeLog(error(`AceRouter:Push URL ${options.url} in router failed`, e)))
+        globalRouterImp!.push(options)
     }
 
     export function back(options?: RouterOptions): void {
         InteropNativeModule._NativeLog("AceRouter:enter ohos back")
-        globalRouterImp!.back(options?.url)
-            .catch((e: Object|null|undefined) => InteropNativeModule._NativeLog(error(`AceRouter:Cannot go back in router`, e)))
+        globalRouterImp!.back(options)
     }
 
     export function UpdateVisiblePagePeerNode(node: PeerNode, index: number = -1): void {
         InteropNativeModule._NativeLog("AceRouter:enter ohos UpdateVisiblePagePeerNode")
         globalRouterImp!.UpdateVisiblePagePeerNode(node, index);
+    }
+
+    export function getStateRoot(): Array<ComputableState<PeerNode>> {
+        return globalRouterImp!.getEntryRootValue();
+    }
+
+    export function runPage(options: RouterOptions, builder: UserViewBuilder): void {
+        globalRouterImp!.runPage(options, builder)
     }
 }
 

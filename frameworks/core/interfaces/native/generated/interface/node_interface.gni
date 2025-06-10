@@ -242,6 +242,7 @@ generated_sources = [
   "implementation/rotation_gesture_event_accessor.cpp",
   "implementation/rotation_gesture_interface_accessor.cpp",
   "implementation/rotation_recognizer_accessor.cpp",
+  "implementation/router_extender_accessor.cpp",
   "implementation/row_modifier.cpp",
   "implementation/row_split_modifier.cpp",
   "implementation/save_button_modifier.cpp",
