@@ -693,6 +693,7 @@ void TextFieldPattern::SetAccessibilityPasswordIconAction()
     CHECK_NULL_VOID(textAccessibilityProperty);
     textAccessibilityProperty->SetAccessibilityLevel("yes");
     textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
+    textAccessibilityProperty->SetAccessibilityCustomRole("button");
 }
 
 void TextFieldPattern::SetAccessibilityClearAction()
@@ -710,7 +711,8 @@ void TextFieldPattern::SetAccessibilityClearAction()
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
     auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
                         (cleanNodeStyle == CleanNodeStyle::INPUT && HasText());
-    textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
+    textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelButton() : "");
+    textAccessibilityProperty->SetAccessibilityCustomRole("button");
 }
 
 void TextFieldPattern::SetAccessibilityUnitAction()
