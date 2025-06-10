@@ -33,7 +33,7 @@ ace_unittest("capi_all_modifiers_test") {
     # "circle_modifier_test.cpp",
     # "column_modifier_test.cpp",
     # "column_split_modifier_test.cpp",
-    # "common_method_modifier_test.cpp",
+    "common_method_modifier_test.cpp",
     # "common_method_modifier_test10.cpp",
     # "common_method_modifier_test11.cpp",
     #"common_method_modifier_test12.cpp",
