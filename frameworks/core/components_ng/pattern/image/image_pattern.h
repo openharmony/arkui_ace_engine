@@ -518,7 +518,7 @@ private:
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
     void SetObscured();
-    void OnKeyEvent();
+    void OnKeyEvent(const KeyEvent& event);
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;

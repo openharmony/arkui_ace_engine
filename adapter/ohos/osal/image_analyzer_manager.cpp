@@ -445,6 +445,12 @@ void ImageAnalyzerManager::UpdateAIButtonConfig(AIButtonConfig config)
     ImageAnalyzerMgr::GetInstance().UpdateAIButtonConfig(&overlayData_, &config);
 }
 
+void ImageAnalyzerManager::UpdateKeyEvent(KeyEvent keyEvent)
+{
+    CHECK_NULL_VOID(isAnalyzerOverlayBuild_);
+    ImageAnalyzerMgr::GetInstance().UpdateKeyEvent(&overlayData_, keyEvent.rawKeyEvent.get());
+}
+
 void ImageAnalyzerManager::UpdateOverlayActiveStatus(bool status)
 {
     CHECK_NULL_VOID(isAnalyzerOverlayBuild_);
