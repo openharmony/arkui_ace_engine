@@ -286,6 +286,16 @@ int32_t FrameNodeImpl::GetMeasureHeight()
     return frameNode_->GetGeometryNode()->GetFrameSize().Height();
 }
 
+NodeHandle FrameNodeImpl::GetParentHandle()
+{
+    CHECK_NULL_RETURN(frameNode_, nullptr);
+    auto* frameNode = reinterpret_cast<AceNode*>(frameNode_);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto parent = frameNode->GetParent();
+    CHECK_NULL_RETURN(parent, nullptr);
+    return reinterpret_cast<NodeHandle>(OHOS::Ace::AceType::RawPtr(parent));
+}
+
 void FrameNodeImpl::SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback)
 {
     CHECK_NULL_VOID(frameNode_);
@@ -352,6 +362,11 @@ void FrameNodeImpl::SetLinearGradientBlur(const NG::LinearGradientBlurPara& blur
 {
     CHECK_NULL_VOID(frameNode_);
     NG::ViewAbstract::SetLinearGradientBlur(frameNode_, blurPara);
+}
+
+void FrameNodeImpl::SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
+{
+    NG::ViewAbstract::SetCompositingFilter(compositingFilter);
 }
 
 } // namespace OHOS::Ace::Kit

@@ -72,9 +72,12 @@ public:
     void ResetSafeAreaPadding() override;
     void SetLinearGradient(const NG::Gradient& gradient) override;
     void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara) override;
+    void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
+    
     void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) override;
     int32_t GetMeasureWidth() override;
     int32_t GetMeasureHeight() override;
+    NodeHandle GetParentHandle() override;
 
 private:
     void PushAceNode(const RefPtr<AceNode>& node);
