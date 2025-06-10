@@ -132,6 +132,11 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
 {
     std::unordered_map<std::string, std::string> payload = param;
     payload[Ressched::NAME] = name;
+    int64_t tid = GetTid();
+    int64_t pid = GetPid();
+    if (pid != tid) {
+        payload["scrTid"] = std::to_string(GetPthreadSelf());
+    }
     if (!reportDataFunc_) {
         reportDataFunc_ = LoadReportDataFunc();
     }

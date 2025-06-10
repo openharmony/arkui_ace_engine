@@ -72,7 +72,9 @@ public:
     void OnAxisEvent(const AxisEvent& axisEvent);
     void AxisEventReportEnd();
     void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode);
-
+    int64_t GetTid();
+    int64_t GetPid();
+    pthread_t GetPthreadSelf();
 private:
     ResSchedReport();
     ~ResSchedReport() {}
