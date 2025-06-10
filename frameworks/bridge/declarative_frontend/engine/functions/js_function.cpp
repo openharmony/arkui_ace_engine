@@ -150,6 +150,42 @@ JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAni
     return result;
 }
 
+JSRef<JSVal> JsWeakFunction::ExecuteJSWithContext(
+    int argc, JSRef<JSVal> argv[], const JSExecutionContext& context, bool isAnimation)
+{
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    JS_CALLBACK_DURATION(id);
+    JAVASCRIPT_EXECUTION_SCOPE(context);
+    ACE_FUNCTION_TRACE();
+    JSRef<JSVal> jsObject = jsThis_.Lock();
+    auto jsFunction = jsWeakFunction_.Lock();
+    if (jsFunction.IsEmpty()) {
+        LOGW("js function is null.");
+        return {};
+    }
+    JSRef<JSVal> result = jsFunction->Call(jsObject, argc, argv);
+    return result;
+}
+
+JSRef<JSVal> JsFunction::ExecuteJSWithContext(
+    int argc, JSRef<JSVal> argv[], const JSExecutionContext& context, bool isAnimation)
+{
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    JS_CALLBACK_DURATION(id);
+    JAVASCRIPT_EXECUTION_SCOPE(context);
+    ACE_FUNCTION_TRACE();
+
+    JSRef<JSVal> jsObject = jsThis_.Lock();
+    JSRef<JSVal> result = jsFunction_->Call(jsObject, argc, argv, isAnimation);
+    return result;
+}
+
 JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAnimation)
 {
     int32_t id = -1;

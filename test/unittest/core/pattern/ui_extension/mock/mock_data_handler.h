@@ -32,7 +32,8 @@ class MockDataHandler : public IDataHandler {
         return DataHandlerErr::OK;
     }
 
-    DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) override
+    DataHandlerErr SendDataAsync(
+        SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) override
     {
         return DataHandlerErr::OK;
     }
