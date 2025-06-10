@@ -54,11 +54,16 @@ interface PerformanceDataFile {
 }
 
 function parseFile(performanceFile: string): PerformanceDataFile | undefined {
+    performanceFile = path.resolve(performanceFile)
     if (!fs.existsSync(performanceFile)) return undefined
 
-    const data = fs.readFileSync(path.resolve(performanceFile)).toString()
-    if (!data.length) return undefined
-    return JSON.parse(data) as PerformanceDataFile
+    const fileData = fs.readFileSync(performanceFile).toString()
+    if (!fileData.length) return undefined
+    try {
+        return JSON.parse(fileData) as PerformanceDataFile
+    } catch (error) {
+        return undefined
+    }
 }
 
 export class Profiler implements PerformanceData {
@@ -70,8 +75,8 @@ export class Profiler implements PerformanceData {
     totalTime: number = 0
     pluginsByName: Record<string, PluginData> = {}
 
-    curPlugin: string = ""
-    curContextState?: Es2pandaContextState
+    private curPlugin: string = ""
+    private curContextState?: Es2pandaContextState
 
     private getPluginData(pluginName: string, contextState?: Es2pandaContextState): PluginData {
         if (!(pluginName in this.pluginsByName)) {
@@ -79,8 +84,6 @@ export class Profiler implements PerformanceData {
         }
         return this.pluginsByName[pluginName]
     }
-
-    disableReport = false
 
     nodeCreated() {
         this.createdNodes++
@@ -93,7 +96,9 @@ export class Profiler implements PerformanceData {
     }
 
     private transformStartTime = 0
-    transformStarted() {
+    transformStarted(state: Es2pandaContextState, pluginName: string) {
+        this.curPlugin = pluginName
+        this.curContextState = state
         this.transformStartTime = Date.now()
     }
     private transformDepStartTime = 0
@@ -105,6 +110,8 @@ export class Profiler implements PerformanceData {
         const transformEndTime = Date.now()
         const consumedTime = transformEndTime - this.transformStartTime
         this.getPluginData(pluginName, state).transformTime += consumedTime
+        this.curPlugin = ""
+        this.curContextState = undefined
     }
 
     transformDepEnded(state: Es2pandaContextState, pluginName: string) {
@@ -133,23 +140,22 @@ export class Profiler implements PerformanceData {
     }
 
     report() {
-        Object.entries(this.pluginsByName).forEach((data, key) => {
-            console.log(data[0], "totalTransformTime =", data[1].transformTime, "ms")
-            console.log(data[0], "totalDepsTransformTime =", data[1].transformTimeDeps, "ms")
+        Object.entries(this.pluginsByName).forEach(([pluginName, data], key) => {
+            console.log(pluginName, "totalTransformTime =", data.transformTime, "ms")
+            console.log(pluginName, "totalDepsTransformTime =", data.transformTimeDeps, "ms")
         })
     }
 
     reportToFile(withSummary: boolean = false) {
-        if (this.disableReport) return
         const outDir = path.resolve(global.outDir, "./performance-results/")
         if (!fs.existsSync(outDir)) fs.mkdirSync(outDir)
         const outFilePath = path.resolve(outDir, path.basename(this.filePath)) + ".json"
     
-        const data: PerformanceDataFile = { data: [this as PerformanceData] }
+        const curData: PerformanceDataFile = { data: [this as PerformanceData] }
         if (!fs.existsSync(outFilePath)) {
-            fs.writeFileSync(outFilePath, JSON.stringify(data))
+            fs.writeFileSync(outFilePath, JSON.stringify(curData))
         } else {
-            const savedData: PerformanceDataFile | undefined = parseFile(outFilePath) ?? data
+            const savedData: PerformanceDataFile | undefined = parseFile(outFilePath) ?? curData
             savedData.data.push(this as PerformanceData)
 
             if (withSummary) {

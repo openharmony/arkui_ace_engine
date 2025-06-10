@@ -15,7 +15,7 @@
 
 import * as fs from "node:fs"
 import * as path from "node:path"
-import { checkSDK, arktsGlobal as global, ImportStorage, ETSModule, ProgramProvider, metaDatabase, runTransformer, RunTransformerContext } from "@koalaui/libarkts"
+import { checkSDK, arktsGlobal as global, ImportStorage, ETSModule, ProgramProvider, metaDatabase, runTransformer, RunTransformerContext, Profiler } from "@koalaui/libarkts"
 import { CheckedBackFilter, ChainExpressionFilter, PluginContext, PluginContextImpl } from "@koalaui/libarkts"
 import { Command } from "commander"
 import { filterSource, isNumber, throwError, withWarning } from "@koalaui/libarkts"
@@ -32,6 +32,7 @@ function parseCommandLineArgs() {
         .option('--dump-plugin-ast', 'Dump ast before and after each plugin')
         .option('--restart-stages', 'Restart the compiler to proceed to next stage')
         .option('--stage <int>', 'Stage of multistage compilation (from 0 to number of plugins in arktsconfig + 1)')
+        .option('--enable-report', 'Enable profiler report')
         .parse(process.argv)
 
     const cliOptions = commander.opts()
@@ -53,8 +54,9 @@ function parseCommandLineArgs() {
     const dumpAst = cliOptions.dumpPluginAst ?? false
     const restartStages = cliOptions.restartStages ?? false
     const stage = cliOptions.stage ?? 0
+    const enableReport = cliOptions.enableReport ?? false
 
-    return { filePath, configPath, outputPath, dumpAst, restartStages, stage }
+    return { filePath, configPath, outputPath, dumpAst, restartStages, stage, enableReport }
 }
 
 function insertPlugin(
@@ -65,9 +67,10 @@ function insertPlugin(
     dumpAst: boolean, 
     restart: boolean,
     context: PluginContext,
+    profiler?: Profiler,
     updateWith?: (node: AstNode) => void
 ): AstNode {
-    proceedToState(state)
+    proceedToState(state, profiler)
     const script = createETSModuleFromContext()
     // Or this: const script = createETSModuleFromSource(source)
     if (script === undefined) {
@@ -79,24 +82,17 @@ function insertPlugin(
         console.log(filterSource(script.dumpSrc()))
     }
 
-    
-    global.profiler.curPlugin = pluginName
-    global.profiler.transformStarted()
-
     runTransformer(global.compilerContext.program, state, transform, context, {
         onProgramTransformStart(ctx: RunTransformerContext) {
-            if (!ctx.isMainProgram) global.profiler.transformDepStarted()
+            profiler?.transformStarted(state, pluginName)
+            if (!ctx.isMainProgram) profiler?.transformDepStarted()
         },
         onProgramTransformEnd(ctx: RunTransformerContext) {
-            if (!ctx.isMainProgram) {
-                global.profiler.transformDepEnded(state, pluginName)
-            }
+            profiler?.transformEnded(state, pluginName)
+            if (!ctx.isMainProgram) profiler?.transformDepEnded(state, pluginName)
             return !restart
         }
     })
-    
-    global.profiler.transformEnded(state, pluginName)
-    global.profiler.curPlugin = ""
 
     if (dumpAst) {
         console.log(`AFTER ${stateName(state)}:`)
@@ -168,7 +164,10 @@ function invokeWithPlugins(
     restart: boolean,
     stage: number,
     pluginNames: string[],
+    profiler?: Profiler
 ): void {
+    profiler?.compilationStarted(filePath)
+
     const source = fs.readFileSync(filePath).toString()
     const sdk = process.env.PANDA_SDK_PATH ?? withWarning(
         defaultPandaSdk,
@@ -220,7 +219,7 @@ function invokeWithPlugins(
             if (pluginsApplied == stage) {
                 // uncomment if switch to dets generator
                 // restartCompiler(configPath, filePath, stdlib, outputPath, false)
-                generateDeclFromCurrentContext(newFilePath)
+                generateDeclFromCurrentContext(newFilePath, profiler)
             }
             pluginsApplied++
             const before = Date.now()
@@ -228,7 +227,7 @@ function invokeWithPlugins(
             const after = Date.now()
             configPath = newConfigPath
             filePath = newFilePath
-            global.profiler.restarted(after - before)
+            profiler?.restarted(after - before)
         }
     }
 
@@ -236,31 +235,31 @@ function invokeWithPlugins(
 
     context.setParameter("restart", restart)
 
-    global.profiler.curContextState = Es2pandaContextState.ES2PANDA_STATE_PARSED
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_PARSED)?.forEach(plugin => {
-        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, pluginNames[pluginsApplied], dumpAst, restart, context)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, pluginNames[pluginsApplied], dumpAst, restart, context, profiler)
         restartProcedure(Es2pandaContextState.ES2PANDA_STATE_PARSED)
     })
 
-    global.profiler.curContextState = Es2pandaContextState.ES2PANDA_STATE_BOUND
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_BOUND)?.forEach(plugin => {
-        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, pluginNames[pluginsApplied], dumpAst, restart, context, rebindSubtree)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, pluginNames[pluginsApplied], dumpAst, restart, context, profiler, rebindSubtree)
         restartProcedure(Es2pandaContextState.ES2PANDA_STATE_BOUND)
     })
 
-    global.profiler.curContextState = Es2pandaContextState.ES2PANDA_STATE_CHECKED
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_CHECKED)?.forEach(plugin => {
-        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, pluginNames[pluginsApplied], dumpAst, restart, context, recheckSubtree)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, pluginNames[pluginsApplied], dumpAst, restart, context, profiler, recheckSubtree)
         restartProcedure(Es2pandaContextState.ES2PANDA_STATE_CHECKED)
     })
-    global.profiler.curContextState = Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED
-    proceedToState(Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED)
+    proceedToState(Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED, profiler)
+
+    profiler?.compilationEnded()
+    profiler?.report()
+    profiler?.reportToFile(true)
 }
 
 const exportsFromInitialFile: string[] = []
 
-function generateDeclFromCurrentContext(filePath: string): never {
-    proceedToState(Es2pandaContextState.ES2PANDA_STATE_PARSED)
+function generateDeclFromCurrentContext(filePath: string, profiler?: Profiler): never {
+    proceedToState(Es2pandaContextState.ES2PANDA_STATE_PARSED, profiler)
     console.log(`Emitting to ${filePath}`)
     let out = [
         filterSource(
@@ -272,9 +271,6 @@ function generateDeclFromCurrentContext(filePath: string): never {
     ].join('\n')
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
     fs.writeFileSync(filePath, out)
-    global.profiler.compilationEnded()
-    global.profiler.report()
-    global.profiler.reportToFile()
     process.exit(0)
 }
 
@@ -322,7 +318,7 @@ function readAndSortPlugins(configDir: string, plugins: any[]) {
 
 export function main() {
     checkSDK()
-    const { filePath, configPath, outputPath, dumpAst, restartStages, stage } = parseCommandLineArgs()
+    const { filePath, configPath, outputPath, dumpAst, restartStages, stage, enableReport } = parseCommandLineArgs()
     const arktsconfig = JSON.parse(fs.readFileSync(configPath).toString())
     const configDir = path.dirname(configPath)
     const compilerOptions = arktsconfig.compilerOptions ?? throwError(`arktsconfig should specify compilerOptions`)
@@ -334,11 +330,7 @@ export function main() {
 
     const pluginsByState = readAndSortPlugins(configDir, plugins)
 
-    global.profiler.compilationStarted(filePath)
-    invokeWithPlugins(configPath, packageName, baseUrl, outDir, filePath, outputPath, pluginsByState, dumpAst, restartStages, stage, pluginNames)
-    global.profiler.compilationEnded()
-    global.profiler.report()
-    global.profiler.reportToFile(true)
+    invokeWithPlugins(configPath, packageName, baseUrl, outDir, filePath, outputPath, pluginsByState, dumpAst, restartStages, stage, pluginNames, enableReport ? new Profiler() : undefined)
 }
 
 function reportErrorAndExit(message: string): never {
