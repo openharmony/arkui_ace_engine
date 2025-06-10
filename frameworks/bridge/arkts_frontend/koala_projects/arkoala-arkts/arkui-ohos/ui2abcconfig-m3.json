@@ -38,46 +38,46 @@
                 "arkui/ani/arkts"
             ],
             "@ohos/animator": [
-                "./ohos.animator.ts"
+                "./@ohos.animator.ts"
             ],
             "@ohos/arkui/componentUtils": [
-                "./ohos.arkui.componentUtils.ts"
+                "./@ohos.arkui.componentUtils.ts"
             ],
             "@ohos/arkui/focusController": [
-                "./ohos.arkui.focusController.ts"
+                "./@ohos.arkui.focusController.ts"
             ],
             "@ohos/arkui/inspector": [
-                "./ohos.arkui.inspector.ts"
+                "./@ohos.arkui.inspector.ts"
             ],
             "@ohos/arkui/UIContext": [
-                "./ohos.arkui.UIContext.ts"
+                "./@ohos.arkui.UIContext.ts"
             ],
             "@ohos/measure": [
-                "./ohos.measure.ts"
+                "./@ohos.measure.ts"
             ],
             "@ohos/font/font": [
-                "./ohos.font.ts"
+                "./@ohos.font.ts"
             ],
             "global/resource": [
                 "./global/resource/resource.ts"
             ],
             "@ohos.router": [
-                "./ohos.router.ts"
+                "./@ohos.router.ts"
             ],
             "@ohos/arkui/observer": [
-                "./ohos.arkui.observer.ts"
+                "./@ohos.arkui.observer.ts"
             ],
             "@ohos/graphics/common2D": [
-                "./ohos.graphics.common2D.ts"
+                "./@ohos.graphics.common2D.ts"
             ],
             "@ohos/graphics/drawing": [
-                "./ohos.graphics.drawing.ts"
+                "./@ohos.graphics.drawing.ts"
             ],
             "@ohos/arkui/graphics": [
-                "./ohos.arkui.graphics.ts"
+                "./@ohos.arkui.graphics.ts"
             ],
             "@ohos.promptAction": [
-                "./ohos.promptAction.ts"
+                "./@ohos.promptAction.ts"
             ],
             "@koalaui/runtime/annotations": ["../../incremental/runtime/annotations"],
             "#stateMgmtTool": [
@@ -99,20 +99,20 @@
     },
     "include": [
         "arkui/**/*.ts",
-        "./ohos.measure.ts",
-        "./ohos.font.ts",
-        "./ohos.arkui.UIContext.ts",
-        "./ohos.animator.ts",
-        "./ohos.arkui.componentUtils.ts",
-        "./ohos.arkui.focusController.ts",
-        "./ohos.arkui.inspector.ts",
+        "./@ohos.measure.ts",
+        "./@ohos.font.ts",
+        "./@ohos.arkui.UIContext.ts",
+        "./@ohos.animator.ts",
+        "./@ohos.arkui.componentUtils.ts",
+        "./@ohos.arkui.focusController.ts",
+        "./@ohos.arkui.inspector.ts",
         "./global/**/*.ts",
-        "./ohos.router.ts",
-        "./ohos.arkui.observer.ts",
-        "./ohos.graphics.common2D.ts",
-        "./ohos.graphics.drawing.ts",
-        "./ohos.arkui.graphics.ts",
-        "./ohos.promptAction.ts"
+        "./@ohos.router.ts",
+        "./@ohos.arkui.observer.ts",
+        "./@ohos.graphics.common2D.ts",
+        "./@ohos.graphics.drawing.ts",
+        "./@ohos.arkui.graphics.ts",
+        "./@ohos.promptAction.ts"
     ],
     "exclude": [
         "arkui/component/ts/*",        
