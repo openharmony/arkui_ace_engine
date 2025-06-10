@@ -761,6 +761,27 @@ HWTEST_F(TextAreaTestTwo, UpdatePressStyle005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToJsonValue
+ * @tc.desc: Test TextFieldLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, ToJsonValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetIsOnlyBetweenLines(true); });
+
+    /**
+     * @tc.steps: step2. run ToJsonValue().
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("onlyBetweenLines"), "true");
+}
+
+/**
  * @tc.name: CalcMeasureContentWithMinLines001
  * @tc.desc: Test is textarea, CalcMeasureContentWithMinLines, minlines = 3
  * @tc.type: FUNC
