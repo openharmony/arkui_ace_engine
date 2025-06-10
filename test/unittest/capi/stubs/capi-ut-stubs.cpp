@@ -31,6 +31,11 @@ void PipelineBase::PrepareCloseImplicitAnimation() {}
 
 void PipelineBase::GetUIFontConfig(OHOS::Ace::FontConfigJsonInfo&) {}
 
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return false;
+}
+
 void NG::PipelineContext::SetCallBackNode(const WeakPtr<NG::FrameNode>& node) {}
 
 RefPtr<NG::FrameNode> NG::CircleModelNG::CreateFrameNode(int32_t nodeId)
