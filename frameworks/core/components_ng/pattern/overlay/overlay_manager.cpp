@@ -4620,6 +4620,8 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     auto isNeedFocus = IsTopOrder(levelOrder);
     if (isNeedFocus) {
         FireModalPageShow();
+        modalNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     modalNodeParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (contentCoverParam.transitionEffect != nullptr) {
@@ -4631,11 +4633,6 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
         modalPagePattern->OnAppear();
         // Fire hidden event of navdestination under the appeared modal
         FireNavigationStateChange(false);
-    }
-
-    if (isNeedFocus) {
-        modalNode->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (modalTransition == ModalTransition::DEFAULT) {
         PlayDefaultModalTransition(modalNode, true);
