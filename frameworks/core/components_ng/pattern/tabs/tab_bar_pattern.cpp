@@ -1631,8 +1631,10 @@ void TabBarPattern::HandleBottomTabBarClick(int32_t selectedIndex, int32_t unsel
     CHECK_NULL_VOID(layoutProperty);
 
     std::vector<int32_t> selectedIndexes = {selectedIndex, unselectedIndex};
-    OffsetF originalSelectedMaskOffset, originalUnselectedMaskOffset;
-    float selectedImageSize = 0.0f, unselectedImageSize = 0.0f;
+    OffsetF originalSelectedMaskOffset;
+    OffsetF originalUnselectedMaskOffset;
+    float selectedImageSize = 0.0f;
+    float unselectedImageSize = 0.0f;
     for (int32_t maskIndex = 0; maskIndex < MASK_COUNT; maskIndex++) {
         if (maskIndex == 0) {
             layoutProperty->UpdateSelectedMask(selectedIndex);
