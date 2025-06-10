@@ -63,6 +63,12 @@ void ResetOnItemDragEnter(ArkUINodeHandle node);
 void ResetOnItemDragMove(ArkUINodeHandle node);
 void ResetOnItemDragLeave(ArkUINodeHandle node);
 void ResetOnItemDrop(ArkUINodeHandle node);
+void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj);
+void ParseResObjDividerStrokeWidth(ArkUINodeHandle node, void* resObj);
+void ParseResObjDividerColor(ArkUINodeHandle node, void* resObj);
+void ParseResObjDividerStartMargin(ArkUINodeHandle node, void* resObj);
+void ParseResObjDividerEndMargin(ArkUINodeHandle node, void* resObj);
+void CreateWithResourceObjLaneConstrain(ArkUINodeHandle node, void* resObjMinLengthValue, void* resObjMaxLengthValue);
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LIST_MODIFIER_H

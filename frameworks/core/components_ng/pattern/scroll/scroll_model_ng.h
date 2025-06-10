@@ -57,7 +57,9 @@ public:
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override;
     void SetEnablePaging(bool enablePaging) override;
     void SetInitialOffset(const OffsetT<CalcDimension>& offset) override;
-
+    void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjSnapPaginations(std::vector<RefPtr<ResourceObject>>& resObjs) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetScrollController(
         FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
@@ -95,12 +97,15 @@ public:
     static void SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event);
     static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
     static ScrollEdgeType GetOnScrollEdge(FrameNode* frameNode);
+    static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetOnWillScroll(FrameNode* frameNode, NG::ScrollEventWithReturn&& event);
     static void SetOnDidScroll(FrameNode* frameNode, NG::ScrollEventWithState&& event);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetInitialOffset(FrameNode* frameNode, const OffsetT<CalcDimension>& offset);
     static void SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy);
+    static void CreateWithResourceObjSnapPaginations(
+        FrameNode* frameNode, std::vector<RefPtr<ResourceObject>>& resObjs);
 };
 
 } // namespace OHOS::Ace::NG

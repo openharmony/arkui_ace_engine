@@ -339,11 +339,13 @@ ArkUINativeModuleValue WaterFlowBridge::SetFriction(ArkUIRuntimeCallInfo *runtim
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     double friction = FRICTION_DEFAULT;
-    if (!ArkTSUtils::ParseJsDouble(vm, frictionArg, friction)) {
+    RefPtr<ResourceObject> frictionResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, frictionArg, friction, frictionResObj)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowFriction(nativeNode);
     } else {
+        auto frictionRawPtr = AceType::RawPtr(frictionResObj);
         GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowFriction(nativeNode,
-            static_cast<ArkUI_Float32>(friction));
+            static_cast<ArkUI_Float32>(friction), frictionRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }

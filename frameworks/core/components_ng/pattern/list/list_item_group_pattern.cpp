@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components/list/list_theme.h"
+
 
 namespace OHOS::Ace::NG {
 
@@ -770,6 +772,36 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
             }
         }
     }
+}
+
+void ListItemGroupPattern::UpdateDefaultColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ListTheme>();
+    CHECK_NULL_VOID(theme);
+    auto listItemLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_VOID(listItemLayoutProperty);
+    if (!listItemLayoutProperty->HasDividerColorSetByUser() ||
+        (listItemLayoutProperty->HasDividerColorSetByUser() &&
+            !listItemLayoutProperty->GetDividerColorSetByUserValue())) {
+        V2::ItemDivider value;
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListItemGroupLayoutProperty, Divider, value, host, value);
+        value.color = theme->GetDividerColor();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, value, host);
+    }
+}
+
+void ListItemGroupPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    UpdateDefaultColor();
+    host->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
 }
 
 void ListItemGroupPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
