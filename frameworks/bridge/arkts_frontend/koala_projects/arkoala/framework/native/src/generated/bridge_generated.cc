@@ -35948,13 +35948,16 @@ void impl_HoverEvent_setDisplayY(Ark_NativePointer thisPtr, KInteropNumber displ
         GetAccessors()->getHoverEventAccessor()->setDisplayY(self, (const Ark_Number*) (&displayY));
 }
 KOALA_INTEROP_DIRECT_V2(HoverEvent_setDisplayY, Ark_NativePointer, KInteropNumber)
-Ark_NativePointer impl_HoverEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_HoverEvent_getStopPropagation(Ark_NativePointer thisPtr) {
         Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getHoverEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getHoverEventAccessor()->getStopPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(HoverEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(HoverEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_HoverEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -36070,13 +36073,16 @@ void impl_MouseEvent_setY(Ark_NativePointer thisPtr, KInteropNumber y) {
         GetAccessors()->getMouseEventAccessor()->setY(self, (const Ark_Number*) (&y));
 }
 KOALA_INTEROP_DIRECT_V2(MouseEvent_setY, Ark_NativePointer, KInteropNumber)
-Ark_NativePointer impl_MouseEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_MouseEvent_getStopPropagation(Ark_NativePointer thisPtr) {
         Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getMouseEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getMouseEventAccessor()->getStopPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(MouseEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(MouseEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_MouseEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -36331,13 +36337,16 @@ void impl_TouchEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBu
         GetAccessors()->getTouchEventAccessor()->setStopPropagation(self, (const Callback_Void*)&stopPropagation_value);
 }
 KOALA_INTEROP_DIRECT_V3(TouchEvent_setStopPropagation, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_TouchEvent_getPreventDefault(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_TouchEvent_getPreventDefault(Ark_NativePointer thisPtr) {
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getTouchEventAccessor()->getPreventDefault(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getTouchEventAccessor()->getPreventDefault(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(TouchEvent_getPreventDefault, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(TouchEvent_getPreventDefault, KInteropReturnBuffer, Ark_NativePointer)
 void impl_TouchEvent_setPreventDefault(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -36795,13 +36804,16 @@ void impl_FocusAxisEvent_setAxisMap(Ark_NativePointer thisPtr, KSerializerBuffer
         GetAccessors()->getFocusAxisEventAccessor()->setAxisMap(self, (const Map_AxisModel_Number*)&axisMap_value);
 }
 KOALA_INTEROP_DIRECT_V3(FocusAxisEvent_setAxisMap, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_FocusAxisEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_FocusAxisEvent_getStopPropagation(Ark_NativePointer thisPtr) {
         Ark_FocusAxisEvent self = reinterpret_cast<Ark_FocusAxisEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getFocusAxisEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getFocusAxisEventAccessor()->getStopPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(FocusAxisEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(FocusAxisEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_FocusAxisEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_FocusAxisEvent self = reinterpret_cast<Ark_FocusAxisEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
