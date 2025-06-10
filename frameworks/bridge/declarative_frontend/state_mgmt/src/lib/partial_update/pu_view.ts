@@ -630,11 +630,17 @@ abstract class ViewPU extends PUV2ViewBase
    * @returns initializing value of the @Consume backing store
    */
   protected initializeConsume<T>(providedPropName: string,
-    consumeVarName: string): ObservedPropertyAbstractPU<T> {
+    consumeVarName: string, defaultValue?: any): ObservedPropertyAbstractPU<T> {
     let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU(providedPropName);
-    if (providedVarStore === undefined) {
-      throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
+    // '3' means that developer has initialized the @Consume decorated variable
+    if (!providedVarStore) {
+      if (arguments.length === 3) {
+        providedVarStore = new ObservedPropertySimplePU(defaultValue, this, consumeVarName);
+        providedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
+      } else {
+        throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
           Fail to resolve @Consume(${providedPropName}).`);
+      }
     }
 
     const factory = <T>(source: ObservedPropertyAbstract<T>) => {
