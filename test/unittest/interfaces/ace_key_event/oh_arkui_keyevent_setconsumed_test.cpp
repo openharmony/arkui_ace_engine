@@ -21,29 +21,27 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace {
 
-HWTEST_F(KeyEventTest, KeyEvent_GetKeyText001, TestSize.Level0)
+HWTEST_F(KeyEventTest, OH_ArkUI_KeyEvent_SetConsumed001, TestSize.Level0)
 {
-    auto result = OH_ArkUI_KeyEvent_GetKeyText(nullptr);
-    EXPECT_EQ(result, nullptr);
-}
+    OH_ArkUI_KeyEvent_SetConsumed(nullptr, true);
+    OH_ArkUI_KeyEvent_SetConsumed(nullptr, false);
 
-HWTEST_F(KeyEventTest, KeyEvent_GetKeyText002, TestSize.Level0)
-{
     ArkUI_UIInputEvent event = {
         .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
         .eventTypeId = C_KEY_EVENT_ID,
         .inputEvent = nullptr,
-        .isCloned = false,
-        .apiVersion = 0,
     };
-    auto result = OH_ArkUI_KeyEvent_GetKeyText(&event);
-    EXPECT_EQ(result, nullptr);
+    OH_ArkUI_KeyEvent_SetConsumed(&event, true);
+    OH_ArkUI_KeyEvent_SetConsumed(&event, false);
+
+    EXPECT_EQ(event.inputEvent, nullptr);
 }
 
-HWTEST_F(KeyEventTest, KeyEvent_GetKeyText003, TestSize.Level0)
+HWTEST_F(KeyEventTest, OH_ArkUI_KeyEvent_SetConsumed002, TestSize.Level0)
 {
-    const char* testText = "A";
-    ArkUIKeyEvent keyEvent { .type = ARKUI_KEY_EVENT_DOWN, .keyCode = 65, .keyText = testText };
+    ArkUIKeyEvent keyEvent = {
+        .isConsumed = false
+    };
     ArkUI_UIInputEvent event = {
         .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
         .eventTypeId = C_KEY_EVENT_ID,
@@ -51,8 +49,12 @@ HWTEST_F(KeyEventTest, KeyEvent_GetKeyText003, TestSize.Level0)
         .isCloned = false,
         .apiVersion = 0,
     };
-    auto result = OH_ArkUI_KeyEvent_GetKeyText(&event);
-    EXPECT_STREQ(result, testText);
+
+    OH_ArkUI_KeyEvent_SetConsumed(&event, true);
+    EXPECT_TRUE(keyEvent.isConsumed);
+
+    OH_ArkUI_KeyEvent_SetConsumed(&event, false);
+    EXPECT_FALSE(keyEvent.isConsumed);
 }
 
 } // namespace OHOS::Ace
