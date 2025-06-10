@@ -36,7 +36,9 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
@@ -561,6 +563,88 @@ HWTEST_F(SelectControlSizeNg, SetShowDefaultSelectedIcon001, TestSize.Level1)
     EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), true);
     SelectModelNG::SetShowDefaultSelectedIcon(selectFrameNode, false);
     EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), false);
+}
+
+/**
+ * @tc.name: UpdateSelectedProps001
+ * @tc.desc: Test SelectPattern UpdateSelectedProps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectControlSizeNg, UpdateSelectedProps001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateSelectedProps,
+     * @tc.expected: Selected menuitem's properties are right.
+     */
+    SelectModelNG::SetShowDefaultSelectedIcon(selectFrameNode, true);
+    int32_t index = 0;
+    selectPattern->UpdateSelectedProps(index);
+    auto newSelected = selectPattern->options_[index]->GetPattern<MenuItemPattern>();
+    ASSERT_NE(newSelected, nullptr);
+    EXPECT_EQ(newSelected->IsSelected(), true);
+    auto checkMarkLayoutProps = newSelected->checkMarkNode_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(checkMarkLayoutProps, nullptr);
+    EXPECT_EQ(checkMarkLayoutProps->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    auto newSelectedNode = newSelected->GetHost();
+    ASSERT_NE(newSelectedNode, nullptr);
+    auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(newSelectedPros, nullptr);
+    EXPECT_EQ(newSelectedPros->GetNeedDividerValue(false), false);
+}
+
+/**
+ * @tc.name: UpdateSelectedProps002
+ * @tc.desc: Test SelectPattern UpdateSelectedProps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectControlSizeNg, UpdateSelectedProps002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateSelectedProps,
+     * @tc.expected: Selected menuitem's properties are right.
+     */
+    SelectModelNG::SetShowDefaultSelectedIcon(selectFrameNode, true);
+    int32_t index = 1;
+    selectPattern->UpdateSelectedProps(index);
+    auto newSelected = selectPattern->options_[index]->GetPattern<MenuItemPattern>();
+    ASSERT_NE(newSelected, nullptr);
+    EXPECT_EQ(newSelected->IsSelected(), true);
+    auto checkMarkLayoutProps = newSelected->checkMarkNode_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(checkMarkLayoutProps, nullptr);
+    EXPECT_EQ(checkMarkLayoutProps->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    auto newSelectedNode = newSelected->GetHost();
+    ASSERT_NE(newSelectedNode, nullptr);
+    auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(newSelectedPros, nullptr);
+    EXPECT_EQ(newSelectedPros->GetNeedDividerValue(false), true);
 }
 
 /**
