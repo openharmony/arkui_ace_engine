@@ -240,6 +240,12 @@ void DynamicPattern::SetBackgroundTransparent(bool backgroundTransparent)
     backgroundTransparent_ = backgroundTransparent;
 }
 
+void DynamicPattern::OnAccessibilityParentRectInfoUpdate()
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->OnAccessibilityParentRectInfoUpdate();
+}
+
 void DynamicPattern::FireOnErrorCallbackOnUI(
     int32_t code, const std::string& name, const std::string& msg)
 {

@@ -558,8 +558,10 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     }
 
     // delete menu when select node destroy
-    auto destructor = [id = select->GetId(), frameNode]() {
-        auto* pipeline = frameNode->GetContextWithCheck();
+    auto destructor = [id = select->GetId(), weak = AceType::WeakClaim(AceType::RawPtr(menuContainer))]() {
+        auto menuNode = weak.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        auto* pipeline = menuNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);

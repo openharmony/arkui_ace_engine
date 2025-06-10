@@ -573,4 +573,30 @@ HWTEST_F(TextFieldPatternTestFour, StrokeTest001, TestSize.Level0)
     EXPECT_EQ(json->GetString("strokeWidth"), "5.00vp");
     EXPECT_EQ(json->GetString("strokeColor"), "#FF000000");
 }
+
+/**
+ * @tc.name: TextAreaMinLinesTest001
+ * @tc.desc: Test attrs about stroke
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, TextAreaMinLinesTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetWidthAuto(true);
+        model.SetType(TextInputType::TEXT);
+        model.SetFontSize(DEFAULT_FONT_SIZE);
+        model.SetTextColor(DEFAULT_TEXT_COLOR);
+        model.SetMinLines(1);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the corresponding JSON
+     */
+    auto json = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("minLines"), "1");
+}
 }

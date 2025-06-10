@@ -2608,7 +2608,7 @@ void DragDropManager::HandleStartDragAnimationFinish(int32_t containerId)
     if (IsAllStartAnimationFinished()) {
         SetStartAnimation(true);
     }
-    if (IsPullMoveReceivedForCurrentDrag()) {
+    if (!IsPullMoveReceivedForCurrentDrag()) {
         TransDragWindowToDragFwk(containerId);
     }
     auto overlayManager = GetDragAnimationOverlayManager(containerId);

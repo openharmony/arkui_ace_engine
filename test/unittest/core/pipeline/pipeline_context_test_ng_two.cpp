@@ -2328,5 +2328,33 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg300, TestSize.Level1)
     EXPECT_EQ(context_->GetRootElement(), nullptr);
     context_->rootNode_ = frameNode_;
 }
+
+/* @tc.name: PipelineContextTestNg301
+ * @tc.desc: Test SetBackgroundColorModeUpdated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg301, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: check context_.
+     * @tc.expected: context_ is nullptr.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: SetBackgroundColorModeUpdated true.
+     * @tc.expected: backgroundColorModeUpdated_ is true.
+     */
+    context_->SetBackgroundColorModeUpdated(true);
+    EXPECT_TRUE(context_->backgroundColorModeUpdated_);
+
+    /**
+     * @tc.steps3: SetBackgroundColorModeUpdated false.
+     * @tc.expected: backgroundColorModeUpdated_ is false.
+     */
+    context_->SetBackgroundColorModeUpdated(false);
+    EXPECT_FALSE(context_->backgroundColorModeUpdated_);
+}
+
 } // namespace NG
 } // namespace OHOS::Ace

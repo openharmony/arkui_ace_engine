@@ -1643,11 +1643,9 @@ HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest001, TestSize.Level1)
      * @tc.steps: step1.The FrameNode is null, related function is called.
      */
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
-    std::string bundleName = "";
-    std::string moduleName = "";
-    ViewAbstract::SetBackgroundColorWithResourceObj(resourceObject);
+    ViewAbstract::SetBackgroundColorWithResourceObj(BLUE, resourceObject);
     ViewAbstract::SetBackgroundColor(nullptr, BLUE, resourceObject);
-    ViewAbstract::SetBackgroundImageWithResourceObj(resourceObject, bundleName, moduleName);
+    ViewAbstract::SetBackgroundImageWithResourceObj(resourceObject, imageSourceInfo);
     ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo, resourceObject);
     ViewAbstract::SetCustomBackgroundColorWithResourceObj(resourceObject);
     ViewAbstract::SetCustomBackgroundColor(BLUE);

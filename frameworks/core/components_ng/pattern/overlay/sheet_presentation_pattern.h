@@ -85,10 +85,11 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        if (GetSheetType() == SheetType::SHEET_SIDE) {
+        auto sheetType = GetSheetType();
+        if (sheetType == SheetType::SHEET_SIDE) {
             return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
         }
-        return MakeRefPtr<SheetPresentationLayoutAlgorithm>(GetSheetType(), sheetPopupInfo_);
+        return MakeRefPtr<SheetPresentationLayoutAlgorithm>(sheetType, sheetPopupInfo_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -925,7 +926,10 @@ public:
     void RecoverHalfFoldOrAvoidStatus();
     bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
+    void InitSheetObject();
     void UpdateSheetObject(SheetType type);
+    void ResetLayoutInfo();
+    void ResetScrollUserDefinedIdealSize(const RefPtr<SheetObject>& oldObject, const RefPtr<SheetObject>& newObject);
     void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
     {
         sheetPopupInfo_ = sheetPopupInfo;
@@ -1028,6 +1032,7 @@ public:
     void HandleFitContontChange(float height);
     void GetCurrentScrollHeight();
     void RecoverScrollOrResizeAvoidStatus();
+    bool IsNeedChangeScrollHeight(float height);
     bool IsResizeWhenAvoidKeyboard();
     void InitScrollProps();
     uint32_t GetCurrentBroadcastDetentsIndex();

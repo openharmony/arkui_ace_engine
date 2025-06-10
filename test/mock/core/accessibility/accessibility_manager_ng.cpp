@@ -41,11 +41,6 @@ HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventBySurfaceId(
     return HandleHoverRet::HOVER_HIT;
 }
 
-void AccessibilityManagerNG::ResetHoverState()
-{
-    return;
-}
-
 void AccessibilityManagerNG::HoverTestDebug(const RefPtr<FrameNode>& root, const PointF& point,
     std::string& summary, std::string& detail) const
 {

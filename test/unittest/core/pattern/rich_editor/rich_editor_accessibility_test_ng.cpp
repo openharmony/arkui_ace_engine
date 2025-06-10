@@ -517,5 +517,34 @@ HWTEST_F(RichEditorAccessibilityTestNg, ActActionCut, TestSize.Level1)
     EXPECT_EQ(changeReason, TextChangeReason::CUT);
 }
 
+/**
+ * @tc.name: AccessibilityProperty
+ * @tc.desc: Test GetText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto accProp = richEditorNode_->GetAccessibilityProperty<RichEditorAccessibilityProperty>();
+    ASSERT_NE(accProp, nullptr);
+    std::string text;
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    richEditorPattern->PreCreateLayoutWrapper();
+    text = accProp->GetText();
+    EXPECT_EQ(text, "hello1");
+
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    richEditorPattern->PreCreateLayoutWrapper();
+    text = accProp->GetText();
+    EXPECT_EQ(text, "hello1hello1");
+
+    RangeOptions rangeOptions;
+    richEditorPattern->DeleteSpans(rangeOptions, TextChangeReason::UNKNOWN);
+    richEditorPattern->PreCreateLayoutWrapper();
+    text = accProp->GetText();
+    EXPECT_EQ(text, "");
+}
 
 } // namespace OHOS::Ace::NG

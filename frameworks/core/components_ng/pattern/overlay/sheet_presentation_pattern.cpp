@@ -108,6 +108,7 @@ void SheetPresentationPattern::OnModifyDone()
     InitPageHeight();
     InitScrollProps();
     UpdateSheetType();
+    UpdateSheetObject(sheetType_);
     InitFoldCreaseRegion();
 }
 
@@ -1081,10 +1082,9 @@ void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) 
 
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
-    bool isNeedChangeScrollHeight = sheetObject_->GetSheetType() != SheetType::SHEET_SIDE &&
-        scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDirectionUp_;
     if ((HasOnHeightDidChange() && IsSheetBottomStyle() && isTransitionIn && isNeedProcessHeight_)
-        || isNeedChangeScrollHeight) {
+        || (isTransitionIn && IsNeedChangeScrollHeight(height_))) {
+        // Pass height_ because it was updated by ChangeSheetHeight() before
         ModifyFireSheetTransition(dragVelocity);
         return;
     }
@@ -2218,6 +2218,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option.GetOnFinishEvent());
         SetBottomStyleHotAreaInSubwindow();
     } else {
+        AnimationUtils::StopAnimation(animation_);
         animation_ = AnimationUtils::StartAnimation(
             option,
             sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset),
@@ -3640,6 +3641,18 @@ void SheetPresentationPattern::OnAppear()
     }
 }
 
+bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
+{
+    auto it = std::min_element(sheetDetentHeight_.begin(), sheetDetentHeight_.end());
+    if (it == sheetDetentHeight_.end()) {
+        return false;
+    }
+    float lowestDetentHeight = *it;
+    bool isNeedChangeScrollHeight =
+        scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && GreatOrEqual(height, lowestDetentHeight);
+    return isNeedChangeScrollHeight;
+}
+
 void SheetPresentationPattern::OnWillDisappear()
 {
     isOnDisappearing_ = true;
@@ -3800,17 +3813,34 @@ void SheetPresentationPattern::UpdateSheetType()
     auto sheetType = GetSheetType();
     if (sheetType_ != sheetType) {
         sheetType_ = sheetType;
-        UpdateSheetObject(sheetType_);
         typeChanged_ = true;
     }
 }
 
-void SheetPresentationPattern::UpdateSheetObject(SheetType type)
+void SheetPresentationPattern::InitSheetObject()
 {
     // The first CreateObject must be later than UpdateSheetStyle, must be earlier than MarkModifyDone.
     // And must be earlier than the entry animation.
+    if (sheetType_ == SheetType::SHEET_SIDE) {
+        sheetObject_ = AceType::MakeRefPtr<SheetSideObject>(sheetType_);
+    } else {
+        sheetObject_ = AceType::MakeRefPtr<SheetObject>(sheetType_);
+    }
+    sheetObject_->BindPattern(WeakClaim(this));
+    // Don't process information here, such as events, etc
+    // Because here only the SheetStyle is updated to the layoutProperty, but the properties are not parsed,
+    // and the data is not updated to the pattern.
+}
+
+void SheetPresentationPattern::UpdateSheetObject(SheetType type)
+{
+    CHECK_NULL_VOID(sheetObject_);
     RefPtr<SheetObject> sheetObject = sheetObject_;
-    if (sheetObject && sheetObject->GetSheetType() == type) {
+    if (sheetObject->GetSheetType() == type) {
+        return;
+    }
+    if (type != SheetType::SHEET_SIDE && sheetObject->GetSheetType() != SheetType::SHEET_SIDE) {
+        sheetObject->UpdateSheetType(type);
         return;
     }
     if (type == SheetType::SHEET_SIDE) {
@@ -3818,14 +3848,39 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType type)
     } else {
         sheetObject = AceType::MakeRefPtr<SheetObject>(type);
     }
-    if (sheetObject_) {
-        sheetObject->CopyData(sheetObject_);
-        // start clear old sheet data
-        RemovePanEvent();
-    }
+    sheetObject->CopyData(sheetObject_);
+    // start clear old sheet data
+    RemovePanEvent();
+    ResetScrollUserDefinedIdealSize(sheetObject_, sheetObject);
+    ResetLayoutInfo();
+
     SetSheetObject(sheetObject);
     sheetObject_->BindPattern(WeakClaim(this));
+    FireOnTypeDidChange();
+    // start init new sheet data
     InitPanEvent();
+    isFirstInit_ = false;
+    AvoidAiBar();
+}
+
+void SheetPresentationPattern::ResetLayoutInfo()
+{
+    height_ = 0.0f;
+}
+
+void SheetPresentationPattern::ResetScrollUserDefinedIdealSize(
+    const RefPtr<SheetObject>& oldObject, const RefPtr<SheetObject>& newObject)
+{
+    CHECK_NULL_VOID(oldObject);
+    CHECK_NULL_VOID(newObject);
+    if (newObject->GetSheetType() != SheetType::SHEET_SIDE) {
+        return;
+    }
+    auto scrollNode = GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto props = scrollNode->GetLayoutProperty();
+    CHECK_NULL_VOID(props);
+    props->ClearUserDefinedIdealSize(true, true);
 }
 
 void SheetPresentationPattern::OnLanguageConfigurationUpdate()

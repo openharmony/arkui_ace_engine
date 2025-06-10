@@ -769,6 +769,7 @@ private:
     bool isSelectOverlaySubWindowWrapper_ = false;
     bool hasCustomOutlineWidth_ = false;
     bool hasCustomOutlineColor_ = false;
+    bool isClearLastMenuItem_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

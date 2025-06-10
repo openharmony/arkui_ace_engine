@@ -361,6 +361,7 @@ void SubwindowOhos::InitContainer()
     container->SetHapPath(parentContainer->GetHapPath());
     container->SetIsSubContainer(true);
     container->InitializeSubContainer(parentContainerId_);
+    container->SetColorMode(parentContainer->GetColorMode());
     SetIsRosenWindowCreate(true);
     ViewportConfig config;
     // create ace_view

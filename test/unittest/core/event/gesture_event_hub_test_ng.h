@@ -65,6 +65,8 @@ RefPtr<MockTaskExecutor> MOCK_TASK_EXECUTOR;
 constexpr float DRAG_DISTANCE = 10.5f;
 const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
 constexpr int32_t FINGERS_NUMBER = 2;
+constexpr int32_t parallelIndex_1 = 2;
+constexpr int32_t parallelIndex_2 = 0;
 } // namespace
 
 class GestureEventHubTestNg : public testing::Test {

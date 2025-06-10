@@ -1145,8 +1145,8 @@ HWTEST_F(WaterFlowTestNg, CustomNode001, TestSize.Level1)
     frameNode_->ChildrenUpdatedFrom(0);
 
     FlushUITasks();
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? 0 : 9);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, TOP_TO_DOWN ? 0 : Infinity<int32_t>());
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? 0 : -1);
     EXPECT_EQ(pattern_->layoutInfo_->childrenCount_, 10);
 }
 

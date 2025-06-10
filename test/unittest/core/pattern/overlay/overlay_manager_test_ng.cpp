@@ -1585,7 +1585,7 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
     ASSERT_NE(topSheetNode, nullptr);
     auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(topSheetPattern, nullptr);
-    topSheetPattern->UpdateSheetObject(SheetType::SHEET_BOTTOM);
+    topSheetPattern->InitSheetObject();
     auto sheetObject = topSheetPattern->GetSheetObject();
     ASSERT_NE(sheetObject, nullptr);
     topSheetPattern->OnDirtyLayoutWrapperSwap(topSheetNode->CreateLayoutWrapper(), DirtySwapConfig());
@@ -1611,6 +1611,61 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
      */
     topSheetPattern->currentOffset_ = -5;
     result = sheetObject->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    EXPECT_TRUE(result.reachEdge);
+    EXPECT_EQ(result.remain, 20.f);
+}
+
+/**
+ * @tc.name: TestOnBindSheet
+ * @tc.desc: SheetPresentationPattern::HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, HandleScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    CreateSheetBuilder();
+    SheetStyle sheetStyle;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+    topSheetPattern->InitSheetObject();
+    auto sheetObject = topSheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    topSheetPattern->OnDirtyLayoutWrapperSwap(topSheetNode->CreateLayoutWrapper(), DirtySwapConfig());
+    /**
+     * @tc.steps: step3. Set source = SCROLL_FROM_JUMP, NestedState = CHILD_SCROLL, deal with HandleDragEnd.
+     */
+    topSheetPattern->currentOffset_ = 100.0f;
+    sheetObject->isSheetNeedScroll_ = true;
+    auto result = sheetObject->HandleScroll(20.f, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL);
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
+    EXPECT_TRUE(result.reachEdge);
+    EXPECT_EQ(result.remain, 0);
+    /**
+     * @tc.steps: step4. isSheetNeedScroll_ = false, and will Not HandleDragEnd.
+     */
+    topSheetPattern->currentOffset_ = 0;
+    sheetObject->isSheetNeedScroll_ = false;
+    result = sheetObject->HandleScroll(20.f, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL);
+    EXPECT_FALSE(sheetObject->isSheetNeedScroll_);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 20.f);
 }
@@ -1658,7 +1713,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(2000);
     sheetPattern->height_ = 500;
@@ -1722,7 +1777,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 200 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -1828,7 +1883,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea4, TestSize.Level1)
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
@@ -1971,7 +2026,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea5, TestSize.Level1)
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
@@ -2116,7 +2171,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
@@ -2303,7 +2358,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
@@ -2492,7 +2547,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea8, TestSize.Level1)
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
@@ -2657,7 +2712,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea9, TestSize.Level1)
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
@@ -2823,7 +2878,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
@@ -3006,7 +3061,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->UpdateSheetType();
-    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
