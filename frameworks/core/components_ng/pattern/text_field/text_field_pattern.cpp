@@ -136,6 +136,7 @@ const std::string PREVIEW_STYLE_UNDERLINE = "underline";
 
 constexpr int32_t PREVIEW_NO_ERROR = 0;
 constexpr int32_t PREVIEW_NULL_POINTER = 1;
+constexpr int32_t DEFAULT_MIN_LINES = 1;
 constexpr int32_t PREVIEW_BAD_PARAMETERS = -1;
 constexpr double MINIMAL_OFFSET = 0.01f;
 constexpr int32_t KEYBOARD_DEFAULT_API = 9;
@@ -7128,6 +7129,13 @@ std::u16string TextFieldPattern::GetPlaceHolder() const
     return layoutProperty->GetPlaceholderValue(u"");
 }
 
+uint32_t TextFieldPattern::GetMinLines() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, DEFAULT_MIN_LINES);
+    return layoutProperty->GetMinLines().value_or(DEFAULT_MIN_LINES);
+}
+
 std::string TextFieldPattern::GetInputFilter() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -7708,6 +7716,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         "undefined", filter);
     json->PutExtAttr("maxLines", GreatOrEqual(GetMaxLines(),
         Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines()).c_str(), filter);
+    json->PutExtAttr("minLines", std::to_string(GetMinLines()).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
@@ -7717,6 +7726,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     ToJsonValueForOption(json, filter);
     ToJsonValueForFontFeature(json, filter);
     ToJsonValueSelectOverlay(json, filter);
+    ToJsonValueForStroke(json, filter);
 }
 
 void TextFieldPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -7824,6 +7834,41 @@ void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json
     for (auto menuItme : selectOverlayInfo->menuOptionItems) {
         json->PutExtAttr("MenuItme", menuItme.content.value_or("").c_str(), filter);
     }
+}
+
+std::string TextFieldPattern::GetStrokeWidth() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return (layoutProperty->GetStrokeWidth().value_or(Dimension())).ToString();
+}
+
+std::string TextFieldPattern::GetStrokeColor() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, "");
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+
+    if (layoutProperty->HasStrokeColor() && layoutProperty->GetStrokeColor().has_value()) {
+        auto strokeColor = layoutProperty->GetStrokeColor().value().ColorToString();
+        if (!strokeColor.empty()) {
+            return strokeColor;
+        }
+    }
+
+    auto textColor = layoutProperty->GetTextColor();
+    if (textColor.has_value()) {
+        return textColor.value().ColorToString();
+    }
+
+    return theme->GetTextColor().ColorToString();
+}
+
+void TextFieldPattern::ToJsonValueForStroke(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("strokeWidth", GetStrokeWidth().c_str(), filter);
+    json->PutExtAttr("strokeColor", GetStrokeColor().c_str(), filter);
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
