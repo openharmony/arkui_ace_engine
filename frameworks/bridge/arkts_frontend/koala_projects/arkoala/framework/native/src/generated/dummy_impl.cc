@@ -43038,6 +43038,50 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     } // GlobalScopeAccessor
+    namespace RouterExtenderAccessor {
+    Ark_NativePointer PushImpl(const Ark_String* url)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("push(");
+        WriteToString(&out, url);
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+    }
+
+    void MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pageNode)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("moveCommonUnderPageNode(");
+        WriteToString(&out, commonNode);
+        out.append(", ");
+        WriteToString(&out, pageNode);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+
+    void BackImpl()
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("back(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+
+    Ark_NativePointer RunPageImpl(const Ark_String* url)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("runPage(");
+        WriteToString(&out, url);
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+    }
+    } // RouterExtenderAccessor
     const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
     {
         static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
@@ -46845,6 +46889,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct GlobalScopePeer {
         virtual ~GlobalScopePeer() = default;
     };
+    const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
+    {
+        static const GENERATED_ArkUIRouterExtenderAccessor RouterExtenderAccessorImpl {
+            RouterExtenderAccessor::PushImpl,
+            RouterExtenderAccessor::MoveCommonUnderPageNode,
+            RouterExtenderAccessor::BackImpl,
+            RouterExtenderAccessor::RunPageImpl
+        };
+        return &RouterExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
@@ -47056,6 +47111,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLinearIndicatorControllerAccessor,
             GetGlobalScopeAccessor,
             GetPromptActionAccessor,
+            GetRouterExtenderAccessor,
         };
         return &accessorsImpl;
     }

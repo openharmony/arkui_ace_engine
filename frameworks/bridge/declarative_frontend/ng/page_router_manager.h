@@ -151,6 +151,9 @@ public:
 
     // router operation
     void Push(const RouterPageInfo& target);
+    RefPtr<FrameNode> PushExtender(const RouterPageInfo& target);
+    RefPtr<FrameNode> ReplaceExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback);
+    RefPtr<FrameNode> RunPageExtender(const RouterPageInfo& target);
     void PushNamedRoute(const RouterPageInfo& target);
     bool Pop();
     void Replace(const RouterPageInfo& target);

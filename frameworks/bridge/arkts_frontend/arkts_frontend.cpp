@@ -226,6 +226,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     ani_class appClass;
     EntryLoader entryLoader(url, env);
 
+    pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
+
     if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
         LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
         return UIContentErrorCode::INVALID_URL;
@@ -238,12 +240,10 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
         return UIContentErrorCode::INVALID_URL;
     }
 
-    std::string appUrl = "ComExampleTrivialApplication"; // TODO: use passed in url and params
-    std::string appParams = "ArkTSLoaderParam";
     ani_string aniUrl;
-    env->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
+    env_->String_NewUTF8(url.c_str(), url.size(), &aniUrl);
     ani_string aniParams;
-    env->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
+    env_->String_NewUTF8(params.c_str(), params.size(), &aniParams);
 
     ani_ref appLocal;
     ani_ref optionalEntry;
