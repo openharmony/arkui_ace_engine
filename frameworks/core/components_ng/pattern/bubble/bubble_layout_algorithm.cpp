@@ -869,6 +869,8 @@ void BubbleLayoutAlgorithm::InitWrapperRect(
             foldCreaseTop_ = foldCrease.Top();
             foldCreaseBottom_ = foldCrease.Bottom();
         }
+    } else {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "DisplayInfo is null");
     }
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);

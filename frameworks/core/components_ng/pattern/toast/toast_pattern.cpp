@@ -126,6 +126,8 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
             foldCreaseTop = foldCrease.Top();
             foldCreaseBottom = foldCrease.Bottom();
         }
+    } else {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "DisplayInfo is null");
     }
     bool isKeyboardShow = false;
     auto showMode = ToastShowMode::DEFAULT;
