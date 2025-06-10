@@ -6,35 +6,35 @@
     },
     {
       "name": "picker_text_style_font_size",
-      "value": "20fp"
+      "value": "30fp"
     },
     {
       "name": "calendar_picker_edge_align_offset",
-      "value": "20fp"
+      "value": "40fp"
     },
     {
       "name": "picker_text_style_min_font_size",
-      "value": "15fp"
+      "value": "25fp"
     },
     {
       "name": "picker_text_style_max_font_size",
-      "value": "18fp"
+      "value": "28fp"
     },
     {
       "name": "text_picker_gradient_height",
-      "value": "40vp"
+      "value": "20vp"
     },
     {
       "name": "text_picker_divider_stroke_width",
-      "value": "10vp"
+      "value": "20vp"
     },
     {
       "name": "text_picker_divider_start_margin",
-      "value": "10vp"
+      "value": "20vp"
     },
     {
       "name": "text_picker_divider_end_margin",
-      "value": "20vp"
+      "value": "0vp"
     }
   ]
 }
