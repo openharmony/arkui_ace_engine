@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 namespace OHOS::Ace::NG {
