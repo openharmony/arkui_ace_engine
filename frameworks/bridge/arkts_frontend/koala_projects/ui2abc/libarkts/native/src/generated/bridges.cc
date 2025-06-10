@@ -14632,17 +14632,6 @@ void impl_ProgramDumpSilentConst(KNativePointer context, KNativePointer receiver
 }
 KOALA_INTEROP_V2(ProgramDumpSilentConst, KNativePointer, KNativePointer);
 
-void impl_ProgramAddDeclGenExportNode(KNativePointer context, KNativePointer receiver, KStringPtr& declGenExportStr, KNativePointer node)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_Program*>(receiver);
-    const auto _declGenExportStr = getStringCopy(declGenExportStr);
-    const auto _node = reinterpret_cast<es2panda_AstNode*>(node);
-    GetImpl()->ProgramAddDeclGenExportNode(_context, _receiver, _declGenExportStr, _node);
-    return ;
-}
-KOALA_INTEROP_V4(ProgramAddDeclGenExportNode, KNativePointer, KNativePointer, KStringPtr, KNativePointer);
-
 KBoolean impl_ProgramIsDiedConst(KNativePointer context, KNativePointer receiver)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);

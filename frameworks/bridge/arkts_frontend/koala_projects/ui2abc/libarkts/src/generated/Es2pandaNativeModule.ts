@@ -4546,9 +4546,6 @@ export class Es2pandaNativeModule {
     _ProgramDumpSilentConst(context: KNativePointer, receiver: KNativePointer): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _ProgramAddDeclGenExportNode(context: KNativePointer, receiver: KNativePointer, declGenExportStr: KStringPtr, node: KNativePointer): void {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
     _ProgramIsDiedConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
         throw new Error("This methods was not overloaded by native module initialization")
     }
