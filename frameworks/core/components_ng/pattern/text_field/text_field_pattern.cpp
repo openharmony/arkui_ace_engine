@@ -136,6 +136,7 @@ const std::string PREVIEW_STYLE_UNDERLINE = "underline";
 
 constexpr int32_t PREVIEW_NO_ERROR = 0;
 constexpr int32_t PREVIEW_NULL_POINTER = 1;
+constexpr int32_t DEFAULT_MIN_LINES = 1;
 constexpr int32_t PREVIEW_BAD_PARAMETERS = -1;
 constexpr double MINIMAL_OFFSET = 0.01f;
 constexpr int32_t KEYBOARD_DEFAULT_API = 9;
@@ -7128,6 +7129,13 @@ std::u16string TextFieldPattern::GetPlaceHolder() const
     return layoutProperty->GetPlaceholderValue(u"");
 }
 
+uint32_t TextFieldPattern::GetMinLines() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, DEFAULT_MIN_LINES);
+    return layoutProperty->GetMinLines().value_or(DEFAULT_MIN_LINES);
+}
+
 std::string TextFieldPattern::GetInputFilter() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -7708,6 +7716,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         "undefined", filter);
     json->PutExtAttr("maxLines", GreatOrEqual(GetMaxLines(),
         Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines()).c_str(), filter);
+    json->PutExtAttr("minLines", std::to_string(GetMinLines()).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
