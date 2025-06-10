@@ -3,7 +3,7 @@ import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
 import { Serializer } from "./peers/Serializer";
 import { asArray } from "@koalaui/common";
-import { RuntimeType, runtimeType } from "@koalaui/interop";
+import { InteropNativeModule } from "@koalaui/interop";
 
 enum ResourceType {
     COLOR = 10001,
@@ -26,17 +26,32 @@ class ArkResource implements Resource {
     params?: Array<Object> | undefined;
     type?: number | undefined;
     _id: number = -1;
-    constructor(resourceName: string, bundleName: string, moduleName: string, ...params: Object[]) {
+    // @ts-ignore
+    constructor(resourceName: string | null, bundleName: string, moduleName: string, ...params: Object[]) {
         this.bundleName = bundleName;
         this.moduleName = moduleName;
-        let param1 = new Array<Object>();
-        if (resourceName != null) {
+        if (resourceName !== null) {
+            let param1 = new Array<Object>();
             param1.push(resourceName);
-            param1 = param1.concat(asArray(params));
+            this.params = param1.concat(asArray(params));
+        } else {
+            this.params = asArray(params);
         }
-        this.params = param1;
         this._id = -1;
-        this.type = this.parseResourceType(resourceName);
+        if (this.params!.length > 0) {
+            const name: string = this.params![0] as string;
+            this.type = this.parseResourceType(name);
+        } else {
+            InteropNativeModule._NativeLog("UI-Plugin do not send resourceName when id is -1");
+        }
+    }
+    // @ts-ignore
+    constructor(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]) {
+        this._id = id;
+        this.type = type;
+        this.params = asArray(params);
+        this.bundleName = bundleName;
+        this.moduleName = moduleName;
     }
     set id(value: number) {
         this._id = value;
@@ -98,15 +113,25 @@ class ArkResource implements Resource {
         return ResourceType.STRING;
     }
 }
+// @ts-ignore
 export function _r(bundleName: string, moduleName: string, name: string, ...params: Object[]): Resource {
     return new ArkResource(name, bundleName, moduleName, ...params)
 }
+// @ts-ignore
 export function _rawfile(bundleName: string, moduleName: string, name: string): Resource {
-    return {
-        "id": 0,
-        "type": 30000,
-        "params": new Array<Object>(name),
-        "bundleName": bundleName,
-        "moduleName": moduleName
-    } as Resource
+    // @ts-ignore
+    return new ArkResource(0, 30000, bundleName, moduleName, name);
+}
+// @ts-ignore
+export function _r(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]): Resource {
+    if (id === -1) {
+        return new ArkResource(null, bundleName, moduleName, ...params);
+    }
+    // @ts-ignore
+    return new ArkResource(id, type, bundleName, moduleName, ...params);
+}
+// @ts-ignore
+export function _rawfile(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]): Resource {
+    const name: string = params[0] as string;
+    return _rawfile(bundleName, moduleName, name);
 }
