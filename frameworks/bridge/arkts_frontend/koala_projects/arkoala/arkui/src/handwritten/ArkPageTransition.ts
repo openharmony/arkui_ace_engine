@@ -266,7 +266,7 @@ export function ArkPageTransitionEnter(
     const receiver = remember(() => new ArkPageTransitionEnterComponent(params))
     style?.(receiver)
     const state = CurrentRouterTransitionState()
-    if (state !== undefined && state.visibility == RouterTransitionVisibility.Showing) {
+    if (state !== undefined && state.visibility == RouterTransitionVisibility.Showing.valueOf()) {
         NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Showing)
     }
 }
@@ -283,7 +283,7 @@ export function ArkPageTransitionExit(
     const receiver = remember(() => new ArkPageTransitionExitComponent(params))
     style?.(receiver)
     const state = CurrentRouterTransitionState()
-    if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding) {
+    if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding.valueOf()) {
         NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Hiding)
     }
 }

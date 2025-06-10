@@ -172,12 +172,12 @@ export class ClassDefinition extends TypedAstNode {
     get localIndex(): number {
         return global.generatedEs2panda._ClassDefinitionLocalIndexConst(global.context, this.peer)
     }
-    get functionalReferenceReferencedMethod(): string {
-        return unpackString(global.generatedEs2panda._ClassDefinitionFunctionalReferenceReferencedMethodConst(global.context, this.peer))
+    get functionalReferenceReferencedMethod(): MethodDefinition | undefined {
+        return unpackNode(global.generatedEs2panda._ClassDefinitionFunctionalReferenceReferencedMethodConst(global.context, this.peer))
     }
     /** @deprecated */
-    setFunctionalReferenceReferencedMethod(functionalReferenceReferencedMethod: string): this {
-        global.generatedEs2panda._ClassDefinitionSetFunctionalReferenceReferencedMethod(global.context, this.peer, functionalReferenceReferencedMethod)
+    setFunctionalReferenceReferencedMethod(functionalReferenceReferencedMethod?: MethodDefinition): this {
+        global.generatedEs2panda._ClassDefinitionSetFunctionalReferenceReferencedMethod(global.context, this.peer, passNode(functionalReferenceReferencedMethod))
         return this
     }
     get localPrefix(): string {
