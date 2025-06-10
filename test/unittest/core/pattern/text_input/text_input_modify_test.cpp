@@ -1887,6 +1887,7 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Initialize text input.
+     * nodeId = 1, same as the textField above.
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1895,7 +1896,7 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
     });
     auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
     EXPECT_NE(paintProperty2, nullptr);
-    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(123.0f)), Dimension(0.0f));
+    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(123.0f)), STROKE_DASH_1);
 }
 
 /**
