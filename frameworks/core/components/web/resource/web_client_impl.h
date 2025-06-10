@@ -305,6 +305,8 @@ public:
 
     void RestoreRenderFit() override;
 
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable) override;
+
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id, int width, int height) override;
 
     bool OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result, OHOS::NWeb::SslError error,

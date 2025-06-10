@@ -185,16 +185,16 @@ public:
     static void SetLayoutDirection(TextDirection value);
     static void RequestFrame();
     static void SetBackgroundColor(const Color &color);
-    static void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetBackgroundImage(const ImageSourceInfo &src);
-    static void SetBackgroundImageWithResourceObj(
-        const RefPtr<ResourceObject> &resObj, std::string &bundleName, std::string &moduleName);
+    static void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
     static void SetBackgroundImageSyncMode(bool syncMode);
     static void SetBackgroundImageSize(BackgroundImageSize &bgImgSize);
     static void SetBackgroundImageSizeUpdateFunc(
         BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction);
     static void SetBackgroundImagePosition(BackgroundImagePosition &bgImgPosition);
+    static void ClearResObj(const std::string resObjName);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetMotionBlur(const MotionBlurOption& motionBlurOption);
     static void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());

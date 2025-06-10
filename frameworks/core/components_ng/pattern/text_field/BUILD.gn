@@ -37,15 +37,16 @@ build_component_ng("text_field_pattern_ng") {
   ]
 
   standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]
-  standard_input_deps = [
-    "hilog:libhilog",
-    "imf:inputmethod_client",
-    "init:libbegetutil",
-    "input:libmmi-client",
-
-    "ability_runtime:abilitykit_native",
-    "ipc:ipc_single",
-    "napi:ace_napi",
-    "window_manager:libwm"
-  ]
+  standard_input_deps = [ "imf:inputmethod_client" ]
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+    external_deps = [
+      "ability_runtime:abilitykit_native",
+      "hilog:libhilog",
+      "init:libbegetutil",
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "napi:ace_napi",
+      "window_manager:libwm",
+    ]
+  }
 }

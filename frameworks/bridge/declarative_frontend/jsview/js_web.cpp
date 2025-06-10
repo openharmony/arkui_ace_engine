@@ -2339,11 +2339,10 @@ JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
     obj->SetProperty("isMainFrame", eventInfo.GetIsMainFrame());
 
     auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
+    if (!engine || !engine->GetNativeEngine()) {
         return JSRef<JSVal>::Cast(obj);
     }
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_env env = reinterpret_cast<napi_env>(engine->GetNativeEngine());
     std::vector<std::string> certChainDerData = eventInfo.GetCertChainData();
     JSRef<JSArray> certsArr = JSRef<JSArray>::New();
     for (uint8_t i = 0; i < certChainDerData.size(); i++) {
@@ -2351,7 +2350,6 @@ JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
             TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
             break;
         }
-
         void *data = nullptr;
         napi_value buffer = nullptr;
         napi_value item = nullptr;
@@ -2360,9 +2358,7 @@ JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
             TAG_LOGE(AceLogTag::ACE_WEB, "Create array buffer failed, status = %{public}d.", status);
             continue;
         }
-        int retCode = memcpy_s(data, certChainDerData[i].size(),
-                               certChainDerData[i].data(), certChainDerData[i].size());
-        if (retCode != 0) {
+        if (memcpy_s(data, certChainDerData[i].size(), certChainDerData[i].data(), certChainDerData[i].size()) != 0) {
             TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data failed, index = %{public}u.", i);
             continue;
         }
@@ -4084,9 +4080,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
+        WebModel::GetInstance()->SetDefaultBackgroundColor();
+    } else {
+        WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
     }
-    WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 void JSWeb::InitialScale(float scale)

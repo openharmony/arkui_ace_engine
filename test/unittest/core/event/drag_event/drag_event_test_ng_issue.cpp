@@ -1087,4 +1087,32 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue018, TestSize.Level1)
     EXPECT_EQ(DragDropGlobalController::GetInstance().stopDragCallback_, nullptr);
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
 }
+
+/**
+ * @tc.name: DragEventTestNGIssue019
+ * @tc.desc: Test HandleStartDragAnimationFinish.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue019, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. get DragDropManager.
+    */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto containerId = Container::CurrentId();
+
+    /**
+    * @tc.steps: step2. call HandleStartDragAnimationFinish function.
+    */
+    dragDropManager->ResetPullMoveReceivedForCurrentDrag(false);
+    dragDropManager->isDragFwkShow_ = false;
+    dragDropManager->HandleStartDragAnimationFinish(containerId);
+    EXPECT_EQ(dragDropManager->isDragFwkShow_, true);
+
+    dragDropManager->ResetPullMoveReceivedForCurrentDrag(true);
+    dragDropManager->isDragFwkShow_ = false;
+    dragDropManager->HandleStartDragAnimationFinish(containerId);
+    EXPECT_EQ(dragDropManager->isDragFwkShow_, false);
+};
 } // namespace OHOS::Ace::NG

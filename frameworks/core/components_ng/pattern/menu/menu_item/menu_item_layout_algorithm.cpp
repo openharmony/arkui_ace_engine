@@ -241,7 +241,7 @@ void MenuItemLayoutAlgorithm::MeasureRow(LayoutWrapper* layoutWrapper, const Ref
             theme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_
     );
     float iconContentPadding = 0.0f;
-    if (!(isOption_ && !showDefaultSelectedIcon_)) {
+    if (!isOption_) {
         iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
     }
 
@@ -260,7 +260,7 @@ void MenuItemLayoutAlgorithm::MeasureRow(LayoutWrapper* layoutWrapper, const Ref
         rowWidth += childSize.Width() + iconContentPadding;
         rowHeight = std::max(rowHeight, childSize.Height());
     }
-    if (!(isOption_ && !showDefaultSelectedIcon_) && GreatNotEqual(rowWidth, iconContentPadding)) {
+    if (!isOption_ && GreatNotEqual(rowWidth, iconContentPadding)) {
         rowWidth -= iconContentPadding;
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && isOption_ &&
@@ -468,8 +468,12 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
     auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     if (isOption_ && showDefaultSelectedIcon_) {
-        layoutConstraint->maxSize.SetWidth(pattern->GetSelectOptionWidth());
-        layoutConstraint->selfIdealSize.SetWidth(pattern->GetSelectOptionWidth());
+        if (pattern->IsSelectOption() && pattern->GetHasOptionWidth()) {
+            auto selectOptionWidth = pattern->GetSelectOptionWidth();
+            layoutConstraint->minSize.SetWidth(selectOptionWidth);
+            layoutConstraint->maxSize.SetWidth(selectOptionWidth);
+            layoutConstraint->selfIdealSize.SetWidth(selectOptionWidth);
+        }
         UpdateIconMargin(layoutWrapper);
     }
     maxRowWidth_ = layoutConstraint->maxSize.Width() - padding_.Width();

@@ -210,6 +210,7 @@ void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
 
 void InputMethodManager::CloseKeyboardInPipelineDestroy()
 {
+#if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
         TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
@@ -217,6 +218,7 @@ void InputMethodManager::CloseKeyboardInPipelineDestroy()
     }
     inputMethod->Close();
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipelinne Destroyed, Close SoftKeyboard Successfully.");
+#endif
 }
 
 void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
@@ -251,6 +253,7 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 
 void InputMethodManager::CloseKeyboardInProcess()
 {
+#if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
         TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
@@ -258,6 +261,7 @@ void InputMethodManager::CloseKeyboardInProcess()
     }
     inputMethod->Close();
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Successfully.");
+#endif
 }
 
 void InputMethodManager::ProcessModalPageScene()

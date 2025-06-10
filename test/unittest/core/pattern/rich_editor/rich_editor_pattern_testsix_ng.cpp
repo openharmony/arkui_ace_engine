@@ -533,4 +533,26 @@ HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent002, TestSize.
     richEditorPattern->ReportAfterContentChangeEvent();
     EXPECT_EQ(richEditorPattern->textCache_, "nihao");
 }
+
+/**
+ * @tc.name: ReportAfterContentChangeEvent003
+ * @tc.desc: Test ReportAfterContentChangeEvent non-span string mode with content modified
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    std::string firstText = "abcd";
+    AddSpan(firstText);
+    std::string space = " ";
+    std::string secondText = "content";
+    AddSpan(space + secondText);
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->textCache_ = "abcdefg";
+    richEditorPattern->ReportAfterContentChangeEvent();
+    EXPECT_EQ(richEditorPattern->textCache_, "abcd content");
+}
 } // namespace OHOS::Ace::NG

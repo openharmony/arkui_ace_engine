@@ -43,6 +43,8 @@ public:
 
     void UpdateAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
 
+    virtual void OnAccessibilityParentRectInfoUpdate() {};
+
 private:
     bool GetAccessibilityParentRect(HandlerReply& reply);
     void GetDCAccessibilityParentRect(HandlerReply& reply);

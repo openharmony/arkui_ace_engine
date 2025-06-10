@@ -639,7 +639,7 @@ private:
     const std::string& referrer_;
     bool isFatalError_;
     bool isMainFrame_;
-    std::vector<std::string>& certChainData_;
+    std::vector<std::string> certChainData_;
 };
 
 class ACE_EXPORT SslSelectCertResult : public AceType {

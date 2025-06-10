@@ -93,15 +93,16 @@ public:
 
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
-    virtual void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
-    virtual void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject>& resObj, std::string& bundleName,
-        std::string& moduleName, RefPtr<ThemeConstants> themeConstant) = 0;
+    virtual void SetBackgroundImageWithResourceObj(
+        const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImageSizeUpdateFunc(
         BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction) = 0;
     virtual void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) = 0;
+    virtual void ClearResObj(const std::string resObjName) = 0;
     virtual void SetBackgroundBlurStyle(
         const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) = 0;
     virtual void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions()) {}

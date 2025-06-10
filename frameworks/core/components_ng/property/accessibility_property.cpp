@@ -62,6 +62,16 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
     return supportActions;
 }
 
+void AccessibilityProperty::ResetSupportAction()
+{
+    supportActions_ = 0;
+    SetSpecificSupportAction();
+    auto callback = GetSpecificSupportActionCallbackFunc();
+    if (callback) {
+        callback();
+    }
+}
+
 void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType eventType)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {

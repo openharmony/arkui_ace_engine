@@ -85,6 +85,7 @@ void PlatformContainerHandler::UpdateAccessibilityParentRectInfo(
 {
     std::unique_lock<std::shared_mutex> lock(rectInfoMutex_);
     rectInfo_ = info;
+    OnAccessibilityParentRectInfoUpdate();
 }
 
 void PlatformContainerHandler::GetDCAccessibilityParentRect(HandlerReply& reply)

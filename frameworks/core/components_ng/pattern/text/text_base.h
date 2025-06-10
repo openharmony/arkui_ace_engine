@@ -279,6 +279,24 @@ public:
     static LayoutCalPolicy GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool isHorizontal);
     static float GetConstraintMaxLength(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, bool isHorizontal);
+    template <typename Callback>
+    void ProcessAccessibilityTextChange(const std::string& currentContent,
+        Callback&& callback, const AceLogTag& logTag)
+    {
+        if (suppressAccessibilityEvent_) {
+            auto [addedText, removedText] = DetectTextDiff(currentContent);
+            TAG_LOGI(logTag,  "addedLen=%{public}d, removedLen=%{public}d",
+                static_cast<int>(addedText.length()), static_cast<int>(removedText.length()));
+            if (!removedText.empty()) {
+                callback(TextChangeType::REMOVE, removedText);
+            }
+            if (!addedText.empty()) {
+                callback(TextChangeType::ADD, addedText);
+            }
+        }
+        textCache_ = currentContent;
+        suppressAccessibilityEvent_ = true;
+    }
 
 protected:
     TextSelector textSelector_;

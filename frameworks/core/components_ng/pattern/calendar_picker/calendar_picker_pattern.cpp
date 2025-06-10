@@ -253,7 +253,11 @@ void CalendarPickerPattern::InitClickEvent()
 
 void CalendarPickerPattern::HandleHoverEvent(bool state, const Offset& globalLocation)
 {
-    bool yearState = false, monthState = false, dayState = false, addState = false, subState = false;
+    bool yearState = false;
+    bool monthState = false;
+    bool dayState = false;
+    bool addState = false;
+    bool subState = false;
     if (state) {
         auto currSelectdDate = calendarData_.selectedDate;
         switch (CheckRegion(globalLocation)) {
@@ -291,7 +295,8 @@ void CalendarPickerPattern::HandleHoverEvent(bool state, const Offset& globalLoc
 
 void CalendarPickerPattern::HandleTouchEvent(bool isPressed, const Offset& globalLocation)
 {
-    bool addState = false, subState = false;
+    bool addState = false;
+    bool subState = false;
     if (isPressed) {
         auto currSelectdDate = calendarData_.selectedDate;
         switch (CheckRegion(globalLocation)) {

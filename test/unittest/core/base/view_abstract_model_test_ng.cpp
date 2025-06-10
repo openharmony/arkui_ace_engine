@@ -27,6 +27,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -1770,6 +1771,79 @@ HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityTextHint001, TestSize.Level1)
 
     viewAbstractModelNG.SetAccessibilityTextHint(&frameNode, TEST_TEXT_HINT);
     EXPECT_EQ(accessibilityProperty->textTypeHint_, TEST_TEXT_HINT);
+}
+
+/**
+ * @tc.name: SetToolbarBuilder
+ * @tc.desc: Test the SetToolbarBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetToolbarBuilder001, TestSize.Level1)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPattern>());
+    rootNode->AddChild(containerModalNode, 0);
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    viewAbstractModelNG.SetToolbarBuilder(nullptr);
+    bool ret = mainNode->removeToolbarItemCallbacks_.size() > 0;
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetToolbarBuilder
+ * @tc.desc: Test the SetToolbarBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetToolbarBuilder002, TestSize.Level1)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPattern>());
+    rootNode->AddChild(containerModalNode, 0);
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto* stack = ViewStackProcessor::GetInstance();
+        CHECK_NULL_RETURN(stack, nullptr);
+        auto frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::TOOLBAR_ETS_TAG, 11, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        stack->Push(frameNode);
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(
+            V2::TOOLBARITEM_ETS_TAG, 22, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        CHECK_NULL_RETURN(childFrameNode, nullptr);
+        stack->Push(childFrameNode);
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+    viewAbstractModelNG.SetToolbarBuilder(std::move(builderFunc));
+    bool ret = mainNode->removeToolbarItemCallbacks_.size() > 0;
+    EXPECT_TRUE(ret);
 }
 
 /**

@@ -1429,6 +1429,25 @@ std::vector<MenuOptionsParam> GetMenuOptionsParamsWithEditMenuOption(
     createMenuItems = info->onCreateCallback.onPrepareMenuCallback(menuItemParams);
     return createMenuItems;
 }
+
+RefPtr<UINode> FindAccessibleFocusNodeInExtMenu(const RefPtr<FrameNode>& extensionMenu)
+{
+    CHECK_NULL_RETURN(extensionMenu, nullptr);
+    auto child = extensionMenu->GetFirstChild();
+    CHECK_NULL_RETURN(child, nullptr);
+    while (child) {
+        if (child->GetTag() == V2::OPTION_ETS_TAG) {
+            bool isPasteOption = SelectContentOverlayManager::IsPasteOption(child);
+            auto row = child->GetFirstChild();
+            if (isPasteOption && row) {
+                return row->GetFirstChild();
+            }
+            return child;
+        }
+        child = child->GetFirstChild();
+    }
+    return nullptr;
+}
 } // namespace
 
 SelectOverlayNode::SelectOverlayNode(const RefPtr<Pattern>& pattern)
@@ -1723,16 +1742,11 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
         selectOverlay->SetAnimationStatus(false);
         auto extensionMenu = weakExtensionMenu.Upgrade();
         CHECK_NULL_VOID(extensionMenu);
-        auto child = extensionMenu->GetFirstChild();
-        while (child) {
-            if (child->GetTag() == V2::OPTION_ETS_TAG) {
-                auto target = AceType::DynamicCast<FrameNode>(child);
-                CHECK_NULL_VOID(target);
-                target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
-                break;
-            }
-            child = child->GetFirstChild();
-        }
+        auto child =  FindAccessibleFocusNodeInExtMenu(extensionMenu);
+        CHECK_NULL_VOID(child);
+        auto target = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(target);
+        target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     };
     AnimationOption selectOption;
     selectOption.SetDuration(ANIMATION_DURATION1);
@@ -1819,7 +1833,7 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
         selectOverlay->SetAnimationStatus(false);
         auto child = selectOverlay->GetFirstChild();
         while (child) {
-            if (child->GetTag() == "SelectMenuButton") {
+            if (child->GetTag() == "SelectMenuButton" || child->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
                 auto target = AceType::DynamicCast<FrameNode>(child);
                 CHECK_NULL_VOID(target);
                 target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);

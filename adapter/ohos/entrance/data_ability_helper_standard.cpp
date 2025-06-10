@@ -165,14 +165,26 @@ int32_t DataAbilityHelperStandard::OpenFileWithDataAbility(const std::string& ur
 
 int32_t DataAbilityHelperStandard::OpenFileWithDataShare(const std::string& uriStr, const std::string& mode)
 {
-    auto context = runtimeContext_.lock();
-    if (useStageModel_ && !dataShareHelper_ && context) {
-        dataShareHelper_ = DataShare::DataShareHelper::Creator(context->GetToken(), MEDIA_SERVER_HEAD);
+    {
+        std::shared_lock<std::shared_mutex> readLock(dataShareHelperLock_);
+        if (dataShareHelper_) {
+            Uri uri(uriStr);
+            return dataShareHelper_->OpenFile(uri, mode);
+        }
     }
-
-    CHECK_NULL_RETURN(dataShareHelper_, -1);
+    auto context = runtimeContext_.lock();
+    {
+        std::unique_lock<std::shared_mutex> writeLock(dataShareHelperLock_);
+        if (useStageModel_ && !dataShareHelper_ && context) {
+            dataShareHelper_ = DataShare::DataShareHelper::Creator(context->GetToken(), MEDIA_SERVER_HEAD);
+        }
+        CHECK_NULL_RETURN(dataShareHelper_, -1);
+    }
     Uri uri = Uri(uriStr);
-    return dataShareHelper_->OpenFile(uri, mode);
+    {
+        std::shared_lock<std::shared_mutex> readLock(dataShareHelperLock_);
+        return dataShareHelper_->OpenFile(uri, mode);
+    }
 }
 
 int32_t DataAbilityHelperStandard::ReadMovingPhotoVideo(const std::string &uri)

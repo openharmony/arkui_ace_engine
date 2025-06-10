@@ -69,7 +69,7 @@ public:
         if (layoutProperty) {
             textDirection = layoutProperty->GetLayoutDirection();
         }
-        if ((HasPrefix() || HasSuffix()) && !contentModifierNode_) {
+        if ((HasPrefix() || HasSuffix()) && !contentModifierNode_ && !endsInitFlag_) {
             endsInitFlag_ = true;
             InitSliderEndsState();
         }
