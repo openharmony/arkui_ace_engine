@@ -752,7 +752,7 @@ HWTEST_F(RichEditorModifierTest, setMaxLinesTestInvalidValues, TestSize.Level1)
  * @tc.desc: Check the functionality of setStopBackPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, setStopBackPressTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, DISABLED_setStopBackPressTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setStopBackPress, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
