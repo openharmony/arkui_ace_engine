@@ -285,32 +285,4 @@ ScopedViewStackProcessor::~ScopedViewStackProcessor()
     ViewStackProcessor::GetInstance()->SetRebuildContainerId(OHOS::Ace::INSTANCE_ID_UNDEFINED);
     std::swap(instance_, ViewStackProcessor::instance);
 }
-
-void InteropViewStackProcessor::Init(int32_t containerId)
-{
-    std::swap(instance_, ViewStackProcessor::instance);
-    ViewStackProcessor::GetInstance()->SetRebuildContainerId(containerId);
-}
-
-void InteropViewStackProcessor::SwapViewStackProcessor(std::unique_ptr<ViewStackProcessor>& instance)
-{
-    std::swap(instance, ViewStackProcessor::instance);
-}
-
-InteropViewStackProcessor::InteropViewStackProcessor(int32_t containerId)
-{
-    Init(containerId);
-}
-
-InteropViewStackProcessor::InteropViewStackProcessor(std::unique_ptr<ViewStackProcessor>& instance, int32_t containerId)
-{
-    std::swap(instance_, instance);
-    Init(containerId);
-}
-
-InteropViewStackProcessor::~InteropViewStackProcessor()
-{
-    ViewStackProcessor::GetInstance()->SetRebuildContainerId(OHOS::Ace::INSTANCE_ID_UNDEFINED);
-    std::swap(instance_, ViewStackProcessor::instance);
-}
 } // namespace OHOS::Ace::NG

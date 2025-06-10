@@ -613,19 +613,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ScopedViewStackProcessor);
 };
 
-class ACE_FORCE_EXPORT InteropViewStackProcessor final : public Referenced {
-public:
-    InteropViewStackProcessor(int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
-    InteropViewStackProcessor(std::unique_ptr<OHOS::Ace::NG::ViewStackProcessor>& instance,
-        int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
-    ~InteropViewStackProcessor();
-    void SwapViewStackProcessor(std::unique_ptr<OHOS::Ace::NG::ViewStackProcessor>& instance);
+class InteropViewStackProcessor;
 
-private:
-    void Init(int32_t containerId);
-    std::unique_ptr<OHOS::Ace::NG::ViewStackProcessor> instance_;
-
-    ACE_DISALLOW_COPY_AND_MOVE(InteropViewStackProcessor);
-};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_PROCESSOR_H
