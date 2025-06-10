@@ -376,6 +376,7 @@ void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent, const ReportCon
     RecordTouchEvent(touchEvent);
     payload[Ressched::NAME] = TOUCH;
     payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(lastTouchEvent_, curTouchEvent_));
+    LoadAceApplicationContext(payload);
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
     isInSlide_ = false;
     isInTouch_ = false;
