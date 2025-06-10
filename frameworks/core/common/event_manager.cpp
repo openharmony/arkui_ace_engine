@@ -30,7 +30,7 @@
 namespace OHOS::Ace {
 constexpr int32_t DUMP_START_NUMBER = 4;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
-constexpr int64_t EVENT_CLEAR_DURATION = 1000;
+constexpr int64_t EVENT_CLEAR_DURATION = 2000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
 constexpr int32_t MIN_DUMP_SIZE = 1;
 constexpr int32_t MAX_DUMP_SIZE = 5;
@@ -2082,7 +2082,7 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
 {
     if (logImmediately) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "Consumed new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
+            "Consumed id:%{public}d, last id:%{public}d", eventId,
             lastConsumedEvent_.eventId);
         return;
     }
@@ -2091,9 +2091,7 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
     if (lastConsumedEvent_.lastLogTimeStamp != 0 &&
         (currentTime - lastConsumedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "Consumed new event id=%{public}d has been more than a second since the last one event "
-            "markProcessed "
-            "in ace_container, lastEventInfo: id:%{public}d",
+            "Consumed id:%{public}d more than 2 second, lastEvent id:%{public}d",
             eventId, lastConsumedEvent_.eventId);
         lastLogTimeStamp = currentTime;
     }
