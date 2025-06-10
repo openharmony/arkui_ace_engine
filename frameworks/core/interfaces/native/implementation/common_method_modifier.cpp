@@ -116,6 +116,15 @@ struct SheetCallbacks {
     std::function<void()> sheetSpringBack;
 };
 
+struct SetFocusData {
+    std::optional<std::string> forward;
+    std::optional<std::string> backward;
+    std::optional<std::string> up;
+    std::optional<std::string> down;
+    std::optional<std::string> left;
+    std::optional<std::string> right;
+};
+
 using PositionWithLocalization = std::pair<std::optional<OffsetT<Dimension>>, bool>;
 
 using OffsetOrEdgesParam = std::variant<
@@ -595,6 +604,19 @@ ChainWeightPair Convert(const Ark_ChainWeightOptions& src)
     return ChainWeightPair(
         Converter::OptConvert<float>(src.horizontal),
         Converter::OptConvert<float>(src.vertical));
+}
+
+template<>
+SetFocusData Convert(const Ark_FocusMovement& src)
+{
+    return {
+        .forward = OptConvert<std::string>(src.forward),
+        .backward = OptConvert<std::string>(src.backward),
+        .up = OptConvert<std::string>(src.up),
+        .down = OptConvert<std::string>(src.down),
+        .left = OptConvert<std::string>(src.left),
+        .right = OptConvert<std::string>(src.right)
+    };
 }
 
 template<>
@@ -2884,40 +2906,28 @@ void NextFocusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto arkFocusMovement = Converter::OptConvertPtr<Ark_FocusMovement>(value);
-    if (!arkFocusMovement) {
-        // ViewAbstract::ResetNextFocus(frameNode);
+    auto setFocusData = Converter::OptConvertPtr<SetFocusData>(value);
+    ViewAbstract::ResetNextFocus(frameNode);
+    if (!setFocusData) {
         return;
     }
-    auto forward = Converter::OptConvert<std::string>(arkFocusMovement->forward);
-    if (forward.has_value()) {
-        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::TAB, forward.value());
+    if (setFocusData->forward.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::TAB, setFocusData->forward.value());
     }
-
-    auto backward = Converter::OptConvert<std::string>(arkFocusMovement->backward);
-    if (backward.has_value()) {
-        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::SHIFT_TAB, backward.value());
+    if (setFocusData->backward.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::SHIFT_TAB, setFocusData->backward.value());
     }
-
-    auto up = Converter::OptConvert<std::string>(arkFocusMovement->up);
-    if (up.has_value()) {
-        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::UP, up.value());
+    if (setFocusData->up.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::UP, setFocusData->up.value());
     }
-
-    auto down = Converter::OptConvert<std::string>(arkFocusMovement->down);
-    if (down.has_value()) {
-        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::DOWN, down.value());
+    if (setFocusData->down.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::DOWN, setFocusData->down.value());
     }
-
-    auto left = Converter::OptConvert<std::string>(arkFocusMovement->left);
-    if (left.has_value()) {
-        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::LEFT, left.value());
+    if (setFocusData->left.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::LEFT, setFocusData->left.value());
     }
-
-    auto right = Converter::OptConvert<std::string>(arkFocusMovement->right);
-    if (right.has_value()) {
-        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::RIGHT, right.value());
+    if (setFocusData->right.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::RIGHT, setFocusData->right.value());
     }
 }
 void TabStopImpl(Ark_NativePointer node,
