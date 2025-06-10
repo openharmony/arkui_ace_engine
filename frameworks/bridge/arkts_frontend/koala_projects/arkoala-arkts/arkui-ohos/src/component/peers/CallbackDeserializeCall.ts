@@ -36,6 +36,7 @@ import { Callback_CalendarRequestedData_Void, CalendarRequestedData, Callback_Ca
 import { ComputedBarAttribute, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Void, Literal_Number_offsetRemain, Callback_Number_Number_ComputedBarAttribute, Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number } from "./../grid"
 import { Callback_CopyEvent_Void, CopyEvent, Callback_CutEvent_Void, CutEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, PasteEvent, Callback_TextRange_Void, MenuCallback, MenuOnAppearCallback, PasteEventCallback, SubmitCallback } from "./../richEditor"
 import { Callback_Date_Void } from "./../calendarPicker"
+import { ShowCallback } from "./../bindSheetOpts"
 import { Callback_DatePickerResult_Void, DatePickerResult } from "./../datePicker"
 import { Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, Callback_InsertValue_Boolean, Callback_InsertValue_Void, SearchSubmitCallback } from "./../search"
 import { Callback_DismissDialogAction_Void, DismissDialogAction } from "./../actionSheet"
@@ -2239,6 +2240,13 @@ export function deserializeAndCallSelectedCallback(thisDeserializer: Deserialize
     let selected : boolean = thisDeserializer.readBoolean()
     _call(selected)
 }
+
+export function deserializeAndCallShowCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ShowCallback)
+    let selected : boolean = thisDeserializer.readBoolean()
+    _call(selected)
+}
 export function deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ShouldBuiltInRecognizerParallelWithCallback)
@@ -2814,6 +2822,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 2049289694/*CallbackKind.Kind_SearchValueCallback*/: return deserializeAndCallSearchValueCallback(thisDeserializer);
         case -1480175598/*CallbackKind.Kind_SelectedCallback*/: return deserializeAndCallSelectedCallback(thisDeserializer);
         case -250780276/*CallbackKind.Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer);
+        case 63936248/*CallbackKind.Kind_ShowCallback*/: return deserializeAndCallShowCallback(thisDeserializer);
         case -1716637992/*CallbackKind.Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisDeserializer);
         case 711649376/*CallbackKind.Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisDeserializer);
         case 1095217433/*CallbackKind.Kind_StyledStringMarshallCallback*/: return deserializeAndCallStyledStringMarshallCallback(thisDeserializer);

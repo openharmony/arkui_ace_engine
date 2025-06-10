@@ -6586,6 +6586,28 @@ void callManagedShouldBuiltInRecognizerParallelWithCallbackSync(Ark_VMContext vm
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedShowCallback(Ark_Int32 resourceId, Ark_Boolean value)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResourceSelf =
+        {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer),
+        sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_ShowCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeBoolean(value);
+    enqueueCallback(&_buffer);
+}
+void callManagedShowCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Boolean value)
+{
+    uint8_t _buffer[4096];
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_ShowCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeBoolean(value);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
 void callManagedSizeChangeCallback(Ark_Int32 resourceId, Ark_SizeOptions oldValue, Ark_SizeOptions newValue)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -7612,6 +7634,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_SearchValueCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSearchValueCallback);
         case Kind_SelectedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSelectedCallback);
         case Kind_ShouldBuiltInRecognizerParallelWithCallback: return reinterpret_cast<Ark_NativePointer>(callManagedShouldBuiltInRecognizerParallelWithCallback);
+        case Kind_ShowCallback: return reinterpret_cast<Ark_NativePointer>(callManagedShowCallback);
         case Kind_SizeChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSizeChangeCallback);
         case Kind_SliderTriggerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSliderTriggerChangeCallback);
         case Kind_StyledStringMarshallCallback: return reinterpret_cast<Ark_NativePointer>(callManagedStyledStringMarshallCallback);
@@ -7908,6 +7931,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_SearchValueCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSearchValueCallbackSync);
         case Kind_SelectedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSelectedCallbackSync);
         case Kind_ShouldBuiltInRecognizerParallelWithCallback: return reinterpret_cast<Ark_NativePointer>(callManagedShouldBuiltInRecognizerParallelWithCallbackSync);
+        case Kind_ShowCallback: return reinterpret_cast<Ark_NativePointer>(callManagedShowCallbackSync);
         case Kind_SizeChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSizeChangeCallbackSync);
         case Kind_SliderTriggerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSliderTriggerChangeCallbackSync);
         case Kind_StyledStringMarshallCallback: return reinterpret_cast<Ark_NativePointer>(callManagedStyledStringMarshallCallbackSync);

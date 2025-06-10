@@ -63,6 +63,7 @@ import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShape
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
 import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
+import { ShowCallback } from "./../bindSheetOpts"
 import { SaveButtonCallback, SaveButtonOnClickResult, SaveDescription, SaveIconStyle, SaveButtonOptions } from "./../saveButton"
 import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchType, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../search"
 import { SearchValueCallback } from "./../searchops"
@@ -18046,6 +18047,20 @@ export class Deserializer extends DeserializerBase {
         const offIconSrc_result : string | Resource | undefined = offIconSrc_buf
         let value : PasswordIcon = ({onIconSrc: onIconSrc_result, offIconSrc: offIconSrc_result} as PasswordIcon)
         return value
+    }
+    readShowCallback(isSync: boolean = false): ShowCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (selected: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(selected);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(63936248, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(63936248, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readPickerDialogButtonStyle(): PickerDialogButtonStyle {
         let valueDeserializer : Deserializer = this
