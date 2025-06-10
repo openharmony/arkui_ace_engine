@@ -119,6 +119,9 @@ const std::vector<PointF> HORIZONTAL_STEP_POINTS { { 10, 20 }, { 20, 20 }, { 30,
 const std::vector<std::pair<std::vector<float>, int32_t>> ACCESSIBILITY_STEP_INDEX_DATA = {
     { { 100, 0, 1, 50 }, 50 }, { { 30, 0, 1.5, 19.5 }, 13 }, { { 80, 10, 8, 70.6 }, 8 }, { { 100, 0, 10, 50 }, 5 }
 };
+constexpr float PLAY_HAPTIC_FEEDBACK_RATIO = 1.0f;
+constexpr float PLAY_HAPTIC_FEEDBACK_RATIO_HALF = 0.5f;
+constexpr float PLAY_HAPTIC_FEEDBACK_RATIO_ZERO = 0.0f;
 } // namespace
 class SliderPatternTestNg : public testing::Test {
 public:
@@ -2226,11 +2229,11 @@ HWTEST_F(SliderPatternTestNg, PlayHapticFeedbackTest001, TestSize.Level1)
     auto host = sliderPattern->GetHost();
     CHECK_NULL_VOID(host);
     host->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    sliderPattern->valueRatio_ = 0.5f;
+    sliderPattern->valueRatio_ = PLAY_HAPTIC_FEEDBACK_RATIO_HALF;
     sliderPattern->PlayHapticFeedback(true);
-    sliderPattern->valueRatio_ = 0.0f;
+    sliderPattern->valueRatio_ = PLAY_HAPTIC_FEEDBACK_RATIO_ZERO;
     sliderPattern->PlayHapticFeedback(false);
-    sliderPattern->valueRatio_ = 1.0f;
+    sliderPattern->valueRatio_ = PLAY_HAPTIC_FEEDBACK_RATIO;
     sliderPattern->PlayHapticFeedback(true);
     EXPECT_TRUE(sliderPattern->isEnableHaptic_);
 }
