@@ -19,15 +19,22 @@
 namespace {
     constexpr float TEXT_SIZE_WIDTH = 10.0f;
     constexpr float TEXT_SIZE_HEIGHT = 10.0f;
+    static OHOS::Ace::MeasureContext s_MeasureCtx;
 }
 
 namespace OHOS::Ace {
 double MeasureUtil::MeasureText(const MeasureContext& context)
 {
+    s_MeasureCtx = context;
     return TEXT_SIZE_WIDTH;
 }
 Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
 {
+    s_MeasureCtx = context;
     return Size(TEXT_SIZE_WIDTH, TEXT_SIZE_HEIGHT);
+}
+MeasureContext* MeasureUtilGetMeasureCtx()
+{
+    return &s_MeasureCtx;
 }
 } // namespace OHOS::Ace
