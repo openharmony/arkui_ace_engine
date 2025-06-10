@@ -2559,7 +2559,7 @@ void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode c
         spanStyle = spanTextStyle.value();
     }
     HandleSelectFontStyleWrapper(code, spanStyle);
-    updateSpanStyle.updateTextColor = spanStyle.GetTextColor();
+    IF_TRUE(!(*it)->useThemeFontColor, updateSpanStyle.updateTextColor = spanStyle.GetTextColor());
     updateSpanStyle.updateFontSize = spanStyle.GetFontSize();
     updateSpanStyle.updateItalicFontStyle = spanStyle.GetFontStyle();
     updateSpanStyle.updateFontWeight = spanStyle.GetFontWeight();
