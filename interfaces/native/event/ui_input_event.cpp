@@ -2660,8 +2660,9 @@ int32_t OH_ArkUI_UIInputEvent_GetTargetDisplayId(const ArkUI_UIInputEvent* event
 {
     const int32_t supportedScenario =
         S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE | S_NODE_ON_FOCUS_AXIS | S_NODE_ON_AXIS |
-        S_NODE_ON_CLICK_EVENT | S_NODE_ON_HOVER_EVENT | S_NODE_ON_HOVER_MOVE | S_GESTURE_TOUCH_EVENT |
-        S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT | S_NXC_ON_TOUCH_INTERCEPT | S_NXC_DISPATCH_AXIS_EVENT;
+        S_NODE_ON_CLICK_EVENT |S_NODE_ON_HOVER_EVENT | S_NODE_ON_CLICK_EVENT | S_NODE_ON_HOVER_EVENT |
+        S_NODE_ON_HOVER_MOVE | S_GESTURE_TOUCH_EVENT | S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT |
+        S_NXC_ON_TOUCH_INTERCEPT | S_NXC_DISPATCH_AXIS_EVENT;
     CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -3809,14 +3810,15 @@ ArkUI_ErrorCode CheckIsSupportedScenario(int32_t scenarioExpr, const ArkUI_UIInp
                                                        : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case C_CLICK_EVENT_ID: {
-            if ((event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) && (scenarioExpr & S_GESTURE_CLICK_EVENT)) {
+            if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
                 // click event from click or tap gesture triggered by keyboard
-                return ARKUI_ERROR_CODE_NO_ERROR;
-            } else if (scenarioExpr & S_NODE_ON_CLICK_EVENT) {
+                return scenarioExpr & S_GESTURE_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+            } else {
                 // click event registed by NODE_ON_CLICK
-                return ARKUI_ERROR_CODE_NO_ERROR;
+                return scenarioExpr & S_NODE_ON_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
             }
-            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case C_HOVER_EVENT_ID: {
             // hover event registed by NODE_ON_HOVER_EVENT
