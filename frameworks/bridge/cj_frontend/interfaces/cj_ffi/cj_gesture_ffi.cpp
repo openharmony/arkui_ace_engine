@@ -987,7 +987,7 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureJudgeBegin(int32_t (*callback)(C
         TransformNativeCJFingerInfo(baseGestureEvent.fingerList, fingerList);
         FormatGestureType(baseGestureEvent, info, gestureInfo->GetType());
         auto result = ffiCallback(cjGestureInfo, baseGestureEvent);
-        delete baseGestureEvent.fingerList;
+        delete[] baseGestureEvent.fingerList;
         return static_cast<GestureJudgeResult>(result);
     };
     ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(std::move(onGestureJudgeFunc));
