@@ -480,6 +480,13 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
         nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType));
 }
 
+bool GreatOrEqualTargetAPIVersion(OHOS::Ace::PlatformVersion platfromVersion)
+{
+    const auto* impl = GetFullImpl();
+    CHECK_NULL_RETURN(impl, false);
+    return impl->getBasicAPI()->greatOrEqualTargetAPIVersion(static_cast<int32_t>(platfromVersion));
+}
+
 void (*g_compatibleEventReceiver)(ArkUI_CompatibleNodeEvent* event) = nullptr;
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event))
 {
