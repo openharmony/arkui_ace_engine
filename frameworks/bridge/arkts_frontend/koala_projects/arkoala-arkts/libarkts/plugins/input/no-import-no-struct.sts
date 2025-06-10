@@ -1,0 +1,32 @@
+@interface Component{}
+
+@interface BuilderLambda {
+	value: string
+}
+
+@Component
+class MyComponent {
+	@BuilderLambda("instantiateImpl")
+	static $_instantiate(factory: () => MyComponent): MyComponent {
+		const instance = factory()
+		return instance
+	}
+
+	static instantiateImpl(builder: (instance: MyComponent)=>MyComponent, factory: () => MyComponent): void {
+		const instance = factory()
+		builder(instance)
+	}
+
+	width(value: number): MyComponent { return this }
+	build() {}
+}
+
+
+@Component
+class AnotherComponent {
+	
+	build() {
+		MyComponent()
+			.width(17.0)
+	}
+}

@@ -128,11 +128,7 @@ void Scrollable::Initialize(const RefPtr<FrameNode>& host)
     springVelocityScale_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)
                                ? scrollableTheme->GetSpringVelocityScale()
                                : VELOCITY_SCALE;
-    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        ratio_ = scrollableTheme->GetGreatApiRatio();
-    } else {
-        ratio_ = scrollableTheme->GetRatio();
-    }
+    ratio_ = scrollableTheme->GetRatio();
     springResponse_ = scrollableTheme->GetSpringResponse();
     touchPadVelocityScaleRate_ = scrollableTheme->GetTouchPadVelocityScaleRate();
     if (friction_ == -1) {
@@ -501,6 +497,9 @@ void Scrollable::HandleTouchUp()
     if (nestedScrolling_) {
         return;
     }
+    if (CanStayOverScroll()) {
+        return;
+    }
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
     if (outBoundaryCallback_ && outBoundaryCallback_()) {
         if (state_ != AnimationState::SPRING && scrollOverCallback_) {
@@ -787,6 +786,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
     if (isAxisEvent) {
         ProcessAxisEndEvent();
         return;
+    }
+    if (CanStayOverScroll()) {
+        SetCanStayOverScroll(false);
     }
     // avoid no render frame when drag end
     if (!isFromPanEnd) {

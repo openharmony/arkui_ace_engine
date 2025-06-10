@@ -46,6 +46,9 @@ constexpr double TITLE_TOP_PADDING = 8.0;
 constexpr double TITLE_RIGHT_PADDING = 8.0;
 constexpr double TITLE_BOTTOM_PADDING = 16.0;
 constexpr double SELECT_OPTION_INTERVAL = 6.0;
+constexpr FontWeight SELECT_MENU_CHECK_MARK_FONT_WEIGHT = FontWeight::REGULAR;
+constexpr Dimension SELECT_MENU_CHECK_MARK_FONT_SIZE = 24.0_vp;
+constexpr uint32_t SELECT_MENU_CHECK_MARK_DEFAULT_COLOR = 0xFF182431;
 
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
@@ -114,6 +117,7 @@ public:
             theme->menuTitleFontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuTitleFontColor_);
             theme->menuTitleHeight_ = pattern->GetAttr<Dimension>("menu_title_height", theme->menuTitleHeight_);
             theme->spinnerSource_ = themeConstants->GetSymbolByName("sys.symbol.arrowtriangle_down_fill");
+            theme->checkMarkIconId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
             ParsePartOne(theme, pattern);
             ParsePartTwo(theme, pattern);
             ParsePartThree(theme, pattern);
@@ -204,7 +208,7 @@ public:
             theme->menuAnimationOffset_ =
                 pattern->GetAttr<Dimension>("menu_animation_offset", theme->menuAnimationOffset_);
             theme->spinnerWidth_ = pattern->GetAttr<Dimension>("spinner_width", theme->spinnerWidth_);
-            theme->menuNeedFocus_ = static_cast<bool>(pattern->GetAttr<int>("menu_need_focus", 0));
+            theme->menuItemNeedFocus_ = static_cast<bool>(pattern->GetAttr<int>("menu_item_need_focus", 0));
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->selectSpinnerWidthMap_.insert(
                     std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->spinnerWidth_));
@@ -336,6 +340,12 @@ public:
             } else {
                 theme->menuWordBreak_ = WordBreak::BREAK_WORD;
             }
+            theme->checkMarkFontWeight_ = FontWeight(static_cast<int32_t>(pattern->GetAttr<double>(
+                "select_check_mark_font_weight", static_cast<double>(SELECT_MENU_CHECK_MARK_FONT_WEIGHT))));
+            theme->checkMarkFontSize_ =
+                pattern->GetAttr<Dimension>("select_check_mark_font_size", SELECT_MENU_CHECK_MARK_FONT_SIZE);
+            theme->checkMarkColor_ =
+                pattern->GetAttr<Color>("select_check_mark_color", Color(SELECT_MENU_CHECK_MARK_DEFAULT_COLOR));
         }
 
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
@@ -500,6 +510,10 @@ public:
         theme->iconSideLength_ = iconSideLength_;
         theme->endIconWidth_ = endIconWidth_;
         theme->endIconHeight_ = endIconHeight_;
+        theme->checkMarkIconId_ = checkMarkIconId_;
+        theme->checkMarkFontSize_ = checkMarkFontSize_;
+        theme->checkMarkFontWeight_ = checkMarkFontWeight_;
+        theme->checkMarkColor_ = checkMarkColor_;
         theme->contentMargin_ = contentMargin_;
         theme->selectDefaultBgColor_ = selectDefaultBgColor_;
         theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
@@ -930,6 +944,16 @@ public:
         return focusedDisableColor_;
     }
 
+    const Color& GetCheckMarkColor() const
+    {
+        return checkMarkColor_;
+    }
+
+    FontWeight GetCheckMarkFontWeight() const
+    {
+        return checkMarkFontWeight_;
+    }
+
     const Color& GetNormalDisableColor() const
     {
         return normalDisableColor_;
@@ -968,6 +992,11 @@ public:
     const uint32_t& GetSpinnerSource() const
     {
         return spinnerSource_;
+    }
+
+    const uint32_t& GetCheckMarkIconId() const
+    {
+        return checkMarkIconId_;
     }
 
     const Color& GetMenuIconColor() const
@@ -1104,9 +1133,9 @@ public:
         return spinnerWidth_;
     }
 
-    bool GetMenuNeedFocus() const
+    bool GetMenuItemNeedFocus() const
     {
-        return menuNeedFocus_;
+        return menuItemNeedFocus_;
     }
 
     const Dimension& GetSpinnerWidth(ControlSize controlSize) const
@@ -1186,6 +1215,11 @@ public:
     const Dimension& GetEndIconHeight() const
     {
         return endIconHeight_;
+    }
+
+    const Dimension& GetCheckMarkFontSize() const
+    {
+        return checkMarkFontSize_;
     }
 
     const Dimension& GetContentMargin() const
@@ -1537,6 +1571,7 @@ private:
     Color spinnerSymbolColor_ = Color(0xff182431);
     Color disabledSpinnerSymbolColor_;
     uint32_t spinnerSource_ = 983615;
+    uint32_t checkMarkIconId_ = 0;
     Color menuIconColor_ = Color(0x99182431);
     Color menuFontColor_;
     Color disabledMenuFontColor_;
@@ -1550,6 +1585,7 @@ private:
     Color secondaryFontColor_;
     std::string fontFamily_;
     FontWeight fontWeight_ { FontWeight::NORMAL };
+    FontWeight checkMarkFontWeight_ { FontWeight::REGULAR };
     TextDecoration textDecoration_ { TextDecoration::NONE };
 
     std::size_t optionSize_ { 0 };
@@ -1602,6 +1638,7 @@ private:
     Dimension endIconWidth_;
     Dimension endIconHeight_;
     Dimension contentMargin_;
+    Dimension checkMarkFontSize_;
 
     Color tvFocusTextColor_;
     Color tvNormalBackColor_;
@@ -1611,6 +1648,7 @@ private:
     Color normalDisableColor_;
     Color focusedTextDisableColor_;
     Color normalTextDisableColor_;
+    Color checkMarkColor_;
 
     TextStyle titleStyle_;
     TextStyle optionTextStyle_;
@@ -1688,7 +1726,7 @@ private:
     Color menuItemFocusedTextColor_;
     double selectFocusStyleType_ = 0.0;
     double optionFocusStyleType_ = 0.0;
-    bool menuNeedFocus_ = false;
+    bool menuItemNeedFocus_ = false;
     int menuBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
     WordBreak menuWordBreak_ = WordBreak::BREAK_WORD;
     int32_t menuAnimationDuration_ = 0;

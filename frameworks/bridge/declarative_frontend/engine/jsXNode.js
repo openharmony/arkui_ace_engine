@@ -13,6 +13,16 @@
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/distRelease/stateMgmt.d.ts" />
+let LogTag;
+(function (LogTag) {
+  LogTag[LogTag['STATE_MGMT'] = 0] = 'STATE_MGMT';
+  LogTag[LogTag['ARK_COMPONENT'] = 1] = 'ARK_COMPONENT';
+})(LogTag || (LogTag = {}));
+class JSXNodeLogConsole {
+  static warn(...args) {
+      aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
+  }
+}
 var NodeRenderType;
 (function (NodeRenderType) {
     NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
@@ -47,6 +57,9 @@ class BaseNode extends ViewBuildNodeBase {
     }
     postTouchEvent(touchEvent) {
         return this.builderBaseNode_.postTouchEvent(touchEvent);
+    }
+    postInputEvent(event) {
+        return this.builderBaseNode_.postInputEvent(event);
     }
     disposeNode() {
         return this.builderBaseNode_.disposeNode();
@@ -107,6 +120,12 @@ class BuilderNode {
     postTouchEvent(touchEvent) {
         __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
         let ret = this._JSBuilderNode.postTouchEvent(touchEvent);
+        __JSScopeUtil__.restoreInstanceId();
+        return ret;
+    }
+    postInputEvent(event) {
+        __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+        let ret = this._JSBuilderNode.postInputEvent(event);
         __JSScopeUtil__.restoreInstanceId();
         return ret;
     }
@@ -209,6 +228,9 @@ class JSBuilderNode extends BaseNode {
         const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
         this.params_ = params;
+        if (options?.localStorage instanceof LocalStorage) {
+            this.setShareLocalStorage(options.localStorage);
+        }
         this.updateFuncByElmtId.clear();
         if (this.bindedViewOfBuilderNode) {
             globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode);
@@ -1366,11 +1388,11 @@ class ImmutableFrameNode extends FrameNode {
         return this._commonAttribute;
     }
     createAnimation(property, startValue, endValue, param) {
-        console.warn("can't create animation on unmodifiable frameNode");
+        JSXNodeLogConsole.warn("can't create animation on unmodifiable frameNode");
         return false;
     }
     cancelAnimations(properties) {
-        console.warn("can't cancel animation on unmodifiable frameNode");
+        JSXNodeLogConsole.warn("can't cancel animation on unmodifiable frameNode");
         return false;
     }
 }
@@ -1686,16 +1708,96 @@ const __creatorMap__ = new Map([
         }],
 ]);
 const __attributeMap__ = new Map([
-    ['Scroll', (node) => {
-            if (node._componentAttribute) {
-                return node._componentAttribute;
-            }
-            if (!node.getNodePtr()) {
-                return undefined;
-            }
-            node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+    ['Swiper', (node) => {
+        if (node._componentAttribute) {
             return node._componentAttribute;
-        }],
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkSwiperComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Scroll', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['List', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkListComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['ListItem', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkListItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['ListItemGroup', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkListItemGroupComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['WaterFlow', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['FlowItem', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Grid', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkGridComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['GridItem', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }]
 ]);
 const __eventMap__ = new Map(
     [
@@ -1749,6 +1851,25 @@ const __eventMap__ = new Map(
       }]
     ]
   )
+const __bindControllerCallbackMap__ = new Map(
+    [
+        ['Swiper', (node, controller) => {
+            getUINativeModule().swiper.setSwiperInitialize(node.getNodePtr(), controller);
+        }],
+        ['Scroll', (node, controller) => {
+            getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
+        }],
+        ['List', (node, controller) => {
+            getUINativeModule().list.setInitialScroller(node.getNodePtr(), controller);
+        }],
+        ['WaterFlow', (node, controller) => {
+            getUINativeModule().waterFlow.setWaterFlowScroller(node.getNodePtr(), controller);
+        }],
+        ['Grid', (node, controller) => {
+            getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller);
+        }]
+    ]
+)
 class typeNode {
     static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
@@ -1783,12 +1904,20 @@ class typeNode {
     static bindController(node, controller, nodeType) {
         if (node === undefined || node === null || controller === undefined || controller === null ||
             node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
-            throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+            if (nodeType === undefined || nodeType === null || nodeType === 'Scroll') {
+                throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+            } else {
+                throw { message: 'Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.', code: 100023 };
+            }
         }
         if (!node.checkIfCanCrossLanguageAttributeSetting()) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
-        getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
+        let callback = __bindControllerCallbackMap__.get(nodeType);
+        if (callback === undefined || callback === null) {
+            return;
+        }
+        callback(node, controller);
     }
 }
 /*
@@ -1886,6 +2015,15 @@ class ColorMetrics {
     }
     static rgba(red, green, blue, alpha = MAX_ALPHA_VALUE) {
         return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
+    }
+    static colorWithSpace(colorSpace, red, green, blue, alpha = MAX_ALPHA_VALUE) {
+        let redInt = Math.round(red * MAX_CHANNEL_VALUE);
+        let greenInt = Math.round(green * MAX_CHANNEL_VALUE);
+        let blueInt = Math.round(blue * MAX_CHANNEL_VALUE);
+        let alphaInt = Math.round(alpha * MAX_CHANNEL_VALUE);
+        const colorMetrics = new ColorMetrics(redInt, greenInt, blueInt, alphaInt);
+        colorMetrics.setColorSpace(colorSpace);
+        return colorMetrics;
     }
     static rgbOrRGBA(format) {
         const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
@@ -2016,6 +2154,14 @@ class ColorMetrics {
     }
     getResourceId() {
         return this.resourceId_;
+    }
+    setColorSpace(colorSpace) {
+        if (ColorSpace.DISPLAY_P3 == colorSpace || ColorSpace.SRGB == colorSpace) {
+            this.colorSpace_ = colorSpace;
+        }
+    }
+    getColorSpace() {
+        return this.colorSpace_;
     }
 }
 class BaseShape {

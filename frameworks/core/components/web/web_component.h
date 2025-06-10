@@ -339,6 +339,17 @@ public:
         }
     }
 
+    void SetActivateContentEventId(const EventMarker& activateContentEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetActivateContentEventId(activateContentEventId);
+    }
+
+    const EventMarker& GetActivateContentEventId() const
+    {
+        return declaration_->GetActivateContentEventId();
+    }
+
     void SetWindowExitEventId(const EventMarker& windowExitEventId)
     {
         CHECK_NULL_VOID(declaration_);
@@ -476,6 +487,11 @@ public:
         mixedContentMode_ = mixedModeNum;
     }
 
+    void SetBypassVsyncCondition(WebBypassVsyncCondition webBypassVsyncCondition)
+    {
+        webBypassVsyncCondition_ = webBypassVsyncCondition;
+    }
+
     bool GetZoomAccessEnabled() const
     {
         return isZoomAccessEnabled_;
@@ -564,6 +580,18 @@ public:
     void SetWebDebuggingAccessEnabled(bool isEnabled)
     {
         isWebDebuggingAccessEnabled_ = isEnabled;
+        webDebuggingPort_ = 0;
+    }
+
+    const std::tuple<bool, int32_t> GetWebDebuggingAccessEnabledAndPort() const
+    {
+        return std::make_tuple(isWebDebuggingAccessEnabled_, webDebuggingPort_);
+    }
+
+    void SetWebDebuggingAccessEnabledAndPort(bool isEnabled, int32_t port)
+    {
+        isWebDebuggingAccessEnabled_ = isEnabled;
+        webDebuggingPort_ = port;
     }
 
     bool GetPinchSmoothModeEnabled() const
@@ -1177,6 +1205,7 @@ private:
     bool isDomStorageAccessEnabled_ = false;
     bool isImageAccessEnabled_ = true;
     MixedModeContent mixedContentMode_ = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
+    WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
     bool isZoomAccessEnabled_ = true;
     bool isGeolocationAccessEnabled_ = true;
     bool isOverviewModeAccessEnabled_ = true;
@@ -1185,6 +1214,7 @@ private:
     int32_t textZoomRatioNum_ = DEFAULT_TEXT_ZOOM_RATIO;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
+    int32_t webDebuggingPort_ = 0;
     bool isMultiWindowAccessEnabled_ = false;
     bool isAllowWindowOpenMethod_ = false;
     OnMouseCallback onMouseEvent_;

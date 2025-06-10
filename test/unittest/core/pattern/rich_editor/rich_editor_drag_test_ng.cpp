@@ -279,12 +279,24 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest004, TestSize.Level1)
     options.style = style;
     auto index = controller->AddTextSpan(options);
     EXPECT_EQ(index, 0);
+
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::DRAG);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    model.SetOnWillChange(std::move(onWillChange));
+
     pattern->dragRange_.first = 0;
     pattern->caretPosition_ = options.value.length();
     pattern->HandleOnDragDropTextOperation(INIT_VALUE_1, true);
+    EXPECT_EQ(changeReason, TextChangeReason::DRAG);
     pattern->dragRange_.first = options.value.length();
     pattern->caretPosition_ = 0;
+    changeReason = TextChangeReason::UNKNOWN;
     pattern->HandleOnDragDropTextOperation(INIT_VALUE_1, true);
+    EXPECT_EQ(changeReason, TextChangeReason::DRAG);
     EXPECT_EQ(pattern->status_, Status::NONE);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -544,40 +556,6 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropTextOperation001, TestSize.Level1
     auto temp = richEditorPattern->caretPosition_;
     richEditorPattern->HandleOnDragDropTextOperation(INIT_VALUE_1, false);
     EXPECT_NE(richEditorPattern->caretPosition_, temp);
-}
-
-/**
- * @tc.name: GetThumbnailCallback001
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, GetThumbnailCallback001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto host = richEditorPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-
-    gestureHub->InitDragDropEvent();
-    gestureHub->SetThumbnailCallback(richEditorPattern->GetThumbnailCallback());
-    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
-}
-
-
-/**
- * @tc.name: GetThumbnailCallback002
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, GetThumbnailCallback002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-
-    richEditorPattern->InitDragDropEvent();
-    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
 }
 
 /**

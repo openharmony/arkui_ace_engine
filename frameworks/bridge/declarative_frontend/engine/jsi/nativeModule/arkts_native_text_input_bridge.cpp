@@ -2326,7 +2326,8 @@ ArkUINativeModuleValue TextInputBridge::SetBackgroundColor(ArkUIRuntimeCallInfo 
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -2521,12 +2522,15 @@ ArkUINativeModuleValue TextInputBridge::SetSelectionMenuOptions(ArkUIRuntimeCall
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClickCallback;
-    if (!ArkTSUtils::ParseSelectionMenuOptions(runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback)) {
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    if (!ArkTSUtils::ParseSelectionMenuOptions(
+        runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback, onPrepareMenuCallback)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputSelectionMenuOptions(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputSelectionMenuOptions(
-        nativeNode, reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback));
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputSelectionMenuOptions(nativeNode,
+        reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback),
+        reinterpret_cast<void*>(&onPrepareMenuCallback));
     return panda::JSValueRef::Undefined(vm);
 }
 

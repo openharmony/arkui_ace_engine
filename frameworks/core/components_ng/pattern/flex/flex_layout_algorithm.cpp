@@ -1124,7 +1124,7 @@ void FlexLayoutAlgorithm::ApplyPatternOperation(
     }
 }
 
-void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
+void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper, bool includeLayoutPolicyChildren)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     if (children.empty()) {
@@ -1139,7 +1139,10 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
         allocatedSize_ = 0.0;
     }
     for (const auto& child : children) {
-        if (child->IsOutOfLayout() || IsVisibleGone(child) ||
+        if (child->IsOutOfLayout() || IsVisibleGone(child)) {
+            continue;
+        }
+        if (!includeLayoutPolicyChildren &&
             find(layoutPolicyChildren_.begin(), layoutPolicyChildren_.end(), child) != layoutPolicyChildren_.end()) {
             continue;
         }
@@ -1164,10 +1167,8 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     auto host = layoutWrapper->GetHostNode();
-    if (host && !host->GetIgnoreLayoutProcess()) {
-        if (GetNeedPostponeForIgnore()) {
-            return;
-        }
+    if (host && !host->GetIgnoreLayoutProcess() && GetNeedPostponeForIgnore()) {
+        return;
     }
 
     if (!hasMeasured_) {
@@ -1190,6 +1191,7 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto contentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    AdjustTotalAllocatedSize(layoutWrapper, true);
     Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
         ? MinusPaddingToNonNegativeSize(padding, contentSize)
         : MinusPaddingToSize(padding, contentSize);
@@ -1331,9 +1333,13 @@ float FlexLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(const Re
     CHECK_NULL_RETURN(host, 0.0f);
     auto childNode = childLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(childNode, 0.0f);
-    CHECK_NULL_RETURN(childNode->GetLayoutProperty()->IsIgnoreOptsValid(), 0.0f);
+    if (!childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {
+        return 0.0f;
+    }
+    auto isExpandConstraintNeeded = childNode->GetLayoutProperty()->IsExpandConstraintNeeded();
     IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
-    auto sae = host->GetAccumulatedSafeAreaExpand(true, opts);
+    auto sae = isExpandConstraintNeeded ? host->GetAccumulatedSafeAreaExpand(true, opts)
+                                        : childNode->GetAccumulatedSafeAreaExpand(false, opts);
     float offsetX = 0.0f;
     float offsetY = 0.0f;
     float offsetEdgeExpand = 0.0f;
@@ -1358,11 +1364,8 @@ float FlexLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(const Re
     }
     OffsetF saeTrans = OffsetF(offsetX, offsetY);
     childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(saeTrans);
-    if (childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
-    }
-    return childNode->GetLayoutProperty()->IsExpandConstraintNeeded() ? offsetEdgeExpand : 0.0f;
+    return isExpandConstraintNeeded ? offsetEdgeExpand : 0.0f;
 }
-
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();

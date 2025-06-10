@@ -48,6 +48,16 @@ constexpr int32_t DOT_INDICATOR_INFO_SIZE = 11;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 12;
 constexpr int32_t DOT_INDICATOR_SPACE = 13;
 constexpr int32_t DEFAULT_INDICATOR_COUNT = 2;
+constexpr int32_t DOT_INDICATOR_RESOURCE_ITEM_WIDTH = 0;
+constexpr int32_t DOT_INDICATOR_RESOURCE_ITEM_HEIGHT = 1;
+constexpr int32_t DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH = 2;
+constexpr int32_t DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT = 3;
+constexpr int32_t DOT_INDICATOR_RESOURCE_COLOR = 4;
+constexpr int32_t DOT_INDICATOR_RESOURCE_SELECTED_COLOR = 5;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_FONT_COLOR = 0;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR = 1;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_FONT_SIZE = 2;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_SELECTED_FONT_SIZE = 3;
 namespace {
 
 std::optional<Dimension> ParseIndicatorDimension(const std::string& value)
@@ -100,7 +110,7 @@ std::string GetInfoFromVectorByIndex(const std::vector<std::string>& dotIndicato
                : (dotIndicatorInfo[index] == "-" ? "" : dotIndicatorInfo[index]);
 }
 
-SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& digitIndicatorInfo)
+SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& digitIndicatorInfo, const void* resObjs)
 {
     auto dotLeftValue = digitIndicatorInfo[DIGIT_INDICATOR_LEFT] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_LEFT];
     auto dotTopValue = digitIndicatorInfo[DIGIT_INDICATOR_TOP] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_TOP];
@@ -111,20 +121,15 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     auto fontColorValue =
         digitIndicatorInfo[DIGIT_INDICATOR_FONT_COLOR] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_FONT_COLOR];
     auto selectedFontColorValue = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR] == "-"
-                                      ? ""
-                                      : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR];
+        ? "" : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR];
     auto digitFontSize = digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_SIZE] == "-"
-                             ? ""
-                             : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_SIZE];
+        ? "" : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_SIZE];
     auto digitFontWeight = digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_WEIGHT] == "-"
-                               ? ""
-                               : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_WEIGHT];
+        ? "" : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_WEIGHT];
     auto selectedDigitFontSize = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_SIZE] == "-"
-                                     ? ""
-                                     : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_SIZE];
+        ? "" : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_SIZE];
     auto selectedDigitFontWeight = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT] == "-"
-                                       ? ""
-                                       : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT];
+        ? "" : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT];
     auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -138,12 +143,23 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     Color fontColor;
     parseOk = Color::ParseColorString(fontColorValue, fontColor);
     digitalParameters.fontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("fontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     parseOk = Color::ParseColorString(selectedFontColorValue, fontColor);
     digitalParameters.selectedFontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("selectedFontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     GetFontContent(digitFontSize, digitFontWeight, false, digitalParameters);
     GetFontContent(selectedDigitFontSize, selectedDigitFontWeight, true, digitalParameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
+        digitalParameters.resourceFontColorValueObject = resourceObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_COLOR);
+        digitalParameters.resourceSelectedFontColorValueObject =
+            resourceObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR);
+        digitalParameters.resourceFontSizeValueObject = resourceObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SIZE);
+        digitalParameters.resourceSelectedFontSizeValueObject =
+            resourceObjs.at(DIGIT_INDICATOR_RESOURCE_SELECTED_FONT_SIZE);
+    }
     return digitalParameters;
 }
 
@@ -179,7 +195,8 @@ void SetItem4GetDotIndicatorInfo(
     }
 }
 
-SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo)
+SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo,
+    const void* resObjs)
 {
     auto maskValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_MASK);
     auto colorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_COLOR);
@@ -217,6 +234,17 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     bool parseSpaceOk = !spaceValue.empty() && space.Unit() != DimensionUnit::PERCENT;
     auto defaultSpaceSize = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     indicatorParameters.dimSpace = (parseSpaceOk && !(space < 0.0_vp)) ? space : defaultSpaceSize;
+    if (SystemProperties::ConfigChangePerform()) {
+        auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
+        indicatorParameters.resourceItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH);
+        indicatorParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
+        indicatorParameters.resourceSelectedItemWidthValueObject =
+            resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH);
+        indicatorParameters.resourceSelectedItemHeightValueObject =
+            resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
+        indicatorParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
+        indicatorParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
+    }
     return indicatorParameters;
 }
 
@@ -270,7 +298,7 @@ void ResetOnChange(ArkUINodeHandle node)
     IndicatorModelNG::SetOnChange(frameNode, nullptr);
 }
 
-void SetStyle(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr)
+void SetStyle(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr, const void* resObjs)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -279,11 +307,11 @@ void SetStyle(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr)
     StringUtils::StringSplitter(indicatorValues, '|', res);
     std::string type = res[INDICATOR_TYPE_INDEX];
     if (type == "ArkDigitIndicator") {
-        SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(res);
+        SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(res, resObjs);
         IndicatorModelNG::SetDigitIndicatorStyle(frameNode, digitalParameters);
         IndicatorModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
     } else {
-        SwiperParameters indicatorParameters = GetDotIndicatorInfo(frameNode, res);
+        SwiperParameters indicatorParameters = GetDotIndicatorInfo(frameNode, res, resObjs);
         IndicatorModelNG::SetDotIndicatorStyle(frameNode, indicatorParameters);
         IndicatorModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
     }

@@ -583,7 +583,7 @@ public:
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
     void FlushModifier() override;
-    void FlushMessages() override;
+    void FlushMessages(std::function<void()> callback = nullptr) override;
 
     void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
     void FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node);
@@ -891,10 +891,7 @@ public:
 
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;
-    void SetVsyncListener(VsyncCallbackFun vsync)
-    {
-        vsyncListener_ = std::move(vsync);
-    }
+    void SetVsyncListener(VsyncCallbackFun vsync);
 
     void SetOnceVsyncListener(VsyncCallbackFun vsync)
     {
@@ -1215,6 +1212,8 @@ public:
         keyOcclusionNodes_[frameNodeId] = enable;
     }
     const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
+    void RemoveNodeFromDirtyRenderNode(int32_t nodeId, int32_t pageId);
+    void GetRemovedDirtyRenderAndErase(uint32_t id);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1284,6 +1283,7 @@ private:
     {
         isEventsPassThrough_ = isEnable;
     }
+    void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) override;
 
     void FlushTouchEvents();
     void FlushWindowPatternInfo();
@@ -1444,6 +1444,7 @@ private:
     uint64_t resampleTimeStamp_ = 0;
     bool touchAccelarate_ = false;
     bool isEventsPassThrough_ = false;
+    bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;

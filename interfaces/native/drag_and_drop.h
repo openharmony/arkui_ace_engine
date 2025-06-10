@@ -36,7 +36,7 @@
 #define ARKUI_NATIVE_DRAG_AND_DROP_H
 
 #include <stdint.h>
-#include <stdbool.h>
+
 #include "native_type.h"
 #include "ui_input_event.h"
 
@@ -276,9 +276,34 @@ int32_t OH_ArkUI_DragEvent_SetDragResult(ArkUI_DragEvent* event, ArkUI_DragResul
  */
 int32_t OH_ArkUI_DragEvent_SetData(ArkUI_DragEvent* event, OH_UdmfData* data);
 
+/**
+ * @brief Use this method to obtain the application bundle name of the drag-and-drop initiator, you need
+ *  to pass a character array for receiving the string and explicitly specify the array length. It is
+ *  recommended that the array length be no less than 128 characters. If the length cannot accommodate
+ *  the actual bundle name length, the ERROR result will be returned.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param bundleName A string array used to receive the source application's bundle name.
+ * @param length Use this to explicitly specify the length of the incoming string array.
+ *  It is recommended to be bigger than 128.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
 ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* bundleName, int32_t length);
 
-ArkUI_ErrorCode OH_ArkUI_DragEvent_IsRemote(ArkUI_DragEvent* event, bool* inRemote);
+/**
+ * @brief Call this method to determine whether the current drag and drop operation is cross-device.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param isRemote Boolean pointer to receive the result.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_DragEvent_IsRemote(ArkUI_DragEvent* event, bool* isRemote);
 
 /**
  * @brief Obtains the default drag data from a drag event.

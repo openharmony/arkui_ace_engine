@@ -151,8 +151,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
     ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE);
+    ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE, true);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION);
+    ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION, true);
     ViewAbstract::SetPixelRound(0);
     ChainInfo chainInfo;
     chainInfo.direction = LineDirection::HORIZONTAL;
@@ -244,8 +246,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest004, TestSize.Level1)
     ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE);
+    ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE, true);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION);
+    ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION, true);
     ViewAbstract::SetPixelRound(0);
 
     ChainInfo chainInfo;
@@ -940,6 +944,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest016, TestSize.Level1)
     ImageResizableSlice slice;
     ViewAbstract::SetBackgroundImageResizableSlice(slice);
     ViewAbstract::SetBackgroundImageResizableSlice(nullptr, slice);
+    ViewAbstract::SetBackgroundImageResizableSlice(nullptr, slice, true);
 
     /**
      * @tc.expected: Return expected results.
@@ -1533,8 +1538,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest029, TestSize.Level1)
     ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE);
+    ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE, true);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION);
+    ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION, true);
     ViewAbstract::SetPixelRound(0);
     ChainInfo chainInfo;
     chainInfo.direction = LineDirection::HORIZONTAL;
@@ -2419,4 +2426,86 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0045, TestSize.Level1)
     EXPECT_EQ(foregroundColor, "");
 }
 
+/**
+ * @tc.name: SetBackgroundColor
+ * @tc.desc: Test SetBackgroundColor of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0046, TestSize.Level1)
+{
+    Color p3Red;
+    p3Red.SetValue(0xffff0000);
+    p3Red.SetColorSpace(ColorSpace::DISPLAY_P3);
+    ViewAbstract::SetBackgroundColor(AceType::RawPtr(FRAME_NODE_REGISTER), p3Red);
+    Color result = ViewAbstract::GetBackgroundColor(AceType::RawPtr(FRAME_NODE_REGISTER));
+    EXPECT_EQ(result.GetColorSpace(), p3Red.GetColorSpace());
+}
+
+/**
+ * @tc.name: SetSweepGradient
+ * @tc.desc: Test SetSweepGradient of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0047, TestSize.Level1)
+{
+    Color p3Red;
+    p3Red.SetValue(0xffff0000);
+    p3Red.SetColorSpace(ColorSpace::DISPLAY_P3);
+    Color p3Green;
+    p3Green.SetValue(0xff00ff00);
+    p3Green.SetColorSpace(ColorSpace::DISPLAY_P3);
+    Color p3Blue;
+    p3Blue.SetValue(0xff0000ff);
+    p3Blue.SetColorSpace(ColorSpace::DISPLAY_P3);
+    GradientColor gradientColor;
+    Gradient gradient;
+    gradientColor.SetColor(p3Red);
+    gradient.AddColor(gradientColor);
+    gradientColor.SetColor(p3Green);
+    gradient.AddColor(gradientColor);
+    gradientColor.SetColor(p3Blue);
+    gradient.AddColor(gradientColor);
+    ViewAbstract::SetSweepGradient(AceType::RawPtr(FRAME_NODE_REGISTER), gradient);
+    Gradient result = ViewAbstract::GetSweepGradient(AceType::RawPtr(FRAME_NODE_REGISTER));
+    EXPECT_EQ(result.GetColors().front().GetColor().GetColorSpace(), p3Red.GetColorSpace());
+    EXPECT_EQ(result.GetColors().back().GetColor().GetColorSpace(), p3Blue.GetColorSpace());
+}
+
+/**
+ * @tc.name: ViewAbstractSetClickFocusTest001
+ * @tc.desc: Test that container node becomes focusable when click event is set and no focusable children exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractSetClickFocusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a FrameNode and set a native onClick event via SetOnClick.
+     * @tc.expected: The FrameNode should be focusable after setting onClick.
+     */
+    auto frameNode1 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode1, nullptr);
+
+    GestureEventFunc onClick = [](GestureEvent&) {};
+    ViewAbstract::SetOnClick(AceType::RawPtr(frameNode1), std::move(onClick), 10.0);
+
+    auto focusHub1 = frameNode1->GetFocusHub();
+    ASSERT_NE(focusHub1, nullptr);
+    EXPECT_TRUE(focusHub1->IsFocusable());
+
+    /**
+     * @tc.steps2: Create another FrameNode and set a JS-based onClick event via SetJSFrameNodeOnClick.
+     * @tc.expected: The FrameNode should also become focusable after setting JS onClick.
+     */
+    auto frameNode2 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode2, nullptr);
+
+    GestureEventFunc jsOnClick = [](GestureEvent&) {};
+    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode2), std::move(jsOnClick));
+
+    auto focusHub2 = frameNode2->GetFocusHub();
+    ASSERT_NE(focusHub2, nullptr);
+    EXPECT_TRUE(focusHub2->IsFocusable());
+}
 } // namespace OHOS::Ace::NG

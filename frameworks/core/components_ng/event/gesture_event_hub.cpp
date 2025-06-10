@@ -26,12 +26,48 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t MAX_FRAME_NODE_DEPTH = 2;
 constexpr const char* HIT_TEST_MODE[] = {
     "HitTestMode.Default",
     "HitTestMode.Block",
     "HitTestMode.Transparent",
     "HitTestMode.None",
 };
+
+bool IsDifferentFrameNodeCollected(
+    const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& host, int32_t depth = 0)
+{
+    CHECK_NULL_RETURN(current, true);
+    if (depth >= MAX_FRAME_NODE_DEPTH) {
+        return false;
+    }
+
+    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(current);
+    if (!recognizerGroup) {
+        auto recognizerNode = current->GetAttachedNode().Upgrade();
+        if (recognizerNode != host) {
+            return false;
+        }
+        return true;
+    }
+
+    auto recognizerList = recognizerGroup->GetGroupRecognizer();
+    for (auto recognizer : recognizerList) {
+        if (!recognizer) {
+            continue;
+        }
+        if (AceType::InstanceOf<RecognizerGroup>(recognizer) &&
+            !IsDifferentFrameNodeCollected(recognizer, host, depth + 1)) {
+            return false;
+        } else {
+            auto recognizerNode = recognizer->GetAttachedNode().Upgrade();
+            if (recognizerNode != host) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
 
@@ -284,23 +320,13 @@ bool GestureEventHub::CheckLastInnerRecognizerCollected(GesturePriority priority
         if (static_cast<int32_t>(externalParallelRecognizer_.size()) <= gestureGroupIndex) {
             return false;
         }
-        recognizerList = externalParallelRecognizer_[gestureGroupIndex]->GetGroupRecognizer();
+        return IsDifferentFrameNodeCollected(externalParallelRecognizer_[gestureGroupIndex], host);
     } else {
         if (static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= gestureGroupIndex) {
             return false;
         }
-        recognizerList = externalExclusiveRecognizer_[gestureGroupIndex]->GetGroupRecognizer();
+        return IsDifferentFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
     }
-    for (auto recognizer : recognizerList) {
-        if (!recognizer) {
-            continue;
-        }
-        auto recognizerNode = recognizer->GetAttachedNode().Upgrade();
-        if (recognizerNode != host) {
-            return false;
-        }
-    }
-    return true;
 }
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -584,6 +610,16 @@ void GestureEventHub::SetOnTouchTestDoneCallbackForInner(TouchTestDoneCallback&&
     touchTestDoneCallbackForInner_ = touchTestDoneFunc;
 }
 
+TouchTestDoneCallback GestureEventHub::GetOnTouchTestDoneCallback() const
+{
+    return touchTestDoneCallback_;
+}
+
+void GestureEventHub::SetOnTouchTestDoneCallback(TouchTestDoneCallback&& touchTestDoneFunc)
+{
+    touchTestDoneCallback_ = touchTestDoneFunc;
+}
+
 void GestureEventHub::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
 {
     touchInterceptFunc_ = std::move(touchInterceptFunc);
@@ -624,6 +660,11 @@ GestureRecognizerJudgeFunc GestureEventHub::GetOnGestureRecognizerJudgeBegin() c
 void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc)
 {
     gestureJudgeNativeFunc_ = std::move(gestureJudgeFunc);
+}
+
+void GestureEventHub::SetOnGestureJudgeNativeBeginForMenu(GestureJudgeFunc&& gestureJudgeFunc)
+{
+    gestureJudgeNativeFuncForMenu_ = std::move(gestureJudgeFunc);
 }
 
 void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -1138,9 +1179,24 @@ GestureJudgeFunc GestureEventHub::GetOnGestureJudgeBeginCallback() const
     return gestureJudgeFunc_;
 }
 
-GestureJudgeFunc GestureEventHub::GetOnGestureJudgeNativeBeginCallback() const
+GestureJudgeFunc GestureEventHub::GetOnGestureJudgeNativeBeginCallback()
 {
-    return gestureJudgeNativeFunc_;
+    auto callback = [weakNode = WeakClaim(this)](const RefPtr<GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        auto gestureHub = weakNode.Upgrade();
+        CHECK_NULL_RETURN(gestureHub, GestureJudgeResult::CONTINUE);
+        auto gestureJudgeNativeFunc = gestureHub->gestureJudgeNativeFunc_;
+        if (gestureJudgeNativeFunc && gestureJudgeNativeFunc(gestureInfo, info) == GestureJudgeResult::REJECT) {
+            return GestureJudgeResult::REJECT;
+        }
+        auto gestureJudgeNativeFuncForMenu = gestureHub->gestureJudgeNativeFuncForMenu_;
+        if (gestureJudgeNativeFuncForMenu &&
+            gestureJudgeNativeFuncForMenu(gestureInfo, info) == GestureJudgeResult::REJECT) {
+            return GestureJudgeResult::REJECT;
+        }
+        return GestureJudgeResult::CONTINUE;
+    };
+    return callback;
 }
 
 void GestureEventHub::RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -1238,6 +1294,12 @@ void GestureEventHub::SetPanEventType(GestureTypeName typeName)
 {
     CHECK_NULL_VOID(panEventActuator_);
     panEventActuator_->SetPanEventType(typeName);
+}
+
+void GestureEventHub::SetLongPressEventType(GestureTypeName typeName)
+{
+    CHECK_NULL_VOID(longPressEventActuator_);
+    longPressEventActuator_->SetLongPressEventType(typeName);
 }
 
 HitTestMode GestureEventHub::GetHitTestMode() const

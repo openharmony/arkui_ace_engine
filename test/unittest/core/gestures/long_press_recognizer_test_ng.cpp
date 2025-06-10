@@ -2094,4 +2094,33 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTypeTest001, TestSize.Lev
     longPressRecognizer->HandleReports(info, GestureCallbackType::END);
     EXPECT_EQ(longPressRecognizer->GetRecognizerType(), GestureTypeName::LONG_PRESS_GESTURE);
 }
+
+/**
+ * @tc.name: TriggerGestureJudgeCallbackTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    longPressRecognizer->inputEventType_ = InputEventType::KEYBOARD;
+    longPressRecognizer->deviceId_ = 1;
+    longPressRecognizer->lastAction_ = 1;
+
+    auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                    const std::list<RefPtr<NGGestureRecognizer>>& others) {
+        EXPECT_EQ(info->rawInputEventType_, InputEventType::KEYBOARD);
+        EXPECT_EQ(info->rawInputDeviceId_, 1);
+        EXPECT_EQ(info->lastAction_.value_or(0), 1);
+        return GestureJudgeResult::REJECT;
+    };
+    TouchEvent touchEvent;
+    touchEvent.rollAngle = 0;
+    longPressRecognizer->touchPoints_[0] = touchEvent;
+    longPressRecognizer->targetComponent_ = targetComponent;
+    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    longPressRecognizer->TriggerGestureJudgeCallback();
+}
 } // namespace OHOS::Ace::NG

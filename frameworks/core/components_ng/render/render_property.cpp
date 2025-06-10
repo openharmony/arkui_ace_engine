@@ -240,6 +240,11 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx(), filter);
     json->PutExtAttr("backgroundImageResizable",
         propBackgroundImageResizableSlice.value_or(ImageResizableSlice()).ToString().c_str(), filter);
+    if (propSysOptions.has_value()) {
+        auto jsonBackgroundSysOption = JsonUtil::Create(true);
+        jsonBackgroundSysOption->Put("disableSystemAdaptation", propSysOptions->disableSystemAdaptation);
+        json->PutExtAttr("backgroundSysOptions", jsonBackgroundSysOption, filter);
+    }
 }
 
 void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -277,6 +282,11 @@ void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         motionBlurAnchor->Put("y", propMotionBlur->anchor.y);
         motionBlur->Put("anchor", motionBlurAnchor);
         json->Put("motionBlur", motionBlur);
+    }
+    if (propSysOptionsForBlur.has_value()) {
+        auto jsonForegroundSysOption = JsonUtil::Create(true);
+        jsonForegroundSysOption->Put("disableSystemAdaptation", propSysOptionsForBlur->disableSystemAdaptation);
+        json->PutExtAttr("foregroundSysOptions", jsonForegroundSysOption, filter);
     }
 }
 

@@ -957,6 +957,48 @@ HWTEST_F(XComponentTestTwoNg, InitXComponentShouldNotCallInitNativeXComponentTes
 }
 
 /**
+ * @tc.name: InitXComponentShouldCallInitAccessibilty
+ * @tc.desc: Test InitXComponent Func Init Accessibilty when isTypedNode_ = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, InitXComponentShouldCallInitAccessibilty, TestSize.Level1)
+{
+    // type = XCOMPONENT_SURFACE_TYPE_VALUE, isTypedNode_ = true, libraryName = std::nullopt
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = true;
+
+    XComponentModelNG().InitXComponent(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(pattern->isNativeXComponent_, false);
+    EXPECT_NE(pattern->accessibilityChildTreeCallback_, nullptr);
+}
+
+/**
+ * @tc.name: InitializeNotCallInitAccessibilty
+ * @tc.desc: Test Initialize Func not Init Accessibilty when isTypedNode_ = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, InitializeNotCallInitAccessibilty, TestSize.Level1)
+{
+    // type = XCOMPONENT_SURFACE_TYPE_VALUE, isTypedNode_ = true, libraryName = std::nullopt
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = true;
+    pattern->accessibilityChildTreeCallback_ = nullptr;
+
+    pattern->Initialize();
+    EXPECT_EQ(pattern->accessibilityChildTreeCallback_, nullptr);
+}
+
+/**
  * @tc.name: SetOnLoadShouldCallEventHubSetFuncTest
  * @tc.desc: Test SetOnLoadShouldCallEventHubSetFunc Func
  * @tc.type: FUNC
@@ -1792,5 +1834,29 @@ HWTEST_F(XComponentTestTwoNg, UnlockCanvasAndPostTest, TestSize.Level1)
     // clear variables on the stack to prevent memory leaks
     delete reinterpret_cast<int*>(pattern->nativeWindow_);
     pattern->nativeWindow_ = nullptr;
+}
+
+/**
+ * @tc.name: IsEnableMatchParentTest
+ * @tc.desc: Test IsEnableMatchParent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, IsEnableMatchParentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Check Function IsEnableMatchParent's return value.
+     * @tc.expected: Function IsEnableMatchParent returns true.
+     */
+    EXPECT_TRUE(pattern->IsEnableMatchParent());
 }
 } // namespace OHOS::Ace::NG

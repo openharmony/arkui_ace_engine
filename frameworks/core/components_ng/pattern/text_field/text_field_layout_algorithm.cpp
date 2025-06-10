@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/font_manager.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
@@ -176,6 +177,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const Layout
             paragraph_->Layout(std::min(static_cast<float>(paragraphLongestLine), paragraph_->GetMaxWidth()));
         }
         contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
+        auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+        if (widthLayoutPolicy == LayoutCalPolicy::WRAP_CONTENT ||
+            widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            contentWidth = std::max(contentWidth, contentConstraint.minSize.Width());
+        }
         // calc inline status in advance
         auto widthOffSet = contentConstraint.selfIdealSize.Width().has_value()?
             pattern->GetPaddingLeft() + pattern->GetPaddingRight() - safeBoundary : 0.0f - safeBoundary;
@@ -356,6 +362,11 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
 
     if (autoWidth_) {
         contentWidth = std::min(contentWidth, paragraph_->GetLongestLineWithIndent());
+        auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+        if (widthLayoutPolicy == LayoutCalPolicy::WRAP_CONTENT ||
+            widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            contentWidth = std::max(contentWidth, contentConstraint.minSize.Width());
+        }
         auto minWidth = INLINE_MIN_WITH.ConvertToPx();
         contentWidth = GreatNotEqual(contentWidth, minWidth) ? contentWidth : minWidth;
         paragraph_->Layout(std::ceil(contentWidth));
@@ -368,6 +379,13 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
                       : std::max(preferredHeight_, paragraph_->GetHeight());
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, SizeF());
+    auto lineCount = paragraph_->GetLineCount() != 0 ? paragraph_->GetLineCount() : 1;
+    if (textFieldLayoutProperty->HasNormalMaxViewLines() && ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        auto maxline = (height / lineCount) * textFieldLayoutProperty->GetNormalMaxViewLines().value();
+        contentHeight = std::min(contentHeight, maxline);
+    }
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
     return SizeF(contentWidth, contentHeight);
@@ -642,8 +660,10 @@ LayoutConstraintF TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithCalculate
     CHECK_NULL_RETURN(frameNode, textFieldContentConstraint);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, textFieldContentConstraint);
-    auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
-    auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+    auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(
+        TextBase::GetConstraintMaxLength(layoutWrapper, contentConstraint, true));
+    auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(
+        TextBase::GetConstraintMaxLength(layoutWrapper, contentConstraint, false));
     auto maxIdealSize = SizeF { idealWidth, idealHeight };
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
         !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
@@ -1246,5 +1266,52 @@ bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
         IsAdaptFontSizeExceedLineHeight(paragraph) ||
            GreatNotEqual(paragraph->GetHeight(), maxSize.Height());
+}
+
+void TextFieldLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize)
+{
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+        const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
+            widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
+            heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), Axis::HORIZONTAL)
+                                    .ConvertToSizeT();
+        frameSize.UpdateSizeWithCheck(layoutPolicySize);
+    }
+}
+
+void TextFieldLayoutAlgorithm::UpdateAutoWidth(
+    const RefPtr<TextFieldLayoutProperty>& property, LayoutWrapper* layoutWrapper)
+{
+    autoWidth_ = property->GetWidthAutoValue(false);
+    if (!autoWidth_) {
+        auto layoutCalPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+        autoWidth_ = (layoutCalPolicy == LayoutCalPolicy::WRAP_CONTENT) ||
+                     (layoutCalPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+    }
+}
+
+void TextFieldLayoutAlgorithm::UpdateTextAreaMaxLines(
+    TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        textStyle.SetMaxLines(INT32_MAX);
+    } else {
+        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+    }
+}
+
+bool TextFieldLayoutAlgorithm::ShouldUseInfiniteMaxLines(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    return textFieldLayoutProperty->HasOverflowMode() &&
+           textFieldLayoutProperty->GetOverflowMode() == OverflowMode::SCROLL &&
+           (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::NONE ||
+               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::CLIP ||
+               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::DEFAULT);
 }
 } // namespace OHOS::Ace::NG

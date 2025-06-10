@@ -362,7 +362,8 @@ ArkUINativeModuleValue ButtonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getButtonModifier()->resetButtonBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getButtonModifier()->setButtonBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace());
     }
     return panda::JSValueRef::Undefined(vm);
 }

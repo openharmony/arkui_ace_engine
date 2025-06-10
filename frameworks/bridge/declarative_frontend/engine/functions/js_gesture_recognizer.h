@@ -40,9 +40,6 @@ enum class GestureRecognizerState {
     FAIL = 5,
 };
 
-using TouchRecognizerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
-using TouchRecognizerMap = std::map<TouchEventTarget*, TouchRecognizerTarget>;
-
 class JSEventTargetInfo : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj);
@@ -131,6 +128,8 @@ public:
     void IsBuiltInRecognizer(const JSCallbackInfo& args);
 
     void SetEnabled(const JSCallbackInfo& args);
+
+    void PreventBegin(const JSCallbackInfo& args);
 
     void IsEnabled(const JSCallbackInfo& args);
 
@@ -409,10 +408,10 @@ public:
     
     void GetEventTargetInfo(const JSCallbackInfo& args);
     void CancelTouch(const JSCallbackInfo& args);
-    void SetTouchData(TouchEventTarget* target, TouchRecognizerTarget& touchRecognizerTarget)
+    void SetTouchData(const WeakPtr<TouchEventTarget>& target, const std::unordered_set<int32_t>& fingerIds)
     {
-        target_ = target;
-        touchRecognizerTarget_ = touchRecognizerTarget;
+        target_ = std::move(target);
+        fingerIds_ = std::move(fingerIds);
     }
     
 private:
@@ -430,8 +429,8 @@ private:
         }
     }
     
-    TouchEventTarget* target_;
-    TouchRecognizerTarget touchRecognizerTarget_;
+    WeakPtr<TouchEventTarget> target_;
+    std::unordered_set<int32_t> fingerIds_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_GESTURE_RECOGNIZER_H

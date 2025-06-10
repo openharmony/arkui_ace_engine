@@ -77,6 +77,18 @@ void DragDropGlobalController::SetAsyncDragCallback(std::function<void()> asyncD
     asyncDragCallback_ = asyncDragCallbac;
 }
 
+void DragDropGlobalController::SetCallAnsyncDragEnd(std::function<void(DragStartRequestStatus)> callSyncDragEnd)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    callSyncDragEnd_ = callSyncDragEnd;
+}
+
+std::function<void(DragStartRequestStatus)> DragDropGlobalController::GetCallAnsyncEnd()
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return callSyncDragEnd_;
+}
+
 std::function<void()> DragDropGlobalController::GetAsyncDragCallback()
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);

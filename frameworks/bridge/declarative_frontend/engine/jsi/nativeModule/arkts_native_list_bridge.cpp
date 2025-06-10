@@ -121,6 +121,38 @@ ArkUINativeModuleValue ListBridge::ResetEditMode(ArkUIRuntimeCallInfo* runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> arg_focusWrapMode = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    if (!arg_focusWrapMode->IsNull() && arg_focusWrapMode->IsNumber()) {
+        int32_t focusWrapMode = arg_focusWrapMode->Int32Value(vm);
+        if (focusWrapMode < 0 || focusWrapMode > 1) {
+            GetArkUINodeModifiers()->getListModifier()->resetListFocusWrapMode(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getListModifier()->setListFocusWrapMode(nativeNode, focusWrapMode);
+        }
+    } else {
+        GetArkUINodeModifiers()->getListModifier()->resetListFocusWrapMode(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetListFocusWrapMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ListBridge::SetMultiSelectable(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

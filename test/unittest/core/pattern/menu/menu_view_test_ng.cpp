@@ -35,6 +35,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
@@ -53,6 +54,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -89,6 +91,7 @@ public:
     void TearDown() override;
     void InitMenuTestNg();
     void InitMenuWrapperNode();
+    RefPtr<FrameNode> GetMenuWrapperForHoverScale(bool isInterrupt);
     void MockPipelineContextGetTheme();
     int32_t GetNodeId();
     RefPtr<FrameNode> menuFrameNode_;
@@ -203,6 +206,57 @@ void MenuViewTestNg::InitMenuWrapperNode()
     std::vector<SelectParam> selectParams;
     selectParams.push_back({ "MenuItem1", "Icon1" });
     menuWrapperNode_ = MenuView::Create(std::move(selectParams), NODE_ID, "");
+}
+
+RefPtr<FrameNode> MenuViewTestNg::GetMenuWrapperForHoverScale(bool isInterrupt)
+{
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+
+    MenuParam menuParam;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    menuParam.isShowHoverImage = true;
+    menuParam.hoverScaleInterruption = isInterrupt;
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    CHECK_NULL_RETURN(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetMenuParam(menuParam);
+    menuWrapperPattern->SetIsShowHoverImage(true);
+    menuWrapperPattern->SetHoverScaleInterruption(menuParam.hoverScaleInterruption);
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), MenuType::MENU));
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+
+    auto flexNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<FlexLayoutPattern>(false));
+    CHECK_NULL_RETURN(flexNode, nullptr);
+    flexNode->MountToParent(menuWrapperNode);
+
+    auto stackNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    CHECK_NULL_RETURN(stackNode, nullptr);
+    stackNode->MountToParent(flexNode);
+
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(imageNode, nullptr);
+    imageNode->MountToParent(stackNode);
+
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    CHECK_NULL_RETURN(previewNode, nullptr);
+    auto menuPreviewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_RETURN(menuPreviewPattern, nullptr);
+    menuPreviewPattern->SetIsShowHoverImage(true);
+    previewNode->MountToParent(stackNode);
+
+    return menuWrapperNode;
 }
 
 /**
@@ -1095,6 +1149,7 @@ HWTEST_F(MenuViewTestNg, SetWordBreak002, TestSize.Level1)
 HWTEST_F(MenuViewTestNg, UpdateMenuProperties001, TestSize.Level1)
 {
     MenuParam menuParam;
+    menuParam.outlineWidth = std::make_optional<BorderWidthProperty>();
     menuParam.outlineWidth->SetBorderWidth(Dimension(10));
     menuParam.enableArrow = true;
     ASSERT_NE(wrapperNode_, nullptr);
@@ -1117,9 +1172,9 @@ HWTEST_F(MenuViewTestNg, UpdateMenuMaskType001, TestSize.Level1)
     menuParam.maskEnable = true;
     menuParam.maskType = NG::MenuMaskType();
     menuParam.maskType->maskColor = Color::RED;
-    menuParam.maskType->maskBackGroundBlueStyle = BlurStyle::REGULAR;
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<Pattern>());
+    menuParam.maskType->maskBackGroundBlurStyle = BlurStyle::REGULAR;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
@@ -1156,5 +1211,300 @@ HWTEST_F(MenuViewTestNg, UpdateMenuMaskType001, TestSize.Level1)
 
     EXPECT_EQ(filterRenderContext->GetBackgroundColorValue(), Color::RED);
     EXPECT_EQ(filterRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
+
+    menuParam.maskEnable = false;
+    menuParam.maskType->maskColor = Color::BLUE;
+    menuParam.maskType->maskBackGroundBlurStyle = BlurStyle::BACKGROUND_THIN;
+    MenuView::UpdateMenuParam(menuWrapperNode, menuNode, menuParam);
+    EXPECT_EQ(filterRenderContext->GetBackgroundColorValue(), Color::RED);
+    EXPECT_EQ(filterRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
+}
+
+/**
+ * @tc.name: ContextMenuChildMountProc
+ * @tc.desc: Verify hoverScaleInterruption in ContextMenuChildMountProc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ContextMenuChildMountProc001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.isShowHoverImage = true;
+    menuParam.hoverScaleInterruption = true;
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    ASSERT_NE(previewNode, nullptr);
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+
+    MenuView::ContextMenuChildMountProc(targetNode, menuWrapperNode, previewNode, menuNode, menuParam);
+    EXPECT_TRUE(menuWrapperPattern->GetHoverScaleInterruption());
+}
+
+/**
+ * @tc.name: UpdateHoverImagePreivewPosition
+ * @tc.desc: Verify flex position for hoverImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateHoverImagePreivewPosition001, TestSize.Level1)
+{
+    auto menuWrapperNode = GetMenuWrapperForHoverScale(false);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
+    ASSERT_NE(flexNode, nullptr);
+
+    auto geometryNode = flexNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameOffset(OffsetF(TWO_HUNDRED, TWO_HUNDRED));
+
+    auto menuPreview = menuWrapperPattern->GetHoverImageCustomPreview();
+    ASSERT_NE(menuPreview, nullptr);
+    auto menuPreviewPattern = menuPreview->GetPattern<MenuPreviewPattern>();
+    ASSERT_NE(menuPreviewPattern, nullptr);
+
+    MenuView::UpdateHoverImagePreivewPosition(menuPreviewPattern);
+
+    auto flexRenderContext = flexNode->GetRenderContext();
+    ASSERT_NE(flexRenderContext, nullptr);
+    auto offset = OffsetT<Dimension>(Dimension(TWO_HUNDRED), Dimension(TWO_HUNDRED));
+    EXPECT_EQ(offset, flexRenderContext->GetPositionValue({}));
+}
+
+/**
+ * @tc.name: ShowHoverImageForInterruption
+ * @tc.desc: Verify stackNode opacity and clipEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShowHoverImageForInterruption001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto menuWrapperNode = GetMenuWrapperForHoverScale(true);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    auto stackNode = menuWrapperPattern->GetHoverImageStackNode();
+    ASSERT_NE(stackNode, nullptr);
+
+    auto menuPreview = menuWrapperPattern->GetHoverImageCustomPreview();
+    ASSERT_NE(menuPreview, nullptr);
+
+    auto imageNode = menuWrapperPattern->GetHoverImagePreview();
+    ASSERT_NE(imageNode, nullptr);
+    auto imageContext = imageNode->GetRenderContext();
+    ASSERT_NE(imageContext, nullptr);
+
+    auto menu = menuWrapperPattern->GetMenu();
+    ASSERT_NE(menu, nullptr);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto targetNode = FrameNode::GetOrCreateFrameNode(
+        menuPattern->GetTargetTag(), menuPattern->GetTargetId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(targetNode, nullptr);
+
+    MenuView::ShowHoverImageForInterruption(stackNode, menuPreview, imageContext, menuWrapperPattern);
+
+    auto stackContext = stackNode->GetRenderContext();
+    ASSERT_NE(stackContext, nullptr);
+    EXPECT_TRUE(stackContext->GetClipEdge().value_or(false));
+    EXPECT_TRUE(NearZero(stackContext->GetOpacity().value_or(1.0f)));
+}
+
+/**
+ * @tc.name: CheckHoverImageFinishForInterruption
+ * @tc.desc: Verify stackNode opacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, CheckHoverImageFinishForInterruption001, TestSize.Level1)
+{
+    auto menuWrapperNode = GetMenuWrapperForHoverScale(true);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    auto stackNode = menuWrapperPattern->GetHoverImageStackNode();
+    ASSERT_NE(stackNode, nullptr);
+
+    auto menuPreview = menuWrapperPattern->GetHoverImageCustomPreview();
+    ASSERT_NE(menuPreview, nullptr);
+    auto menuPreviewPattern = menuPreview->GetPattern<MenuPreviewPattern>();
+    ASSERT_NE(menuPreviewPattern, nullptr);
+
+    MenuView::SetMenuHoverScaleStatus(TARGET_ID, MenuHoverScaleStatus::MENU_SHOW);
+    MenuView::CheckHoverImageFinishForInterruption(menuWrapperPattern, menuPreviewPattern, stackNode);
+
+    auto stackContext = stackNode->GetRenderContext();
+    ASSERT_NE(stackContext, nullptr);
+    auto opacity = stackContext->GetOpacity().value_or(0.0f);
+    EXPECT_TRUE(NearEqual(opacity, 1.0));
+}
+
+/**
+ * @tc.name: TouchEventGenerator001
+ * @tc.desc: Verify touch event parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, TouchEventGenerator001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    TouchEvent event;
+    MenuView::TouchEventGenerator(menuItemNode, event);
+    auto childOffset = menuItemNode->GetPaintRectOffset(false, true);
+    auto rectWithRender = menuItemNode->GetRectWithRender();
+    auto x = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / TWO;
+    auto y = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / TWO;
+    EXPECT_EQ(event.id, menuItemNode->GetId());
+    EXPECT_EQ(event.originalId, menuItemNode->GetId());
+    EXPECT_EQ(event.postEventNodeId, menuItemNode->GetId());
+    EXPECT_DOUBLE_EQ(event.x, x);
+    EXPECT_DOUBLE_EQ(event.y, y);
+}
+
+/**
+ * @tc.name: TouchPointGenerator001
+ * @tc.desc: Verify touch point parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, TouchPointGenerator001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    TouchPoint point;
+    MenuView::TouchPointGenerator(menuItemNode, point);
+    auto childOffset = menuItemNode->GetPaintRectOffset(false, true);
+    auto rectWithRender = menuItemNode->GetRectWithRender();
+    auto x = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / TWO;
+    auto y = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / TWO;
+    EXPECT_EQ(point.id, menuItemNode->GetId());
+    EXPECT_EQ(point.originalId, menuItemNode->GetId());
+    EXPECT_DOUBLE_EQ(point.x, x);
+    EXPECT_DOUBLE_EQ(point.y, y);
+    EXPECT_DOUBLE_EQ(point.screenX, x);
+    EXPECT_DOUBLE_EQ(point.screenY, y);
+}
+
+/**
+ * @tc.name: RegisterAccessibilityChildActionNotify001
+ * @tc.desc: Check callback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, RegisterAccessibilityChildActionNotify001, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    ASSERT_NE(menuWrapperNode_, nullptr);
+    MenuView::RegisterAccessibilityChildActionNotify(menuWrapperNode_);
+    auto menuwrapperAccessibilityProperty = menuWrapperNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(menuwrapperAccessibilityProperty, nullptr);
+    auto callback = menuwrapperAccessibilityProperty->GetNotifyChildActionFunc();
+    ASSERT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.name: Create001
+ * @tc.desc: MenuView Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, Create001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API version to VERSION_ELEVEN and disable arrow
+     * @tc.expected: Objects are created successfully.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+    MockPipelineContextGetTheme();
+
+    std::vector<OptionParam> optionParams;
+    OptionParam param1;
+    optionParams.emplace_back(param1);
+
+    MenuParam menuParam;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHasCustomOutlineWidth(true);
+    menuParam.enableArrow = false;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    /**
+     * @tc.steps: step2. Set API version to VERSION_ELEVEN and enable arrow
+     * @tc.expected: Objects are created successfully.
+     */
+    menuParam.enableArrow = true;
+    menuWrapperNode = MenuView::Create(std::move(optionParams), 2, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    /**
+     * @tc.steps: step3. Set API version to VERSION_EIGHT and disable arrow
+     * @tc.expected: Objects are created successfully.
+     */
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHT);
+    menuParam.enableArrow = false;
+    menuWrapperNode = MenuView::Create(std::move(optionParams), 3, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    /**
+     * @tc.steps: step4. Set API version to VERSION_EIGHT and enable arrow
+     * @tc.expected: Objects are created successfully.
+     */
+    menuParam.enableArrow = true;
+    menuWrapperNode = MenuView::Create(std::move(optionParams), 4, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: Create002
+ * @tc.desc: MenuView Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, Create002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Mock theme manager and configure double-border enable
+     * @tc.expected: The conditions are set correctly.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+    MockPipelineContextGetTheme();
+
+    std::vector<OptionParam> optionParams;
+    OptionParam param1;
+    optionParams.emplace_back(param1);
+    MenuParam menuParam;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHasCustomOutlineWidth(false);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<MenuTheme>();
+    theme->doubleBorderEnable_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    menuParam.enableArrow = false;
+    /**
+     * @tc.steps: step1. create menu wrapper node
+     * @tc.expected: Objects are created successfully.
+     */
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
 } // namespace OHOS::Ace::NG

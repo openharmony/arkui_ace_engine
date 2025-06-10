@@ -268,7 +268,7 @@ void DatePickerColumnPattern::InitTextFontFamily()
 }
 
 void DatePickerColumnPattern::FlushCurrentOptions(
-    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties)
+    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties, bool isTossPlaying)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -331,16 +331,20 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if ((NotLoopOptions() || !isLoop_) && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent(u"");
-            textNode->MarkModifyDone();
-            textNode->MarkDirtyNode();
+            if (!isTossPlaying) {
+                textNode->MarkModifyDone();
+                textNode->MarkDirtyNode();
+            }
             continue;
         }
         auto date = datePickerPattern->GetAllOptions(host)[optionIndex];
         auto optionValue = DatePickerPattern::GetFormatString(date);
         textLayoutProperty->UpdateContent(optionValue);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        textNode->MarkModifyDone();
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (!isTossPlaying) {
+            textNode->MarkModifyDone();
+            textNode->MarkDirtyNode();
+        }
     }
     if (isUpateTextContentOnly && isUpdateAnimationProperties) {
         FlushAnimationTextProperties(isDown);
@@ -580,20 +584,13 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(blendNode, false);
-    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
-    CHECK_NULL_RETURN(stackNode, false);
-    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
-    CHECK_NULL_RETURN(parentNode, false);
-    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    bool canLoop = GetCanLoopFromLayoutProperty();
     // When CanLoop is true and NotLoopOptions is false(which means LoopOptions are satisfied), CanMove returns true;
     // otherwise, validate the index legality.
-    if (dataPickerRowLayoutProperty->GetCanLoopValue(true) && !NotLoopOptions()) {
-
+    if (canLoop && !NotLoopOptions()) {
         return true;
     }
-    int totalOptionCount = GetOptionCount();
+    int totalOptionCount = static_cast<int>(GetOptionCount());
 
     auto datePickerColumnPattern = host->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(datePickerColumnPattern, false);
@@ -690,5 +687,24 @@ bool DatePickerColumnPattern::GetOptionItemCount(uint32_t& itemCounts)
 bool DatePickerColumnPattern::IsLanscape(uint32_t itemCount)
 {
     return (itemCount == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER);
+}
+
+bool DatePickerColumnPattern::GetCanLoopFromLayoutProperty() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(blendNode, false);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_RETURN(stackNode, false);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_RETURN(parentNode, false);
+    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    return dataPickerRowLayoutProperty->GetCanLoopValue(true);
+}
+
+bool DatePickerColumnPattern::IsTossNeedToStop()
+{
+    return !GetCanLoopFromLayoutProperty();
 }
 } // namespace OHOS::Ace::NG

@@ -22,10 +22,10 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-class MockTaskExecutor : public TaskExecutor {
+class MockScrollTaskExecutor : public TaskExecutor {
 public:
-    MockTaskExecutor() = default;
-    explicit MockTaskExecutor(bool delayRun) : delayRun_(delayRun) {}
+    MockScrollTaskExecutor() = default;
+    explicit MockScrollTaskExecutor(bool delayRun) : delayRun_(delayRun) {}
 
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
         PriorityType priorityType = PriorityType::LOW) const override

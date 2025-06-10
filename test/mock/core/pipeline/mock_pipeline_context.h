@@ -33,6 +33,7 @@ public:
     static void TearDown();
     static void SetCurrentWindowRect(Rect rect);
     static RefPtr<MockPipelineContext> GetCurrent();
+    void ResetFontManager();
     void SetRootSize(double rootWidth, double rootHeight);
     void SetInstanceId(int32_t instanceId);
     void SetContainerModalButtonsRect(bool hasModalButtonsRect);
@@ -78,6 +79,27 @@ public:
     }
     void SetEnableSwipeBack(bool isEnable) {}
 
+    void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
+
+    bool ReachResponseDeadline() const override
+    {
+        if (responseTime_ > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    void SetResponseTime(int32_t time)
+    {
+        responseTime_ = time;
+    }
+
+    void DecResponseTime()
+    {
+        if (responseTime_ > 0 && responseTime_ != INT32_MAX) {
+            responseTime_--;
+        }
+    }
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;
@@ -85,6 +107,7 @@ protected:
     std::function<void()> backCallback_;
     RefPtr<TaskExecutor> taskExecutor_;
     bool useFlushUITasks_ = false;
+    int32_t responseTime_ = INT32_MAX;
 };
 } // namespace OHOS::Ace::NG
 

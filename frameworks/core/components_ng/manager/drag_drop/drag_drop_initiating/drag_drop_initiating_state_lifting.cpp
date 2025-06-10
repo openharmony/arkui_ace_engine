@@ -441,6 +441,10 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
         }
         return;
     }
+    if (!IsAllowedDrag()) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragDrop long press and info received");
+        return;
+    }
     DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
@@ -502,6 +506,14 @@ void OHOS::Ace::NG::DragDropInitiatingStateLifting::SetTextAnimation()
     auto renderContext = dragNode->GetRenderContext();
     if (renderContext) {
         params.preScaledPixelMap = renderContext->GetThumbnailPixelMap();
+    }
+    // ai长按预览菜单hovescale依赖dragNode节点截图
+    if (textBase->CanAIEntityDrag()) {
+        auto hub = dragNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto dragGestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(dragGestureHub);
+        dragGestureHub->SetPixelMap(params.preScaledPixelMap);
     }
     modifier->StartFloatingAnimate();
     pattern->OnDragNodeFloating();

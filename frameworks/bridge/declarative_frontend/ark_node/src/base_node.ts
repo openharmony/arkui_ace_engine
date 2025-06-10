@@ -32,6 +32,7 @@ declare class __JSBaseNode__ {
     updateConfiguration, supportLazyBuild: boolean, baseNode: BaseNode): NodePtr;
   finishUpdateFunc(): void;
   postTouchEvent(touchEvent: TouchEvent): boolean;
+  postInputEvent(event: InputEventType): boolean;
   disposeNode(): void;
   updateStart(): void;
   updateEnd(): void;
@@ -73,6 +74,9 @@ abstract class BaseNode extends ViewBuildNodeBase {
   }
   postTouchEvent(touchEvent: TouchEvent): boolean {
     return this.builderBaseNode_.postTouchEvent(touchEvent);
+  }
+  postInputEvent(event: InputEventType): boolean {
+    return this.builderBaseNode_.postInputEvent(event);
   }
   disposeNode(): void {
     return this.builderBaseNode_.disposeNode();

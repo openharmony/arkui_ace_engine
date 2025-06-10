@@ -118,7 +118,8 @@ void JSScrollBar::JsSetScrollBarColor(const JSCallbackInfo& args)
     Color color;
     if (!JSViewAbstract::ParseColorMetricsToColor(args[0], color)) {
         ScrollBarModel::GetInstance()->ResetScrollBarColor();
+    } else {
+        ScrollBarModel::GetInstance()->SetScrollBarColor(color);
     }
-    ScrollBarModel::GetInstance()->SetScrollBarColor(color);
 }
 } // namespace OHOS::Ace::Framework

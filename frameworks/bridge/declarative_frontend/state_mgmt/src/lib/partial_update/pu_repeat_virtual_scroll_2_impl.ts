@@ -341,6 +341,9 @@ class __RepeatVirtualScroll2Impl<T> {
     // adjusted activeRange[0] based on accumulated array mutations
     private activeRangeAdjustedStart_ = Number.NaN;
 
+    // adjusted activeRange[1] based on accumulated array mutations
+    private activeRangeAdjustedEnd_ = Number.NaN;
+
     // adjusted visibleRange[0] based on accumulated array mutations
     private visibleRangeAdjustedStart_ = Number.NaN;
 
@@ -358,6 +361,11 @@ class __RepeatVirtualScroll2Impl<T> {
     // rid not in L1 / not in active range belong to this set
     // they are no longer associated with a data item
     private spareRid_: Set<number> = new Set<number>();
+
+    // rid for node deleted with animation
+    // such nodes can't be reused, otherwise animation will be interrupted
+    // and must be purged during onPurge call
+    private noReuseRid_: Set<number> = new Set<number>();
 
     // request container re-layout
     private firstIndexChanged_: number = 0;
@@ -421,7 +429,7 @@ class __RepeatVirtualScroll2Impl<T> {
     }
 
     private totalCount(forceRetrieveTotalCount = false): number {
-        // when 'totalCount' is set as an ,observable', we call updateElement() just to
+        // when 'totalCount' is set as an observable', we call updateElement() just to
         // retrieve its actual value - prevent triggering re-render here
         if (forceRetrieveTotalCount && typeof this.totalCount_ === 'number') {
             this.preventReRender_ = true;
@@ -637,6 +645,9 @@ class __RepeatVirtualScroll2Impl<T> {
 
         this.rerenderOngoing_ = false;
 
+        this.activeRangeAdjustedStart_ = Number.NaN;
+        this.activeRangeAdjustedEnd_ = Number.NaN;
+
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) reRender() data array length: `,
             `${this.arr_.length}, totalCount: ${this.totalCount()} - done`);
     }
@@ -714,11 +725,40 @@ class __RepeatVirtualScroll2Impl<T> {
             this.requestContainerReLayout(Math.min(this.totalCount() - 1, this.activeRange_[1] + 1));
         }
 
+        this.activeRangeAdjustedStart_ = Number.NaN;
+        this.activeRangeAdjustedEnd_ = Number.NaN;
+
         return false;
     }
 
     private moveRetainedItems(
         newActiveDataItems: Array<ActiveDataItem<void | T>>, newL1Rid4Index: Map<number, number>): void {
+        // We should determine retained items according to adjusted active range instead of original active range.
+        // Otherwise some item will be unexpectedly added into L2. 
+        // Since when animation is on-going item reuse is disabled, unexpected item disappear and appear will occur.
+        // Thus animiation will be in disorder.
+        // We should delay the determination about whether item is in L1 until DoSetActiveChildRange is called. 
+        if (!isNaN(this.activeRangeAdjustedStart_) && !isNaN(this.activeRangeAdjustedEnd_) && RepeatVirtualScroll2Native.isInAnimation()) {
+            for (let activeIndex = this.activeRangeAdjustedStart_; activeIndex <= this.activeRangeAdjustedEnd_; activeIndex++) {
+                if (newActiveDataItems[activeIndex] !== undefined && newActiveDataItems[activeIndex] !== null) {
+                    continue;
+                }
+                const [dataItemExists, dataItemAtIndex] = this.getItemUnmonitored(activeIndex);
+                if (!dataItemExists) {
+                    stateMgmtConsole.debug(`supplementary ActiveDataItem: index ${activeIndex} no data in new array`);
+                    newActiveDataItems[activeIndex] = ActiveDataItem.createMissingDataItem();
+                    continue;
+                }
+
+                const ttype = this.computeTtype(dataItemAtIndex, activeIndex,
+                    /* monitored access already enabled */ false);
+                const key = this.computeKey(dataItemAtIndex, activeIndex,
+                    /* monitor access already on-going */ false, newActiveDataItems);
+
+                newActiveDataItems[activeIndex] = ActiveDataItem.createToBeRenderedDataItem(dataItemAtIndex, ttype, key);
+                stateMgmtConsole.debug(`supplementary ActiveDataItem: index ${activeIndex}, ttype ${ttype}, key ${key}, using keys ${this.useKeys_}`);
+            }
+        }
         for (const indexS in newActiveDataItems) {
             const activeIndex = parseInt(indexS);
             const newActiveDataItemAtActiveIndex = newActiveDataItems[activeIndex];
@@ -780,7 +820,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 if (this.allowItemUpdate_) {
                     this.spareRid_.add(this.activeDataItems_[oldIndex].rid);
                 } else {
-                    this.purgeNode(this.activeDataItems_[oldIndex].rid);
+                    this.noReuseRid_.add(this.activeDataItems_[oldIndex].rid);
                 }
                 const index = parseInt(oldIndex);
                 this.index4Key_.delete(this.key4Index_.get(index));
@@ -1271,7 +1311,12 @@ class __RepeatVirtualScroll2Impl<T> {
         }
 
         // add to spare rid Set
-        this.spareRid_.add(rid);
+        if (this.allowItemUpdate_) {
+            this.spareRid_.add(rid);
+        } else {
+            // deleted node with animation should not be added into L2 and then be reused, otherwise the animation will be interrupted
+            this.noReuseRid_.add(rid);
+        }
 
         if (invalidate) {
             stateMgmtConsole.debug(`dropFromL1ActiveNodes index: ${index} - rid: ${rid}/ttype: '${ttype}' `,
@@ -1293,6 +1338,7 @@ class __RepeatVirtualScroll2Impl<T> {
             this.activeRange_ = [nStart, nEnd];
             this.visibleRange_ = [vStart, vEnd];
             this.activeRangeAdjustedStart_ = nStart;
+            this.activeRangeAdjustedEnd_ = nEnd;
             this.visibleRangeAdjustedStart_ = vStart;
         } else if (this.activeRange_[0] === nStart && this.activeRange_[1] === nEnd) {
             if (this.visibleRange_[0] === vStart || this.visibleRange_[1] === vEnd) {
@@ -1301,7 +1347,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 this.activeRange_ = [vStart, vEnd];
                 this.visibleRangeAdjustedStart_ = vStart;
             }
-            if (!isLoop && !forceUpdate) {
+            if (!isLoop && !forceUpdate && !RepeatVirtualScroll2Native.isInAnimation()) {
                 stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,
                     `(nStart: ${nStart}, nEnd: ${nEnd})`,
                     `data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - unchanged, skipping.`);
@@ -1348,6 +1394,7 @@ class __RepeatVirtualScroll2Impl<T> {
         this.activeRange_ = [nStart, nEnd];
         this.visibleRange_ = [vStart, vEnd];
         this.activeRangeAdjustedStart_ = nStart;
+        this.activeRangeAdjustedEnd_ = nEnd;
         this.visibleRangeAdjustedStart_ = vStart;
 
         stateMgmtConsole.debug(`onActiveRange Result: number remaining activeItems ${numberOfActiveItems}.`,
@@ -1477,6 +1524,29 @@ class __RepeatVirtualScroll2Impl<T> {
             `visibleRangeAdjustedStart_ = ${this.visibleRangeAdjustedStart_}`);
     }
 
+    // update this.activeRangeAdjustedEnd_
+    private adjustActiveRangeEnd(index: number, deleteCount: number, addCount: number): void {
+        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_})`,
+            `adjustActiveRangeEnd(${index}, ${deleteCount}, ${addCount})`);
+
+        // If activeRange_ is not yet known, do nothing
+        if (isNaN(this.activeRangeAdjustedEnd_)) {
+            this.activeRangeAdjustedEnd_ = this.activeRange_[1];
+        }
+        if (isNaN(this.activeRangeAdjustedEnd_)) {
+            return;
+        }
+
+        // count changes before active range
+        if (index <= this.activeRangeAdjustedEnd_) {
+            this.activeRangeAdjustedEnd_ -= Math.min(deleteCount, this.activeRangeAdjustedEnd_ - index);
+            this.activeRangeAdjustedEnd_ += addCount;
+        }
+
+        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_})`,
+            `activeRangeAdjustedEnd_ = ${this.activeRangeAdjustedEnd_}`);
+    }
+
     // Return false if a regular re-render is required. Otherwise, only notify the container
     // about a layout change and schedule a re-layout
     public tryFastRelayout(arrChange: string, args: Array<unknown>): boolean {
@@ -1565,6 +1635,7 @@ class __RepeatVirtualScroll2Impl<T> {
     private tryFastRelayoutForChangeNormalized(index: number, deleteCount: number, addCount: number): boolean {
         // update accumulated active-range offset here
         this.adjustActiveRangeStart(index, deleteCount, addCount);
+        this.adjustActiveRangeEnd(index, deleteCount, addCount);
 
         if (this.lazyLoadingIndex_ === -1 && this.needRerenderChange(index, deleteCount, addCount)) {
             // discard nextTickTask if it's scheduled
@@ -1615,7 +1686,6 @@ class __RepeatVirtualScroll2Impl<T> {
         // List.maintainVisibleContentPosition(bool)
         this.notifyContainerLayoutChange(changeIndex, changeCount);
         this.visibleRangeAdjustedStart_ = NaN;
-        this.activeRangeAdjustedStart_ = NaN;
         return true;
     }
 
@@ -1648,6 +1718,12 @@ class __RepeatVirtualScroll2Impl<T> {
         Object.entries(this.templateOptions_).forEach((pair) => {
             availableCachedCount[pair[0]] = pair[1].cachedCount as number;
         });
+
+        // purge no reused nodes
+        for (const rid of this.noReuseRid_) {
+            this.purgeNode(rid);
+        }
+        this.noReuseRid_.clear();
 
         // Improvement needed:
         // this is a simplistic purge is more or less randomly purges 

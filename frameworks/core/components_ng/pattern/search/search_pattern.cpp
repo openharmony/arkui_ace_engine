@@ -1765,6 +1765,9 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("stopBackPress", textFieldLayoutProperty->GetStopBackPressValue(true), filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(textFieldPattern->GetKeyboardAppearance()), filter);
     json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback() ? "true" : "false", filter);
+    textFieldPattern->ToJsonValueForStroke(json, filter);
+    json->PutExtAttr("enableAutoSpacing", std::to_string(
+        textFieldLayoutProperty->GetEnableAutoSpacing().value_or(false)).c_str(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -2771,4 +2774,14 @@ float SearchPattern::GetMinFontScale()
     return minFontScale;
 }
 
+void SearchPattern::SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->SetKeyboardAppearanceConfig(config);
+}
 } // namespace OHOS::Ace::NG

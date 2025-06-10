@@ -205,21 +205,26 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineOffsetTest1, TestSize.Leve
 }
 
 /**
- * @tc.name: CreateWithGuidelineResourceObj
- * @tc.desc: Test CreateWithGuidelineResourceObj of Relative_Container
+ * @tc.name: ResObjGuidelineTest1
+ * @tc.desc: Test ResObjGuidelineTest1 of Relative_Container
  * @tc.type: FUNC
  */
 HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest1, TestSize.Level1)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<Pattern>();
-    CHECK_NULL_VOID(pattern);
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
-    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
-    updateFunc(resObj);
-    pattern->AddResObj("RelativeContainer.guideLine", resObj, std::move(updateFunc));
-    std::string guideLine = pattern->GetResCacheMapByKey("RelativeContainer.guideLine");
-    EXPECT_EQ(guideLine, "");
+    RelativeContainerModelNG relativeContainerModelNG;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {};
+    GuidelineInfo guidelineInfo;
+    guidelineInfo.AddResource("relativeContainer.guideLine.position.start", resObj, std::move(updateFunc));
+    EXPECT_EQ(guidelineInfo.resMap_.empty(), false);
+    std::vector<GuidelineInfo> guidelineInfos;
+    guidelineInfos.emplace_back(guidelineInfo);
+    relativeContainerModelNG.SetGuideline(guidelineInfos);
+    auto layoutProperty = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    EXPECT_EQ(layoutProperty->HasGuideline(), true);
 }
 } // namespace OHOS::Ace::NG

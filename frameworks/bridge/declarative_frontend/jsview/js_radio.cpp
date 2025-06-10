@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,15 +97,16 @@ void JSRadio::ParseIndicator(const JSCallbackInfo& info, std::optional<int32_t>&
 {
     if (indicator.value() == static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
         if (builderObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderObject));
-            CHECK_NULL_VOID(builderFunc);
+            auto vm = info.GetVm();
+            auto jsFunc = JSRef<JSFunc>::Cast(builderObject);
+            auto func = jsFunc->GetLocalHandle();
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            customBuilderFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
-                                    node = targetNode]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            customBuilderFunc = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
                 ACE_SCORING_EVENT("Radio.builder");
                 PipelineContext::SetCallBackNode(node);
-                func->Execute();
+                func->Call(vm, func.ToLocal(), nullptr, 0);
             };
         } else {
             indicator = static_cast<int32_t>(RadioIndicatorType::TICK);
@@ -124,7 +125,6 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("radioStyle", &JSRadio::JsRadioStyle);
     JSClass<JSRadio>::StaticMethod("responseRegion", &JSRadio::JsResponseRegion);
     JSClass<JSRadio>::StaticMethod("hoverEffect", &JSRadio::JsHoverEffect);
-    JSClass<JSRadio>::StaticMethod("onChange", &JSRadio::OnChange);
     JSClass<JSRadio>::StaticMethod("onClick", &JSRadio::JsOnClick);
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRadio>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -140,14 +140,17 @@ void ParseCheckedObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEv
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = args.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChecked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool check) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+    auto onChecked = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool check) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("Radio.onChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
-        func->ExecuteJS(1, &newJSVal);
+        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, check) };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     RadioModel::GetInstance()->SetOnChangeEvent(std::move(onChecked));
 }
@@ -346,25 +349,6 @@ void JSRadio::JsResponseRegion(const JSCallbackInfo& info)
     }
 
     RadioModel::GetInstance()->SetResponseRegion(result);
-}
-
-void JSRadio::OnChange(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool check) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Radio.onChange");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
-        func->ExecuteJS(1, &newJSVal);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Radio.onChange");
-    };
-    RadioModel::GetInstance()->SetOnChange(std::move(onChange));
-    args.ReturnSelf();
 }
 
 void JSRadio::JsOnClick(const JSCallbackInfo& args)

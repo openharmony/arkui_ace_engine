@@ -104,6 +104,9 @@ export struct BindContextMenuBootcamp {
         .bindContextMenu(this.MyMenu(), ResponseType.LongPress, {
           hapticFeedbackMode: useEnabled(this.enableCompHapticFeedbackMode, this.compHapticFeedbackMode)
         })
+        .margin(10)
+      Button('右键弹出菜单')
+        .bindContextMenu(this.MyMenu(), ResponseType.RightClick)
     }
     .onDragStart(() => {
       ContextMenu.close()

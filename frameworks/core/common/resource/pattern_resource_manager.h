@@ -26,6 +26,25 @@
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
+class PropertyValueBase : public virtual AceType {
+    DECLARE_ACE_TYPE(PropertyValueBase, AceType);
+public:
+    virtual ~PropertyValueBase() = default;
+};
+ 
+template<typename T>
+class PropertyValue : public PropertyValueBase {
+    DECLARE_ACE_TYPE(PropertyValue<T>, PropertyValueBase);
+public:
+    T value;
+    PropertyValue() : value() {}
+    explicit PropertyValue(const T& val) : value(val) {}
+    void SetValue(const T& value_)
+    {
+        value = value_;
+    }
+};
+
 class PatternResourceManager final : public AceType {
     DECLARE_ACE_TYPE(PatternResourceManager, AceType);
 
@@ -48,12 +67,42 @@ public:
 
     bool Empty();
 
+    template<typename T>
+    void UpdateProperty(std::function<void(const std::string&, const RefPtr<PropertyValueBase>&)>&& propUpdateFunc,
+        const std::string& key, const RefPtr<ResourceObject>& resObj)
+    {
+        auto value = AceType::MakeRefPtr<PropertyValue<T>>();
+        ParsePropertyValue(resObj, value);
+        if (propUpdateFunc) {
+            propUpdateFunc(key, value);
+        }
+    }
+
+    template<typename T>
+    void RegisterResource(std::function<void(const std::string&, const RefPtr<PropertyValueBase>&)>&& propUpdateFunc,
+        const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    {
+        auto&& updateFunc = [weakptr = AceType::WeakClaim(this), propUpdateFunc, key](
+                                const RefPtr<ResourceObject>& resObj) mutable {
+            auto manager = weakptr.Upgrade();
+            if (manager) {
+                manager->UpdateProperty<T>(std::move(propUpdateFunc), key, resObj);
+            }
+        };
+        AddResource(key, resObj, std::move(updateFunc));
+        if (propUpdateFunc) {
+            propUpdateFunc(key, AceType::MakeRefPtr<PropertyValue<T>>(value));
+        }
+    }
+
+    void ParsePropertyValue(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
 private:
     struct ResourceUpdater {
         RefPtr<ResourceObject> obj;
         std::function<void(const RefPtr<ResourceObject>&)> updateFunc;
     };
     std::unordered_map<std::string, ResourceUpdater> resMap_;
+    std::vector<std::string> resKeyArray_;
     std::unordered_map<std::string, std::map<bool, std::string>> resCacheMap_;
 };
 }

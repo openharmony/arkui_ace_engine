@@ -17,6 +17,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const int32_t MAX_CUMULATIVE_LINES = 100;
+}
 int32_t GridLayoutInfo::GetItemIndexByPosition(int32_t position)
 {
     auto iter = positionItemIndexMap_.find(position);
@@ -161,7 +164,7 @@ bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
     }
     const float endPos = currentOffset_ + totalHeightOfItemsInView_;
     return !atOrOutOfStart && (endIndex_ == childrenCount_ - 1) &&
-           LessNotEqual(endPos, lastMainSize_ - contentEndPadding_);
+           LessNotEqualCustomPrecision(endPos, lastMainSize_ - contentEndPadding_, -0.01f);
 }
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
@@ -361,6 +364,9 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     }
     if (Negative(irregularHeight)) {
         irregularHeight = regularHeight;
+    }
+    if (Negative(regularHeight)) {
+        regularHeight = irregularHeight;
     }
     // get line count
     float totalHeight = 0;
@@ -1079,5 +1085,39 @@ bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
         }
     }
     return true;
+}
+
+bool GridLayoutInfo::IsAllItemsMeasured() const
+{
+    if (gridMatrix_.empty()) {
+        return false;
+    }
+    auto allItemsMeasured = false;
+    auto firstLine = gridMatrix_.begin();
+    if (firstLine->first == 0) {
+        if (firstLine->second.empty()) {
+            return false;
+        }
+        auto firstItem = firstLine->second.begin();
+        allItemsMeasured |= firstItem->second == 0;
+    }
+    if (allItemsMeasured) {
+        auto lastLine = gridMatrix_.rbegin();
+        if (lastLine->second.empty() || lastLine->first - firstLine->first > MAX_CUMULATIVE_LINES) {
+            return false;
+        }
+        auto lastItem = lastLine->second.rbegin();
+        allItemsMeasured &= lastItem->second == GetChildrenCount() - 1;
+    }
+    return allItemsMeasured;
+}
+
+std::string GridLayoutInfo::ToString() const
+{
+    return "startMainLine = " + std::to_string(startMainLineIndex_) + ", offset = " + std::to_string(currentOffset_) +
+           ", endMainLine = " + std::to_string(endMainLineIndex_) + ", startIndex = " + std::to_string(startIndex_) +
+           ", endIndex = " + std::to_string(endIndex_) + ", jumpIndex = " + std::to_string(jumpIndex_) +
+           ", gridMatrix size = " + std::to_string(gridMatrix_.size()) +
+           ", lineHeightMap size = " + std::to_string(lineHeightMap_.size());
 }
 } // namespace OHOS::Ace::NG

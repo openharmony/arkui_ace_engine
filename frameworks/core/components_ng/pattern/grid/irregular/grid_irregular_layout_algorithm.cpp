@@ -82,6 +82,8 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // only use accurate counting method when cached items need to be shown
         cachedItemCnt.first = cachedItemCnt.second = cacheLines * info.crossCount_;
     }
+    LostChildFocusToSelf(layoutWrapper, std::min(info.startIndex_, info.endIndex_) - cachedItemCnt.first,
+        info.endIndex_ + cachedItemCnt.second);
     wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cachedItemCnt.first,
         cachedItemCnt.second, props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cachedItemCnt.first);
@@ -185,8 +187,10 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         return;
     }
 
-    if ((wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) &&
-        scrollSource_ != SCROLL_FROM_ANIMATION_SPRING) {
+    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+        auto mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
+        overscrollOffsetBeforeJump_ =
+            -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
         postJumpOffset_ = info_.currentOffset_;
         info_.lineHeightMap_.clear();
         PrepareJumpOnReset(info_);
@@ -296,6 +300,7 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
         info_.jumpIndex_ = Negative(info_.currentOffset_) ? SkipLinesForward() : SkipLinesBackward();
         info_.scrollAlign_ = ScrollAlign::START;
         info_.currentOffset_ = 0.0f;
+        info_.jumpForRecompose_ = info_.jumpIndex_;
         Jump(mainSize);
         return true;
     }
@@ -522,7 +527,8 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
 
             float len = filler.Fill(params, mainSize, jumpLineIdx).length;
             // condition [jumpLineIdx > 0] guarantees a finite call stack
-            if (LessNotEqual(len, mainSize) && jumpLineIdx > 0) {
+            // Over scroll at bottom dose not need ScrollAlign::END
+            if (LessNotEqual(len, mainSize) && jumpLineIdx > 0 && NonPositive(overscrollOffsetBeforeJump_)) {
                 jumpLineIdx = info_.lineHeightMap_.rbegin()->first;
                 info_.scrollAlign_ = ScrollAlign::END;
                 PrepareLineHeight(mainSize, jumpLineIdx);

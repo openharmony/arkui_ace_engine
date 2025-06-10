@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/shape/rect_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 
 #if OHOS_STANDARD_SYSTEM
 #include "form_info.h"
@@ -1159,7 +1160,7 @@ void FormPattern::LoadFormSkeleton(bool isRefresh)
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext != nullptr) {
         Color colorStyle = isDarkMode ? Color(CONTENT_BG_COLOR_DARK) : Color(CONTENT_BG_COLOR_LIGHT);
-        if (SystemProperties::IsFormSkeletonBlurEnabled()) {
+        if (SystemProperties::IsFormSkeletonBlurEnabled() && !isUnTrust_) {
             BlurStyleOption styleOption;
             styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
             renderContext->UpdateBackBlurStyle(styleOption);
@@ -1448,6 +1449,11 @@ void FormPattern::InitFormManagerDelegate()
     CHECK_NULL_VOID(formManagerBridge_);
     formManagerBridge_->AddRenderDelegate();
     formManagerBridge_->RegisterRenderDelegateEvent();
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "GetMultiInstanceEnabled is true");
+        GetRSUIContext();
+        formManagerBridge_->SetRSUIContext(rsUIContext_);
+    }
     auto formUtils = FormManager::GetInstance().GetFormUtils();
     if (formUtils) {
         formManagerBridge_->SetFormUtils(formUtils);
@@ -1505,11 +1511,7 @@ void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRec
     if (pipeline) {
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
-            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            parentRectInfo.left = parentRectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
-            parentRectInfo.top = parentRectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
-            parentRectInfo.scaleX *= windowInfo.scaleX;
-            parentRectInfo.scaleY *= windowInfo.scaleY;
+            parentRectInfo = accessibilityManager->GetTransformRectInfoRelativeToWindow(host, pipeline);
         } else {
             auto windowRect = pipeline->GetDisplayWindowRectInfo();
             parentRectInfo.top += static_cast<int32_t>(windowRect.Top());
@@ -1586,6 +1588,10 @@ void FormPattern::FireFormSurfaceNodeCallback(
     bool isEnableSkeleton = isSkeletonAnimEnable_;
     TAG_LOGI(AceLogTag::ACE_FORM, "FireFormSurfaceNodeCallback %{public}d, %{public}d",
         isTransparencyEnable_, isEnableSkeleton);
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_FORM, "GetMultiInstanceEnabled is true");
+        node->SetRSUIContext(rsUIContext_);
+    }
     node->CreateNodeInRenderThread();
 
     // do anim only when skeleton enable and transparency
@@ -2759,5 +2765,25 @@ void FormPattern::FireOnUpdateFormDone(int64_t id) const
     json->Put("id", std::to_string(onUpdateFormId).c_str());
     json->Put("idString", std::to_string(id).c_str());
     eventHub->FireOnUpdate(json->ToString());
+}
+
+void FormPattern::GetRSUIContext()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    NG::PipelineContext* pipeline = host->GetContext();
+    if (!pipeline) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "FormPattern: pipeline is nullptr");
+        return;
+    }
+    std::shared_ptr<Rosen::RSUIDirector> rsUIDirector = pipeline->GetRSUIDirector();
+    if (!rsUIDirector) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "FormPattern: rsUIDirector is nullptr");
+        return;
+    }
+    rsUIContext_ = rsUIDirector->GetRSUIContext();
+    if (!rsUIContext_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "FormPattern: rsUIContext_ is nullptr");
+    }
 }
 } // namespace OHOS::Ace::NG

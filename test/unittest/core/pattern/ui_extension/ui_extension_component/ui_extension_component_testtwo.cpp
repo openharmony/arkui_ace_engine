@@ -159,7 +159,6 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SetEventProxyFlagTest001, TestSize.Level
     int32_t flag = 0X00000000;
     EXPECT_EQ(flag, EventProxyFlag::EVENT_NONE);
     pattern->platformEventProxy_ = nullptr;
-    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
     pattern->SetEventProxyFlag(flag);
 
     // False - True

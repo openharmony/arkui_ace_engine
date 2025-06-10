@@ -59,6 +59,7 @@ const int32_t PARAM_ONE = 1;
 const int32_t PARAM_TWO = 2;
 constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
 constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
+const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 
 void EraseSpace(std::string& data)
 {
@@ -98,6 +99,7 @@ WebModel* WebModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 bool JSWeb::webDebuggingAccess_ = false;
+int32_t JSWeb::webDebuggingPort_ = 0;
 class JSWebDialog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -433,8 +435,12 @@ public:
 
     void HandleCancel(const JSCallbackInfo& args)
     {
+        bool abortLoading = false;
+        if (args.Length() >= 1 && args[0]->IsBoolean()) {
+            abortLoading = args[0]->ToBoolean();
+        }
         if (result_) {
-            result_->HandleCancel();
+            result_->HandleCancel(abortLoading);
         }
     }
 
@@ -1769,6 +1775,9 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("paste", &JSContextMenuResult::Paste);
         JSClass<JSContextMenuResult>::CustomMethod("cut", &JSContextMenuResult::Cut);
         JSClass<JSContextMenuResult>::CustomMethod("selectAll", &JSContextMenuResult::SelectAll);
+        JSClass<JSContextMenuResult>::CustomMethod("undo", &JSContextMenuResult::Undo);
+        JSClass<JSContextMenuResult>::CustomMethod("redo", &JSContextMenuResult::Redo);
+        JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -1817,6 +1826,27 @@ public:
     {
         if (result_) {
             result_->SelectAll();
+        }
+    }
+
+    void Undo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Undo();
+        }
+    }
+
+    void Redo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Redo();
+        }
+    }
+
+    void PasteAndMatchStyle(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->PasteAndMatchStyle();
         }
     }
 
@@ -1968,6 +1998,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSWeb>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
+    JSClass<JSWeb>::StaticMethod("onActivateContent", &JSWeb::OnActivateContent);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
     JSClass<JSWeb>::StaticMethod("allowWindowOpenMethod", &JSWeb::AllowWindowOpenMethod);
@@ -2036,6 +2067,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
     JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
+    JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2093,6 +2125,14 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateCommonDialogResultHandler(const WebDialogEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSWebDialog>::NewInstance();
+    auto jsWebDialog = Referenced::Claim(resultObj->Unwrap<JSWebDialog>());
+    jsWebDialog->SetResult(eventInfo.GetResult());
+    return resultObj;
+}
+
 JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -2121,6 +2161,14 @@ JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo
     obj->SetProperty("videoWidth", eventInfo.GetVideoNaturalWidth());
     obj->SetProperty("videoHeight", eventInfo.GetVideoNaturalHeight());
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSFullScreenExitHandler>::NewInstance();
+    auto jsFullScreenExitHandler = Referenced::Claim(resultObj->Unwrap<JSFullScreenExitHandler>());
+    jsFullScreenExitHandler->SetHandler(eventInfo.GetHandler());
+    return resultObj;
 }
 
 JSRef<JSVal> FullScreenExitEventToJSValue(const FullScreenExitEvent& eventInfo)
@@ -2180,6 +2228,14 @@ JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEv
     geolocationEvent->SetEvent(eventInfo);
     obj->SetPropertyObject("geolocation", geolocationObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo)
+{
+    JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
+    auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
+    geolocationEvent->SetEvent(eventInfo);
+    return geolocationObj;
 }
 
 JSRef<JSVal> DownloadStartEventToJSValue(const DownloadStartEvent& eventInfo)
@@ -2531,11 +2587,21 @@ void JSWeb::Create(const JSCallbackInfo& info)
             return;
         }
         bool webDebuggingAccess = JSRef<JSFunc>::Cast(getWebDebugingFunction)->Call(controller, 0, {})->ToBoolean();
-        if (webDebuggingAccess == JSWeb::webDebuggingAccess_) {
-            return;
+        int32_t webDebuggingPort = 0;
+        auto getWebDebuggingPortFunction = controller->GetProperty("getWebDebuggingPort");
+        if (getWebDebuggingPortFunction->IsFunction()) {
+            webDebuggingPort = JSRef<JSFunc>::Cast(getWebDebuggingPortFunction)
+                ->Call(controller, 0, {})
+                ->ToNumber<int32_t>();
         }
-        WebModel::GetInstance()->SetWebDebuggingAccessEnabled(webDebuggingAccess);
+        if (webDebuggingPort > 0) {
+            WebModel::GetInstance()->SetWebDebuggingAccessEnabledAndPort(
+                webDebuggingAccess, webDebuggingPort);
+        } else {
+            WebModel::GetInstance()->SetWebDebuggingAccessEnabled(webDebuggingAccess);
+        }
         JSWeb::webDebuggingAccess_ = webDebuggingAccess;
+        JSWeb::webDebuggingPort_ = webDebuggingPort;
         return;
 
     } else {
@@ -3215,6 +3281,22 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateFileSelectorResultHandler(const FileSelectorEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
+    auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
+    fileSelectorResult->SetResult(eventInfo);
+    return resultObj;
+}
+
+JSRef<JSVal> JSWeb::CreateFileSelectorParamHandler(const FileSelectorEvent& eventInfo)
+{
+    JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
+    auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
+    fileSelectorParam->SetParam(eventInfo);
+    return paramObj;
+}
+
 void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -3259,6 +3341,22 @@ JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
     obj->SetPropertyObject("result", resultObj);
     obj->SetPropertyObject("param", paramObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateContextMenuParamHandler(const ContextMenuEvent& eventInfo)
+{
+    JSRef<JSObject> paramObj = JSClass<JSContextMenuParam>::NewInstance();
+    auto contextMenuParam = Referenced::Claim(paramObj->Unwrap<JSContextMenuParam>());
+    contextMenuParam->SetParam(eventInfo);
+    return paramObj;
+}
+
+JSRef<JSVal> JSWeb::CreateContextMenuResultHandler(const ContextMenuEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSContextMenuResult>::NewInstance();
+    auto contextMenuResult = Referenced::Claim(resultObj->Unwrap<JSContextMenuResult>());
+    contextMenuResult->SetResult(eventInfo);
+    return resultObj;
 }
 
 void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
@@ -3339,7 +3437,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
         if (previewMenuOptions->IsObject()) {
-            auto hapticFeedbackMode = JSRef<JSObject>::Cast(previewMenuOptions)->GetProperty("hapticFeedbackMode");
+            auto previewMenuOptionsObj = JSRef<JSObject>::Cast(previewMenuOptions);
+            auto hapticFeedbackMode = previewMenuOptionsObj->GetProperty("hapticFeedbackMode");
             if (hapticFeedbackMode->IsNumber()) {
                 menuParam.hapticFeedbackMode = HapticFeedbackMode(hapticFeedbackMode->ToNumber<int32_t>());
             }
@@ -3357,8 +3456,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     }
 }
 
-NG::MenuParam GetSelectionMenuParam(
-    const JSCallbackInfo& info, ResponseType responseType, std::function<void()> previewBuilder)
+NG::MenuParam GetSelectionMenuParam(const JSCallbackInfo &info, ResponseType responseType,
+    std::function<void()> &previewBuilder, WebElementType elementType)
 {
     NG::MenuParam menuParam;
     if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
@@ -3376,7 +3475,7 @@ NG::MenuParam GetSelectionMenuParam(
     paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
     menuParam.layoutRegionMargin = paddings;
     menuParam.disappearScaleToTarget = true;
-    menuParam.isPreviewContainScale = true;
+    menuParam.isPreviewContainScale = (elementType == WebElementType::IMAGE);
     menuParam.isShow = true;
     return menuParam;
 }
@@ -3431,7 +3530,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     };
 
     std::function<void()> previewBuilder = nullptr;
-    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder);
+    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder, elementType);
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
         elementType, responseType, menuBuilder, previewBuilder, menuParam);
@@ -3866,6 +3965,14 @@ JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& ev
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreatePermissionRequestHandler(const WebPermissionRequestEvent& eventInfo)
+{
+    JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
+    auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
+    permissionEvent->SetEvent(eventInfo);
+    return permissionObj;
+}
+
 void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -3900,6 +4007,14 @@ JSRef<JSVal> ScreenCaptureRequestEventToJSValue(const WebScreenCaptureRequestEve
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSScreenCaptureRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSScreenCaptureRequest>());
+    requestEvent->SetEvent(eventInfo);
+    return requestObj;
+}
+
 void JSWeb::OnScreenCaptureRequest(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -3931,9 +4046,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
+        WebModel::GetInstance()->SetDefaultBackgroundColor();
+    } else {
+        WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
     }
-    WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 void JSWeb::InitialScale(float scale)
@@ -4142,7 +4258,15 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
-bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
+JSRef<JSVal> JSWeb::CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo)
+{
+    JSRef<JSObject> handlerObj = Framework::JSClass<JSWebWindowNewHandler>::NewInstance();
+    auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
+    handler->SetEvent(eventInfo);
+    return handlerObj;
+}
+
+bool JSWeb::HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
 {
     if (eventInfo == nullptr) {
         return false;
@@ -4196,6 +4320,36 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetWindowNewEvent(jsCallback);
+}
+
+JSRef<JSVal> ActivateContentEventToJSValue(const WebActivateContentEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnActivateContent(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebActivateContentEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ActivateContentEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebActivateContentEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetActivateContentEventId(jsCallback);
 }
 
 JSRef<JSVal> WindowExitEventToJSValue(const WebWindowExitEvent& eventInfo)
@@ -4646,6 +4800,22 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
         bool audioExclusive = audioExclusiveObj->ToBoolean();
         WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
+    auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
+    auto audioSessionType = WebAudioSessionType::AUTO;
+    if (audioSessionTypeObj->IsNumber()) {
+        int32_t audioSessionTypeIntValue = audioSessionTypeObj->ToNumber<int32_t>();
+        switch (audioSessionTypeIntValue) {
+            case 0:
+                audioSessionType = WebAudioSessionType::AUTO;
+                break;
+            case WEB_AUDIO_SESSION_TYPE_AMBIENT:
+                audioSessionType = WebAudioSessionType::AMBIENT;
+                break;
+            default:
+                audioSessionType = WebAudioSessionType::AUTO;
+        }
+    }
+    WebModel::GetInstance()->SetAudioSessionType(audioSessionType);
 }
 
 JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)
@@ -5055,6 +5225,14 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     requestEvent->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("result", requestObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
+    requestEvent->SetResult(eventInfo.GetResult());
+    return requestObj;
 }
 
 void JSWeb::OnNativeEmbedGestureEvent(const JSCallbackInfo& args)
@@ -5657,7 +5835,8 @@ void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
     WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
@@ -5708,6 +5887,23 @@ void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
         return;
     }
     WebModel::GetInstance()->SetDataDetectorConfig(textDetectConfig);
+}
+
+void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
+{
+    auto condition = WebBypassVsyncCondition::NONE;
+    switch (webBypassVsyncCondition) {
+        case 0:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+        case 1:
+            condition = WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET;
+            break;
+        default:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+    }
+    WebModel::GetInstance()->SetBypassVsyncCondition(condition);
 }
 
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)

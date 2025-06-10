@@ -60,9 +60,7 @@ void SubMenuLayoutAlgorithm::UpdateHoverRegion(
     auto bottomRightPoint = position + OffsetF(size.Width(), size.Height());
     auto pipelineContext = parentMenuItem->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
-    auto windowManager = pipelineContext->GetWindowManager();
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
-                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
     OffsetF wrapperOffset;
     if ((!canExpandCurrentWindow_) && isContainerModal) {
         auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
@@ -92,6 +90,7 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
     position_ = GetSubMenuPosition(parentMenuItem, expandingMode);
+    bool stacked = expandingMode == SubMenuExpandingMode::STACK;
     if (layoutWrapper != nullptr) {
         auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
         CHECK_NULL_RETURN(menuLayoutProperty, NG::OffsetF(0.0f, 0.0f));
@@ -105,12 +104,17 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>
     x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
     float y = 0.0f;
     if (canExpandCurrentWindow_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
+        y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize, parentMenuItem, stacked, layoutWrapper);
     } else {
-        y = VerticalLayoutSubMenuHalfScreen(size, position_.GetY(), menuItemSize);
+        y = VerticalLayoutSubMenuHalfScreen(size, position_.GetY(), menuItemSize, parentMenuItem, stacked,
+            layoutWrapper);
     }
     float yMinAvoid = wrapperRect_.Top() + paddingTop_;
     float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+    if (stacked) {
+        yMinAvoid = wrapperRect_.Top() + param_.topSecurity;
+        yMaxAvoid = wrapperRect_.Bottom() - param_.bottomSecurity - size.Height();
+    }
     y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return NG::OffsetF(x, y);
 }
@@ -142,10 +146,7 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(
 
     auto pipelineContext = parentMenuItem->GetContextWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
-    auto windowManager = pipelineContext->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, OffsetF());
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
-                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
     if ((!canExpandCurrentWindow_) && isContainerModal) {
         auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
         auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
@@ -171,42 +172,164 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(
     return position;
 }
 
+float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreenWithPreview(
+    const SizeF& size,
+    const RefPtr<FrameNode>& parentMenu,
+    LayoutWrapper* layoutWrapper
+)
+{
+    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
+    auto parentPlacement = parentMenuPattern->GetLastPlacement().value_or(Placement::NONE);
+    auto firstItemBottomPositionY = GetFirstItemBottomPositionY(parentMenu);
+    float parentMenuBottomY = GetMenuBottomPositionY(parentMenu);
+    auto lastItemPositionY = GetLastItemTopPositionY(parentMenu);
+    auto containerModalOffsetY = GetContainerModalOffsetY(parentMenu);
+    //correct position when window modal is containerModal
+    if (isContainerModal(parentMenu)) {
+        firstItemBottomPositionY -= containerModalOffsetY;
+        parentMenuBottomY -= containerModalOffsetY;
+        lastItemPositionY -= containerModalOffsetY;
+    }
+    if (parentPlacement == Placement::TOP_LEFT || parentPlacement == Placement::TOP ||
+        parentPlacement == Placement::TOP_RIGHT) {
+        auto bottomSpace = parentMenuBottomY - position_.GetY();
+        if (bottomSpace >= size.Height()) {
+            return position_.GetY();
+        }
+        bottomSpace = lastItemPositionY - wrapperRect_.Top() - param_.topSecurity;
+        if (size.Height() <= bottomSpace) {
+            return lastItemPositionY - size.Height();
+        }
+        auto subMenuNode = layoutWrapper->GetHostNode();
+        auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
+        auto diffY = bottomSpace - size.Height();
+        subMenuPattern->SetTranslateYForStack(diffY);
+        return wrapperRect_.Top() + param_.topSecurity;
+    } else {
+        auto bottomSpace = wrapperRect_.Bottom() - param_.bottomSecurity - position_.GetY();
+        if (bottomSpace >= size.Height()) {
+            return position_.GetY();
+        }
+        bottomSpace = wrapperRect_.Bottom() - param_.bottomSecurity - firstItemBottomPositionY;
+        if (size.Height() <= bottomSpace) {
+            return wrapperRect_.Bottom() - param_.bottomSecurity - size.Height();
+        }
+        auto subMenuNode = layoutWrapper->GetHostNode();
+        auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
+        auto diffY = size.Height() - bottomSpace;
+        subMenuPattern->SetTranslateYForStack(diffY);
+        return wrapperRect_.Bottom() - param_.bottomSecurity - size.Height();
+    }
+}
+
+float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreen(
+    const SizeF& size, const RefPtr<FrameNode>& parentMenu, const RefPtr<FrameNode>& parentMenuItem
+)
+{
+    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
+    auto parentPlacement = parentMenuPattern->GetLastPlacement().value_or(Placement::NONE);
+    auto firstItemBottomPositionY = GetFirstItemBottomPositionY(parentMenu);
+    float parentMenuBottomY = GetMenuBottomPositionY(parentMenu);
+    float lastMenuItemPositionY = GetLastItemTopPositionY(parentMenu);
+    auto containerModalOffsetY = GetContainerModalOffsetY(parentMenu);
+    auto parentMenuPositionY = parentMenu->GetPaintRectOffset(false, true).GetY();
+    //correct position when window modal is containerModal
+    if (isContainerModal(parentMenu)) {
+        firstItemBottomPositionY -= containerModalOffsetY;
+        parentMenuBottomY -= containerModalOffsetY;
+        lastMenuItemPositionY -= containerModalOffsetY;
+        parentMenuPositionY -= containerModalOffsetY;
+    }
+    float bottomSpace = 0.0f;
+    if (parentPlacement == Placement::TOP_LEFT || parentPlacement == Placement::TOP ||
+            parentPlacement == Placement::TOP_RIGHT) {
+        bottomSpace = parentMenuBottomY - position_.GetY();
+        if (bottomSpace >= size.Height()) {
+            return position_.GetY();
+        }
+        bottomSpace = lastMenuItemPositionY - wrapperRect_.Top() - param_.topSecurity;
+        if (bottomSpace >= size.Height()) {
+            return lastMenuItemPositionY - size.Height();
+        }
+        return wrapperRect_.Top() + param_.topSecurity;
+    }
+    bottomSpace = wrapperRect_.Bottom() - param_.bottomSecurity - position_.GetY();
+    if (bottomSpace >= size.Height()) {
+        return position_.GetY();
+    }
+    if (size.Height() < wrapperRect_.Height()) {
+        bottomSpace = wrapperRect_.Bottom() - param_.bottomSecurity - firstItemBottomPositionY;
+        if (size.Height() <= bottomSpace) {
+            return wrapperRect_.Bottom() - param_.bottomSecurity - size.Height();
+        }
+        if (bottomSpace < parentMenuItem->GetGeometryNode()->GetFrameSize().Height()) {
+            return parentMenuPositionY;
+        }
+        return firstItemBottomPositionY;
+    }
+    // can't fit in screen, line up with top of the screen
+    return 0.0f;
+}
+
 float SubMenuLayoutAlgorithm::VerticalLayoutSubMenuHalfScreen(
-    const SizeF& size, float position, const SizeF& menuItemSize)
+    const SizeF& size, float position, const SizeF& menuItemSize,
+    const RefPtr<FrameNode>& parentMenuItem, bool stacked, LayoutWrapper* layoutWrapper)
 {
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0f);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, 0.0f);
     float wrapperHeight = wrapperSize_.Height();
-
-    float bottomSpace = wrapperSize_.Height() - (position_.GetY() - param_.windowsOffsetY) - margin_ * 2.0f;
-    // line up top of subMenu with top of the menuItem
-    if (bottomSpace >= size.Height()) {
-        return position;
+    float bottomSpace = 0.0f;
+    if (!stacked) {
+        bottomSpace = wrapperSize_.Height() - (position_.GetY() - param_.windowsOffsetY) - margin_ * 2.0f;
+        // line up top of subMenu with top of the menuItem
+        if (bottomSpace >= size.Height()) {
+            return position;
+        }
+        // line up bottom of menu with bottom of the screen
+        if (size.Height() < wrapperHeight) {
+            return wrapperHeight - size.Height();
+        }
+        // can't fit in screen, line up with top of the screen
+        return 0.0f;
     }
-    // line up bottom of menu with bottom of the screen
-    if (size.Height() < wrapperHeight) {
-        return wrapperHeight - size.Height();
+    auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+    auto parentMenu = parentItemPattern->GetMenu(true);
+    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
+    if (parentMenuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+        return CalcStackSubMenuPositionYHalfScreenWithPreview(size, parentMenu, layoutWrapper);
+    } else {
+        return CalcStackSubMenuPositionYHalfScreen(size, parentMenu, parentMenuItem);
     }
-    // can't fit in screen, line up with top of the screen
-    return 0.0f;
 }
 
 // return submenu vertical offset
-float SubMenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
+float SubMenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize,
+    const RefPtr<FrameNode>& parentMenuItem, bool stacked, LayoutWrapper* layoutWrapper)
 {
-    float bottomSpace = wrapperRect_.Bottom() - position - paddingBottom_;
-    // line up top of subMenu with top of the menuItem
-    if (bottomSpace >= size.Height()) {
-        return position;
+    float bottomSpace = 0.0f;
+    if (!stacked) {
+        bottomSpace = wrapperRect_.Bottom() - position - paddingBottom_;
+        // line up top of subMenu with top of the menuItem
+        if (bottomSpace >= size.Height()) {
+            return position;
+        }
+        // line up bottom of menu with bottom of the screen
+        if (size.Height() < wrapperRect_.Height()) {
+            return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
+        }
+        // can't fit in screen, line up with top of the screen
+        return wrapperRect_.Top() + paddingTop_;
     }
-    // line up bottom of menu with bottom of the screen
-    if (size.Height() < wrapperRect_.Height()) {
-        return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
+    auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+    auto parentMenu = parentItemPattern->GetMenu(true);
+    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
+    if (parentMenuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+        return CalcStackSubMenuPositionYHalfScreenWithPreview(size, parentMenu, layoutWrapper);
+    } else {
+        return CalcStackSubMenuPositionYHalfScreen(size, parentMenu, parentMenuItem);
     }
-    // can't fit in screen, line up with top of the screen
-    return wrapperRect_.Top() + paddingTop_;
 }
 
 // returns submenu horizontal offset

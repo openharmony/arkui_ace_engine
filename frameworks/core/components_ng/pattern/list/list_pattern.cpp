@@ -14,9 +14,6 @@
  */
 
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include <cstdint>
-#include <optional>
-#include <unistd.h>
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
@@ -24,7 +21,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
@@ -36,6 +32,7 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -180,6 +177,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
+    prevMeasureBreak_ = listLayoutAlgorithm->MeasureInNextFrame();
+    if (!prevMeasureBreak_) {
+        jumpIndexInGroup_.reset();
+        jumpIndex_.reset();
+    }
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     cachedItemPosition_ = listLayoutAlgorithm->GetCachedItemPosition();
     laneIdx4Divider_ = listLayoutAlgorithm->GetLaneIdx4Divider();
@@ -248,45 +250,54 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
-    auto endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
-    CheckScrollable();
-    if (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty))) {
-        OnMidIndexChanged();
-    }
-    bool indexChanged = false;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (isNeedUpdateIndex) {
+    if (!prevMeasureBreak_) {
+        auto endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
+        CheckScrollable();
+        if (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty))) {
+            OnMidIndexChanged();
+        }
+        bool indexChanged = false;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            if (isNeedUpdateIndex) {
+                indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
+                            (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
+                            (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+            }
+        } else {
             indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
-                           (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
-                           (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+                (endIndex_ != listLayoutAlgorithm->GetEndIndex());
         }
+        startIndexChanged_ = startIndex_ != listLayoutAlgorithm->GetStartIndex();
+        endIndexChanged_ = endIndex_ != listLayoutAlgorithm->GetEndIndex();
+        if (indexChanged) {
+            startIndex_ = listLayoutAlgorithm->GetStartIndex();
+            endIndex_ = listLayoutAlgorithm->GetEndIndex();
+            centerIndex_ = listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty));
+        }
+        ProcessEvent(indexChanged, relativeOffset, isJump);
+        HandleScrollBarOutBoundary();
+        UpdateScrollBarOffset();
+        if (config.frameSizeChange) {
+            if (GetScrollBar() != nullptr) {
+                GetScrollBar()->ScheduleDisappearDelayTask();
+            }
+        }
+        bool sizeDiminished =
+            !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
+        if (!GetCanStayOverScroll()) {
+            CheckRestartSpring(sizeDiminished);
+        }
+        isInitialized_ = true;
     } else {
-        indexChanged =
-            (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
+        ACE_SCOPED_TRACE("List MeasureInNextFrame");
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    startIndexChanged_ = startIndex_ != listLayoutAlgorithm->GetStartIndex();
-    endIndexChanged_ = endIndex_ != listLayoutAlgorithm->GetEndIndex();
-    if (indexChanged) {
-        startIndex_ = listLayoutAlgorithm->GetStartIndex();
-        endIndex_ = listLayoutAlgorithm->GetEndIndex();
-        centerIndex_ = listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty));
-    }
-    ProcessEvent(indexChanged, relativeOffset, isJump);
-    HandleScrollBarOutBoundary();
-    UpdateScrollBarOffset();
-    if (config.frameSizeChange) {
-        if (GetScrollBar() != nullptr) {
-            GetScrollBar()->ScheduleDisappearDelayTask();
-        }
-    }
-    bool sizeDiminished =
-        !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
-    CheckRestartSpring(sizeDiminished);
-
     DrivenRender(dirty);
+    UpdateLayoutRange(GetAxis(), !isInitialized_);
 
     SetScrollSource(SCROLL_FROM_NONE);
-    isInitialized_ = true;
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
     snapTrigByScrollBar_ = false;
@@ -467,6 +478,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
         FireOnScrollWithVersionCheck(finalOffset, onScroll);
     }
     FireObserverOnDidScroll(finalOffset);
+    FireObserverOnScrollerAreaChange(finalOffset);
     auto onDidScroll = listEventHub->GetOnDidScroll();
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
@@ -490,6 +502,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     auto onJSFrameNodeReachEnd = listEventHub->GetJSFrameNodeOnReachEnd();
     FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
     OnScrollStop(listEventHub->GetOnScrollStop(), listEventHub->GetJSFrameNodeOnScrollStop());
+    ProcessFocusEvent(keyEvent_, indexChanged);
 }
 
 void ListPattern::FireOnScrollWithVersionCheck(float finalOffset, OnScrollEvent& onScroll)
@@ -682,7 +695,6 @@ void ListPattern::SetLayoutAlgorithmParams(
     }
     if (jumpIndexInGroup_) {
         listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
-        jumpIndexInGroup_.reset();
     }
     if (targetIndexInGroup_) {
         listLayoutAlgorithm->SetTargetIndexInGroup(targetIndexInGroup_.value());
@@ -704,6 +716,8 @@ void ListPattern::SetLayoutAlgorithmParams(
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
+    listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
+    listLayoutAlgorithm->SetDraggingIndex(draggingIndex_);
 }
 
 void ListPattern::SetChainAnimationToPosMap()
@@ -763,7 +777,6 @@ void ListPattern::SetLayoutAlgorithmJumpAlign(
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
-        jumpIndex_.reset();
     }
 }
 
@@ -969,6 +982,13 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(float delta, bool useChainDel
     return offset;
 }
 
+void ListPattern::UpdateOffsetHelper(float lastDelta)
+{
+    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+    currentDelta_ = lastDelta + userOffset;
+    UpdateOffset(-userOffset);
+}
+
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect
@@ -990,8 +1010,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         MarkDirtyNodeSelf();
     }
     if (itemPosition_.empty() || !IsOutOfBoundary() || !isScrollable_) {
-        auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
-        currentDelta_ = lastDelta + userOffset;
+        UpdateOffsetHelper(lastDelta);
         return true;
     }
 
@@ -1005,8 +1024,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         currentDelta_ = lastDelta - offset;
     }
 
-    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
-    currentDelta_ = lastDelta + userOffset;
+    UpdateOffsetHelper(lastDelta);
     MarkScrollBarProxyDirty();
     return true;
 }
@@ -1080,6 +1098,11 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     CHECK_NULL_RETURN(scrollSnapAlign != ScrollSnapAlign::NONE, false);
     if (snapDirection != SnapDirection::NONE) {
         return ScrollToSnapIndex(snapDirection, scrollSnapAlign);
+    }
+    if (snapAnimationOptions.fromScrollBar &&
+        ((GreatNotEqual(snapAnimationOptions.animationVelocity, 0.0f) && IsAtTop()) ||
+            (LessNotEqual(snapAnimationOptions.animationVelocity, 0.0f) && IsAtBottom()))) {
+        return false;
     }
     if (!IsScrolling()) {
         snapTrigOnScrollStart_ = true;
@@ -1249,6 +1272,10 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
     }
     if (event.code == KeyCode::KEY_PAGE_UP) {
         ScrollPage(true);
+        return true;
+    }
+    if (FocusHub::IsFocusStepKey(event.code) && (ScrollToLastFocusIndex(event.code))) {
+        keyEvent_ = event;
         return true;
     }
     return HandleDirectionKey(event);
@@ -1698,7 +1725,9 @@ void ListPattern::ScrollTo(float position)
     jumpIndex_.reset();
     targetIndex_.reset();
     currentDelta_ = 0.0f;
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    SetIsOverScroll(GetCanStayOverScroll());
     MarkDirtyNodeSelf();
     isScrollEnd_ = true;
 }
@@ -1720,6 +1749,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             if (!AnimateToTarget(index, std::nullopt, align)) {
                 targetIndex_ = index;
                 scrollAlign_ = align;
+                RequestFillToTarget(*targetIndex_, scrollAlign_, extraOffset.value_or(0.0f));
             }
         } else {
             if (extraOffset.has_value()) {
@@ -1728,6 +1758,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             jumpIndex_ = index;
             scrollAlign_ = align;
             jumpIndexInGroup_.reset();
+            RequestJump(*jumpIndex_, scrollAlign_, extraOffset.value_or(0.0f));
         }
         MarkDirtyNodeSelf();
     }
@@ -1780,6 +1811,9 @@ void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool 
             jumpIndex_ = index;
             jumpIndexInGroup_ = indexInGroup;
             scrollAlign_ = align;
+            if (align == ScrollAlign::AUTO && !isInitialized_) {
+                scrollAlign_ = ScrollAlign::END;
+            }
         }
         MarkDirtyNodeSelf();
     }
@@ -1993,6 +2027,7 @@ void ListPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType 
 void ListPattern::ScrollBy(float offset)
 {
     StopAnimate();
+    SetIsOverScroll(false);
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
     isScrollEnd_ = true;
 }
@@ -2224,6 +2259,9 @@ bool ListPattern::CalculateJumpOffset()
 
 float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump)
 {
+    if (prevMeasureBreak_) {
+        return 0;
+    }
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     float prevOffset = currentOffset_;
     if (childrenSize_) {
@@ -2414,6 +2452,8 @@ void ListPattern::UpdateScrollBarOffset()
         currentOffset += contentStartOffset_;
         estimatedHeight += contentStartOffset_ + contentEndOffset_;
     }
+    float expandHeight = ScrollableUtils::CheckHeightExpansion(layoutPriority, GetAxis());
+    estimatedHeight -= expandHeight;
 
     UpdateScrollBarRegion(currentOffset, estimatedHeight + paddingMain, size, Offset(0.0f, 0.0f));
 }
@@ -2806,6 +2846,16 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
     return 0;
 }
 
+std::string static FocusWrapModeToString(FocusWrapMode mode)
+{
+    switch (mode) {
+        case FocusWrapMode::WRAP_WITH_ARROW:
+            return "WRAP_WITH_ARROW";
+        default:
+            return "DEFAULT";
+    }
+}
+
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollablePattern::ToJsonValue(json, filter);
@@ -2824,6 +2874,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     nestedScrollOptions->Put("scrollForward", nestedScroll.GetNestedScrollModeStr(nestedScroll.forward).c_str());
     nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
     json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
+    json->PutExtAttr("focusWrapMode", FocusWrapModeToString(focusWrapMode_).c_str(), filter);
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -3142,6 +3193,7 @@ void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listE
     if (onScrollVisibleContentChange) {
         if (indexChanged || startChanged || endChanged) {
             onScrollVisibleContentChange(startInfo_, endInfo_);
+            groupIndexChanged_ = true;
             ReportOnItemListScrollEvent("onScrollVisibleContentChange", startInfo_.index, endInfo_.index);
         }
     }
@@ -3159,6 +3211,13 @@ float ListPattern::GetScrollUpdateFriction(float overScroll)
 
 void ListPattern::NotifyDataChange(int32_t index, int32_t count)
 {
+    if (focusIndex_.has_value() && focusIndex_.value() >= index) {
+        focusIndex_ = focusIndex_.value() + count;
+        if (focusIndex_ < 0) {
+            focusIndex_ = 0;
+        }
+    }
+
     if (!maintainVisibleContentPosition_ || itemPosition_.empty() || count == 0) {
         return;
     }
@@ -3184,6 +3243,7 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
+    RequestReset(startIndex, contentStartOffset_);
 }
 
 bool ListPattern::CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex)
@@ -3278,7 +3338,7 @@ SizeF ListPattern::GetChildrenExpandedSize()
 }
 
 bool ListPattern::LayoutItemInGroupForFocus(int32_t indexInList, int32_t nextIndexInGroup, int32_t curIndexInGroup,
-    ListItemGroupPara listItemGroupPara, int32_t maxListItemIndex)
+    const ListItemGroupPara& listItemGroupPara, int32_t maxListItemIndex)
 {
     // nextIndexInGroup = -1 indicates the current position is Header; nextIndexInGroup = maxListItemIndex indicates the
     // current position is Footer.
@@ -3439,7 +3499,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNodeInList(FocusStep step, const Weak
             return nullptr;
         }
         LayoutListForFocus(nextIndex, curIndex);
-        auto nextFocusNode = FindChildFocusNodeByIndex(nextIndex, step);
+        auto nextFocusNode = FindChildFocusNodeByIndex(nextIndex, step, curIndex);
         if (nextFocusNode.Upgrade()) {
             // Scroll and display the ListItem.
             if (IsListItem(nextFocusNode)) {
@@ -3465,15 +3525,41 @@ bool ListPattern::IsListItemGroupByIndex(int32_t index)
     return frameNode && frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
 }
 
-WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(int32_t tarMainIndex, const FocusStep& step)
+FocusStep static JudgeFocusStep(
+    int32_t tarMainIndex, const FocusStep& step, int32_t curFocusIndex, FocusWrapMode focusWrapMode, bool isVertical)
 {
+    if (isVertical && focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+        if (curFocusIndex < tarMainIndex && step == FocusStep::RIGHT) {
+            return FocusStep::UP_END;
+        } else if (curFocusIndex > tarMainIndex && step == FocusStep::LEFT) {
+            return FocusStep::DOWN_END;
+        }
+    }
+    if (!isVertical && focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+        if (curFocusIndex < tarMainIndex && step == FocusStep::DOWN) {
+            return FocusStep::LEFT_END;
+        } else if (curFocusIndex > tarMainIndex && step == FocusStep::UP) {
+            return FocusStep::RIGHT_END;
+        }
+    }
+    return step;
+}
+
+WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(
+    int32_t tarMainIndex, const FocusStep& step, int32_t curFocusIndex)
+{
+    auto focusWrapMode = GetFocusWrapMode();
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    auto isVertical = listProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
+    CHECK_NULL_RETURN(listProperty, nullptr);
     // Only for GetNextFocusNodeInList.
     auto listFrame = GetHost();
     CHECK_NULL_RETURN(listFrame, nullptr);
     auto listFocus = listFrame->GetFocusHub();
     CHECK_NULL_RETURN(listFocus, nullptr);
     WeakPtr<FocusHub> target;
-    listFocus->AnyChildFocusHub([&target, tarMainIndex, step](const RefPtr<FocusHub>& childFocus) {
+    listFocus->AnyChildFocusHub([&target, tarMainIndex, step, curFocusIndex, focusWrapMode, isVertical](
+        const RefPtr<FocusHub>& childFocus) {
         if (!childFocus->IsFocusable()) {
             return false;
         }
@@ -3489,19 +3575,20 @@ WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(int32_t tarMainIndex, c
         if (!childItemPattern) {
             auto childItemGroupPattern = AceType::DynamicCast<ListItemGroupPattern>(childPattern);
             CHECK_NULL_RETURN(childItemGroupPattern, false);
-
             if (childItemGroupPattern->GetIndexInList() == tarMainIndex) {
-                auto isFindTailOrHead = childItemGroupPattern->FindHeadOrTailChild(childFocus, step, target);
-                if (!isFindTailOrHead) {
-                    target = childFocus;
-                }
+                auto tempStep = JudgeFocusStep(tarMainIndex, step, curFocusIndex, focusWrapMode, isVertical);
+                bool isFindTailOrHead = childItemGroupPattern->FindHeadOrTailChild(childFocus, tempStep, target);
+                target = isFindTailOrHead ? target : childFocus;
                 return true;
             }
             return false;
         }
         auto curIndex = childItemPattern->GetIndexInList();
         if (curIndex == tarMainIndex) {
-            target = childFocus;
+            auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
+            CHECK_NULL_RETURN(childItemPattern, false);
+            auto isFindTailOrHead = childItemPattern->FindHeadOrTailChild(childFocus, step, target);
+            target = !isFindTailOrHead ? childFocus : target;
             return true;
         }
         return false;
@@ -3534,7 +3621,6 @@ void ListPattern::DetermineMultiLaneStep(
     FocusStep step, bool isVertical, int32_t curIndex, int32_t& moveStep, int32_t& nextIndex)
 {
     // Only for GetNextFocusNodeInList.
-
     if ((step == FocusStep::UP_END) || (step == FocusStep::LEFT_END)) {
         moveStep = 1;
         nextIndex = 0;
@@ -3662,9 +3748,14 @@ void ListPattern::HandleIndexToBounds(int32_t& nextIndex, bool& loopFlag)
 int32_t ListPattern::GetCrossAxisNextIndex(int32_t curIndex, bool isVertical, int32_t moveStep, FocusStep step)
 {
     // Only for DetermineMultiLaneStep
+    auto focusWrapMode = GetFocusWrapMode();
     int32_t nextIndex = curIndex + moveStep;
     const bool isForward = (isVertical && step == FocusStep::RIGHT) || (!isVertical && step == FocusStep::DOWN);
     const bool isBackward = (isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP);
+
+    if (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+        return nextIndex;
+    }
 
     if (!isForward && !isBackward) {
         return nextIndex;
@@ -3743,8 +3834,6 @@ ScopeFocusAlgorithm ListPattern::GetScopeFocusAlgorithm()
             if (list) {
                 nextFocusNode = list->GetNextFocusNodeInList(step, currFocusNode);
             }
-            LOGI("acefocus ListPattern::GetScopeFocusAlgorithm return: %{public}d",
-                nextFocusNode.Upgrade() != currFocusNode.Upgrade());
             return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         });
 }
@@ -3815,4 +3904,239 @@ int32_t ListPattern::OnInjectionEvent(const std::string& command)
     return RET_SUCCESS;
 }
 
+void ListPattern::SetFocusWrapMode(FocusWrapMode focusWrapMode)
+{
+    if (focusWrapMode != FocusWrapMode::DEFAULT && focusWrapMode != FocusWrapMode::WRAP_WITH_ARROW) {
+        focusWrapMode_ = FocusWrapMode::DEFAULT;
+    } else {
+        focusWrapMode_ = focusWrapMode;
+    }
+}
+
+FocusWrapMode ListPattern::GetFocusWrapMode() const
+{
+    return focusWrapMode_;
+}
+
+bool ListPattern::ScrollToLastFocusIndex(KeyCode code)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    CHECK_NULL_RETURN(focusHub->IsCurrentFocus(), false);
+    CHECK_NULL_RETURN(focusIndex_, false);
+    auto totalItemCount = maxListItemIndex_ + 1;
+    auto focusIndex = focusIndex_.value();
+    auto focusGroupIndex = focusGroupIndex_.value_or(-1);
+    if (!IsInViewport(focusIndex) || !GetIsInViewInGroup(focusIndex, focusGroupIndex)) {
+        StopAnimate();
+        needTriggerFocus_ = true;
+        // If focused item is above viewport and the current keyCode type is UP, scroll forward one more line
+        if (focusIndex < startIndex_ && code == KeyCode::KEY_DPAD_UP && focusIndex - lanes_ >= 0) {
+            UpdateStartIndex(focusIndex - lanes_);
+            // If focused item is below viewport and the current keyCode type is DOWN, scroll backward one more line
+        } else if (focusIndex > endIndex_ && code == KeyCode::KEY_DPAD_DOWN && focusIndex + lanes_ < totalItemCount) {
+            UpdateStartIndex(focusIndex + lanes_);
+        } else {
+            if (focusGroupIndex >= 0) {
+                UpdateStartIndex(focusIndex, focusGroupIndex);
+            } else {
+                UpdateStartIndex(focusIndex);
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+bool ListPattern::IsInViewport(int32_t index) const
+{
+    return index >= startIndex_ && index <= endIndex_;
+}
+
+bool ListPattern::UpdateStartIndex(int32_t index, int32_t indexInGroup)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (focusGroupIndex_.has_value() && indexInGroup >= 0) {
+        jumpIndexInGroup_ = indexInGroup;
+    }
+    jumpIndex_ = index;
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    SetScrollSource(SCROLL_FROM_FOCUS_JUMP);
+    return true;
+}
+
+void ListPattern::ProcessFocusEvent(const KeyEvent& event, bool indexChanged)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+    if (needTriggerFocus_) {
+        if (triggerFocus_) {
+            needTriggerFocus_ = false;
+            triggerFocus_ = false;
+            focusHub->GetNextFocusByStep(event);
+        } else {
+            if (!focusIndex_.has_value()) {
+                needTriggerFocus_ = false;
+                return;
+            }
+            triggerFocus_ = true;
+            RequestFocusForItem();
+        }
+        return;
+    }
+    if (groupIndexChanged_ && focusGroupIndex_.has_value()) {
+        FireFocusInListItemGroup();
+    } else if (indexChanged && focusIndex_.has_value() && !focusIndexChangedByListItemGroup_) {
+        FireFocus();
+    }
+}
+
+void ListPattern::FireFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+    CHECK_NULL_VOID(focusIndex_);
+    if (IsInViewport(focusIndex_.value())) {
+        auto child = host->GetChildByIndex(focusIndex_.value());
+        CHECK_NULL_VOID(child);
+        auto childNode = child->GetHostNode();
+        CHECK_NULL_VOID(childNode);
+        auto childFocusHub = childNode->GetFocusHub();
+        CHECK_NULL_VOID(childFocusHub);
+        if (!childFocusHub->IsCurrentFocus()) {
+            ResetFocusIndex();
+            focusHub->SetFocusDependence(FocusDependence::AUTO);
+            childFocusHub->RequestFocusImmediately(FocusReason::FOCUS_TRAVEL);
+        }
+    } else {
+        auto childFocusHub = focusHub->GetLastWeakFocusNode().Upgrade();
+        CHECK_NULL_VOID(childFocusHub);
+        if (childFocusHub->IsCurrentFocus()) {
+            focusHub->LostChildFocusToSelf();
+        }
+    }
+}
+
+void ListPattern::FireFocusInListItemGroup()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+    CHECK_NULL_VOID(focusGroupIndex_);
+    if (GetIsInViewInGroup(focusIndex_.value(), focusGroupIndex_.value())) {
+        auto groupChild = host->GetChildByIndex(focusIndex_.value());
+        CHECK_NULL_VOID(groupChild);
+        auto groupChildNode = groupChild->GetHostNode();
+        CHECK_NULL_VOID(groupChildNode);
+        auto itemChild = groupChildNode->GetChildByIndex(focusGroupIndex_.value());
+        CHECK_NULL_VOID(itemChild);
+        auto childNode = itemChild->GetHostNode();
+        CHECK_NULL_VOID(childNode);
+        auto childFocusHub = childNode->GetFocusHub();
+        CHECK_NULL_VOID(childFocusHub);
+        if (!childFocusHub->IsCurrentFocus()) {
+            ResetFocusIndex();
+            ResetGroupFocusIndex();
+            ResetGroupIndexChanged();
+            focusHub->SetFocusDependence(FocusDependence::AUTO);
+            childFocusHub->RequestFocusImmediately(FocusReason::FOCUS_TRAVEL);
+        }
+    } else {
+        auto childFocusHub = focusHub->GetLastWeakFocusNode().Upgrade();
+        CHECK_NULL_VOID(childFocusHub);
+
+        if (childFocusHub->IsCurrentFocus()) {
+            focusHub->LostChildFocusToSelf();
+        }
+    }
+}
+
+bool ListPattern::GetIsInViewInGroup(int32_t groupIndex, int32_t index)
+{
+    auto result = true;
+    if (index < 0) {
+        return result;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto startWrapper = host->GetChildByIndex(groupIndex);
+    bool startIsGroup = startWrapper && startWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (startIsGroup) {
+        auto indexPattern = startWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
+        result = indexPattern->IsInViewport(index);
+    }
+    return result;
+}
+
+void ListPattern::RequestFocusForItem()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(focusIndex_);
+    auto child = host->GetChildByIndex(focusIndex_.value());
+    CHECK_NULL_VOID(child);
+    auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    if (focusGroupIndex_.has_value()) {
+        auto itemInGroup = childNode->GetChildByIndex(focusGroupIndex_.value());
+        auto itemInGroupNode = itemInGroup->GetHostNode();
+        CHECK_NULL_VOID(itemInGroupNode);
+        auto itemInGroupFocusHub = itemInGroupNode->GetFocusHub();
+        CHECK_NULL_VOID(itemInGroupFocusHub);
+        if (!itemInGroupFocusHub->IsCurrentFocus() && itemInGroupFocusHub->IsFocusable()) {
+            itemInGroupFocusHub->RequestFocusImmediately();
+        }
+    } else {
+        auto childFocusHub = childNode->GetFocusHub();
+        CHECK_NULL_VOID(childFocusHub);
+        if (!childFocusHub->IsCurrentFocus() && childFocusHub->IsFocusable()) {
+            childFocusHub->RequestFocusImmediately();
+        }
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+int32_t ListPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
+{
+    auto tarFrame = focusNode->GetFrameNode();
+    CHECK_NULL_RETURN(tarFrame, -1);
+    auto tarPattern = tarFrame->GetPattern();
+    CHECK_NULL_RETURN(tarPattern, -1);
+    auto tarItemPattern = AceType::DynamicCast<ListItemPattern>(tarPattern);
+    CHECK_NULL_RETURN(tarItemPattern, -1);
+
+    return tarItemPattern->GetIndexInList();
+}
+
+void ListPattern::ScrollToFocusNodeIndex(int32_t index)
+{
+    if (focusIndex_.has_value()) {
+        index = focusIndex_.value();
+    }
+
+    StopAnimate();
+    UpdateStartIndex(index);
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
+    auto tarFocusNodeWeak = GetChildFocusNodeByIndex(index, -1);
+    auto tarFocusNode = tarFocusNodeWeak.Upgrade();
+    if (tarFocusNode) {
+        tarFocusNode->RequestFocusImmediately();
+    }
+}
 } // namespace OHOS::Ace::NG

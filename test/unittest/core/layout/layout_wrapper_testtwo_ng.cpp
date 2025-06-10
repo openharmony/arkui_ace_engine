@@ -166,6 +166,47 @@ std::optional<LayoutConstraintF> MakeLayoutConstraintF()
     return constraint;
 }
 
+void PresetAttributesForStrategyTest(PaddingProperty& safeAreaPadding0, PaddingProperty& safeAreaPadding1,
+    PaddingProperty& margin1, MarginPropertyF& margin1_)
+{
+    safeAreaPadding0 = {
+        .left = CalcLength(10.0f),
+        .right = CalcLength(15.0f),
+        .top = CalcLength(20.0f),
+        .bottom = CalcLength(25.0f)
+    };
+    safeAreaPadding1 = {
+        .left = CalcLength(10.0f),
+        .right = CalcLength(15.0f),
+        .top = CalcLength(10.0f),
+        .bottom = CalcLength(15.0f)
+    };
+    margin1 = {
+        .left = CalcLength(0.0f),
+        .right = CalcLength(10.0f),
+        .top = CalcLength(0.0f),
+        .bottom = CalcLength(10.0f)
+    };
+    margin1_ = {
+        .left = 0.0f,
+        .right = 10.0f,
+        .top = 0.0f,
+        .bottom = 10.0f
+    };
+}
+
+void PresetSceneForStrategyTest(RefPtr<LayoutWrapperNode> layoutWrapper0, RefPtr<LayoutWrapperNode> layoutWrapper1)
+{
+    PaddingProperty safeAreaPadding0;
+    PaddingProperty safeAreaPadding1;
+    PaddingProperty margin1;
+    MarginPropertyF margin1_;
+    PresetAttributesForStrategyTest(safeAreaPadding0, safeAreaPadding1, margin1, margin1_);
+    layoutWrapper0->GetLayoutProperty()->UpdateSafeAreaPadding(safeAreaPadding0);
+    layoutWrapper1->GetLayoutProperty()->UpdateSafeAreaPadding(safeAreaPadding1);
+    layoutWrapper1->GetLayoutProperty()->UpdateMargin(margin1);
+    layoutWrapper1->GetGeometryNode()->UpdateMargin(margin1_);
+}
 } // namespace
 
 class LayoutWrapperTestTwoNg : public testing::Test {
@@ -907,5 +948,71 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level1)
     EXPECT_FALSE(layoutWrapper->AvoidKeyboard(false));
     EXPECT_TRUE(LessNotEqual(safeAreamanager->GetKeyboardOffset(), 0.0));
 }
+/**
+ * @tc.name: IgnoreLayoutProcessTagFuncs
+ * @tc.desc: Test Get,Set,ResetIgnoreLayoutProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, IgnoreLayoutProcessTagFuncs, TestSize.Level0)
+{
+    auto node = FrameNode::CreateFrameNode(V2::OVERLAY_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(node);
+    EXPECT_EQ(layoutWrapper->GetIgnoreLayoutProcess(), false);
+    layoutWrapper->SetIgnoreLayoutProcess(true);
+    EXPECT_EQ(layoutWrapper->GetIgnoreLayoutProcess(), true);
+    layoutWrapper->ResetIgnoreLayoutProcess();
+    EXPECT_EQ(layoutWrapper->GetIgnoreLayoutProcess(), false);
+}
+/**
+ * @tc.name: StrategyControlOnGetAccumulatedSafeAreaExpand003
+ * @tc.desc: Test GetAccumulatedSafeAreaExpand with Strategy options
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand003, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto [node0, layoutWrapper0] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, RectF(0.0f, 0.0f, 200.0f, 200.0f));
+    auto [child, layoutWrapper1] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_1, RectF(10.0f, 20.0f, 165.0f, 145.0f));
+    child->MountToParent(node0);
+    PresetSceneForStrategyTest(layoutWrapper0, layoutWrapper1);
+    PaddingProperty margin1 = {
+        .left = CalcLength(10.0f),
+        .right = CalcLength(10.0f),
+        .top = CalcLength(10.0f),
+        .bottom = CalcLength(10.0f)
+    };
+    layoutWrapper1->GetLayoutProperty()->UpdateMargin(margin1);
+    MarginPropertyF margin1_ = {
+        .left = 10.0f,
+        .right = 10.0f,
+        .top = 10.0f,
+        .bottom = 10.0f
+    };
+    layoutWrapper1->GetGeometryNode()->UpdateMargin(margin1_);
+    layoutWrapper1->GetLayoutProperty()->marginResult_ = margin1_;
 
+    ExpandEdges expectedRes = {
+        .left = std::nullopt,
+        .right = std::nullopt,
+        .top = std::nullopt,
+        .bottom = std::nullopt
+    };
+    /**
+     * @tc.steps: step5. overlay whole margin
+     */
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }), expectedRes);
+
+    /**
+     * @tc.steps: step6. overlay whole margin, with fromMargin
+     */
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }, IgnoreStrategy::FROM_MARGIN), expectedRes);
+}
 }

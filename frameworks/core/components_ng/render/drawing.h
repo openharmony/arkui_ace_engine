@@ -91,6 +91,7 @@ using RSBlurType = Rosen::Drawing::BlurType;
 using RSPathFillType = Rosen::Drawing::PathFillType;
 using RSSkPath = Rosen::Drawing::SkiaPath;
 using RSColorQuad = Rosen::Drawing::ColorQuad;
+using RSColor4f = Rosen::Drawing::Color4f;
 using RSShaderEffect = Rosen::Drawing::ShaderEffect;
 using RSTileMode = Rosen::Drawing::TileMode;
 using RSFont = Rosen::Drawing::Font;
@@ -154,6 +155,8 @@ using RSEllipsisMode = Rosen::EllipsisModal;
 using RSSymbolAnimation = Rosen::RSSymbolAnimation;
 using RSSymbolAnimationConfig = Rosen::TextEngine::SymbolAnimationConfig;
 using RSPictureRecorder = Rosen::Drawing::PictureRecorder;
+using RSCMSTransferFuncType = Rosen::Drawing::CMSTransferFuncType;
+using RSCMSMatrixType = Rosen::Drawing::CMSMatrixType;
 struct RSDataWrapper {
     std::shared_ptr<RSData> data;
 };

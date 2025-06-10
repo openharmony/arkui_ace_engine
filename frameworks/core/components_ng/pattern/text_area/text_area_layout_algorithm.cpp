@@ -44,7 +44,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
 
     auto isInlineStyle = pattern->IsNormalInlineState();
     if (!isInlineStyle && textFieldLayoutProperty->HasNormalMaxViewLines()) {
-        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+        UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
     }
 
     if (isInlineStyle && textFieldLayoutProperty->HasTextOverflow()) {
@@ -70,7 +70,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }
 
-    autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
+    UpdateAutoWidth(textFieldLayoutProperty, layoutWrapper);
 
     if (textContent_.empty()) {
         // Used for empty text.
@@ -125,6 +125,7 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.SetWidth(finalWidth);
         ConstraintHeight(layoutWrapper, frameSize, contentHeight);
     }
+    UpdateFrameSizeWithLayoutPolicy(layoutWrapper, frameSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 

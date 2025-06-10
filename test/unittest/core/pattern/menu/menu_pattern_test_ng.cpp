@@ -1568,12 +1568,16 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg088, TestSize.Level1)
     auto menuItemPattern = child->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     menuItemPattern->SetClickMenuItemId(child->GetId());
-    auto testInfo = menuPattern->GetInnerMenuOffset(child, false);
+    RefPtr<FrameNode> subMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(2, "", TYPE); });
+    ASSERT_NE(subMenuNode, nullptr);
+    auto testInfo = menuPattern->GetInnerMenuOffset(child, subMenuNode, false);
     EXPECT_TRUE(testInfo.isFindTargetId);
     /**
      * @tc.steps: step1+. test GetInnerMenuOffset and isNeedRestoreNodeId if true;
      */
-    testInfo = menuPattern->GetInnerMenuOffset(child, true);
+    testInfo = menuPattern->GetInnerMenuOffset(child, subMenuNode, true);
     EXPECT_TRUE(testInfo.isFindTargetId);
     /**
      * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if false;
@@ -1587,12 +1591,12 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg088, TestSize.Level1)
     itemchildOne->MountToParent(menuitemgroupNode);
     itemchildTwo->MountToParent(menuitemgroupNode);
     menuPattern = menuNode->GetPattern<MenuPattern>();
-    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, false);
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, subMenuNode, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
     /**
      * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if true;
      */
-    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, true);
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, subMenuNode, true);
     EXPECT_EQ(testInfo.originOffset, OffsetF(0.0, 0.0));
     EXPECT_FALSE(testInfo.isFindTargetId);
 }
@@ -1692,6 +1696,58 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTest091, TestSize.Level1)
     parent->parent_ = uiNode;
     menuPattern->HandlePrevPressed(parent, index, press);
     EXPECT_NE(menuPattern->GetOutsideForEachMenuItem(parent, false), nullptr);
+}
+
+/**
+ * @tc.name: MenuLifecycleCallbackTest001
+ * @tc.desc: Test MenuLifecycleCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuLifecycleCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+    menuParam.isShow = true;
+    menuParam.isShowInSubWindow = false;
+    menuParam.onWillAppear = std::move(onWillAppearEvent);
+    menuParam.onDidAppear = std::move(onDidAppearEvent);
+    menuParam.onWillDisappear = std::move(onWillDisappearEvent);
+    menuParam.onDidDisappear = std::move(onDidDisappearEvent);
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+
+    auto menuNode =
+        MenuView::Create(std::move(optionParams), TARGET_ID, MENU_TAG, MenuType::MENU, menuParam);
+    CHECK_NULL_VOID(menuNode);
+    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
+    /**
+     * @tc.steps: step2. Call Callback.
+     * @tc.expected: Check Callback.
+     */
+    menuWrapperPattern->CallMenuOnWillAppearCallback();
+    menuWrapperPattern->CallMenuOnDidAppearCallback();
+    menuWrapperPattern->CallMenuOnWillDisappearCallback();
+    menuWrapperPattern->CallMenuOnDidDisappearCallback();
+
+    EXPECT_EQ(onWillAppearFlag, true);
+    EXPECT_EQ(onDidAppearFlag, true);
+    EXPECT_EQ(onWillDisappearFlag, true);
+    EXPECT_EQ(onDidDisappearFlag, true);
 }
 
 /**

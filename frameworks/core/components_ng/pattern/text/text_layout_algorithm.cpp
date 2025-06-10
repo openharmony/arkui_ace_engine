@@ -22,6 +22,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #ifdef ACE_ENABLE_VK
@@ -167,10 +168,11 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             return std::nullopt;
         }
     }
-    UpdateRelayoutShaderStyle(pattern, textLayoutProperty);
+    UpdateRelayoutShaderStyle(layoutWrapper);
     baselineOffset_ = textStyle_.GetBaselineOffset().ConvertToPxDistribute(
         textStyle_.GetMinFontScale(), textStyle_.GetMaxFontScale(), textStyle_.IsAllowScale());
-    if (NearZero(contentConstraint.maxSize.Height()) || NearZero(contentConstraint.maxSize.Width())) {
+    if (NearZero(contentConstraint.maxSize.Height()) || NearZero(contentConstraint.maxSize.Width()) ||
+        IsParentSizeNearZero(contentConstraint, layoutWrapper)) {
         return SizeF {};
     }
     CHECK_NULL_RETURN(paragraphManager_, std::nullopt);
@@ -205,15 +207,16 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     return SizeF(maxWidth, heightFinal);
 }
 
-void TextLayoutAlgorithm::UpdateRelayoutShaderStyle(
-    const RefPtr<TextPattern>& pattern, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+void TextLayoutAlgorithm::UpdateRelayoutShaderStyle(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
     if (textStyle_.GetGradient().has_value() && !pattern->GetExternalParagraph()) {
-        auto gradient = textStyle_.GetGradient().value();
-        OHOS::Ace::GradientType type = gradient.GetType();
-        if (type == OHOS::Ace::GradientType::LINEAR) {
-            RelayoutShaderStyle(textLayoutProperty);
-        }
+        RelayoutShaderStyle(textLayoutProperty);
     }
 }
 
@@ -801,7 +804,12 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
             return false;
         }
     }
-    return ParagraphReLayout(contentConstraint);
+    auto reLayoutConstraint = contentConstraint;
+    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    if (widthPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        reLayoutConstraint.selfIdealSize.SetWidth(contentConstraint.parentIdealSize.Width().value_or(0.0f));
+    }
+    return ParagraphReLayout(reLayoutConstraint);
 }
 
 bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle,
@@ -883,6 +891,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
         if (!CreateParagraph(textStyle, content, layoutWrapper)) {
             return std::nullopt;
         }
+        textStyle.ResetReCreateAndReLayoutBitmap();
     } else {
         if (!AdaptMinTextSize(textStyle, content, contentConstraint, layoutWrapper)) {
             return std::nullopt;
@@ -901,6 +910,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     }
     paragraphWidth = std::ceil(paragraphWidth);
     paragraph->Layout(paragraphWidth);
+    UpdateRelayoutShaderStyle(layoutWrapper);
 
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     // calculate the content size
@@ -974,5 +984,20 @@ bool TextLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
     CHECK_NULL_RETURN(paragraphManager_, false);
     return (paragraphManager_->GetLineCount() > 1) || paragraphManager_->DidExceedMaxLines() ||
            GreatNotEqual(paragraphManager_->GetLongestLineWithIndent(), maxSize.Width());
+}
+
+bool TextLayoutAlgorithm::IsParentSizeNearZero(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    if (widthPolicy == LayoutCalPolicy::MATCH_PARENT &&
+        (!contentConstraint.parentIdealSize.Width() || NearZero(contentConstraint.parentIdealSize.Width().value()))) {
+        return true;
+    }
+    auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    if (heightPolicy == LayoutCalPolicy::MATCH_PARENT &&
+        (!contentConstraint.parentIdealSize.Height() || NearZero(contentConstraint.parentIdealSize.Height().value()))) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

@@ -108,9 +108,11 @@ public:
 
     virtual bool IsReverse() const
     {
-        if (GetAxis() != Axis::HORIZONTAL) {
-            return false;
-        }
+        return GetAxis() == Axis::HORIZONTAL && IsRTL();
+    };
+
+    bool IsRTL() const
+    {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
@@ -425,6 +427,14 @@ public:
     {
         return CanOverScroll(source) && GetEffectEdge() != EffectEdge::START;
     }
+    void SetCanStayOverScroll(bool canStayOverScroll)
+    {
+        canStayOverScroll_ = canStayOverScroll;
+    }
+    bool GetCanStayOverScroll() const
+    {
+        return canStayOverScroll_;
+    }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
     void UpdateMouseStart(float offset);
@@ -731,6 +741,9 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+    void SetIsOverScroll(bool val);
+    bool GetIsOverScroll() const;
+
     void SetScrollBarShape(const ScrollBarShape &shape)
     {
         if (shape == ScrollBarShape::ARC) {
@@ -860,6 +873,7 @@ protected:
     void FireObserverOnScrollStart();
     void FireObserverOnScrollStop();
     void FireObserverOnDidScroll(float finalOffset);
+    void FireObserverOnScrollerAreaChange(float finalOffset);
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
     void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
@@ -957,6 +971,7 @@ private:
     void ProcessNavBarReactOnEnd();
     void InitSpringOffsetProperty();
     void InitCurveOffsetProperty();
+    bool HandleCurveOffsetAnimateOverScroll();
     void OnAnimateFinish();
     void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
@@ -1102,6 +1117,7 @@ private:
     bool isScrollToSafeAreaHelper_ = true;
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;
+    bool canStayOverScroll_ = false;
 
     float startPercent_ = 0.0f;
     float endPercent_ = 1.0f;

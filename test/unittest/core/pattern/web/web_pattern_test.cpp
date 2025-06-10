@@ -291,7 +291,7 @@ HWTEST_F(WebPatternTest, OnOverviewUpdateTest008, TestSize.Level1)
     int y = 0;
     EXPECT_NE(g_webPattern->delegate_, nullptr);
     g_webPattern->OnPinchSmoothModeEnabledUpdate(true);
-    g_webPattern->OnWebDebuggingAccessEnabledUpdate(true);
+    g_webPattern->OnWebDebuggingAccessEnabledAndPortUpdate(std::make_tuple(true, 0));
     g_webPattern->OnTextZoomRatioUpdate(value);
     g_webPattern->OnDatabaseAccessEnabledUpdate(true);
     g_webPattern->OnFileFromUrlAccessEnabledUpdate(true);
@@ -311,7 +311,7 @@ HWTEST_F(WebPatternTest, OnOverviewUpdateTest008, TestSize.Level1)
     RefPtr<WebPattern> webPattern = AceType::MakeRefPtr<WebPattern>("test", controller);
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnPinchSmoothModeEnabledUpdate(true);
-    webPattern->OnWebDebuggingAccessEnabledUpdate(true);
+    webPattern->OnWebDebuggingAccessEnabledAndPortUpdate(std::make_tuple(true, 0));
     webPattern->OnTextZoomRatioUpdate(value);
     webPattern->OnDatabaseAccessEnabledUpdate(true);
     webPattern->OnFileFromUrlAccessEnabledUpdate(true);

@@ -33,7 +33,7 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -2007,5 +2007,34 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg_EndTaskKeyCorrectness, TestSiz
         std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
         EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0); // The task map should be empty after cleanup.
     }
+}
+
+/**
+ * @tc.name: StaticImageMakeCanvasImage001
+ * @tc.desc: Test MakeCanvasImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, StaticImageMakeCanvasImage001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_THUMBNAIL);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+
+    SizeF size(LENGTH_100, LENGTH_100);
+    auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
+    auto pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, true);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
 }
 } // namespace OHOS::Ace::NG

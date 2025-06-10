@@ -24,12 +24,14 @@
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
+#include "core/components_ng/pattern/scrollable/lazy_container.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT WaterFlowPattern : public ScrollablePattern {
-    DECLARE_ACE_TYPE(WaterFlowPattern, ScrollablePattern);
+class ACE_EXPORT WaterFlowPattern : public ScrollablePattern, public LinearLazyContainer {
+    DECLARE_ACE_TYPE(WaterFlowPattern, ScrollablePattern, LinearLazyContainer);
 
 public:
+    void OnAttachToFrameNode() override;
     bool UpdateCurrentOffset(float delta, int32_t source) override;
     bool IsScrollable() const override;
     bool IsAtTop() const override;
@@ -83,6 +85,16 @@ public:
     void AddFooter(const RefPtr<NG::UINode>& footer);
 
     void ResetLayoutInfo();
+
+    bool GetItemStart() const
+    {
+        return layoutInfo_->itemStart_;
+    }
+
+    bool GetItemEnd() const
+    {
+        return layoutInfo_->itemEnd_;
+    }
 
     int32_t GetBeginIndex() const
     {
@@ -207,6 +219,12 @@ public:
     }
 
     SizeF GetChildrenExpandedSize() override;
+
+    bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child) override
+    {
+        node->AddChild(child);
+        return true;
+    }
 
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override

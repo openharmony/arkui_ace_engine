@@ -62,5 +62,6 @@ struct MenuItemParam {
 };
 using OnCreateMenuCallback = std::function<std::vector<MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)>;
 using OnMenuItemClickCallback = std::function<bool(const NG::MenuItemParam&)>;
+using OnPrepareMenuCallback = std::function<std::vector<MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)>;
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

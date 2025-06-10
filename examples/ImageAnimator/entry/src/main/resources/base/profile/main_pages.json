@@ -1,0 +1,8 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/example/ImageAnimatorExample001",
+    "pages/example/ImageAnimatorExample002",
+    "pages/example/ImageAnimatorExample003"
+  ]
+}

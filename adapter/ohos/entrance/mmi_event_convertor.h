@@ -116,6 +116,12 @@ bool GetPointerEventToolType(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned);
 
 void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent);
+
+TouchType GetTouchTypeFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+AxisAction GetAxisActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+MouseAction GetMouseActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 } // namespace OHOS::Ace::Platform
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_MMI_EVENT_CONVERTOR_H

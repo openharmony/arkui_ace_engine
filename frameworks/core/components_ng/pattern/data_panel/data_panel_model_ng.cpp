@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
+#include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
@@ -64,6 +66,22 @@ void DataPanelModelNG::SetEffect(bool isCloseEffect)
 
 void DataPanelModelNG::SetValueColors(const std::vector<Gradient>& valueColors)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [valueColors, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        for (auto& gradient : const_cast<std::vector<Gradient>&>(valueColors)) {
+            gradient.ReloadResources();
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors, frameNode);
+    };
+    pattern->AddResObj("dataPanel.ValueColors", resObj, std::move(updateFunc));
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors);
 }
 
@@ -79,6 +97,21 @@ void DataPanelModelNG::SetStrokeWidth(const Dimension& strokeWidth)
 
 void DataPanelModelNG::SetShadowOption(const DataPanelShadow& shadowOption)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [shadowOption, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        DataPanelShadow& shadowValue = const_cast<DataPanelShadow&>(shadowOption);
+        shadowValue.ReloadResources();
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowValue, frameNode);
+    };
+    pattern->AddResObj("dataPanel.ShadowOption", resObj, std::move(updateFunc));
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowOption);
 }
 

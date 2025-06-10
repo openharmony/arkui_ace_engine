@@ -65,11 +65,13 @@ public:
         return MakeRefPtr<DatePickerColumnAccessibilityProperty>();
     }
 
-    void FlushCurrentOptions(
-        bool isDown = false, bool isUpateTextContentOnly = false, bool isUpdateAnimationProperties = false) override;
+    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false,
+        bool isUpdateAnimationProperties = false, bool isTossPlaying = false) override;
 
     void UpdateColumnChildPosition(double offsetY) override;
     bool CanMove(bool isDown) const override;
+    bool IsTossNeedToStop() override;
+    bool GetCanLoopFromLayoutProperty() const;
 
     const std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>>& GetOptions() const
     {

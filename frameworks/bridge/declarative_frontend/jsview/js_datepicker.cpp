@@ -497,10 +497,6 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        DatePickerModel::GetInstance()->ParseDisappearTextStyleResObj(textStyle);
-    }
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -511,10 +507,6 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
-    }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        DatePickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);
     }
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
@@ -535,10 +527,6 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
-    }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        DatePickerModel::GetInstance()->ParseSelectedTextStyleResObj(textStyle);
     }
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
     if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
@@ -1621,10 +1609,6 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyleTime");
     }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TimePickerModel::GetInstance()->ParseDisappearTextStyleResObj(textStyle);
-    }
     TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -1636,10 +1620,6 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyleTime");
     }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TimePickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);
-    }
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -1650,10 +1630,6 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
-    }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TimePickerModel::GetInstance()->ParseSelectedTextStyleResObj(textStyle);
     }
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
     if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
@@ -2049,7 +2025,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
         isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
     }
     settingData.isEnableHapticFeedback = isEnableHapticFeedback;
-    
+
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));

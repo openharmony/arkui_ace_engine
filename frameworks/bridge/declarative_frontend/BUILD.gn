@@ -225,12 +225,14 @@ template("declarative_js_engine") {
       "engine/functions/js_animator_function.cpp",
       "engine/functions/js_click_function.cpp",
       "engine/functions/js_clipboard_function.cpp",
+      "engine/functions/js_common_utils.cpp",
       "engine/functions/js_drag_function.cpp",
       "engine/functions/js_focus_function.cpp",
       "engine/functions/js_foreach_function.cpp",
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_touch_test_done_function.cpp",
       "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
@@ -429,6 +431,7 @@ template("declarative_js_engine") {
 
       # ark_theme
       "ark_theme/theme_apply/js_with_theme.cpp",
+      "ark_theme/theme_apply/js_theme.cpp",
 
       # Models implemenations for classic fw
       "jsview/models/action_sheet_model_impl.cpp",
@@ -790,12 +793,14 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_animator_function.cpp",
       "engine/functions/js_click_function.cpp",
       "engine/functions/js_clipboard_function.cpp",
+      "engine/functions/js_common_utils.cpp",
       "engine/functions/js_drag_function.cpp",
       "engine/functions/js_focus_function.cpp",
       "engine/functions/js_foreach_function.cpp",
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_touch_test_done_function.cpp",
       "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
@@ -990,6 +995,7 @@ template("declarative_js_engine_ng") {
 
       # ark_theme
       "ark_theme/theme_apply/js_with_theme.cpp",
+      "ark_theme/theme_apply/js_theme.cpp",
     ]
 
     if (!ace_engine_feature_wearable) {

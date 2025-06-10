@@ -90,4 +90,77 @@ HWTEST_F(StackNewTestNG, Example, TestSize.Level1)
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 45.0f);
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetY(), 120.0f);
 }
+/**
+ * @tc.name: StackIgnoreLayoutSafeArea001
+ * @tc.desc: test stack ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea001, TestSize.Level1)
+{
+    RefPtr<FrameNode> text;
+
+    auto frameNode = CreateStack([this, &text](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+
+        text = CreateText(u"Text", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+    });
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    text->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+    EXPECT_EQ(text->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0F));
+    EXPECT_EQ(text->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0F));
+}
+
+/**
+ * @tc.name: StackIgnoreLayoutSafeArea002
+ * @tc.desc: test stack ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea002, TestSize.Level1)
+{
+    RefPtr<FrameNode> stack1;
+    RefPtr<FrameNode> stack2;
+
+    auto frameNode = CreateStack([this, &stack1, &stack2](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+        stack1 = CreateStack([this, &stack2](StackModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(1.0f, DimensionUnit::PERCENT));
+            ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+            stack2 = CreateStack( [this](StackModelNG model) {});
+        });
+    });
+    auto childLayoutProperty = stack2->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateAlignment(Alignment::BOTTOM_RIGHT);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+    EXPECT_EQ(stack2->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f));
+    EXPECT_EQ(stack2->GetGeometryNode()->GetFrameOffset(), OffsetF(-10.0f, -10.0f));
+    EXPECT_EQ(stack1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f));
+    EXPECT_EQ(stack1->GetGeometryNode()->GetFrameOffset(), OffsetF(10.0f, 10.0f));
+}
 } // namespace OHOS::Ace::NG

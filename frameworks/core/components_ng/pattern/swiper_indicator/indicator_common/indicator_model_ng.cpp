@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<IndicatorController> IndicatorModelNG::Create()
@@ -102,6 +103,9 @@ void IndicatorModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParame
     auto pattern = indicatorNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateDotWithResourceObj(indicatorNode, swiperParameters);
+    }
 };
 
 void IndicatorModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& indicatorDigitalParameters)
@@ -111,6 +115,9 @@ void IndicatorModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& ind
     auto pattern = indicatorNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperDigitalParameters(indicatorDigitalParameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateDigitWithResourceObj(indicatorNode, indicatorDigitalParameters);
+    }
 };
 
 void IndicatorModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
@@ -155,6 +162,9 @@ void IndicatorModelNG::SetDigitIndicatorStyle(
     auto pattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperDigitalParameters(swiperDigitalParameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateDigitWithResourceObj(frameNode, swiperDigitalParameters);
+    }
 }
 
 void IndicatorModelNG::SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType)
@@ -168,6 +178,9 @@ void IndicatorModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperPa
     auto pattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateDotWithResourceObj(frameNode, swiperParameters);
+    }
 }
 
 void IndicatorModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange)
@@ -201,5 +214,90 @@ int32_t  IndicatorModelNG::GetCount(FrameNode* frameNode)
     int32_t  value = 0;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperIndicatorLayoutProperty, Count, value, frameNode, value);
     return value;
+}
+
+template<typename T>
+void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
+{
+    if constexpr (std::is_same_v<T, Color>) {
+        ResourceParseUtils::ParseResColor(resObj, result);
+    } else if constexpr (std::is_same_v<T, CalcDimension>) {
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+    }
+}
+
+#define UPDATE_DOT_VALUE(frameNode, name, resObj, resultType)                                                   \
+    do {                                                                                                        \
+        CHECK_NULL_VOID(frameNode);                                                                             \
+        auto pattern = frameNode->GetPattern<IndicatorPattern>();                                               \
+        CHECK_NULL_VOID(pattern);                                                                               \
+        if (resObj) {                                                                                           \
+            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {  \
+                auto node = weak.Upgrade();                                                                     \
+                CHECK_NULL_VOID(node);                                                                          \
+                auto pattern = node->GetPattern<IndicatorPattern>();                                            \
+                CHECK_NULL_VOID(pattern);                                                                       \
+                resultType result;                                                                              \
+                ParseType(resObj, result);                                                                      \
+                auto params = pattern->GetIndicatorParameters();                                                \
+                params->name = result;                                                                          \
+            };                                                                                                  \
+            pattern->AddResObj("indicator." #name, resObj, std::move(updateFunc));                              \
+        } else {                                                                                                \
+            pattern->RemoveResObj("indicator." #name);                                                          \
+        }                                                                                                       \
+    } while (false)
+
+#define UPDATE_DIGITAL_VALUE(frameNode, name, resObj, resultType)                                               \
+    do {                                                                                                        \
+        CHECK_NULL_VOID(frameNode);                                                                             \
+        auto pattern = frameNode->GetPattern<IndicatorPattern>();                                               \
+        CHECK_NULL_VOID(pattern);                                                                               \
+        if (resObj) {                                                                                           \
+            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {  \
+                auto node = weak.Upgrade();                                                                     \
+                CHECK_NULL_VOID(node);                                                                          \
+                auto pattern = node->GetPattern<IndicatorPattern>();                                            \
+                CHECK_NULL_VOID(pattern);                                                                       \
+                resultType result;                                                                              \
+                ParseType(resObj, result);                                                                      \
+                auto params = pattern->GetSwiperDigitalParameters();                                            \
+                params->name = result;                                                                          \
+            };                                                                                                  \
+            pattern->AddResObj("indicator." #name, resObj, std::move(updateFunc));                              \
+        } else {                                                                                                \
+            pattern->RemoveResObj("indicator." #name);                                                          \
+        }                                                                                                       \
+    } while (false)
+
+void IndicatorModelNG::CreateDotWithResourceObj(FrameNode* frameNode, const SwiperParameters& swiperParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto resObj = swiperParameters.resourceColorValueObject;
+    UPDATE_DOT_VALUE(frameNode, colorVal, resObj, Color);
+    resObj = swiperParameters.resourceSelectedColorValueObject;
+    UPDATE_DOT_VALUE(frameNode, selectedColorVal, resObj, Color);
+    resObj = swiperParameters.resourceItemWidthValueObject;
+    UPDATE_DOT_VALUE(frameNode, itemWidth, resObj, CalcDimension);
+    resObj = swiperParameters.resourceItemHeightValueObject;
+    UPDATE_DOT_VALUE(frameNode, itemHeight, resObj, CalcDimension);
+    resObj = swiperParameters.resourceSelectedItemWidthValueObject;
+    UPDATE_DOT_VALUE(frameNode, selectedItemWidth, resObj, CalcDimension);
+    resObj = swiperParameters.resourceSelectedItemHeightValueObject;
+    UPDATE_DOT_VALUE(frameNode, selectedItemHeight, resObj, CalcDimension);
+}
+
+void IndicatorModelNG::CreateDigitWithResourceObj(FrameNode* frameNode,
+    const SwiperDigitalParameters& swiperDigitalParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto resObj = swiperDigitalParameters.resourceFontColorValueObject;
+    UPDATE_DIGITAL_VALUE(frameNode, fontColor, resObj, Color);
+    resObj = swiperDigitalParameters.resourceFontSizeValueObject;
+    UPDATE_DIGITAL_VALUE(frameNode, fontSize, resObj, CalcDimension);
+    resObj = swiperDigitalParameters.resourceSelectedFontColorValueObject;
+    UPDATE_DIGITAL_VALUE(frameNode, selectedFontColor, resObj, Color);
+    resObj = swiperDigitalParameters.resourceSelectedFontSizeValueObject;
+    UPDATE_DIGITAL_VALUE(frameNode, selectedFontSize, resObj, CalcDimension);
 }
 } // namespace OHOS::Ace::NG

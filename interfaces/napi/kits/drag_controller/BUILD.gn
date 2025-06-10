@@ -87,11 +87,9 @@ template("napi_dragcontroller_static") {
         config.enable_drag_framework) {
       external_deps += [
         "device_status:devicestatus_client",
+        "graphic_2d:librender_service_base",
         "graphic_2d:librender_service_client",
       ]
-      if (ohos_indep_compiler_enable) {
-        external_deps += [ "graphic_2d:librender_service_base" ]
-      }
     }
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {

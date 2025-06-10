@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/property/measure_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -314,6 +315,48 @@ HWTEST_F(DatePickerTestTwoNg, CreateDatePicker002, TestSize.Level1)
 }
 
 /**
+* @tc.name: ParseDirectionKey001
+* @tc.desc: Test DatePickerTest ParseDirectionKey
+* @tc.type: FUNC
+*/
+HWTEST_F(DatePickerTestTwoNg, ParseDirectionKey001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    auto totalOptionCount = columnPattern_->GetOptionCount();
+
+    KeyCode code = KeyCode::KEY_UNKNOWN;
+
+    code = KeyCode::KEY_DPAD_UP;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(columnPattern_, code, totalOptionCount, 0);
+    EXPECT_TRUE(columnPattern_->stopHaptic_);
+
+    code = KeyCode::KEY_DPAD_DOWN;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(columnPattern_, code, totalOptionCount, 0);
+    EXPECT_TRUE(columnPattern_->stopHaptic_);
+
+    code = KeyCode::KEY_DPAD_LEFT;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(columnPattern_, code, totalOptionCount, 0);
+    EXPECT_FALSE(columnPattern_->stopHaptic_);
+
+    code = KeyCode::KEY_DPAD_RIGHT;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(columnPattern_, code, totalOptionCount, 0);
+    EXPECT_FALSE(columnPattern_->stopHaptic_);
+}
+
+/**
  * @tc.name: DatePickerCanLoopTest001
  * @tc.desc: Test SetCanLoop.
  * @tc.type: FUNC
@@ -432,7 +475,6 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR+2));
     options[columnNode_] = pickerDates;
     columnPattern_->options_ = options;
-    columnPattern_->SetCurrentIndex(2);
     columnPattern_->OnModifyDone();
 
     /**
@@ -444,6 +486,7 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     columnPattern_->InitPanEvent(gestureHub);
+    columnPattern_->SetCurrentIndex(2);
     EXPECT_EQ(columnPattern_->GetCurrentIndex(), 2);
 
     auto actionEndTask = columnPattern_->panEvent_->actionEnd_;
@@ -451,9 +494,10 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     info.SetSourceTool(SourceTool::FINGER);
     info.SetInputEventType(InputEventType::AXIS);
     actionEndTask(info);
-    Point globalPoint(1.0f, 1.0f);
-    info.SetGlobalPoint(globalPoint);
     info.SetOffsetX(1.0f);
+    
+    Point globalPoint1 = Point(1.0f, 1.0f);
+    info.SetGlobalPoint(globalPoint1);
     info.SetOffsetY(200.0f);
     columnPattern_->yLast_ = 0.0f;
     columnPattern_->pressed_ = true;
@@ -461,15 +505,15 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     EXPECT_FLOAT_EQ(columnPattern_->yLast_, 201.0f);
     EXPECT_EQ(columnPattern_->GetCurrentIndex(), 1);
     
-    info.SetOffsetY(400.0f);
-    columnPattern_->yLast_ = 0.0f;
+    Point globalPoint2 = Point(1.0f, 201.0f);
+    info.SetGlobalPoint(globalPoint2);
     columnPattern_->pressed_ = true;
     columnPattern_->HandleDragMove(info);
     EXPECT_FLOAT_EQ(columnPattern_->yLast_, 401.0f);
     EXPECT_EQ(columnPattern_->GetCurrentIndex(), 0);
 
-    info.SetOffsetY(600.0f);
-    columnPattern_->yLast_ = 0.0f;
+    Point globalPoint3 = Point(1.0f, 401.0f);
+    info.SetGlobalPoint(globalPoint3);
     columnPattern_->pressed_ = true;
     columnPattern_->HandleDragMove(info);
     EXPECT_FLOAT_EQ(columnPattern_->yLast_, 601.0f);
@@ -530,5 +574,94 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest006, TestSize.Level1)
     */
     auto rowLayoutProperty2 = AceType::DynamicCast<DataPickerRowLayoutProperty>(rowLayoutProperty->Clone());
     ASSERT_FALSE(rowLayoutProperty2->GetCanLoopValue(true));
+}
+
+/**
+ * @tc.name: DatePickerCanLoopTest007
+ * @tc.desc: Test SetCanLoop with framenode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest007, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    DatePickerModelNG::SetCanLoop(frameNode, false);
+    EXPECT_FALSE(pickerProperty->GetCanLoopValue());
+}
+
+/**
+ * @tc.name: DatePickerCanLoopTest008
+ * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create columnNode and default canLoop is true.
+    */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(columnPattern_->GetCanLoopFromLayoutProperty());
+
+    /**
+    * @tc.steps: step2. Set canLoop value to false.
+    */
+    DatePickerModelNG::SetCanLoop(frameNode, false);
+
+    /**
+    * @tc.steps: step3. GetCanLoopFromLayoutProperty.
+    */
+    EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutProperty());
+}
+
+/**
+ * @tc.name: DatePickerFocusRectWithPadding
+ * @tc.desc: Test datePicker focus rect normal when padding is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerFocusRectWithPadding, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pickerPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get default focus rect.
+     */
+    RoundRect rect;
+    pickerPattern->GetInnerFocusPaintRect(rect);
+    EXPECT_EQ(rect.GetRect().GetX(), 3.5f);
+
+    /**
+     * @tc.steps: step3. Set padding.
+     */
+    PaddingPropertyF testPadding;
+    testPadding.left = 10.0f;
+    testPadding.right = 10.0f;
+    testPadding.top = 10.0f;
+    testPadding.bottom = 10.0f;
+    auto host = pickerPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->UpdatePaddingWithBorder(testPadding);
+    pickerPattern->GetInnerFocusPaintRect(rect);
+    EXPECT_EQ(rect.GetRect().GetX(), 13.5f);
 }
 } // namespace OHOS::Ace::NG

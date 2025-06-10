@@ -78,6 +78,10 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         }
     }
     tabsLayoutProperty->UpdateIndexSetByUser(index);
+    if (SystemProperties::ConfigChangePerform()) {
+        tabsLayoutProperty->ResetDividerColorSetByUser();
+        tabsLayoutProperty->ResetBarBackgroundColorSetByUser();
+    }
 }
 
 RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode>& swiperNode,
@@ -520,6 +524,16 @@ void TabsModelNG::SetDivider(const TabsItemDivider& divider)
     }
 }
 
+void TabsModelNG::SetDividerColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, DividerColorSetByUser, isByUser);
+}
+
+void TabsModelNG::SetDividerColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, DividerColorSetByUser, isByUser, frameNode);
+}
+
 void TabsModelNG::SetBarBackgroundColor(const Color& backgroundColor)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -529,6 +543,11 @@ void TabsModelNG::SetBarBackgroundColor(const Color& backgroundColor)
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
+}
+
+void TabsModelNG::SetBarBackgroundColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColorSetByUser, isByUser);
 }
 
 RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty()
@@ -831,6 +850,11 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
+}
+
+void TabsModelNG::SetBarBackgroundColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColorSetByUser, isByUser, frameNode);
 }
 
 void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption)
@@ -1143,6 +1167,17 @@ void TabsModelNG::SetTabsController(FrameNode* frameNode, const RefPtr<SwiperCon
     InitTabsNode(tabsNode, tabsController);
 }
 
+void TabsModelNG::SetBarModifier(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& onApply)
+{
+    CHECK_NULL_VOID(onApply);
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    onApply(tabBarNode);
+}
+
 void TabsModelNG::SetBarBackgroundEffect(const EffectOption& effectOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1294,6 +1329,12 @@ void TabsModelNG::CreateWithResourceObj(TabJsResType jsResourceType, const RefPt
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<TabsPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string key = "tabs." + std::to_string(static_cast<int32_t>(jsResourceType));
+        pattern->RemoveResObj(key);
+    }
     switch (jsResourceType) {
         case TabJsResType::BAR_BACKGROUND_COLOR:
             HandleBarBackgroundColor(frameNode, resObj);

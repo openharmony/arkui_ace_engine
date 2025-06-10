@@ -52,6 +52,9 @@ constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
 constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engine.bundle.name";
 constexpr char IS_OPINC_ENABLE[] = "persist.ddgr.opinctype";
+constexpr char LAYOUT_BREAKPOINT[] = "const.arkui.layoutbreakpoint";
+constexpr char LAYOUT_BREAKPOINT_DEFAULT[] = "320,600,1000,1440;0.8,1.2;";
+enum class LayoutBreakPointPart : uint32_t { WIDTH_PART = 0, HEIGHT_PART };
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -462,6 +465,81 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
+bool IsAscending(const std::vector<double>& nums)
+{
+    for (size_t i = 1; i < nums.size(); ++i) {
+        if (nums[i] < nums[i - 1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ParseBreakPoints(const std::string& input, const size_t expectedCount, std::vector<double>& breakpointsVec)
+{
+    std::vector<std::string> numStrVec;
+    StringUtils::StringSplitter(input, ',', numStrVec);
+    if (numStrVec.size() != expectedCount) {
+        return false;
+    }
+    for (const std::string& numStr : numStrVec) {
+        std::string s = StringUtils::TrimStr(numStr);
+        if (!StringUtils::IsFloat(s)) {
+            return false;
+        }
+        double num = StringUtils::StringToDouble(s);
+        if (LessOrEqual(num, 0)) {
+            return false;
+        }
+        breakpointsVec.push_back(num);
+    }
+    return IsAscending(breakpointsVec);
+}
+
+bool ParseWidthBreakPoints(const std::string& input, std::vector<double>& breakpointsVec)
+{
+    // 4 means that there are exactly 4 layout break points in the horizontal direction
+    return ParseBreakPoints(input, 4, breakpointsVec);
+}
+
+bool ParseHeightBreakPoints(const std::string& input, std::vector<double>& breakpointsVec)
+{
+    // 2 means that there are exactly 2 layout break points in the vertical direction
+    return ParseBreakPoints(input, 2, breakpointsVec);
+}
+
+void GetLayoutBreakpoints(WidthLayoutBreakPoint& widthLayoutBreakpoints,
+    HeightLayoutBreakPoint& heightLayoutBreakpoints)
+{
+    auto param = StringUtils::TrimStr(system::GetParameter(LAYOUT_BREAKPOINT, LAYOUT_BREAKPOINT_DEFAULT));
+    if (param == LAYOUT_BREAKPOINT_DEFAULT) {
+        return;
+    }
+
+    std::vector<std::string> parts;
+    StringUtils::StringSplitter(param, ';', parts);
+    // 2 means that "const.arkui.layoutbreakpoint" must have exactly two parts
+    if (parts.size() != 2) {
+        return;
+    }
+    bool parseRet = false;
+    std::vector<double> widthLayoutBreakpointsVec;
+    if (ParseWidthBreakPoints(parts[static_cast<uint32_t>(LayoutBreakPointPart::WIDTH_PART)],
+        widthLayoutBreakpointsVec)) {
+        widthLayoutBreakpoints = WidthLayoutBreakPoint(widthLayoutBreakpointsVec[0],
+        widthLayoutBreakpointsVec[1], widthLayoutBreakpointsVec[2], widthLayoutBreakpointsVec[3]);
+        parseRet = true;
+    }
+
+    std::vector<double> heightLayoutBreakpointsVec;
+    if (parseRet && ParseHeightBreakPoints(parts[static_cast<uint32_t>(LayoutBreakPointPart::HEIGHT_PART)],
+        heightLayoutBreakpointsVec)) {
+        heightLayoutBreakpoints = HeightLayoutBreakPoint(heightLayoutBreakpointsVec[0], heightLayoutBreakpointsVec[1]);
+    } else {
+        widthLayoutBreakpoints = WidthLayoutBreakPoint();
+    }
+}
+
 std::string InitSysBrand()
 {
     const char* res = ::GetBrand();
@@ -611,6 +689,9 @@ int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
+WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
+HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
+bool SystemProperties::syncLoadEnabled_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -773,12 +854,14 @@ void SystemProperties::InitDeviceInfo(
     formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
     formSharedImageCacheThreshold_ =
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
+    syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
         screenShape_ = ScreenShape::NOT_ROUND;
     }
     InitDeviceTypeBySystemProperty();
+    GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
@@ -906,6 +989,11 @@ bool SystemProperties::GetResourceDecoupling()
 bool SystemProperties::ConfigChangePerform()
 {
     return configChangePerform_;
+}
+
+void SystemProperties::SetConfigChangePerform()
+{
+    configChangePerform_ = true;
 }
 
 bool SystemProperties::GetTitleStyleEnabled()

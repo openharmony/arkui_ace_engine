@@ -22,7 +22,7 @@ void ImageUtils::PostTask(
 {
     auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
     if (!taskExecutor) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "taskExecutor is null when try post task to %{public}s", taskTypeName);
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "taskExecutor is null : %{public}s", taskTypeName);
         return;
     }
     taskExecutor->PostTask(
@@ -39,7 +39,7 @@ void ImageUtils::PostDelayedTask(std::function<void()>&& task, TaskExecutor::Tas
 {
     auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
     if (!taskExecutor) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "taskExecutor is null when try post task to %{public}s", taskTypeName);
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "taskExecutor is null : %{public}s", taskTypeName);
         return;
     }
     taskExecutor->PostDelayedTask(

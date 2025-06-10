@@ -27,6 +27,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -46,6 +47,7 @@ namespace {
     ViewAbstractModelNG viewAbstractModelNG;
     RefPtr<MockTaskExecutor> MOCK_TASK_EXECUTOR;
     int32_t flag = 0;
+    const std::string TEST_TEXT_HINT = "testTextHint";
 }; // namespace
 
 class ViewAbstractModelTestNg : public testing::Test {
@@ -1460,6 +1462,92 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg023, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetBackgroundOptions001
+ * @tc.desc: Test the background options
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetBackgroundOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+
+    /**
+     * @tc.steps: step2. init theme, pipeline and container.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto containerId = pipelineContext->GetInstanceId();
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
+
+    /**
+     * @tc.steps: step3. init background build func and alignment.
+     * @tc.expected: background function is successfully set.
+     */
+    auto mainFrameNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    Alignment alignment = Alignment::CENTER;
+    auto buildFunc = [mainFrameNode]() { flag++; };
+    viewAbstractModelNG.SetBackground(std::move(buildFunc));
+    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_NE(targetNode->builderFunc_, nullptr);
+
+    /**
+     * @tc.steps: step4. update background alignment.
+     * @tc.expected: background alignment is successfully set.
+     */
+    auto renderContext = targetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    alignment = Alignment::TOP_CENTER;
+    viewAbstractModelNG.SetBackgroundAlign(alignment);
+    auto backgroundAlign = renderContext->GetBackgroundAlign().value_or(Alignment::BOTTOM_CENTER);
+    EXPECT_EQ(backgroundAlign, alignment);
+
+    /**
+     * @tc.steps: step5. update background color.
+     * @tc.expected: background alignment is successfully set.
+     */
+    Color color = Color::BLUE;
+    viewAbstractModelNG.SetCustomBackgroundColor(color);
+    auto customBackgroundColor = renderContext->GetCustomBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(customBackgroundColor.GetValue(), color.GetValue());
+
+    /**
+     * @tc.steps: step6. update background flags.
+     * @tc.expected: background flags is successfully set.
+     */
+    viewAbstractModelNG.SetIsTransitionBackground(true);
+    EXPECT_TRUE(renderContext->GetIsTransitionBackground().value_or(false));
+    viewAbstractModelNG.SetIsBuilderBackground(true);
+    EXPECT_TRUE(renderContext->GetBuilderBackgroundFlag().value_or(false));
+
+    /**
+     * @tc.steps: step7. update background ignoresLayoutSafeAreaEdges.
+     * @tc.expected: background ignoresLayoutSafeAreaEdges is successfully set.
+     */
+    viewAbstractModelNG.SetBackgroundIgnoresLayoutSafeAreaEdges(NG::LAYOUT_SAFE_AREA_EDGE_ALL);
+    auto layoutProp = targetNode->GetLayoutProperty();
+    ASSERT_NE(layoutProp, nullptr);
+    EXPECT_EQ(layoutProp->GetBackgroundIgnoresLayoutSafeAreaEdges(), NG::LAYOUT_SAFE_AREA_EDGE_ALL);
+}
+
+/**
  * @tc.name: SetAccessibilitySelected001
  * @tc.desc: Test the SetAccessibilitySelected
  * @tc.type: FUNC
@@ -1662,5 +1750,158 @@ HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityRole002, TestSize.Level1)
     resetValue = false;
     viewAbstractModelNG.SetAccessibilityRole(&frameNode, role, resetValue);
     EXPECT_EQ(frameNode.accessibilityProperty_->accessibilityCustomRole_, role);
+}
+
+/**
+ * @tc.name: SetAccessibilityTextHint001
+ * @tc.desc: Test the SetAccessibilityTextHint
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityTextHint001, TestSize.Level1)
+{
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityTextHint(TEST_TEXT_HINT);
+
+    viewAbstractModelNG.SetAccessibilityTextHint(&frameNode, "");
+    EXPECT_EQ(accessibilityProperty->textTypeHint_, "");
+
+    viewAbstractModelNG.SetAccessibilityTextHint(&frameNode, TEST_TEXT_HINT);
+    EXPECT_EQ(accessibilityProperty->textTypeHint_, TEST_TEXT_HINT);
+}
+
+/**
+ * @tc.name: SetToolbarBuilder
+ * @tc.desc: Test the SetToolbarBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetToolbarBuilder001, TestSize.Level1)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPattern>());
+    rootNode->AddChild(containerModalNode, 0);
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    viewAbstractModelNG.SetToolbarBuilder(nullptr);
+    bool ret = mainNode->removeToolbarItemCallbacks_.size() > 0;
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetToolbarBuilder
+ * @tc.desc: Test the SetToolbarBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetToolbarBuilder002, TestSize.Level1)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPattern>());
+    rootNode->AddChild(containerModalNode, 0);
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto* stack = ViewStackProcessor::GetInstance();
+        CHECK_NULL_RETURN(stack, nullptr);
+        auto frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::TOOLBAR_ETS_TAG, 11, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        stack->Push(frameNode);
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(
+            V2::TOOLBARITEM_ETS_TAG, 22, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        CHECK_NULL_RETURN(childFrameNode, nullptr);
+        stack->Push(childFrameNode);
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+    viewAbstractModelNG.SetToolbarBuilder(std::move(builderFunc));
+    bool ret = mainNode->removeToolbarItemCallbacks_.size() > 0;
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: BindContextMenuTest2
+ * @tc.desc: Test the BindContextMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, BindContextMenuTest2, TestSize.Level1)
+{
+    std::function<void()> buildFunc = nullptr;
+    std::function<void()> previewBuildFunc = nullptr;
+    MenuParam menuParam;
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
+    menuParam.anchorPosition = {10, 20};
+    menuParam.isAnchorPosition = true;
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    EXPECT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam, previewBuildFunc);
+    EXPECT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+}
+
+/**
+ * @tc.name: BindMenuTest
+ * @tc.desc: Test the BindMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, BindMenuTest, TestSize.Level1)
+{
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+    menuParam.setShow = true;
+    menuParam.anchorPosition = {10, 20};
+    menuParam.isAnchorPosition = true;
+    menuParam.isShow = true;
+    menuParam.isShowInSubWindow = true;
+    buildFunc = []() { flag++; };
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    EXPECT_NE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode(), nullptr);
+
+    params.push_back(OptionParam());
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    EXPECT_NE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode(), nullptr);
 }
 } // namespace OHOS::Ace::NG

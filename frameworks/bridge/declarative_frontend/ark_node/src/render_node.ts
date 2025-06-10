@@ -183,6 +183,11 @@ declare enum Color {
   Transparent,
 }
 
+declare enum ColorSpace {
+  SRGB = 0,
+  DISPLAY_P3 = 1,
+}
+
 declare type ResourceColor = Color | number | string | Resource;
 
 const MAX_CHANNEL_VALUE = 0xFF;
@@ -196,6 +201,7 @@ class ColorMetrics {
   private blue_: number;
   private alpha_: number;
   private resourceId_: number;
+  private colorSpace_: ColorSpace;
   private static clamp(value: number): number {
     return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
@@ -220,6 +226,15 @@ class ColorMetrics {
   }
   static rgba(red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
     return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
+  }
+  static colorWithSpace(colorSpace: ColorSpace, red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    let redInt = Math.round(red * MAX_CHANNEL_VALUE);
+    let greenInt = Math.round(green * MAX_CHANNEL_VALUE);
+    let blueInt = Math.round(blue * MAX_CHANNEL_VALUE);
+    let alphaInt = Math.round(alpha * MAX_CHANNEL_VALUE);
+    const colorMetrics = new ColorMetrics(redInt, greenInt, blueInt, alphaInt);
+    colorMetrics.setColorSpace(colorSpace);
+    return colorMetrics;
   }
 
   private static rgbOrRGBA(format: string): ColorMetrics {
@@ -346,6 +361,12 @@ class ColorMetrics {
   }
   getResourceId(): number {
     return this.resourceId_;
+  }
+  setColorSpace(colorSpace: ColorSpace): void {
+    this.colorSpace_ = colorSpace;
+  }
+  getColorSpace(): ColorSpace {
+    return this.colorSpace_;
   }
 }
 

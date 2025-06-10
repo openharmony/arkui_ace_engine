@@ -1260,6 +1260,49 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg031, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogModelTestNg032
+ * @tc.desc: Test DialogLayoutAlgorithm.SetSubWindowHotarea/GetMaskRect function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg032, TestSize.Level1)
+{
+    auto layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    DialogProperties props;
+    props.isShowInSubWindow = true;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
+    auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogProp);
+ 
+    auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
+    auto selfSize = SizeF(CHILD_SIZE_2, CHILD_SIZE_2);
+ 
+    layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
+    auto maskRect = layoutAlgorithm->GetMaskRect(dialog);
+    EXPECT_FALSE(maskRect.has_value());
+ 
+    auto offset = DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP));
+    layoutAlgorithm->isUIExtensionSubWindow_ = true;
+    layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
+    maskRect = layoutAlgorithm->GetMaskRect(dialog);
+    EXPECT_EQ(maskRect.value().GetOffset(), offset);
+    EXPECT_EQ(maskRect.value().GetWidth(), CalcDimension(1, DimensionUnit::PERCENT));
+    EXPECT_EQ(maskRect.value().GetHeight(), CalcDimension(1, DimensionUnit::PERCENT));
+ 
+    layoutAlgorithm->expandDisplay_ = true;
+    layoutAlgorithm->hostWindowRect_ = RectF(OffsetF(), SizeF(CHILD_SIZE, CHILD_SIZE));
+    layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
+    maskRect = layoutAlgorithm->GetMaskRect(dialog);
+    offset = DimensionOffset(CalcDimension(0, DimensionUnit::PX), CalcDimension(0, DimensionUnit::PX));
+    EXPECT_EQ(maskRect.value().GetOffset(), offset);
+    EXPECT_EQ(maskRect.value().GetWidth(), Dimension(CHILD_SIZE, DimensionUnit::PX));
+    EXPECT_EQ(maskRect.value().GetHeight(), Dimension(CHILD_SIZE, DimensionUnit::PX));
+}
+
+/**
  * @tc.name: DialogModelTestNg033
  * @tc.desc: Test DialogLayoutAlgorithm::UpdateChildMaxSizeHeight function
  * @tc.type: FUNC
@@ -1768,6 +1811,8 @@ HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode001, TestSize.Level1)
      */
     auto result = controllerModel.SetOpenDialogWithNode(props, nullptr);
     EXPECT_EQ(result, nullptr);
+    EXPECT_TRUE(props.isShowInSubWindow);
+    EXPECT_TRUE(props.isModal);
 }
 
 /**

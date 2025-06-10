@@ -1998,4 +1998,54 @@ HWTEST_F(FormPatternTest, FormPatternTest_054, TestSize.Level1)
     EXPECT_NE(res, nullptr);
     EXPECT_EQ(res->GetTag(), "Column");
 }
+
+/**
+ * @tc.name: FormPatternTest_055
+ * @tc.desc: LoadFormSkeleton
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_055, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    pattern->frameNode_ = formNode;
+    EXPECT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    pattern->isUnTrust_ = false;
+    pattern->cardInfo_.dimension = 3;
+    pattern->LoadFormSkeleton(true);
+    int32_t num = host->GetTotalChildCount();
+    EXPECT_EQ(num, 1);
+
+    pattern->isUnTrust_ = true;
+    pattern->LoadFormSkeleton(true);
+    num = host->GetTotalChildCount();
+    EXPECT_EQ(num, 1);
+}
+
+/**
+ * @tc.name: GetRectRelativeToWindow001
+ * @tc.desc: GetRectRelativeToWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, GetRectRelativeToWindow001, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    auto renderContext = formNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->instanceId_ = 1;
+    formNode->AttachContext(AceType::RawPtr(pipeline), false);
+
+    AccessibilityParentRectInfo parentRectInfo;
+    pattern->GetRectRelativeToWindow(parentRectInfo);
+    auto rectInfoDegree = parentRectInfo.rotateTransform.rotateDegree;
+    EXPECT_EQ(rectInfoDegree, static_cast<int32_t>(Rotation::ROTATION_0));
+}
 } // namespace OHOS::Ace::NG

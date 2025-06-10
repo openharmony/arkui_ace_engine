@@ -922,6 +922,24 @@ class TextShaderStyleModifier extends ModifierWithKey<{
   }
 }
 
+class TextVerticalAlignModifier extends ModifierWithKey<TextVerticalAlign> {
+  constructor(value: TextVerticalAlign) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textVerticalAlignIdentity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTextVerticalAlign(node);
+    }
+    else {
+      getUINativeModule().text.setTextVerticalAlign(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1154,6 +1172,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     repeating?: boolean;
   }): this {
     modifierWithKey(this._modifiersWithKeys, TextShaderStyleModifier.identity, TextShaderStyleModifier, value);
+    return this;
+  }
+  textVerticalAlign(value: TextVerticalAlign): this {
+    modifierWithKey(this._modifiersWithKeys, TextVerticalAlignModifier.identity, TextVerticalAlignModifier, value);
     return this;
   }
 }

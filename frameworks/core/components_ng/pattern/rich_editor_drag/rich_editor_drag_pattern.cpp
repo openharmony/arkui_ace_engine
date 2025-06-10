@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostNode,
@@ -47,6 +48,10 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     }
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     CHECK_NULL_RETURN(dragPattern, nullptr);
+    auto hub = dragNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_RETURN(hub, nullptr);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
     auto data = CalculateTextDragData(hostPattern, dragNode);
     dragPattern->Initialize(data);
     dragPattern->SetLastLineHeight(data.lastLineHeight_);

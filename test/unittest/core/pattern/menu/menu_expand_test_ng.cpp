@@ -897,24 +897,17 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg021, TestSize.Level1)
     auto menuNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(2, TEXT_TAG, MenuType::MENU));
     ASSERT_NE(menuNode, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::MENU_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuPattern>(0, "menu", MenuType::MENU));
-    ASSERT_NE(frameNode, nullptr);
-    menuNode->MountToParent(frameNode);
     MenuParam menuParam;
-    MenuPattern menuPattern(4, "menu", MenuType::MENU);
-    auto scrollNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(0));
-    auto duplicateMenuNode = menuPattern.DuplicateMenuNode(frameNode, menuParam);
-    ASSERT_NE(duplicateMenuNode, nullptr);
-    EXPECT_EQ(duplicateMenuNode->GetChildByIndex(0), scrollNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    auto duplicateMenuNode = menuPattern->DuplicateMenuNode(menuNode, menuParam);
+    EXPECT_NE(duplicateMenuNode, nullptr);
     menuNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(5, TEXT_TAG, MenuType::MENU));
-    menuNode->MountToParent(frameNode);
-    auto menuLayoutProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
     menuLayoutProperty->UpdateBorderRadius(borderRadius);
-    menuPattern.DuplicateMenuNode(frameNode, menuParam);
+    menuPattern->DuplicateMenuNode(menuNode, menuParam);
     EXPECT_TRUE(menuLayoutProperty->GetBorderRadius().has_value());
 }
 } // namespace OHOS::Ace::NG

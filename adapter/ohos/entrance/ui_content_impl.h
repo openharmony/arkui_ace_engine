@@ -45,10 +45,20 @@ namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 }
 
+namespace OHOS::Rosen {
+class RSSyncTransactionController;
+class RSSyncTransactionHandler;
+} // namespace OHOS::Rosen
+
 namespace OHOS::Ace {
+struct StorageWrapper {
+    std::optional<napi_value> napiStorage_;
+    std::optional<ani_object> aniStorage_;
+};
+
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
-    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
+    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType);
     UIContentImpl(OHOS::AppExecFwk::Ability* ability);
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
@@ -82,8 +92,10 @@ public:
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
     // restore
-    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
-        napi_value storage, ContentInfoType type) override;
+    UIContentErrorCode Restore(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type) override;
+    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, ani_object storage,
+        ContentInfoType type = ContentInfoType::CONTINUATION) override;
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
@@ -158,6 +170,7 @@ public:
 
     // ArkTS Form
     void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void PreInitializeFormAni(OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
     void RunFormPage() override;
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
     void UpdateFormData(const std::string& data) override;
@@ -247,6 +260,7 @@ public:
         const std::vector<std::string>& assetBasePaths) override;
 
     napi_value GetUINapiContext() override;
+    ani_object GetUIAniContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
 
     void UpdateResource() override;
@@ -401,19 +415,7 @@ public:
 
     bool ConfigCustomWindowMask(bool enable) override;
 
-    void SetUIExtensionImeShow(const Rect& keyboardRect, int32_t instanceId);
-
-    bool UIExtensionKeyboardAvoid(const RefPtr<PipelineBase>& pipelineContext, int32_t instanceId,
-        const Rect keyboardRect, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info);
-
     bool LaterAvoid(const Rect& keyboardRect, double positionY, double height);
-
-    void SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext, float height);
-
-    void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceId,
-        const RefPtr<PipelineBase>& pipelineContext, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
-        const RefPtr<Platform::AceContainer>& container,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction);
 
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 
@@ -440,21 +442,40 @@ public:
     void ExecKeyFrameCachedAnimateAction();
 
     void KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context);
-    bool KeyFrameActionPolicy(const ViewportConfig& config,
-        OHOS::Rosen::WindowSizeChangeReason reason,
+    bool KeyFrameActionPolicy(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
 
     // intent framework
     void SetIntentParam(const std::string& intentInfoSerialized,
         const std::function<void()>&& loadPageCallback, bool isColdStart) override;
+    std::string GetTopNavDestinationInfo(bool onlyFullScreen = false, bool needParam = true) override;
+    void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) override;
+    UIContentErrorCode InitializeWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
+
+    UIContentErrorCode InitializeWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& url, ani_object storage, uint32_t focusWindowID) override;
+
+    UIContentErrorCode InitializeWithAniStorage(
+        OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage) override;
+
+    UIContentErrorCode InitializeWithAniStorage(OHOS::Rosen::Window* window,
+        const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage,
+        const std::string& contentName) override;
+
+    UIContentErrorCode InitializeByNameWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& name, ani_object storage) override;
+
 private:
+    void RunIntentPageIfNeeded();
+    void RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart);
     UIContentErrorCode InitializeInner(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId = 0);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, uint32_t focusWindowId = 0);
     UIContentErrorCode CommonInitializeForm(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper StorageWrapper);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     void ProcessDestructCallbacks();
@@ -484,6 +505,11 @@ private:
     void SetDeviceProperties();
     RefPtr<Platform::AceContainer> CreateContainer(
         std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info, FrontendType frontendType, bool useNewPipe);
+    void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
+        std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
+        const RefPtr<NG::PipelineContext>& context);
+    void CloseSyncTransaction(OHOS::Rosen::RSSyncTransactionController* transactionController,
+        std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -552,6 +578,9 @@ private:
 
     std::function<void()> loadPageCallback_;
     std::string intentInfoSerialized_;
+    std::string restoreNavDestinationInfo_;
+
+    VMType vmType_ = VMType::NORMAL;
 };
 
 } // namespace OHOS::Ace

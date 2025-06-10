@@ -238,6 +238,7 @@ private:
     bool isUserInitiatedBgColor_ = false;
     bool isModifierInitiatedColor_ = false;
     bool isModifierInitiatedBgColor_ = false;
+    double reportLastValue_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };
 } // namespace OHOS::Ace::NG

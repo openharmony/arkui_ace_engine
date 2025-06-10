@@ -305,7 +305,13 @@ HWTEST_F(ScrollableUtilsTest, GetMoveOffset001, TestSize.Level1)
      * @tc.expected: return 0.0f;
      */
     auto parentFrameNode = FrameNode::CreateFrameNode("ScrollableContainer", -1, AceType::MakeRefPtr<Pattern>());
-    auto notMove = ScrollableUtils::GetMoveOffset(parentFrameNode, nullptr, true, 1.0f, 2.0f);
+    MoveOffsetParam param {
+        true,
+        1.0f,
+        2.0f,
+        false
+    };
+    auto notMove = ScrollableUtils::GetMoveOffset(parentFrameNode, nullptr, param);
     EXPECT_EQ(notMove, 0.0f);
 }
 
@@ -324,7 +330,13 @@ HWTEST_F(ScrollableUtilsTest, GetMoveOffset002, TestSize.Level1)
     parentFrameNode->geometryNode_->SetFrameSize({ 1000, 100 });
     auto curFrameNode = FrameNode::CreateFrameNode("ScrollableContainer", -1, AceType::MakeRefPtr<Pattern>());
     curFrameNode->geometryNode_->SetFrameSize({ 1000, 100 });
-    auto notMove = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, true, 1.0f, 2.0f);
+    MoveOffsetParam param {
+        true,
+        1.0f,
+        2.0f,
+        false
+    };
+    auto notMove = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
     EXPECT_EQ(notMove, 0.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -1,0 +1,42 @@
+{
+  "rootElement": {
+    "nodeId": 1203,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1204,
+        "kind": "Navigator",
+        "children": [
+          {
+            "nodeId": 1205,
+            "kind": "Text",
+            "children": [],
+            "setTextOptions_content": "Navigator test 1"
+          }
+        ],
+        "active_value": 0,
+        "type_value": 0,
+        "target_value": "/target/attribute/page 1"
+      },
+      {
+        "nodeId": 1206,
+        "kind": "Navigator",
+        "children": [
+          {
+            "nodeId": 1207,
+            "kind": "Text",
+            "children": [],
+            "setTextOptions_content": "Navigator test 2"
+          }
+        ],
+        "setNavigatorOptions0_value": {
+          "target": "/target/param/page2",
+          "type": 1
+        },
+        "active_value": 0,
+        "type_value": 0,
+        "target_value": "/target/attribute/page"
+      }
+    ]
+  }
+}

@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
 #include <tuple>
-#include "base/log/log_wrapper.h"
 #include "core/animation/chain_animation.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -53,8 +54,8 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public ScrollablePattern {
-    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
+class ListPattern : public ScrollablePattern, public LinearLazyContainer {
+    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern, LinearLazyContainer);
 
 public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
@@ -91,6 +92,10 @@ public:
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
     DisplayMode GetDefaultScrollBarDisplayMode() const override;
+
+    int32_t GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode) override;
+
+    void ScrollToFocusNodeIndex(int32_t index) override;
 
     int32_t GetStartIndex() const
     {
@@ -150,6 +155,7 @@ public:
     OverScrollOffset GetOutBoundaryOffset(float delta, bool useChainDelta = true) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
+    bool GetIsInViewInGroup(int32_t groupIndex, int32_t index);
     virtual void HandleScrollBarOutBoundary();
 
     FocusPattern GetFocusPattern() const override
@@ -160,7 +166,7 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
 
     bool LayoutItemInGroupForFocus(int32_t indexInList, int32_t nextIndexInGroup, int32_t curIndexInGroup,
-        ListItemGroupPara listItemGroupPara, int32_t maxListItemIndex);
+        const ListItemGroupPara& listItemGroupPara, int32_t maxListItemIndex);
 
     ScrollOffsetAbility GetScrollOffsetAbility() override;
 
@@ -234,6 +240,8 @@ public:
     // chain animation
     void SetChainAnimation();
     void SetChainAnimationOptions(const ChainAnimationOptions& options);
+    void SetFocusWrapMode(FocusWrapMode focusWrapMode);
+    FocusWrapMode GetFocusWrapMode() const;
     float FlushChainAnimation(float dragOffset);
     void ProcessDragStart(float startPosition);
     void ProcessDragUpdate(float dragOffset, int32_t source);
@@ -387,6 +395,50 @@ public:
         return itemStartIndex_;
     }
 
+    void ResetFocusIndex()
+    {
+        focusIndex_.reset();
+    }
+
+    void SetFocusIndex(int32_t index)
+    {
+        focusIndex_ = index;
+    }
+
+    void ResetGroupFocusIndex()
+    {
+        focusGroupIndex_.reset();
+    }
+
+    void SetGroupFocusIndex(int32_t index)
+    {
+        focusGroupIndex_ = index;
+    }
+
+    void ResetGroupIndexChanged()
+    {
+        groupIndexChanged_ = false;
+    }
+
+    void SetGroupIndexChanged(bool groupIndexChanged)
+    {
+        groupIndexChanged_ = groupIndexChanged;
+    }
+    void ResetGroupIndexInView()
+    {
+        groupIndexInView_ = true;
+    }
+    
+    void SetFocusIndexChangedByListItemGroup(bool focusIndexChangedByListItemGroup)
+    {
+        focusIndexChangedByListItemGroup_ = focusIndexChangedByListItemGroup;
+    }
+
+    void SetGroupIndexInView(bool groupIndexInView)
+    {
+        groupIndexInView_ = groupIndexInView;
+    }
+
     void SetIsNeedDividerAnimation(bool isNeedDividerAnimation)
     {
         isNeedDividerAnimation_ = isNeedDividerAnimation;
@@ -403,6 +455,11 @@ public:
     }
 
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+
+    void SetDraggingIndex(int32_t index)
+    {
+        draggingIndex_ = index;
+    }
 
 protected:
     void OnModifyDone() override;
@@ -459,12 +516,16 @@ protected:
     RefPtr<ChainAnimation> chainAnimation_;
 
     RefPtr<Scrollable> scrollable_;
+    KeyEvent keyEvent_;
 
     int32_t itemStartIndex_ = 0;
     float scrollSnapVelocity_ = 0.0f;
     bool isStackFromEnd_ = true;
+    FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
+    void UpdateOffsetHelper(float lastDelta);
+
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -523,7 +584,7 @@ private:
     int32_t GetNextMoveStepForMultiLanes(int32_t curIndex, FocusStep focuseStep, bool isVertical, int32_t& nextIndex);
     WeakPtr<FocusHub> GetNextFocusNodeInList(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     bool IsListItemGroupByIndex(int32_t index);
-    WeakPtr<FocusHub> FindChildFocusNodeByIndex(int32_t tarMainIndex, const FocusStep& step);
+    WeakPtr<FocusHub> FindChildFocusNodeByIndex(int32_t tarMainIndex, const FocusStep& step, int32_t curFocusIndex);
     void DetermineSingleLaneStep(
         FocusStep step, bool isVertical, int32_t curIndex, int32_t& moveStep, int32_t& nextIndex);
     void DetermineMultiLaneStep(
@@ -552,6 +613,17 @@ private:
     void ReportOnItemListEvent(const std::string& event);
     void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
+    bool ScrollToLastFocusIndex(KeyCode keyCode);
+    bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
+    bool IsInViewport(int32_t index) const;
+    void FireFocus();
+    void FireFocusInListItemGroup();
+    void ProcessFocusEvent(const KeyEvent& event, bool indexChanged);
+    void RequestFocusForItem();
+    bool needTriggerFocus_ = false;
+    bool triggerFocus_ = false;
+    std::optional<int32_t> focusIndex_;
+    std::optional<int32_t> focusGroupIndex_;
     float prevStartOffset_ = 0.f;
     float prevEndOffset_ = 0.f;
     float currentOffset_ = 0.0f;
@@ -561,6 +633,9 @@ private:
     bool crossMatchChild_ = false;
     bool snapTrigOnScrollStart_ = false;
     bool snapTrigByScrollBar_ = false;
+    bool groupIndexChanged_ = false;
+    bool groupIndexInView_ = true;
+    bool focusIndexChangedByListItemGroup_ = false;
 
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndexInGroup_;
@@ -603,6 +678,9 @@ private:
     ListItemIndex endInfo_ = {-1, -1, -1};
     bool isNeedDividerAnimation_ = true;
     int32_t repeatDifference_ = 0;
+
+    bool prevMeasureBreak_ = false;
+    int32_t draggingIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

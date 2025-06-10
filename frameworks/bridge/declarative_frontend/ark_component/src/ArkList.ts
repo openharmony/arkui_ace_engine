@@ -639,6 +639,19 @@ class ListInitialScrollerModifier extends ModifierWithKey<number> {
   }
 }
 
+class ListFocusWrapModeModifier extends ModifierWithKey<FocusWrapMode> {
+  constructor(value: FocusWrapMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listFocusWrapMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetFocusWrapMode(node);
+    } else {
+      getUINativeModule().list.setFocusWrapMode(node, this.value);
+    }
+  }
+}
 interface ListParam {
   initialIndex?: number;
   space?: number | string;
@@ -836,6 +849,10 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   }
   childrenMainSize(value: ChildrenMainSize): this {
     modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
+    return this;
+  }
+  focusWrapMode(value: FocusWrapMode): this {
+    modifierWithKey(this._modifiersWithKeys, ListFocusWrapModeModifier.identity, ListFocusWrapModeModifier, value);
     return this;
   }
 }

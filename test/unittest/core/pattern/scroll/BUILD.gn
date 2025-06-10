@@ -22,6 +22,7 @@ ace_unittest("scroll_test_ng") {
     "scroll_dump_test_ng.cpp",
     "scroll_effect_test_ng.cpp",
     "scroll_event_test_ng.cpp",
+    "scroll_inner_bar_test_ng.cpp",
     "scroll_inner_event_test_ng.cpp",
     "scroll_inner_layout_test_ng.cpp",
     "scroll_layout_test_ng.cpp",

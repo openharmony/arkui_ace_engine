@@ -245,7 +245,6 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     if (!isFirstHandle && IsSingleHandle()) {
         overlayManager->SetIsHandleLineShow(true);
     }
-    pattern->UpdateAIMenuOptions();
     pattern->CalculateHandleOffsetAndShowOverlay();
     overlayManager->MarkInfoChange((isFirstHandle ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
                             DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_AI_MENU_ITEM);
@@ -531,6 +530,9 @@ bool RichEditorSelectOverlay::IsSingleHandleShow()
 
 void RichEditorSelectOverlay::UpdateMenuOffset()
 {
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAIMenuOptions();
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_SELECT_AREA | DIRTY_ALL_MENU_ITEM);

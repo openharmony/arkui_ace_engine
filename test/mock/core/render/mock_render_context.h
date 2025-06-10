@@ -43,6 +43,7 @@ public:
     MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
     MOCK_METHOD0(ResetContentClip, void());
     MOCK_METHOD1(SetTransparentLayer, void(bool));
+    MOCK_METHOD1(SetClipToBounds, void(bool));
 
     void SetVisible(bool visible) override
     {

@@ -62,8 +62,8 @@ public:
         return MakeRefPtr<TimePickerColumnAccessibilityProperty>();
     }
 
-    void FlushCurrentOptions(
-        bool isDown = false, bool isUpateTextContentOnly = false, bool isUpdateAnimationProperties = false) override;
+    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false,
+        bool isUpdateAnimationProperties = false, bool isTossPlaying = false) override;
     void UpdateColumnChildPosition(double offsetY) override;
     bool CanMove(bool isDown) const override;
     void ScrollTimeColumn();
@@ -105,7 +105,8 @@ public:
     void UpdateScrollDelta(double delta);
 
     void InitHapticController(const RefPtr<FrameNode>& host) override;
-    bool IsStartEndTimeDefined() override;
+    bool IsStartEndTimeDefined();
+    bool IsTossNeedToStop() override;
 
     uint32_t GetEnterIndex() const
     {

@@ -611,6 +611,20 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
+
+    virtual RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index)
+    {
+        return nullptr;
+    }
+
+    /**
+     * @brief To override FrameNode::GetTotalChildCount in Arkoala
+     */
+    virtual int32_t GetTotalChildCount() const
+    {
+        return -1;
+    }
+
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -672,6 +686,15 @@ public:
     virtual void AddInnerOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
 
+    virtual ScrollWindowAdapter* GetScrollWindowAdapter()
+    {
+        return nullptr;
+    }
+    virtual ScrollWindowAdapter* GetOrCreateScrollWindowAdapter()
+    {
+        return nullptr;
+    }
+
     virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
 
     virtual bool OnThemeScopeUpdate(int32_t themeScopeId)
@@ -720,6 +743,30 @@ public:
     };
 
     virtual bool BorderUnoccupied() const
+    {
+        return false;
+    }
+
+    void UnRegisterResource(const std::string& key);
+
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    {
+        if (resourceMgr_ == nullptr) {
+            resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+        }
+        auto&& propUpdateFunc = [weakptr = AceType::WeakClaim(this)](
+                                    const std::string& key, const RefPtr<PropertyValueBase>& valueBase) {
+            auto pattern = weakptr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdatePropertyImpl(key, valueBase);
+        };
+        resourceMgr_->RegisterResource<T>(std::move(propUpdateFunc), key, resObj, value);
+    }
+
+    virtual void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> valueBase) {};
+
+    virtual bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child)
     {
         return false;
     }

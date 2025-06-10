@@ -52,7 +52,6 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -250,49 +249,24 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
             PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
-            if (dialogProperties_.isUECHostMask) {
-                NG::OverlayMaskManager::GetInstance().SendDialogMaskEventToUEA(host, UECHostMaskAction::CLICK);
+            auto overlayManager = GetOverlayManager(nullptr);
+            CHECK_NULL_VOID(overlayManager);
+            if (this->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE))) {
+                return;
+            } else if (this->ShouldDismiss()) {
+                overlayManager->SetDismissDialogId(host->GetId());
+                DialogManager::GetInstance().SetDismissDialogInfo(host->GetId(), host->GetTag());
+                auto currentId = Container::CurrentId();
+                this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE), currentId);
+                TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss, currentId: %{public}d", currentId);
                 return;
             }
 
-            CloseDialogByEvent(DialogDismissReason::DIALOG_TOUCH_OUTSIDE);
+            PopDialog(-1);
+            if (overlayManager->isMaskNode(GetHost()->GetId())) {
+                overlayManager->PopModalDialog(GetHost()->GetId());
+            }
         }
-    }
-}
-
-void DialogPattern::CloseDialogByEvent(DialogDismissReason reason)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto overlayManager = GetOverlayManager(nullptr);
-    CHECK_NULL_VOID(overlayManager);
-
-    if (CallDismissInNDK(static_cast<int32_t>(reason))) {
-        return;
-    }
-
-    if (ShouldDismiss()) {
-        overlayManager->SetDismissDialogId(host->GetId());
-        DialogManager::GetInstance().SetDismissDialogInfo(host->GetId(), host->GetTag());
-        auto currentId = Container::CurrentId();
-        CallOnWillDismiss(static_cast<int32_t>(reason), currentId);
-        TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss, currentId: %{public}d", currentId);
-        return;
-    }
-
-    CloseDialog();
-}
-
-void DialogPattern::CloseDialog()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto overlayManager = GetOverlayManager(nullptr);
-    CHECK_NULL_VOID(overlayManager);
-
-    PopDialog(-1);
-    if (overlayManager->isMaskNode(host->GetId()) && !dialogProperties_.isUECHostMask) {
-        overlayManager->PopModalDialog(host->GetId());
     }
 }
 
@@ -911,6 +885,8 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         BindCloseCallBack(hub, -1);
     }
 
+    RegisterButtonOnKeyEvent(params, buttonNode, isCancel ? -1 : index);
+
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
@@ -932,6 +908,30 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetHeight())));
     }
     return buttonNode;
+}
+
+void DialogPattern::RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx)
+{
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto onKeyEvent = [weak = WeakClaim(RawPtr(host)), params, buttonIdx](const KeyEvent& event) -> bool {
+        if ((event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER) &&
+            event.action == KeyAction::DOWN) {
+            auto dialog = weak.Upgrade();
+            CHECK_NULL_RETURN(dialog, false);
+            if (params.action) {
+                auto actionFunc = params.action->GetGestureEventFunc();
+                GestureEvent info;
+                actionFunc(info);
+            }
+            dialog->GetPattern<DialogPattern>()->PopDialog(buttonIdx);
+            return true;
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
 void DialogPattern::UpdateDialogButtonProperty(
@@ -1678,6 +1678,11 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
 
 void DialogPattern::UpdateTitleTextFontScale()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    double maxAppFontScale = pipelineContext->GetMaxAppFontScale();
     CHECK_NULL_VOID(titleContainer_);
     auto scale = dialogTheme_->GetMinFontScaleForElderly();
     if (isSuitableForElderly_) {
@@ -1691,9 +1696,9 @@ void DialogPattern::UpdateTitleTextFontScale()
             auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
             CHECK_NULL_VOID(titleProp);
             if (notAdapationAging_) {
-                titleProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+                titleProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
             } else {
-                titleProp->UpdateMaxFontScale(scale);
+                titleProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
                 titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
             }
         }
@@ -1703,9 +1708,9 @@ void DialogPattern::UpdateTitleTextFontScale()
         auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
         CHECK_NULL_VOID(titleProp);
         if (notAdapationAging_) {
-            titleProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+            titleProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
         } else {
-            titleProp->UpdateMaxFontScale(scale);
+            titleProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
             titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
         }
     }
@@ -1718,6 +1723,9 @@ void DialogPattern::UpdateTextFontScale()
     auto scale = dialogTheme_->GetMinFontScaleForElderly();
     auto contentProp =
         AceType::DynamicCast<TextLayoutProperty>(contentNodeMap_[DialogContentNode::MESSAGE]->GetLayoutProperty());
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    double maxAppFontScale = context->GetMaxAppFontScale();
     CHECK_NULL_VOID(contentProp);
     if (isSuitableForElderly_) {
         scale = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE
@@ -1725,9 +1733,9 @@ void DialogPattern::UpdateTextFontScale()
                     : dialogTheme_->GetContentMaxFontScale();
     }
     if (notAdapationAging_) {
-        contentProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+        contentProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
     } else {
-        contentProp->UpdateMaxFontScale(scale);
+        contentProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
     }
     CHECK_NULL_VOID(buttonContainer_);
     MarginProperty margin;
@@ -1748,9 +1756,9 @@ void DialogPattern::UpdateTextFontScale()
             auto textProp = AceType::DynamicCast<TextLayoutProperty>(buttonTextNode->GetLayoutProperty());
             CHECK_NULL_VOID(textProp);
             if (notAdapationAging_) {
-                textProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+                textProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
             } else {
-                textProp->UpdateMaxFontScale(scale);
+                textProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
             }
             if (isSuitableForElderly_) {
                 textProp->UpdateMargin(margin);
@@ -1945,7 +1953,15 @@ void DialogPattern::UpdateHostWindowRect()
         return;
     }
 
-    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+    auto needUpdate = true;
+    if (SystemProperties::IsSuperFoldDisplayDevice()) {
+        auto container = AceEngine::Get().GetContainer(currentId);
+        auto isHalfFold = container && container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
+        needUpdate = isHalfFold && subwindow && subwindow->IsSameDisplayWithParentWindow() && dialogProperties_.isModal;
+    }
+ 
+    if (needUpdate) {
         InitHostWindowRect();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -2268,7 +2284,6 @@ void DialogPattern::OnAttachToMainTree()
     AddFollowParentWindowLayoutNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    MountUECMask();
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(parentNode);
     if (parentNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -2292,16 +2307,6 @@ void DialogPattern::OnDetachFromMainTree()
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->RemoveDialogFromMapForcefully(host);
-}
-
-void DialogPattern::MountUECMask()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    if (isUIExtensionSubWindow_ && dialogProperties_.isModal) {
-        SubwindowManager::GetInstance()->ShowDialogMaskNG(host);
-    }
 }
 
 RefPtr<OverlayManager> DialogPattern::GetOverlayManager(const RefPtr<FrameNode>& host)

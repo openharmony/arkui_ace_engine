@@ -223,6 +223,7 @@
       OHOS::Ace::NG::PipelineContext::*;
       OHOS::Ace::NG::OverlayManager::*;
       OHOS::Ace::PipelineBase::PostAsyncEvent*;
+      "OHOS::Ace::PipelineBase::GetFrontend() const";
       OHOS::Ace::NG::UINode::*;
       OHOS::Ace::NG::PagePattern::*;
       OHOS::Ace::NG::StageManager::*;
@@ -269,6 +270,7 @@
       OHOS::Ace::PipelineBase::GetSystemFont*;
       OHOS::Ace::PipelineBase::GetUIFontConfig*;
       OHOS::Ace::PipelineBase::GetImageCache*;
+      OHOS::Ace::PipelineBase::ConvertPxToVp*;
       OHOS::Ace::ImageCache::ClearCacheImgObj*;
       OHOS::Ace::NG::ViewAbstract::*;
       OHOS::Ace::NG::Inspector::*;
@@ -281,6 +283,10 @@
       OHOS::Ace::NG::RichEditorAbstractSpanResult::*;
       OHOS::Ace::NG::RichEditorInsertValue::*;
       OHOS::Ace::NG::RichEditorDeleteValue::*;
+      OHOS::Ace::NG::LocationButtonModelNG::*;
+      OHOS::Ace::NG::SecurityComponentModelNG::*;
+      OHOS::Ace::NG::PasteButtonModelNG::*;
+      OHOS::Ace::NG::SaveButtonModelNG::*;
       OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::TabController::*;
       OHOS::Ace::ParseFontFeatureSettings*;
@@ -362,6 +368,10 @@
       vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
       vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
       vtable?for?OHOS::Ace::NG::TimePickerModelNG;
+      vtable?for?OHOS::Ace::NG::LocationButtonModelNG;
+      vtable?for?OHOS::Ace::NG::SaveButtonModelNG;
+      vtable?for?OHOS::Ace::NG::PasteButtonModelNG;
+      vtable?for?OHOS::Ace::NG::SecurityComponentModelNG;
       vtable?for?OHOS::Ace::NG::Pattern;
 
       VTT?for?OHOS::Ace::Animator;
@@ -555,6 +565,10 @@
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
       OHOS::Ace::NG::PanRecognizer::GetDistance*;
       OHOS::Ace::NG::NodeRenderStatusMonitor::*;
+      "OHOS::Ace::RoundToMaxPrecision(double)";
+      OHOS::Ace::NG::SwiperPattern::IsAtStart*;
+      OHOS::Ace::NG::SwiperPattern::IsAtEnd*;
+      OHOS::Ace::PipelineBase::GetImageCache*;
     };
   local:
     *;

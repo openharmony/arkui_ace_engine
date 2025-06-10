@@ -68,6 +68,9 @@ constexpr int CHILD_SIZE_Y = 2;
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float POSITION_OFFSET = 100.0f;
+constexpr float FONT_MAX_SIZE_SCALE = 2.0f;
+constexpr float FONT_SIZE_SCALE_TEST1 = 1.75f;
+constexpr float FONT_SIZE_SCALE_TEST2 = 3.20f;
 constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE = true;
 constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_FALSE = false;
 constexpr bool BUBBLE_PROPERTY_SHOW = true;
@@ -2274,6 +2277,10 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText, TestSize.Level1)
     /**
      * @tc.steps: step1. set value to popupParam.
      */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(FONT_SIZE_SCALE_TEST1);
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
@@ -2313,6 +2320,59 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText, TestSize.Level1)
     auto popupTheme = pattern->GetPopupTheme();
     auto color = popupTheme->GetFontPrimaryColor();
     EXPECT_EQ(layoutProperty->GetTextColor().value(), color);
+    EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), FONT_SIZE_SCALE_TEST1);
+}
+
+/**
+ * @tc.name: UpdateBubbleText01
+ * @tc.desc: Test UpdateBubbleText function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, UpdateBubbleText01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set value to popupParam.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(FONT_SIZE_SCALE_TEST2);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    ButtonProperties buttonProperties { true, "Button" };
+    buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    popupParam->SetPrimaryButtonProperties(buttonProperties);
+    popupParam->SetSecondaryButtonProperties(buttonProperties);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    /**
+     * @tc.steps: step2. create bubble and get popupNode.
+     * @tc.expected: Check the popupNode were created successfully.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto pattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. test UpdateBubbleText.
+     */
+    pattern->UpdateBubbleText();
+    auto columnNode = popupNode->GetFirstChild();
+    ASSERT_NE(columnNode, nullptr);
+    auto combinedChild = columnNode->GetFirstChild();
+    ASSERT_NE(combinedChild, nullptr);
+    auto scrollNode = combinedChild->GetFirstChild();
+    ASSERT_NE(scrollNode, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(scrollNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), FONT_MAX_SIZE_SCALE);
 }
 
 /**
@@ -2625,6 +2685,7 @@ HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
     popupParam->SetArrowHeight(arrowHeight);
     popupParam->SetArrowWidth(arrowWidth);
     popupParam->SetShadow(shadow);
+    popupParam->SetAnchorType(TipsAnchorType::CURSOR);
 
     /**
      * @tc.steps: step2. create BubbleNode with position offset
@@ -2649,6 +2710,7 @@ HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
     EXPECT_EQ(property->GetRadius().value(), radius);
     EXPECT_EQ(property->GetArrowHeight().value(), arrowHeight);
     EXPECT_EQ(property->GetArrowWidth().value(), arrowWidth);
+    EXPECT_EQ(property->GetShowAtAnchor().value(), TipsAnchorType::CURSOR);
 }
 
 /**

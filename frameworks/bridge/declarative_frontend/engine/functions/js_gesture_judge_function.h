@@ -26,6 +26,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
 namespace OHOS::Ace::Framework {
+using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
 class JsGestureJudgeFunction : public JsFunction {
     DECLARE_ACE_TYPE(JsGestureJudgeFunction, JsFunction)
 
@@ -53,6 +54,10 @@ private:
     JSRef<JSObject> CreateGestureEventObject(const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName typeName);
     JSRef<JSObject> CreateFingerInfosObject(const std::shared_ptr<BaseGestureEvent>& info, JSRef<JSObject>& obj);
     void ParsePanGestureEvent(JSRef<JSObject>& obj, const std::shared_ptr<BaseGestureEvent>& info);
+    static TouchRecognizerMap CreateTouchRecognizerMap(
+        const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current);
+    static void CollectTouchEventTarget(TouchRecognizerMap& dict, std::list<RefPtr<TouchEventTarget>>& targets,
+        NG::FrameNode* borderNode, int32_t fingerId);
 };
 } // namespace OHOS::Ace::Framework
 

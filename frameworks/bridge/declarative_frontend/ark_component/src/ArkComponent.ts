@@ -944,12 +944,12 @@ class RadialGradientModifier extends ModifierWithKey<{ center: Array<any>; radiu
 class SweepGradientModifier extends ModifierWithKey<{
   center: Array<any>; start?: number |
   string; end?: number | string; rotation?: number | string;
-  colors: Array<any>; repeating?: boolean;
+  colors: Array<any>; metricsColors?: Array<any>; repeating?: boolean;
 }> {
   constructor(value: {
     center: Array<any>;
     start?: number | string; end?: number | string;
-    rotation?: number | string; colors: Array<any>; repeating?: boolean;
+    rotation?: number | string; colors: Array<any>; metricsColors?: Array<any>; repeating?: boolean;
   }) {
     super(value);
   }
@@ -961,7 +961,7 @@ class SweepGradientModifier extends ModifierWithKey<{
       getUINativeModule().common.setSweepGradient(node,
         this.value.center,
         this.value.start, this.value.end, this.value.rotation,
-        this.value.colors, this.value.repeating);
+        this.value.colors, this.value.metricsColors, this.value.repeating);
     }
   }
   checkObjectDiff(): boolean {
@@ -970,6 +970,7 @@ class SweepGradientModifier extends ModifierWithKey<{
       (this.stageValue.end === this.value.end) &&
       (this.stageValue.rotation === this.value.rotation) &&
       (this.stageValue.colors === this.value.colors) &&
+      (this.stageValue.metricsColors === this.value.metricsColors) &&
       (this.stageValue.repeating === this.value.repeating));
   }
 }
@@ -1553,8 +1554,8 @@ class ScaleModifier extends ModifierWithKey<ScaleOptions> {
   }
 }
 
-class RotateModifier extends ModifierWithKey<RotateOptions> {
-  constructor(value: RotateOptions) {
+class RotateModifier extends ModifierWithKey<RotateOptions | RotateAngleOptions> {
+  constructor(value: RotateOptions | RotateAngleOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('rotate');
@@ -1562,12 +1563,35 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
     if (reset) {
       getUINativeModule().common.resetRotate(node);
     } else {
-      getUINativeModule().common.setRotate(node, this.value.x, this.value.y, this.value.z, this.value.angle,
-        this.value.centerX, this.value.centerY, this.value.centerY, this.value.perspective);
+      if ('angle' in this.value) {
+        getUINativeModule().common.setRotate(
+          node,
+          this.value.x,
+          this.value.y,
+          this.value.z,
+          this.value.angle,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      } else {
+        getUINativeModule().common.setRotateAngle(
+          node,
+          this.value.angleX,
+          this.value.angleY,
+          this.value.angleZ,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      }
     }
   }
   checkObjectDiff(): boolean {
-    return !(
+    if ('angle' in this.value) {
+      return !(
       this.value.x === this.stageValue.x &&
       this.value.y === this.stageValue.y &&
       this.value.z === this.stageValue.z &&
@@ -1576,7 +1600,18 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
       this.value.centerY === this.stageValue.centerY &&
       this.value.centerZ === this.stageValue.centerZ &&
       this.value.perspective === this.stageValue.perspective
-    );
+      );
+    } else {
+      return !(
+        this.value.angleX === this.stageValue.angleX &&
+        this.value.angleY === this.stageValue.angleY &&
+        this.value.angleZ === this.stageValue.angleZ &&
+        this.value.centerX === (this.stageValue.centerX) &&
+        this.value.centerY === (this.stageValue.centerY) &&
+        this.value.centerZ === (this.stageValue.centerZ) &&
+        this.value.perspective === this.stageValue.perspective
+      );
+    }
   }
 }
 
@@ -1899,9 +1934,8 @@ class DragLeaveModifier extends ModifierWithKey<DragLeaveCallback> {
   }
 }
 
-declare type DropCallback = (event?: DragEvent, extraParams?: string) => void;
-class DropModifier extends ModifierWithKey<DropCallback> {
-  constructor(value: DropCallback) {
+class DropModifier extends ModifierWithKey<ArkOnDrop> {
+  constructor(value: ArkOnDrop) {
     super(value);
   }
   static identity: Symbol = Symbol('onDrop');
@@ -1909,7 +1943,7 @@ class DropModifier extends ModifierWithKey<DropCallback> {
     if (reset) {
       getUINativeModule().common.resetOnDrop(node);
     } else {
-      getUINativeModule().common.setOnDrop(node, this.value);
+      getUINativeModule().common.setOnDrop(node, this.value.event, this.value.disableDataPrefetch);
     }
   }
 }
@@ -2589,6 +2623,48 @@ class AccessibilityHoverTransparentModifier extends ModifierWithKey<Accessibilit
   }
 }
 
+class AccessibilityTextHintModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityTextHint');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityTextHint(node);
+    } else {
+      getUINativeModule().common.setAccessibilityTextHint(node, this.value);
+    }
+  }
+}
+
+class AccessibilityCheckedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityChecked');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityChecked(node);
+    } else {
+      getUINativeModule().common.setAccessibilityChecked(node, this.value);
+    }
+  }
+}
+
+class AccessibilitySelectedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilitySelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilitySelected(node);
+    } else {
+      getUINativeModule().common.setAccessibilitySelected(node, this.value);
+    }
+  }
+}
+
 class AllowDropModifier extends ModifierWithKey<Array<UniformDataType>> {
   constructor(value: Array<UniformDataType>) {
     super(value);
@@ -3213,7 +3289,8 @@ class BindTipsModifier extends ModifierWithKey<ArkBindTipsOptions> {
         this.value.options?.enableArrow,
         this.value.options?.arrowPointPosition,
         this.value.options?.arrowWidth,
-        this.value.options?.arrowHeight
+        this.value.options?.arrowHeight,
+        this.value.options?.showAtAnchor
       );
     }
   }
@@ -3251,6 +3328,10 @@ class BindTipsModifier extends ModifierWithKey<ArkBindTipsOptions> {
       !isBaseOrResourceEqual(
         this.stageValue.options.arrowHeight,
         this.value.options.arrowHeight
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.showAtAnchor,
+        this.value.options.showAtAnchor
       )
     );
   }
@@ -5126,8 +5207,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  onDrop(event: (event?: DragEvent, extraParams?: string) => void): this {
-    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, event);
+  onDrop(event: (event?: DragEvent, extraParams?: string) => void, dropOptions: DropOptions): this {
+    let arkOnDrop = new ArkOnDrop();
+    if (typeof event === 'function') {
+      arkOnDrop.event = event;
+    }
+    if (typeof dropOptions === 'object') {
+      arkOnDrop.disableDataPrefetch = dropOptions.disableDataPrefetch;
+    }
+    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, arkOnDrop);
     return this;
   }
 
@@ -5208,6 +5296,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     end?: number | string;
     rotation?: number | string;
     colors: Array<any>;
+    metricsColors?: Array<any>; 
     repeating?: boolean;
   }): this {
     modifierWithKey(this._modifiersWithKeys, SweepGradientModifier.identity, SweepGradientModifier, value);
@@ -5488,6 +5577,37 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, value);
     } else {
       modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityTextHint(value: string): this {
+    if (typeof value === 'string') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextHintModifier.identity, AccessibilityTextHintModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextHintModifier.identity, AccessibilityTextHintModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityVirtualNode(builder: CustomBuilder): this {
+    throw new Error('Method not implemented.');
+  }
+
+  accessibilityChecked(isCheck: boolean): this {
+    if (typeof isCheck === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityCheckedModifier.identity, AccessibilityCheckedModifier, isCheck);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityCheckedModifier.identity, AccessibilityCheckedModifier, undefined);
+    }
+    return this;
+  }
+  
+  accessibilitySelected(isCheck: boolean): this {
+    if (typeof isCheck === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilitySelectedModifier.identity, AccessibilitySelectedModifier, isCheck);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilitySelectedModifier.identity, AccessibilitySelectedModifier, undefined);
     }
     return this;
   }

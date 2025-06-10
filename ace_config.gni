@@ -246,6 +246,13 @@ if (defined(global_parts_info)) {
   }
 }
 
+if (defined(global_parts_info) &&
+  defined(global_parts_info.resourceschedule_ffrt) && current_os == "ohos") {
+  ffrt_support = true
+} else {
+  ffrt_support = false
+}
+
 if (defined(global_parts_info.multimedia_camera_framework)) {
   enable_camera_framework = true
   ace_common_defines += [ "CAMERA_FRAMEWORK_EXISTS" ]
@@ -267,7 +274,7 @@ if (defined(global_parts_info.multimedia_audio_framework)) {
   enable_audio_framework = false
 }
 
-if (defined(global_parts_info.thirdparty_qrcodegen)) {
+if (defined(global_parts_info.thirdparty_qrcodegen) || is_arkui_x) {
   qrcodegen_support = true
   ace_common_defines += [ "QRCODEGEN_SUPPORT" ]
 } else {

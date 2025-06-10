@@ -161,7 +161,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
         AddScrollLayoutInfo();
     }
 
-    if (LessNotEqual(scrollableDistance_, oldScrollableDistance)) {
+    if (LessNotEqual(scrollableDistance_, oldScrollableDistance) && !GetCanStayOverScroll()) {
         CheckRestartSpring(true);
     }
     auto axis = GetAxis();
@@ -438,6 +438,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
     FireObserverOnDidScroll(scroll);
+    FireObserverOnScrollerAreaChange(scroll);
     auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnDidScrollEvent();
@@ -687,6 +688,7 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
         return;
     }
     float position = currentOffset_ + distance;
+    SetIsOverScroll(false);
     if (smooth) {
         AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, false, false);
         return;
@@ -721,7 +723,9 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
 
 void ScrollPattern::ScrollTo(float position)
 {
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     JumpToPosition(-position, SCROLL_FROM_JUMP);
+    SetIsOverScroll(GetCanStayOverScroll());
 }
 
 void ScrollPattern::DoJump(float position, int32_t source)
@@ -1189,7 +1193,7 @@ float ScrollPattern::GetPagingOffset(float delta, float dragDistance, float velo
     // handle last page
     if (GreatNotEqual(lastPageLength_, 0.f) &&
         LessNotEqual(currentOffset_, -scrollableDistance_ + lastPageLength_)) {
-        auto offset = fmod(currentOffset_, lastPageLength_);
+        auto offset = fmod(currentOffset_, viewPortLength_);
         return currentOffset_ - offset + GetPagingDelta(offset, velocity, lastPageLength_);
     }
     // handle other pages

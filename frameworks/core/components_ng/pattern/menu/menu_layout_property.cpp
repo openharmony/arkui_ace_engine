@@ -45,6 +45,9 @@ void MenuLayoutProperty::BindToJsonValue(std::unique_ptr<JsonValue>& json, const
         jsonDashArray->Put(std::to_string(index++).c_str(), jsonValue);
     }
     json->PutExtAttr("bindMenu", jsonDashArray, filter);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    json->PutExtAttr("uniRender", context->IsUniRenderEnabled() ? "true" : "false", filter);
 }
 
 void MenuLayoutProperty::DividerToJsonValue(std::unique_ptr<JsonValue>& json) const

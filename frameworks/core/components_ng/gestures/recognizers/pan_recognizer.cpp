@@ -228,6 +228,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     extraInfo_ = "";
+    lastAction_ = static_cast<int32_t>(TouchType::DOWN);
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -281,6 +282,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
     extraInfo_ = "";
+    lastAction_ = static_cast<int32_t>(AxisAction::BEGIN);
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -327,6 +329,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     extraInfo_ = "currentFingers: " + std::to_string(currentFingers_) + " fingers: " + std::to_string(fingers_);
+    lastAction_ = static_cast<int32_t>(TouchType::UP);
     fingersId_.erase(event.id);
     if (currentFingers_ < fingers_) {
         if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
@@ -383,6 +386,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
+    lastAction_ = static_cast<int32_t>(AxisAction::END);
     // if axisEvent received rotateEvent, no need to active Pan recognizer.
     if (event.isRotationEvent) {
         return;
@@ -422,6 +426,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     isTouchEventFinished_ = false;
+    lastAction_ = static_cast<int32_t>(TouchType::MOVE);
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -495,6 +500,7 @@ void PanRecognizer::UpdateAxisDeltaTransform(const AxisEvent& event)
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
+    lastAction_ = static_cast<int32_t>(AxisAction::UPDATE);
     if (fingers_ != AXIS_PAN_FINGERS || event.isRotationEvent) {
         return;
     }
@@ -571,6 +577,7 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    lastAction_ = static_cast<int32_t>(TouchType::CANCEL);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -590,6 +597,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
+    lastAction_ = static_cast<int32_t>(AxisAction::CANCEL);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -799,6 +807,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetPointerEvent(lastPointEvent_);
     info.SetIsPostEventResult(isPostEventResult_);
     info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
+    info.SetLastAction(lastAction_);
     return info;
 }
 
@@ -820,11 +829,21 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
-        HandlePanGestureAccept(info, PanGestureState::BEFORE, callback);
+        HandleCallbackReports(info, type, PanGestureState::BEFORE);
         callbackFunction(info);
-        HandleReports(info, type);
-        HandlePanGestureAccept(info, PanGestureState::AFTER, callback);
+        HandleCallbackReports(info, type, PanGestureState::AFTER);
     }
+}
+
+void PanRecognizer::HandleCallbackReports(
+    const GestureEvent& info, GestureCallbackType type, PanGestureState panGestureState)
+{
+    if (panGestureState == PanGestureState::BEFORE) {
+        HandleGestureAccept(info, type);
+    } else if (panGestureState == PanGestureState::AFTER) {
+        HandleReports(info, type);
+    }
+    HandlePanGestureAccept(info, panGestureState, type);
 }
 
 void PanRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
@@ -874,6 +893,10 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     }
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(lastTouchEvent_.force);
+    info->SetRawInputEventType(inputEventType_);
+    info->SetRawInputEvent(lastPointEvent_);
+    info->SetRawInputDeviceId(deviceId_);
+    info->SetLastAction(lastAction_);
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());
     }
@@ -1181,14 +1204,14 @@ void PanRecognizer::DumpVelocityInfo(int32_t fingerId)
 }
 
 void PanRecognizer::HandlePanGestureAccept(
-    const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback)
+    const GestureEvent& info, PanGestureState panGestureState, GestureCallbackType type)
 {
-    if (callback == onActionStart_) {
+    if (type == GestureCallbackType::START) {
         currentCallbackState_ = CurrentCallbackState::START;
         auto node = GetAttachedNode().Upgrade();
         UIObserverHandler::GetInstance().NotifyPanGestureStateChange(
             info, Claim(this), node, { panGestureState, currentCallbackState_ });
-    } else if (callback == onActionEnd_) {
+    } else if (type == GestureCallbackType::END) {
         currentCallbackState_ = CurrentCallbackState::END;
         auto node = GetAttachedNode().Upgrade();
         UIObserverHandler::GetInstance().NotifyPanGestureStateChange(

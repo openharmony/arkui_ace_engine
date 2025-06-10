@@ -14,6 +14,7 @@
  */
 #include "progress_test_ng.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pattern/mock_ui_session_manage.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1668,6 +1669,26 @@ HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProgressPatternUpdateColorTest002
+ * @tc.desc: Test UpdateColor function with first load scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest002, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Color testColor(Color::BLACK);
+    pattern->UpdateColor(testColor, true);
+
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetColorValue(), testColor);
+}
+
+/**
  * @tc.name: ProgressPatternUpdateColorTest003
  * @tc.desc: Test UpdateColor function without first load or system color change.
  * @tc.type: FUNC
@@ -1679,18 +1700,12 @@ HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     ASSERT_NE(pattern, nullptr);
-    
-    // Set initial color
     Color initialColor(Color::GREEN);
     pattern->UpdateColor(initialColor, true);
-    
-    // Try to update without first load or system color change
     Color newColor(Color::BLUE);
     pattern->UpdateColor(newColor, false);
-    
     auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    // Should keep the initial color
     EXPECT_EQ(paintProperty->GetColorValue(), initialColor);
 }
 
@@ -1720,5 +1735,42 @@ HWTEST_F(ProgressTestNg, ProgressPatternUpdateGradientColorTest001, TestSize.Lev
     auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
     EXPECT_EQ(paintProperty->GetGradientColorValue(), gradient);
+}
+
+/**
+ * @tc.name: ReportProgressEventTest001
+ * @tc.desc: Test ReportProgressEvent fuction of progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ReportProgressEventTest001, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+    RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ProgressPaintProperty> progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    pattern->ReportProgressEvent();
+    auto mockUiSessionManage = reinterpret_cast<MockUiSessionManage*>(MockUiSessionManage::GetInstance());
+    EXPECT_CALL(*mockUiSessionManage, ReportComponentChangeEvent(_, _)).Times(0);
+}
+
+/**
+ * @tc.name: ReportProgressEventTest002
+ * @tc.desc: Test ReportProgressEvent fuction of progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ReportProgressEventTest002, TestSize.Level1)
+{
+    float progressDefaultValue = 100.0f;
+    float progressMaxValue = 100.0f;
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+    RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ProgressPaintProperty> progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    progressPaintProperty->UpdateValue(progressDefaultValue);
+    progressPaintProperty->UpdateMaxValue(progressMaxValue);
+    pattern->ReportProgressEvent();
+    auto mockUiSessionManage = reinterpret_cast<MockUiSessionManage*>(MockUiSessionManage::GetInstance());
+    EXPECT_CALL(*mockUiSessionManage, ReportComponentChangeEvent(_, _)).Times(1);
 }
 } // namespace OHOS::Ace::NG

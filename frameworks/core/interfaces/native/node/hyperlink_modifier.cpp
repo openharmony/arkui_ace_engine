@@ -26,11 +26,19 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 } // namespace
-void SetHyperlinkColor(ArkUINodeHandle node, uint32_t color)
+void SetHyperlinkColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     HyperlinkModelNG::SetColor(frameNode, Color(color));
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        pattern->RegisterResource<Color>("Color", resObj, Color(color));
+    } else {
+        pattern->UnRegisterResource("Color");
+    }
 }
 
 void ResetHyperlinkColor(ArkUINodeHandle node)

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_RECORDER_EVENT_RECORDER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_RECORDER_EVENT_RECORDER_H
 
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 
@@ -112,7 +113,8 @@ public:
     bool IsComponentRecordEnable() const;
     bool IsRecordEnable(EventCategory category) const;
     void UpdateEventSwitch(const std::vector<bool>& eventSwitch);
-    void UpdateWebIdentifier(const std::unordered_map<std::string, std::string> identifierMap);
+    void UpdateGlobalEventSwitch(const std::vector<bool>& eventSwitch);
+    void UpdateWebIdentifier(const std::unordered_map<std::string, std::string>& identifierMap);
 
     void SetContainerInfo(const std::string& windowName, int32_t id, bool foreground);
     void SetFocusContainerInfo(const std::string& windowName, int32_t id);
@@ -144,8 +146,10 @@ private:
     ~EventRecorder() = default;
     friend class EventConfig;
 
+    std::shared_mutex mutable switchLock_;
     std::vector<bool> eventSwitch_;
     std::vector<bool> globalSwitch_;
+    std::unordered_map<std::string, std::string> webIdentifierMap_;
 
     int32_t containerId_ = -1;
     int32_t focusContainerId_ = -1;
@@ -156,8 +160,6 @@ private:
     bool isFocusContainerChanged_ = false;
 
     RefPtr<TaskExecutor> taskExecutor_;
-
-    std::unordered_map<std::string, std::string> webIdentifierMap_;
 
     std::unordered_map<int32_t, WeakPtr<NG::FrameNode>> weakNodeCache_;
 

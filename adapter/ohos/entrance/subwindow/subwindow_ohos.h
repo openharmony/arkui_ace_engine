@@ -217,8 +217,6 @@ public:
         detachState_ = t;
     }
 
-    void ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
-    void CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
     void SwitchFollowParentWindowLayout(bool freeMultiWindowEnable) override;
     bool NeedFollowParentWindowLayout() override
     {
@@ -226,6 +224,14 @@ public:
     }
     void AddFollowParentWindowLayoutNode(int32_t nodeId) override;
     void RemoveFollowParentWindowLayoutNode(int32_t nodeId) override;
+    void SetNodeId(int32_t nodeId) override
+    {
+        nodeId_ = nodeId;
+    }
+    int32_t GetNodeId() const override
+    {
+        return nodeId_;
+    }
 
 private:
     RefPtr<StackElement> GetStack();
@@ -273,11 +279,15 @@ private:
         OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
         const Rosen::WindowType& toastWindowType, uint32_t mainWindowId);
 
+    void InitDialogWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
+    void InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
+
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
     int32_t childContainerId_ = -1;
     uint64_t defaultDisplayId_ = 0;
+    int32_t nodeId_ = -1;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
@@ -292,6 +302,7 @@ private:
     bool isShowed_ = false;
     bool isClosing_ = false;
     bool needAvoidKeyboard_ = false;
+    bool ifNeedSetCurrentWindow_ = true;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
     int32_t callbackId_ = 0;
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;

@@ -39,7 +39,6 @@ constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
 constexpr bool DEFAULT_DRAGGABLE = false;
 constexpr bool DEFAULT_IMAGE_SENSITIVE = false;
 constexpr ArkUI_Float32 DEFAULT_IMAGE_EDGE_ANTIALIASING = 0;
-ImageResizableSlice DEFAULT_IMAGE_SLICE;
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
 constexpr int32_t LOAD_ERROR_CODE = 401;
 constexpr int32_t IMAGE_LOAD_STATUS_INDEX = 0;
@@ -751,7 +750,8 @@ void ResetResizable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetResizableSlice(frameNode, DEFAULT_IMAGE_SLICE);
+    ImageResizableSlice defaultImageSlice;
+    ImageModelNG::SetResizableSlice(frameNode, defaultImageSlice);
 }
 
 void SetResizableLattice(ArkUINodeHandle node, void* lattice)

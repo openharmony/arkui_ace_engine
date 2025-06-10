@@ -137,6 +137,7 @@ public:
             V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
         json->PutExtAttr("stopBackPress", GetStopBackPress().value_or(true), filter);
+        json->PutExtAttr("enableAutoSpacing", std::to_string(GetEnableAutoSpacing().value_or(false)).c_str(), filter);
     }
 
     const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
@@ -183,6 +184,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineBreakStrategy, LineBreakStrategy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLength, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OverflowMode, OverflowMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         TextLineStyle, HeightAdaptivePolicy, TextHeightAdaptivePolicy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);

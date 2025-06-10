@@ -7272,4 +7272,50 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyToJsonValue007, TestSi
      EXPECT_EQ(timeOption->GetString("minute"), "");
      EXPECT_EQ(timeOption->GetString("second"), "");
  }
+
+/**
+* @tc.name: ParseDirectionKey001
+* @tc.desc: Test TimePickerTest ParseDirectionKey
+* @tc.type: FUNC
+*/
+HWTEST_F(TimePickerPatternTestNg, ParseDirectionKey001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateTimePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    auto host = pickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto totalOptionCount = columnPattern_->GetOptionCount();
+    auto currentIndex = columnPattern_->GetCurrentIndex();
+
+    KeyCode code = KeyCode::KEY_UNKNOWN;
+
+    code = KeyCode::KEY_DPAD_UP;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(host, columnPattern_, code, currentIndex, totalOptionCount, 0);
+    EXPECT_TRUE(columnPattern_->stopHaptic_);
+
+    code = KeyCode::KEY_DPAD_DOWN;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(host, columnPattern_, code, currentIndex, totalOptionCount, 0);
+    EXPECT_TRUE(columnPattern_->stopHaptic_);
+
+    code = KeyCode::KEY_DPAD_LEFT;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(host, columnPattern_, code, currentIndex, totalOptionCount, 0);
+    EXPECT_FALSE(columnPattern_->stopHaptic_);
+
+    code = KeyCode::KEY_DPAD_RIGHT;
+    columnPattern_->stopHaptic_ = false;
+    pickerPattern->ParseDirectionKey(host, columnPattern_, code, currentIndex, totalOptionCount, 0);
+    EXPECT_FALSE(columnPattern_->stopHaptic_);
+}
 } // namespace OHOS::Ace::NG

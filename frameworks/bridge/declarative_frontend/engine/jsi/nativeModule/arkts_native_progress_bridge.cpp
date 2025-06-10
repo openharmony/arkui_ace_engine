@@ -594,7 +594,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressBackgroundColor(ArkUIRuntimeCa
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         nodeModifiers->getProgressModifier()->resetProgressBackgroundColor(nativeNode);
     } else {
-        nodeModifiers->getProgressModifier()->setProgressBackgroundColor(nativeNode, color.GetValue());
+        nodeModifiers->getProgressModifier()->setProgressBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace());
     }
 
     return panda::JSValueRef::Undefined(vm);

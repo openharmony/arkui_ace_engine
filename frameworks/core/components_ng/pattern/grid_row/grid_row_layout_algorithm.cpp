@@ -469,10 +469,8 @@ void GridRowLayoutAlgorithm::InitChildrenRowInLayout(LayoutWrapper* layoutWrappe
 void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
-    if (host && !host->GetIgnoreLayoutProcess()) {
-        if (GetNeedPostponeForIgnore()) {
-            return;
-        }
+    if (host && !host->GetIgnoreLayoutProcess() && GetNeedPostponeForIgnore()) {
+        return;
     }
     InitChildrenRowInLayout(layoutWrapper);
     if (gridColChildrenRows_.empty()) {
@@ -490,6 +488,7 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     bool firstLine = true;
     float firstLineOffset = 0.0f;
     for (auto&& row : gridColChildrenRows_) {
+        bool childTallerThanMatchParent = false;
         for (auto&& pair : row) {
             auto childLayoutWrapper = pair.first;
             auto& newLineOffset = pair.second;
@@ -509,17 +508,29 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + paddingOffset);
             auto ignoreMatchOffset = UpdateChildPositionWidthIgnoreLayoutSafeArea(
                 IsRightToLeft(layoutWrapper), childLayoutWrapper, offset + paddingOffset);
-            if (firstLine) {
-                auto lineOffset =
-                    GreatNotEqual(childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height() - ignoreMatchOffset,
-                        layoutWrapper->GetGeometryNode()->GetFrameSize().Height())
-                        ? 0.0f
-                        : ignoreMatchOffset;
-                firstLineOffset = std::max(firstLineOffset, lineOffset);
-            }
+                if (firstLine) {
+                    auto isGreatThanParent =
+                    GreatNotEqual(childLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY() +
+                                      childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height(),
+                        layoutWrapper->GetGeometryNode()->GetFrameSize().Height());
+                    UpdateFirstLineOffset(
+                        childTallerThanMatchParent, isGreatThanParent, ignoreMatchOffset, firstLineOffset);
+                }
             childLayoutWrapper->Layout();
         }
         firstLine = false;
+    }
+}
+
+void GridRowLayoutAlgorithm::UpdateFirstLineOffset(
+    bool& childTallerThanMatchParent, const bool isGreatThanParent, float ignoreMatchOffset, float& firstLineOffset)
+{
+    childTallerThanMatchParent |= isGreatThanParent;
+    if (GreatNotEqual(ignoreMatchOffset, 0.0f)) {
+        firstLineOffset = ignoreMatchOffset;
+    }
+    if (childTallerThanMatchParent) {
+        firstLineOffset = 0.0f;
     }
 }
 
@@ -529,7 +540,9 @@ float GridRowLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(
     auto childNode = childLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(childNode, 0.0f);
     CHECK_NULL_RETURN(childNode->GetLayoutProperty(), 0.0f);
-    CHECK_NULL_RETURN(childNode->GetLayoutProperty()->IsIgnoreOptsValid(), 0.0f);
+    if (!childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {
+        return 0.0f;
+    }
     IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
     auto sae = childNode->GetAccumulatedSafeAreaExpand(false, opts);
     auto offsetX = isRtl ? -sae.right.value_or(0.0f) : sae.left.value_or(0.0f);

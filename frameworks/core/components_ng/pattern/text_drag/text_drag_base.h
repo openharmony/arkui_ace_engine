@@ -81,6 +81,10 @@ public:
         return OffsetF(0, 0);
     }
 
+    virtual void OnDragNodeDetachFromMainTree() {};
+    virtual void ResetAISelected(AIResetSelectionReason reason) {}
+    virtual void ShowAIEntityMenuForCancel() {}
+
     ACE_DISALLOW_COPY_AND_MOVE(TextDragBase);
 };
 } // namespace OHOS::Ace::NG

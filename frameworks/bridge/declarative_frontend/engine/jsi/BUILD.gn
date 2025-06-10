@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -315,11 +315,15 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_utils_bridge.cpp",
       "nativeModule/arkts_native_video_bridge.cpp",
       "nativeModule/arkts_native_water_flow_bridge.cpp",
-      "nativeModule/arkts_native_web_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
     ]
 
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      sources += ["nativeModule/arkts_native_web_bridge.cpp",]
+    }
+    
     if (!ace_engine_feature_wearable) {
       sources += [ "nativeModule/arkts_native_folder_stack_bridge.cpp" ]
     }
@@ -398,6 +402,11 @@ template("declarative_js_engine_ark") {
       if (os_account_exists) {
         external_deps += [ "os_account:os_account_innerkits" ]
       }
+    }
+
+    if (defined(config.window_scene_support) &&
+        config.window_scene_support) {
+      sources += [ "nativeModule/arkts_native_embedded_component_bridge.cpp" ]
     }
 
     include_dirs = []

@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
@@ -107,6 +108,7 @@ void SheetPresentationPattern::OnModifyDone()
     InitPageHeight();
     InitScrollProps();
     UpdateSheetType();
+    UpdateSheetObject(sheetType_);
     InitFoldCreaseRegion();
 }
 
@@ -1080,10 +1082,9 @@ void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) 
 
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
-    bool isNeedChangeScrollHeight = sheetObject_->GetSheetType() != SheetType::SHEET_SIDE &&
-        scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDirectionUp_;
     if ((HasOnHeightDidChange() && IsSheetBottomStyle() && isTransitionIn && isNeedProcessHeight_)
-        || isNeedChangeScrollHeight) {
+        || (isTransitionIn && IsNeedChangeScrollHeight(height_))) {
+        // Pass height_ because it was updated by ChangeSheetHeight() before
         ModifyFireSheetTransition(dragVelocity);
         return;
     }
@@ -1167,21 +1168,16 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto operationNode = GetTitleBuilderNode();
-    CHECK_NULL_VOID(operationNode);
-    auto perationGeometryNode = operationNode->GetGeometryNode();
-    CHECK_NULL_VOID(perationGeometryNode);
-    auto operationHeight = perationGeometryNode->GetFrameSize().Height();
     auto scrollNode = GetSheetScrollNode();
     CHECK_NULL_VOID(scrollNode);
     auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollProps);
-    auto scrollHeight = height - operationHeight - resizeDecreasedHeight_;
+    auto scrollHeight = height - GetTitleBuilderHeight() - resizeDecreasedHeight_;
     auto sheetType = GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP || sheetType == SheetType::SHEET_CENTER ||
         sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         auto sheetHeight = geometryNode->GetFrameSize().Height();
-        scrollHeight = sheetHeight - operationHeight - resizeDecreasedHeight_;
+        scrollHeight = sheetHeight - GetTitleBuilderHeight() - resizeDecreasedHeight_;
     }
     scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1196,9 +1192,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto showDragIndicator = sheetStyle.showDragBar.value_or(true);
 
-    auto titleColumn = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(titleColumn);
-    auto sheetDragBar = DynamicCast<FrameNode>(titleColumn->GetFirstChild());
+    auto sheetDragBar = GetDragBarNode();
     CHECK_NULL_VOID(sheetDragBar);
     auto dragBarLayoutProperty = sheetDragBar->GetLayoutProperty();
     CHECK_NULL_VOID(dragBarLayoutProperty);
@@ -1220,7 +1214,39 @@ void SheetPresentationPattern::UpdateDragBarStatus()
             dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         }
     }
+    int32_t zIndex = sheetStyle.enableFloatingDragBar.value_or(false) ? INT32_MAX : 0;
+    auto dragBarRenderContext = sheetDragBar->GetRenderContext();
+    CHECK_NULL_VOID(dragBarRenderContext);
+    dragBarRenderContext->UpdateZIndex(zIndex);
     sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SheetPresentationPattern::UpdateTitleColumnSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto operationColumn = GetTitleBuilderNode();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+
+    if (operationColumn && sheetStyle.sheetTitle.has_value() &&
+        NearEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale())) {
+        auto layoutProps = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(layoutProps);
+        layoutProps->UpdateUserDefinedIdealSize(CalcSize(
+            std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight() - sheetTheme->GetSheetTitleAreaMargin() -
+                                     GetDragBarHeight(GetDragBarNode()))));
+        if (sheetStyle.sheetSubtitle.has_value()) {
+            layoutProps->UpdateUserDefinedIdealSize(CalcSize(
+                std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeightDouble() -
+                                         sheetTheme->GetSheetTitleAreaMargin() - GetDragBarHeight(GetDragBarNode()))));
+        }
+    }
 }
 
 float SheetPresentationPattern::GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme)
@@ -1247,7 +1273,7 @@ RefPtr<FrameNode> SheetPresentationPattern::GetTitleNode()
 {
     auto operationNode = GetTitleBuilderNode();
     CHECK_NULL_RETURN(operationNode, nullptr);
-    return DynamicCast<FrameNode>(operationNode->GetChildAtIndex(1));
+    return DynamicCast<FrameNode>(operationNode->GetChildAtIndex(0));
 }
 
 void SheetPresentationPattern::UpdateTitleTextColor()
@@ -1258,9 +1284,9 @@ void SheetPresentationPattern::UpdateTitleTextColor()
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    auto firstChild = host->GetChildAtIndex(0);
+    auto firstChild = GetTitleBuilderNode();
     CHECK_NULL_VOID(firstChild);
-    auto sheetTitleColumn = firstChild->GetChildAtIndex(1);
+    auto sheetTitleColumn = firstChild->GetChildAtIndex(0);
     CHECK_NULL_VOID(sheetTitleColumn);
     auto mainRow = sheetTitleColumn->GetChildAtIndex(0);
     CHECK_NULL_VOID(mainRow);
@@ -1370,6 +1396,17 @@ void SheetPresentationPattern::UpdateSheetTitle()
     }
 }
 
+Dimension SheetPresentationPattern::GetDragBarHeight(const RefPtr<FrameNode>& dragBarNode)
+{
+    CHECK_NULL_RETURN(dragBarNode, 0.0_vp);
+    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(dragBarLayoutProperty, 0.0_vp);
+    if (!dragBarLayoutProperty->HasVisibility()) {
+        return 0.0_vp;
+    }
+    return (dragBarLayoutProperty->GetVisibility() == VisibleType::GONE) ? 0.0_vp : SHEET_DRAG_BAR_HEIGHT;
+}
+
 void SheetPresentationPattern::UpdateFontScaleStatus()
 {
     auto host = GetHost();
@@ -1382,7 +1419,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
     if (pipeline->GetFontScale() != scale_) {
         auto operationNode = GetTitleBuilderNode();
         CHECK_NULL_VOID(operationNode);
-        auto titleColumnNode = DynamicCast<FrameNode>(operationNode->GetChildAtIndex(1));
+        auto titleColumnNode = DynamicCast<FrameNode>(operationNode->GetChildAtIndex(0));
         CHECK_NULL_VOID(titleColumnNode);
         auto layoutProps = operationNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
@@ -1401,15 +1438,15 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
             CHECK_NULL_VOID(sheetTheme);
             auto operationAreaHeight = sheetTheme->GetOperationAreaHeight();
             layoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(operationAreaHeight - sheetTheme->GetSheetTitleAreaMargin())));
-            titleLayoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(operationAreaHeight)));
+                CalcSize(std::nullopt, CalcLength(operationAreaHeight - sheetTheme->GetSheetTitleAreaMargin() -
+                                                  GetDragBarHeight(GetDragBarNode()))));
+            titleLayoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(operationAreaHeight)));
             if (sheetStyle.sheetSubtitle.has_value()) {
                 layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
-                    CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAreaMargin())));
-                titleLayoutProps->UpdateUserDefinedIdealSize(
-                    CalcSize(std::nullopt,
-                        CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
+                    CalcLength(sheetTheme->GetOperationAreaHeightDouble() - sheetTheme->GetSheetTitleAreaMargin() -
+                               GetDragBarHeight(GetDragBarNode()))));
+                titleLayoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
+                    CalcLength(sheetTheme->GetOperationAreaHeightDouble() - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
         }
         UpdateSheetTitle();
@@ -2181,6 +2218,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option.GetOnFinishEvent());
         SetBottomStyleHotAreaInSubwindow();
     } else {
+        AnimationUtils::StopAnimation(animation_);
         animation_ = AnimationUtils::StartAnimation(
             option,
             sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset),
@@ -2355,16 +2393,6 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
     return true;
 }
 
-float SheetPresentationPattern::GetFirstChildHeight() const
-{
-    auto firstChildNode = GetTitleBuilderNode();
-    CHECK_NULL_RETURN(firstChildNode, 0.0f);
-    auto firstChildGeometryNode = firstChildNode->GetGeometryNode();
-    CHECK_NULL_RETURN(firstChildGeometryNode, 0.0f);
-    auto titleHeight = firstChildGeometryNode->GetFrameSize().Height();
-    return titleHeight;
-}
-
 void SheetPresentationPattern::SetColumnMinSize(bool reset)
 {
     auto buildContent = GetFirstFrameNodeOfBuilder();
@@ -2500,15 +2528,24 @@ std::string SheetPresentationPattern::ArcTo(double rx, double ry, double rotatio
 
 float SheetPresentationPattern::GetFitContentHeight()
 {
-    auto sheetNode = GetHost();
-    CHECK_NULL_RETURN(sheetNode, 0.0f);
-    auto titleColumn = DynamicCast<FrameNode>(sheetNode->GetFirstChild());
-    CHECK_NULL_RETURN(titleColumn, 0.0f);
-    auto titleGeometryNode = titleColumn->GetGeometryNode();
     auto builderNode = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_RETURN(builderNode, 0.0f);
     auto builderGeometryNode = builderNode->GetGeometryNode();
-    return builderGeometryNode->GetMarginFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
+    return builderGeometryNode->GetMarginFrameSize().Height() + GetTitleBuilderHeight();
+}
+
+float SheetPresentationPattern::GetTitleBuilderHeight() const
+{
+    auto titleColumn = GetTitleBuilderNode();
+    CHECK_NULL_RETURN(titleColumn, 0.0f);
+    auto titleGeometryNode = titleColumn->GetGeometryNode();
+    CHECK_NULL_RETURN(titleGeometryNode, 0.0f);
+    OffsetF titleOffset = titleGeometryNode->GetMarginFrameOffset();
+    float titleOffsetY = titleOffset.GetY();
+    float titleHeight = Positive(
+        titleGeometryNode->GetFrameSize().Height()) ? titleGeometryNode->GetFrameSize().Height() : 0.0f;
+    float titleBottomY = titleOffsetY + titleHeight;
+    return titleBottomY;
 }
 
 RefPtr<OverlayManager> SheetPresentationPattern::GetOverlayManager()
@@ -2711,122 +2748,23 @@ bool SheetPresentationPattern::IsScrollOutOfBoundary()
 void SheetPresentationPattern::OnScrollStartRecursive(
     WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
-    InitScrollProps();
-    if (animation_ && isAnimationProcess_) {
-        AnimationUtils::StopAnimation(animation_);
-        isAnimationBreak_ = true;
-    }
-    currentOffset_ = 0.0f;
-    isSheetNeedScroll_ = false;
-    isDirectionUp_ = true;
-    GetCurrentBroadcastDetentsIndex();
+    return sheetObject_->OnScrollStartRecursive(position, velocity);
 }
 
 ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t source, NestedState state,
     float velocity)
 {
-    if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
-        return {scrollOffset, true};
-    }
-    ScrollResult result = {0, true};
-    if (GreatOrEqual(currentOffset_, 0.0) && (source == SCROLL_FROM_UPDATE) && !isSheetNeedScroll_) {
-        isSheetNeedScroll_ = true;
-    }
-    if (!isSheetNeedScroll_ || IsScrollOutOfBoundary()) {
-        return {scrollOffset, true};
-    }
-    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
-    if (state == NestedState::CHILD_SCROLL) {
-        if (scrollState == ScrollState::SCROLL) {
-            return HandleScrollWithSheet(scrollOffset);
-        }
-        if (isSheetPosChanged_) {
-            HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
-            isSheetPosChanged_ = false;
-        }
-    } else if (state == NestedState::CHILD_OVER_SCROLL) {
-        isSheetNeedScroll_ = false;
-        return {scrollOffset, true};
-    }
-    return result;
-}
-
-ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
-{
-    ScrollResult result = {0, true};
-    auto sheetType = GetSheetType();
-    auto sheetDetentsSize = sheetDetentHeight_.size();
-    if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0) || IsShowInSubWindowTwoInOne()) {
-        isSheetNeedScroll_ = false;
-        return {scrollOffset, true};
-    }
-
-    auto currentHeightPos = GetSheetHeightBeforeDragUpdate();
-    bool isDraggingUp = LessNotEqual(scrollOffset, 0.0f);
-    bool isReachMaxSheetHeight = GreatOrEqual(currentHeightPos, GetMaxSheetHeightBeforeDragUpdate());
-
-    // When dragging up the sheet, and sheet height is larger than sheet content height,
-    // the sheet height should be updated.
-    // When dragging up the sheet, and sheet height is less than or equal to sheet content height,
-    // the sheet content should scrolling.
-    if ((NearZero(currentOffset_)) && isDraggingUp && isReachMaxSheetHeight) {
-        isSheetNeedScroll_ = false;
-        return {scrollOffset, true};
-    }
-
-    // When dragging up the sheet, and sheet height is larger than max height,
-    // should set the coefficient of friction.
-    bool isExceedMaxSheetHeight =
-        GreatNotEqual((currentHeightPos - currentOffset_), GetMaxSheetHeightBeforeDragUpdate());
-    bool isNeedCalculateFriction = isExceedMaxSheetHeight && isDraggingUp;
-    if (isNeedCalculateFriction && GreatNotEqual(sheetMaxHeight_, 0.0f)) {
-        auto friction = CalculateFriction((currentHeightPos - currentOffset_) / sheetMaxHeight_, GetRadio());
-        scrollOffset = scrollOffset * friction;
-    }
-
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, result);
-    currentOffset_ = currentOffset_ + scrollOffset;
-    auto pageHeight = GetPageHeightWithoutOffset();
-    auto sheetOffsetInPage = pageHeight - currentHeightPos + currentOffset_;
-    if (LessOrEqual(sheetOffsetInPage, pageHeight - sheetMaxHeight_)) {
-        sheetOffsetInPage = pageHeight - sheetMaxHeight_;
-        currentOffset_ = currentHeightPos - sheetMaxHeight_;
-    }
-    bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDraggingUp;
-    if (isNeedChangeScrollHeight) {
-        ChangeScrollHeight(currentHeightPos - currentOffset_);
-    }
-    HandleFollowAccessibilityEvent(currentHeightPos - currentOffset_);
-    auto renderContext = host->GetRenderContext();
-    renderContext->UpdateTransformTranslate({ 0.0f, sheetOffsetInPage, 0.0f });
-    isSheetPosChanged_ = NearZero(scrollOffset) ? false : true;
-    if (IsSheetBottomStyle()) {
-        OnHeightDidChange(height_ - currentOffset_ + sheetHeightUp_);
-    }
-    isSheetPosChanged_ = true;
-    return result;
+    return sheetObject_->HandleScroll(scrollOffset, source, state, velocity);
 }
 
 void SheetPresentationPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
-    if (isSheetPosChanged_) {
-        HandleDragEnd(velocity.value_or(0.f));
-        isSheetPosChanged_ = false;
-    }
+    sheetObject_->OnScrollEndRecursive(velocity);
 }
 
 bool SheetPresentationPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
-    if (isSheetPosChanged_) {
-        HandleDragEnd(velocity);
-        isSheetPosChanged_ = false;
-    }
-    // Use child edge effect
-    if (!isSheetNeedScroll_) {
-        return false;
-    }
-    return true;
+    return sheetObject_->HandleScrollVelocity(velocity);
 }
 
 bool SheetPresentationPattern::IsTypeNeedAvoidAiBar()
@@ -3703,6 +3641,18 @@ void SheetPresentationPattern::OnAppear()
     }
 }
 
+bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
+{
+    auto it = std::min_element(sheetDetentHeight_.begin(), sheetDetentHeight_.end());
+    if (it == sheetDetentHeight_.end()) {
+        return false;
+    }
+    float lowestDetentHeight = *it;
+    bool isNeedChangeScrollHeight =
+        scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && GreatOrEqual(height, lowestDetentHeight);
+    return isNeedChangeScrollHeight;
+}
+
 void SheetPresentationPattern::OnWillDisappear()
 {
     isOnDisappearing_ = true;
@@ -3863,17 +3813,34 @@ void SheetPresentationPattern::UpdateSheetType()
     auto sheetType = GetSheetType();
     if (sheetType_ != sheetType) {
         sheetType_ = sheetType;
-        UpdateSheetObject(sheetType_);
         typeChanged_ = true;
     }
 }
 
-void SheetPresentationPattern::UpdateSheetObject(SheetType type)
+void SheetPresentationPattern::InitSheetObject()
 {
     // The first CreateObject must be later than UpdateSheetStyle, must be earlier than MarkModifyDone.
     // And must be earlier than the entry animation.
+    if (sheetType_ == SheetType::SHEET_SIDE) {
+        sheetObject_ = AceType::MakeRefPtr<SheetSideObject>(sheetType_);
+    } else {
+        sheetObject_ = AceType::MakeRefPtr<SheetObject>(sheetType_);
+    }
+    sheetObject_->BindPattern(WeakClaim(this));
+    // Don't process information here, such as events, etc
+    // Because here only the SheetStyle is updated to the layoutProperty, but the properties are not parsed,
+    // and the data is not updated to the pattern.
+}
+
+void SheetPresentationPattern::UpdateSheetObject(SheetType type)
+{
+    CHECK_NULL_VOID(sheetObject_);
     RefPtr<SheetObject> sheetObject = sheetObject_;
-    if (sheetObject && sheetObject->GetSheetType() == type) {
+    if (sheetObject->GetSheetType() == type) {
+        return;
+    }
+    if (type != SheetType::SHEET_SIDE && sheetObject->GetSheetType() != SheetType::SHEET_SIDE) {
+        sheetObject->UpdateSheetType(type);
         return;
     }
     if (type == SheetType::SHEET_SIDE) {
@@ -3881,14 +3848,39 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType type)
     } else {
         sheetObject = AceType::MakeRefPtr<SheetObject>(type);
     }
-    if (sheetObject_) {
-        sheetObject->CopyData(sheetObject_);
-        // start clear old sheet data
-        RemovePanEvent();
-    }
+    sheetObject->CopyData(sheetObject_);
+    // start clear old sheet data
+    RemovePanEvent();
+    ResetScrollUserDefinedIdealSize(sheetObject_, sheetObject);
+    ResetLayoutInfo();
+
     SetSheetObject(sheetObject);
     sheetObject_->BindPattern(WeakClaim(this));
+    FireOnTypeDidChange();
+    // start init new sheet data
     InitPanEvent();
+    isFirstInit_ = false;
+    AvoidAiBar();
+}
+
+void SheetPresentationPattern::ResetLayoutInfo()
+{
+    height_ = 0.0f;
+}
+
+void SheetPresentationPattern::ResetScrollUserDefinedIdealSize(
+    const RefPtr<SheetObject>& oldObject, const RefPtr<SheetObject>& newObject)
+{
+    CHECK_NULL_VOID(oldObject);
+    CHECK_NULL_VOID(newObject);
+    if (newObject->GetSheetType() != SheetType::SHEET_SIDE) {
+        return;
+    }
+    auto scrollNode = GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto props = scrollNode->GetLayoutProperty();
+    CHECK_NULL_VOID(props);
+    props->ClearUserDefinedIdealSize(true, true);
 }
 
 void SheetPresentationPattern::OnLanguageConfigurationUpdate()

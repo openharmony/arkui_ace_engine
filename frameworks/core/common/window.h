@@ -35,6 +35,10 @@ namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
 } // namespace NG
+
+enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL};
+enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
+
 class ACE_EXPORT Window : public std::enable_shared_from_this<Window> {
 public:
     Window() = default;
@@ -70,7 +74,7 @@ public:
 
     virtual void RecordFrameTime(uint64_t timeStamp, const std::string& name) {}
 
-    virtual void FlushTasks() {}
+    virtual void FlushTasks(std::function<void()> callback = nullptr) {}
 
     virtual std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const
     {
@@ -227,10 +231,18 @@ public:
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
+    virtual void NotifySnapshotUpdate() {}
+
     virtual bool GetIsRequestFrame()
     {
         return false;
     }
+
+    void SetForceVsyncRequests(bool forceVsyncRequests);
+
+    WidthBreakpoint GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBreakpoints) const;
+    HeightBreakpoint GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const;
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
@@ -249,6 +261,7 @@ protected:
     uint32_t windowId_ = 0;
     bool dvsyncOn_ = false;
     int64_t lastDVsyncInbihitPredictTs_ = 0;
+    bool forceVsync_ = false;
 
 private:
     std::function<Rect()> windowRectImpl_;

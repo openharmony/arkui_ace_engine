@@ -15,7 +15,7 @@
 import curves from '@ohos.curves';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import util from '@ohos.util';
-import { LengthMetrics } from '@ohos.arkui.node';
+import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import I18n from '@ohos.i18n';
 
 const MIN_ITEM_COUNT = 2
@@ -26,6 +26,9 @@ const MIN_MAX_FONT_SCALE: number = 1
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
 const CAPSULE_FOCUS_SELECTED_OFFSET: number = 4;
+// Space character for selected accessibility description - prevents screen readers from announcing
+const ACCESSIBILITY_SELECTED_DESCRIPTION = ' ';
+const ACCESSIBILITY_DEFAULT_DESCRIPTION = '';
 
 interface SegmentButtonThemeInterface {
   SEGMENT_TEXT_VERTICAL_PADDING: Resource;
@@ -90,6 +93,11 @@ interface Point {
 
 function nearEqual(first: number, second: number): boolean {
   return Math.abs(first - second) < 0.001
+}
+
+function validateLengthMetrics(value: LengthMetrics | undefined, defaultValue: LengthMetrics): LengthMetrics {
+  const actualValue = value ?? defaultValue;
+  return actualValue.value < 0 ? defaultValue : actualValue;
 }
 
 interface SegmentButtonTextItem {
@@ -363,10 +371,14 @@ export class SegmentButtonOptions {
       this.borderRadiusMode !== BorderRadiusMode.CUSTOM) {
       this.borderRadiusMode = BorderRadiusMode.DEFAULT;
     }
-    this.backgroundBorderRadius =
-      options.backgroundBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE);
-    this.itemBorderRadius =
-      options.itemBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE);
+    this.backgroundBorderRadius = validateLengthMetrics(
+      options.backgroundBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE)
+    );
+    this.itemBorderRadius = validateLengthMetrics(
+      options.itemBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE)
+    );
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons)
     if (this.type === 'capsule') {
       this.multiply = (options as CapsuleSegmentButtonOptions).multiply ?? false
@@ -624,13 +636,8 @@ struct SegmentButtonItem {
         return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
       }
       return this.options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
-    } else {
-      if (this.options.fontColor === segmentButtonTheme.FONT_COLOR && this.isSegmentFocusStyleCustomized &&
-        this.focusIndex === this.index) {
-        return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
-      }
-      return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
     }
+    return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
   }
 
   private getAccessibilityText(): Resource | undefined {
@@ -927,6 +934,8 @@ struct SegmentButtonItemArrayComponent {
     .direction(this.options.direction)
     .size({ width: 1, height: 1 })
     .align(Alignment.Center)
+    // 当前仅TV场景isSegmentFocusStyleCustomized为true,TV场景需要使用按键内置的focus样式，故隐藏此高级组件自定义的focus样式
+    .visibility(!this.isSegmentFocusStyleCustomized && this.focusIndex === index ? Visibility.Visible : Visibility.None)
   }
 
   calculateBorderRadius() {
@@ -945,38 +954,41 @@ struct SegmentButtonItemArrayComponent {
     const isSingleSelect = this.options.type === 'tab' || !(this.options.multiply ?? false);
     const buttonsLength =
       this.options.buttons ? Math.min(this.options.buttons.length, this.buttonItemsSize.length) : MIN_ITEM_COUNT;
-    const setAllCorners = (array: LocalizedBorderRadiuses[], index: number, value: number) => {
+
+    const setAllCorners = (array: LocalizedBorderRadiuses[], index: number, lengthMetrics: LengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
 
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(safeValue);
-      array[index].topEnd = LengthMetrics.vp(safeValue);
-      array[index].bottomStart = LengthMetrics.vp(safeValue);
-      array[index].bottomEnd = LengthMetrics.vp(safeValue);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      array[index].topStart = safeLengthMetrics;
+      array[index].topEnd = safeLengthMetrics;
+      array[index].bottomStart = safeLengthMetrics;
+      array[index].bottomEnd = safeLengthMetrics;
     };
 
-    const setLeftCorners = (array: LocalizedBorderRadiuses[], index: number, value: number) => {
+    const setLeftCorners = (array: LocalizedBorderRadiuses[], index: number, lengthMetrics: LengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(safeValue);
-      array[index].topEnd = LengthMetrics.vp(0);
-      array[index].bottomStart = LengthMetrics.vp(safeValue);
-      array[index].bottomEnd = LengthMetrics.vp(0);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      const zeroLengthMetrics = LengthMetrics.vp(0);
+      array[index].topStart = safeLengthMetrics;
+      array[index].topEnd = zeroLengthMetrics;
+      array[index].bottomStart = safeLengthMetrics;
+      array[index].bottomEnd = zeroLengthMetrics;
     };
 
-    const setRightCorners = (array: LocalizedBorderRadiuses[], index: number, value: number) => {
+    const setRightCorners = (array: LocalizedBorderRadiuses[], index: number, lengthMetrics: LengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(0);
-      array[index].topEnd = LengthMetrics.vp(safeValue);
-      array[index].bottomStart = LengthMetrics.vp(0);
-      array[index].bottomEnd = LengthMetrics.vp(safeValue);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      const zeroLengthMetrics = LengthMetrics.vp(0);
+      array[index].topStart = zeroLengthMetrics;
+      array[index].topEnd = safeLengthMetrics;
+      array[index].bottomStart = zeroLengthMetrics;
+      array[index].bottomEnd = safeLengthMetrics;
     };
 
     const setMiddleCorners = (array: LocalizedBorderRadiuses[], index: number) => {
@@ -992,19 +1004,27 @@ struct SegmentButtonItemArrayComponent {
     for (let index = 0; index < this.buttonBorderRadius.length; index++) {
       let halfButtonItemsSizeHeight = this.buttonItemsSize[index].height as number / 2;
       let radius = this.options.iconTextRadius ?? halfButtonItemsSizeHeight; // default radius
-
+      // Determine which border radius to use based on mode setting
       const isCustomMode = this.options.borderRadiusMode === BorderRadiusMode.CUSTOM &&
         this.options.itemBorderRadius !== undefined;
-      const radiusValue = isCustomMode ? this.options.itemBorderRadius!.value : radius;
+
+      let radiusLengthMetrics: LengthMetrics;
+      if (isCustomMode && this.options.itemBorderRadius) {
+        // Use custom border radius from options
+        radiusLengthMetrics = this.options.itemBorderRadius;
+      } else {
+        // Use default calculated radius value
+        radiusLengthMetrics = LengthMetrics.vp(radius);
+      }
       if (isSingleSelect) {
         // single-select
-        setAllCorners(borderRadiusArray, index, radiusValue);
+        setAllCorners(borderRadiusArray, index, radiusLengthMetrics);
       } else {
         // multi-select
         if (index === 0) {
-          setLeftCorners(borderRadiusArray, index, radiusValue);
+          setLeftCorners(borderRadiusArray, index, radiusLengthMetrics);
         } else if (index === buttonsLength - 1) {
-          setRightCorners(borderRadiusArray, index, radiusValue);
+          setRightCorners(borderRadiusArray, index, radiusLengthMetrics);
         } else {
           setMiddleCorners(borderRadiusArray, index);
         }
@@ -1014,8 +1034,17 @@ struct SegmentButtonItemArrayComponent {
     this.buttonBorderRadius = borderRadiusArray;
   }
 
-  getAccessibilityDescription(value?: ResourceStr): Resource | undefined {
-    return (typeof value !== undefined) ? value as Resource : undefined
+  getAccessibilityDescription(value?: ResourceStr, index?: number): string | undefined {
+    if (value !== undefined) {
+      return value as string;
+    }
+    const isSingleSelect = this.options.type === 'tab' || !this.options.multiply;
+
+    if (isSingleSelect && index !== undefined && this.selectedIndexes.includes(index)) {
+      return ACCESSIBILITY_SELECTED_DESCRIPTION;
+    }
+
+    return ACCESSIBILITY_DEFAULT_DESCRIPTION;
   }
 
   isDefaultSelectedBgColor(): boolean {
@@ -1064,7 +1093,7 @@ struct SegmentButtonItemArrayComponent {
             .accessibilityLevel(item.accessibilityLevel)
             .accessibilitySelected(this.options.multiply ? undefined : this.selectedIndexes.includes(index))
             .accessibilityChecked(this.options.multiply ? this.selectedIndexes.includes(index) : undefined)
-            .accessibilityDescription(this.getAccessibilityDescription(item.accessibilityDescription))
+            .accessibilityDescription(this.getAccessibilityDescription(item.accessibilityDescription, index))
             .direction(this.options.direction)
             .borderRadius(this.buttonBorderRadius[index])
             .scale({
@@ -1085,16 +1114,17 @@ struct SegmentButtonItemArrayComponent {
                 }
               }
             })
-            .stateStyles({
-              normal: {
-                .overlay(undefined)
-              },
-              focused: {
-                .overlay(this.focusStack(index), {
-                  align: Alignment.Center
-                })
-              }
-            })
+            .overlay(this.focusStack(index), { align: Alignment.Center })
+            .attributeModifier(this.isSegmentFocusStyleCustomized ? undefined :
+              new FocusStyleButtonModifier((isFocused: boolean): void => {
+                if (!isFocused && this.focusIndex === index) {
+                  this.focusIndex = -1;
+                  return;
+                }
+                if (isFocused) {
+                  this.focusIndex = index;
+                }
+              }))
             .onFocus(() => {
               this.focusIndex = index;
               if (this.isSegmentFocusStyleCustomized) {
@@ -1102,7 +1132,9 @@ struct SegmentButtonItemArrayComponent {
               }
             })
             .onBlur(() => {
-              this.focusIndex = -1;
+              if (this.focusIndex === index) {
+                this.focusIndex = -1;
+              }
               this.hoverColorArray[index].hoverColor = Color.Transparent;
             })
             .gesture(TapGesture().onAction(() => {
@@ -1521,13 +1553,26 @@ export struct SegmentButton {
             if (this.isCurrentPositionSelected) {
               return
             }
-            if (Math.abs(event.angle) < 90 && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
+
+            // Only handle horizontal swipes (angle between -45 to 45 degrees or 135 to 225 degrees)
+            let isHorizontalSwipe = (Math.abs(event.angle) <= 45) || (Math.abs(event.angle) >= 135);
+            if (!isHorizontalSwipe) {
+              return;
+            }
+
+            let isSwipeRight = Math.abs(event.angle) <= 45; // swipe right
+            let isSwipeLeft = Math.abs(event.angle) >= 135; // swipe left
+
+            let isSwipeToNext = this.isShouldMirror() ? isSwipeLeft : isSwipeRight;
+            let isSwipeToPrevious = this.isShouldMirror() ? isSwipeRight : isSwipeLeft;
+
+            if (isSwipeToNext && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
               this.buttonItemsSize.length) - 1) {
               // Move to next
               this.doSelectedChangeAnimate = true
               this.selectedIndexes[0] = this.selectedIndexes[0] + 1
               this.doSelectedChangeAnimate = false
-            } else if (Math.abs(event.angle) > 90 && this.selectedIndexes[0] !== 0) {
+            } else if (isSwipeToPrevious && this.selectedIndexes[0] !== 0) {
               // Move to previous
               this.doSelectedChangeAnimate = true
               this.selectedIndexes[0] = this.selectedIndexes[0] - 1
@@ -1551,10 +1596,13 @@ export struct SegmentButton {
             let selectedInfo = fingerInfo.localX
             this.panGestureStartPoint = { x: fingerInfo.globalX, y: fingerInfo.globalY }
             this.isPanGestureMoved = false
-            for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
+
+            let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+            for (let i = 0; i < buttonLength; i++) {
               selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
               if (selectedInfo < 0) {
-                this.isCurrentPositionSelected = i === this.selectedIndexes[0] ? true : false
+                let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+                this.isCurrentPositionSelected = realIndex === this.selectedIndexes[0] ? true : false;
                 break
               }
             }
@@ -1579,13 +1627,16 @@ export struct SegmentButton {
               fingerInfo.globalY)) {
               this.isPanGestureMoved = true
             }
-            for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
-              selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
+
+            let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+            for (let i = 0; i < buttonLength; i++) {
+              selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number);
               if (selectedInfo < 0) {
-                this.doSelectedChangeAnimate = true
-                this.selectedIndexes[0] = i
-                this.doSelectedChangeAnimate = false
-                break
+                let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+                this.doSelectedChangeAnimate = true;
+                this.selectedIndexes[0] = realIndex;
+                this.doSelectedChangeAnimate = false;
+                break;
               }
             }
             this.zoomScaleArray.forEach((_, index) => {
@@ -1620,9 +1671,14 @@ export struct SegmentButton {
             if (this.isMouseWheelScroll(event)) {
               let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY
               this.doSelectedChangeAnimate = true
-              if (offset > 0 && this.selectedIndexes[0] > 0) {
-                this.selectedIndexes[0] -= 1
-              } else if (offset < 0 && this.selectedIndexes[0] < Math.min(this.options.buttons.length,
+
+              // Reverse mouse wheel direction in mirrored layout
+              let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
+              let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
+
+              if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
+                this.selectedIndexes[0] -= 1;
+              } else if (shouldMoveNext && this.selectedIndexes[0] < Math.min(this.options.buttons.length,
                 this.buttonItemsSize.length) - 1) {
                 this.selectedIndexes[0] += 1
               }
@@ -1729,13 +1785,46 @@ function resourceToNumber(context: Context | undefined, resource: Resource, defa
   }
 }
 
-function getBackgroundBorderRadius(options: SegmentButtonOptions, defaultRadius: number): number {
+class LengthMetricsUtils {
+  private static instance?: LengthMetricsUtils;
+
+  private constructor() {
+  }
+
+  public static getInstance(): LengthMetricsUtils {
+    if (!LengthMetricsUtils.instance) {
+      LengthMetricsUtils.instance = new LengthMetricsUtils();
+    }
+    return LengthMetricsUtils.instance;
+  }
+
+  stringify(metrics: LengthMetrics): Dimension {
+    switch (metrics.unit) {
+      case LengthUnit.PX:
+        return `${metrics.value}px`;
+      case LengthUnit.VP:
+        return `${metrics.value}vp`;
+      case LengthUnit.FP:
+        return `${metrics.value}fp`;
+      case LengthUnit.PERCENT:
+        return `${metrics.value}%`;
+      case LengthUnit.LPX:
+        return `${metrics.value}lpx`;
+    }
+  }
+
+  isNaturalNumber(metrics: LengthMetrics): boolean {
+    return metrics.value >= 0;
+  }
+}
+
+function getBackgroundBorderRadius(options: SegmentButtonOptions, defaultRadius: number): Length {
   if (options.borderRadiusMode === BorderRadiusMode.CUSTOM) {
     // For capsule multi-select buttons, use itemBorderRadius
     if (options.type === 'capsule' && (options.multiply ?? false) && options.itemBorderRadius !== undefined) {
-      return options.itemBorderRadius.value;
+      return LengthMetricsUtils.getInstance().stringify(options.itemBorderRadius);
     } else if (options.backgroundBorderRadius !== undefined) {
-      return options.backgroundBorderRadius.value;
+      return LengthMetricsUtils.getInstance().stringify(options.backgroundBorderRadius);
     }
   }
 
@@ -1743,4 +1832,20 @@ function getBackgroundBorderRadius(options: SegmentButtonOptions, defaultRadius:
     return options.iconTextRadius ?? options.iconTextBackgroundRadius ?? defaultRadius;
   }
   return options.iconTextBackgroundRadius ?? defaultRadius;
+}
+
+class FocusStyleButtonModifier implements AttributeModifier<ButtonAttribute> {
+  private stateStyleAction?: (isFocused: boolean) => void;
+
+  constructor(stateStyleAction: (isFocused: boolean) => void) {
+    this.stateStyleAction = stateStyleAction;
+  }
+
+  applyNormalAttribute(instance: ButtonAttribute): void {
+    this.stateStyleAction && this.stateStyleAction(false);
+  }
+
+  applyFocusedAttribute(instance: ButtonAttribute): void {
+    this.stateStyleAction && this.stateStyleAction(true);
+  }
 }

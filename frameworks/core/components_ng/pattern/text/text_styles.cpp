@@ -100,6 +100,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextOverflow, TextOverflow);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextAlign, TextAlign);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextVerticalAlign, ParagraphVerticalAlign);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, MaxLines, MaxLines);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, WordBreak, WordBreak);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, EllipsisMode, EllipsisMode);
@@ -163,6 +164,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, TextBaseline, SetTextBaseline);
         UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);
         UPDATE_TEXT_STYLE(textLineStyle, TextAlign, SetTextAlign);
+        UPDATE_TEXT_STYLE(textLineStyle, TextVerticalAlign, SetParagraphVerticalAlign);
         UPDATE_TEXT_STYLE(textLineStyle, MaxLines, SetMaxLines);
         UPDATE_TEXT_STYLE(textLineStyle, WordBreak, SetWordBreak);
         UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);

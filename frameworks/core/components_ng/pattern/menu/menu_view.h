@@ -21,11 +21,22 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace::NG {
+
+enum class MenuHoverScaleStatus {
+    DISABLE = 0,
+    NONE,
+    READY,
+    HOVER,
+    INTERRUPT,
+    MENU_SHOW,
+};
 
 class ACE_EXPORT MenuView {
 struct OptionValueInfo {
@@ -77,8 +88,19 @@ public:
     static void SetHasCustomOutline(
         const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& menuNode);
-    static void TouchEventGernerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event);
-    static void TouchPointGernerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point);
+    static void TouchEventGenerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event);
+    static void TouchPointGenerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point);
+    static void ShowMenuTargetScaleToOrigin(
+        const RefPtr<MenuWrapperPattern>& wrapperPattern, const RefPtr<MenuPreviewPattern>& previewPattern);
+    static void UpdateHoverImagePreivewPosition(const RefPtr<MenuPreviewPattern>& previewPattern);
+    static void ShowHoverImageForInterruption(const RefPtr<FrameNode>& hoverImageStackNode,
+        const RefPtr<FrameNode>& previewNode, const RefPtr<RenderContext>& imageContext,
+        const RefPtr<MenuWrapperPattern>& wrapperPattern);
+    static bool CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPattern>& wrapperPattern,
+        const RefPtr<MenuPreviewPattern>& previewPattern, const RefPtr<FrameNode>& hoverImageStackNode);
+    static void SetMenuHoverScaleStatus(int32_t targetId, MenuHoverScaleStatus status);
+    static void RemoveMenuHoverScaleStatus(int32_t targetId);
+    static MenuHoverScaleStatus GetMenuHoverScaleStatus(int32_t targetId);
 
 private:
     static void UpdateMenuPaintProperty(

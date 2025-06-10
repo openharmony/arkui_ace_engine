@@ -1272,6 +1272,31 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HtmlConvertPriorityText
+ * @tc.desc: This test case checks the conversion priority of html text
+ *           where inner attribute has the higher priority.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertPriorityText, TestSize.Level1)
+{
+    const std::string html = "<p style=\"font-size: 20px; color: blue\">\n"
+        "test1\n<span style=\"color: red;\">test2</span>\ntest3\n<strong>strong1</strong>\ntest4\n</p>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
+    EXPECT_EQ(spans.size(), 9);
+    auto it = spans.begin();
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(20, DimensionUnit::VP));
+    ++it;
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), Color::RED);
+    ++it;
+    ++it;
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::BOLD);
+}
+
+/**
  * @tc.name: HtmlConverter001
  * @tc.desc: This test case checks the conversion of a span string with a font-family property applied.
  *           It verifies that the font-family attribute is correctly parsed and converted into a SpanItem.
@@ -1432,7 +1457,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConverter006, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
     EXPECT_EQ(spans.size(), 2);
     auto it = spans.begin();
-    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(50, DimensionUnit::VP));
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(100, DimensionUnit::VP));
 }
 
 /**
@@ -2254,36 +2279,69 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvertTestSuperscriptText, TestSize.Level1)
 }
 
 /**
- * @tc.name: HtmlConvertTestBlodText
- * @tc.desc: Test the conversion of BLOD text (<b>labels)
+ * @tc.name: HtmlTagsConversionTest
+ * @tc.desc: Verify the conversion of HTML tags <a>, <b>, <i>, <u>, <del>, <br>, <strong>, <s>, and <em> to SpanItems.
  * @tc.level: 1
  */
-HWTEST_F(HtmlConvertTestNg, HtmlConvertTestBlodText, TestSize.Level1)
+HWTEST_F(HtmlConvertTestNg, HtmlTagsConversionTest, TestSize.Level1)
 {
-    const std::string html = "<html><body><p>This is <b>b</b> text</p></body></html>";
+    /**
+     * @tc.steps1: Create an HTML string with various tags and convert it to SpanString.
+     * @tc.expected: The tags should be correctly converted to SpanItems with appropriate styles.
+     */
+    const std::string html = "<html>"
+                             "<body>"
+                             "<a href=\"https://example.com\">Link</a>"
+                             "<b>Bold Text</b>"
+                             "<i>Italic Text</i>"
+                             "<u>Underlined Text</u>"
+                             "<del>Deleted Text</del>"
+                             "<br>"
+                             "<strong>Strong Text</strong>"
+                             "<s>Strikethrough Text</s>"
+                             "<em>Emphasized Text</em>"
+                             "</body>"
+                             "</html>";
+
     HtmlToSpan toSpan;
     auto dstSpan = toSpan.ToSpanString(html);
-    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
-    EXPECT_EQ(spans.size(), 3);
-    auto it = spans.begin();
+    EXPECT_NE(dstSpan, nullptr);
+
+    std::list<RefPtr<NG::SpanItem>> items = dstSpan->GetSpanItems();
+    EXPECT_EQ(items.size(), 9);
+
+    auto it = items.begin();
+
+    // Verify <b> tag
     ++it;
     EXPECT_TRUE((*it)->fontStyle->GetFontWeight().has_value());
     EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::BOLD);
-}
 
-/**
- * @tc.name: HtmlConvertTestEmphasizeText
- * @tc.desc: Test the conversion of emphasize text (<em>labels)
- * @tc.level: 1
- */
-HWTEST_F(HtmlConvertTestNg, HtmlConvertTestEmphasizeText, TestSize.Level1)
-{
-    const std::string html = "<html><body><p>This is <em>em</em> text</p></body></html>";
-    HtmlToSpan toSpan;
-    auto dstSpan = toSpan.ToSpanString(html);
-    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
-    EXPECT_EQ(spans.size(), 3);
-    auto it = spans.begin();
+    // Verify <i> tag
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+
+    // Verify <u> tag
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
+
+    // Verify <del> tag
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
+
+    // Verify <br> tag (no specific style to check)
+    ++it;
+
+    // Verify <strong> tag
+    ++it;
+    EXPECT_TRUE((*it)->fontStyle->GetFontWeight().has_value());
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::BOLD);
+
+    // Verify <s> tag
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
+
+    // Verify <em> tag
     ++it;
     EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
 }

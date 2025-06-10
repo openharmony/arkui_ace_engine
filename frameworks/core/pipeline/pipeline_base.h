@@ -1140,7 +1140,7 @@ public:
         return displayWindowRectInfo_;
     }
     virtual void FlushModifier() {}
-    virtual void FlushMessages() = 0;
+    virtual void FlushMessages(std::function<void()> callback = nullptr) = 0;
     void SetGSVsyncCallback(std::function<void(void)>&& callback)
     {
         gsVsyncCallback_ = std::move(callback);
@@ -1328,6 +1328,8 @@ public:
         vsyncTime_ = time;
     }
 
+    virtual bool ReachResponseDeadline() const;
+
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 
     virtual std::string GetCurrentExtraInfo() { return ""; }
@@ -1497,16 +1499,6 @@ public:
         return isOpenInvisibleFreeze_;
     }
 
-    void SetVisibleAreaRealTime(bool visibleAreaRealTime)
-    {
-        visibleAreaRealTime_ = visibleAreaRealTime;
-    }
-
-    bool GetVisibleAreaRealTime() const
-    {
-        return visibleAreaRealTime_;
-    }
-
     // Prints out the count of the unexecuted finish callback
     std::string GetUnexecutedFinishCount() const;
 
@@ -1520,6 +1512,7 @@ public:
     virtual void SetTouchAccelarate(bool isEnable) {}
     virtual void SetTouchPassThrough(bool isEnable) {}
     virtual void SetEnableSwipeBack(bool isEnable) {}
+    virtual void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
     bool IsSystmColorChange()
     {
@@ -1734,6 +1727,7 @@ protected:
 
     uint64_t compensationValue_ = 0;
     int64_t recvTime_ = 0;
+    int64_t currRecvTime_ = -1;
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
@@ -1765,7 +1759,6 @@ private:
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
     // whether visible area need to be calculate at each vsync after approximate timeout.
-    bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool destroyed_ = false;

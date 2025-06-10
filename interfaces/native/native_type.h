@@ -379,6 +379,22 @@ typedef enum {
 } ArkUI_TextAlignment;
 
 /**
+ * @brief 定义文本垂直对齐样式枚举值。
+ *
+ * @since 20
+ */
+typedef enum {
+    /** 基线对齐。 */
+    ARKUI_TEXT_VERTICAL_ALIGNMENT_BASELINE = 0,
+    /** 底部对齐。 */
+    ARKUI_TEXT_VERTICAL_ALIGNMENT_BOTTOM,
+    /** 居中对齐。 */
+    ARKUI_TEXT_VERTICAL_ALIGNMENT_CENTER,
+    /** 顶部对齐。 */
+    ARKUI_TEXT_VERTICAL_ALIGNMENT_TOP,
+} ArkUI_TextVerticalAlignment;
+
+/**
  * @brief Enumerates the types of the Enter key for a single-line text box.
  *
  * @since 12
@@ -1290,6 +1306,8 @@ typedef enum {
     ARKUI_IMAGE_SPAN_ALIGNMENT_CENTER,
     /** The image is top aligned with the text. */
     ARKUI_IMAGE_SPAN_ALIGNMENT_TOP,
+    /** The image follow with the text's alignment. */
+    ARKUI_IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH,
 } ArkUI_ImageSpanAlignment;
 
 /**
@@ -2263,6 +2281,11 @@ typedef enum {
     /** The node is not on main tree. */
     ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE = 106203,
     /**
+     * @error The node is running on invalid thread.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_NODE_ON_INVALID_THREAD = 106204,
+    /**
      * @error The node requesting focus is not focusable.
      * @since 15
      */
@@ -2296,6 +2319,11 @@ typedef enum {
      * @since 15
      */
     ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT = 180005,
+    /**
+     * @error input event type is not supported.
+     * @since 20
+     */
+    ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT = 180006,
     /** invalid styled string */
     ARKUI_ERROR_CODE_INVALID_STYLED_STRING = 180101,
     /**

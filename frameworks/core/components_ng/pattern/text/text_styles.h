@@ -245,8 +245,10 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BaselineOffset, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextOverflow, TextOverflow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAlign, TextAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextVerticalAlign, TextVerticalAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLength, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OverflowMode, OverflowMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightAdaptivePolicy, TextHeightAdaptivePolicy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextIndent, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMargin, LeadingMargin);

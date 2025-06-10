@@ -443,21 +443,43 @@ void LayoutProperty::ExpandConstraintWithSafeArea()
         options = *ignoreLayoutSafeAreaOpts_;
     }
     ExpandEdges sae = parent->GetAccumulatedSafeAreaExpand(true, options);
-    auto parentConstraint = host->GetGeometryNode()->GetParentLayoutConstraint();
-    OptionalSizeF contentSize;
+    OptionalSizeF expandedSize;
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto parentConstraint = geometryNode->GetParentLayoutConstraint();
     if (parentConstraint) {
-        contentSize = parentConstraint->parentIdealSize;
+        expandedSize = parentConstraint->parentIdealSize;
     } else {
-        auto rect = parent->GetGeometryNode()->GetFrameSize();
-        auto padding = parent->GetLayoutProperty()->CreatePaddingAndBorder();
+        SizeF rect;
+        auto parentGeometryNode = parent->GetGeometryNode();
+        if (parentGeometryNode) {
+            rect = parentGeometryNode->GetFrameSize();
+        }
+        PaddingPropertyF padding;
+        auto parentLayoutProperty = parent->GetLayoutProperty();
+        if (parentLayoutProperty) {
+            padding = parentLayoutProperty->CreatePaddingAndBorder();
+        }
         MinusPaddingToNonNegativeSize(padding, rect);
-        contentSize.SetWidth(rect.Width());
-        contentSize.SetHeight(rect.Height());
+        expandedSize.SetWidth(rect.Width());
+        expandedSize.SetHeight(rect.Height());
     }
-    layoutConstraint_->parentIdealSize.SetWidth(
-        contentSize.Width().value_or(0.0f) + sae.left.value_or(0.0f) + sae.right.value_or(0.0f));
-    layoutConstraint_->parentIdealSize.SetHeight(
-        contentSize.Height().value_or(0.0f) + sae.top.value_or(0.0f) + sae.bottom.value_or(0.0f));
+    expandedSize.SetWidth(expandedSize.Width().value_or(0.0f) + sae.left.value_or(0.0f) + sae.right.value_or(0.0f));
+    expandedSize.SetHeight(expandedSize.Height().value_or(0.0f) + sae.top.value_or(0.0f) + sae.bottom.value_or(0.0f));
+
+    layoutConstraint_->parentIdealSize.SetWidth(expandedSize.Width());
+    layoutConstraint_->parentIdealSize.SetHeight(expandedSize.Height());
+    if (GreatNotEqual(expandedSize.Width().value(), layoutConstraint_->maxSize.Width())) {
+        layoutConstraint_->maxSize.SetWidth(expandedSize.Width().value());
+    }
+    if (GreatNotEqual(expandedSize.Height().value(), layoutConstraint_->maxSize.Height())) {
+        layoutConstraint_->maxSize.SetHeight(expandedSize.Height().value());
+    }
+
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("ExpandByIgnore[parentConstraint:%s]",
+            layoutConstraint_.has_value() ? layoutConstraint_.value().ToString().c_str() : "NA");
+    }
 }
 
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)

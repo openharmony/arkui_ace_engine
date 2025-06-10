@@ -110,7 +110,8 @@ struct CustomBackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundAlign, Alignment);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CustomBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IsTransitionBackground, bool);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(IsBuilderBackground, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BuilderBackgroundFlag, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundIgnoresLayoutSafeAreaEdges, uint32_t);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
@@ -219,6 +220,7 @@ struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, TranslateOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector5F);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotateAngle, Vector4F);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };

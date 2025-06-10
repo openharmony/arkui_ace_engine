@@ -16,6 +16,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
@@ -57,14 +58,14 @@ bool NGGestureRecognizer::ShouldResponse()
     return true;
 }
 
-bool NGGestureRecognizer::IsPreventDefault() const
+bool NGGestureRecognizer::IsPreventBegin() const
 {
-    return preventDefault_;
+    return preventBegin_;
 }
 
-void NGGestureRecognizer::SetPreventDefault(bool preventDefault)
+void NGGestureRecognizer::SetPreventBegin(bool preventBegin)
 {
-    preventDefault_ = preventDefault;
+    preventBegin_ = preventBegin;
 }
 
 bool NGGestureRecognizer::CheckoutDownFingers(int32_t fingerId) const
@@ -111,7 +112,7 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
     if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
-    if (IsPreventDefault()) {
+    if (IsPreventBegin()) {
         return true;
     }
     auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(Claim(this));
@@ -190,7 +191,7 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
     if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
-    if (IsPreventDefault()) {
+    if (IsPreventBegin()) {
         return true;
     }
     switch (event.action) {
@@ -695,5 +696,71 @@ std::string NGGestureRecognizer::GetCallbackName(const std::unique_ptr<GestureEv
         return "onActionCancel";
     }
     return "";
+}
+
+void NGGestureRecognizer::HandleGestureAccept(const GestureEvent& info, GestureCallbackType type)
+{
+    auto gestureInfo = GetGestureInfo();
+    CHECK_NULL_VOID(gestureInfo);
+    auto node = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(node);
+    GestureListenerType listenerType = GetListenerType(gestureInfo->GetRecognizerType());
+    if (listenerType == GestureListenerType::UNKNOWN) {
+        return;
+    }
+    GestureActionPhase phase = GetActionPhase(type, gestureInfo->GetRecognizerType());
+    if (phase == GestureActionPhase::UNKNOWN) {
+        return;
+    }
+    UIObserverHandler::GetInstance().NotifyGestureStateChange(listenerType, info, Claim(this), node, phase);
+}
+
+GestureListenerType NGGestureRecognizer::GetListenerType(GestureTypeName typeName) const
+{
+    switch (typeName) {
+        case GestureTypeName::PAN_GESTURE:
+            return GestureListenerType::PAN;
+        case GestureTypeName::PINCH_GESTURE:
+            return GestureListenerType::PINCH;
+        case GestureTypeName::ROTATION_GESTURE:
+            return GestureListenerType::ROTATION;
+        case GestureTypeName::TAP_GESTURE:
+            return GestureListenerType::TAP;
+        case GestureTypeName::SWIPE_GESTURE:
+            return GestureListenerType::SWIPE;
+        case GestureTypeName::LONG_PRESS_GESTURE:
+            return GestureListenerType::LONG_PRESS;
+        default:
+            return GestureListenerType::UNKNOWN;
+    }
+}
+
+GestureActionPhase NGGestureRecognizer::GetActionPhase(GestureCallbackType callbackType, GestureTypeName typeName) const
+{
+    static const std::unordered_set<GestureTypeName> startSupportedGestures = {
+        GestureTypeName::PAN_GESTURE,
+        GestureTypeName::PINCH_GESTURE,
+        GestureTypeName::ROTATION_GESTURE,
+        // LONG_PRESS_GESTURE when onAction, callbackType is START
+        GestureTypeName::LONG_PRESS_GESTURE
+    };
+
+    switch (callbackType) {
+        case GestureCallbackType::START:
+            return (startSupportedGestures.count(typeName)) ? GestureActionPhase::WILL_START
+                                                            : GestureActionPhase::UNKNOWN;
+
+        case GestureCallbackType::END:
+            return (startSupportedGestures.count(typeName)) ? GestureActionPhase::WILL_END
+                                                            : GestureActionPhase::UNKNOWN;
+
+        case GestureCallbackType::ACTION:
+            // ACTION will only be mapped to WILL_START if the START gesture is not supported
+            return (!startSupportedGestures.count(typeName)) ? GestureActionPhase::WILL_START
+                                                             : GestureActionPhase::UNKNOWN;
+
+        default:
+            return GestureActionPhase::UNKNOWN;
+    }
 }
 } // namespace OHOS::Ace::NG

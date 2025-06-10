@@ -530,6 +530,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         info.SetGestureTypeName(GestureTypeName::TAP_GESTURE);
         // onAction may be overwritten in its invoke so we copy it first
         auto onActionFunction = *onAction;
+        HandleGestureAccept(info, type);
         onActionFunction(info);
         HandleReports(info, type);
         RecordClickEventIfNeed(info);
@@ -620,6 +621,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
         info->SetRollAngle(touchPoint.rollAngle.value());
     }
     info->SetSourceTool(touchPoint.sourceTool);
+    info->SetRawInputEventType(inputEventType_);
+    info->SetRawInputEvent(lastPointEvent_);
+    info->SetRawInputDeviceId(deviceId_);
     if (sysJudge_) {
         return sysJudge_(gestureInfo_, info);
     }

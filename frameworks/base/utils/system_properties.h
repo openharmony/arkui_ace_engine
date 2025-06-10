@@ -81,6 +81,24 @@ union DebugFlags {
     } bits_;
 };
 
+struct WidthLayoutBreakPoint {
+    double widthVPXS_ = 320.0;
+    double widthVPSM_ = 600.0;
+    double widthVPMD_ = 840.0;
+    double widthVPLG_ = 1440.0;
+    WidthLayoutBreakPoint() = default;
+    WidthLayoutBreakPoint(double widthVPXS, double widthVPSM, double widthVPMD, double widthVPLG)
+        : widthVPXS_(widthVPXS), widthVPSM_(widthVPSM), widthVPMD_(widthVPMD), widthVPLG_(widthVPLG) {}
+};
+
+struct HeightLayoutBreakPoint {
+    double heightVPRATIOSM_ = 0.8;
+    double heightVPRATIOMD_ = 1.2;
+    HeightLayoutBreakPoint() = default;
+    HeightLayoutBreakPoint(double heightVPRATIOSM, double heightVPRATIOMD)
+        : heightVPRATIOSM_(heightVPRATIOSM), heightVPRATIOMD_(heightVPRATIOMD) {}
+};
+
 class ACE_FORCE_EXPORT SystemProperties final {
 public:
     /*
@@ -598,6 +616,8 @@ public:
 
     static bool ConfigChangePerform();
 
+    static void SetConfigChangePerform();
+
     static int32_t GetJankFrameThreshold();
 
     static bool GetTitleStyleEnabled();
@@ -723,6 +743,22 @@ public:
     static bool IsFormSkeletonBlurEnabled();
 
     static int32_t getFormSharedImageCacheThreshold();
+
+    static WidthLayoutBreakPoint GetWidthLayoutBreakpoints()
+    {
+        return widthLayoutBreakpoints_;
+    }
+
+    static HeightLayoutBreakPoint GetHeightLayoutBreakpoints()
+    {
+        return heightLayoutBreakpoints_;
+    }
+
+    static bool IsSyncLoadEnabled()
+    {
+        return syncLoadEnabled_;
+    }
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -814,6 +850,9 @@ private:
     static bool pageTransitionFrzEnabled_;
     static bool formSkeletonBlurEnabled_;
     static int32_t formSharedImageCacheThreshold_;
+    static WidthLayoutBreakPoint widthLayoutBreakpoints_;
+    static HeightLayoutBreakPoint heightLayoutBreakpoints_;
+    static bool syncLoadEnabled_;
 };
 
 } // namespace OHOS::Ace

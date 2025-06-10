@@ -27,6 +27,81 @@ constexpr int32_t ANGLE_90 = 90;
 constexpr int32_t ANGLE_180 = 180;
 constexpr int32_t ANGLE_270 = 270;
 constexpr double SIZE_DIVIDE = 2.0;
+
+TouchType ConvertTouchEventType(int32_t originAction)
+{
+    std::map<int32_t, TouchType> actionMap = {
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL, TouchType::CANCEL },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN, TouchType::DOWN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE, TouchType::MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_UP, TouchType::UP },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN, TouchType::PULL_DOWN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE, TouchType::PULL_MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP, TouchType::PULL_UP },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW, TouchType::PULL_IN_WINDOW },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW, TouchType::PULL_OUT_WINDOW },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER, TouchType::HOVER_ENTER },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE, TouchType::HOVER_MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT, TouchType::HOVER_EXIT },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
+    };
+    auto typeIter = actionMap.find(originAction);
+    if (typeIter == actionMap.end()) {
+        return TouchType::UNKNOWN;
+    }
+    return typeIter->second;
+}
+
+MouseAction ConvertMouseEventAction(int32_t originAction)
+{
+    switch (originAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+            return MouseAction::PRESS;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+            return MouseAction::RELEASE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW:
+            return MouseAction::WINDOW_ENTER;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW:
+            return MouseAction::WINDOW_LEAVE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
+            return MouseAction::MOVE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
+            return MouseAction::PRESS;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
+            return MouseAction::MOVE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
+            return MouseAction::WINDOW_ENTER;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
+            return MouseAction::WINDOW_LEAVE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
+            return MouseAction::RELEASE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            return MouseAction::CANCEL;
+        default:
+            return MouseAction::NONE;
+    }
+}
+
+AxisAction ConvertAxisEventAction(int32_t originAction)
+{
+    switch (originAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN:
+            return AxisAction::BEGIN;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE:
+            return AxisAction::UPDATE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
+            return AxisAction::END;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            return AxisAction::CANCEL;
+        default:
+            return AxisAction::NONE;
+    }
+}
 } // namespace
 
 SourceTool GetSourceTool(int32_t orgToolType)
@@ -69,17 +144,24 @@ uint64_t GetPointerSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerE
     return inputTime;
 }
 
-TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
+TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType)
 {
     TouchPoint touchPoint;
     // just get the max of width and height
     touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
-    touchPoint.x = pointerItem.GetWindowX();
-    touchPoint.y = pointerItem.GetWindowY();
-    touchPoint.screenX = pointerItem.GetDisplayX();
-    touchPoint.screenY = pointerItem.GetDisplayY();
+    if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        touchPoint.x = static_cast<float>(pointerItem.GetWindowXPos());
+        touchPoint.y = static_cast<float>(pointerItem.GetWindowYPos());
+        touchPoint.screenX = static_cast<float>(pointerItem.GetDisplayXPos());
+        touchPoint.screenY = static_cast<float>(pointerItem.GetDisplayYPos());
+    } else {
+        touchPoint.x = pointerItem.GetWindowX();
+        touchPoint.y = pointerItem.GetWindowY();
+        touchPoint.screenX = pointerItem.GetDisplayX();
+        touchPoint.screenY = pointerItem.GetDisplayY();
+    }
     touchPoint.isPressed = pointerItem.IsPressed();
     touchPoint.force = static_cast<float>(pointerItem.GetPressure());
     touchPoint.tiltX = pointerItem.GetTiltX();
@@ -110,7 +192,7 @@ void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, To
             LOGE("get pointer item failed.");
             continue;
         }
-        auto touchPoint = ConvertTouchPoint(item);
+        auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType());
         touchPoint.CovertId();
         touchEvent.pointers.emplace_back(std::move(touchPoint));
     }
@@ -128,6 +210,9 @@ Offset GetTouchEventOriginOffset(const TouchEvent& event)
     bool ret = pointerEvent->GetPointerItem(pointerID, item);
     if (!ret) {
         return Offset();
+    }
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        return Offset(static_cast<float>(item.GetWindowXPos()), static_cast<float>(item.GetWindowYPos()));
     } else {
         return Offset(item.GetWindowX(), item.GetWindowY());
     }
@@ -224,7 +309,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         LOGE("get pointer item failed.");
         return TouchEvent();
     }
-    auto touchPoint = ConvertTouchPoint(item);
+    auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType());
     TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
     std::chrono::microseconds microseconds(GetPointerSensorTime(pointerEvent));
     TimeStamp time(microseconds);
@@ -256,79 +341,38 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 
 void SetTouchEventType(int32_t orgAction, TouchEvent& event)
 {
-    std::map<int32_t, TouchType> actionMap = {
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL, TouchType::CANCEL },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN, TouchType::DOWN },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE, TouchType::MOVE },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_UP, TouchType::UP },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN, TouchType::PULL_DOWN },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE, TouchType::PULL_MOVE },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP, TouchType::PULL_UP },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW, TouchType::PULL_IN_WINDOW },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW, TouchType::PULL_OUT_WINDOW },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER, TouchType::HOVER_ENTER },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE, TouchType::HOVER_MOVE },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT, TouchType::HOVER_EXIT },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
-    };
-    auto typeIter = actionMap.find(orgAction);
-    if (typeIter == actionMap.end()) {
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "unknown touch type");
+    auto touchType = ConvertTouchEventType(orgAction);
+    if (touchType == TouchType::UNKNOWN) {
+        TAG_LOGE(AceLogTag::ACE_INPUTKEYFLOW, "unknown touch type");
         return;
     }
-    event.type = typeIter->second;
-    if (typeIter->second == TouchType::PULL_DOWN || typeIter->second == TouchType::PULL_MOVE ||
-        typeIter->second == TouchType::PULL_UP || typeIter->second == TouchType::PULL_IN_WINDOW ||
-        typeIter->second == TouchType::PULL_OUT_WINDOW) {
-        event.pullType = typeIter->second;
+    event.type = touchType;
+    if (touchType == TouchType::PULL_DOWN || touchType == TouchType::PULL_MOVE || touchType == TouchType::PULL_UP ||
+        touchType == TouchType::PULL_IN_WINDOW || touchType == TouchType::PULL_OUT_WINDOW) {
+        event.pullType = touchType;
     }
 }
 
 void GetMouseEventAction(int32_t action, MouseEvent& events, bool isSceneBoardWindow)
 {
+    events.action = ConvertMouseEventAction(action);
     switch (action) {
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
-            events.action = MouseAction::PRESS;
-            break;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
-            events.action = MouseAction::RELEASE;
-            break;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW:
-            events.action = MouseAction::WINDOW_ENTER;
-            break;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW:
-            events.action = MouseAction::WINDOW_LEAVE;
-            break;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
-            events.action = MouseAction::MOVE;
-            break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
-            events.action = MouseAction::PRESS;
             events.pullAction = MouseAction::PULL_DOWN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
-            events.action = MouseAction::MOVE;
             events.pullAction = MouseAction::PULL_MOVE;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
-            events.action = MouseAction::WINDOW_ENTER;
             events.pullAction = MouseAction::PULL_MOVE;
             return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
-            events.action = MouseAction::WINDOW_LEAVE;
             events.pullAction = MouseAction::PULL_MOVE;
             return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
-            events.action = MouseAction::RELEASE;
             events.pullAction = MouseAction::PULL_UP;
             break;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
-            events.action = MouseAction::CANCEL;
-            break;
         default:
-            events.action = MouseAction::NONE;
             break;
     }
 }
@@ -366,10 +410,17 @@ void ConvertMouseEvent(
         return;
     }
     events.id = pointerID;
-    events.x = item.GetWindowX();
-    events.y = item.GetWindowY();
-    events.screenX = item.GetDisplayX();
-    events.screenY = item.GetDisplayY();
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        events.x = static_cast<float>(item.GetWindowXPos());
+        events.y = static_cast<float>(item.GetWindowYPos());
+        events.screenX = static_cast<float>(item.GetDisplayXPos());
+        events.screenY = static_cast<float>(item.GetDisplayYPos());
+    } else {
+        events.x = item.GetWindowX();
+        events.y = item.GetWindowY();
+        events.screenX = item.GetDisplayX();
+        events.screenY = item.GetDisplayY();
+    }
     events.rawDeltaX = item.GetRawDx();
     events.rawDeltaY = item.GetRawDy();
     GetMouseEventAction(pointerEvent->GetPointerAction(), events, isSceneBoardWindow);
@@ -412,26 +463,7 @@ void ConvertMouseEvent(
 
 void GetAxisEventAction(int32_t action, AxisEvent& event)
 {
-    switch (action) {
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN:
-            event.action = AxisAction::BEGIN;
-            break;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE:
-            event.action = AxisAction::UPDATE;
-            break;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END:
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
-            event.action = AxisAction::END;
-            break;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
-            event.action = AxisAction::CANCEL;
-            break;
-        default:
-            event.action = AxisAction::NONE;
-            break;
-    }
+    event.action = ConvertAxisEventAction(action);
 }
 
 void GetNonPointerAxisEventAction(int32_t action, NG::FocusAxisEvent& event)
@@ -489,10 +521,17 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     }
 
     event.id = item.GetPointerId();
-    event.x = static_cast<float>(item.GetWindowX());
-    event.y = static_cast<float>(item.GetWindowY());
-    event.screenX = static_cast<float>(item.GetDisplayX());
-    event.screenY = static_cast<float>(item.GetDisplayY());
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        event.x = static_cast<float>(item.GetWindowXPos());
+        event.y = static_cast<float>(item.GetWindowYPos());
+        event.screenX = static_cast<float>(item.GetDisplayXPos());
+        event.screenY = static_cast<float>(item.GetDisplayYPos());
+    } else {
+        event.x = static_cast<float>(item.GetWindowX());
+        event.y = static_cast<float>(item.GetWindowY());
+        event.screenX = static_cast<float>(item.GetDisplayX());
+        event.screenY = static_cast<float>(item.GetDisplayY());
+    }
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
@@ -561,10 +600,17 @@ static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN) {
         axisFakePntEvt.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
-        touchPoint.x = pointerItem.GetWindowX();
-        touchPoint.y = pointerItem.GetWindowY();
-        touchPoint.screenX = pointerItem.GetDisplayX();
-        touchPoint.screenY = pointerItem.GetDisplayY();
+        if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+            touchPoint.x = static_cast<float>(pointerItem.GetWindowXPos());
+            touchPoint.y = static_cast<float>(pointerItem.GetWindowYPos());
+            touchPoint.screenX = static_cast<float>(pointerItem.GetDisplayXPos());
+            touchPoint.screenY = static_cast<float>(pointerItem.GetDisplayYPos());
+        } else {
+            touchPoint.x = pointerItem.GetWindowX();
+            touchPoint.y = pointerItem.GetWindowY();
+            touchPoint.screenX = pointerItem.GetDisplayX();
+            touchPoint.screenY = pointerItem.GetDisplayY();
+        }
     } else {
         const float xOffset =
             cvtStep * pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
@@ -775,10 +821,17 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     event.pressed = pointerItem.IsPressed();
-    event.windowX = pointerItem.GetWindowX();
-    event.windowY = pointerItem.GetWindowY();
-    event.displayX = pointerItem.GetDisplayX();
-    event.displayY = pointerItem.GetDisplayY();
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        event.windowX = static_cast<float>(pointerItem.GetWindowXPos());
+        event.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+        event.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
+        event.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
+    } else {
+        event.windowX = pointerItem.GetWindowX();
+        event.windowY = pointerItem.GetWindowY();
+        event.displayX = pointerItem.GetDisplayX();
+        event.displayY = pointerItem.GetDisplayY();
+    }
     event.displayId = pointerEvent->GetTargetDisplayId();
     event.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / SIZE_DIVIDE;
     event.force = static_cast<float>(pointerItem.GetPressure());
@@ -833,10 +886,11 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
             MMI::PointerEvent::PointerItem item;
             if (pointerEvent->GetPointerItem(id, item)) {
                 TAG_LOGD(AceLogTag::ACE_UIEVENT,
-                    "all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
-                    "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
-                    actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(),
-                    item.GetTiltX(), item.GetTiltY());
+                    "all point info: id: %{public}d, x: %{public}d/%{public}f, y: %{public}d/%{public}f, isPressed: "
+                    "%{public}d, pressure: %{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                    actionId, item.GetWindowX(), static_cast<float>(item.GetWindowXPos()), item.GetWindowY(),
+                    static_cast<float>(item.GetWindowYPos()), item.IsPressed(), item.GetPressure(), item.GetTiltX(),
+                    item.GetTiltY());
             }
         }
     }
@@ -852,8 +906,7 @@ void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, cons
     if (ret) {
         float xRelative = item.GetWindowX();
         float yRelative = item.GetWindowY();
-        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
-            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             xRelative = item.GetWindowXPos();
             yRelative = item.GetWindowYPos();
         }
@@ -877,8 +930,7 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
     if (ret) {
         float xRelative = item.GetWindowX();
         float yRelative = item.GetWindowY();
-        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
-            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             xRelative = item.GetWindowXPos();
             yRelative = item.GetWindowYPos();
         }
@@ -934,8 +986,7 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
         }
         float xRelative = item.GetDisplayX();
         float yRelative = item.GetDisplayY();
-        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
-            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             xRelative = item.GetDisplayXPos();
             yRelative = item.GetDisplayYPos();
         }
@@ -970,5 +1021,26 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
         item.SetWindowYPos(windowY);
         point->UpdatePointerItem(id, item);
     }
+}
+
+TouchType GetTouchTypeFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, TouchType::UNKNOWN);
+    auto pointerAction = pointerEvent->GetPointerAction();
+    return ConvertTouchEventType(pointerAction);
+}
+
+AxisAction GetAxisActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, AxisAction::NONE);
+    auto pointerAction = pointerEvent->GetPointerAction();
+    return ConvertAxisEventAction(pointerAction);
+}
+
+MouseAction GetMouseActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, MouseAction::NONE);
+    auto pointerAction = pointerEvent->GetPointerAction();
+    return ConvertMouseEventAction(pointerAction);
 }
 } // namespace OHOS::Ace::Platform

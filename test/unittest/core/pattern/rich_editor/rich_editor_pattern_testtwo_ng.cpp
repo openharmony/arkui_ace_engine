@@ -124,38 +124,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, CalcLineBeginPosition001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RequestKeyboardToEdit001
- * @tc.desc: test RequestKeyboardToEdit
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, RequestKeyboardToEdit001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->previewLongPress_ = true;
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = false;
-    richEditorPattern->RequestKeyboardToEdit();
-    EXPECT_FALSE(richEditorPattern->previewLongPress_);
-}
-
-/**
- * @tc.name: RequestKeyboardToEdit002
- * @tc.desc: test RequestKeyboardToEdit
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, RequestKeyboardToEdit002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->RequestKeyboardToEdit();
-}
-
-/**
  * @tc.name: IsResponseRegionExpandingNeededForStylus001
  * @tc.desc: test IsResponseRegionExpandingNeededForStylus
  * @tc.type: FUNC
@@ -207,76 +175,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, TripleClickSection002, TestSize.Level1)
 }
 
 /**
- * @tc.name: ResetKeyboardIfNeed001
- * @tc.desc: test ResetKeyboardIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-
-    focusHub->currentFocus_ = true;
-    richEditorPattern->action_ = TextInputAction::UNSPECIFIED;
-    richEditorPattern->ResetKeyboardIfNeed();
-    EXPECT_NE(richEditorPattern->action_, TextInputAction::UNSPECIFIED);
-}
-
-/**
- * @tc.name: ResetKeyboardIfNeed002
- * @tc.desc: test ResetKeyboardIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-
-    richEditorPattern->imeShown_ = false;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->currentFocus_ = false;
-    richEditorPattern->action_ = TextInputAction::SEARCH;
-    richEditorPattern->ResetKeyboardIfNeed();
-    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
-}
-
-/**
- * @tc.name: ResetKeyboardIfNeed003
- * @tc.desc: test ResetKeyboardIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-
-    richEditorPattern->imeShown_ = false;
-    richEditorPattern->isCustomKeyboardAttached_ = false;
-    focusHub->currentFocus_ = true;
-    richEditorPattern->action_ = TextInputAction::SEARCH;
-    richEditorPattern->ResetKeyboardIfNeed();
-    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
-}
-
-/**
  * @tc.name: DumpInfo001
  * @tc.desc: test DumpInfo.
  * @tc.type: FUNC
@@ -299,31 +197,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, DumpInfo001, TestSize.Level1)
     richEditorOverlay->caretHeight_->Set(1.0f);
     richEditorPattern->DumpInfo();
     EXPECT_NE(richEditorPattern->selectOverlay_->HasRenderTransform(), true);
-}
-
-/**
- * @tc.name: GetLineMetrics001
- * @tc.desc: test GetLineMetrics
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetLineMetrics001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    int32_t lineNumber = 3;
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(3));
-    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 2 });
-    richEditorPattern->richTextRect_.SetRect(1, 1, 1, 1);
-    auto lineMetrics1 = richEditorPattern->paragraphs_.GetLineMetrics(lineNumber);
-    auto ret1 = richEditorPattern->GetLineMetrics(lineNumber);
-    EXPECT_EQ(lineMetrics1.x, ret1.x);
-
-    lineNumber = 1;
-    richEditorPattern->richTextRect_.SetRect(1, 1, 1, 1);
-    auto lineMetrics2 = richEditorPattern->paragraphs_.GetLineMetrics(lineNumber);
-    auto ret2 = richEditorPattern->GetLineMetrics(lineNumber);
-    EXPECT_NE(lineMetrics2.x, ret2.x);
 }
 
 /**
@@ -521,11 +394,46 @@ HWTEST_F(RichEditorPatternTestTwoNg, IsResponseRegionExpandingNeededForStylus005
 }
 
 /**
- * @tc.name: OnDirtyLayoutWrapperSwap002
+ * @tc.name: IsResponseRegionExpandingNeededForStylus006
+ * @tc.desc: test testInput text IsResponseRegionExpandingNeededForStylus001
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, IsResponseRegionExpandingNeededForStylus006, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.x = 10;
+    touchEvent.y = 10;
+    auto ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.sourceTool = SourceTool::PEN;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_TRUE(ret);
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.type = TouchType::MOVE;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::MOVE;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceTool = SourceTool::PEN;
+    EXPECT_TRUE(richEditorNode_->IsVisible());
+    richEditorNode_->layoutProperty_->OnVisibilityUpdate(VisibleType::INVISIBLE);
+    EXPECT_FALSE(richEditorNode_->IsVisible());
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
  * @tc.desc: test OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -544,44 +452,4 @@ HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap002, TestSize.Level
     EXPECT_FALSE(ret);
 }
 
-/**
- * @tc.name: GetParagraphInfo001
- * @tc.desc: test GetParagraphInfo
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetParagraphInfo001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    int32_t start = 1;
-    int32_t end = 24;
-    ClearSpan();
-    auto size = richEditorPattern->GetParagraphInfo(start, end).size();
-    AddSpan(INIT_VALUE_2);
-    AddSpan(INIT_VALUE_2 + u"\n");
-    AddSpan(INIT_VALUE_2);
-    AddSpan(INIT_VALUE_2);
-    EXPECT_NE(size, richEditorPattern->GetParagraphInfo(start, end).size());
-}
-
-/**
- * @tc.name: HandleOnCopy001
- * @tc.desc: test HandleOnCopy
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, HandleOnCopy001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->clipboard_ = AceType::MakeRefPtr<MockClipBoard>(taskExecutor);
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    bool isUsingExternalKeyboard = true;
-    richEditorPattern->selectOverlay_->isUsingMouse_ = true;
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-    richEditorPattern->HandleOnCopy(isUsingExternalKeyboard);
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-}
 } // namespace OHOS::Ace::NG

@@ -19,13 +19,15 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/list/list_item_group_accessibility_property.h"
+#include "core/components_ng/layout/section/dummy_fill_algorithm.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
+#include "core/components_ng/pattern/list/list_item_group_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
@@ -68,8 +70,8 @@ struct ListMainSizeValues {
     bool backward = false;
 };
 
-class ACE_EXPORT ListItemGroupPattern : public Pattern {
-    DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
+class ACE_EXPORT ListItemGroupPattern : public LazyContainer {
+    DECLARE_ACE_TYPE(ListItemGroupPattern, LazyContainer);
 
 public:
     explicit ListItemGroupPattern(
@@ -332,6 +334,7 @@ public:
     VisibleContentInfo GetStartListItemIndex();
     VisibleContentInfo GetEndListItemIndex();
     void ResetChildrenSize();
+    bool IsInViewport(int32_t index) const;
 
     void ClearItemPosition();
     void ClearCachedItemPosition();
@@ -363,6 +366,10 @@ public:
     }
 
 private:
+    RefPtr<FillAlgorithm> CreateFillAlgorithm() override
+    {
+        return MakeRefPtr<DummyFillAlgorithm>();
+    }
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
@@ -394,7 +401,8 @@ private:
     WeakPtr<FocusHub> FindNextValidFocus(int32_t moveStep, int32_t curIndexInGroup, int32_t curGroupIndexInList,
         int32_t nextIndexInGroup, const WeakPtr<FocusHub>& currentFocusNode);
     void AdjustMountTreeSequence(int32_t footerCount);
-    
+    void MappingPropertiesFromLayoutAlgorithm(const RefPtr<ListItemGroupLayoutAlgorithm>& layoutAlgorithm);
+
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
@@ -437,8 +445,9 @@ private:
     TextDirection layoutDirection_ = TextDirection::LTR;
     float mainSize_ = 0.0f;
     float listContentSize_ = 0.0f;
-    ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
     bool isStackFromEnd_ = false;
+    bool prevMeasureBreak_ = false;
+    ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };
 } // namespace OHOS::Ace::NG
 

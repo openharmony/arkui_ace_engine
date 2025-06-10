@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,14 +118,10 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionBgColor", &JSSelect::OptionBgColor, opt);
     JSClass<JSSelect>::StaticMethod("optionFont", &JSSelect::OptionFont, opt);
     JSClass<JSSelect>::StaticMethod("optionFontColor", &JSSelect::OptionFontColor, opt);
-    JSClass<JSSelect>::StaticMethod("onSelect", &JSSelect::OnSelected, opt);
     JSClass<JSSelect>::StaticMethod("space", &JSSelect::SetSpace, opt);
     JSClass<JSSelect>::StaticMethod("arrowPosition", &JSSelect::SetArrowPosition, opt);
     JSClass<JSSelect>::StaticMethod("menuAlign", &JSSelect::SetMenuAlign, opt);
     JSClass<JSSelect>::StaticMethod("avoidance", &JSSelect::SetAvoidance, opt);
-
-    // API7 onSelected deprecated
-    JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
     JSClass<JSSelect>::StaticMethod("size", &JSSelect::JsSize);
     JSClass<JSSelect>::StaticMethod("padding", &JSSelect::JsPadding);
     JSClass<JSSelect>::StaticMethod("paddingTop", &JSSelect::SetPaddingTop, opt);
@@ -146,6 +142,8 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("textModifier", &JSSelect::SetTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("optionTextModifier", &JSSelect::SetOptionTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionTextModifier", &JSSelect::SetSelectedOptionTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("showInSubWindow", &JSSelect::SetShowInSubWindow);
+    JSClass<JSSelect>::StaticMethod("showDefaultSelectedIcon", &JSSelect::SetShowDefaultSelectedIcon);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -162,14 +160,17 @@ void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeE
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = info.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](int32_t index) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+    auto onSelect = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](int32_t index) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("Select.SelectChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(index));
-        func->ExecuteJS(1, &newJSVal);
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     SelectModel::GetInstance()->SetSelectChangeEvent(onSelect);
 }
@@ -209,15 +210,18 @@ void ParseValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEven
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = info.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+    auto onSelect = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](
                         const std::string& value) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("Select.ValueChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-        func->ExecuteJS(1, &newJSVal);
+        panda::Local<panda::JSValueRef> params[1] = { panda::StringRef::NewFromUtf8(vm, value.c_str()) };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     SelectModel::GetInstance()->SetValueChangeEvent(onSelect);
 }
@@ -535,29 +539,6 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set option font color %{public}s", textColor.ColorToString().c_str());
     SelectModel::GetInstance()->SetOptionFontColor(textColor);
-}
-
-void JSSelect::OnSelected(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                        int32_t index, const std::string& value) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Select.onSelect");
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire change event %{public}d %{public}s", index, value.c_str());
-        PipelineContext::SetCallBackNode(node);
-        JSRef<JSVal> params[2];
-        params[0] = JSRef<JSVal>::Make(ToJSValue(index));
-        params[1] = JSRef<JSVal>::Make(ToJSValue(value));
-        func->ExecuteJS(2, params);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect");
-    };
-    SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
-    info.ReturnSelf();
 }
 
 void JSSelect::JsSize(const JSCallbackInfo& info)
@@ -993,10 +974,11 @@ void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    auto menuOptionArg = info[0];
     auto menuTheme = GetTheme<NG::MenuTheme>();
     NG::MenuParam menuParam;
     MenuDefaultParam(menuParam);
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+    if (!menuOptionArg->IsObject()) {
         NG::BorderWidthProperty outlineWidth;
         outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
         menuParam.outlineWidth = outlineWidth;
@@ -1004,7 +986,7 @@ void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
         outlineColor.SetColor(menuTheme->GetOuterBorderColor());
         menuParam.outlineColor = outlineColor;
     } else {
-        auto menuOptions = JSRef<JSObject>::Cast(info[0]);
+        auto menuOptions = JSRef<JSObject>::Cast(menuOptionArg);
         auto outlineWidthValue = menuOptions->GetProperty("width");
         JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
         auto outlineColorValue = menuOptions->GetProperty("color");
@@ -1056,5 +1038,29 @@ void JSSelect::SetSelectedOptionTextModifier(const JSCallbackInfo& info)
     }
     JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
     SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
+}
+
+void JSSelect::SetShowInSubWindow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        SelectModel::GetInstance()->ResetShowInSubWindow();
+        return;
+    }
+    SelectModel::GetInstance()->SetShowInSubWindow(info[0]->ToBoolean());
+}
+
+void JSSelect::SetShowDefaultSelectedIcon(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        SelectModel::GetInstance()->ResetShowDefaultSelectedIcon();
+        return;
+    }
+    SelectModel::GetInstance()->SetShowDefaultSelectedIcon(info[0]->ToBoolean());
 }
 } // namespace OHOS::Ace::Framework

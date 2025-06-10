@@ -48,6 +48,12 @@ class BuilderNode {
     __JSScopeUtil__.restoreInstanceId();
     return ret;
   }
+  public postInputEvent(event: InputEventType): boolean {
+    __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+    let ret = this._JSBuilderNode.postInputEvent(event);
+    __JSScopeUtil__.restoreInstanceId();
+    return ret;
+  }
   public dispose(): void {
     this._JSBuilderNode.dispose();
   }
@@ -156,6 +162,9 @@ class JSBuilderNode extends BaseNode {
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
     this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
     this.params_ = params;
+    if (options?.localStorage instanceof LocalStorage) {
+      this.setShareLocalStorage(options.localStorage);
+    }
     this.updateFuncByElmtId.clear();
     if(this.bindedViewOfBuilderNode){
       globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode); 

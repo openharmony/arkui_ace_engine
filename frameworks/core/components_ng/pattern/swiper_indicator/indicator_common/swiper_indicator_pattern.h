@@ -127,6 +127,9 @@ public:
             swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate(true);
         paintMethod->SetTouchBottomPageRate(currentTurnPageRate);
         paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
+        auto targetIndex = swiperPattern->GetTargetIndex();
+        targetIndex ? paintMethod->SetTargetIndex(swiperPattern->GetLoopIndex(targetIndex.value()))
+                    : paintMethod->SetTargetIndex(std::nullopt);
         mouseClickIndex_ = std::nullopt;
     }
 
@@ -305,7 +308,6 @@ private:
     void UpdateOverlongPaintMethod(
         const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod);
     int32_t GetDisplayCurrentIndex() const;
-    void UpdateDigitalIndicator();
     void RegisterIndicatorChangeEvent();
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCountDefault() const;
@@ -457,6 +459,7 @@ protected:
     virtual RectF CalcBoundsRect() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();
+    void UpdateDigitalIndicator();
 };
 } // namespace OHOS::Ace::NG
 

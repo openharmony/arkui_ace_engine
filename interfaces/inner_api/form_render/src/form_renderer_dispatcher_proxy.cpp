@@ -313,5 +313,28 @@ int32_t FormRendererDispatcherProxy::SendRequest(uint32_t code, MessageParcel &d
     }
     return remote->SendRequest(code, data, reply, option);
 }
+
+void FormRendererDispatcherProxy::SetMultiInstanceEnabled(bool isMultiInstanceEnabled)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return;
+    }
+ 
+    if (!data.WriteBool(isMultiInstanceEnabled)) {
+        HILOG_ERROR("write multi instance enabled flag fail, action error");
+        return;
+    }
+ 
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_MULTI_INSTANCE_ENABLED),
+        data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
+    }
+}
 } // namespace Ace
 } // namespace OHOS

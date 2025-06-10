@@ -179,7 +179,7 @@ HWTEST_F(DatePickerTestToJson, DatePickerTestToJsonEnableHapticFeedback, TestSiz
  * @tc.desc: Test DatePickerPattern ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestToJson, atePickerTestToJsondataOption001, TestSize.Level1)
+HWTEST_F(DatePickerTestToJson, DatePickerTestToJsondataOption001, TestSize.Level1)
 {
     /**
      * @tc.step: step1. create picker framenode and pattern.
@@ -219,7 +219,7 @@ HWTEST_F(DatePickerTestToJson, atePickerTestToJsondataOption001, TestSize.Level1
  * @tc.desc: Test DatePickerPattern ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestToJson, atePickerTestToJsondataOption002, TestSize.Level1)
+HWTEST_F(DatePickerTestToJson, DatePickerTestToJsondataOption002, TestSize.Level1)
 {
     /**
      * @tc.step: step1. create picker framenode and pattern.

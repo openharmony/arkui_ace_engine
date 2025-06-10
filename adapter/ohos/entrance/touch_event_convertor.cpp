@@ -44,4 +44,19 @@ void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touc
 {
     Platform::SetPostPointerEvent(pointerEvent, touchEvent);
 }
+
+TouchType GetTouchEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return Platform::GetTouchTypeFromPointerEvent(pointerEvent);
+}
+
+AxisAction GetAxisEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return Platform::GetAxisActionFromPointerEvent(pointerEvent);
+}
+
+MouseAction GetMouseEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return Platform::GetMouseActionFromPointerEvent(pointerEvent);
+}
 }

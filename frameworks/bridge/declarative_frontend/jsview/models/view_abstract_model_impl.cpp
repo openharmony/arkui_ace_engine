@@ -675,6 +675,8 @@ void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle, fl
     transform->Rotate(x, y, z, angle, option);
 }
 
+void ViewAbstractModelImpl::SetRotateAngle(float x, float y, float z, float perspective) {}
+
 void ViewAbstractModelImpl::SetTransformMatrix(const std::vector<float>& matrix)
 {
     RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();

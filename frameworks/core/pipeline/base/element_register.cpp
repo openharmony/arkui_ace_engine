@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
+std::atomic<ElementIdType> ElementRegister::nextUniqueElementId_ = 0;
 std::mutex ElementRegister::mutex_;
 
 ElementRegister* ElementRegister::GetInstance()
@@ -30,6 +31,11 @@ ElementRegister* ElementRegister::GetInstance()
         }
     }
     return (ElementRegister::instance_);
+}
+
+ElementIdType ElementRegister::MakeUniqueId()
+{
+    return ElementRegister::nextUniqueElementId_++;
 }
 
 RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
@@ -272,5 +278,39 @@ void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32
     if (it->second.empty()) {
         inspectorIdMap_.erase(it);
     }
+}
+
+void ElementRegister::RegisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
+{
+    surfaceIdEmbedNodeMap_[surfaceId] = node;
+    auto nodeRef = node.Upgrade();
+    CHECK_NULL_VOID(nodeRef);
+    embedNodeSurfaceIdMap_[AceType::RawPtr(nodeRef)] = surfaceId;
+}
+
+void ElementRegister::UnregisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
+{
+    surfaceIdEmbedNodeMap_.erase(surfaceId);
+    auto nodeRef = node.Upgrade();
+    CHECK_NULL_VOID(nodeRef);
+    NG::FrameNode* nodePtr = AceType::RawPtr(nodeRef);
+    embedNodeSurfaceIdMap_.erase(nodePtr);
+}
+
+WeakPtr<NG::FrameNode> ElementRegister::GetEmbedNodeBySurfaceId(const uint64_t surfaceId)
+{
+    auto it = surfaceIdEmbedNodeMap_.find(surfaceId);
+    return (it == surfaceIdEmbedNodeMap_.end()) ? nullptr : it->second;
+}
+
+bool ElementRegister::IsEmbedNode(NG::FrameNode* node)
+{
+    return (embedNodeSurfaceIdMap_.find(node) != embedNodeSurfaceIdMap_.end());
+}
+
+uint64_t ElementRegister::GetSurfaceIdByEmbedNode(NG::FrameNode* node)
+{
+    auto it = embedNodeSurfaceIdMap_.find(node);
+    return (it == embedNodeSurfaceIdMap_.end()) ? 0U : it->second;
 }
 } // namespace OHOS::Ace

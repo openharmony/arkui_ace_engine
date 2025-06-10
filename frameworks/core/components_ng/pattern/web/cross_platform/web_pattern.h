@@ -338,7 +338,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DatabaseAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextZoomRatio, int32_t);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabledAndPort,
+        WebPatternProperty::WebDebuggingConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, PinchSmoothModeEnabled, bool);
@@ -360,6 +361,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceDarkAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioResumeInterval, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioExclusive, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioSessionType, WebAudioSessionType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
@@ -503,7 +505,7 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder);
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
-
+    void SetDefaultBackgroundColor();
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -537,7 +539,8 @@ private:
     void OnFileFromUrlAccessEnabledUpdate(bool value);
     void OnDatabaseAccessEnabledUpdate(bool value);
     void OnTextZoomRatioUpdate(int32_t value);
-    void OnWebDebuggingAccessEnabledUpdate(bool value);
+    void OnWebDebuggingAccessEnabledAndPortUpdate(
+        const WebPatternProperty::WebDebuggingConfigType& enabled_and_port);
     void OnPinchSmoothModeEnabledUpdate(bool value);
     void OnBackgroundColorUpdate(int32_t value);
     void OnInitialScaleUpdate(float value);
@@ -559,6 +562,7 @@ private:
     void OnForceDarkAccessUpdate(bool access);
     void OnAudioResumeIntervalUpdate(int32_t resumeInterval);
     void OnAudioExclusiveUpdate(bool audioExclusive);
+    void OnAudioSessionTypeUpdate(WebAudioSessionType value);
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
@@ -688,6 +692,7 @@ private:
     int32_t rootLayerHeight_ = 0;
     bool richTextInit_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
+    bool needSetDefaultBackgroundColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -141,6 +141,13 @@ void JSGestureRecognizer::SetEnabled(const JSCallbackInfo& args)
     recognizer->SetEnabled(enabled);
 }
 
+void JSGestureRecognizer::PreventBegin(const JSCallbackInfo& args)
+{
+    auto recognizer = recognizer_.Upgrade();
+    CHECK_NULL_VOID(recognizer);
+    recognizer->SetPreventBegin(true);
+}
+
 void JSGestureRecognizer::IsEnabled(const JSCallbackInfo& args)
 {
     bool isEnabled = false;
@@ -298,29 +305,46 @@ void JSSwipeRecognizer::GetSpeed(const JSCallbackInfo& args)
 
 void JSTouchRecognizer::CancelTouch(const JSCallbackInfo& args)
 {
-    if (touchRecognizerTarget_.empty()) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE, "touchRecognizerTarget_ is empty.");
+    if (fingerIds_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_GESTURE, "fingerIds_ is empty.");
         return;
     }
-    CHECK_NULL_VOID(target_);
-    auto node = target_->GetAttachedNode().Upgrade();
+    auto target = target_.Upgrade();
+    CHECK_NULL_VOID(target);
+    auto node = target->GetAttachedNode().Upgrade();
     CHECK_NULL_VOID(node);
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
- 
-    eventManager->DispatchTouchCancelToRecognizer(target_, touchRecognizerTarget_);
-    touchRecognizerTarget_.clear();
+    auto& touchTestResult = eventManager->touchTestResults_;
+    std::vector<std::pair<int32_t, TouchTestResult::iterator>> legacyTarget;
+    for (const auto& fingerId : fingerIds_) {
+        if (touchTestResult.find(fingerId) == touchTestResult.end()) {
+            continue;
+        }
+
+        auto& targetsList = touchTestResult[fingerId];
+        auto it = std::find_if(targetsList.begin(), targetsList.end(),
+            [&target](const RefPtr<TouchEventTarget>& t) { return t == target; });
+
+        if (it != targetsList.end()) {
+            legacyTarget.emplace_back(fingerId, it);
+        }
+    }
+
+    eventManager->DispatchTouchCancelToRecognizer(RawPtr(target), legacyTarget);
+    fingerIds_.clear();
 }
  
 void JSTouchRecognizer::GetEventTargetInfo(const JSCallbackInfo& args)
 {
-    if (!target_) {
+    auto target = target_.Upgrade();
+    if (!target) {
         args.SetReturnValue(JSClass<JSEventTargetInfo>::NewInstance());
         return;
     }
-    auto attachNode = target_->GetAttachedNode().Upgrade();
+    auto attachNode = target->GetAttachedNode().Upgrade();
     if (!attachNode) {
         args.SetReturnValue(JSClass<JSEventTargetInfo>::NewInstance());
         return;
@@ -356,6 +380,7 @@ void JSGestureRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSGestureRecognizer>::CustomMethod("isFingerCountLimit", &JSGestureRecognizer::IsFingerCountLimit);
     JSClass<JSGestureRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
     JSClass<JSGestureRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
+    JSClass<JSGestureRecognizer>::CustomMethod("preventBegin", &JSGestureRecognizer::PreventBegin);
     JSClass<JSGestureRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
     JSClass<JSGestureRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
     JSClass<JSGestureRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
@@ -372,6 +397,7 @@ void JSPanRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSPanRecognizer>::CustomMethod("isFingerCountLimit", &JSGestureRecognizer::IsFingerCountLimit);
     JSClass<JSPanRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
     JSClass<JSPanRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
+    JSClass<JSPanRecognizer>::CustomMethod("preventBegin", &JSGestureRecognizer::PreventBegin);
     JSClass<JSPanRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
     JSClass<JSPanRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
     JSClass<JSPanRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
@@ -393,6 +419,7 @@ void JSPinchRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSPinchRecognizer>::CustomMethod("isFingerCountLimit", &JSGestureRecognizer::IsFingerCountLimit);
     JSClass<JSPinchRecognizer>::CustomMethod("getDistance", &JSPinchRecognizer::GetDistance);
     JSClass<JSPinchRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
+    JSClass<JSPinchRecognizer>::CustomMethod("preventBegin", &JSGestureRecognizer::PreventBegin);
     JSClass<JSPinchRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
     JSClass<JSPinchRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
     JSClass<JSPinchRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
@@ -411,6 +438,7 @@ void JSTapRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSTapRecognizer>::CustomMethod("isFingerCountLimit", &JSGestureRecognizer::IsFingerCountLimit);
     JSClass<JSTapRecognizer>::CustomMethod("getTapCount", &JSTapRecognizer::GetCount);
     JSClass<JSTapRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
+    JSClass<JSTapRecognizer>::CustomMethod("preventBegin", &JSGestureRecognizer::PreventBegin);
     JSClass<JSTapRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
     JSClass<JSTapRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
     JSClass<JSTapRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
@@ -430,6 +458,7 @@ void JSLongPressRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSLongPressRecognizer>::CustomMethod("isRepeat", &JSLongPressRecognizer::GetRepeat);
     JSClass<JSLongPressRecognizer>::CustomMethod("getDuration", &JSLongPressRecognizer::GetDuration);
     JSClass<JSLongPressRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
+    JSClass<JSLongPressRecognizer>::CustomMethod("preventBegin", &JSGestureRecognizer::PreventBegin);
     JSClass<JSLongPressRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
     JSClass<JSLongPressRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
     JSClass<JSLongPressRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
@@ -449,6 +478,7 @@ void JSRotationRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSRotationRecognizer>::CustomMethod("isFingerCountLimit", &JSGestureRecognizer::IsFingerCountLimit);
     JSClass<JSRotationRecognizer>::CustomMethod("getAngle", &JSRotationRecognizer::GetAngle);
     JSClass<JSRotationRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
+    JSClass<JSRotationRecognizer>::CustomMethod("preventBegin", &JSGestureRecognizer::PreventBegin);
     JSClass<JSRotationRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
     JSClass<JSRotationRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
     JSClass<JSRotationRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
@@ -469,6 +499,7 @@ void JSSwipeRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSSwipeRecognizer>::CustomMethod("getVelocityThreshold", &JSSwipeRecognizer::GetSpeed);
     JSClass<JSSwipeRecognizer>::CustomMethod("getDirection", &JSSwipeRecognizer::GetDirection);
     JSClass<JSSwipeRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
+    JSClass<JSSwipeRecognizer>::CustomMethod("preventBegin", &JSGestureRecognizer::PreventBegin);
     JSClass<JSSwipeRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
     JSClass<JSSwipeRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
     JSClass<JSSwipeRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);

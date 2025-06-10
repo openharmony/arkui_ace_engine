@@ -574,6 +574,46 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel018, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel019
+ * @tc.desc: test SetEnableAutoSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create RichEditor node and Set EnableAutoSpacing True
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    richEditorModel.SetEnableAutoSpacing(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = richEditorNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), true);
+    EXPECT_EQ(pattern->isEnableAutoSpacing_, true);
+
+    /**
+     * @tc.expected: Set EnableAutoSpacing False
+     */
+    RichEditorModelNG::SetEnableAutoSpacing(richEditorNode, false);
+
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
+    EXPECT_EQ(pattern->isEnableAutoSpacing_, false);
+}
+
+/**
  * @tc.name: CreateImageSourceInfo001
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
@@ -586,26 +626,6 @@ HWTEST_F(RichEditorBaseTestNg, CreateImageSourceInfo001, TestSize.Level1)
     ImageSpanOptions info;
     auto ret = richEditorPattern->CreateImageSourceInfo(info);
     EXPECT_NE(ret, nullptr);
-}
-
-/**
- * @tc.name: NeedSoftKeyboard001
- * @tc.desc: test NeedSoftKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, NeedSoftKeyboard001, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Get frameNode and pattern.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test whether rich editor need soft keyboard.
-     */
-    EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
 }
 
 /**
@@ -688,9 +708,14 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest002, TestSize.Level1)
      * @tc.steps: step2. localOffset is in the normal area.
      */
     localOffset.SetY(MAGNIFIER_OFFSETY.ConvertToPx() + MAGNIFIERNODE_HEIGHT.ConvertToPx());
-    SystemProperties::SetDevicePhysicalHeight(1280);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    auto height = displayInfo->GetHeight();
+    displayInfo->SetHeight(1280);
     controller->SetLocalOffset(localOffset);
-    SystemProperties::SetDevicePhysicalHeight(0);
+    displayInfo->SetHeight(height);
     magnifierOffset = geometryNode->GetFrameOffset();
     EXPECT_EQ(magnifierOffset.GetY(), paintOffset.GetY() + localOffset.GetY() - MAGNIFIERNODE_HEIGHT.ConvertToPx() / 2
         - MAGNIFIER_OFFSETY.ConvertToPx());

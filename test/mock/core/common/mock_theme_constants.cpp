@@ -144,7 +144,7 @@ uint32_t ThemeConstants::GetSymbolByName(const char* name) const
 
 uint32_t ThemeConstants::GetSymbolById(uint32_t resId) const
 {
-    return  -1;
+    return  0;
 }
 
 std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const

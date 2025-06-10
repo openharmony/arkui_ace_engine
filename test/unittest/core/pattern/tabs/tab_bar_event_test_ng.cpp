@@ -1136,6 +1136,12 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest001, TestSize.Level1)
     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     CreateTabsDone(model);
+    auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    auto childFocusHub0 = childNode0->GetOrCreateFocusHub();
+    auto childFocusHub1 = childNode1->GetOrCreateFocusHub();
+    EXPECT_EQ(childFocusHub0->GetFocusDependence(), FocusDependence::SELF);
+    EXPECT_EQ(childFocusHub1->GetFocusDependence(), FocusDependence::SELF);
 
     /**
      * @tc.steps: step2. Call onGetNextFocusNodeFunc_ use FocusReason::DEFAULT
@@ -1150,8 +1156,6 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest001, TestSize.Level1)
      * @tc.steps: step3. Call onGetNextFocusNodeFunc_ use FocusReason::FOCUS_TRAVEL
      * @tc.expected: expect The function is run ok.
      */
-    auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
-    auto childFocusHub0 = childNode0->GetOrCreateFocusHub();
     nextFocusHub = tabBarFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::TAB);
     EXPECT_EQ(nextFocusHub, childFocusHub0);
     EXPECT_EQ(tabBarPattern_->focusIndicator_, 0);
@@ -1161,8 +1165,6 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest001, TestSize.Level1)
      * @tc.expected: expect The function is run ok.
      */
     ChangeIndex(1);
-    auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
-    auto childFocusHub1 = childNode1->GetOrCreateFocusHub();
     nextFocusHub = tabBarFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::TAB);
     EXPECT_EQ(nextFocusHub, childFocusHub1);
     EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
@@ -1257,6 +1259,10 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest003, TestSize.Level1)
     CreateTabsDone(model);
     auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
     auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    auto childFocusHub0 = childNode0->GetOrCreateFocusHub();
+    auto childFocusHub1 = childNode1->GetOrCreateFocusHub();
+    EXPECT_EQ(childFocusHub0->GetFocusDependence(), FocusDependence::SELF);
+    EXPECT_EQ(childFocusHub1->GetFocusDependence(), FocusDependence::SELF);
 
     /**
      * @tc.steps: step2. Call scopeFocusAlgorithm.getNextFocusNode use different FocusStep
@@ -1310,6 +1316,10 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest004, TestSize.Level1)
     CreateTabsDone(model);
     auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
     auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    auto childFocusHub0 = childNode0->GetOrCreateFocusHub();
+    auto childFocusHub1 = childNode1->GetOrCreateFocusHub();
+    EXPECT_EQ(childFocusHub0->GetFocusDependence(), FocusDependence::SELF);
+    EXPECT_EQ(childFocusHub1->GetFocusDependence(), FocusDependence::SELF);
 
     /**
      * @tc.steps: step2. Call scopeFocusAlgorithm.getNextFocusNode use different FocusStep
@@ -1585,5 +1595,25 @@ HWTEST_F(TabBarEventTestNg, HandleDragOverScroll003, TestSize.Level1)
 
     DragEnd(0);
     EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
+}
+
+/**
+ * @tc.name: TabBarPatternCheckSvg001
+ * @tc.desc: test CheckSvg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternCheckSvg001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    int32_t index = 1;
+
+    /**
+     * @tc.steps: step2. Test function TabBarPatternCheckSvg001.
+     * @tc.expected: Related function runs ok.
+     */
+    auto ret = tabBarPattern_->CheckSvg(index);
+    EXPECT_EQ(ret, false);
 }
 } // namespace OHOS::Ace::NG

@@ -66,11 +66,7 @@ public:
         component_->MarkIsRoot(isRoot);
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override;
-#else
     RSPath AsPath(const Size& viewPort) const override;
-#endif
 
     bool IsRoot() const
     {

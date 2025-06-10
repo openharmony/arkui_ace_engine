@@ -21,6 +21,7 @@
 #include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::NG {
+using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
 class CommonBridge {
 public:
     static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -117,6 +118,8 @@ public:
     static ArkUINativeModuleValue ResetScale(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetRotate(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetRotate(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetRotateAngle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetRotateAngle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetGeometryTransition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetGeometryTransition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBindTips(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -297,6 +300,10 @@ public:
     static Local<panda::ObjectRef> CreateRecognizerObject(EcmaVM* vm, const RefPtr<NG::NGGestureRecognizer>& target);
     static Local<panda::ArrayRef> CreateTouchRecognizersObject(
         EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& target);
+    static TouchRecognizerMap CreateTouchRecognizerMap(
+        const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current);
+    static void CollectTouchEventTarget(TouchRecognizerMap& dict, std::list<RefPtr<TouchEventTarget>>& targets,
+        NG::FrameNode* borderNode, int32_t fingerId);
     static Local<panda::ObjectRef> CreateFingerInfo(EcmaVM* vm, const FingerInfo& fingerInfo);
     static Local<panda::ObjectRef> CreateEventTargetObject(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateAreaObject(EcmaVM* vm, const RectF& rect, const OffsetF& origin);
@@ -456,6 +463,12 @@ public:
     static Local<panda::ObjectRef> CreateAxisEventInfo(EcmaVM* vm, AxisInfo& info);
     static ArkUINativeModuleValue SetOnAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetAccessibilityTextHint(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAccessibilityTextHint(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetAccessibilityChecked(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAccessibilityChecked(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetAccessibilitySelected(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAccessibilitySelected(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetVisualEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetVisualEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundFilter(ArkUIRuntimeCallInfo* runtimeCallInfo);

@@ -103,6 +103,7 @@ public:
     static void JsOnDrop(const JSCallbackInfo& info);
     static void PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     static void OnWindowNew(const JSCallbackInfo& args);
+    static void OnActivateContent(const JSCallbackInfo& args);
     static void OnWindowExit(const JSCallbackInfo& args);
     static void MultiWindowAccessEnabled(bool isMultiWindowAccessEnable);
     static void AllowWindowOpenMethod(bool isAllowWindowOpenMethod);
@@ -151,11 +152,26 @@ public:
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void OptimizeParserBudgetEnabled(bool enable);
+    static void BypassVsyncCondition(int32_t webBypassVsyncCondition);
     static void RunJavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
+    static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
+    static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
+    static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);
+    static JSRef<JSVal> CreatePermissionRequestHandler(const WebPermissionRequestEvent& eventInfo);
+    static JSRef<JSVal> CreateGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo);
+    static JSRef<JSVal> CreateNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo);
+    static JSRef<JSVal> CreateFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo);
+    static JSRef<JSVal> CreateCommonDialogResultHandler(const WebDialogEvent& eventInfo);
+    static JSRef<JSVal> CreateFileSelectorResultHandler(const FileSelectorEvent& eventInfo);
+    static JSRef<JSVal> CreateFileSelectorParamHandler(const FileSelectorEvent& eventInfo);
+    static JSRef<JSVal> CreateContextMenuParamHandler(const ContextMenuEvent& eventInfo);
+    static JSRef<JSVal> CreateContextMenuResultHandler(const ContextMenuEvent& eventInfo);
+
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
+    static int32_t webDebuggingPort_;
     static JSwebEventCallback OnControllerAttachedCallback_;
     static void CopyOption(int32_t copyOption);
     static void OnOverrideUrlLoading(const JSCallbackInfo& args);

@@ -129,6 +129,7 @@ public:
         std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
+    static void NewGetJsGradientColorStopsCheck(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
     static void SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabBarSymbol& symbolApply,
@@ -317,6 +318,7 @@ public:
     static void JsOnTouchIntercept(const JSCallbackInfo& info);
     static void JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info);
     static void JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info);
+    static void JsOnTouchTestDone(const JSCallbackInfo& info);
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
@@ -787,7 +789,7 @@ public:
         const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius, bool notNegative = true);
     static void ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
     static bool ParseEditMenuOptions(const JSCallbackInfo& info, NG::OnCreateMenuCallback& onCreateMenuCallback,
-        NG::OnMenuItemClickCallback& onMenuItemClick);
+        NG::OnMenuItemClickCallback& onMenuItemClick, NG::OnPrepareMenuCallback& onPrepareMenuCallback);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties);
@@ -819,6 +821,16 @@ public:
         const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
         const std::optional<Dimension>& radiusBottomEnd);
     static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    template<typename T>
+    static void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern(); 
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterResource<T>(key, resObj, value);
+    }
+    static void UnRegisterResource(const std::string& key);
     static void ParseDragSpringLoadingConfiguration(
         const JSRef<JSObject>& paramObj, const RefPtr<NG::DragSpringLoadingConfiguration>& config);
     static void ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj);
@@ -839,10 +851,12 @@ private:
         int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
     static bool ParseJsDimensionByNameInternal(const JSRef<JSObject>& jsObj, CalcDimension& result,
         DimensionUnit defaultUnit, RefPtr<ResourceWrapper>& resourceWrapper, int32_t resType);
-
+    static void ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam menuOptionsParam);
     static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray, bool showShortcut);
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);
+    static void ParseOnPrepareMenu(
+        const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnPrepareMenuCallback& onPrepareMenuCallback);
     static JSRef<JSVal> CreateJsTextMenuItem(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsTextRange(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSObject> CreateJsTextMenuId(const std::string& id);
@@ -856,7 +870,8 @@ private:
     static void ParseMaskRectHeightWithResourceObj(const JSRef<JSVal>& width, DimensionRect& options);
     static void CompleteResourceObjectInner(
         JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
-    static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(const JSRef<JSArray>& jsSafeAreaEdges);
+    static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(
+        const JSRef<JSArray>& jsSafeAreaEdges, NG::LayoutSafeAreaEdge defaultVal);
     static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);
     static void GetBorderRadiusTopLeft(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
     static void GetBorderRadiusTopRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);

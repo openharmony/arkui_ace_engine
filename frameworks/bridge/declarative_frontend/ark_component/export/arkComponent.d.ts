@@ -176,7 +176,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
-    onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDrop(event: (event?: DragEvent, extraParams?: string) => void, dropOptions?: DropOptions): this;
     onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this;
     onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
     allowDrop(value: Array<UniformDataType>): this;
@@ -201,6 +201,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
         end?: number | string;
         rotation?: number | string;
         colors: Array<any>;
+        metricsColors?: Array<any>;
         repeating?: boolean;
     }): this;
     radialGradient(value: {
@@ -806,7 +807,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     style(value: TextContentStyle): TextAreaAttribute;
     barState(value: BarState): TextAreaAttribute;
     selectionMenuHidden(value: boolean): TextAreaAttribute;
-    maxLines(value: number): TextAreaAttribute;
+    maxLines(value: number, options?: MaxLinesOptions): TextAreaAttribute;
     customKeyboard(value: CustomBuilder): TextAreaAttribute;
     ellipsisMode(value: EllipsisMode): TextAreaAttribute;
     strokeWidth(value: LengthMetrics): TextAreaAttribute;
@@ -1258,6 +1259,15 @@ declare class ArkFormComponentComponent extends ArkComponent implements FormComp
     }) => void): this;
     onLoad(callback: () => void): this;
 }
+declare class ArkEmbeddedComponent extends ArkComponent implements EmbeddedComponentAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onTerminated(callback: (info: TerminationInfo) => void): this;
+    onError(callback: (info: ErrorCallback) => void): this;
+}
+declare class ArkIsolatedComponent extends ArkComponent implements IsolatedComponentAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onError(callback: any): IsolatedComponentAttribute;
+}
 declare class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     value(value: number): this;
@@ -1600,6 +1610,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         viewportFit: ViewportFit;
     }) => void): this;
     onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
+    onActivateContent(callback: () => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;

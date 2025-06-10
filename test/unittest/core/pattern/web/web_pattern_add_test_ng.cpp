@@ -222,6 +222,7 @@ public:
     {
         return false;
     }
+    void SetMemoryName(std::string pixelMapName) const override {}
 };
 
 class NWebDragDataDummy : public NWeb::NWebDragData {

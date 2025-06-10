@@ -2033,7 +2033,7 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto centerX = leftTotalColumnWidth + FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
     auto centerY = (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE +
         FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
-
+    AdjustFocusBoxOffset(centerX);
     paintRect.SetRect(RectF(centerX, centerY, paintRectWidth, paintRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
@@ -2043,6 +2043,17 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+}
+
+void TimePickerRowPattern::AdjustFocusBoxOffset(double& centerX)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (geometryNode->GetPadding()) {
+        centerX += geometryNode->GetPadding()->left.value_or(0.0);
+    }
 }
 
 bool TimePickerRowPattern::OnKeyEvent(const KeyEvent& event)
@@ -2111,13 +2122,14 @@ bool TimePickerRowPattern::ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<Tim
     KeyCode& code, int32_t currentIndex, uint32_t totalOptionCount, int32_t childSize)
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (code == KeyCode::KEY_DPAD_UP || code == KeyCode::KEY_DPAD_DOWN) {
-        auto index = (code == KeyCode::KEY_DPAD_UP) ? -1 : 1;
-        pattern->SetCurrentIndex((totalOptionCount + currentIndex + index) % totalOptionCount);
-        pattern->FlushCurrentOptions();
-        pattern->HandleChangeCallback((code == KeyCode::KEY_DPAD_UP) ? false : true, true);
-        pattern->HandleEventCallback(true);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (code == KeyCode::KEY_DPAD_UP) {
+        pattern->StopHaptic();
+        pattern->InnerHandleScroll(false, false);
+        return true;
+    }
+    if (code == KeyCode::KEY_DPAD_DOWN) {
+        pattern->StopHaptic();
+        pattern->InnerHandleScroll(true, false);
         return true;
     }
     if (code == KeyCode::KEY_MOVE_HOME) {
@@ -2179,16 +2191,14 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pickerTheme);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    if (!SystemProperties::ConfigChangePerform()) {
-        auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-        auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-        auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
-        CHECK_NULL_VOID(pickerProperty);
-        pickerProperty->UpdateColor(
-            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-        pickerProperty->UpdateDisappearColor(
-            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
-    }
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateColor(
+        GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearColor(
+        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
         return;
     }

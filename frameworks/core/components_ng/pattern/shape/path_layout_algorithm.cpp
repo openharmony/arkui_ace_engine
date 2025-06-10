@@ -59,6 +59,21 @@ std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
     if (NearZero(bottom)) {
         bottom += lineWidth;
     }
+
+    // if width or height is matchParent
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (layoutProperty) {
+        auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value()) {
+            if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
+                right = contentConstraint.parentIdealSize.Width().value();
+            }
+            if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
+                bottom = contentConstraint.parentIdealSize.Height().value();
+            }
+        }
+    }
+
     return SizeF(right, bottom);
 }
 } // namespace OHOS::Ace::NG

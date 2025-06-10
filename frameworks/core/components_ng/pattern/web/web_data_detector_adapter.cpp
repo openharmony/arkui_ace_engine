@@ -221,8 +221,8 @@ void WebDataDetectorAdapter::ProcessRequest(const std::string& jsonStr)
     requestData.requestId = requestId;
     auto nodesValue = requestJson->GetValue("nodes");
     if (nodesValue && nodesValue->IsArray()) {
-        size_t arraySize = nodesValue->GetArraySize();
-        for (size_t i = 0; i < arraySize; ++i) {
+        int32_t arraySize = nodesValue->GetArraySize();
+        for (int32_t i = 0; i < arraySize; ++i) {
             auto nodeValue = nodesValue->GetArrayItem(i);
             if (!nodeValue || !nodeValue->IsObject()) {
                 continue;
@@ -327,8 +327,13 @@ void WebDataDetectorAdapter::ParseAIResultByType(std::shared_ptr<DataDetectorReq
         if (!item || !item->IsObject()) {
             continue;
         }
+        auto charOffset = item->GetInt("charOffset");
+        if (charOffset < 0) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::ParseAIResultByType charOffset invalid");
+            continue;
+        }
         EntityMatch mat;
-        mat.start = item->GetInt("charOffset"); // u16 offset
+        mat.start = static_cast<size_t>(charOffset); // u16 offset
         mat.clean = item->GetString("oriText"); // u8 string
         mat.end = mat.start + UtfUtils::Str8DebugToStr16(mat.clean).length(); // u16 offset not include
         mat.entityType = detectType;
@@ -672,17 +677,6 @@ void WebDataDetectorAdapter::DetectSelectedText(const std::string& detectText)
         return;
     }
 
-    if (resultCache_) {
-        DataDetectorResult result;
-        if (resultCache_->Get(detectText, result)) {
-            if (result.size() != 1) {
-                return;
-            }
-            UpdateAISelectMenu(result[0].entityType, result[0].clean);
-            return;
-        }
-    }
-
     // ui thread
     auto instanceId = Container::CurrentIdSafely();
     auto resultFunc = [weak = AceType::WeakClaim(this), instanceId](const TextDataDetectResult result) {
@@ -719,13 +713,16 @@ DataDetectorResult WebDataDetectorAdapter::ParseAIResultJson(std::unique_ptr<Jso
             if (!item || !item->IsObject()) {
                 continue;
             }
+            auto charOffset = item->GetInt("charOffset");
+            if (charOffset < 0) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::ParseAIResultJson charOffset invalid");
+                continue;
+            }
             EntityMatch mat;
-            mat.start = item->GetInt("charOffset"); // u16 offset
+            mat.start = static_cast<size_t>(charOffset); // u16 offset
             mat.clean = item->GetString("oriText"); // u8 string
             mat.end = mat.start + UtfUtils::Str8DebugToStr16(mat.clean).length(); // u16 offset not include
             mat.entityType = detectType;
-            TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::ParseAIResultJson clean: %{public}s",
-                mat.clean.c_str());
             result.emplace_back(std::move(mat));
         }
     }
@@ -758,12 +755,11 @@ void WebDataDetectorAdapter::OnDetectSelectedTextDone(const TextDataDetectResult
 void WebDataDetectorAdapter::UpdateAISelectMenu(const std::string& entityType, const std::string& content)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::UpdateAISelectMenu type: %{public}s", entityType.c_str());
-    size_t index = std::distance(
-        TEXT_DETECT_LIST.begin(), std::find(TEXT_DETECT_LIST.begin(), TEXT_DETECT_LIST.end(), entityType));
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::UpdateAISelectMenu index: %{public}zu", index);
-    if (index >= TEXT_DETECT_LIST.size()) {
+    auto it = std::find(TEXT_DETECT_LIST.begin(), TEXT_DETECT_LIST.end(), entityType);
+    if (it == TEXT_DETECT_LIST.end()) {
         return;
     }
+    auto index = std::distance(TEXT_DETECT_LIST.begin(), it);
     TextDataDetectType type = static_cast<TextDataDetectType>(index);
     auto pattern = DynamicCast<WebPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);

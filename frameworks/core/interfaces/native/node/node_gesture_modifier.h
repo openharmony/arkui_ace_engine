@@ -17,10 +17,18 @@
 #define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_GESTTURE_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
+namespace {
+    constexpr int32_t MAX_POINTS = 10;
+}
+
     const ArkUIGestureModifier* GetGestureModifier();
     const CJUIGestureModifier* GetCJUIGestureModifier();
     ArkUIGestureRecognizer* CreateGestureRecognizer(const RefPtr<NG::NGGestureRecognizer>& recognizer);
+    void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
+        ArkUI_UIInputEvent& inputEvent, const std::shared_ptr<BaseGestureEvent>& info,
+        std::array<ArkUITouchPoint, MAX_POINTS>& points);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

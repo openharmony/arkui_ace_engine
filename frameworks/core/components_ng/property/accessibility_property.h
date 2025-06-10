@@ -242,11 +242,7 @@ public:
 
     std::unordered_set<AceAction> GetSupportAction() const;
 
-    void ResetSupportAction()
-    {
-        supportActions_ = 0;
-        SetSpecificSupportAction();
-    };
+    void ResetSupportAction();
 
     void SetActionSetText(const ActionSetTextImpl& actionSetTextImpl)
     {

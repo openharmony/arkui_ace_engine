@@ -415,6 +415,16 @@ void WebModelImpl::SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled
     webComponent->SetWebDebuggingAccessEnabled(isWebDebuggingAccessEnabled);
 }
 
+void WebModelImpl::SetWebDebuggingAccessEnabledAndPort(
+    bool isWebDebuggingAccessEnabled, int32_t webDebuggingPort)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(
+        ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetWebDebuggingAccessEnabledAndPort(
+        isWebDebuggingAccessEnabled, webDebuggingPort);
+}
+
 void WebModelImpl::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -540,6 +550,14 @@ void WebModelImpl::SetWindowNewEvent(std::function<void(const std::shared_ptr<Ba
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetWindowNewEvent(std::move(jsCallback));
+}
+
+void WebModelImpl::SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+    webComponent->SetActivateContentEventId(eventMarker);
 }
 
 void WebModelImpl::SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
@@ -687,5 +705,12 @@ void WebModelImpl::SetOptimizeParserBudgetEnabled(bool enable)
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetOptimizeParserBudgetEnabled(enable);
+}
+
+void WebModelImpl::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetBypassVsyncCondition(condition);
 }
 } // namespace OHOS::Ace::Framework

@@ -227,6 +227,19 @@ void SetToggleBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     ToggleModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
+void SetToggleBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    ToggleModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void ResetToggleBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -377,6 +390,7 @@ const ArkUIToggleModifier* GetToggleModifier()
         .setTogglePadding = SetTogglePadding,
         .resetTogglePadding = ResetTogglePadding,
         .setToggleBackgroundColor = SetToggleBackgroundColor,
+        .setToggleBackgroundColorWithColorSpace = SetToggleBackgroundColorWithColorSpace,
         .resetToggleBackgroundColor = ResetToggleBackgroundColor,
         .setToggleHoverEffect = SetToggleHoverEffect,
         .resetToggleHoverEffect = ResetToggleHoverEffect,
@@ -416,6 +430,7 @@ const CJUIToggleModifier* GetCJUIToggleModifier()
         .setTogglePadding = SetTogglePadding,
         .resetTogglePadding = ResetTogglePadding,
         .setToggleBackgroundColor = SetToggleBackgroundColor,
+        .setToggleBackgroundColorWithColorSpace = SetToggleBackgroundColorWithColorSpace,
         .resetToggleBackgroundColor = ResetToggleBackgroundColor,
         .setToggleHoverEffect = SetToggleHoverEffect,
         .resetToggleHoverEffect = ResetToggleHoverEffect,

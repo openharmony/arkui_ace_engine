@@ -16,7 +16,11 @@
 #include "core/image/image_loader.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#ifdef USE_NEW_SKIA
+#include "src/base/SkBase64.h"
+#else
 #include "include/utils/SkBase64.h"
+#endif
 
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
@@ -27,7 +31,7 @@
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -599,7 +603,9 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
         return drawingData;
     }
     TAG_LOGW(AceLogTag::ACE_IMAGE, "load image data failed, as uri is invalid:%{private}s", uri.c_str());
-    errorInfo = { ImageErrorCode::GET_IMAGE_RESOURCE_URI_INVALID, "uri is invalid." };
+    if (errorInfo.errorCode == ImageErrorCode::DEFAULT) {
+        errorInfo = { ImageErrorCode::GET_IMAGE_RESOURCE_URI_INVALID, "uri is invalid." };
+    }
     return nullptr;
 }
 
@@ -658,7 +664,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
     if (!pixmap) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "DecodeData is Empty. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
-        errorInfo = { ImageErrorCode::GET_IMAGE_DECODE_DATA_PROVIDER_DATA_EMPTY, "decode data is empty." };
+        errorInfo = { ImageErrorCode::GET_IMAGE_DECODE_DATA_PROVIDER_DATA_EMPTY, "decoded data is empty." };
         return nullptr;
     }
     TAG_LOGI(AceLogTag::ACE_IMAGE,
@@ -730,7 +736,8 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
         if (status == std::cv_status::timeout) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "load SharedMemoryImage timeout! %{private}s,  %{public}s.",
                 imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
-            errorInfo = { ImageErrorCode::GET_IMAGE_SHARED_MEMORY_LOAD_TIMEOUT, "load shared memory image data timeout." };
+            errorInfo = { ImageErrorCode::GET_IMAGE_SHARED_MEMORY_LOAD_TIMEOUT,
+                "load shared memory image data timeout." };
             return nullptr;
         }
     }

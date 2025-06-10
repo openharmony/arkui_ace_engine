@@ -27,6 +27,8 @@
 #include "frameworks/base/geometry/ng/point_t.h"
 
 namespace OHOS::Ace::NG {
+enum class GestureListenerType;
+enum class GestureActionPhase;
 
 struct DelayedTask {
     WeakPtr<NGGestureRecognizer> recognizer;
@@ -436,7 +438,7 @@ public:
     void TransformForRecognizer(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false,
         bool isPostEventResult = false, int32_t postEventNodeId = -1);
 
-    void SetPreventDefault(bool preventDefault);
+    void SetPreventBegin(bool preventBegin);
 
     std::string GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback);
 protected:
@@ -465,7 +467,7 @@ protected:
     virtual void OnSucceedCancel() {}
     virtual void RemoveUnsupportEvent(int32_t touchId) {}
     bool ShouldResponse() override;
-    bool IsPreventDefault() const;
+    bool IsPreventBegin() const;
     bool CheckoutDownFingers(int32_t fingerId) const;
 
     void HandleWillAccept();
@@ -476,6 +478,7 @@ protected:
     void HandleTouchDown(const TouchEvent& point);
     void HandleTouchUp(const TouchEvent& point);
     void HandleTouchCancel(const TouchEvent& point);
+    void HandleGestureAccept(const GestureEvent& info, GestureCallbackType type);
 
     RefereeState refereeState_ = RefereeState::READY;
 
@@ -520,10 +523,12 @@ protected:
     bool isNeedResetVoluntarily_ = false;
     bool isNeedResetRecognizerState_ = false;
     std::vector<Matrix4> localMatrix_ = {};
-    bool preventDefault_ = false;
+    bool preventBegin_ = false;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;
+    GestureListenerType GetListenerType(GestureTypeName typeName) const;
+    GestureActionPhase GetActionPhase(GestureCallbackType callbackType, GestureTypeName typeName) const;
 };
 
 } // namespace OHOS::Ace::NG

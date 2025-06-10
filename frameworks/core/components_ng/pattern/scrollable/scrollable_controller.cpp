@@ -62,6 +62,13 @@ bool ScrollableController::AnimateTo(
     return false;
 }
 
+void ScrollableController::SetCanStayOverScroll(bool canStayOverScroll)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCanStayOverScroll(canStayOverScroll);
+}
+
 Offset ScrollableController::GetCurrentOffset() const
 {
     auto pattern = scroll_.Upgrade();
@@ -92,6 +99,7 @@ void ScrollableController::ScrollBy(double pixelX, double pixelY, bool /* smooth
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("ScrollBy, offset:%f, id:%d, tag:%s", static_cast<float>(-offset),
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    pattern->SetIsOverScroll(false);
     pattern->UpdateCurrentOffset(static_cast<float>(-offset), SCROLL_FROM_JUMP);
 }
 

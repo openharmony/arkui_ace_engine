@@ -17,6 +17,7 @@
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 
@@ -29,6 +30,10 @@ const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Col
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
+    if (MultiThreadBuildManager::IsFreeNodeScope()) {
+        isFreeNode_ = true;
+        isFreeState_ = true;
+    }
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
         nodeInfo_ = std::make_unique<PerformanceCheckNode>();
@@ -86,6 +91,18 @@ UINode::~UINode()
     }
 }
 
+bool UINode::MaybeRelease()
+{
+    if (!isFreeNode_ || MultiThreadBuildManager::IsOnUIThread()) {
+        return true;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto executor = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, true);
+    return !executor->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyUINode");
+}
+
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     CHECK_NULL_VOID(context);
@@ -141,6 +158,38 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
         }
     }
     DoAddChild(it, child, silently, addDefaultTransition);
+}
+
+UINode* UINode::GetChildAfter(UINode* node)
+{
+    const auto& children = GetChildren(true);
+    auto iter = children.rbegin();
+    UINode* targetNode = nullptr;
+    while (iter != children_.rend()) {
+        auto* point = iter->GetRawPtr();
+        if (point == node) {
+            break;
+        }
+        targetNode = point;
+        iter++;
+    }
+    return targetNode;
+}
+
+UINode* UINode::GetChildBefore(UINode* node)
+{
+    const auto& children = GetChildren(true);
+    auto iter = children.begin();
+    UINode* targetNode = nullptr;
+    while (iter != children_.end()) {
+        auto* point = iter->GetRawPtr();
+        if (point == node) {
+            break;
+        }
+        targetNode = point;
+        iter++;
+    }
+    return targetNode;
 }
 
 bool UINode::CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter)
@@ -764,6 +813,11 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
     }
     isRemoving_ = false;
+    if (isFreeNode_) {
+        isFreeState_ = false;
+        ElementRegister::GetInstance()->AddUINode(Claim(this));
+        ExecuteAfterAttachMainTreeTasks();
+    }
     OnAttachToMainTree(recursive);
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -795,7 +849,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     }
 }
 
-void UINode::DetachFromMainTree(bool recursive)
+void UINode::DetachFromMainTree(bool recursive, bool isRoot)
 {
     if (!onMainTree_) {
         return;
@@ -816,7 +870,16 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = true;
     std::list<RefPtr<UINode>> children = GetChildren();
     for (const auto& child : children) {
-        child->DetachFromMainTree(isRecursive);
+        child->DetachFromMainTree(isRecursive, false);
+    }
+    if (isFreeNode_) {
+        ElementRegister::GetInstance()->RemoveItemSilently(Claim(this));
+        isFreeState_ = true;
+        if (isRoot && !IsFreeNodeTree()) {
+            // Remind developers that it is unsafe to operate node trees containing not free nodes on non UI threads
+            TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
+                "CheckIsFreeNodeSubTree failed. free node: %{public}d contains not free node children", GetId());
+        }
     }
     isTraversing_ = false;
 }

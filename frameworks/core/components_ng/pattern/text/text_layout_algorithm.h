@@ -96,8 +96,7 @@ private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
     bool UpdateSingleParagraph(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, const TextStyle& textStyle,
         const std::u16string& content, double maxWidth);
-    void UpdateRelayoutShaderStyle(
-        const RefPtr<TextPattern>& pattern, const RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void UpdateRelayoutShaderStyle(LayoutWrapper* layoutWrapper);
     bool UpdateSymbolTextStyle(const TextStyle& textStyle, const ParagraphStyle& paraStyle,
         LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode);
     void CreateParagraphDrag(
@@ -131,6 +130,7 @@ private:
     std::pair<bool, double> GetSuitableSizeBS(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
+    bool IsParentSizeNearZero(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);

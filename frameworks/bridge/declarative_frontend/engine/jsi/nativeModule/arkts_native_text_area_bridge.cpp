@@ -267,15 +267,24 @@ ArkUINativeModuleValue TextAreaBridge::SetMaxLines(ArkUIRuntimeCallInfo *runtime
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> maxLinesArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> overflowModeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber() && secondArg->Int32Value(vm) > 0) {
-        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(nativeNode, secondArg->Uint32Value(vm));
-    } else {
-        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaMaxLines(nativeNode);
+
+    auto maxLines = INT32_MAX;
+    if (maxLinesArg->IsNumber() && maxLinesArg->Int32Value(vm) > NUM_0) {
+        maxLines = maxLinesArg->Uint32Value(vm);
     }
+
+    auto overflowMode = NUM_0;
+
+    if (overflowModeArg->IsNumber() &&
+        (overflowModeArg->Int32Value(vm) == NUM_0 || overflowModeArg->Int32Value(vm) == NUM_1)) {
+        overflowMode = overflowModeArg->Uint32Value(vm);
+    }
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(nativeNode, maxLines, overflowMode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2273,7 +2282,8 @@ ArkUINativeModuleValue TextAreaBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -2613,12 +2623,15 @@ ArkUINativeModuleValue TextAreaBridge::SetSelectionMenuOptions(ArkUIRuntimeCallI
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClickCallback;
-    if (!ArkTSUtils::ParseSelectionMenuOptions(runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback)) {
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    if (!ArkTSUtils::ParseSelectionMenuOptions(
+        runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback, onPrepareMenuCallback)) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaSelectionMenuOptions(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaSelectionMenuOptions(
-        nativeNode, reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback));
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaSelectionMenuOptions(nativeNode,
+        reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback),
+        reinterpret_cast<void*>(&onPrepareMenuCallback));
     return panda::JSValueRef::Undefined(vm);
 }
 

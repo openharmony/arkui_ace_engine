@@ -125,9 +125,12 @@ ArkUINativeModuleValue NavDestinationBridge::SetToolBarConfiguration(ArkUIRuntim
         }
         NG::MoreButtonOptions toolbarMoreButtonOptions;
         if (info.Length() > MIN_INFO_LENGTH) {
-            auto optObj = JSRef<JSObject>::Cast(info[MIN_INFO_LENGTH]);
-            auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
-            JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
+            auto optObjValue = info[MIN_INFO_LENGTH];
+            if (optObjValue->IsObject()) {
+                auto optObj = JSRef<JSObject>::Cast(optObjValue);
+                auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
+                JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
+            }
         }
         if (SystemProperties::ConfigChangePerform()) {
             NavDestinationModel::GetInstance()->SetToolbarConfiguration(
@@ -137,13 +140,17 @@ ArkUINativeModuleValue NavDestinationBridge::SetToolBarConfiguration(ArkUIRuntim
             NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
         }
     } else if (info[NUM_1]->IsObject()) {
-        auto builderFuncParam = JSRef<JSObject>::Cast(info[NUM_1])->GetProperty("builder");
-        if (builderFuncParam->IsFunction()) {
-            ViewStackModel::GetInstance()->NewScope();
-            JsFunction jsBuilderFunc(builderFuncParam);
-            jsBuilderFunc.Execute();
-            auto customNode = ViewStackModel::GetInstance()->Finish();
-            NavDestinationModel::GetInstance()->SetCustomToolBar(customNode);
+        auto arg1Value = info[NUM_1];
+        if (arg1Value->IsObject()) {
+            auto builderObj = JSRef<JSObject>::Cast(arg1Value);
+            auto builderFuncParam = builderObj->GetProperty("builder");
+            if (builderFuncParam->IsFunction()) {
+                ViewStackModel::GetInstance()->NewScope();
+                JsFunction jsBuilderFunc(builderFuncParam);
+                jsBuilderFunc.Execute();
+                auto customNode = ViewStackModel::GetInstance()->Finish();
+                NavDestinationModel::GetInstance()->SetCustomToolBar(customNode);
+            }
         }
     }
     NG::NavigationToolbarOptions options;

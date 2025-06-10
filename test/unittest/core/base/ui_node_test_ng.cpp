@@ -26,6 +26,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -3426,5 +3427,226 @@ HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo005, TestSize.Level1)
     EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
     EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
     EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: UINodeTestNg049
+ * @tc.desc: Test ui node method of instanceid
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ASSERT_NE(testNode, nullptr);
+
+    int32_t testId = 0;
+    testNode->RegisterUpdateJSInstanceCallback([&testId](int32_t newId) { testId = newId; });
+
+    /**
+     * @tc.steps: step2. attach context
+     */
+    SystemProperties::multiInstanceEnabled_ = true;
+    testNode->AttachContext(AceType::RawPtr(context), true);
+    EXPECT_EQ(testNode->context_, AceType::RawPtr(context));
+    EXPECT_EQ(testNode->instanceId_, context->GetInstanceId());
+    EXPECT_EQ(testId, context->GetInstanceId());
+
+    /**
+     * @tc.steps: step3. detach context
+     */
+    testNode->DetachContext(true);
+    EXPECT_EQ(testNode->context_, nullptr);
+}
+
+/**
+ * @tc.name: FreeUINodeTestNg001
+ * @tc.desc: Test free ui node create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FreeUINodeTestNg001, TestSize.Level1)
+{
+    MultiThreadBuildManager::SetIsFreeNodeScope(true);
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    MultiThreadBuildManager::SetIsFreeNodeScope(false);
+    EXPECT_EQ(frameNode->isFreeNode_, true);
+    EXPECT_EQ(frameNode->isFreeState_, true);
+}
+
+/**
+ * @tc.name: FreeUINodeTestNg002
+ * @tc.desc: Test free ui node release.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FreeUINodeTestNg002, TestSize.Level1)
+{
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    {
+        MultiThreadBuildManager::SetIsFreeNodeScope(true);
+        auto frameNode =
+            FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+        MultiThreadBuildManager::SetIsFreeNodeScope(false);
+        
+        MultiThreadBuildManager::isUIThread_ = false;
+        EXPECT_EQ(frameNode->isFreeNode_, true);
+        EXPECT_EQ(frameNode->isFreeState_, true);
+    }
+    {
+        MultiThreadBuildManager::SetIsFreeNodeScope(true);
+        auto frameNode =
+            FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+        MultiThreadBuildManager::SetIsFreeNodeScope(false);
+        
+        MultiThreadBuildManager::isUIThread_ = true;
+        EXPECT_EQ(frameNode->isFreeNode_, true);
+        EXPECT_EQ(frameNode->isFreeState_, true);
+    }
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+}
+
+/**
+ * @tc.name: FreeUINodeTestNg003
+ * @tc.desc: Test ui node release.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FreeUINodeTestNg003, TestSize.Level1)
+{
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    {
+        auto frameNode =
+            FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+        
+        MultiThreadBuildManager::isUIThread_ = false;
+        EXPECT_EQ(frameNode->isFreeNode_, false);
+        EXPECT_EQ(frameNode->isFreeState_, false);
+    }
+    {
+        auto frameNode =
+            FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+        
+        MultiThreadBuildManager::isUIThread_ = true;
+        EXPECT_EQ(frameNode->isFreeNode_, false);
+        EXPECT_EQ(frameNode->isFreeState_, false);
+    }
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+}
+
+/**
+ * @tc.name: FreeUINodeTestNg004
+ * @tc.desc: Test free ui node AttachToMainTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FreeUINodeTestNg004, TestSize.Level1)
+{
+    MultiThreadBuildManager::SetIsFreeNodeScope(true);
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    MultiThreadBuildManager::SetIsFreeNodeScope(false);
+    
+    PipelineContext* pipeline = frameNode->GetContextWithCheck();
+    frameNode->AttachToMainTree(false, pipeline);
+    EXPECT_EQ(frameNode->isFreeState_, false);
+    frameNode->DetachFromMainTree(false, false);
+    EXPECT_EQ(frameNode->isFreeState_, true);
+}
+
+/**
+ * @tc.name: FreeUINodeTestNg005
+ * @tc.desc: Test free ui node DetachFromMainTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FreeUINodeTestNg005, TestSize.Level1)
+{
+    MultiThreadBuildManager::SetIsFreeNodeScope(true);
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    MultiThreadBuildManager::SetIsFreeNodeScope(false);
+        
+    PipelineContext* pipeline = frameNode->GetContextWithCheck();
+    frameNode->AttachToMainTree(false, pipeline);
+    EXPECT_EQ(frameNode->isFreeState_, false);
+    frameNode->DetachFromMainTree(false, true);
+    EXPECT_EQ(frameNode->isFreeState_, true);
+}
+
+/**
+ * @tc.name: FreeUINodeTestNg006
+ * @tc.desc: Test free ui node tree DetachFromMainTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FreeUINodeTestNg006, TestSize.Level1)
+{
+    MultiThreadBuildManager::SetIsFreeNodeScope(true);
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto child =
+        FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddChild(child);
+    MultiThreadBuildManager::SetIsFreeNodeScope(false);
+        
+    PipelineContext* pipeline = frameNode->GetContextWithCheck();
+    frameNode->AttachToMainTree(false, pipeline);
+    EXPECT_EQ(frameNode->isFreeState_, false);
+    frameNode->DetachFromMainTree(false, true);
+    EXPECT_EQ(frameNode->isFreeState_, true);
+}
+
+/**
+ * @tc.name: FreeUINodeTestNg007
+ * @tc.desc: Test free ui node tree DetachFromMainTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FreeUINodeTestNg007, TestSize.Level1)
+{
+    MultiThreadBuildManager::SetIsFreeNodeScope(true);
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    MultiThreadBuildManager::SetIsFreeNodeScope(false);
+    auto child =
+        FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddChild(child);
+        
+    PipelineContext* pipeline = frameNode->GetContextWithCheck();
+    frameNode->AttachToMainTree(false, pipeline);
+    EXPECT_EQ(frameNode->isFreeState_, false);
+    frameNode->DetachFromMainTree(false, true);
+    EXPECT_EQ(frameNode->isFreeState_, true);
+}
+
+/**
+ * @tc.name: FreeUINodeTestNg008
+ * @tc.desc: Test free node MarkModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FreeUINodeTestNg008, TestSize.Level1)
+{
+    MultiThreadBuildManager::SetIsFreeNodeScope(true);
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    MultiThreadBuildManager::SetIsFreeNodeScope(false);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(frameNode->isFreeNode_, true);
+    EXPECT_EQ(frameNode->isFreeState_, true);
+}
+
+/**
+ * @tc.name: FreeUINodeTestNg009
+ * @tc.desc: Test free node MarkDirtyNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FreeUINodeTestNg009, TestSize.Level1)
+{
+    MultiThreadBuildManager::SetIsFreeNodeScope(true);
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    MultiThreadBuildManager::SetIsFreeNodeScope(false);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(frameNode->isFreeNode_, true);
+    EXPECT_EQ(frameNode->isFreeState_, true);
 }
 } // namespace OHOS::Ace::NG

@@ -310,9 +310,7 @@ void DatePickerModelNG::SetCanLoop(bool isLoop)
 void DatePickerModelNG::SetCanLoop(FrameNode* frameNode, bool isLoop)
 {
     CHECK_NULL_VOID(frameNode);
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    CHECK_NULL_VOID(datePickerPattern);
-    datePickerPattern->SetCanLoop(isLoop);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, CanLoop, isLoop, frameNode);
 }
 
 bool DatePickerModelNG::GetCanLoop(FrameNode* frameNode)
@@ -447,6 +445,10 @@ void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(theme);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseDisappearTextStyleResObj(value);
+    }
     auto disappearStyle = theme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DisappearFontSize,
@@ -495,6 +497,10 @@ void DatePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(theme);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseNormalTextStyleResObj(value);
+    }
     auto normalStyle = theme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontSize,
@@ -543,6 +549,10 @@ void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(theme);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseSelectedTextStyleResObj(value);
+    }
     auto selectedStyle = theme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedFontSize,
@@ -818,6 +828,9 @@ void DatePickerModelNG::SetSelectedTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseSelectedTextStyleResObj(value);
+    }
     auto selectedStyle = theme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -842,6 +855,9 @@ void DatePickerModelNG::SetNormalTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseNormalTextStyleResObj(value);
+    }
     auto normalStyle = theme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontSize,
@@ -864,6 +880,9 @@ void DatePickerModelNG::SetDisappearTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseDisappearTextStyleResObj(value);
+    }
     auto disappearStyle = theme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -996,10 +1015,6 @@ void DatePickerModelNG::UpdateUserSetSelectColor()
 void DatePickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
     std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
-
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 

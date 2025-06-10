@@ -49,7 +49,7 @@ enum class ContextMenuRegisterType : char {
 
 struct MenuMaskType {
     std::optional<Color> maskColor;
-    std::optional<BlurStyle> maskBackGroundBlueStyle;
+    std::optional<BlurStyle> maskBackGroundBlurStyle;
 };
 
 struct MenuParam {
@@ -66,6 +66,10 @@ struct MenuParam {
     std::function<void()> onDisappear;
     std::function<void()> aboutToAppear;
     std::function<void()> aboutToDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onDidAppear;
+    std::function<void()> onWillDisappear;
+    std::function<void()> onDidDisappear;
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
     bool isShowInSubWindow = true;
@@ -77,6 +81,7 @@ struct MenuParam {
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
     bool isShowHoverImage = false;
+    bool hoverScaleInterruption = false;
     MenuPreviewAnimationOptions hoverImageAnimationOptions;
     std::optional<EffectOption> backgroundEffectOption;
     std::optional<Color> backgroundColor;
@@ -94,6 +99,9 @@ struct MenuParam {
     std::optional<NG::BorderColorProperty> outlineColor;
     std::optional<bool> maskEnable;
     std::optional<MenuMaskType> maskType;
+    std::optional<ModalMode> modalMode;
+    OffsetF anchorPosition;
+    bool isAnchorPosition = false;
 };
 
 } // namespace OHOS::Ace::NG

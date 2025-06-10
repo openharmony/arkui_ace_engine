@@ -41,10 +41,11 @@ const Offset RIGHT_BOTTOM = Offset(360.f, 250.f);
 
 class ListCommonTestNg : public ListTestNg {
 public:
-    void CreateFocusableListItems(int32_t itemNumber);
+    void CreateFocusableListItems(int32_t itemNumber, int32_t count = 0);
     void CreateFocusableListItemGroups(int32_t groupNumber, int32_t groupItemNum = GROUP_ITEM_NUMBER);
     void MouseSelect(Offset start, Offset end);
     AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
+    AssertionResult IsEqualNextFocusNodeHOMEEND(FocusStep step, int32_t currentIndex, std::string id);
     AssertionResult IsEqualNextFocusNodeInGroup(FocusStep step, int32_t currentIndex, int32_t expectNextIndex,
         int32_t groupIndex = 0, int32_t groupItemNum = GROUP_ITEM_NUMBER);
     AssertionResult IsEqualNextFocusNodeInGroupWithHeaderAndFooter(FocusStep step, int32_t currentIndex, int32_t expectNextIndex,
@@ -55,7 +56,9 @@ public:
     int32_t FindFocusNodeIndexInGroup(
         RefPtr<FocusHub>& focusNode, int32_t groupIndexInList = -1, int32_t groupItemNum = GROUP_ITEM_NUMBER);
     std::vector<RefPtr<FrameNode>> GetListItemOrListItemGroupInList();
-    void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
+    void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove,
+        Axis axis = Axis::VERTICAL);
+    void CreateForEach(int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove, bool multiItem);
     void CreateRepeatList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
     void MapEventInForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
         int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo);
@@ -69,24 +72,70 @@ public:
     RefPtr<ListItemDragManager> GetForEachItemDragManager(int32_t itemIndex);
     RefPtr<ListItemDragManager> GetLazyForEachItemDragManager(int32_t itemIndex);
     RefPtr<ListItemDragManager> GetRepeatItemDragManager(int32_t itemIndex);
-    ListItemGroupModelNG CreateListItemGroupWithHeaderAndFooter();
-    void CreateFocusableListItemGroupsWithHeaderAndFooter(int32_t groupNumber, int32_t groupItemNum);
-    std::function<void()> GetHeaderOrFooterButtonBuilder();
+    ListItemGroupModelNG CreateListItemGroupWithHeaderAndFooter(int32_t count = 0, int32_t index = 0);
+    void CreateFocusableListItemGroupsWithHeaderAndFooter(
+        int32_t groupNumber, int32_t groupItemNum, int32_t count = 0, int32_t index = 0);
+    std::function<void()> GetHeaderOrFooterButtonBuilder(int32_t count = 0, std::string prefix = "", int32_t index = 0);
+    static void CreateFocusableListItemsWithMultiComponent(int32_t index, std::string prefix = "");
 };
+void ListCommonTestNg::CreateFocusableListItemsWithMultiComponent(int32_t index, std::string prefix)
+{
+    RowModelNG rowModel;
+    rowModel.Create(std::nullopt, nullptr, "");
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(Dimension(GROUP_HEADER_LEN)));
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+    auto row = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto rowNode = AceType::DynamicCast<FrameNode>(row);
 
-void ListCommonTestNg::CreateFocusableListItems(int32_t itemNumber)
+    TextModelNG textModelNG;
+    textModelNG.Create("text1");
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true);
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+    auto text = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto textNode = AceType::DynamicCast<FrameNode>(text);
+    textNode->UpdateInspectorId(prefix + "text" + std::to_string(index));
+    text->MountToParent(rowNode);
+    ViewStackProcessor::GetInstance()->Pop();
+
+    ButtonModelNG buttonModelNG;
+    CreateWithPara para;
+    para.label = "label";
+    std::list<RefPtr<Component>> buttonChildren;
+    buttonModelNG.CreateWithLabel(para, buttonChildren);
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+    auto button = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto buttonNode = AceType::DynamicCast<FrameNode>(button);
+    buttonNode->UpdateInspectorId(prefix + "button" + std::to_string(index));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Pop();
+}
+void ListCommonTestNg::CreateFocusableListItems(int32_t itemNumber, int32_t count)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
-        CreateListItem();
-        {
-            ButtonModelNG buttonModelNG;
-            CreateWithPara para;
-            para.label = "label";
-            std::list<RefPtr<Component>> buttonChildren;
-            buttonModelNG.CreateWithLabel(para, buttonChildren);
-            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
-            ViewStackProcessor::GetInstance()->Pop();
+        if (count > 0) {
+            CreateListItem();
+            {
+                CreateFocusableListItemsWithMultiComponent(index);
+            }
+        } else {
+            CreateListItem();
+            {
+                ButtonModelNG buttonModelNG;
+                CreateWithPara para;
+                para.label = "label";
+                std::list<RefPtr<Component>> buttonChildren;
+                buttonModelNG.CreateWithLabel(para, buttonChildren);
+                auto button = ViewStackProcessor::GetInstance()->GetMainElementNode();
+                auto buttonNode = AceType::DynamicCast<FrameNode>(button);
+                buttonNode->UpdateInspectorId("button" + std::to_string(index));
+                ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+                ViewStackProcessor::GetInstance()->Pop();
+            }
         }
+
         ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
@@ -104,26 +153,30 @@ void ListCommonTestNg::CreateFocusableListItemGroups(int32_t groupNumber, int32_
     }
 }
 
-std::function<void()> ListCommonTestNg::GetHeaderOrFooterButtonBuilder()
+std::function<void()> ListCommonTestNg::GetHeaderOrFooterButtonBuilder(int32_t count, std::string prefix, int32_t index)
 {
-    return []() {
-        ButtonModelNG buttonModelNG;
-        CreateWithPara para;
-        para.label = "label";
-        std::list<RefPtr<Component>> buttonChildren;
-        buttonModelNG.CreateWithLabel(para, buttonChildren);
-        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
-        ViewStackProcessor::GetInstance()->Pop();
+    return [count, prefix, index]() {
+        if (count > 0) {
+            ListCommonTestNg::CreateFocusableListItemsWithMultiComponent(index, prefix);
+        } else {
+            ButtonModelNG buttonModelNG;
+            CreateWithPara para;
+            para.label = "label";
+            std::list<RefPtr<Component>> buttonChildren;
+            buttonModelNG.CreateWithLabel(para, buttonChildren);
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+            ViewStackProcessor::GetInstance()->Pop();
+        }
     };
 }
 
-ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter()
+ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter(int32_t count, int32_t index)
 {
     auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
-    auto header = GetHeaderOrFooterButtonBuilder();
-    auto footer = GetHeaderOrFooterButtonBuilder();
+    auto header = GetHeaderOrFooterButtonBuilder(count, "header", index);
+    auto footer = GetHeaderOrFooterButtonBuilder(count, "footer", index);
     ListItemGroupModelNG groupModel;
     groupModel.Create(V2::ListItemGroupStyle::NONE);
     groupModel.SetHeader(std::move(header));
@@ -133,10 +186,11 @@ ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter()
     return groupModel;
 }
 
-void ListCommonTestNg::CreateFocusableListItemGroupsWithHeaderAndFooter(int32_t groupNumber, int32_t groupItemNum)
+void ListCommonTestNg::CreateFocusableListItemGroupsWithHeaderAndFooter(
+    int32_t groupNumber, int32_t groupItemNum, int32_t count, int32_t index)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
-        auto groupMode = CreateListItemGroupWithHeaderAndFooter();
+        auto groupMode = CreateListItemGroupWithHeaderAndFooter(count, index);
         CreateFocusableListItems(groupItemNum);
         ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
@@ -172,6 +226,28 @@ AssertionResult ListCommonTestNg::IsEqualNextFocusNode(FocusStep step, int32_t c
     }
     int32_t nextIndex = FindFocusNodeIndex(nextFocusNode);
     return IsEqual(nextIndex, expectNextIndex);
+}
+
+AssertionResult ListCommonTestNg::IsEqualNextFocusNodeHOMEEND(FocusStep step, int32_t currentIndex, std::string id)
+{
+    auto isHome = step == FocusStep::LEFT_END || step == FocusStep::UP_END;
+    auto isEnd = step == FocusStep::RIGHT_END || step == FocusStep::DOWN_END;
+    if (!isHome && !isEnd) {
+        return AssertionFailure() << "FocusStep is NOT HOME/END";
+    }
+    std::vector<RefPtr<FrameNode>> listItems = GetListItemOrListItemGroupInList();
+    RefPtr<FocusHub> currentFocusNode = listItems[currentIndex]->GetOrCreateFocusHub();
+    if (currentFocusNode == nullptr) {
+        return AssertionFailure() << "Current FocusNode is null.";
+    }
+    currentFocusNode->RequestFocusImmediately();
+    RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNodeInList(step, currentFocusNode).Upgrade();
+    auto nextNodeIdStr =
+        nextFocusNode->GetFrameNode() != nullptr ? nextFocusNode->GetFrameNode()->GetInspectorId().value_or("") : "";
+    if (nextNodeIdStr != "" && nextNodeIdStr == id) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure() << "Next FocusNode is not equal to home or tail node.";
 }
 
 int32_t ListCommonTestNg::FindFocusNodeIndex(RefPtr<FocusHub>& focusNode)
@@ -320,10 +396,17 @@ std::vector<RefPtr<FrameNode>> ListCommonTestNg::GetGroupListItems(RefPtr<FrameN
 }
 
 void ListCommonTestNg::CreateForEachList(
-    int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
+    int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove, Axis axis)
 {
     ListModelNG model = CreateList();
     model.SetLanes(lanes);
+    model.SetListDirection(axis);
+    CreateForEach(itemNumber, onMove, false);
+}
+
+void ListCommonTestNg::CreateForEach(
+    int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove, bool multiItem)
+{
     auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
@@ -338,13 +421,16 @@ void ListCommonTestNg::CreateForEachList(
     std::list<int32_t> removedElmtId;
     forEachModelNG.SetNewIds(std::move(newIds));
     forEachModelNG.SetRemovedElmtIds(removedElmtId);
-    forEachModelNG.OnMove(std::move(onMove));
     for (int32_t index = 0; index < itemNumber; index++) {
         // key is 0,1,2,3...
         forEachModelNG.CreateNewChildStart(std::to_string(index));
         CreateListItems(1);
+        if (multiItem) {
+            CreateListItems(1);
+        }
         forEachModelNG.CreateNewChildFinish(std::to_string(index));
     }
+    forEachModelNG.OnMove(std::move(onMove));
 }
 
 void ListCommonTestNg::CreateRepeatList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
@@ -469,7 +555,7 @@ HWTEST_F(ListCommonTestNg, FocusStep001, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, currentIndex, "button3"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
 }
@@ -494,8 +580,8 @@ HWTEST_F(ListCommonTestNg, FocusStep002, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::RIGHT_END, currentIndex, "button3"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 1));
 
@@ -506,7 +592,7 @@ HWTEST_F(ListCommonTestNg, FocusStep002, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 2));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
@@ -533,10 +619,10 @@ HWTEST_F(ListCommonTestNg, FocusStep003, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 0));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::RIGHT_END, currentIndex, "button5"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, currentIndex, "button5"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 1));
 
@@ -549,10 +635,10 @@ HWTEST_F(ListCommonTestNg, FocusStep003, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::RIGHT_END, currentIndex, "button5"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, currentIndex, "button5"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
 }
@@ -579,10 +665,10 @@ HWTEST_F(ListCommonTestNg, FocusStep004, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 2));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 5));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::LEFT_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, currentIndex, "button0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::RIGHT_END, currentIndex, "button5"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, currentIndex, "button5"));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
 }
@@ -809,6 +895,114 @@ HWTEST_F(ListCommonTestNg, FocusStep010, TestSize.Level1)
      * @tc.expected: next focus is last list item
      */
     EXPECT_TRUE(IsEqualNextFocusNodeInGroupWithHeaderAndFooter(FocusStep::UP, 4, 3, 0, 4));
+}
+
+/**
+ * @tc.name: FocusStep011
+ * @tc.desc: Test GetNextFocusNode HOME/END when ListItem in List has more than 1 focuable component.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FocusStep011, TestSize.Level1)
+{
+    CreateList();
+    CreateFocusableListItems(4, 2);
+    CreateDone();
+
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, 1, "text0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, 1, "button3"));
+}
+
+/**
+ * @tc.name: FocusStep012
+ * @tc.desc: Test GetNextFocusNode HOME/END when header and footer in ListItemGroup has more than 1 focuable component.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FocusStep012, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateFocusableListItemGroupsWithHeaderAndFooter(4, 4, 2);
+    CreateDone();
+
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::UP_END, 1, "headertext0"));
+    EXPECT_TRUE(IsEqualNextFocusNodeHOMEEND(FocusStep::DOWN_END, 1, "footerbutton3"));
+}
+
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode001, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. GetNextFocusNode func from last item
+     * @tc.expected: Move focus to the next line of first item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 3, 4));
+    /**
+     * @tc.steps: step2. GetNextFocusNode func from first item
+     * @tc.expected: Move focus to the previous line of last item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 4, 3));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode002, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. GetNextFocusNode func from last item
+     * @tc.expected: Move focus to the next line of first item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 3, NULL_VALUE));
+    /**
+     * @tc.steps: step2. GetNextFocusNode func from first item
+     * @tc.expected: Move focus to the previous line of last item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 4, NULL_VALUE));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode003, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    /**
+     * @tc.steps: step1. GetNextFocusNode func from last item
+     * @tc.expected: Move focus to the next line of first item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::RIGHT, 1, 2, 0, 4));
+    /**
+     * @tc.steps: step2. GetNextFocusNode func from first item
+     * @tc.expected: Move focus to the previous line of last item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 2, 1, 0, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode004, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateDone();
+    /**
+     * @tc.steps: step1. GetNextFocusNode func from last item
+     * @tc.expected: Move focus to the next line of first item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::RIGHT, 1, 1, 0, 4));
+    /**
+     * @tc.steps: step2. GetNextFocusNode func from first item
+     * @tc.expected: Move focus to the previous line of last item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 2, 2, 1, 4));
 }
 
 /**
@@ -1672,6 +1866,260 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
     listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
     gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_EQ(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
+}
+
+/**
+* @tc.name: ForEachDrag008
+* @tc.desc: Drag test. 2 lanes, rtl
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag008, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(4, 2, onMoveEvent); // 2 lanes
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. Drag item(index:0)
+    */
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+    * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+    * @tc.expected: Change of order
+    */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "2", "0" }));
+
+    /**
+    * @tc.steps: step3. Drag left-up delta > half size
+    * @tc.expected: Continue change of order
+    */
+    info.SetOffsetX(-121.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(-121.f, 0));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+
+    /**
+    * @tc.steps: step4. Drag right delta > itemWidth/2
+    * @tc.expected: Continue change of order
+    */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(0, 0));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    /**
+    * @tc.steps: step5. Drag end
+    * @tc.expected: No trigger onMoveEvent
+    */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+* @tc.name: ForEachDrag009
+* @tc.desc: Drag with 2 lanes and rtl list, but items number is 3, test oblique drag direction
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag009, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(3, 2, onMoveEvent); // 2 lanes but 3 items
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. Drag item(index:1)
+    */
+    auto dragManager = GetForEachItemDragManager(1);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 1);
+
+    /**
+    * @tc.steps: step2. Drag right-down delta > half size
+    * @tc.expected: Will change right order, than change down order
+    */
+    info.SetOffsetX(121.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(121.f, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "2", "1" }));
+}
+
+/**
+* @tc.name: ForEachDrag010
+* @tc.desc: ForEach generates two items per iteration.
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag010, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    ListModelNG model = CreateList();
+    CreateForEach(3, onMoveEvent, true); // 1 lanes and 3 items
+    CreateDone();
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto syntaxItem = forEachNode->GetChildAtIndex(0);
+    forEachNode->InitDragManager(syntaxItem);
+    auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    EXPECT_EQ(pattern->dragManager_, nullptr);
+}
+
+/**
+* @tc.name: ForEachDrag011
+* @tc.desc: List drag sort in center snap mode, Items has varying heights.
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag011, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
+    CreateForEach(5, onMoveEvent, false);
+    CreateDone();
+    auto item1 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(0));
+    item1->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(150)));
+    FlushUITasks();
+
+    /**
+    * @tc.steps: step1. Drag item(index:0)
+    */
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.f);
+    info.SetGlobalPoint(Point(0, 100.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(GetChildY(frameNode_, 0), 125);
+
+    /**
+     * @tc.steps: step3. hold drag position
+     * @tc.expected: not change of order
+     */
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(GetChildY(frameNode_, 0), 125);
+}
+
+/**
+* @tc.name: ForEachDrag012
+* @tc.desc: Drag to reachStart, will scroll(rtl mode)
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag012, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(TOTAL_ITEM_NUMBER, 1, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. scroll List to index 0, delta 10
+    * @tc.expected: List to index 0, delta 10
+    */
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    pattern_->ScrollBy(10.f);
+    FlushUITasks();
+    const auto& itemPosition = pattern_->GetItemPosition();
+    EXPECT_TRUE(IsEqual(pattern_->GetStartIndex(), 0));
+    EXPECT_TRUE(IsEqual(itemPosition.begin()->second.startPos, -10.f));
+
+    /**
+    * @tc.steps: step2. Drag to the starts of view
+    * @tc.expected: Will scroll with animation
+    */
+    auto dragManager = GetForEachItemDragManager(1);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(20.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(230.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
+    FlushUITasks();
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_FALSE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
+}
+
+/**
+* @tc.name: ForEachDrag013
+* @tc.desc: Drag to reachEnd, will scroll(rtl mode)
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag013, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(TOTAL_ITEM_NUMBER, 1, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. scroll List to end, delta -10
+    * @tc.expected: List to tail index, delta -10
+    */
+    pattern_->ScrollToIndex(TOTAL_ITEM_NUMBER - 1, false, ScrollAlign::END);
+    pattern_->ScrollBy(-10.f);
+    FlushUITasks();
+    const auto& itemPosition = pattern_->GetItemPosition();
+    EXPECT_TRUE(IsEqual(pattern_->GetEndIndex(), TOTAL_ITEM_NUMBER - 1));
+    EXPECT_TRUE(IsEqual(itemPosition.rbegin()->second.endPos, 250.f));
+
+    /**
+    * @tc.steps: step2. Drag to the end of view
+    * @tc.expected: Will scroll with animation
+    */
+    auto dragManager = GetForEachItemDragManager(TOTAL_ITEM_NUMBER - 2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(-20.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(10.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
+    FlushUITasks();
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_FALSE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
 }
 
 /**
@@ -2869,6 +3317,283 @@ HWTEST_F(ListCommonTestNg, ChainAnimation004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetChainDelta(1), -10);
     FlushUITasks();
     EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
+/**
+ * @tc.name: IsInViewPort001
+ * @tc.desc: Test Focus with Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, IsInViewPort001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, true);
+    CreateFocusableListItems(28);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check is in view port
+     * @tc.expected: item 0 is in view port
+     */
+    EXPECT_TRUE(pattern_->IsInViewport(0));
+
+    /**
+     * @tc.steps: step2. Scroll to third row
+     * @tc.expected: item 0 is in cache, not in view port
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 2, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->IsInViewport(0));
+
+    /**
+     * @tc.steps: step2. Scroll to fifth row
+     * @tc.expected: item 0 is not cache, not in view port
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->IsInViewport(0));
+}
+
+/**
+ * @tc.name: IsInViewPort002
+ * @tc.desc: Test Focus with Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, IsInViewPort002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, true);
+    CreateListItemGroup();
+    CreateFocusableListItems(28);
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check is in view port
+     * @tc.expected: item 0 is in view port
+     */
+    EXPECT_TRUE(pattern_->GetIsInViewInGroup(0, 0));
+
+    /**
+     * @tc.steps: step2. Scroll to fifth row
+     * @tc.expected: item 0 is not cache, not in view port
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 5, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->GetIsInViewInGroup(0, 0));
+}
+
+/**
+ * @tc.name: ScrollToLastFocusIndex001
+ * @tc.desc: Test ListFocus ScrollToLastFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex001, TestSize.Level1)
+{
+    ListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<FocusManager> focusManager = AceType::MakeRefPtr<FocusManager>(pipe);
+    focusManager->isFocusActive_ = true;
+    pipe->focusManager_ = focusManager;
+    frameNode->context_ = AceType::RawPtr(pipe);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    frameNode->focusHub_ = focusNode;
+    list.needTriggerFocus_ = true;
+    list.focusIndex_ = 2;
+    list.startIndex_ = 0;
+    list.endIndex_ = 10;
+    auto result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_UP);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ScrollToLastFocusIndex002
+ * @tc.desc: Test ListFocus ScrollToLastFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex002, TestSize.Level1)
+{
+    ListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<FocusManager> focusManager = AceType::MakeRefPtr<FocusManager>(pipe);
+    focusManager->isFocusActive_ = true;
+    pipe->focusManager_ = focusManager;
+    frameNode->context_ = AceType::RawPtr(pipe);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    frameNode->focusHub_ = focusNode;
+    list.needTriggerFocus_ = true;
+    list.focusIndex_ = 2;
+    list.startIndex_ = 5;
+
+    list.endIndex_ = 10;
+    auto result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_DOWN);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(list.scrollSource_, 7);
+}
+
+/**
+ * @tc.name: ScrollToLastFocusIndex003
+ * @tc.desc: Test ListFocus ScrollToLastFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex003, TestSize.Level1)
+{
+    ListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<FocusManager> focusManager = AceType::MakeRefPtr<FocusManager>(pipe);
+    focusManager->isFocusActive_ = true;
+    pipe->focusManager_ = focusManager;
+    frameNode->context_ = AceType::RawPtr(pipe);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    frameNode->focusHub_ = focusNode;
+    list.needTriggerFocus_ = true;
+    list.focusIndex_ = 2;
+    list.startIndex_ = 5;
+    list.endIndex_ = 10;
+
+    auto result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_UP);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(list.scrollSource_, 7);
+
+    list.focusIndex_ = 11;
+    result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_DOWN);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(list.scrollSource_, 7);
+}
+
+
+/**
+ * @tc.name: ProcessFocusEvent001
+ * @tc.desc: Test list ProcessFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ProcessFocusEvent001, TestSize.Level1)
+{
+    ListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    frameNode->focusHub_ = focusNode;
+    KeyEvent event;
+    
+    list.needTriggerFocus_ = true;
+    list.triggerFocus_ = true;
+    list.ProcessFocusEvent(event, true);
+    EXPECT_FALSE(list.triggerFocus_);
+}
+
+/**
+ * @tc.name: ProcessFocusEvent002
+ * @tc.desc: Test list ProcessFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ProcessFocusEvent002, TestSize.Level1)
+{
+    ListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    frameNode->focusHub_ = focusNode;
+    KeyEvent event;
+    
+    list.needTriggerFocus_ = true;
+    list.focusIndex_ = std::nullopt;
+    list.ProcessFocusEvent(event, true);
+    EXPECT_FALSE(list.needTriggerFocus_);
+}
+
+/**
+ * @tc.name: ProcessFocusEvent003
+ * @tc.desc: Test list ProcessFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ProcessFocusEvent003, TestSize.Level1)
+{
+    ListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    frameNode->focusHub_ = focusNode;
+    KeyEvent event;
+
+    list.needTriggerFocus_ = true;
+    list.focusIndex_ = 2;
+    list.ProcessFocusEvent(event, true);
+    EXPECT_TRUE(list.triggerFocus_);
+}
+
+/**
+ * @tc.name: ScrollToFocusNodeIndex001
+ * @tc.desc: Test ScrollToFocusNodeIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Focus node outside the viewport
+     * @tc.expected: scroll to the node
+     */
+    int32_t focusNodeIndex = 6;
+    pattern_->focusIndex_ = 2;
+    pattern_->ScrollToFocusNodeIndex(focusNodeIndex);
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, focusNodeIndex);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+
+    focusNode = GetChildFocusHub(frameNode_, 2);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
 }
 
 void ListCommonTestNg::MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,

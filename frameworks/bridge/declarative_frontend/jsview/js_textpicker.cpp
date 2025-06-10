@@ -213,7 +213,7 @@ void ParseDivider(JSRef<JSObject>& obj, NG::ItemDivider& divider)
         divider.strokeWidth = strokeWidth;
         divider.strokeWidthResObj = strokeWidthResObj;
     }
-    
+
     Color color = defaultColor;
     RefPtr<ResourceObject> colorResObj;
     if (ConvertFromJSValue(obj->GetProperty("color"), color, colorResObj)) {
@@ -293,10 +293,6 @@ void JSTextPicker::SetDefaultTextStyle(const JSCallbackInfo& info)
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "defaultTextStyle");
     }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseDefaultTextStyleResObj(textStyle);
-    }
     TextPickerModel::GetInstance()->SetDefaultTextStyle(theme, textStyle);
 }
 
@@ -344,6 +340,16 @@ void JSTextPicker::CreateSingle(const RefPtr<PickerTheme>& theme, ParseTextArray
     TextPickerModel::GetInstance()->SetSelected(param.selected);
     TextPickerModel::GetInstance()->SetValue(param.value);
     TextPickerModel::GetInstance()->SetColumnWidths(param.columnWidths);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        if (param.kind == NG::TEXT) {
+            TextPickerModel::GetInstance()->ParseSingleRangeResourceObj(param.resultResObj, param.valueResObj);
+        } else if (param.kind == NG::ICON || param.kind == (NG::ICON | NG::TEXT)) {
+            TextPickerModel::GetInstance()->ParseSingleIconTextResourceObj(param.result);
+        }
+
+        TextPickerModel::GetInstance()->ParseColumnWidthsResourceObj(param.columnWidthResObjs);
+    }
 }
 
 void JSTextPicker::CreateMulti(const RefPtr<PickerTheme>& theme,
@@ -356,6 +362,11 @@ void JSTextPicker::CreateMulti(const RefPtr<PickerTheme>& theme,
     TextPickerModel::GetInstance()->SetHasSelectAttr(attr.isHasSelectAttr);
     TextPickerModel::GetInstance()->SetColumns(param.options);
     TextPickerModel::GetInstance()->SetColumnWidths(param.columnWidths);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TextPickerModel::GetInstance()->ParseCascadeResourceObj(param.options, param.valueArrResObj);
+        TextPickerModel::GetInstance()->ParseColumnWidthsResourceObj(param.columnWidthResObjs);
+    }
 }
 
 void ParseTextPickerValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -487,7 +498,7 @@ bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject, Par
         param.options.clear();
         return false;
     }
-    if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, param.selecteds, param.values, attr)) {
+    if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, param, attr)) {
         param.options.clear();
         return false;
     } else {
@@ -526,7 +537,7 @@ bool JSTextPickerParser::GenerateCascadeOptionsInternal(
     NG::TextCascadePickerOptions option;
     auto text = jsObj->GetProperty("text");
     std::string textStr = "";
-    if (ParseJsString(text, textStr)) {
+    if (ParseJsString(text, textStr, option.rangeResultResObj)) {
         option.rangeResult.emplace_back(textStr);
     } else {
         return false;
@@ -567,7 +578,8 @@ bool JSTextPickerParser::ParseMultiTextArrayRangeInternal(
 {
     if (value->IsArray()) {
         NG::TextCascadePickerOptions option;
-        if (!ParseJsStrArray(value, option.rangeResult)) {
+        std::vector<RefPtr<ResourceObject>> resObjVector;
+        if (!ParseJsStrArray(value, option.rangeResult, option.rangeResultResObj, resObjVector)) {
             return false;
         } else {
             options.emplace_back(option);
@@ -657,7 +669,8 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
 bool JSTextPickerParser::ParseMultiColumnWidths(const JsiRef<JsiValue>& jsColumnWidthsValue,
     ParseTextArrayParam& param)
 {
-    if (jsColumnWidthsValue->IsArray() && ParseJsLengthMetricsArray(jsColumnWidthsValue, param.columnWidths)) {
+    if (jsColumnWidthsValue->IsArray() &&
+        ParseJsLengthMetricsArray(jsColumnWidthsValue, param.columnWidths, param.columnWidthResObjs)) {
         return true;
     }
     return false;
@@ -839,15 +852,24 @@ void JSTextPickerParser::SetSelectedValues(std::vector<uint32_t>& selectedValues
     }
 }
 
-bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObject,
-    std::vector<uint32_t>& selectedValues, std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr)
+bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param,
+    NG::TextCascadePickerOptionsAttr& attr)
 {
+    std::vector<uint32_t>& selectedValues = param.selecteds;
+    std::vector<std::string>& values = param.values;
+
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     auto getSelected = paramObject->GetProperty("selected");
     auto getValue = paramObject->GetProperty("value");
     if (getValue->IsArray()) {
-        if (!ParseJsStrArray(getValue, values)) {
+        RefPtr<ResourceObject> resObj;
+        std::vector<RefPtr<ResourceObject>> resObjVector;
+        if (!ParseJsStrArray(getValue, values, resObj, resObjVector)) {
             return false;
+        }
+
+        if (resObjVector.size() > 0) {
+            param.valueArrResObj = resObjVector;
         }
     } else {
         std::string value = "";
@@ -912,7 +934,7 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
                 getValue = valueObj->GetProperty("value");
             }
         }
-        if (!ParseJsString(getValue, param.value)) {
+        if (!ParseJsString(getValue, param.value, param.valueResObj)) {
             param.value = getRangeVector.front();
         }
         if (getSelected->IsObject()) {
@@ -958,14 +980,18 @@ bool JSTextPickerParser::ParseIconTextArray(const JSRef<JSObject>& paramObject, 
         NG::RangeContent content;
         std::string icon;
         std::string text;
-        if (ParseJsMedia(rangeIcon, icon)) {
+        RefPtr<ResourceObject> iconResObj;
+        RefPtr<ResourceObject> textResObj;
+        if (ParseJsMedia(rangeIcon, icon, iconResObj)) {
             content.icon_ = icon;
             param.kind |= NG::ICON;
+            content.iconResObj_ = iconResObj;
         }
 
-        if (ParseJsString(rangeText, text)) {
+        if (ParseJsString(rangeText, text, textResObj)) {
             content.text_ = text;
             param.kind |= NG::TEXT;
+            content.textResObj_ = textResObj;
         }
         param.result.emplace_back(content);
     }
@@ -1193,10 +1219,6 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseDisappearTextStyleResObj(textStyle);
-    }
     TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -1208,10 +1230,6 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "textStyle");
     }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);
-    }
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -1222,10 +1240,6 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
-    }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseSelectedTextStyleResObj(textStyle);
     }
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
     if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
@@ -1405,9 +1419,6 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
         divider.strokeWidth = 0.0_vp;
     }
 
-    if (SystemProperties::ConfigChangePerform()) {
-        TextPickerModel::GetInstance()->ParseDividerResObj();
-    }
     TextPickerModel::GetInstance()->SetDivider(divider);
 }
 
@@ -1894,7 +1905,7 @@ bool JSTextPickerDialog::ParseShowDataOptions(
     }
 
     if (optionsMultiContentCheckErr) {
-        if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, param.selecteds, param.values, attr)) {
+        if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, param, attr)) {
             param.options.clear();
             optionsCascadeContentCheckErr = true;
         } else {

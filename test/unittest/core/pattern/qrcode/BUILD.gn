@@ -23,5 +23,9 @@ ace_unittest("qrcode_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp",
     "qrcode_test_ng.cpp",
   ]
-  external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+  if (is_arkui_x) {
+    deps = [ "//third_party/qrcodegen:ace_engine_qrcode" ]
+  } else {
+    external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+  }
 }

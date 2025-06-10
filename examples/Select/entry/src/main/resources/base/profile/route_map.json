@@ -76,6 +76,16 @@
       "buildFunction": "SelectOptionTextModifierBuilder"
     },
     {
+      "name": "SelectLevel00",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel00.ets",
+      "buildFunction": "SelectLevel00Builder"
+    },
+    {
+      "name": "SelectLevel11",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel11.ets",
+      "buildFunction": "SelectLevel11Builder"
+    },
+    {
       "name": "ButtonIndex",
       "pageSourceFile": "src/main/ets/pages/components/button/Index.ets",
       "buildFunction": "ButtonIndexBuilder"
@@ -309,6 +319,46 @@
       "name": "SliderNormal",
       "pageSourceFile": "src/main/ets/pages/components/slider/sliderNormal.ets",
       "buildFunction": "SliderNormalBuilder"
+    },
+    {
+      "name": "SliderLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel0.ets",
+      "buildFunction": "SliderLevel0Builder"
+    },
+    {
+      "name": "SliderLevel01",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel01.ets",
+      "buildFunction": "SliderLevel01Builder"
+    },
+    {
+      "name": "SliderLevel10",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel10.ets",
+      "buildFunction": "SliderLevel10Builder"
+    },
+    {
+      "name": "SliderLevel11",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel11.ets",
+      "buildFunction": "SliderLevel11Builder"
+    },
+    {
+      "name": "SliderLevel12",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel12.ets",
+      "buildFunction": "SliderLevel12Builder"
+    },
+    {
+      "name": "SliderLevel13",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel13.ets",
+      "buildFunction": "SliderLevel13Builder"
+    },
+    {
+      "name": "SliderLevel14",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel14.ets",
+      "buildFunction": "SliderLevel14Builder"
+    },
+    {
+      "name": "SliderLevel15",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel15.ets",
+      "buildFunction": "SliderLevel15Builder"
     },
     {
       "name": "RadioIndex",

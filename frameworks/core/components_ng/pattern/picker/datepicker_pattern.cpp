@@ -640,16 +640,14 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pickerTheme);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    if (!SystemProperties::ConfigChangePerform()) {
-        auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-        auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-        auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
-        CHECK_NULL_VOID(pickerProperty);
-        pickerProperty->UpdateColor(
-            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-        pickerProperty->UpdateDisappearColor(
-            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
-    }
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateColor(
+        GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearColor(
+        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
         if (!SystemProperties::ConfigChangePerform()) {
             OnModifyDone();
@@ -806,7 +804,7 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto centerX = leftTotalColumnWidth + FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
     auto centerY = (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE +
         FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
-
+    AdjustFocusBoxOffset(centerX);
     paintRect.SetRect(RectF(centerX, centerY, paintRectWidth, paintRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
@@ -816,6 +814,17 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+}
+
+void DatePickerPattern::AdjustFocusBoxOffset(double& centerX)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (geometryNode->GetPadding()) {
+        centerX += geometryNode->GetPadding()->left.value_or(0.0);
+    }
 }
 
 bool DatePickerPattern::OnKeyEvent(const KeyEvent& event)
@@ -878,10 +887,12 @@ bool DatePickerPattern::ParseDirectionKey(
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (code == KeyCode::KEY_DPAD_UP) {
+        pattern->StopHaptic();
         pattern->InnerHandleScroll(false, false);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_DOWN) {
+        pattern->StopHaptic();
         pattern->InnerHandleScroll(true, false);
         return true;
     }

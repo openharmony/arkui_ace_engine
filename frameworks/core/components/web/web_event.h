@@ -550,7 +550,7 @@ public:
     AllSslErrorResult() = default;
     ~AllSslErrorResult() = default;
     virtual void HandleConfirm() = 0;
-    virtual void HandleCancel() = 0;
+    virtual void HandleCancel(bool abortLoading) = 0;
 };
 
 class ACE_EXPORT WebAllSslErrorEvent : public BaseEventInfo {
@@ -1407,6 +1407,9 @@ public:
     virtual void Paste() const = 0;
     virtual void Cut() const = 0;
     virtual void SelectAll() const = 0;
+    virtual void Undo() const = 0;
+    virtual void Redo() const = 0;
+    virtual void PasteAndMatchStyle() const = 0;
 };
 
 class ACE_EXPORT ContextMenuEvent : public BaseEventInfo {
@@ -1505,6 +1508,14 @@ class ACE_EXPORT WebWindowExitEvent : public BaseEventInfo {
 public:
     WebWindowExitEvent() : BaseEventInfo("WebWindowExitEvent") {}
     ~WebWindowExitEvent() = default;
+};
+
+class ACE_EXPORT WebActivateContentEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebActivateContentEvent, BaseEventInfo);
+
+public:
+    WebActivateContentEvent() : BaseEventInfo("WebActivateContentEvent") {}
+    ~WebActivateContentEvent() = default;
 };
 
 class ACE_EXPORT PageVisibleEvent : public BaseEventInfo {

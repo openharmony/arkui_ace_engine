@@ -83,6 +83,8 @@ public:
 
     GestureEventFunc GetGestureEventFunc();
 
+    void SetLongPressEventType(GestureTypeName typeName);
+
     void CopyLongPressEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator)
     {
         isForDrag_ = longPressEventActuator->isForDrag_;

@@ -14,6 +14,10 @@
  */
 
 #include "gtest/gtest.h"
+
+#define protected public
+#define private public
+
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/referenced.h"
@@ -1185,6 +1189,59 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SafeAreaToPaddingTest7
+ * @tc.desc: Test SafeAreaToPadding with LayoutSafeAreaType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest7, TestSize.Level1)
+{
+    safeAreaManager_->SetIgnoreSafeArea(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->SetIsNeedAvoidWindow(true);
+
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    safeAreaManager_->UpdateNavSafeArea(navArea);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
+
+    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
+    safeAreaManager_->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT);
+    PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding(true, LAYOUT_SAFE_AREA_TYPE_KEYBOARD);
+    EXPECT_EQ(paddingProperty.left, std::nullopt);
+    EXPECT_EQ(paddingProperty.right, std::nullopt);
+    EXPECT_EQ(paddingProperty.top, std::nullopt);
+    EXPECT_EQ(paddingProperty.bottom, KEYBOARD_HEIGHT);
+
+    paddingProperty = safeAreaManager_->SafeAreaToPadding(true, LAYOUT_SAFE_AREA_TYPE_ALL);
+    EXPECT_EQ(paddingProperty.left, NAV_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - NAV_RIGHT_START);
+    EXPECT_EQ(paddingProperty.top, NAV_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.bottom, KEYBOARD_HEIGHT);
+
+    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
+    float offset = -KEYBOARD_HEIGHT;
+    safeAreaManager_->UpdateKeyboardOffset(offset);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding(true, LAYOUT_SAFE_AREA_TYPE_KEYBOARD);
+    EXPECT_EQ(paddingProperty.left, std::nullopt);
+    EXPECT_EQ(paddingProperty.right, std::nullopt);
+    EXPECT_EQ(paddingProperty.top, std::nullopt);
+    EXPECT_EQ(paddingProperty.bottom, std::nullopt);
+
+    offset = -KEYBOARD_HEIGHT / 2.0f;
+    safeAreaManager_->UpdateKeyboardOffset(offset);
+    paddingProperty = safeAreaManager_->SafeAreaToPadding(true, LAYOUT_SAFE_AREA_TYPE_KEYBOARD);
+    EXPECT_EQ(paddingProperty.left, std::nullopt);
+    EXPECT_EQ(paddingProperty.right, std::nullopt);
+    EXPECT_EQ(paddingProperty.top, std::nullopt);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - NAV_BOTTOM_START);
+
+    paddingProperty = safeAreaManager_->SafeAreaToPadding(true, LAYOUT_SAFE_AREA_TYPE_ALL);
+    EXPECT_EQ(paddingProperty.left, NAV_LEFT_END - SYSTEM_LEFT_START);
+    EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - NAV_RIGHT_START);
+    EXPECT_EQ(paddingProperty.top, NAV_TOP_END - SYSTEM_TOP_START);
+    EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - NAV_BOTTOM_START);
+}
+
+/**
  * @tc.name: NeedExpandNodeListTest
  * @tc.desc: Build an UI tree and start layouting from the root
  * and test if set of nodes are added in the list correctly.
@@ -1273,6 +1330,8 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode3), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode4), true);
+    EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 4);
+
     // repeat add should not work
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), false);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode1), false);
@@ -1284,4 +1343,31 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 0);
 }
 
+/**
+ * @tc.name: IsModeResizeOrIsModeOffset
+ * @tc.desc: Test IsModeResize and IsModeOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
+{
+    std::vector<KeyBoardAvoidMode> modeArr = {
+        KeyBoardAvoidMode::OFFSET,
+        KeyBoardAvoidMode::RESIZE,
+        KeyBoardAvoidMode::OFFSET_WITH_CARET,
+        KeyBoardAvoidMode::RESIZE_WITH_CARET,
+        KeyBoardAvoidMode::NONE
+    };
+    std::vector<std::pair<bool, bool>> expectedRes = {
+        { true, false },
+        { false, true },
+        { true, false },
+        { false, true },
+        { false, false }
+    };
+    for (int i= 0; i < modeArr.size(); ++i) {
+        safeAreaManager_->SetKeyBoardAvoidMode(modeArr[i]);
+        EXPECT_EQ(safeAreaManager_->IsModeOffset(), expectedRes[i].first);
+        EXPECT_EQ(safeAreaManager_->IsModeResize(), expectedRes[i].second);
+    }
+}
 } // namespace OHOS::Ace::NG

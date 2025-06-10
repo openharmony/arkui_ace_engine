@@ -281,9 +281,6 @@ void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& im
     ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top);
     ParseJsDimensionVp(jsObjImage->GetProperty("left"), imageProperties.left);
     ParseJsInt32(jsObjImage->GetProperty("duration"), imageProperties.duration);
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::SRC, resObj);
-    }
 }
 
 } // namespace OHOS::Ace::Framework

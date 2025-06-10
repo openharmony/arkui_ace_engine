@@ -63,7 +63,7 @@ void PipelineContextTestNg::SetUpTestSuite()
     ElementRegister::GetInstance()->AddUINode(frameNode_);
     auto window = std::make_shared<MockWindow>();
     EXPECT_CALL(*window, RequestFrame()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushTasks()).Times(AnyNumber());
+    EXPECT_CALL(*window, FlushTasks(testing::_)).Times(AnyNumber());
     EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
     EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
     EXPECT_CALL(*window, OnShow()).Times(AnyNumber());

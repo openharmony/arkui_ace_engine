@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("container_test") {
@@ -49,10 +50,15 @@ ohos_unittest("layout_inspector_test") {
     "layout_inspector_test.cpp",
     "$ace_root/adapter/ohos/osal/layout_inspector.cpp"
   ]
+  defines = []
+  if (use_new_skia) {
+    defines += [ "USE_NEW_SKIA" ]
+  }
 
   external_deps = [
      "ability_runtime:abilitykit_native",
      "ability_runtime:connect_server_manager",
+     "graphic_2d:librender_service_base",
      "graphic_2d:librender_service_client",
      "image_framework:image_native",
      "napi:ace_napi",
@@ -64,8 +70,16 @@ ohos_unittest("layout_inspector_test") {
 
 ohos_unittest("rs_adapter_test") {
   module_out_path = adapter_test_output_path
-  sources = [ "rs_adapter_test.cpp" ]
+  sources = [
+    "$ace_root/adapter/ohos/entrance/rs_adapter.cpp",
+    "rs_adapter_test.cpp"
+  ]
+
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  defines = [
+    "ENABLE_ROSEN_BACKEND"
+  ]
 
   deps = [
     "$ace_root/test/unittest:ace_base",
@@ -84,10 +98,18 @@ ohos_unittest("rs_adapter_test") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
   ]
+
   external_deps = [
     "googletest:gmock_main",
     "window_manager:libwm",
+    "graphic_2d:librender_service_base",
+    "ability_base:configuration",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
     "graphic_2d:librender_service_client",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+
   ]
 }
 

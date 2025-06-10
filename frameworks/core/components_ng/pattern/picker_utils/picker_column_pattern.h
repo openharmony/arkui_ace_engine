@@ -35,9 +35,9 @@ struct TextProperties {
     Dimension upFontSize;
     Dimension fontSize;
     Dimension downFontSize;
-    FontWeight upFontWeight;
-    FontWeight fontWeight;
-    FontWeight downFontWeight;
+    FontWeight upFontWeight = FontWeight::W100;
+    FontWeight fontWeight = FontWeight::W100;
+    FontWeight downFontWeight = FontWeight::W100;
     Color upColor;
     Color currentColor;
     Color downColor;
@@ -86,8 +86,8 @@ public:
         }
     }
 
-    virtual void FlushCurrentOptions(
-        bool isDown = false, bool isUpateTextContentOnly = false, bool isUpdateAnimationProperties = false) = 0;
+    virtual void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false,
+        bool isUpdateAnimationProperties = false, bool isTossPlaying = false) = 0;
     virtual void InitHapticController(const RefPtr<FrameNode>& host) = 0;
     virtual void UpdateColumnChildPosition(double offsetY) = 0;
     virtual void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme) = 0;
@@ -241,7 +241,7 @@ public:
         clickBreak_ = value;
     }
 
-    virtual bool IsStartEndTimeDefined()
+    virtual bool IsTossNeedToStop()
     {
         return false;
     }
@@ -346,6 +346,7 @@ protected:
     bool isEnableHaptic_ = true;
     bool isHapticPlayOnce_ = true;
     bool wheelModeEnabled_ = true;
+    bool isTossPlaying_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
     RefPtr<TossAnimationController> tossAnimationController_ = AceType::MakeRefPtr<TossAnimationController>();

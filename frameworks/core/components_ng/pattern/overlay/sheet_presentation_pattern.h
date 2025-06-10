@@ -85,16 +85,19 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        if (GetSheetType() == SheetType::SHEET_SIDE) {
+        auto sheetType = GetSheetType();
+        if (sheetType == SheetType::SHEET_SIDE) {
             return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
         }
-        return MakeRefPtr<SheetPresentationLayoutAlgorithm>(GetSheetType(), sheetPopupInfo_);
+        return MakeRefPtr<SheetPresentationLayoutAlgorithm>(sheetType, sheetPopupInfo_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<SheetPresentationProperty>();
     }
+
+    RefPtr<RenderContext> GetRenderContext();
 
     int32_t GetTargetId() const override
     {
@@ -738,6 +741,12 @@ public:
 
     float GetFitContentHeight();
 
+    void UpdateTitleColumnSize();
+
+    float GetTitleBuilderHeight() const;
+
+    static Dimension GetDragBarHeight(const RefPtr<FrameNode>& dragBarNode = nullptr);
+
     bool WillSpringBack() const
     {
         return isSpringBack_;
@@ -819,14 +828,12 @@ public:
     // Get ScrollHeight before avoid keyboard
     float GetScrollHeight() const
     {
-        auto titleHeight = GetFirstChildHeight();
+        auto titleHeight = GetTitleBuilderHeight();
         if (sheetType_ == SheetType::SHEET_CENTER) {
             return centerHeight_ - titleHeight;
         }
         return height_ - titleHeight;
     }
-
-    float GetFirstChildHeight() const;
 
     RefPtr<OverlayManager> GetOverlayManager();
     RefPtr<FrameNode> GetOverlayRoot();
@@ -919,7 +926,10 @@ public:
     void RecoverHalfFoldOrAvoidStatus();
     bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
+    void InitSheetObject();
     void UpdateSheetObject(SheetType type);
+    void ResetLayoutInfo();
+    void ResetScrollUserDefinedIdealSize(const RefPtr<SheetObject>& oldObject, const RefPtr<SheetObject>& newObject);
     void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
     {
         sheetPopupInfo_ = sheetPopupInfo;
@@ -944,6 +954,11 @@ public:
         closeButtonNode_ = node;
     }
 
+    void SetDragBarNode(const WeakPtr<FrameNode>& node)
+    {
+        dragBarNode_ = node;
+    }
+
     void SetScrollNode(const WeakPtr<FrameNode>& node) {
         scrolNode_ = node;
     }
@@ -951,7 +966,12 @@ public:
     void SetTitleBuilderNode(const WeakPtr<FrameNode>& node) {
         titleBuilderNode_ = node;
     }
-    
+
+    RefPtr<FrameNode> GetDragBarNode() const
+    {
+        return dragBarNode_.Upgrade();
+    }
+
     RefPtr<FrameNode> GetSheetCloseIcon() const
     {
         auto closeButtonNode = closeButtonNode_.Upgrade();
@@ -1012,6 +1032,7 @@ public:
     void HandleFitContontChange(float height);
     void GetCurrentScrollHeight();
     void RecoverScrollOrResizeAvoidStatus();
+    bool IsNeedChangeScrollHeight(float height);
     bool IsResizeWhenAvoidKeyboard();
     void InitScrollProps();
     uint32_t GetCurrentBroadcastDetentsIndex();
@@ -1045,7 +1066,7 @@ private:
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
-    RefPtr<RenderContext> GetRenderContext();
+
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
     float GetWrapperHeight();
@@ -1171,8 +1192,6 @@ private:
     bool isDrag_ = false;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     bool isNeedProcessHeight_ = false;
-    bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
-    bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
     bool isSpringBack_ = false; // sheet rebound
 
     double start_ = 0.0; // start position of detents changed
@@ -1196,6 +1215,7 @@ private:
     WeakPtr<FrameNode> scrolNode_;
     WeakPtr<FrameNode> titleBuilderNode_;
     RefPtr<SheetObject> sheetObject_;
+    WeakPtr<FrameNode> dragBarNode_;
 };
 } // namespace OHOS::Ace::NG
 

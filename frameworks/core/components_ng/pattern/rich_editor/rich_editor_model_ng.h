@@ -59,6 +59,7 @@ public:
     void SetMaxLength(std::optional<int32_t> value) override;
     void ResetMaxLength() override;
     void SetMaxLines(uint32_t value) override;
+    void SetEnableAutoSpacing(bool enabled) override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
     void SetSupportStyledUndo(bool enabled) override;
@@ -97,6 +98,7 @@ public:
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
+    static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);

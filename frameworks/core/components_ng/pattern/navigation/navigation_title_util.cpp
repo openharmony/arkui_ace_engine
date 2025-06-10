@@ -64,7 +64,7 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     MenuParam menuParam;
     menuParam.isShowInSubWindow = false;
     menuParam.placement = Placement::BOTTOM_RIGHT;
-     if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
         menuParam.isShowInSubWindow = true;
     }
     NavigationMenuOptions menuOptions = navDestinationPattern->GetMenuOptions();

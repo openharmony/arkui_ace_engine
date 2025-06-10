@@ -50,7 +50,7 @@ class MenuWrapperPattern : public PopupBasePattern {
     DECLARE_ACE_TYPE(MenuWrapperPattern, Pattern);
 
 public:
-    explicit MenuWrapperPattern(int32_t Id) : targetId_(Id) {}
+    explicit MenuWrapperPattern(int32_t Id, const std::string& tag = "") : targetId_(Id), targetTag_(tag) {}
     ~MenuWrapperPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -236,6 +236,16 @@ public:
         return isShowHoverImage_;
     }
 
+    void SetHoverScaleInterruption(bool interruption)
+    {
+        hoverScaleInterruption_ = interruption;
+    }
+
+    bool GetHoverScaleInterruption() const
+    {
+        return hoverScaleInterruption_;
+    }
+
     void SetIsStopHoverImageAnimation(bool isStop)
     {
         isStopHoverImageAnimation_ = isStop;
@@ -298,6 +308,26 @@ public:
         aboutToDisappearCallback_ = aboutToDisappear;
     }
 
+    void RegisterMenuOnWillAppearCallback(const std::function<void()>& onWillAppear)
+    {
+        onWillAppearCallback_ = onWillAppear;
+    }
+
+    void RegisterMenuOnDidAppearCallback(const std::function<void()>& onDidAppear)
+    {
+        onDidAppearCallback_ = onDidAppear;
+    }
+
+    void RegisterMenuOnWillDisappearCallback(const std::function<void()>& onWillDisappear)
+    {
+        onWillDisappearCallback_ = onWillDisappear;
+    }
+
+    void RegisterMenuOnDidDisappearCallback(const std::function<void()>& onDidDisappear)
+    {
+        onDidDisappearCallback_ = onDidDisappear;
+    }
+
     void RegisterMenuStateChangeCallback(const std::function<void(const std::string&)>& callback)
     {
         onStateChangeCallback_ = callback;
@@ -330,6 +360,34 @@ public:
             aboutToDisappearCallback_();
         }
     }
+
+   void CallMenuOnWillAppearCallback()
+   {
+       if (onWillAppearCallback_) {
+           onWillAppearCallback_();
+       }
+   }
+
+   void CallMenuOnDidAppearCallback()
+   {
+       if (onDidAppearCallback_) {
+           onDidAppearCallback_();
+       }
+   }
+
+   void CallMenuOnWillDisappearCallback()
+   {
+       if (onWillDisappearCallback_) {
+           onWillDisappearCallback_();
+       }
+   }
+
+   void CallMenuOnDidDisappearCallback()
+   {
+       if (onDidDisappearCallback_) {
+           onDidDisappearCallback_();
+       }
+   }
 
     void CallMenuStateChangeCallback(const std::string& value)
     {
@@ -612,16 +670,14 @@ public:
         hasCustomOutlineColor_ = hasCustomOutlineColor;
     }
 
-    bool GetMenuMaskEnable();
-    Color GetMenuMaskColor();
-    BlurStyle GetMenuMaskblurStyle();
-    void SetMenuMaskEnable(bool maskEnable);
-    void SetMenuMaskColor(Color maskColor);
-    void SetMenuMaskblurStyle(BlurStyle maskBlurStyle);
+    bool GetMenuMaskEnable() const;
+    Color GetMenuMaskColor() const;
+    BlurStyle GetMenuMaskBlurStyle() const;
     void UpdateFilterMaskType();
+    void CheckAndShowAnimation();
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
-    void CheckAndShowAnimation();
 
 private:
     bool AvoidKeyboard() const override
@@ -662,17 +718,24 @@ private:
         const std::list<RefPtr<UINode>>& children, const PointF& position);
     RefPtr<FrameNode> GetParentMenu(const RefPtr<UINode>& subMenu);
     void MenuFocusViewShow(const RefPtr<FrameNode>& menuNode);
-    void EnsureMenuMaskTypeInitialized();
+    void AddTargetWindowHotArea(std::vector<Rect>& rects);
+    void AddWrapperChildHotArea(std::vector<Rect>& rects, const RefPtr<LayoutWrapper>& layoutWrapper);
+    void AddFilterHotArea(std::vector<Rect>& rects);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
     std::function<void()> aboutToDisappearCallback_ = nullptr;
+    std::function<void()> onWillAppearCallback_ = nullptr;
+    std::function<void()> onDidAppearCallback_ = nullptr;
+    std::function<void()> onWillDisappearCallback_ = nullptr;
+    std::function<void()> onDidDisappearCallback_ = nullptr;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     RefPtr<TouchEventImpl> onTouch_;
     RefPtr<FrameNode> lastTouchItem_ = nullptr;
     RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+    std::string targetTag_ = "";
     int embeddedSubMenuExpandTotalCount_ = 0;
     bool forceUpdateEmbeddedMenu_ = false;
     LayoutConstraintF childLayoutConstraint_;
@@ -682,6 +745,7 @@ private:
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
     bool isShowHoverImage_ = false;
+    bool hoverScaleInterruption_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
     bool onMenuDisappear_ = false;
@@ -705,6 +769,7 @@ private:
     bool isSelectOverlaySubWindowWrapper_ = false;
     bool hasCustomOutlineWidth_ = false;
     bool hasCustomOutlineColor_ = false;
+    bool isClearLastMenuItem_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

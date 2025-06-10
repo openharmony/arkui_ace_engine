@@ -19,6 +19,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
+#include "interfaces/napi/kits/observer/gesture/gesture_observer.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 
@@ -85,6 +86,7 @@ static constexpr uint32_t SUCCESSFUL = 4;
 static constexpr uint32_t FAILED = 5;
 
 constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
+constexpr char NAVDESTINATION_UPDATE_BY_UNIQUEID[] = "navDestinationUpdateByUniqueId";
 constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
 constexpr char SCROLL_EVENT[] = "scrollEvent";
 constexpr char DENSITY_UPDATE[] = "densityUpdate";
@@ -370,6 +372,7 @@ ObserverProcess::ObserverProcess()
 {
     registerProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationRegister },
+        { NAVDESTINATION_UPDATE_BY_UNIQUEID, &ObserverProcess::ProcessNavigationRegisterByUniqueId },
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityRegister },
@@ -387,6 +390,7 @@ ObserverProcess::ObserverProcess()
     };
     unregisterProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
+        { NAVDESTINATION_UPDATE_BY_UNIQUEID, &ObserverProcess::ProcessNavigationUnRegisterByUniqueId },
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventUnRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageUnRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityUnRegister },
@@ -463,6 +467,19 @@ napi_value ObserverProcess::ProcessNavigationRegister(napi_env env, napi_callbac
         }
     }
 
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessNavigationRegisterByUniqueId(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isNavigationHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFunc(&UIObserver::HandleNavigationStateChange);
+        isNavigationHandleFuncSetted_ = true;
+    }
+
     if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number) &&
         MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
         int32_t navigationUniqueId;
@@ -503,6 +520,14 @@ napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callb
         }
     }
 
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessNavigationUnRegisterByUniqueId(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+    
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number)) {
         int32_t navigationUniqueId;
         if (napi_get_value_int32(env, argv[PARAM_INDEX_ONE], &navigationUniqueId) == napi_ok) {
@@ -1591,6 +1616,7 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     };
     NAPI_CALL(
         env, napi_define_properties(env, exports, sizeof(uiObserverDesc) / sizeof(uiObserverDesc[0]), uiObserverDesc));
+    NAPI_CALL(env, GestureObserver::DefineGestureObserver(env, exports));
     return exports;
 }
 

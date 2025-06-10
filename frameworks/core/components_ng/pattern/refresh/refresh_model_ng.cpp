@@ -23,7 +23,6 @@
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/i18n/localization.h"
 #include "frameworks/base/utils/time_util.h"
-#include "frameworks/core/components/refresh/refresh_theme.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/event/event_hub.h"
@@ -113,10 +112,8 @@ void RefreshModelNG::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_VOID(pattern);
-    if (!resObj) {
-        pattern->RemoveResObj("refresh.promptText");
-        return;
-    }
+    pattern->RemoveResObj("refresh.promptText");
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);

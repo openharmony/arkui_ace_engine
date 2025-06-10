@@ -156,6 +156,10 @@ class __RepeatImpl<T> {
         // keep  this.id2item_. by removing all entries for remaining
         // deleted items
         deletedKeysAndIndex.forEach(delItem => {
+            if (delItem && delItem.repeatItem && ('aboutToBeDeleted' in delItem.repeatItem)) {
+                // delete repeatItem property
+                delItem.repeatItem.aboutToBeDeleted();
+            }
             this.key2Item_.delete(delItem!.key);
         });
 

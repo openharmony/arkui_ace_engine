@@ -55,6 +55,9 @@ public:
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
+
+    void MeasurePrimaryContentNode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& homePositionDestSize);
     void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize);
 
@@ -84,6 +87,9 @@ private:
 
     void SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size);
 
+    void SizeCalculationForForceSplit(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+
     bool ifNeedInit_ = true;
 
     bool userSetNavBarRangeFlag_ = false;
@@ -99,6 +105,7 @@ private:
     float realContentWidth_ = 0.0f;
     float realContentHeight_ = 0.0f;
 
+    SizeF primaryNodeSize_ = SizeF(0.0f, 0.0f);
     SizeF navBarSize_ = SizeF(0.0f, 0.0f);
     SizeF contentSize_ = SizeF(0.0f, 0.0f);
     SizeF dividerSize_ = SizeF(0.0f, 0.0f);

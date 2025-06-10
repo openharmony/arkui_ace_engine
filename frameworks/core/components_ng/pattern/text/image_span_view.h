@@ -30,13 +30,15 @@ public:
     static void SetObjectFit(ImageFit value);
     static void SetVerticalAlign(VerticalAlign verticalAlign);
     static void SetBaselineOffset(const Dimension& value);
-    static void SetVerticalAlign(FrameNode* frameNode, VerticalAlign verticalAlign);
-    static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
+    static void SetObjectFit(FrameNode* frameNode, const std::optional<ImageFit>& value);
+    static void SetVerticalAlign(FrameNode* frameNode, const std::optional<VerticalAlign>& verticalAlign);
+    static void SetBaselineOffset(FrameNode* frameNode, const std::optional<Dimension>& value);
     static float GetBaselineOffset(FrameNode* frameNode, int32_t unit);
     static void SetPlaceHolderStyle(TextBackgroundStyle& radius);
     static void Create();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static ImageSourceInfo GetImageSpanSrc(FrameNode* frameNode);
+    static void SetImageSpanSrc(FrameNode* frameNode, const ImageSourceInfo& info);
     static ImageFit GetObjectFit(FrameNode* frameNode);
     static void SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
     static VerticalAlign GetVerticalAlign(FrameNode* frameNode);
@@ -46,6 +48,9 @@ public:
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
     static void SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius);
     static void ResetBorderRadius(FrameNode* frameNode);
+    static void SetPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
+    static void SetSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
+        const std::string& moduleName, bool isUriPureNumber);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_SPAN_VIEW_H

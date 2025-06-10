@@ -267,7 +267,7 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     touchEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     touchEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    touchEvent.action = static_cast<int32_t>(tempTouchEvent.type);
+    touchEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempTouchEvent.type));
     touchEvent.sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
     touchEvent.timeStamp = tempTouchEvent.time.time_since_epoch().count();
     touchEvent.actionTouchPoint.pressure = tempTouchEvent.force;
@@ -306,6 +306,22 @@ SourceTool ConvertCInputEventToolTypeToSourceTool(int32_t cInputEventToolType)
     }
 }
 
+ArkUI_UIInputEvent_Type ConvertInputEventTypeToArkuiUIInputEventType(InputEventType type)
+{
+    switch (type) {
+        case InputEventType::TOUCH_SCREEN:
+            return ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+        case InputEventType::MOUSE_BUTTON:
+            return ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+        case InputEventType::AXIS:
+            return ARKUI_UIINPUTEVENT_TYPE_AXIS;
+        case InputEventType::KEYBOARD:
+            return ARKUI_UIINPUTEVENT_TYPE_KEY;
+        default:
+            return ARKUI_UIINPUTEVENT_TYPE_UNKNOWN;
+    }
+}
+
 void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
 {
     ret.repeat = info.GetRepeat();
@@ -321,23 +337,24 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.speed = info.GetSpeed();
     ret.source = static_cast<int32_t>(info.GetSourceDevice());
     ret.targetDisplayId = info.GetTargetDisplayId();
-    switch (info.GetInputEventType()) {
-        case InputEventType::TOUCH_SCREEN :
-            ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_TOUCH);
-            break;
-        case InputEventType::MOUSE_BUTTON:
-            ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_MOUSE);
-            break;
-        case InputEventType::AXIS :
-            ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_AXIS);
-            break;
-        case InputEventType::KEYBOARD:
-            ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_KEY);
-            ret.deviceId = info.GetDeviceId();
-            break;
-        default:
-            break;
+    ret.inputEventType = ConvertInputEventTypeToArkuiUIInputEventType(info.GetInputEventType());
+}
+
+int32_t GetPointerEventAction(InputEventType type, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    if (type == InputEventType::AXIS) {
+        CHECK_NULL_RETURN(pointerEvent, static_cast<int32_t>(AxisAction::NONE));
+        return static_cast<int32_t>(NG::GetAxisEventType(pointerEvent));
     }
+    if (type == InputEventType::MOUSE_BUTTON) {
+        CHECK_NULL_RETURN(pointerEvent, static_cast<int32_t>(MouseAction::NONE));
+        return static_cast<int32_t>(NG::GetMouseEventType(pointerEvent));
+    }
+    if (type == InputEventType::KEYBOARD) {
+        return static_cast<int32_t>(KeyAction::DOWN);
+    }
+    CHECK_NULL_RETURN(pointerEvent, static_cast<int32_t>(TouchType::UNKNOWN));
+    return static_cast<int32_t>(NG::GetTouchEventType(pointerEvent));
 }
 
 void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
@@ -345,6 +362,9 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
 {
     rawInputEvent.sourceType = static_cast<ArkUI_Int32>(info->GetSourceDevice());
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
+    rawInputEvent.action =
+        info->GetLastAction().value_or(GetPointerEventAction(info->GetRawInputEventType(), info->GetRawInputEvent()));
+    rawInputEvent.deviceId = info->GetRawInputDeviceId();
     rawInputEvent.actionTouchPoint.tiltX = info->GetTiltX().value_or(0.0f);
     rawInputEvent.actionTouchPoint.tiltY = info->GetTiltY().value_or(0.0f);
     rawInputEvent.actionTouchPoint.rollAngle = info->GetRollAngle().value_or(0.0f);
@@ -441,7 +461,7 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     mouseEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     mouseEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    mouseEvent.action = static_cast<int32_t>(tempMouseEvent.action);
+    mouseEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempMouseEvent.action));
     mouseEvent.sourceType = static_cast<int32_t>(tempMouseEvent.sourceType);
     mouseEvent.timeStamp = tempMouseEvent.time.time_since_epoch().count();
     mouseEvent.actionTouchPoint.pressure = 0.0f;
@@ -475,7 +495,7 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     axisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    axisEvent.action = static_cast<int32_t>(tempAxisEvent.action);
+    axisEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempAxisEvent.action));
     axisEvent.sourceType = static_cast<int32_t>(tempAxisEvent.sourceType);
     axisEvent.timeStamp = tempAxisEvent.time.time_since_epoch().count();
     axisEvent.horizontalAxis = tempAxisEvent.horizontalAxis;
@@ -806,7 +826,8 @@ void setGestureInterrupterToNodeWithUserData(
         }
         interruptInfo.responseLinkRecognizer = othersRecognizer;
         interruptInfo.count = count;
-        ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &rawInputEvent };
+        ArkUI_UIInputEvent inputEvent { ConvertInputEventTypeToArkuiUIInputEventType(info->GetRawInputEventType()),
+            C_TOUCH_EVENT_ID, &rawInputEvent };
         inputEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
         interruptInfo.inputEvent = &inputEvent;
@@ -1108,6 +1129,15 @@ ArkUI_Int32 getDistanceByToolType(ArkUIGestureRecognizer* recognizer, int toolTy
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 setPreventBegin(ArkUIGestureRecognizer* recognizer)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    gestureRecognizer->SetPreventBegin(true);
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Bool isBuiltInGesture(ArkUIGestureRecognizer* recognizer)
 {
     auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
@@ -1224,6 +1254,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         .getTapGestureDistanceThreshold = getTapGestureDistanceThreshold,
         .setDistanceMap = setDistanceMap,
         .getDistanceByToolType = getDistanceByToolType,
+        .setPreventBegin = setPreventBegin,
         .isBuiltInGesture = isBuiltInGesture,
         .getGestureTag = getGestureTag,
         .getGestureBindNodeId = getGestureBindNodeId,
@@ -1312,6 +1343,79 @@ ArkUIGestureRecognizer* CreateGestureRecognizer(const RefPtr<NG::NGGestureRecogn
         delete arkUIGestureRecognizer;
     });
     return arkUIGestureRecognizer;
+}
+
+void GetTouchPoints(const std::shared_ptr<BaseGestureEvent>& info, std::array<ArkUITouchPoint, MAX_POINTS>& points,
+    ArkUITouchEvent& rawInputEvent)
+{
+    CHECK_NULL_VOID(info);
+    auto fingerList = info->GetFingerList();
+    rawInputEvent.touchPointSize = fingerList.size();
+    int32_t i = 0;
+    for (const auto& fingureIterator : fingerList) {
+        points[i].id = fingureIterator.fingerId_;
+        points[i].nodeX = fingureIterator.localLocation_.GetX();
+        points[i].nodeY = fingureIterator.localLocation_.GetY();
+        points[i].windowX = fingureIterator.globalLocation_.GetX();
+        points[i].windowY = fingureIterator.globalLocation_.GetY();
+        points[i].screenX = fingureIterator.screenLocation_.GetX();
+        points[i].screenY = fingureIterator.screenLocation_.GetY();
+        points[i].operatingHand = fingureIterator.operatingHand_;
+        points[i].tiltX = info->GetTiltX().value_or(0.0f);
+        points[i].tiltY = info->GetTiltY().value_or(0.0f);
+        points[i].toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
+        points[i].rollAngle = info->GetRollAngle().value_or(0.0f);
+        points[i].pressure = info->GetForce();
+        points[i].pressedTime = info->GetTimeStamp().time_since_epoch().count();
+        i++;
+    }
+    rawInputEvent.touchPointes = &(points[0]);
+    if (rawInputEvent.touchPointSize > 0) {
+        rawInputEvent.actionTouchPoint.nodeX = rawInputEvent.touchPointes[0].nodeX;
+        rawInputEvent.actionTouchPoint.nodeY = rawInputEvent.touchPointes[0].nodeY;
+        rawInputEvent.actionTouchPoint.windowX = rawInputEvent.touchPointes[0].windowX;
+        rawInputEvent.actionTouchPoint.windowY = rawInputEvent.touchPointes[0].windowY;
+        rawInputEvent.actionTouchPoint.screenX = rawInputEvent.touchPointes[0].screenX;
+        rawInputEvent.actionTouchPoint.screenY = rawInputEvent.touchPointes[0].screenY;
+        rawInputEvent.actionTouchPoint.operatingHand = rawInputEvent.touchPointes[0].operatingHand;
+        rawInputEvent.actionTouchPoint.tiltX = rawInputEvent.touchPointes[0].tiltX;
+        rawInputEvent.actionTouchPoint.tiltY = rawInputEvent.touchPointes[0].tiltY;
+        rawInputEvent.actionTouchPoint.toolType = rawInputEvent.touchPointes[0].toolType;
+        rawInputEvent.actionTouchPoint.rollAngle = rawInputEvent.touchPointes[0].rollAngle;
+        rawInputEvent.actionTouchPoint.pressure = rawInputEvent.touchPointes[0].pressure;
+        rawInputEvent.actionTouchPoint.pressedTime = rawInputEvent.touchPointes[0].pressedTime;
+    }
+}
+
+void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
+    ArkUI_UIInputEvent& inputEvent, const std::shared_ptr<BaseGestureEvent>& info,
+    std::array<ArkUITouchPoint, MAX_POINTS>& points)
+{
+    CHECK_NULL_VOID(info);
+    rawInputEvent.sourceType = static_cast<ArkUI_Int32>(info->GetSourceDevice());
+    rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
+    rawInputEvent.action =
+        info->GetLastAction().value_or(GetPointerEventAction(info->GetRawInputEventType(), info->GetRawInputEvent()));
+    rawInputEvent.deviceId = info->GetRawInputDeviceId();
+    rawInputEvent.stopPropagation = info->IsStopPropagation();
+    rawInputEvent.preventDefault = info->IsPreventDefault();
+    rawInputEvent.targetDisplayId = info->GetTargetDisplayId();
+    const auto& targetLocalOffset = info->GetTarget().area.GetOffset();
+    const auto& targetOrigin = info->GetTarget().origin;
+    // width height x y globalx globaly
+    rawInputEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+    rawInputEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+    rawInputEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+    rawInputEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+    rawInputEvent.width = info->GetTarget().area.GetWidth().ConvertToPx();
+    rawInputEvent.height = info->GetTarget().area.GetHeight().ConvertToPx();
+    GetTouchPoints(info, points, rawInputEvent);
+    inputEvent.inputType = ConvertInputEventTypeToArkuiUIInputEventType(info->GetRawInputEventType());
+    inputEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
+    inputEvent.inputEvent = &rawInputEvent;
+    if (ret) {
+        ret->rawPointerEvent = &inputEvent;
+    }
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

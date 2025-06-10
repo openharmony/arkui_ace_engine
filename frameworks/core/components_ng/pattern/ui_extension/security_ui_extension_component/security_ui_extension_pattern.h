@@ -102,16 +102,16 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
-    void FireOnRemoteReadyCallback();
-    void FireBindModalCallback();
-    void FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap);
-    void FireOnReceiveCallback(const AAFwk::WantParams& params);
-    void SetSyncCallbacks(
+    virtual void FireOnRemoteReadyCallback();
+    virtual void FireBindModalCallback();
+    virtual void FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap);
+    virtual void FireOnReceiveCallback(const AAFwk::WantParams& params);
+    virtual void SetSyncCallbacks(
         const std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>>&& callbackList);
-    void FireSyncCallbacks();
-    void SetAsyncCallbacks(
+    virtual void FireSyncCallbacks();
+    virtual void SetAsyncCallbacks(
         const std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>>&& callbackList);
-    void FireAsyncCallbacks();
+    virtual void FireAsyncCallbacks();
 
     // Dpi
     void SetDensityDpi(bool densityDpi);
@@ -140,7 +140,7 @@ public:
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
 
-private:
+protected:
     void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event) override;
     void HandleFocusEvent() override;

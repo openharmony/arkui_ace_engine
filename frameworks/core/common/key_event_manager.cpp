@@ -347,7 +347,7 @@ void AddKeyboardShortcutKeys(
     }
     // single key
     if (keys == CtrlKeysBit::CTRL || keys == CtrlKeysBit::SHIFT || keys == CtrlKeysBit::ALT) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys single key");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys single key");
         AddKeyboardShortcutSingleKey(keys, keyCodes, permutation);
     }
     // double keys

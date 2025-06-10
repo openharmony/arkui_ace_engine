@@ -14,17 +14,40 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/unittest/core/pattern/test_ng.h"
-
+#define private public
+#define protected public
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 
-#define private public
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_default.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
+
 class TestableTossAnimationController : public TossAnimationController {
 public:
     void TestCreatePropertyCallback()
@@ -64,6 +87,23 @@ private:
 
 // Test fixture. Renamed to DatePickerTestThree to match the HWTEST_F macro.
 class DatePickerTestToss : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    bool CompareOptionProperties(std::vector<PickerOptionProperty> option1, std::vector<PickerOptionProperty> option2)
+    {
+        int32_t size = option1.size();
+        for (int32_t i = 0; i < size; i++) {
+            if (option1[i].height != option2[i].height ||
+                option1[i].fontheight != option2[i].fontheight ||
+                option1[i].prevDistance != option2[i].prevDistance ||
+                option1[i].nextDistance != option2[i].nextDistance) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 protected:
     void SetUp() override
     {
@@ -72,11 +112,37 @@ protected:
         controller_ = column_->GetToss();
         controller_->SetColumn(column_);
         ASSERT_NE(controller_, nullptr);
+
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+            return GetTheme(type);
+        });
+        EXPECT_CALL(*themeManager, GetTheme(_, _))
+            .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
+        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    }
+
+    void TearDown()
+    {
+        MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
+        ViewStackProcessor::GetInstance()->ClearStack();
     }
 
     RefPtr<DummyDatePickerColumnPattern> column_;
     RefPtr<TossAnimationController> controller_;
 };
+
+void DatePickerTestToss::SetUpTestSuite()
+{
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+}
+
+void DatePickerTestToss::TearDownTestSuite()
+{
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
 
 /**
 @tc.name: TossAnimationControllerSetStartTest
@@ -259,6 +325,64 @@ HWTEST_F(DatePickerTestToss, TossAnimationControllerStartSpringMotionNullTest, T
     ctrl->StartSpringMotion();
     ctrl->SetColumn(column_);
     ctrl->StartSpringMotion();
+}
+
+/**
+@tc.name: TestFlushCurrentOptionsNormalCase
+@tc.desc: Test FlushCurrentOptions with normal parameters.
+@tc.type: FUNC
+*/
+HWTEST_F(DatePickerTestToss, TestFlushCurrentOptionsNormalCase, TestSize.Level1)
+{
+    bool isDown = true;
+    bool isUpateTextContentOnly = false;
+    bool isUpdateAnimationProperties = true;
+    bool isTossPlaying = false;
+    /**
+     * @tc.steps: step1. Create DatePicker and get columnPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildAtIndex(1)->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    columnNode->MarkModifyDone();
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto initOptionProperties = columnPattern->optionProperties_;
+    /*
+    @tc.steps: step2. FlushCurrentOptions with parameters1.
+    */
+    columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
+    auto optionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
+
+    /*
+    @tc.steps: step3. FlushCurrentOptions with parameters2.
+    */
+    isDown = false;
+    isUpateTextContentOnly = true;
+    isUpdateAnimationProperties = false;
+    isTossPlaying = true;
+    columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
+    optionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
+
+    /*
+    @tc.steps: step4. FlushCurrentOptions with parameters3.
+    */
+    isDown = true;
+    isUpateTextContentOnly = false;
+    isUpdateAnimationProperties = false;
+    isTossPlaying = false;
+    columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
+    optionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
 }
 
 } // namespace OHOS::Ace::NG

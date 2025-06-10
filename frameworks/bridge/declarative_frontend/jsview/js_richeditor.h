@@ -90,6 +90,7 @@ public:
     static void SetBarState(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetEnableAutoSpacing(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetUndoStyle(const JSCallbackInfo& info);
@@ -132,6 +133,7 @@ public:
     static void ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseParagraphSpacing(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    static void ParseTextVerticalAlign(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseLineBreakStrategyParagraphStyle(
         const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,

@@ -812,4 +812,50 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg017, TestSize.Level1)
     model.SetDotIndicatorStyle(frameNode, swiperParameters);
     EXPECT_EQ(indicatorPattern_->swiperParameters_->dimSpace, Dimension(2.f, DimensionUnit::LPX));
 }
+
+/**
+ * @tc.name: CreateDotWithResourceObj001
+ * @tc.desc: Text CreateDotWithResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, CreateDigitWithResourceObj, TestSize.Level1)
+{
+    SwiperDigitalParameters swiperDigitalParameters;
+    swiperDigitalParameters.fontColor = Color::RED;
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+    model.CreateDigitWithResourceObj(frameNode, swiperDigitalParameters);
+    model.SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
+    model.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+
+    EXPECT_EQ(indicatorPattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
+    EXPECT_EQ(indicatorPattern_->swiperDigitalParameters_->fontColor, Color::RED);
+}
+
+/**
+ * @tc.name: CreateDotWithResourceObj001
+ * @tc.desc: Text CreateDotWithResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, CreateDotWithResourceObj, TestSize.Level1)
+{
+    SwiperParameters swiperParameters;
+    swiperParameters.colorVal = Color::RED;
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+    model.CreateDotWithResourceObj(frameNode, swiperParameters);
+    model.SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+
+    EXPECT_EQ(indicatorPattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->colorVal, Color::RED);
+}
 } // namespace OHOS::Ace::NG

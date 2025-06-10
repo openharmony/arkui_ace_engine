@@ -33,6 +33,9 @@ namespace OHOS::Ace::Framework {
     FUNCTION("centerX", CENTER_X)       \
     FUNCTION("centerY", CENTER_Y)       \
     FUNCTION("centerZ", CENTER_Z)       \
+    FUNCTION("angleX", ANGLE_X)       \
+    FUNCTION("angleY", ANGLE_Y)       \
+    FUNCTION("angleZ", ANGLE_Z)       \
     FUNCTION("color", COLOR)       \
     FUNCTION("colors", COLORS)       \
     FUNCTION("colorValue", COLOR_VALUE)       \
@@ -91,7 +94,8 @@ namespace OHOS::Ace::Framework {
     FUNCTION("z", Z)       \
     FUNCTION("spaceValue", SPACE_VALUE)       \
     FUNCTION("ignoreSizeValue", IGNORE_SIZE_VALUE)       \
-    FUNCTION("setIgnoreSizeValue", SET_IGNORE_SIZE_VALUE)
+    FUNCTION("setIgnoreSizeValue", SET_IGNORE_SIZE_VALUE)       \
+    FUNCTION("metricsColors", METRICS_COLORS)
 
 #define PROPERTY_NAME_INDEX(propertyName, index) index,
 enum class ArkUIIndex : uint32_t {

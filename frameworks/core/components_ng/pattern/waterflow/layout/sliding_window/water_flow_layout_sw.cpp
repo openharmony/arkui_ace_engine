@@ -51,6 +51,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     } else if (info_->targetIndex_) {
         MeasureBeforeAnimation(*info_->targetIndex_);
     } else if (canSkip_ && info_->TryConvertLargeDeltaToJump(mainLen_, itemCnt_)) {
+        info_->jumpForRecompose_ = info_->jumpIndex_;
         MeasureOnJump(info_->jumpIndex_, ScrollAlign::START);
     } else {
         MeasureOnOffset(info_->delta_);
@@ -180,7 +181,9 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     for (const auto& len : cross.first) {
         itemsCrossSize_[0].push_back(static_cast<float>(len));
     }
-    info_->lanes_[0].resize(itemsCrossSize_[0].size());
+
+    const float newStartPos = info_->lanes_[0].size() > 0 ? info_->lanes_[0][0].startPos : 0.0f;
+    info_->lanes_[0].resize(itemsCrossSize_[0].size(), WaterFlowLayoutInfoSW::Lane { newStartPos, newStartPos });
 }
 
 bool WaterFlowLayoutSW::ItemHeightChanged() const
@@ -211,6 +214,7 @@ int32_t WaterFlowLayoutSW::CheckReset()
             info_->ResetWithLaneOffset(std::nullopt);
             return std::min(info_->startIndex_, itemCnt_ - 1);
         }
+        info_->jumpForRecompose_ = info_->startIndex_;
         info_->maxHeight_ = 0.0f;
         info_->ClearDataFrom(updateIdx, mainGaps_);
     }
@@ -315,8 +319,8 @@ using lanePos = std::pair<float, size_t>;
 struct LanePosLess {
     bool operator()(const lanePos& a, const lanePos& b) const
     {
-        if (!NearEqual(a.first, b.first)) {
-            return LessNotEqual(a.first, b.first);
+        if (!NearEqual(a.first, b.first, 0.01f)) {
+            return LessNotEqualCustomPrecision(a.first, b.first, -0.01f);
         } else {
             return a.second < b.second;
         }
@@ -325,8 +329,8 @@ struct LanePosLess {
 struct LanePosGreater {
     bool operator()(const lanePos& a, const lanePos& b) const
     {
-        if (!NearEqual(a.first, b.first)) {
-            return GreatNotEqual(a.first, b.first);
+        if (!NearEqual(a.first, b.first, 0.01f)) {
+            return GreatNotEqualCustomPrecision(a.first, b.first, 0.01f);
         } else {
             return a.second > b.second;
         }
@@ -397,6 +401,9 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
         q.pop();
         info_->idxToLane_[idx] = laneIdx;
         const float mainLen = MeasureChild(idx, laneIdx);
+        if (Negative(mainLen)) {
+            return true;
+        }
         float endPos = FillBackHelper(mainLen, idx++, laneIdx);
         if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, laneIdx });
@@ -437,6 +444,9 @@ bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int3
         q.pop();
         info_->idxToLane_[idx] = laneIdx;
         const float mainLen = MeasureChild(idx, laneIdx, false);
+        if (Negative(mainLen)) {
+            return true;
+        }
         float startPos = FillFrontHelper(mainLen, idx--, laneIdx);
         if (GreatNotEqual(startPos, viewportBound)) {
             q.push({ startPos, laneIdx });
@@ -492,6 +502,9 @@ void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t m
     while (!lanes.empty() && idx <= maxChildIdx && info_->idxToLane_.count(idx)) {
         size_t laneIdx = info_->idxToLane_.at(idx);
         const float mainLen = MeasureChild(idx, laneIdx);
+        if (Negative(mainLen)) {
+            return;
+        }
         float endPos = FillBackHelper(mainLen, idx++, laneIdx);
         if (GreatOrEqual(endPos, viewportBound)) {
             lanes.erase(laneIdx);
@@ -516,6 +529,9 @@ void WaterFlowLayoutSW::RecoverFront(float viewportBound, int32_t& idx, int32_t 
     while (!lanes.empty() && idx >= minChildIdx && info_->idxToLane_.count(idx)) {
         size_t laneIdx = info_->idxToLane_.at(idx);
         const float mainLen = MeasureChild(idx, laneIdx, false);
+        if (Negative(mainLen)) {
+            return;
+        }
         float startPos = FillFrontHelper(mainLen, idx--, laneIdx);
         if (LessOrEqual(startPos, viewportBound)) {
             lanes.erase(laneIdx);
@@ -721,7 +737,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
 float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane, bool forward) const
 {
     auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx), !cacheDeadline_, cacheDeadline_.has_value());
-    CHECK_NULL_RETURN(child, 0.0f);
+    CHECK_NULL_RETURN(child, -1.0f);
     float userHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(idx), idx);
     if (NonNegative(userHeight)) {
         WaterFlowLayoutUtils::UpdateItemIdealSize(child, axis_, userHeight);

@@ -35,6 +35,7 @@ const curves = globalThis.requireNativeModule('ohos.curves');
 const KeyCode = globalThis.requireNapi('multimodalInput.keyCode').KeyCode;
 const util = globalThis.requireNapi('util');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const I18n = requireNapi('i18n');
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
@@ -44,6 +45,9 @@ const MIN_MAX_FONT_SCALE = 1;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
 const CAPSULE_FOCUS_SELECTED_OFFSET = 4;
+// Space character for selected accessibility description - prevents screen readers from announcing
+const ACCESSIBILITY_SELECTED_DESCRIPTION = ' ';
+const ACCESSIBILITY_DEFAULT_DESCRIPTION = '';
 const segmentButtonTheme = {
   FONT_COLOR: {
     id: -1,
@@ -224,6 +228,10 @@ const segmentButtonTheme = {
 function nearEqual(first, second) {
   return Math.abs(first - second) < 0.001;
 }
+function validateLengthMetrics(value, defaultValue) {
+  const actualValue = value ?? defaultValue;
+  return actualValue.value < 0 ? defaultValue : actualValue;
+}
 export var BorderRadiusMode;
 (function (BorderRadiusMode) {
   /**
@@ -359,10 +367,14 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
     if (this.borderRadiusMode !== BorderRadiusMode.DEFAULT && this.borderRadiusMode !== BorderRadiusMode.CUSTOM) {
       this.borderRadiusMode = BorderRadiusMode.DEFAULT;
     }
-    this.backgroundBorderRadius =
-      options.backgroundBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE);
-    this.itemBorderRadius =
-      options.itemBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE);
+    this.backgroundBorderRadius = validateLengthMetrics(
+      options.backgroundBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE)
+    );
+    this.itemBorderRadius = validateLengthMetrics(
+      options.itemBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE)
+    );
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons);
     if (this.type === 'capsule') {
       this.multiply = options.multiply ?? false;
@@ -1023,16 +1035,8 @@ class SegmentButtonItem extends ViewPU {
         return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
       }
       return this.options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
-    } else {
-      if (
-        this.options.fontColor === segmentButtonTheme.FONT_COLOR &&
-        this.isSegmentFocusStyleCustomized &&
-        this.focusIndex === this.index
-      ) {
-        return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
-      }
-      return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
     }
+    return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
   }
   getAccessibilityText() {
     if (
@@ -1331,7 +1335,7 @@ class PressAndHoverEffectArray extends ViewPU {
                         undefined,
                         elmtId,
                         () => {},
-                        { page: 'library/src/main/ets/components/MainPage.ets', line: 727, col: 13 }
+                        { page: 'library/src/main/ets/components/MainPage.ets', line: 730, col: 13 }
                       );
                       ViewPU.create(componentCall);
                       let paramsLambda = () => {
@@ -1751,6 +1755,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
       Stack.direction(this.options.direction);
       Stack.size({ width: 1, height: 1 });
       Stack.align(Alignment.Center);
+      Stack.visibility(!this.isSegmentFocusStyleCustomized && this.focusIndex === index ? Visibility.Visible : Visibility.None);
     }, Stack);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
@@ -1782,35 +1787,37 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     const buttonsLength = this.options.buttons
       ? Math.min(this.options.buttons.length, this.buttonItemsSize.length)
       : MIN_ITEM_COUNT;
-    const setAllCorners = (array, index, value) => {
+    const setAllCorners = (array, index, lengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(safeValue);
-      array[index].topEnd = LengthMetrics.vp(safeValue);
-      array[index].bottomStart = LengthMetrics.vp(safeValue);
-      array[index].bottomEnd = LengthMetrics.vp(safeValue);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      array[index].topStart = safeLengthMetrics;
+      array[index].topEnd = safeLengthMetrics;
+      array[index].bottomStart = safeLengthMetrics;
+      array[index].bottomEnd = safeLengthMetrics;
     };
-    const setLeftCorners = (array, index, value) => {
+    const setLeftCorners = (array, index, lengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(safeValue);
-      array[index].topEnd = LengthMetrics.vp(0);
-      array[index].bottomStart = LengthMetrics.vp(safeValue);
-      array[index].bottomEnd = LengthMetrics.vp(0);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      const zeroLengthMetrics = LengthMetrics.vp(0);
+      array[index].topStart = safeLengthMetrics;
+      array[index].topEnd = zeroLengthMetrics;
+      array[index].bottomStart = safeLengthMetrics;
+      array[index].bottomEnd = zeroLengthMetrics;
     };
-    const setRightCorners = (array, index, value) => {
+    const setRightCorners = (array, index, lengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(0);
-      array[index].topEnd = LengthMetrics.vp(safeValue);
-      array[index].bottomStart = LengthMetrics.vp(0);
-      array[index].bottomEnd = LengthMetrics.vp(safeValue);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      const zeroLengthMetrics = LengthMetrics.vp(0);
+      array[index].topStart = zeroLengthMetrics;
+      array[index].topEnd = safeLengthMetrics;
+      array[index].bottomStart = zeroLengthMetrics;
+      array[index].bottomEnd = safeLengthMetrics;
     };
     const setMiddleCorners = (array, index) => {
       if (!array || index < 0 || index >= array.length) {
@@ -1824,18 +1831,26 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     for (let index = 0; index < this.buttonBorderRadius.length; index++) {
       let halfButtonItemsSizeHeight = this.buttonItemsSize[index].height / 2;
       let radius = this.options.iconTextRadius ?? halfButtonItemsSizeHeight; // default radius
+      // Determine which border radius to use based on mode setting
       const isCustomMode =
         this.options.borderRadiusMode === BorderRadiusMode.CUSTOM && this.options.itemBorderRadius !== undefined;
-      const radiusValue = isCustomMode ? this.options.itemBorderRadius.value : radius;
+      let radiusLengthMetrics;
+      if (isCustomMode && this.options.itemBorderRadius) {
+        // Use custom border radius from options
+        radiusLengthMetrics = this.options.itemBorderRadius;
+      } else {
+        // Use default calculated radius value
+        radiusLengthMetrics = LengthMetrics.vp(radius);
+      }
       if (isSingleSelect) {
         // single-select
-        setAllCorners(borderRadiusArray, index, radiusValue);
+        setAllCorners(borderRadiusArray, index, radiusLengthMetrics);
       } else {
         // multi-select
         if (index === 0) {
-          setLeftCorners(borderRadiusArray, index, radiusValue);
+          setLeftCorners(borderRadiusArray, index, radiusLengthMetrics);
         } else if (index === buttonsLength - 1) {
-          setRightCorners(borderRadiusArray, index, radiusValue);
+          setRightCorners(borderRadiusArray, index, radiusLengthMetrics);
         } else {
           setMiddleCorners(borderRadiusArray, index);
         }
@@ -1843,8 +1858,15 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     }
     this.buttonBorderRadius = borderRadiusArray;
   }
-  getAccessibilityDescription(value) {
-    return typeof value !== undefined ? value : undefined;
+  getAccessibilityDescription(value, index) {
+    if (value !== undefined) {
+      return value;
+    }
+    const isSingleSelect = this.options.type === 'tab' || !this.options.multiply;
+    if (isSingleSelect && index !== undefined && this.selectedIndexes.includes(index)) {
+      return ACCESSIBILITY_SELECTED_DESCRIPTION;
+    }
+    return ACCESSIBILITY_DEFAULT_DESCRIPTION;
   }
   isDefaultSelectedBgColor() {
     if (this.options.type === 'tab') {
@@ -1889,7 +1911,9 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                       Button.accessibilityChecked(
                         this.options.multiply ? this.selectedIndexes.includes(index) : undefined
                       );
-                      Button.accessibilityDescription(this.getAccessibilityDescription(item.accessibilityDescription));
+                      Button.accessibilityDescription(
+                        this.getAccessibilityDescription(item.accessibilityDescription, index)
+                      );
                       Button.direction(this.options.direction);
                       Button.borderRadius(this.buttonBorderRadius[index]);
                       Button.scale({
@@ -1924,20 +1948,21 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                           };
                         }
                       });
-                      ViewStackProcessor.visualState('normal');
-                      Button.overlay(undefined);
-                      ViewStackProcessor.visualState('focused');
-                      Button.overlay(
-                        {
-                          builder: () => {
-                            this.focusStack.call(this, index);
-                          },
-                        },
-                        {
-                          align: Alignment.Center,
+                      Button.overlay({
+                        builder: () => {
+                          this.focusStack.call(this, index);
                         }
-                      );
-                      ViewStackProcessor.visualState();
+                      }, { align: Alignment.Center });
+                      Button.attributeModifier.bind(this)(this.isSegmentFocusStyleCustomized ? undefined :
+                        new FocusStyleButtonModifier((isFocused) => {
+                          if (!isFocused && this.focusIndex === index) {
+                            this.focusIndex = -1;
+                            return;
+                          }
+                          if (isFocused) {
+                            this.focusIndex = index;
+                          }
+                        }));
                       Button.onFocus(() => {
                         this.focusIndex = index;
                         if (this.isSegmentFocusStyleCustomized) {
@@ -1945,7 +1970,9 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         }
                       });
                       Button.onBlur(() => {
-                        this.focusIndex = -1;
+                        if (this.focusIndex === index) {
+                          this.focusIndex = -1;
+                        }
                         this.hoverColorArray[index].hoverColor = Color.Transparent;
                       });
                       Gesture.create(GesturePriority.Low);
@@ -2058,7 +2085,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                               undefined,
                               elmtId,
                               () => {},
-                              { page: 'library/src/main/ets/components/MainPage.ets', line: 1036, col: 15 }
+                              { page: 'library/src/main/ets/components/MainPage.ets', line: 1048, col: 15 }
                             );
                             ViewPU.create(componentCall);
                             let paramsLambda = () => {
@@ -2655,15 +2682,24 @@ export class SegmentButton extends ViewPU {
         if (this.isCurrentPositionSelected) {
           return;
         }
+        // Only handle horizontal swipes (angle between -45 to 45 degrees or 135 to 225 degrees)
+        let isHorizontalSwipe = Math.abs(event.angle) <= 45 || Math.abs(event.angle) >= 135;
+        if (!isHorizontalSwipe) {
+          return;
+        }
+        let isSwipeRight = Math.abs(event.angle) <= 45; // swipe right
+        let isSwipeLeft = Math.abs(event.angle) >= 135; // swipe left
+        let isSwipeToNext = this.isShouldMirror() ? isSwipeLeft : isSwipeRight;
+        let isSwipeToPrevious = this.isShouldMirror() ? isSwipeRight : isSwipeLeft;
         if (
-          Math.abs(event.angle) < 90 &&
+          isSwipeToNext &&
           this.selectedIndexes[0] !== Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1
         ) {
           // Move to next
           this.doSelectedChangeAnimate = true;
           this.selectedIndexes[0] = this.selectedIndexes[0] + 1;
           this.doSelectedChangeAnimate = false;
-        } else if (Math.abs(event.angle) > 90 && this.selectedIndexes[0] !== 0) {
+        } else if (isSwipeToPrevious && this.selectedIndexes[0] !== 0) {
           // Move to previous
           this.doSelectedChangeAnimate = true;
           this.selectedIndexes[0] = this.selectedIndexes[0] - 1;
@@ -2688,10 +2724,12 @@ export class SegmentButton extends ViewPU {
         let selectedInfo = fingerInfo.localX;
         this.panGestureStartPoint = { x: fingerInfo.globalX, y: fingerInfo.globalY };
         this.isPanGestureMoved = false;
-        for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
+        let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+        for (let i = 0; i < buttonLength; i++) {
           selectedInfo = selectedInfo - this.buttonItemsSize[i].width;
           if (selectedInfo < 0) {
-            this.isCurrentPositionSelected = i === this.selectedIndexes[0] ? true : false;
+            let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+            this.isCurrentPositionSelected = realIndex === this.selectedIndexes[0] ? true : false;
             break;
           }
         }
@@ -2715,11 +2753,13 @@ export class SegmentButton extends ViewPU {
         if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX, fingerInfo.globalY)) {
           this.isPanGestureMoved = true;
         }
-        for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
+        let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+        for (let i = 0; i < buttonLength; i++) {
           selectedInfo = selectedInfo - this.buttonItemsSize[i].width;
           if (selectedInfo < 0) {
+            let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
             this.doSelectedChangeAnimate = true;
-            this.selectedIndexes[0] = i;
+            this.selectedIndexes[0] = realIndex;
             this.doSelectedChangeAnimate = false;
             break;
           }
@@ -2755,10 +2795,13 @@ export class SegmentButton extends ViewPU {
         if (this.isMouseWheelScroll(event)) {
           let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
           this.doSelectedChangeAnimate = true;
-          if (offset > 0 && this.selectedIndexes[0] > 0) {
+          // Reverse mouse wheel direction in mirrored layout
+          let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
+          let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
+          if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
             this.selectedIndexes[0] -= 1;
           } else if (
-            offset < 0 &&
+            shouldMoveNext &&
             this.selectedIndexes[0] < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1
           ) {
             this.selectedIndexes[0] += 1;
@@ -2808,7 +2851,7 @@ export class SegmentButton extends ViewPU {
                           undefined,
                           elmtId,
                           () => {},
-                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1378, col: 11 }
+                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1390, col: 11 }
                         );
                         ViewPU.create(componentCall);
                         let paramsLambda = () => {
@@ -2861,7 +2904,7 @@ export class SegmentButton extends ViewPU {
                                 undefined,
                                 elmtId,
                                 () => {},
-                                { page: 'library/src/main/ets/components/MainPage.ets', line: 1385, col: 15 }
+                                { page: 'library/src/main/ets/components/MainPage.ets', line: 1397, col: 15 }
                               );
                               ViewPU.create(componentCall);
                               let paramsLambda = () => {
@@ -2922,7 +2965,7 @@ export class SegmentButton extends ViewPU {
                           undefined,
                           elmtId,
                           () => {},
-                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1405, col: 13 }
+                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1417, col: 13 }
                         );
                         ViewPU.create(componentCall);
                         let paramsLambda = () => {
@@ -2960,7 +3003,7 @@ export class SegmentButton extends ViewPU {
                           undefined,
                           elmtId,
                           () => {},
-                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1411, col: 13 }
+                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1423, col: 13 }
                         );
                         ViewPU.create(componentCall);
                         let paramsLambda = () => {
@@ -3006,7 +3049,7 @@ export class SegmentButton extends ViewPU {
                     undefined,
                     elmtId,
                     () => {},
-                    { page: 'library/src/main/ets/components/MainPage.ets', line: 1427, col: 9 }
+                    { page: 'library/src/main/ets/components/MainPage.ets', line: 1439, col: 9 }
                   );
                   ViewPU.create(componentCall);
                   let paramsLambda = () => {
@@ -3125,19 +3168,56 @@ function resourceToNumber(context, resource, defaultValue) {
       return defaultValue;
   }
 }
+class LengthMetricsUtils {
+  constructor() {}
+  static getInstance() {
+    if (!LengthMetricsUtils.instance) {
+      LengthMetricsUtils.instance = new LengthMetricsUtils();
+    }
+    return LengthMetricsUtils.instance;
+  }
+  stringify(metrics) {
+    switch (metrics.unit) {
+      case LengthUnit.PX:
+        return `${metrics.value}px`;
+      case LengthUnit.VP:
+        return `${metrics.value}vp`;
+      case LengthUnit.FP:
+        return `${metrics.value}fp`;
+      case LengthUnit.PERCENT:
+        return `${metrics.value}%`;
+      case LengthUnit.LPX:
+        return `${metrics.value}lpx`;
+    }
+  }
+  isNaturalNumber(metrics) {
+    return metrics.value >= 0;
+  }
+}
 function getBackgroundBorderRadius(options, defaultRadius) {
   if (options.borderRadiusMode === BorderRadiusMode.CUSTOM) {
     // For capsule multi-select buttons, use itemBorderRadius
     if (options.type === 'capsule' && (options.multiply ?? false) && options.itemBorderRadius !== undefined) {
-      return options.itemBorderRadius.value;
+      return LengthMetricsUtils.getInstance().stringify(options.itemBorderRadius);
     } else if (options.backgroundBorderRadius !== undefined) {
-      return options.backgroundBorderRadius.value;
+      return LengthMetricsUtils.getInstance().stringify(options.backgroundBorderRadius);
     }
   }
   if (options.type === 'capsule' && (options.multiply ?? false)) {
     return options.iconTextRadius ?? options.iconTextBackgroundRadius ?? defaultRadius;
   }
   return options.iconTextBackgroundRadius ?? defaultRadius;
+}
+class FocusStyleButtonModifier {
+  constructor(stateStyleAction) {
+    this.stateStyleAction = stateStyleAction;
+  }
+  applyNormalAttribute(instance) {
+    this.stateStyleAction && this.stateStyleAction(false);
+  }
+  applyFocusedAttribute(instance) {
+    this.stateStyleAction && this.stateStyleAction(true);
+  }
 }
 
 export default {

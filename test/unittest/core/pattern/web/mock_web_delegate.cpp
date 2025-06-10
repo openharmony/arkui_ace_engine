@@ -263,7 +263,7 @@ void AuthResultOhos::Cancel() {}
 void SslErrorResultOhos::HandleConfirm() {}
 void SslErrorResultOhos::HandleCancel() {}
 void AllSslErrorResultOhos::HandleConfirm() {}
-void AllSslErrorResultOhos::HandleCancel() {}
+void AllSslErrorResultOhos::HandleCancel(bool abortLoading) {}
 void SslSelectCertResultOhos::HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) {}
 void SslSelectCertResultOhos::HandleCancel() {}
 void SslSelectCertResultOhos::HandleIgnore() {}
@@ -481,11 +481,19 @@ int WebDelegate::ConverToWebHitTestType(int hitType)
 {
     return false;
 }
+int WebDelegate::GetLastHitTestResult()
+{
+    return 0;
+}
 int WebDelegate::GetHitTestResult()
 {
     return false;
 }
 void WebDelegate::GetHitTestValue(HitTestResult& result) {}
+int WebDelegate::GetProgress()
+{
+    return false;
+}
 int WebDelegate::GetPageHeight()
 {
     return false;
@@ -638,12 +646,14 @@ void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_p
 {}
 void WebDelegate::UpdateForceDarkAccess(const bool& access) {}
 void WebDelegate::UpdateAudioResumeInterval(const int32_t& resumeInterval) {}
+void WebDelegate::UpdateAudioSessionType(const WebAudioSessionType& audioSessionType) {}
 void WebDelegate::UpdateAudioExclusive(const bool& audioExclusive) {}
 void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled) {}
 void WebDelegate::UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled) {}
 void WebDelegate::UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled) {}
 void WebDelegate::UpdateTextZoomRatio(const int32_t& textZoomRatioNum) {}
 void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled) {}
+void WebDelegate::UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port) {}
 void WebDelegate::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) {}
 void WebDelegate::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess) {}
 void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled) {}
@@ -665,6 +675,7 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
 void WebDelegate::UpdateOverlayScrollbarEnabled(bool isEnabled) {}
 void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled) {}
 void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) {}
+void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition) {}
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag) {}
 void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}
@@ -854,6 +865,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
 #else
 #endif
 }
+void WebDelegate::OnActivateContent() {}
 void WebDelegate::OnWindowExit() {}
 void WebDelegate::OnPageVisible(const std::string& url) {}
 void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs) {}
@@ -1056,6 +1068,10 @@ void WebDelegate::SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface)
 void WebDelegate::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling) {}
 void WebDelegate::OnScrollState(bool scrollState) {}
 void WebDelegate::OnScrollStart(const float x, const float y) {}
+bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable)
+{
+    return false;
+}
 void WebDelegate::OnRootLayerChanged(int width, int height) {}
 bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
@@ -1249,4 +1265,14 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 {
     return false;
 }
+
+void WebDelegate::RemoveSnapshotFrameNode() {}
+
+void WebDelegate::OnPip(int status, int delegate_id,
+    int child_id, int frame_routing_id,  int width, int height) {}
+void WebDelegate::SetPipNativeWindow(int delegate_id,
+    int child_id, int frame_routing_id, void* window) {}
+void WebDelegate::SendPipEvent(int delegate_id,
+    int child_id, int frame_routing_id, int event) {}
+
 } // namespace OHOS::Ace

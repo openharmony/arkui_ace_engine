@@ -14,10 +14,8 @@
  */
 
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
-#include <cstdint>
 
 #include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -106,6 +104,7 @@ RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetLayoutedItemInfo(layoutedItemInfo_);
     layoutAlgorithm->SetPrevTotalItemCount(itemTotalCount_);
     layoutAlgorithm->SetPrevTotalMainSize(mainSize_);
+    layoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     if (childrenSize_ && ListChildrenSizeExist()) {
         if (!posMap_) {
             posMap_ = MakeRefPtr<ListPositionMap>();
@@ -155,28 +154,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
                                                  cacheParam.value().backwardCachedIndex;
         layoutAlgorithm->SetCacheParam(std::nullopt);
     }
-    if (lanes_ != layoutAlgorithm->GetLanes()) {
-        lanes_ = layoutAlgorithm->GetLanes();
-        ClearCachedItemPosition();
-    }
-    itemPosition_ = layoutAlgorithm->GetItemPosition();
-    cachedItemPosition_ = layoutAlgorithm->GetCachedItemPosition();
-    spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
-    axis_ = layoutAlgorithm->GetAxis();
-    layoutDirection_ = layoutAlgorithm->GetLayoutDirection();
-    mainSize_ = layoutAlgorithm->GetMainSize();
-    laneGutter_ = layoutAlgorithm->GetLaneGutter();
-    itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
-    itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
-    headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
-    footerMainSize_ = layoutAlgorithm->GetFooterMainSize();
-    layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
-    startHeaderPos_ = layoutAlgorithm->GetStartHeaderPos();
-    endFooterPos_ = layoutAlgorithm->GetEndFooterPos();
-    adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
-    adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
-    listContentSize_ = layoutAlgorithm->GetListContentSize();
-    layouted_ = true;
+    MappingPropertiesFromLayoutAlgorithm(layoutAlgorithm);
     CheckListDirectionInCardStyle();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -879,11 +857,9 @@ void ListItemGroupPattern::AdjustMountTreeSequence(int32_t footerCount)
 {
     // Adjust the mount tree sequence to header, listitem, footer
     if (footerIndex_ >= 0 && footerIndex_ < itemStartIndex_) {
-        auto groupHost = GetHost();
-        CHECK_NULL_VOID(groupHost);
-        auto totalChildCount = groupHost->GetTotalChildCount();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto totalChildCount = host->GetTotalChildCount();
         auto childNode = host->GetChildAtIndex(itemStartIndex_);
         CHECK_NULL_VOID(childNode);
         auto endNode = host->GetChildAtIndex(footerIndex_);
@@ -1043,6 +1019,11 @@ bool ListItemGroupPattern::HandleCrossAxisLeftOrUpStep(
 bool ListItemGroupPattern::DetermineMultiLaneStep(FocusStep step, bool isVertical, const RefPtr<FrameNode>& curFrame,
     int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex)
 {
+    auto parentList = GetListFrameNode();
+    CHECK_NULL_RETURN(parentList, false);
+    auto listPattern = parentList->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, false);
+    auto focusWrapMode = listPattern->GetFocusWrapMode();
     // Only for GetNextFocusNode
     CHECK_NULL_RETURN(curFrame, false);
     // ListItemGroup does not handle HOME/END, bubble it up to List for processing.
@@ -1054,11 +1035,17 @@ bool ListItemGroupPattern::DetermineMultiLaneStep(FocusStep step, bool isVertica
     } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
         HandleBackwardStep(curFrame, curIndexInGroup, moveStep, nextIndex);
     } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN)) {
-        if (!HandleCrossAxisRightOrDownStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
+        if (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+            moveStep = 1;
+            nextIndex = curIndexInGroup + 1;
+        } else if (!HandleCrossAxisRightOrDownStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
             return false;
         }
     } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP)) {
-        if (!HandleCrossAxisLeftOrUpStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
+        if (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+            moveStep = -1;
+            nextIndex = curIndexInGroup - 1;
+        } else if (!HandleCrossAxisLeftOrUpStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
             return false;
         }
     } else if (step == FocusStep::TAB) {
@@ -1195,7 +1182,7 @@ bool ListItemGroupPattern::FindHeadOrTailChild(
     } else if (isEnd) {
         isFindTailOrHead = childFocus->AnyChildFocusHub(
             [&target](const RefPtr<FocusHub>& node) {
-                auto tailNode = node->GetHeadOrTailChild(true);
+                auto tailNode = node->GetHeadOrTailChild(false);
                 if (tailNode) {
                     target = tailNode;
                     return true;
@@ -1206,4 +1193,38 @@ bool ListItemGroupPattern::FindHeadOrTailChild(
     }
     return isFindTailOrHead;
 }
+bool ListItemGroupPattern::IsInViewport(int32_t index) const
+{
+    return index >= itemDisplayStartIndex_ && index <= itemDisplayEndIndex_;
+}
+
+void ListItemGroupPattern::MappingPropertiesFromLayoutAlgorithm(
+    const RefPtr<ListItemGroupLayoutAlgorithm>& layoutAlgorithm)
+{
+    CHECK_NULL_VOID(layoutAlgorithm);
+    if (lanes_ != layoutAlgorithm->GetLanes()) {
+        lanes_ = layoutAlgorithm->GetLanes();
+        ClearCachedItemPosition();
+    }
+    itemPosition_ = layoutAlgorithm->GetItemPosition();
+    cachedItemPosition_ = layoutAlgorithm->GetCachedItemPosition();
+    spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
+    axis_ = layoutAlgorithm->GetAxis();
+    layoutDirection_ = layoutAlgorithm->GetLayoutDirection();
+    mainSize_ = layoutAlgorithm->GetMainSize();
+    laneGutter_ = layoutAlgorithm->GetLaneGutter();
+    itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
+    itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
+    headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
+    footerMainSize_ = layoutAlgorithm->GetFooterMainSize();
+    layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
+    startHeaderPos_ = layoutAlgorithm->GetStartHeaderPos();
+    endFooterPos_ = layoutAlgorithm->GetEndFooterPos();
+    adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
+    adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
+    listContentSize_ = layoutAlgorithm->GetListContentSize();
+    prevMeasureBreak_ = layoutAlgorithm->MeasureInNextFrame();
+    layouted_ = true;
+}
+
 } // namespace OHOS::Ace::NG

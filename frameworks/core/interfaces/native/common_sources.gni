@@ -1,0 +1,41 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+common_sources = [
+  "common/api_impl.cpp",
+  "common/view_model.cpp",
+  "common/view_model2.cpp",
+  "implementation/canvas_path_peer_impl.cpp",
+  "implementation/canvas_renderer_peer_impl.cpp",
+  "implementation/canvas_rendering_context2d_peer_impl.cpp",
+  "implementation/custom_dialog_controller_peer_impl.cpp",
+  "implementation/dialog_common.cpp",
+  "implementation/drawing_rendering_context_peer_impl.cpp",
+  "implementation/global_scope_animation_helper.cpp",
+  "implementation/image_bitmap_peer_impl.cpp",
+  "implementation/image_common_methods.cpp",
+  "implementation/matrix2d_peer_impl.cpp",
+  "implementation/navigation_context.cpp",
+  "implementation/offscreen_canvas_peer.cpp",
+  "implementation/offscreen_canvas_rendering_context2d_peer_impl.cpp",
+  "implementation/scroller_peer_impl.cpp",
+  "implementation/video_controller_peer_impl.cpp",
+  "implementation/web_modifier_callbacks.cpp",
+  "implementation/x_component_controller_peer_impl.cpp",
+  "utility/accessor_utils.cpp",
+  "utility/converter_enums.cpp",
+  "utility/peer_utils.cpp",
+  "utility/reverse_converter.cpp",
+  "utility/reverse_converter_enums.cpp",
+  "utility/validators.cpp",
+]

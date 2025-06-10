@@ -1,0 +1,58 @@
+{
+  "name": "@koalaui/interop",
+  "version": "1.4.1+devel",
+  "description": "",
+  "files": [
+    "build/lib/src/**/*.js",
+    "build/lib/src/**/*.d.ts"
+  ],
+  "main": "./build/lib/src/interop/index.js",
+  "exports": {
+    ".": "./build/lib/src/interop/index.js",
+    "./*.js": "./build/lib/src/interop/*.js",
+    "./*": "./build/lib/src/interop/*.js"
+  },
+  "imports": {
+    "#common/wrappers": {
+      "browser": "./build/lib/src/wasm/wrappers/index.js",
+      "node": "./build/lib/src/napi/wrappers/index.js"
+    },
+    "#common/wrappers/*": {
+      "browser": "./build/lib/src/wasm/wrappers/*.js",
+      "node": "./build/lib/src/napi/wrappers/*.js"
+    }
+  },
+  "types": "./index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": ["./build/lib/src/interop/*"]
+    }
+  },
+  "scripts": {
+    "clean": "tsc -b . --clean && rimraf dist build types",
+    "ets-api": "node scripts/download-ets-api.mjs",
+    "compile": "tsc -b .",
+    "compile:ohos": "npm run ets-api && npm run compile",
+    "compile:all": "npm run compile:ohos",
+    "compile:arkts": "bash ../tools/panda/arkts/arktsc --arktsconfig arktsconfig.json",
+    "lint": "eslint src test components",
+    "test:wasm:coverage": "NODE_OPTIONS='--conditions browser --no-experimental-fetch' nyc mocha",
+    "test:wasm": "NODE_OPTIONS='--conditions browser --no-experimental-fetch' mocha",
+    "test:node:coverage": "nyc mocha",
+    "test:node": "mocha",
+    "test:coverage": "npm run test:node:coverage",
+    "test": "npm run test:node",
+    "watch": "tsc -b . --watch"
+  },
+  "keywords": [],
+  "dependencies": {
+       "@koalaui/common": "1.4.1+devel"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^8.13.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "source-map-support": "^0.5.21"
+  }
+}

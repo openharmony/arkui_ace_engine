@@ -62,4 +62,56 @@ bool LocationButtonModelNG::GetTextResource(int32_t textStyle, std::string& text
     text = theme->GetLocationDescriptions(textStyle);
     return true;
 }
+
+bool LocationButtonModelNG::GetIconResourceStatic(int32_t iconStyle, InternalResource::ResourceId& id)
+{
+    if ((iconStyle < 0) || (static_cast<uint32_t>(iconStyle) >= ICON_RESOURCE_TABLE.size())) {
+        return false;
+    }
+    id = static_cast<InternalResource::ResourceId>(ICON_RESOURCE_TABLE[iconStyle]);
+    return true;
+}
+
+bool LocationButtonModelNG::GetTextResourceStatic(int32_t textStyle, std::string& text)
+{
+    auto theme = GetTheme();
+    if (theme == nullptr) {
+        return false;
+    }
+    text = theme->GetLocationDescriptions(textStyle);
+    return true;
+}
+
+RefPtr<FrameNode> LocationButtonModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::LOCATION_BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
+
+    return frameNode;
+}
+
+bool LocationButtonModelNG::InitLocationButton(FrameNode* frameNode,
+    const LocationButtonStyle& style, bool isArkuiComponent)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+
+    auto text = style.text.value_or(LocationButtonLocationDescription::TEXT_NULL);
+    auto icon = style.icon.value_or(LocationButtonIconStyle::ICON_NULL);
+    auto backgroundType = style.backgroundType.value_or(ButtonType::CAPSULE);
+
+    if ((text == LocationButtonLocationDescription::TEXT_NULL) && (icon == LocationButtonIconStyle::ICON_NULL)) {
+        // set default values
+        text = LocationButtonStyle::DEFAULT_TEXT;
+        icon = LocationButtonStyle::DEFAULT_ICON;
+        backgroundType = LocationButtonStyle::DEFAULT_BACKGROUND_TYPE;
+    }
+
+    SecurityComponentElementStyle secCompStyle = {
+        .text = static_cast<int32_t>(text),
+        .icon = static_cast<int32_t>(icon),
+        .backgroundType = static_cast<int32_t>(backgroundType)
+    };
+    return SecurityComponentModelNG::InitSecurityComponent(frameNode, secCompStyle, isArkuiComponent,
+        LocationButtonModelNG::GetIconResourceStatic, LocationButtonModelNG::GetTextResourceStatic);
+}
 } // namespace OHOS::Ace::NG

@@ -398,7 +398,7 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
 
 bool DialogLayoutAlgorithm::IsGetExpandDisplayValidHeight(const RefPtr<DialogLayoutProperty>& dialogProp)
 {
-    CHECK_NULL_RETURN(expandDisplay_ && isShowInSubWindow_ && dialogProp, false);
+    CHECK_NULL_RETURN(expandDisplay_ && isShowInSubWindow_ && dialogProp && !isModal_, false);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto dialog = dialogProp->GetHost();
@@ -586,6 +586,26 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
     gestureHub->SetResponseRegion(mouseResponseRegion);
 }
 
+std::optional<DimensionRect> DialogLayoutAlgorithm::GetMaskRect(const RefPtr<FrameNode>& dialog)
+{
+    std::optional<DimensionRect> maskRect;
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, maskRect);
+    maskRect = dialogPattern->GetDialogProperties().maskRect;
+    if (!isUIExtensionSubWindow_) {
+        return maskRect;
+    }
+ 
+    if (expandDisplay_ && hostWindowRect_.GetSize().IsPositive()) {
+        auto offset = DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY()));
+        maskRect = DimensionRect(Dimension(hostWindowRect_.Width()), Dimension(hostWindowRect_.Height()), offset);
+    } else {
+        maskRect = DimensionRect(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT),
+            DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    }
+    return maskRect;
+}
+
 void DialogLayoutAlgorithm::UpdateCustomMaskNodeLayout(const RefPtr<FrameNode>& dialog)
 {
     auto maskNodePtr = dialog->GetChildByIndex(1);
@@ -623,7 +643,8 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto dialogPattern = frameNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     if (isModal_ && dialogPattern->GetDialogProperties().maskRect.has_value()) {
-        ProcessMaskRect(dialogPattern->GetDialogProperties().maskRect, frameNode, true);
+        std::optional<DimensionRect> maskRect = GetMaskRect(frameNode);
+        ProcessMaskRect(maskRect, frameNode, true);
     }
     if (hasAddMaskNode_) {
         UpdateCustomMaskNodeLayout(frameNode);
@@ -645,7 +666,8 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
-    if ((!isModal_ || isShowInSubWindow_) && !dialogProp->GetIsSceneBoardDialog().value_or(false)) {
+    auto isNonUIExtensionSubwindow = isShowInSubWindow_ && !isUIExtensionSubWindow_;
+    if ((!isModal_ || isNonUIExtensionSubwindow) && !dialogProp->GetIsSceneBoardDialog().value_or(false)) {
         ProcessMaskRect(
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
@@ -753,6 +775,9 @@ void DialogLayoutAlgorithm::SetSubWindowHotarea(
     } else {
         rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
     }
+    if (isUIExtensionSubWindow_ && isModal_) {
+        rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
+    }
     rects.emplace_back(rect);
     SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_DIALOG, frameNodeId, subWindowId_);
 }
@@ -822,11 +847,11 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto isHostWindowAlign = isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive();
     auto maxSize = isHostWindowAlign ? hostWindowRect_.GetSize() : layoutConstraint->maxSize;
-    wrapperSize_ = maxSize;
+    wrapperSize_ = layoutConstraint->maxSize;
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
-    if (isHostWindowAlign) {
+    if (isHostWindowAlign && !isModal_) {
         topLeftPoint += hostWindowRect_.GetOffset();
     }
     const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();

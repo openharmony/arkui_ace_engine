@@ -431,70 +431,26 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText002, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomBuilderNodeVisibility001
- * @tc.desc: Test CustomBuilderNode's visibility
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate function
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshLayoutTestNg, CustomBuilderNodeVisibility001, TestSize.Level1)
+HWTEST_F(RefreshLayoutTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. SetCustomBuilder
-     * @tc.expected: custom node exists, and default visibility is invisible.
-     */
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    auto builder = CreateCustomNode();
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     RefreshModelNG model = CreateRefresh();
-    model.SetCustomBuilder(builder);
-    model.SetIsCustomBuilderExist(true);
+    model.SetLoadingText("loadingText");
     CreateDone();
-    EXPECT_EQ(pattern_->progressChild_, nullptr);
-    EXPECT_EQ(pattern_->customBuilder_, builder);
-    auto customBuilderLayoutProperty = pattern_->customBuilder_->GetLayoutProperty();
-    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+    EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+    EXPECT_NE(pattern_->refreshTheme_, nullptr);
     EXPECT_TRUE(pattern_->isHigherVersion_);
-
-    /**
-     * @tc.steps: step2.  start Refreshing
-     * @tc.expected: Update Visibility to VISIBLE
-     */
-    layoutProperty_->UpdateIsRefreshing(true);
-    frameNode_->MarkModifyDone();
-    FlushUITasks();
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
-
-    /**
-     * @tc.steps: step3.  end Refreshing
-     * @tc.expected: Update Visibility to INVISIBLE
-     */
-    layoutProperty_->UpdateIsRefreshing(false);
-    frameNode_->MarkModifyDone();
-    FlushUITasks();
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
-
-    /**
-     * @tc.steps: step4.  user has setted visibility and  start Refreshing
-     * @tc.expected: don't change visibility
-     */
-    customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE, false, true);
-    layoutProperty_->UpdateIsRefreshing(true);
-    frameNode_->MarkModifyDone();
-    FlushUITasks();
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
-    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
-
-    /**
-     * @tc.steps: step5.  user has setted visibility and  end Refreshing
-     * @tc.expected: don't change visibility
-     */
-    customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE, false, true);
-    layoutProperty_->UpdateIsRefreshing(false);
-    frameNode_->MarkModifyDone();
-    FlushUITasks();
-    MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
-    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    EXPECT_TRUE(pattern_->hasLoadingText_);
+    
+    pattern_->OnColorConfigurationUpdate();
+    auto progressPaintProperty = pattern_->progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    EXPECT_EQ(progressPaintProperty->GetColorValue(Color::WHITE), Color::BLACK);
+    auto textLayoutProperty = pattern_->loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(0.0_vp), 14.0_fp);
+    EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::WHITE), Color::BLACK);
 }
 } // namespace OHOS::Ace::NG

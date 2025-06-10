@@ -37,6 +37,8 @@ public:
     static ArkUINativeModuleValue SetListDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetListDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetListFriction(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetListFriction(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetListMaintainVisibleContentPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetListMaintainVisibleContentPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);

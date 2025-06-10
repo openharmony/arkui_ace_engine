@@ -28,10 +28,107 @@
 #include "base/log/dump_log.h"
 #include "nweb_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "oh_window_pip.h"
 
 using namespace testing;
 using namespace testing::ext;
+#define PIP_WIDTH   100
+#define PIP_HEIGHT  100
+enum PictureInPictureState {
+    PIP_STATE_ENTER = 0,
+    PIP_STATE_EXIT,
+    PIP_STATE_PLAY,
+    PIP_STATE_PAUSE,
+    PIP_STATE_FAST_FORWARD,
+    PIP_STATE_FAST_BACKWARD,
+    PIP_STATE_RESTORE,
+    PIP_STATE_HLS_ENTER,
+    PIP_STATE_HLS_EXIT,
+    PIP_STATE_RESIZE,
+    PIP_STATE_NONE,
+};
 
+int32_t OH_PictureInPicture_CreatePip(
+    PictureInPicture_PipConfig pipConfig, uint32_t* controllerId)
+{
+    return static_cast<int32_t>(*controllerId);
+}
+int32_t OH_PictureInPicture_DeletePip(uint32_t controllerId)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_StartPip(uint32_t controllerId)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_StopPip(uint32_t controllerId)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_UpdatePipControlStatus(
+    uint32_t controllerId, PictureInPicture_PipControlType controlType,
+    PictureInPicture_PipControlStatus status)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_SetPipControlEnabled(
+    uint32_t controllerId, PictureInPicture_PipControlType controlType,
+    bool enabled)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_RegisterStartPipCallback(
+    uint32_t controllerId, WebPipStartPipCallback callback)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_RegisterLifecycleListener(
+    uint32_t controllerId, WebPipLifecycleCallback callback)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_RegisterControlEventListener(
+    uint32_t controllerId, WebPipControlEventCallback callback)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_RegisterResizeListener(
+    uint32_t controllerId, WebPipResizeCallback callback)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_UnregisterAllResizeListeners(
+    uint32_t controllerId)
+{
+    return static_cast<int32_t>(controllerId);
+}
+int32_t OH_PictureInPicture_SetPipMainWindowId(
+    PictureInPicture_PipConfig pipConfig, uint32_t mainWindowId)
+{
+    return 0;
+}
+int32_t OH_PictureInPicture_SetPipTemplateType(
+    PictureInPicture_PipConfig pipConfig, PictureInPicture_PipTemplateType pipTemplateType)
+{
+    return 0;
+}
+int32_t OH_PictureInPicture_SetPipRect(
+    PictureInPicture_PipConfig pipConfig, uint32_t width, uint32_t height)
+{
+    return 0;
+}
+int32_t OH_PictureInPicture_SetPipControlGroup(
+    PictureInPicture_PipConfig pipConfig,
+    PictureInPicture_PipControlGroup* controlGroup,
+    uint8_t controlGroupLength)
+{
+    return 0;
+}
+int32_t OH_PictureInPicture_SetPipNapiEnv(
+    PictureInPicture_PipConfig pipConfig, void* env)
+{
+    return 0;
+}
 namespace OHOS::Ace {
 void DialogTheme::Builder::ParseNewPattern(
     const RefPtr<ThemeConstants>& themeConstants, const RefPtr<DialogTheme>& theme) const {};
@@ -118,7 +215,10 @@ public:
         return true;
     }
 };
-
+bool IsSnapshotPathValid(const std::string& snapshotPath)
+{
+    return true;
+}
 } // namespace OHOS::NWeb
 
 namespace OHOS::Ace::NG {
@@ -203,6 +303,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnVerticalScrollBarAccessEnabledUpdate(true);
     webpattern.OnAudioResumeIntervalUpdate(0);
     webpattern.OnAudioExclusiveUpdate(true);
+    webpattern.OnAudioSessionTypeUpdate(WebAudioSessionType::AUTO);
     webpattern.OnOptimizeParserBudgetEnabledUpdate(true);
     webpattern.OnBlurOnKeyboardHideModeUpdate(0);
 #endif
@@ -287,6 +388,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
     webPattern->OnForceDarkAccessUpdate(true);
     webPattern->OnAudioResumeIntervalUpdate(0);
     webPattern->OnAudioExclusiveUpdate(true);
+    webPattern->OnAudioSessionTypeUpdate(WebAudioSessionType::AUTO);
     webPattern->isEnhanceSurface_ = true;
     webPattern->delegate_ = nullptr;
     webPattern->OnModifyDone();
@@ -353,6 +455,34 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
         std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
     EXPECT_NE(callback, nullptr);
     webPattern->OnSelectPopupMenu(params, callback);
+#endif
+}
+
+/**
+ * @tc.name: GetDragAcceptableStatus001
+ * @tc.desc: GetDragAcceptableStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, GetDragAcceptableStatus001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    webPattern->delegate_->UpdateDragCursor(NWeb::NWebDragData::DragOperation::DRAG_OPERATION_COPY);
+    webPattern->GetDragAcceptableStatus();
+    webPattern->GetDragAcceptableStatus();
+    webPattern->delegate_->UpdateDragCursor(NWeb::NWebDragData::DragOperation::DRAG_OPERATION_LINK);
+    webPattern->GetDragAcceptableStatus();
+    webPattern->delegate_->UpdateDragCursor(NWeb::NWebDragData::DragOperation::DRAG_OPERATION_MOVE);
+    webPattern->GetDragAcceptableStatus();
+    webPattern->delegate_ = nullptr;
 #endif
 }
 
@@ -2712,6 +2842,391 @@ HWTEST_F(WebPatternTestNg, InitDataDetector_001, TestSize.Level1)
     ASSERT_NE(webPattern->webDataDetectorAdapter_, nullptr);
     ret = webPattern->GetDataDetectorEnable();
     ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: CreatePip_001
+ * @tc.desc: CreatePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CreatePip_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+#endif
+}
+
+/**
+ * @tc.name: CreatePip_002
+ * @tc.desc: CreatePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CreatePip_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_HLS_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+#endif
+}
+
+/**
+ * @tc.name: CreatePip_003
+ * @tc.desc: CreatePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CreatePip_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+#endif
+}
+
+/**
+ * @tc.name: CreatePip_004
+ * @tc.desc: CreatePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CreatePip_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+#endif
+}
+
+/**
+ * @tc.name: CreatePip_005
+ * @tc.desc: CreatePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CreatePip_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    pipController++;
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, false);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, false);
+    webPattern.EnablePip(pipController);
+#endif
+}
+
+/**
+ * @tc.name: StopPip_001
+ * @tc.desc: StopPip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, StopPip_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    ret = webPattern.StopPip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, true);
+#endif
+}
+
+/**
+ * @tc.name: StopPip_002
+ * @tc.desc: StopPip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, StopPip_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    info.delegateId = 1;
+    ret = webPattern.StopPip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: StopPip_003
+ * @tc.desc: StopPip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, StopPip_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_HLS_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    info.childId = 1;
+    ret = webPattern.StopPip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: PlayPausePip_001
+ * @tc.desc: PlayPausePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, PlayPausePip_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    ret = webPattern.PlayPip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, true);
+#endif
+}
+
+/**
+ * @tc.name: PlayPausePip_002
+ * @tc.desc: PlayPausePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, PlayPausePip_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    info.delegateId = 1;
+    ret = webPattern.PlayPip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: PlayPausePip_003
+ * @tc.desc: PlayPausePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, PlayPausePip_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    ret = webPattern.PausePip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, true);
+#endif
+}
+
+/**
+ * @tc.name: PlayPausePip_004
+ * @tc.desc: PlayPausePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, PlayPausePip_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    info.delegateId = 1;
+    ret = webPattern.PlayPip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+
+/**
+ * @tc.name: CreateSnapshotImageFrameNode_001
+ * @tc.desc: CreateSnapshotImageFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+   auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/web_frame_123456.png"), true);
+    std::string snapshotPath = "/data/storage/el2/base/cache/web/web_frame_123456.png";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    webPattern->RemoveSnapshotFrameNode();
+    webPattern->RemoveSnapshotFrameNode();
+    ASSERT_NE(webPattern, nullptr);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: OnBypassVsyncConditionUpdate_001
+ * @tc.desc: OnBypassVsyncConditionUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnBypassVsyncConditionUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnBypassVsyncConditionUpdate(WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
+    EXPECT_EQ(webPattern->webBypassVsyncCondition_, WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
+#endif
+}
+
+/**
+ * @tc.name: SetDefaultBackgroundColor001
+ * @tc.desc: SetDefaultBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, SetDefaultBackgroundColor001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->SetDefaultBackgroundColor();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+
+    webPattern->OnBackgroundColorUpdate(Color::RED.GetValue());
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
 #endif
 }
 } // namespace OHOS::Ace::NG

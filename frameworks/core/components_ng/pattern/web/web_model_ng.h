@@ -121,9 +121,12 @@ public:
     void SetPermissionRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetBackgroundColor(Color backgroundColor) override;
+    void SetDefaultBackgroundColor() override;
     void InitialScale(float scale) override;
     void SetSearchResultReceiveEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled) override;
+    void SetWebDebuggingAccessEnabledAndPort(
+        bool isWebDebuggingAccessEnabled, int32_t webDebuggingPort) override;
 
     void SetOnDragStart(
         std::function<NG::DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)>&&
@@ -139,6 +142,7 @@ public:
     void AddDragFrameNodeToManager();
     void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) override;
     void SetWindowNewEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) override;
+    void SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 
     void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnable) override;
@@ -187,6 +191,7 @@ public:
     void NotifyPopupWindowResult(int32_t webId, bool result) override;
     void SetAudioResumeInterval(int32_t resumeInterval) override;
     void SetAudioExclusive(bool audioExclusive) override;
+    void SetAudioSessionType(WebAudioSessionType audioSessionType) override;
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
     void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) override;
@@ -233,15 +238,38 @@ public:
     void SetEnableDataDetector(bool isEnabled) override;
     void SetDataDetectorConfig(const TextDetectConfig& config) override;
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
+    void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
 
+    // static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    // static void SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback);
+    // static void SetHapPathCallback(FrameNode* frameNode, std::function<void(const std::string&)>&& hapPathCallback);
+    // static void SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc);
+    // static void SetRenderMode(FrameNode* frameNode, const std::optional<RenderMode>& renderMode);
+    // static void SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode);
+    // static void SetSharedRenderProcessToken(FrameNode* frameNode,
+    //     const std::optional<std::string>& sharedRenderProcessToken);
+    // static void SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController);
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
+    // static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
     static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
+    // static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);
     static void SetMixedMode(FrameNode* frameNode, MixedModeContent mixedMode);
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    // static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
+    // static void SetForceDarkAccess(FrameNode* frameNode, bool access);
+    // static void SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled);
+    // static void SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled);
+    // static void SetMetaViewport(FrameNode* frameNode, bool enabled);
+    // static void SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeedGestureAccess);
     static void SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode);
     static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
+    // static void SetOverlayScrollbarEnabled(FrameNode* frameNode, bool isEnabled);
+    // static void SetBlockNetwork(FrameNode* frameNode, bool isNetworkBlocked);
+    // static void SetHorizontalScrollBarAccessEnabled(FrameNode* frameNode, bool isHorizontalScrollBarAccessEnabled);
+    // static void SetVerticalScrollBarAccessEnabled(FrameNode* frameNode, bool isVerticalScrollBarAccessEnabled);
+    // static void SetPinchSmoothModeEnabled(FrameNode* frameNode, bool isPinchSmoothModeEnabled);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetKeyboardAvoidMode(FrameNode* frameNode, const WebKeyboardAvoidMode& mode);
     static void SetOnControllerAttached(FrameNode* frameNode, std::function<void()>&& callback);
@@ -256,6 +284,7 @@ public:
     static void SetOnContextMenuHide(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
     static void SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled);
+    static void SetOnGeolocationShow(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled);
     static void SetForceDarkAccess(FrameNode* frameNode, bool isForceDarkAccess);
     static void SetPinchSmoothModeEnabled(FrameNode* frameNode, bool isPinchSmoothModeEnabled);
@@ -276,8 +305,10 @@ public:
     static void SetLayoutMode(FrameNode* frameNode, WebLayoutMode mode);
     static void SetNativeEmbedLifecycleChangeId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetNativeEmbedGestureEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type);
-    static void SetNativeEmbedOptions(FrameNode* frameNode, bool isIntrinsicSizeEnabled);
+    static void SetIntrinsicSizeEnabled(FrameNode* frameNode, bool isIntrinsicSizeEnabled);
     static void SetFirstContentfulPaintId(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId);
     static void SetAudioStateChangedId(
@@ -288,6 +319,54 @@ public:
     static void SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeedGestureAccess);
     static void SetAudioResumeInterval(FrameNode* frameNode, int32_t resumeInterval);
     static void SetAudioExclusive(FrameNode* frameNode, bool audioExclusive);
+    static void SetOnPageFinish(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnPageStart(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnProgressChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnTitleReceive(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnDownloadStart(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
+    static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
+    static void SetCopyOptionMode(FrameNode* frameNode, CopyOptions mode);
+    static void SetRenderProcessNotRespondingId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnPageVisible(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& pageVisible);
+    static void SetOnRenderExited(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetBlockNetwork(FrameNode* frameNode, bool isNetworkBlocked);
+    static void SetOnResourceLoad(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnRefreshAccessedHistory(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnNavigationEntryCommitted(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommitted);
+    static void SetOnSearchResultReceive(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOverScrollMode(FrameNode* frameNode, OverScrollMode mode);
+    static void SetOnTouchIconUrlReceived(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& touchIconUrlId);
+    static void SetOnRenderProcessResponding(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+	static void SetPermissionRequestEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetScreenCaptureRequestEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetWindowNewEvent(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback);
+    static void SetOnFullScreenEnter(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetWindowExitEventId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnAlert(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
+    static void SetOnConfirm(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
+    static void SetOnPrompt(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
+    static void SetOnShowFileSelector(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnContextMenuShow(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnSafeBrowsingCheckResult(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResult);
+    static void SetNestedScrollExt(FrameNode* frameNode, const NestedScrollOptionsExt& nestedOpt);
+    static void SetOnInterceptKeyEvent(
+        FrameNode* frameNode, std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

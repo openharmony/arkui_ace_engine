@@ -2198,8 +2198,13 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     if (!scrollFunc || scrollAxis == Axis::NONE) {
         return false;
     }
-    auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
-        scrollAbility.contentStartOffset, scrollAbility.contentEndOffset);
+    MoveOffsetParam param {
+        scrollAxis == Axis::VERTICAL,
+        scrollAbility.contentStartOffset,
+        scrollAbility.contentEndOffset,
+        false
+    };
+    auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);

@@ -25,6 +25,7 @@
 #include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -145,12 +146,16 @@ public:
     static void SetStrokeWidth(const JSCallbackInfo& info);
     static void SetStrokeColor(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static NG::KeyboardAppearanceConfig ParseKeyboardAppearanceConfig(const JSRef<JSObject>& obj);
+    static void SetOnWillAttachIME(const JSCallbackInfo& info);
+    static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
     static void SetCancelDefaultIcon();
     static void ResetCancelIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
+    static void SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth);
 };
 
 } // namespace OHOS::Ace::Framework

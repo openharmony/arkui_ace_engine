@@ -638,4 +638,34 @@ std::pair<int32_t, int32_t> IndicatorPattern::CalMouseClickIndexStartAndEnd(
     }
     return { start, end };
 }
+
+void IndicatorPattern::UpdateDefaultColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("fontColor")) {
+        swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+    if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("selectedFontColor")) {
+        swiperDigitalParameters_->selectedFontColor =
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+}
+
+void IndicatorPattern::OnColorModeChange(uint32_t colorMode)
+{
+    UpdateDefaultColor();
+    Pattern::OnColorModeChange(colorMode);
+    auto indicatorNode = GetHost();
+    CHECK_NULL_VOID(indicatorNode);
+    if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty();
+    } else if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {
+        SaveDigitIndicatorProperty();
+        UpdateDigitalIndicator();
+    }
+}
 } // namespace OHOS::Ace::NG

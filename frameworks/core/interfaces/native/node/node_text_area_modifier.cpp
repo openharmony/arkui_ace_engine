@@ -88,12 +88,15 @@ void ResetTextAreaSelectionMenuHidden(ArkUINodeHandle node)
     TextFieldModelNG::SetSelectionMenuHidden(frameNode, DEFAULT_SELECTION_MENU_HIDDEN);
 }
 
-void SetTextAreaMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
+void SetTextAreaMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine, ArkUI_Uint32 overflowMode)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetMaxViewLines(frameNode, maxLine);
+    int32_t inlineMaxViewLines = maxLine;
+    inlineMaxViewLines = inlineMaxViewLines > 0 ? inlineMaxViewLines : DEFAULT_MAX_VIEW_LINE;
+    TextFieldModelNG::SetMaxViewLines(frameNode, inlineMaxViewLines);
     TextFieldModelNG::SetNormalMaxViewLines(frameNode, maxLine);
+    TextFieldModelNG::SetOverflowMode(frameNode, static_cast<OverflowMode>(overflowMode));
 }
 
 void SetTextAreaMinLines(ArkUINodeHandle node, ArkUI_Uint32 minLine)
@@ -564,6 +567,19 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color)
     TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
+void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void ResetTextAreaBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -626,6 +642,14 @@ void GetTextAreaShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* 
     options->thresholdPercentage = TextFieldModelNG::GetCounterType(frameNode);
     options->highlightBorder = TextFieldModelNG::GetShowCounterBorder(frameNode);
 }
+
+ArkUI_Uint32 GetTextAreaMinLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetMinLines(frameNode);
+}
+
 void SetTextAreaDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1761,7 +1785,8 @@ void GetTextAreaPadding(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_
     (*values)[NUM_3] = padding.left->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
-void SetTextAreaSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+void SetTextAreaSelectionMenuOptions(
+    ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1778,6 +1803,13 @@ void SetTextAreaSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCal
     } else {
         TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
+    if (onPrepareMenuCallback) {
+        NG::OnPrepareMenuCallback onPrepareMenu =
+            *(reinterpret_cast<NG::OnPrepareMenuCallback*>(onPrepareMenuCallback));
+        TextFieldModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenu));
+    } else {
+        TextFieldModelNG::OnPrepareMenuCallbackUpdate(frameNode, nullptr);
+    }
 }
 
 void ResetTextAreaSelectionMenuOptions(ArkUINodeHandle node)
@@ -1786,8 +1818,10 @@ void ResetTextAreaSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
     TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
     TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+    TextFieldModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
 }
 
 void SetTextAreaWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -1962,6 +1996,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaPlaceholderFont = GetTextAreaPlaceholderFont,
         .getTextAreaEditing = GetTextAreaEditing,
         .setTextAreaBackgroundColor = SetTextAreaBackgroundColor,
+        .setTextAreaBackgroundColorWithColorSpace = SetTextAreaBackgroundColorWithColorSpace,
         .resetTextAreaBackgroundColor = ResetTextAreaBackgroundColor,
         .setTextAreaType = SetTextAreaType,
         .resetTextAreaType = ResetTextAreaType,
@@ -2004,6 +2039,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaAdaptMaxFontSize = GetTextAreaAdaptMaxFontSize,
         .getTextAreaLineHeight = GetTextAreaLineHeight,
         .getTextAreaMaxLines = GetgetTextAreaMaxLines,
+        .getTextAreaMinLines = GetTextAreaMinLines,
         .setTextAreaPadding = SetTextAreaPadding,
         .resetTextAreaPadding = ResetTextAreaPadding,
         .getTextAreaFontFeature = GetTextAreaFontFeature,
@@ -2146,6 +2182,7 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         .getTextAreaPlaceholderFont = GetTextAreaPlaceholderFont,
         .getTextAreaEditing = GetTextAreaEditing,
         .setTextAreaBackgroundColor = SetTextAreaBackgroundColor,
+        .setTextAreaBackgroundColorWithColorSpace = SetTextAreaBackgroundColorWithColorSpace,
         .resetTextAreaBackgroundColor = ResetTextAreaBackgroundColor,
         .setTextAreaType = SetTextAreaType,
         .resetTextAreaType = ResetTextAreaType,

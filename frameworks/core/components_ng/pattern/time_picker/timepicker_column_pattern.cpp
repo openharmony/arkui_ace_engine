@@ -149,6 +149,11 @@ bool TimePickerColumnPattern::IsStartEndTimeDefined()
     return timePickerRowPattern->IsStartEndTimeDefined();
 }
 
+bool TimePickerColumnPattern::IsTossNeedToStop()
+{
+    return IsStartEndTimeDefined();
+}
+
 void TimePickerColumnPattern::InitTextFontFamily()
 {
     auto host = GetHost();
@@ -436,7 +441,7 @@ uint32_t TimePickerColumnPattern::GetOptionCount() const
 }
 
 void TimePickerColumnPattern::FlushCurrentOptions(
-    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties)
+    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties, bool isTossPlaying)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -498,8 +503,10 @@ void TimePickerColumnPattern::FlushCurrentOptions(
             textLayoutProperty->UpdateContent(optionValue);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
-        textNode->MarkModifyDone();
-        textNode->MarkDirtyNode();
+        if (!isTossPlaying) {
+            textNode->MarkModifyDone();
+            textNode->MarkDirtyNode();
+        }
     }
 }
 
@@ -519,6 +526,9 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         auto currentIndex = GetCurrentIndex();
         if ((currentIndex == 0 && dir == PickerScrollDirection::DOWN && GreatOrEqual(yOffset_, 0.0)) ||
             (currentIndex == totalCount - 1 && dir == PickerScrollDirection::UP && LessOrEqual(yOffset_, 0.0))) {
+            auto toss = GetToss();
+            CHECK_NULL_VOID(toss);
+            toss->StopTossAnimation();
             return;
         }
     }
@@ -560,7 +570,7 @@ bool TimePickerColumnPattern::CanMove(bool isDown) const
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    int totalOptionCount = GetOptionCount();
+    int totalOptionCount = static_cast<int>(GetOptionCount());
     auto timePickerColumnPattern = host->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(timePickerColumnPattern, false);
     int currentIndex = static_cast<int>(timePickerColumnPattern->GetCurrentIndex());

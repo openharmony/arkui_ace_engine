@@ -60,4 +60,12 @@ GestureEventFunc LongPressEventActuator::GetGestureEventFunc()
     return callback;
 }
 
+void LongPressEventActuator::SetLongPressEventType(GestureTypeName typeName)
+{
+    CHECK_NULL_VOID(longPressRecognizer_);
+    auto gestureInfo = longPressRecognizer_->GetOrCreateGestureInfo();
+    CHECK_NULL_VOID(gestureInfo);
+    gestureInfo->SetType(typeName);
+    gestureInfo->SetIsSystemGesture(true);
+}
 } // namespace OHOS::Ace::NG

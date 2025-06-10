@@ -27,6 +27,7 @@ abstract class ViewBuildNodeBase {
     protected childrenWeakrefMap_ = new Map<number, WeakRef<IView>>();
     protected updateFuncByElmtId = new UpdateFuncsByElmtId();
     protected id_: number;
+    protected shareLocalStorage_: LocalStorage = undefined;
     // Map elmtId -> Repeat instance in ViewPU or ViewV2
     protected elmtId2Repeat_: Map<number, RepeatAPI<Object | null | undefined>> =
         new Map<number, RepeatAPI<Object | null | undefined>>();
@@ -181,5 +182,11 @@ abstract class ViewBuildNodeBase {
                 child.onGlobalThemeChanged();
             }
         });
+    }
+    public getShareLocalStorage(): LocalStorage {
+        return this.shareLocalStorage_;
+    }
+    public setShareLocalStorage(localStorage: LocalStorage): void {
+        this.shareLocalStorage_ = localStorage;
     }
 }

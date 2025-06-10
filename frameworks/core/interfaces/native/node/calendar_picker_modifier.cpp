@@ -27,6 +27,10 @@ constexpr int NUM_12 = 12;
 constexpr int DATE_SIZE = 3;
 const bool DEFAULT_MARK_TODAY = false;
 std::string g_strValue;
+constexpr int TEXT_STYLE_FONT_INFO_SIZE = 2;
+constexpr int TEXT_STYLE_FONT_SIZE_INDEX = 0;
+constexpr int TEXT_STYLE_FONT_WEIGHT_INDEX = 1;
+const char DEFAULT_DELIMITER = '|';
 } // namespace
 void SetHintRadius(ArkUINodeHandle node, float radius, int32_t unit)
 {
@@ -161,6 +165,45 @@ void SetTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontSize, co
     CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
 }
 
+void SetCalendarPickerTextStyleResObj(NG::PickerTextStyle& textStyle, void* fontSizeRawPtr, void* textColorRawPtr)
+{
+    auto* fontSizePtr = reinterpret_cast<ResourceObject*>(fontSizeRawPtr);
+    if (fontSizePtr) {
+        textStyle.fontSizeResObj = AceType::Claim(fontSizePtr);
+    }
+
+    auto* textColorPtr = reinterpret_cast<ResourceObject*>(textColorRawPtr);
+    if (textColorPtr) {
+        textStyle.textColorResObj = AceType::Claim(textColorPtr);
+    }
+}
+
+void SetTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(textStyleStruct->fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != TEXT_STYLE_FONT_INFO_SIZE) {
+        return;
+    }
+    CalcDimension fontSizeDimension =
+        StringUtils::StringToCalcDimension(res[TEXT_STYLE_FONT_SIZE_INDEX], false, DimensionUnit::FP);
+    if (fontSizeDimension.Unit() == DimensionUnit::PERCENT) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        textStyle.fontSize = fontSizeDimension;
+    }
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[TEXT_STYLE_FONT_WEIGHT_INDEX], FontWeight::NORMAL);
+    textStyle.textColor = Color(textStyleStruct->textColor);
+
+    SetCalendarPickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->textColorRawPtr);
+    CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
+}
+
 ArkUICalendarTextStyleType GetTextStyle(ArkUINodeHandle node)
 {
     ArkUICalendarTextStyleType textStyle = { Color::BLACK.GetValue(), 0.0f, 0 };
@@ -206,6 +249,28 @@ void SetEdgeAlign(ArkUINodeHandle node, const ArkUI_Float32* values, const int* 
     CalendarPickerModelNG::SetEdgeAlign(frameNode, align, offset);
 }
 
+void SetEdgeAlignWithResObj(ArkUINodeHandle node, const struct ArkUIPickerEdgeAlignStruct* edgeAlignStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    Dimension dx = Dimension(edgeAlignStruct->dxValue, static_cast<OHOS::Ace::DimensionUnit>(edgeAlignStruct->dxUnit));
+    Dimension dy = Dimension(edgeAlignStruct->dyValue, static_cast<OHOS::Ace::DimensionUnit>(edgeAlignStruct->dyUnit));
+    NG::CalendarEdgeAlign align = static_cast<NG::CalendarEdgeAlign>(edgeAlignStruct->alignType);
+    DimensionOffset offset = DimensionOffset(dx, dy);
+
+    auto* dxPtr = reinterpret_cast<ResourceObject*>(edgeAlignStruct->dxRawPtr);
+    auto dxResObj = AceType::Claim(dxPtr);
+    auto* dyPtr = reinterpret_cast<ResourceObject*>(edgeAlignStruct->dyRawPtr);
+    auto dyResObj = AceType::Claim(dyPtr);
+    if (dxResObj || dyResObj) {
+        std::vector<RefPtr<ResourceObject>> resArray = { dxResObj, dyResObj };
+        CalendarPickerModelNG::ParseEdgeAlignResObj(frameNode, resArray);
+    }
+
+    CalendarPickerModelNG::SetEdgeAlign(frameNode, align, offset);
+}
+
 ArkUIEdgeAlignType GetEdgeAlign(ArkUINodeHandle node)
 {
     ArkUIEdgeAlignType align = { 0, 0.0f, 0.0f };
@@ -224,6 +289,7 @@ void ResetEdgeAlign(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::CalendarEdgeAlign alignType = NG::CalendarEdgeAlign::EDGE_ALIGN_END;
     DimensionOffset offset;
+    CalendarPickerModelNG::CalendarPickerRemoveResObj(frameNode, "CalendarPicker.EdgeAlign");
     CalendarPickerModelNG::SetEdgeAlign(frameNode, alignType, offset);
 }
 
@@ -341,7 +407,7 @@ void SetCalendarPickerPadding(ArkUINodeHandle node, const struct ArkUISizeType* 
     paddings.bottom = std::optional<CalcLength>();
     paddings.left = std::optional<CalcLength>();
     paddings.right = std::optional<CalcLength>();
-    
+
     if (IsPaddingValid(paddings, topDim, rightDim, bottomDim, leftDim)) {
         CalendarPickerModelNG::SetPadding(frameNode, paddings);
     } else {
@@ -499,6 +565,7 @@ const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
         .resetSelectDate = ResetSelectedDate,
         .setTextStyleWithWeightEnum = SetTextStyleWithWeightEnum,
         .setTextStyle = SetTextStyle,
+        .setTextStyleWithResObj = SetTextStyleWithResObj,
         .resetTextStyle = ResetTextStyle,
         .setStartDate = SetStartDate,
         .resetStartDate = ResetStartDate,
@@ -509,6 +576,7 @@ const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
         .setCalendarPickerDisabledDateRange = SetCalendarPickerDisabledDateRange,
         .resetCalendarPickerDisabledDateRange = ResetCalendarPickerDisabledDateRange,
         .setEdgeAlign = SetEdgeAlign,
+        .setEdgeAlignWithResObj = SetEdgeAlignWithResObj,
         .resetEdgeAlign = ResetEdgeAlign,
         .setCalendarPickerPadding = SetCalendarPickerPadding,
         .resetCalendarPickerPadding = ResetCalendarPickerPadding,

@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 
-JSCanvasGradient::JSCanvasGradient() : isColorStopValid_(true) {}
+JSCanvasGradient::JSCanvasGradient() {}
 
 void JSCanvasGradient::Constructor(const JSCallbackInfo& args)
 {
@@ -39,52 +39,67 @@ void JSCanvasGradient::Destructor(JSCanvasGradient* controller)
 void JSCanvasGradient::JSBind(BindingTarget globalObj)
 {
     JSClass<JSCanvasGradient>::Declare("CanvasGradient");
-    JSClass<JSCanvasGradient>::CustomMethod("addColorStop", &JSCanvasGradient::addColorStop);
+    JSClass<JSCanvasGradient>::CustomMethod("addColorStop", &JSCanvasGradient::AddColorStop);
     JSClass<JSCanvasGradient>::Bind(globalObj, JSCanvasGradient::Constructor, JSCanvasGradient::Destructor);
 }
 
-void JSCanvasGradient::addColorStop(const JSCallbackInfo& info)
+// if the params is invalid, fill the shape with transparent
+void JSCanvasGradient::AddColorTransparent()
+{
+    isColorStopValid_ = false;
+    gradient_->ClearColors();
+    GradientColor color;
+    color.SetColor(Color::TRANSPARENT);
+    color.SetDimension(0.0);
+    gradient_->AddColor(color);
+    gradient_->AddColor(color);
+}
+
+void JSCanvasGradient::AddColorStop(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(gradient_);
     if (!isColorStopValid_ && gradient_->GetColors().empty()) {
         isColorStopValid_ = true;
     }
-    if (isColorStopValid_ && info[0]->IsNumber() && info[1]->IsString()) {
-        double offset = 0.0;
-        JSViewAbstract::ParseJsDouble(info[0], offset);
-        if (offset < 0 || offset > 1) {
-            isColorStopValid_ = false;
-            // if the offset is invalid, fill the shape with transparent
-            gradient_->ClearColors();
-            GradientColor color;
-            color.SetColor(Color::TRANSPARENT);
-            color.SetDimension(0.0);
-            gradient_->AddColor(color);
-            gradient_->AddColor(color);
-            return;
-        }
-        std::string jsColor;
-        GradientColor color;
-        JSViewAbstract::ParseJsString(info[1], jsColor);
-        Color colorFromString = Color::WHITE;
-        if (!Color::ParseColorString(jsColor, colorFromString)) {
-            gradient_->ClearColors();
-            color.SetColor(Color::TRANSPARENT);
-            color.SetDimension(0.0);
-            gradient_->AddColor(color);
-            gradient_->AddColor(color);
-            isColorStopValid_ = false;
-            return;
-        }
-        color.SetColor(colorFromString);
-        color.SetDimension(offset);
-        gradient_->AddColor(color);
-        auto colorSize = gradient_->GetColors().size();
-        // prevent setting only one colorStop
-        if (colorSize == 1) {
-            gradient_->AddColor(color);
-        }
+    if (!info[0]->IsNumber() || (!info[1]->IsString() && !info[1]->IsObject())) {
+        return;
     }
+    double offset = 0.0;
+    JSViewAbstract::ParseJsDouble(info[0], offset);
+    if (offset < 0 || offset > 1) {
+        AddColorTransparent();
+        return;
+    }
+    GradientColor gradientColor;
+    Color color = Color::WHITE;
+    ColorSpace colorSpace = ColorSpace::SRGB;
+    if (info[1]->IsString()) {
+        std::string colorStr;
+        JSViewAbstract::ParseJsString(info[1], colorStr);
+        if (!Color::ParseColorString(colorStr, color)) {
+            AddColorTransparent();
+            return;
+        }
+    } else {
+        if (!JSViewAbstract::ParseColorMetricsToColor(info[1], color)) {
+            AddColorTransparent();
+            return;
+        }
+        colorSpace = color.GetColorSpace();
+    }
+    if (!gradient_->GetColors().empty() && colorSpace != colorSpace_) {
+        JSException::Throw(
+            ERROR_CODE_CANVAS_PARAM_INVALID, "%s", "The color's ColorSpace is not the same as the last color's.");
+        return;
+    }
+    gradientColor.SetColor(color);
+    gradientColor.SetDimension(offset);
+    if (gradient_->GetColors().empty()) {
+        colorSpace_ = colorSpace;
+        // prevent setting only one colorStop
+        gradient_->AddColor(gradientColor);
+    }
+    gradient_->AddColor(gradientColor);
 }
 
 } // namespace OHOS::Ace::Framework

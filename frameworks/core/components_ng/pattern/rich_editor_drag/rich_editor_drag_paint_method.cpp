@@ -66,5 +66,7 @@ void RichEditorDragPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper
     modifier->SetSelectedColor(selectorColor.GetValue());
     modifier->SetDragBackgroundColor(info_.dragBackgroundColor);
     modifier->SetIsDragShadowNeeded(info_.isDragShadowNeeded);
+    modifier->SetIsFirstHandleAnimated(info_.isFirstHandleAnimation);
+    modifier->SetIsSecondHandleAnimated(info_.isSecondHandleAnimation);
 }
 } // namespace OHOS::Ace::NG

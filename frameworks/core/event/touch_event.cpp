@@ -16,6 +16,8 @@
 #include "core/event/touch_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/common/ace_application_info.h"
+#include "core/event/mouse_event.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace {
@@ -24,6 +26,20 @@ void TouchPoint::CovertId()
     if (sourceTool == SourceTool::PEN) {
         originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
         id = id + originalId;
+    }
+}
+
+int32_t TouchPoint::GetOriginalReCovertId() const
+{
+    if (!AceApplicationInfo::GetInstance().GetTouchPadIdChanged()) {
+        return originalId;
+    }
+    if (sourceTool == SourceTool::PEN) {
+        return originalId - TOUCH_TOOL_BASE_ID - static_cast<int32_t>(sourceTool);
+    } else if (sourceTool == SourceTool::MOUSE) {
+        return originalId - MOUSE_BASE_ID - static_cast<int32_t>(MouseButton::LEFT_BUTTON);
+    } else {
+        return originalId;
     }
 }
 
@@ -265,6 +281,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.height = height;
     event.pressedTime = pressedTime;
     event.convertInfo = convertInfo;
+    event.passThrough = passThrough;
     return event;
 }
 
@@ -348,6 +365,20 @@ void TouchEvent::CovertId()
     }
 }
 
+int32_t TouchEvent::GetOriginalReCovertId() const
+{
+    if (!AceApplicationInfo::GetInstance().GetTouchPadIdChanged()) {
+        return originalId;
+    }
+    if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
+        return originalId - TOUCH_TOOL_BASE_ID - static_cast<int32_t>(sourceTool);
+    } else if (sourceType == SourceType::MOUSE) {
+        return originalId - MOUSE_BASE_ID - static_cast<int32_t>(MouseButton::LEFT_BUTTON);
+    } else {
+        return originalId;
+    }
+}
+
 TouchEvent TouchEvent::CreateScalePoint(float scale) const
 {
     if (NearZero(scale)) {
@@ -428,6 +459,14 @@ bool TouchEvent::IsPenHoverEvent() const
 int32_t TouchEvent::GetTargetDisplayId() const
 {
     return targetDisplayId;
+}
+
+int32_t TouchEvent::GetEventIdentity() const
+{
+    if (passThrough) {
+        return id;
+    }
+    return originalId;
 }
 
 void TouchCallBackInfo::SetScreenX(float screenX)

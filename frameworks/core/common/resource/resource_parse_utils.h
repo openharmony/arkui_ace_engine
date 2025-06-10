@@ -45,7 +45,7 @@ class ResourceParseUtils final : public AceType {
     DECLARE_ACE_TYPE(ResourceParseUtils, AceType);
 
 public:
-    static RefPtr<ThemeConstants> GetThemeConstants();
+    static RefPtr<ThemeConstants> GetThemeConstants(const RefPtr<ResourceObject>& resObj);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result);
     static bool ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result);
@@ -85,6 +85,7 @@ public:
     template<typename T>
     static bool ParseResInteger(const RefPtr<ResourceObject>& resObj, T& result)
     {
+        CHECK_NULL_RETURN(resObj, false);
         auto resIdNum = resObj->GetId();
         auto type = resObj->GetType();
         auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);

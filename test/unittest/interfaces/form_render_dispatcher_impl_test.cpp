@@ -504,4 +504,23 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest023, TestSize
     }
 }
 
+/**
+ * @tc.name: FormRenderDispatcherImplTest024
+ * @tc.type: FUNC
+ * Function: OnNotifyDumpInfo
+ **@tc.desc: FUNC
+ */
+HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest024, TestSize.Level1)
+{
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    bool flag = false;
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    if (renderDispatcher != nullptr) {
+        renderDispatcher->OnNotifyDumpInfo(params, info);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+}
+
 } // namespace OHOS::Ace

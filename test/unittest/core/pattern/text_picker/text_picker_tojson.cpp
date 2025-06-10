@@ -380,7 +380,7 @@ HWTEST_F(TextPickerToJson, TextPickerToJsonDefaultPickerItemHeight001, TestSize.
     GTEST_LOG_(INFO) << json->ToString();
     /**
      * @tc.steps: check the key value.
-     * @tc.expected: it should be -.
+     * @tc.expected: it should be 10.00vp.
      */
     EXPECT_EQ(json->GetString("defaultPickerItemHeight"), "10.00vp");
 }
@@ -424,10 +424,702 @@ HWTEST_F(TextPickerToJson, TextPickerToJsonDefaultPickerItemHeight002, TestSize.
     GTEST_LOG_(INFO) << json->ToString();
     /**
      * @tc.steps: check the key value.
-     * @tc.expected: it should be -.
+     * @tc.expected: it should be 50.00px.
      */
     EXPECT_EQ(json->GetString("defaultPickerItemHeight"), "50.00px");
 }
 
+/**
+ * @tc.name: TextPickerPatternToJsonValueRange
+ * @tc.desc: Test TextPickerPattern ToJsonValue(range is not empty).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerPatternToJsonValueRange, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
+    /**
+     * @tc.step: step1. init range and Set range.
+     */
+    std::vector<NG::RangeContent> range = { { "/demo/demo1.jpg", "test1" }, { "/demo/demo2.jpg", "test2" },
+        { "/demo/demo3.jpg", "test3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
 
+    /**
+     * @tc.step: step2. call ToJsonValue.
+     */
+    InspectorFilter filter;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    auto json = JsonUtil::Create(true);
+    textPickerPattern->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the range value.
+     * @tc.expected: it should be the value set.
+     */
+    std::string rangeStr = textPickerPattern->GetRangeStr();
+    EXPECT_EQ(json->GetString("range"), rangeStr.c_str());
+}
+
+/**
+ * @tc.name: TextPickerPatternToJsonValueColumnWidths
+ * @tc.desc: Test TextPickerPattern ToJsonValue(range is empty).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerPatternToJsonValueColumnWidths, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step1. init columnWidths.
+     */
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->columnWidths_ = { 7.0_vp, 8.0_vp, 9.0_vp };
+
+    /**
+     * @tc.step: step2. call ToJsonValue.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    textPickerPattern->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the columnWidths value.
+     * @tc.expected: it should be the value set.
+     */
+    std::string columnWidthsStr = textPickerPattern->GetColumnWidthsStr();
+    EXPECT_EQ(json->GetString("columnWidths"), columnWidthsStr.c_str());
+}
+
+/**
+ * @tc.name: TextPickerPatternToJsonValueEnableHapticFeedback
+ * @tc.desc: Test TextPickerPattern ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerPatternToJsonValueEnableHapticFeedback, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    /**
+     * @tc.cases: case. cover isEnableHapticFeedback == true;
+     */
+    bool isEnableHapticFeedback = true;
+    InspectorFilter filter;
+    TextPickerModelNG::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
+    auto json = JsonUtil::Create(true);
+    textPickerPattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetBool("enableHapticFeedback"), isEnableHapticFeedback);
+
+    /**
+     * @tc.cases: case. cover isEnableHapticFeedback == false;
+     */
+    isEnableHapticFeedback = false;
+    TextPickerModelNG::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
+    std::unique_ptr<JsonValue> json2 = JsonUtil::Create(true);
+    textPickerPattern->ToJsonValue(json2, filter);
+    EXPECT_EQ(json2->GetBool("enableHapticFeedback"), isEnableHapticFeedback);
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueCanLoop
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueCanLoop, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    bool isCanLoop = true;
+    TextPickerModelNG::GetInstance()->SetCanLoop(isCanLoop);
+
+    EXPECT_EQ(TextPickerModelNG::GetCanLoop(frameNode), isCanLoop);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+
+    /**
+     * @tc.step: step2. call ToJsonValue.
+     * @tc.expected: the canLoop result is true.
+     */
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    pickerProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("canLoop"), "true");
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueSelecteds
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueSelecteds, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set.
+     */
+    bool isCanLoop = true;
+    TextPickerModelNG::GetInstance()->SetCanLoop(isCanLoop);
+
+    EXPECT_EQ(TextPickerModelNG::GetCanLoop(frameNode), isCanLoop);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+
+    std::vector<uint32_t> selecteds;
+    int selectedCount = 5;
+    for (int i = 1; i < selectedCount; i++) {
+        selecteds.emplace_back(i);
+    }
+    selecteds.emplace_back(66);
+    pickerProperty->UpdateSelecteds(selecteds);
+
+    auto selectedRes = pickerProperty->CloneSelecteds().value_or(std::vector<uint32_t>());
+    for (int i = 0; i < selectedCount; i++) {
+        EXPECT_EQ(selectedRes[i], selecteds[i]);
+    }
+
+    std::vector<std::string> values;
+    values.emplace_back("hellow");
+    values.emplace_back("good");
+    values.emplace_back("better");
+    values.emplace_back("best");
+    values.emplace_back("most");
+    pickerProperty->UpdateValues(values);
+
+    auto values2 = pickerProperty->CloneValues().value_or(std::vector<std::string>());
+    for (int i = 0; i < selectedCount; i++) {
+        EXPECT_EQ(values2[i], values[i]);
+    }
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.step: step3 call ToJsonValue and Judging expected results.
+     */
+    auto jsonArraySelected = json->GetValue("selecteds");
+    ASSERT_NE(jsonArraySelected, nullptr);
+    EXPECT_EQ(jsonArraySelected->GetArraySize(), selectedCount);
+    for (int i = 0; i < selectedCount; i++) {
+        EXPECT_EQ(jsonArraySelected->GetString(std::to_string(i).c_str()), std::to_string(selecteds[i]));
+    }
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueValues
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueValues, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set.
+     */
+    bool isCanLoop = true;
+    TextPickerModelNG::GetInstance()->SetCanLoop(isCanLoop);
+
+    EXPECT_EQ(TextPickerModelNG::GetCanLoop(frameNode), isCanLoop);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+
+    std::vector<uint32_t> selecteds;
+    int selectedCount = 5;
+    for (int i = 1; i < selectedCount; i++) {
+        selecteds.emplace_back(i);
+    }
+    selecteds.emplace_back(66);
+    pickerProperty->UpdateSelecteds(selecteds);
+
+    std::vector<std::string> values;
+    values.emplace_back("hellow");
+    values.emplace_back("good");
+    values.emplace_back("better");
+    values.emplace_back("best");
+    values.emplace_back("most");
+    pickerProperty->UpdateValues(values);
+
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.step: step3 call ToJsonValue and Judging expected results.
+     */
+    auto jsonArrayValues = json->GetValue("values");
+    EXPECT_EQ(jsonArrayValues->GetArraySize(), selectedCount);
+    for (int i = 0; i < selectedCount; i++) {
+        EXPECT_EQ(jsonArrayValues->GetString(std::to_string(i).c_str()), values[i]);
+    }
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueSelectedIndex
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueSelectedIndex, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set selectedIndex.
+     */
+    bool isCanLoop = true;
+    TextPickerModelNG::GetInstance()->SetCanLoop(isCanLoop);
+
+    EXPECT_EQ(TextPickerModelNG::GetCanLoop(frameNode), isCanLoop);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    std::vector<uint32_t> selectIndex;
+    selectIndex.push_back(1);
+    selectIndex.push_back(2);
+    pickerProperty->UpdateSelectedIndex(selectIndex);
+
+    std::vector<uint32_t> selecteds;
+    int selectedCount = 5;
+    for (int i = 0; i < selectedCount; i++) {
+        selecteds.emplace_back(i);
+    }
+    InspectorFilter filter;
+    pickerProperty->UpdateSelecteds(selecteds);
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.step: step3 call ToJsonValue and Judging expected results.
+     * The result is the same as selects
+     */
+    auto jsonArraySelectIndex = json->GetValue("selectedIndex");
+    ASSERT_NE(jsonArraySelectIndex, nullptr);
+    EXPECT_EQ(jsonArraySelectIndex->GetArraySize(), selectedCount);
+    for (int i = 0; i < selectedCount; i++) {
+        EXPECT_EQ(jsonArraySelectIndex->GetString(std::to_string(i).c_str()), std::to_string(selecteds[i]));
+    }
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValue006
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValue006, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set.
+     */
+    Dimension defaultPickerItemHeight = Dimension(6);
+    Dimension gradientHeight = Dimension(7);
+    std::string value = "testValue";
+    uint32_t selected = 0;
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateSelected(selected);
+    pickerProperty->UpdateDefaultPickerItemHeight(defaultPickerItemHeight);
+    pickerProperty->UpdateGradientHeight(gradientHeight);
+    pickerProperty->UpdateValue(value);
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.step: step3 call ToJsonValue and Judging expected results.
+     */
+    EXPECT_EQ(json->GetString("defaultPickerItemHeight"), defaultPickerItemHeight.ToString().c_str());
+    EXPECT_EQ(json->GetString("gradientHeight"), gradientHeight.ToString().c_str());
+    EXPECT_EQ(json->GetString("selected"), std::to_string(selected));
+    EXPECT_EQ(json->GetString("value"), value.c_str());
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueGradientHeight
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueGradientHeight, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step1. Construct property values and set.
+     */
+    Dimension gradientHeight = Dimension(7);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateGradientHeight(gradientHeight);
+    /**
+     * @tc.step: step1. call ToJsonValue fun.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the gradientHeight value.
+     * @tc.expected: it should be the value set.
+     */
+    EXPECT_EQ(json->GetString("gradientHeight"), gradientHeight.ToString().c_str());
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueSelected
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueSelected, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set.
+     */
+    uint32_t selected = 0;
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateSelected(selected);
+    /**
+     * @tc.step: step1. call ToJsonValue fun.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the selected value.
+     * @tc.expected: it should be the value set.
+     */
+    EXPECT_EQ(json->GetString("selected"), std::to_string(selected));
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueValue
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueValue, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set.
+     */
+    std::string value = "testValue";
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateValue(value);
+    /**
+     * @tc.step: step1. call ToJsonValue fun.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the value value.
+     * @tc.expected: it should be the value set.
+     */
+    EXPECT_EQ(json->GetString("value"), value.c_str());
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueSelectedTextStyle
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueSelectedTextStyle, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set selectedTextStyle.
+     */
+    PickerTextStyle data;
+    data.fontSize = Dimension(10);
+    data.textColor = Color::RED;
+    data.fontWeight = Ace::FontWeight::BOLD;
+    TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.step: step3 call ToJsonValue and Judging expected results.
+     */
+    auto selectedTextStyle = json->GetObject("selectedTextStyle");
+    ASSERT_NE(selectedTextStyle, nullptr);
+    EXPECT_EQ(selectedTextStyle->GetString("color"), "#FFFF0000");
+    auto selectedFont = selectedTextStyle->GetObject("font");
+    ASSERT_NE(selectedFont, nullptr);
+    EXPECT_EQ(selectedFont->GetString("size"), "10.00px");
+    EXPECT_EQ(selectedFont->GetString("weight"), "FontWeight.Bold");
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValue008
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValue008, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set disappearTextStyle.
+     */
+    PickerTextStyle data;
+    data.fontSize = Dimension(10);
+    data.textColor = Color::RED;
+    data.fontWeight = Ace::FontWeight::BOLD;
+    TextPickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.step: step3 call ToJsonValue and Judging expected results.
+     */
+    auto disappearTextStyle = json->GetObject("disappearTextStyle");
+    ASSERT_NE(disappearTextStyle, nullptr);
+    EXPECT_EQ(disappearTextStyle->GetString("color"), "#FFFF0000");
+    auto disappearFont = disappearTextStyle->GetObject("font");
+    ASSERT_NE(disappearFont, nullptr);
+    EXPECT_EQ(disappearFont->GetString("size"), "10.00px");
+    EXPECT_EQ(disappearFont->GetString("weight"), "FontWeight.Bold");
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueNormalTextStyle
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueNormalTextStyle, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set normalTextStyle.
+     */
+    PickerTextStyle data;
+    data.fontSize = Dimension(10);
+    data.textColor = Color::RED;
+    data.fontWeight = Ace::FontWeight::BOLD;
+    TextPickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.step: step3 call ToJsonValue and Judging expected results.
+     */
+    auto normalTextStyle = json->GetObject("textStyle");
+    ASSERT_NE(normalTextStyle, nullptr);
+    EXPECT_EQ(normalTextStyle->GetString("color"), "#FFFF0000");
+    auto normalFont = normalTextStyle->GetObject("font");
+    ASSERT_NE(normalFont, nullptr);
+    EXPECT_EQ(normalFont->GetString("size"), "10.00px");
+    EXPECT_EQ(normalFont->GetString("weight"), "FontWeight.Bold");
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueDefaultTextStyle
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueDefaultTextStyle, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct property values and set defaultTextStyle.
+     */
+    PickerTextStyle data;
+    data.fontSize = Dimension(10);
+    data.textColor = Color::RED;
+    data.fontWeight = Ace::FontWeight::BOLD;
+    Dimension minFontSize = Dimension(10);
+    Dimension maxFontSize = Dimension(10);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateDefaultFontSize(data.fontSize.value());
+    pickerProperty->UpdateDefaultColor(data.textColor.value());
+    pickerProperty->UpdateDefaultWeight(data.fontWeight.value());
+    pickerProperty->UpdateDefaultMinFontSize(minFontSize);
+    pickerProperty->UpdateDefaultMaxFontSize(maxFontSize);
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.step: step3 call ToJsonValue and Judging expected results.
+     */
+    auto defaultTextStyle = json->GetObject("defaultTextStyle");
+    ASSERT_NE(defaultTextStyle, nullptr);
+    EXPECT_EQ(defaultTextStyle->GetString("color"), "#FFFF0000");
+    EXPECT_EQ(defaultTextStyle->GetString("minFontSize"), "10.00px");
+    EXPECT_EQ(defaultTextStyle->GetString("maxFontSize"), "10.00px");
+    auto defaultFont = defaultTextStyle->GetObject("font");
+    ASSERT_NE(defaultFont, nullptr);
+    EXPECT_EQ(defaultFont->GetString("size"), "10.00px");
+    EXPECT_EQ(defaultFont->GetString("weight"), "FontWeight.Bold");
+}
+
+/**
+ * @tc.name: TextPickerLayoutPropertyToJsonValueDivider
+ * @tc.desc: Test TextPickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerToJson, TextPickerLayoutPropertyToJsonValueDivider, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. Construct divider property values and call  SetDivider.
+     */
+    ItemDivider dividerData;
+    dividerData.strokeWidth = 6.0_vp;
+    dividerData.startMargin = 6.0_vp;
+    dividerData.endMargin = 6.0_vp;
+    dividerData.color = Color::RED;
+    TextPickerModelNG::GetInstance()->SetDivider(dividerData);
+
+    /**
+     * @tc.step: step3 call ToJsonValue and Judging expected results.
+     */
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    pickerProperty->ToJsonValue(json, filter);
+
+    auto divider = json->GetObject("divider");
+    ASSERT_NE(divider, nullptr);
+    EXPECT_EQ(divider->GetString("color"), "#FFFF0000");
+    EXPECT_EQ(divider->GetString("strokeWidth"), "6.00vp");
+    EXPECT_EQ(divider->GetString("startMargin"), "6.00vp");
+    EXPECT_EQ(divider->GetString("endMargin"), "6.00vp");
+}
 } // namespace OHOS::Ace::NG

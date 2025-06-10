@@ -81,6 +81,7 @@ private:
     void ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog, bool isMask = false);
     void SetSubWindowHotarea(
         const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize, SizeF selfSize, int32_t frameNodeId);
+    std::optional<DimensionRect> GetMaskRect(const RefPtr<FrameNode>& dialog);
 
     void UpdateTouchRegion();
 

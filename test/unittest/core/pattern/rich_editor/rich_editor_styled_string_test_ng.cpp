@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
@@ -505,6 +506,33 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController009, TestSize.Level
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->InsertValue(INIT_STRING_2);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
+}
+
+/**
+ * @tc.name: StyledStringController010
+ * @tc.desc: Test textVerticalAlign.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController010, TestSize.Level1)
+{
+    /*
+     *@tc.steps: step1. create styledString with text
+     */
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
+    /**
+     *@tc.steps: step2. get richEditor styledString controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
+    ASSERT_NE(styledStringController, nullptr);
+    styledStringController->SetStyledString(mutableStr);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
+    EXPECT_EQ(richEditorPattern->dataDetectorAdapter_->textForAI_, INIT_STRING_1);
+    auto spanItem = richEditorPattern->spans_.front();
+    auto& textLineStyle = spanItem->textLineStyle;
+    EXPECT_NE(textLineStyle->GetTextVerticalAlign(), std::nullopt);
 }
 
 /**
@@ -1235,25 +1263,122 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Le
 }
 
 /**
- * @tc.name: HandleOnPaste001
- * @tc.desc: test HandleOnPaste
+ * @tc.name: DeleteTextDecorationType
+ * @tc.desc: Test deleteDecorationType of DecorationSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, HandleOnPaste001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, DeleteTextDecorationType, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a spanString and AddSpan
+     * @tc.expected: The SpanString and style should be successfully created and applied
+     */
+    std::string buffer;
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({ TextDecoration::UNDERLINE, TextDecoration::OVERLINE }), Color::RED,
+        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1);
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    buffer.clear();
+    buffer = decorationSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+
+    /**
+     * @tc.steps2:remove overline to decorationSpan
+     * @tc.expected: The decorationSpan types removed Overline ,size equal 1
+     */
+    decorationSpan->RemoveTextDecorationType(TextDecoration::OVERLINE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationTypes().size(), 1);
+
+    /**
+     * @tc.steps3:remove none to decorationSpan
+     * @tc.expected: The decorationSpan types can remove None, size equal 1
+     */
+    decorationSpan->RemoveTextDecorationType(TextDecoration::NONE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationTypes().size(), 1);
+}
+
+/**
+ * @tc.name: InsertValueInStyledString002
+ * @tc.desc: test InsertValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto styledString = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
-    richEditorPattern->SetStyledString(styledString);
-    richEditorPattern->textSelector_.Update(0, 1);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    std::vector<uint8_t> tlvData;
-    styledString->EncodeTlv(tlvData);
-    std::vector<std::vector<uint8_t>> tlvDatas = { tlvData };
-    richEditorPattern->ProcessSpanStringData(tlvDatas, styledString->GetString(), false);
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    richEditorPattern->InsertValueInStyledString(PREVIEW_TEXT_VALUE1);
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+}
+
+/**
+ * @tc.name: InsertValueInStyledString003
+ * @tc.desc: test RichEditorPattern InsertValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto host = richEditorPattern->GetHost();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(options2);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->FireOnSelectionChange(-1, 0);
+    richEditorPattern->FireOnSelectionChange(0, -1);
+    richEditorPattern->FireOnSelectionChange(-1, -1);
+    ASSERT_EQ(richEditorPattern->HasFocus(), true);
+}
+
+/**
+ * @tc.name: CreatePasteCallback001
+ * @tc.desc: test CreatePasteCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, CreatePasteCallback001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    richEditorPattern->clipboard_ = clipboard;
+    /**
+     * @tc.steps: step1. CreatePasteCallback
+     */
+    auto pasteCallback = richEditorPattern->CreatePasteCallback();
+    /**
+     * @tc.steps: step2. value from clipBoard
+     */
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
+    auto mutableImageStr = CreateImageStyledString();
+    std::vector<uint8_t> data1;
+    std::vector<uint8_t> data2;
+    mutableTextStr->EncodeTlv(data1);
+    mutableImageStr->EncodeTlv(data2);
+    std::vector<std::vector<uint8_t>> arrs = { std::move(data1), std::move(data2) };
+    string text = UtfUtils::Str16ToStr8(INIT_U16STRING_1);
+    bool isMulitiTypeRecord = true;
+    /**
+     * @tc.steps: step3. test spanStringMode
+     */
+    richEditorPattern->spans_.clear();
+    richEditorPattern->isSpanStringMode_ = true;
+    pasteCallback(arrs, text, isMulitiTypeRecord);
+    EXPECT_EQ(2, richEditorPattern->spans_.size());
 }
 } // namespace OHOS::Ace::NG
