@@ -598,6 +598,7 @@ bool GestureEventHub::IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInf
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
+    isRestoreDrag_ = false;
     TAG_LOGD(AceLogTag::ACE_DRAG, "Start handle onDragStart.");
     auto frameNode = GetFrameNode();
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -641,6 +642,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::READY) {
+        isRestoreDrag_ = true;
         DoOnDragStartHandling(info, frameNode, dragDropInfo, event, dragPreviewInfo, pipeline);
     } else {
         dragDropManager->SetDelayDragCallBack(continueFunc);
@@ -978,10 +980,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     auto dragMoveLastPoint = dragDropManager->GetDragMoveLastPointByCurrentPointer(info.GetPointerId());
+    auto screenX = isRestoreDrag_ ? info.GetScreenLocation().GetX() : dragMoveLastPoint.GetScreenX();
+    auto screenY = isRestoreDrag_ ? info.GetScreenLocation().GetY() : dragMoveLastPoint.GetScreenY();
+
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        dragMoveLastPoint.GetScreenX(), dragMoveLastPoint.GetScreenY(), info.GetTargetDisplayId(),
-        windowId, true, false, summary, false, detailedSummary };
+        screenX, screenY, info.GetTargetDisplayId(), windowId, true, false, summary, false, detailedSummary };
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && (info.GetSourceTool() == SourceTool::MOUSE) &&
         (info.GetSourceDevice() == SourceType::TOUCH)) {
         dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);
