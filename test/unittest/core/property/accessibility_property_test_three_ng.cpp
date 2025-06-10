@@ -421,4 +421,31 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree015, Te
     auto result = accessibilityProperty.ProcessHoverTestRecursive(hoverPoint, node, path, debugInfo, recursiveParam);
     EXPECT_EQ(result, true);
 }
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree016
+ * @tc.desc: SpecificSupportActionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree016, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    
+    accessibilityProperty.SetSpecificSupportActionCallback([&]() {
+        accessibilityProperty.AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+    });
+    auto supportAceActions = accessibilityProperty.GetSupportAction();
+    auto ret = std::any_of(supportAceActions.begin(),
+        supportAceActions.end(),
+        [](const AceAction& action) { return action == AceAction::ACTION_SCROLL_BACKWARD; });
+    EXPECT_EQ(ret, false);
+
+    accessibilityProperty.ResetSupportAction();
+
+    supportAceActions = accessibilityProperty.GetSupportAction();
+    ret = std::any_of(supportAceActions.begin(),
+        supportAceActions.end(),
+        [](const AceAction& action) { return action == AceAction::ACTION_SCROLL_BACKWARD; });
+    EXPECT_EQ(ret, true);
+}
 } // namespace OHOS::Ace::NG
