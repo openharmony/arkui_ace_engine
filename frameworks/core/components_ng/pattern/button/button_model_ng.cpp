@@ -573,35 +573,35 @@ void ButtonModelNG::SetSize(
 std::string ButtonModelNG::GetLabel(FrameNode* frameNode)
 {
     std::string value;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Label, value, frameNode, value);
     return value;
 }
 
 Dimension ButtonModelNG::GetFontSize(FrameNode* frameNode)
 {
     Dimension value;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, FontSize, value, frameNode, value);
     return value;
 }
 
 Ace::FontWeight ButtonModelNG::GetFontWeight(FrameNode* frameNode)
 {
     Ace::FontWeight value = Ace::FontWeight::NORMAL;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, FontWeight, value, frameNode, Ace::FontWeight::NORMAL);
     return value;
 }
 
 Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, FontColor, value, frameNode, value);
     return value;
 }
 
 bool ButtonModelNG::GetAutoDisable(FrameNode* frameNode)
 {
     bool value = false;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, AutoDisable, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, AutoDisable, value, frameNode, false);
     return value;
 }
 
