@@ -31,6 +31,27 @@
 
 namespace OHOS::Ace::NG {
 namespace GeneratedApiImpl {
+Ark_NodeHandle CreateViewStackProcessor()
+{
+    auto pointer = Referenced::MakeRefPtr<OHOS::Ace::NG::ScopedViewStackProcessor>();
+    auto raw = AceType::RawPtr(pointer);
+    raw->IncRefCount();
+    return reinterpret_cast<Ark_NodeHandle>(raw);
+}
+
+Ark_NodeHandle PopViewStackProcessor()
+{
+    auto node = OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Finish();
+    auto pointer = AceType::RawPtr(node);
+    pointer->IncRefCount();
+    return reinterpret_cast<Ark_NodeHandle>(pointer);
+}
+
+void DeleteViewStackProcessor(Ark_NodeHandle pointer)
+{
+    reinterpret_cast<OHOS::Ace::NG::ScopedViewStackProcessor*>(pointer)->DecRefCount();
+}
+
 void ShowCrash(Ark_CharPtr message)
 {
     TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);

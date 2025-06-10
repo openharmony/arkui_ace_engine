@@ -597,7 +597,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };
 
-class ACE_FORCE_EXPORT ScopedViewStackProcessor final {
+class ACE_FORCE_EXPORT ScopedViewStackProcessor final : public Referenced {
 public:
     ScopedViewStackProcessor(int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
     ScopedViewStackProcessor(std::unique_ptr<ViewStackProcessor>& instance,
