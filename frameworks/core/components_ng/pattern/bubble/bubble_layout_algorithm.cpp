@@ -127,6 +127,18 @@ constexpr Dimension MAX_TIP_WIDTH = 480.0_vp;
 const std::vector<Placement> FOLLOW_CURSOR_TIPS = { Placement::BOTTOM_LEFT, Placement::TOP_LEFT,
     Placement::BOTTOM_RIGHT, Placement::TOP_RIGHT, Placement::BOTTOM, Placement::TOP, Placement::NONE };
 
+static RefPtr<PopupTheme> GetPopupTheme(LayoutWrapper* layoutWrapper)
+{
+    RefPtr<PipelineContext> pipeline;
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, nullptr);
+    pipeline = hostNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
+    return popupTheme;
+}
+
 void GetEndP2P4(const Dimension& radius)
 {
     auto h1 = BUBBLE_ARROW_HEIGHT.ConvertToPx() - radius.ConvertToPx();
@@ -211,24 +223,6 @@ void calculateArrowPoint(Dimension height, Dimension width)
     ARROW_REPLACE_END_HORIZON_P4_OFFSET_X = p4y;
     ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y = p1x;
     ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y = p1x;
-}
-
-// get main window's pipeline
-RefPtr<PipelineContext> GetMainPipelineContext(LayoutWrapper* layoutWrapper)
-{
-    auto containerId = Container::CurrentId();
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, nullptr);
-    RefPtr<PipelineContext> context;
-    if (containerId >= MIN_SUBCONTAINER_ID) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
-        CHECK_NULL_RETURN(parentContainer, nullptr);
-        context = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
-    } else {
-        context = host->GetContextRefPtr();
-    }
-    return context;
 }
 
 void ResetTipsMaxLines(const RefPtr<LayoutWrapper>& childWrapper, bool followCursor)
@@ -399,7 +393,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         measureChildSizeLast_ = child->GetGeometryNode()->GetFrameSize();
     }
     if (useCustom_ && !showInSubWindow) {
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = bubbleNode->GetContext();
         CHECK_NULL_VOID(context);
         float rootH = context->GetRootHeight();
         float rootW = context->GetRootWidth();
@@ -710,9 +704,8 @@ void BubbleLayoutAlgorithm::UpdateDumpInfo()
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow,
     LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(layoutWrapper);
+    auto popupTheme = GetPopupTheme(layoutWrapper);
     CHECK_NULL_VOID(popupTheme);
     padding_ = isTips_ ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
     doubleBorderEnable_ = popupTheme->GetPopupDoubleBorderEnable();
@@ -740,7 +733,6 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     targetSecurity_ = HORIZON_SPACING_WITH_SCREEN.ConvertToPx();
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    CHECK_NULL_VOID(layoutWrapper);
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(layoutWrapper->GetHostNode());
     top_ = safeAreaInsets.top_.Length();
     bottom_ = safeAreaInsets.bottom_.Length();
@@ -1783,7 +1775,14 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
     }
 
     auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
-    auto pipelineContext = expandDisplay ? targetNode->GetContextRefPtr() : GetMainPipelineContext(layoutWrapper);
+    RefPtr<PipelineContext> pipelineContext;
+    if (expandDisplay) {
+        pipelineContext = AceType::Claim(targetNode->GetContext());
+    } else {
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        pipelineContext = DialogManager::GetMainPipelineContext(host);
+    }
     CHECK_NULL_VOID(pipelineContext);
 
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s, "
