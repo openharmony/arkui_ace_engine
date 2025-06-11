@@ -97,7 +97,7 @@ function nearEqual(first: number, second: number): boolean {
 
 function validateLengthMetrics(value: LengthMetrics | undefined, defaultValue: LengthMetrics): LengthMetrics {
   const actualValue = value ?? defaultValue;
-  return actualValue.value < 0 ? defaultValue : actualValue;
+  return (actualValue.value < 0 || actualValue.unit === LengthUnit.PERCENT) ? defaultValue : actualValue;
 }
 
 interface SegmentButtonTextItem {

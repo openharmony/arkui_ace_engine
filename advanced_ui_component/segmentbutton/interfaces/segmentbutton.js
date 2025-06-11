@@ -230,7 +230,7 @@ function nearEqual(first, second) {
 }
 function validateLengthMetrics(value, defaultValue) {
   const actualValue = value ?? defaultValue;
-  return actualValue.value < 0 ? defaultValue : actualValue;
+  return (actualValue.value < 0 || actualValue.unit === LengthUnit.PERCENT) ? defaultValue : actualValue;
 }
 export var BorderRadiusMode;
 (function (BorderRadiusMode) {
