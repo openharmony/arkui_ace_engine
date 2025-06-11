@@ -1256,4 +1256,23 @@ void ViewAbstractModelStatic::SetPrivacySensitive(FrameNode* frameNode, const st
     frameNode->SetPrivacySensitive(flag.value_or(false));
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
+
+void ViewAbstractModelStatic::SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
+}
+
+void ViewAbstractModelStatic::SetOnGestureRecognizerJudgeBegin(
+    FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc,
+    bool exposeInnerGestureFlag)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetExposeInnerGestureFlag(exposeInnerGestureFlag);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+}
 } // namespace OHOS::Ace::NG
