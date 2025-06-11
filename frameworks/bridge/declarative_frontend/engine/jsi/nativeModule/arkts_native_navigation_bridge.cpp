@@ -180,6 +180,9 @@ ArkUINativeModuleValue NavigationBridge::SetCustomNavContentTransition(ArkUIRunt
     if (info.Length() != 2) { // 2: Array length
         return panda::JSValueRef::Undefined(vm);
     }
+    if (!info[1]->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     auto transitionObj = JSRef<JSObject>::Cast(info[1]);
     if (transitionObj->IsUndefined() || !info[1]->IsFunction()) {
         return panda::JSValueRef::Undefined(vm);
@@ -282,7 +285,7 @@ ArkUINativeModuleValue NavigationBridge::ResetToolBar(ArkUIRuntimeCallInfo* runt
 void ParseToolBarItems(const JsiCallbackInfo& info, std::list<RefPtr<AceType>>& items)
 {
     using namespace OHOS::Ace::Framework;
-    if (info[1]->IsUndefined()) {
+    if (info[1]->IsUndefined() || !info[1]->IsArray()) {
         return;
     }
     JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(info[1]);
@@ -342,17 +345,15 @@ ArkUINativeModuleValue NavigationBridge::SetToolBarConfiguration(ArkUIRuntimeCal
     NavigationModel::GetInstance()->SetHideItemText(hideText);
     if (info[1]->IsUndefined() || info[1]->IsArray()) {
         if (NavigationModel::GetInstance()->NeedSetItems()) {
-            std::vector<NG::BarItem> toolbarItems;
-            if (info[1]->IsUndefined()) {
-                toolbarItems = {};
-            } else {
+            std::vector<NG::BarItem> toolbarItems = {};
+            if (!info[1]->IsUndefined()) {
                 auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
                 JSNavigationUtils::ParseToolbarItemsConfiguration(
                     targetNode, info, JSRef<JSArray>::Cast(info[1]), toolbarItems);
             }
             NG::MoreButtonOptions toolbarMoreButtonOptions;
-            if (info.Length() > MIN_INFO_LENGTH) {
-                auto optObj = JSRef<JSObject>::Cast(info[2]);
+            if (info.Length() > MIN_INFO_LENGTH && info[NUM_2]->IsObject()) {
+                auto optObj = JSRef<JSObject>::Cast(info[NUM_2]);
                 auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
                 JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
             }

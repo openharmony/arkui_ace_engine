@@ -64,20 +64,34 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     {
         std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        rsUIDirector_->Init(); // Func Init Thread unsafe.
+        if (SystemProperties::GetMultiInstanceEnabled()) {
+            rsUIDirector_->Init(true, true); // Func Init Thread unsafe.
+        } else {
+            rsUIDirector_->Init(); // Func Init Thread unsafe.
+        }
     }
 
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName, .isSync = true};
-    rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
-
-    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
-        ContainerScope scope(id);
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostDelayedTask(
-            task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
-    }, id);
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsUIDirector_->GetRSUIContext());
+        rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
+        rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
+            ContainerScope scope(id);
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostDelayedTask(
+                task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
+            }, 0, true);
+    } else {
+        rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+        rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
+        rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
+            ContainerScope scope(id);
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostDelayedTask(
+                task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
+            }, id);
+    }
 #else
     taskExecutor_ = nullptr;
     id_ = 0;

@@ -251,7 +251,7 @@ void JSUIExtensionProxy::On(const JSCallbackInfo& info)
         proxy->SetInstanceId(instanceId);
         proxy->SetProxy(session);
         auto param = JSRef<JSVal>::Cast(contextObj);
-        func->ExecuteJS(1, &param);
+        func->ExecuteJSWithContext(1, &param, execCtx);
     };
 
     ContainerScope scope(instanceId_);
@@ -473,7 +473,7 @@ void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)
         proxy->SetInstanceId(instanceId);
         proxy->SetProxy(session);
         auto returnValue = JSRef<JSVal>::Cast(contextObj);
-        func->ExecuteJS(1, &returnValue);
+        func->ExecuteJSWithContext(1, &returnValue, execCtx);
     };
     UIExtensionModel::GetInstance()->SetOnRemoteReady(std::move(onRemoteReady));
 }
@@ -501,7 +501,7 @@ void JSUIExtension::OnReceive(const JSCallbackInfo& info)
         auto env = reinterpret_cast<napi_env>(nativeEngine);
         auto nativeWantParams = WantWrap::ConvertParamsToNativeValue(wantParams, env);
         auto wantParamsJSVal = JsConverter::ConvertNapiValueToJsVal(nativeWantParams);
-        func->ExecuteJS(1, &wantParamsJSVal);
+        func->ExecuteJSWithContext(1, &wantParamsJSVal, execCtx);
     };
     UIExtensionModel::GetInstance()->SetOnReceive(std::move(onReceive));
 }
@@ -523,7 +523,7 @@ void JSUIExtension::OnRelease(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(releaseCode));
-        func->ExecuteJS(1, &newJSVal);
+        func->ExecuteJSWithContext(1, &newJSVal, execCtx);
     };
     UIExtensionModel::GetInstance()->SetOnRelease(std::move(onRelease));
 }
@@ -554,7 +554,7 @@ void JSUIExtension::OnResult(const JSCallbackInfo& info)
             obj->SetProperty<int32_t>("code", code);
             obj->SetPropertyObject("want", wantJSVal);
             auto returnValue = JSRef<JSVal>::Cast(obj);
-            func->ExecuteJS(1, &returnValue);
+            func->ExecuteJSWithContext(1, &returnValue, execCtx);
         };
     UIExtensionModel::GetInstance()->SetOnResult(std::move(onResult));
 }
@@ -580,7 +580,7 @@ void JSUIExtension::OnError(const JSCallbackInfo& info)
             obj->SetProperty<std::string>("name", name);
             obj->SetProperty<std::string>("message", message);
             auto returnValue = JSRef<JSVal>::Cast(obj);
-            func->ExecuteJS(1, &returnValue);
+            func->ExecuteJSWithContext(1, &returnValue, execCtx);
         };
     UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
 }
@@ -614,7 +614,7 @@ void JSUIExtension::OnTerminated(const JSCallbackInfo& info)
             obj->SetPropertyObject("want", wantJSVal);
         }
         auto returnValue = JSRef<JSVal>::Cast(obj);
-        func->ExecuteJS(1, &returnValue);
+        func->ExecuteJSWithContext(1, &returnValue, execCtx);
     };
     UIExtensionModel::GetInstance()->SetOnTerminated(std::move(onTerminated));
 }
@@ -636,7 +636,7 @@ void JSUIExtension::OnDrawReady(const JSCallbackInfo& info)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             auto newJSVal = JSRef<JSVal>::Make();
-            func->ExecuteJS(1, &newJSVal);
+            func->ExecuteJSWithContext(1, &newJSVal, execCtx);
     };
     UIExtensionModel::GetInstance()->SetOnDrawReady(std::move(onDrawReady));
 }

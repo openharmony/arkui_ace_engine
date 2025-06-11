@@ -1,0 +1,4 @@
+/** @memo:intrinsic */
+intrinsicFunctionUsingThis(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
+    this.x = this;
+}

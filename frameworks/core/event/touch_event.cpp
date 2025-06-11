@@ -461,6 +461,14 @@ int32_t TouchEvent::GetTargetDisplayId() const
     return targetDisplayId;
 }
 
+int32_t TouchEvent::GetEventIdentity() const
+{
+    if (passThrough) {
+        return id;
+    }
+    return originalId;
+}
+
 void TouchCallBackInfo::SetScreenX(float screenX)
 {
     screenX_ = screenX;

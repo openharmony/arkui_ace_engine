@@ -184,6 +184,7 @@ private:
     static void SetHideNavBarInner(const RefPtr<NavigationGroupNode>& navigationGroupNode, bool hideNavBar);
     static bool CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode);
     static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
+    void SetToolbarNavigationMode(NavigationMode mode);
     static bool navBarWidthDoubleBind_;
 };
 } // namespace OHOS::Ace::NG

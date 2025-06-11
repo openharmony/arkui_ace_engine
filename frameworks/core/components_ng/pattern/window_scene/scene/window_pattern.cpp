@@ -490,6 +490,7 @@ void WindowPattern::CreateStartingWindow()
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
             startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
+        startingWindow_->GetPattern<ImagePattern>()->SetSyncLoad(syncStartingWindow_);
         return;
     }
     startingWindow_ = FrameNode::CreateFrameNode(
@@ -505,6 +506,7 @@ void WindowPattern::CreateStartingWindow()
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
+    startingWindow_->GetPattern<ImagePattern>()->SetSyncLoad(syncStartingWindow_);
     startingWindow_->MarkModifyDone();
 }
 

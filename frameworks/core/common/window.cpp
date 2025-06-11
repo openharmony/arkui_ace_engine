@@ -101,4 +101,51 @@ int64_t Window::GetDeadlineByFrameCount(int64_t deadline, int64_t ts, int64_t fr
     }
     return deadline;
 }
+
+WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBreakpoints) const
+{
+    double density = PipelineBase::GetCurrentDensity();
+    double width = 0.0;
+    if (NearZero(density)) {
+        width = GetCurrentWindowRect().Width();
+    } else {
+        width = GetCurrentWindowRect().Width() / density;
+    }
+
+    WidthBreakpoint breakpoint;
+    if (width < layoutBreakpoints.widthVPXS_) {
+        breakpoint = WidthBreakpoint::WIDTH_XS;
+    } else if (width < layoutBreakpoints.widthVPSM_) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (width < layoutBreakpoints.widthVPMD_) {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    } else if (width < layoutBreakpoints.widthVPLG_) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XL;
+    }
+    return breakpoint;
+}
+
+HeightBreakpoint Window::GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const
+{
+    auto width = GetCurrentWindowRect().Width();
+    auto height = GetCurrentWindowRect().Height();
+    auto aspectRatio = 0.0;
+    if (NearZero(width)) {
+        aspectRatio = 0.0;
+    } else {
+        aspectRatio = height / width;
+    }
+
+    HeightBreakpoint breakpoint;
+    if (aspectRatio < layoutBreakpoints.heightVPRATIOSM_) {
+        breakpoint = HeightBreakpoint::HEIGHT_SM;
+    } else if (aspectRatio < layoutBreakpoints.heightVPRATIOMD_) {
+        breakpoint = HeightBreakpoint::HEIGHT_MD;
+    } else {
+        breakpoint = HeightBreakpoint::HEIGHT_LG;
+    }
+    return breakpoint;
+}
 } // namespace OHOS::Ace

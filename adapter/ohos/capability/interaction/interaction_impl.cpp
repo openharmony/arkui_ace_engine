@@ -192,6 +192,11 @@ void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime)
     InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime);
 }
 
+int32_t InteractionImpl::EnableInternalDropAnimation(const std::string& animationInfo)
+{
+    return InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
+}
+
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)
 {
     switch (style) {

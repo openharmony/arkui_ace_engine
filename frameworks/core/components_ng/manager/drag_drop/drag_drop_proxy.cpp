@@ -65,6 +65,7 @@ void DragDropProxy::OnDragStart(
     auto pointerEvent = DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
         info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY());
     pointerEvent.UpdatePressedKeyCodes(info.GetPressedKeyCodes());
+    manager->RequireBundleInfo();
     manager->OnDragStart(point, frameNode);
     manager->SetExtraInfo(extraInfo);
     HandleExtraDragMoveReporting(frameNode, extraInfo);

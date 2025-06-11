@@ -213,4 +213,30 @@ HWTEST_F(IndexerTestNg, CreateWithResourceObjTest001, TestSize.Level1)
     IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_POSITION_Y, resObj);
     EXPECT_TRUE(true);
 }
+
+/**
+ * @tc.name: IndexerSetColorByUser001
+ * @tc.desc: Test property SetColorByUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerSetColorByUser001, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 2);
+    CreateDone();
+    model.SetColorByUser(true);
+    model.SetSelectedColorByUser(true);
+    model.SetPopupColorByUser(true);
+    model.SetSelectedBGColorByUser(true);
+    model.SetPopupUnselectedColorByUser(true);
+    model.SetPopupTitleBackgroundByUser(true);
+    pattern_->OnModifyDone();
+    auto indexerLayoutProperty = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty, nullptr);
+    EXPECT_TRUE(indexerLayoutProperty->GetSetColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetSelectedColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetSelectedBGColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupUnselectedColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupTitleBackgroundByUser().value_or(false));
+}
 } // namespace OHOS::Ace::NG

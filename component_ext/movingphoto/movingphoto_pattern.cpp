@@ -774,7 +774,7 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo());
     CHECK_NULL_RETURN(video, false);
     video->GetRenderContext()->SetClipToBounds(true);
-    if (currentPlayStatus_ == PlaybackStatus::STARTED) {
+    if (currentPlayStatus_ != PlaybackStatus::STARTED) {
         video->GetRenderContext()->UpdateOpacity(0.0);
     }
     return false;
@@ -1108,6 +1108,7 @@ void MovingPhotoPattern::GetXmageHeight()
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV, host);
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto XmageHeight.%{public}f", imageL - bottomV);
     } else {
+        isXmageMode_ = false;
         imageSize = SizeF(imageW, imageL);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize, host);
@@ -1118,6 +1119,8 @@ void MovingPhotoPattern::GetXmageHeight()
 void MovingPhotoPattern::SetXmagePosition()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto SetXmagePosition");
+    isXmageMode_ = false;
+    xmageModeValue_ = 0;
     int32_t fd = GetImageFd();
     CHECK_NULL_VOID(fd >= 0);
     auto imageSrc = ImageSource::Create(fd);
@@ -2309,6 +2312,23 @@ bool MovingPhotoPattern::IsRefreshMovingPhotoReturn(bool status)
         }
     }
     return false;
+}
+
+void MovingPhotoPattern::SetHdrBrightness(float hdrBrightness)
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "SetHdrBrightness:%{public}f.", hdrBrightness);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto movingPhotoNode = AceType::DynamicCast<MovingPhotoNode>(host);
+    CHECK_NULL_VOID(movingPhotoNode);
+    auto imageNode = AceType::DynamicCast<FrameNode>(movingPhotoNode->GetImage());
+    CHECK_NULL_VOID(imageNode);
+    auto imageRenderContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageRenderContext);
+    imageRenderContext->SetImageHDRBrightness(hdrBrightness);
+    imageRenderContext->SetImageHDRPresent(true);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, hdrBrightness, imageNode);
+    hdrBrightness_ = hdrBrightness;
 }
 
 MovingPhotoPattern::~MovingPhotoPattern()

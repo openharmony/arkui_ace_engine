@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+        "package": "arkui",
+        "outDir": "build/abc",
+        "baseUrl": "./build/unmemoized/src",
+        "paths": {
+            "#components": ["./generated/arkts"],
+            "#arkcompat/*": ["../../../../../arkoala/arkui-common/build/unmemoized/src/arkts/*"],
+            "#arkstate": ["../../../../../arkoala/arkui-common/build/unmemoized/src"],
+            "@koalaui/arkui-common": ["../../../../../arkoala/arkui-common/build/unmemoized/src"],
+            "@ohos/arkui": ["./"],
+            "@ohos/arkui/*": ["./*"],
+            "@koalaui/interop": ["../../../../../interop/src/arkts"],
+            "@koalaui/common": ["../../../../../incremental/common/src"],
+            "@koalaui/compat": ["../../../../../incremental/compat/src/arkts"],
+            "@koalaui/runtime": ["../../../../../incremental/runtime/build/unmemoized/src"],
+            "#helpindexarkui": ["index.ts"],
+            "@ohos/animator": ["../ohos.animator.ts"],
+            "@ohos.arkui.UIContext": ["../ohos.arkui.UIContext.ts"],
+            "@ohos.measure": ["../ohos.measure.ts"],
+            "@ohos.font.font": ["../ohos.font.ts"],
+            "global/resource": ["../global/resource/resource.ts"]
+        }
+    },
+    "include": [
+        "build/unmemoized/src/**/*.ts", "build/unmemoized/src/*.ts", "build/unmemoized/ohos.arkui.UIContext.ts",
+        "build/unmemoized/ohos.measure.ts", "build/unmemoized/ohos.font.ts", "build/unmemoized/ohos.animator.ts"
+    ],
+    "exclude": [
+        "**/index.ts",
+        "build/unmemoized/src/generated/ts/*.ts",
+        "build/unmemoized/generated/main.ts"
+    ]
+}

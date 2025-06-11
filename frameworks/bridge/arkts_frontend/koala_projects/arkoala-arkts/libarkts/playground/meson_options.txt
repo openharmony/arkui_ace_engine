@@ -1,0 +1,4 @@
+option('panda_sdk_dir', type : 'string', value : '../../../incremental/tools/panda/node_modules/@panda/sdk/',
+    description : 'path to panda sdk')
+option('interop_src_dir', type : 'string', value : '../../../interop/src/cpp/',
+    description : 'path to interop_src')

@@ -265,11 +265,10 @@ void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
     SaveGridRowGutterOptionyResObjLgXlXXl(gutter, gutterSizeArrayResObj);
 }
 
-void ParseGutterObjectSub(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gutter, bool isHorizontal)
+void ParseGutterObjectSub(const JSRef<JSObject>& gutterParam, RefPtr<V2::Gutter>& gutter, bool isHorizontal)
 {
     std::optional<CalcDimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
     RefPtr<ResourceObject> gutterOptionsResObj[MAX_NUMBER_BREAKPOINT];
-    auto gutterParam = JSRef<JSObject>::Cast(gutterObject);
     auto xs = gutterParam->GetProperty("xs");
     CalcDimension xsDimension;
     RefPtr<ResourceObject> xsDimensionResObj;
@@ -363,7 +362,8 @@ void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gut
     if (!gutterObject->IsObject()) {
         return;
     }
-    ParseGutterObjectSub(gutterObject, gutter, isHorizontal);
+    auto gutterParam = JSRef<JSObject>::Cast(gutterObject);
+    ParseGutterObjectSub(gutterParam, gutter, isHorizontal);
 }
 
 RefPtr<V2::Gutter> ParserGutter(const JSRef<JSVal>& jsValue)

@@ -654,7 +654,6 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage015, TestSize
      */
     gestureEventHub->InitDragDropEvent();
     ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
     GestureEvent gestureEvent;
     char voidPtr[0];
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
@@ -669,8 +668,11 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage015, TestSize
     textPattern->dragRecordSize_ = 1;
     frameNode->pattern_ = textPattern;
     frameNode->GetOrCreateFocusHub();
+    auto pipeline = PipelineContext::GetCurrentContext();
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(mainPipeline, nullptr);
     auto overlayManager = mainPipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
     overlayManager->pixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
     gestureEventHub->OnDragStart(gestureEvent, pipeline, frameNode, dragDropInfo, event);
     gestureEventHub->dragEventActuator_->itemParentNode_ = patternNode;

@@ -1,0 +1,14 @@
+{
+    "extends": "@koalaui/ets-plugin/base-tsconfig.ets.json",
+    "include": ["./specification/**/*.ets"],
+    "exclude": ["js_output"],
+    "compilerOptions": {
+        "plugins": [
+            {
+                "transform": "@koalaui/ets-plugin/build/lib/src/ArkExpander.js",
+                "destination": "../generated",
+                "arkui": "@koalaui/koala-arkui"
+            }
+        ]
+    }
+}

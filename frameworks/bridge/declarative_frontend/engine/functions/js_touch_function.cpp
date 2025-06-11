@@ -45,6 +45,7 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     touchInfoObj->SetProperty<double>("pressure", PipelineBase::Px2VpWithCurrentDensity(touchInfo.GetForce()));
     touchInfoObj->SetProperty<double>("width", PipelineBase::Px2VpWithCurrentDensity(touchInfo.GetWidth()));
     touchInfoObj->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(touchInfo.GetHeight()));
+    touchInfoObj->SetProperty<int32_t>("hand", touchInfo.GetOperatingHand());
     touchInfoObj->Wrap<TouchEventInfo>(&info);
     return touchInfoObj;
 }

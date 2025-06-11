@@ -62,6 +62,12 @@ public:
     void SetPopupTitleBackground(const std::optional<Color>& color) override;
     void SetAdaptiveWidth(bool state) override;
     void SetEnableHapticFeedback(bool state) override;
+    void SetSelectedColorByUser(bool isByUser) override;
+    void SetColorByUser(bool isByUser) override;
+    void SetPopupColorByUser(bool isByUser) override;
+    void SetSelectedBGColorByUser(bool isByUser) override;
+    void SetPopupUnselectedColorByUser(bool isByUser) override;
+    void SetPopupTitleBackgroundByUser(bool isByUser) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isArc = false);
     static void CreateWithResourceObj(
@@ -109,6 +115,12 @@ public:
         std::function<void(const int32_t selected)>&& onPopupSelected);
     static void SetChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
     static void SetCreatChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
+    static void SetSelectedColorByUser(FrameNode* frameNode, bool isByUser);
+    static void SetColorByUser(FrameNode* frameNode, bool isByUser);
+    static void SetPopupColorByUser(FrameNode* frameNode, bool isByUser);
+    static void SetSelectedBGColorByUser(FrameNode* frameNode, bool isByUser);
+    static void SetPopupUnselectedColorByUser(FrameNode* frameNode, bool isByUser);
+    static void SetPopupTitleBackgroundByUser(FrameNode* frameNode, bool isByUser);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H

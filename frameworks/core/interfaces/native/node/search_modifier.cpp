@@ -830,7 +830,8 @@ void ResetSearchCaretPosition(ArkUINodeHandle node)
     SearchModelNG::SetCaretPosition(frameNode, DEFAULT_CARET_POSITION);
 }
 
-void SetSearchSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+void SetSearchSelectionMenuOptions(
+    ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -847,6 +848,13 @@ void SetSearchSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallb
     } else {
         SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
+    if (onPrepareMenuCallback) {
+        NG::OnPrepareMenuCallback onPrepareMenu =
+            *(reinterpret_cast<NG::OnPrepareMenuCallback*>(onPrepareMenuCallback));
+        SearchModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenu));
+    } else {
+        SearchModelNG::OnPrepareMenuCallbackUpdate(frameNode, nullptr);
+    }
 }
 
 void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
@@ -855,8 +863,10 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
     SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
     SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+    SearchModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
 }
 
 void SetSearchMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)

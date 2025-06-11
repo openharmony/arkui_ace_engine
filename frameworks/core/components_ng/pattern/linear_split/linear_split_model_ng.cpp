@@ -36,7 +36,7 @@ void LinearSplitModelNG::SetResizable(NG::SplitType splitType, bool resizable)
     ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizable, resizable);
 }
 
-void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ItemDivider& divider)
+void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ColumnSplitDivider& divider)
 {
     if (SystemProperties::ConfigChangePerform()) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -47,7 +47,7 @@ void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ItemDivider& 
         auto&& updateFunc = [divider, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
-            ItemDivider &value = const_cast<ItemDivider &>(divider);
+            ColumnSplitDivider &value = const_cast<ColumnSplitDivider &>(divider);
             value.ReloadResources();
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, value, frameNode);
             frameNode->MarkModifyDone();
@@ -63,7 +63,7 @@ void LinearSplitModelNG::SetResizable(FrameNode* frameNode, NG::SplitType splitT
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizable, resizable, frameNode);
 }
-void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitType, const ItemDivider& divider)
+void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitType, const ColumnSplitDivider& divider)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider, frameNode);

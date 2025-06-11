@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,9 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
@@ -35,16 +37,17 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t SHEET_DETENTS_TWO = 2;
-constexpr int32_t SHEET_DETENTS_THREE = 3;
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
 constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND = 120003;
 constexpr int32_t NUM_0 = 0;
+const std::string TITLE = "title";
+const std::string SUBTITLE = "subtitle";
 
 class MockOverlayManager : public OverlayManager {
     DECLARE_ACE_TYPE(MockOverlayManager, OverlayManager);
@@ -55,6 +58,7 @@ public:
         return true;
     }
 };
+
 class MockSheetPresentationPattern : public SheetPresentationPattern {
     DECLARE_ACE_TYPE(MockSheetPresentationPattern, SheetPresentationPattern);
 public:
@@ -74,17 +78,27 @@ public:
 
 class SheetOthersTestNg : public testing::Test {
 public:
+    static RefPtr<SheetTheme> sheetTheme_;
+    static RefPtr<TextTheme> textTheme_;
+
     static void SetUpTestCase();
     static void TearDownTestCase();
 };
+
+RefPtr<SheetTheme> SheetOthersTestNg::sheetTheme_ = nullptr;
+RefPtr<TextTheme> SheetOthersTestNg::textTheme_ = nullptr;
 
 void SheetOthersTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    sheetTheme_ = AceType::MakeRefPtr<SheetTheme>();
+    textTheme_ = AceType::MakeRefPtr<TextTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
+            return sheetTheme_;
+        } else if (type == TextTheme::TypeId()) {
+            return textTheme_;
         } else {
             return nullptr;
         }
@@ -99,537 +113,891 @@ void SheetOthersTestNg::TearDownTestCase()
 
 /**
  * @tc.name: CreateOperationColumnNode001
- * @tc.desc: Increase the coverage of SheetView::CreateOperationColumnNode function.
+ * @tc.desc: Branch: if (isTitleBuilder.has_value() && GetFontScale() == GetSheetNormalScale()) = false
+ *           Condition: isTitleBuilder.has_value() = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode001, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto titleBuilder = FrameNode::CreateFrameNode("Title", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
-        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetPresentation", std::move(callback)));
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(sheetLayoutProperty, nullptr);
-    NG::SheetStyle sheetStyle;
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = std::nullopt;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    EXPECT_FALSE(sheetStyle.isTitleBuilder.has_value());
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    EXPECT_NE(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
-    SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
 
-    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
-    EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
-    SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
-
-    sheetStyle.isTitleBuilder = true;
-    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_FALSE(sheetStyle.sheetTitle.has_value());
-    EXPECT_FALSE(sheetStyle.sheetSubtitle.has_value());
-    SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
+    auto operationColumn = SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
+    ASSERT_NE(operationColumn, nullptr);
+    auto columnLayoutProperty = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(columnLayoutProperty, nullptr);
+    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint(), nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: CreateOperationColumnNode002
- * @tc.desc: Increase the coverage of SheetView::CreateOperationColumnNode function.
+ * @tc.desc: Branch: if (isTitleBuilder.has_value() && GetFontScale() == GetSheetNormalScale()) = false
+ *           Condition: isTitleBuilder.has_value() = true, GetFontScale() == GetSheetNormalScale() = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode002, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto titleBuilder = FrameNode::CreateFrameNode("Title", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
-        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetPresentation", std::move(callback)));
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(sheetLayoutProperty, nullptr);
-    NG::SheetStyle sheetStyle;
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = true;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetStyle.isTitleBuilder = true;
-    sheetStyle.sheetSubtitle = "sheetSubtitle";
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
-    EXPECT_FALSE(sheetStyle.sheetTitle.has_value());
-    EXPECT_TRUE(sheetStyle.sheetSubtitle.has_value());
-    SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale() + 5.0f;
 
+    auto operationColumn = SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
+    ASSERT_NE(operationColumn, nullptr);
+    auto columnLayoutProperty = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(columnLayoutProperty, nullptr);
+    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateOperationColumnNode003
+ * @tc.desc: Branch: if (isTitleBuilder.has_value() && GetFontScale() == GetSheetNormalScale()) = true
+ *           Condition: isTitleBuilder.has_value() = true, GetFontScale() == GetSheetNormalScale() = true
+ *           Branch: if (sheetTitle.has_value() && sheetSubtitle.has_value()) = false
+ *           Condition: sheetTitle.has_value() = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode003, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    SheetStyle sheetStyle;
     sheetStyle.isTitleBuilder = true;
-    sheetStyle.sheetTitle = "sheetTitle";
-    sheetStyle.sheetSubtitle = "sheetSubtitle";
-    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
-    EXPECT_TRUE(sheetStyle.sheetTitle.has_value());
-    SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
+    sheetStyle.sheetTitle = std::nullopt;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 16.0_vp;
+    SheetOthersTestNg::sheetTheme_->sheetTitleAreaMargin_ = 0.0_vp;
+
+    auto operationColumn = SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
+    ASSERT_NE(operationColumn, nullptr);
+    auto columnLayoutProperty = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(columnLayoutProperty, nullptr);
+    ASSERT_NE(columnLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    ASSERT_TRUE(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(0.0_vp));
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateOperationColumnNode004
+ * @tc.desc: Branch: if (isTitleBuilder.has_value() && GetFontScale() == GetSheetNormalScale()) = true
+ *           Condition: isTitleBuilder.has_value() = true, GetFontScale() == GetSheetNormalScale() = true
+ *           Branch: if (sheetTitle.has_value() && sheetSubtitle.has_value()) = false
+ *           Condition: sheetTitle.has_value() = true, sheetSubtitle.has_value() = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode004, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = true;
+    sheetStyle.sheetTitle = TITLE;
+    sheetStyle.sheetSubtitle = std::nullopt;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 16.0_vp;
+    SheetOthersTestNg::sheetTheme_->sheetTitleAreaMargin_ = 0.0_vp;
+
+    auto operationColumn = SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
+    ASSERT_NE(operationColumn, nullptr);
+    auto columnLayoutProperty = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(columnLayoutProperty, nullptr);
+    ASSERT_NE(columnLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    ASSERT_TRUE(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(0.0_vp));
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateOperationColumnNode005
+ * @tc.desc: Branch: if (isTitleBuilder.has_value() && GetFontScale() == GetSheetNormalScale()) = true
+ *           Condition: isTitleBuilder.has_value() = true, GetFontScale() == GetSheetNormalScale() = true
+ *           Branch: if (sheetTitle.has_value() && sheetSubtitle.has_value()) = true
+ *           Condition: sheetTitle.has_value() = true, sheetSubtitle.has_value() = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, CreateOperationColumnNode005, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = true;
+    sheetStyle.sheetTitle = TITLE;
+    sheetStyle.sheetSubtitle = SUBTITLE;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale();
+
+    auto operationColumn = SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
+    ASSERT_NE(operationColumn, nullptr);
+    auto columnLayoutProperty = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(columnLayoutProperty, nullptr);
+    ASSERT_NE(columnLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    ASSERT_TRUE(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    EXPECT_EQ(columnLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(56.0_vp));
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: CreateDragBarNode001
- * @tc.desc: Increase the coverage of SheetView::CreateDragBarNode function.
+ * @tc.desc: Branch: if (sheetStyle.detents.size() == SHEET_DETENTS_TWO) = false
+ *           Branch: else if (sheetStyle.detents.size() == SHEET_DETENTS_THREE) = false
+ *           Branch: if ((!isSingleDetents && showDragIndicator && sheetPattern->IsSheetBottomStyle())
+ *               || sheetStyle.isTitleBuilder.has_value()) = false
+ *           Condition: !isSingleDetents = false, sheetStyle.isTitleBuilder.has_value() = false
+ *           Branch: if (sheetStyle.isTitleBuilder.has_value()) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, CreateDragBarNode001, TestSize.Level1)
 {
-    auto titleBuilder = FrameNode::CreateFrameNode("Title", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto operationColumn = FrameNode::CreateFrameNode("Column", 201, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
-        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(sheetLayoutProperty, nullptr);
-    NG::SheetStyle sheetStyle;
+    SheetStyle sheetStyle;
+    sheetStyle.detents = {};
+    sheetStyle.isTitleBuilder = std::nullopt;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    EXPECT_NE(sheetStyle.detents.size(), SHEET_DETENTS_TWO);
-    EXPECT_NE(sheetStyle.detents.size(), SHEET_DETENTS_THREE);
-    EXPECT_FALSE(sheetStyle.isTitleBuilder.has_value());
-    SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
 
-    SheetHeight detent;
-    detent.sheetMode = SheetMode::AUTO;
-    sheetStyle.detents.emplace_back(detent);
-    detent.sheetMode = SheetMode::MEDIUM;
-    sheetStyle.detents.emplace_back(detent);
-    detent.sheetMode = SheetMode::LARGE;
-    sheetStyle.detents.emplace_back(detent);
-    sheetStyle.showDragBar = false;
-    sheetStyle.isTitleBuilder = false;
-    EXPECT_NE(sheetStyle.detents.size(), SHEET_DETENTS_TWO);
-    EXPECT_EQ(sheetStyle.detents.size(), SHEET_DETENTS_THREE);
-    EXPECT_FALSE(sheetStyle.showDragBar.value_or(true));
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_EQ(SheetView::BuildTitleColumn(sheetNode, sheetStyle), nullptr);
     SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
-
-    sheetStyle.detents.pop_back();
-    sheetStyle.showDragBar = true;
-    EXPECT_EQ(sheetStyle.detents.size(), SHEET_DETENTS_TWO);
-    EXPECT_NE(sheetStyle.detents.size(), SHEET_DETENTS_THREE);
-    EXPECT_TRUE(sheetStyle.showDragBar.value_or(true));
-    SheetView::CreateDragBarNode(nullptr, operationColumn, sheetStyle, sheetNode);
+    ASSERT_EQ(operationColumn->children_.size(), 0);
 }
 
 /**
  * @tc.name: CreateDragBarNode002
- * @tc.desc: Increase the coverage of SheetView::CreateDragBarNode function.
+ * @tc.desc: Branch: if (sheetStyle.detents.size() == SHEET_DETENTS_TWO) = true
+ *           Branch: if ((!isSingleDetents && showDragIndicator && sheetPattern->IsSheetBottomStyle())
+ *               || sheetStyle.isTitleBuilder.has_value()) = false
+ *           Condition: !isSingleDetents = true, showDragIndicator = false,
+ *               sheetStyle.isTitleBuilder.has_value() = true
+ *           Branch: if (sheetStyle.isTitleBuilder.has_value()) = true
+ *           Branch: if (titleColumn) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, CreateDragBarNode002, TestSize.Level1)
 {
-    SheetOthersTestNg::SetUpTestCase();
-    auto operationColumn = FrameNode::CreateFrameNode("Column", 201, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    SheetOthersTestNg::TearDownTestCase();
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
-        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(sheetLayoutProperty, nullptr);
-    NG::SheetStyle sheetStyle;
-    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetStyle.isTitleBuilder = false;
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_NE(SheetView::BuildTitleColumn(sheetNode, sheetStyle), nullptr);
-    SheetView::CreateDragBarNode(nullptr, operationColumn, sheetStyle, sheetNode);
-
-    auto titleBuilder = FrameNode::CreateFrameNode("Title", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    EXPECT_FALSE(sheetStyle.isTitleBuilder.value());
-    SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
-
+    SheetStyle sheetStyle;
+    sheetStyle.detents = {SheetHeight({ 300.0_vp }), SheetHeight({ 700.0_vp })};
     sheetStyle.isTitleBuilder = true;
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.value());
+    sheetStyle.showDragBar = false;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+
     SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+    ASSERT_EQ(operationColumn->children_.size(), 0);
+}
+
+/**
+ * @tc.name: CreateDragBarNode003
+ * @tc.desc: Branch: if (sheetStyle.detents.size() == SHEET_DETENTS_TWO) = false
+ *           Branch: else if (sheetStyle.detents.size() == SHEET_DETENTS_THREE) = true
+ *           Branch: if ((!isSingleDetents && showDragIndicator && sheetPattern->IsSheetBottomStyle())
+ *               || sheetStyle.isTitleBuilder.has_value()) = false
+ *           Condition: !isSingleDetents = true, showDragIndicator = true,
+ *               sheetPattern->IsSheetBottomStyle() = false, sheetStyle.isTitleBuilder.has_value() = true
+ *           Branch: if (sheetStyle.isTitleBuilder.has_value()) = true
+ *           Branch: if (titleColumn) = true
+ *           Branch: if ((titleBuilder) && (sheetStyle.isTitleBuilder.value())) = false
+ *           Condition: (titleBuilder) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, CreateDragBarNode003, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.detents = {SheetHeight({ 300.0_vp }), SheetHeight({ 700.0_vp }), SheetHeight({ 1000.0_vp })};
+    sheetStyle.isTitleBuilder = true;
+    sheetStyle.showDragBar = true;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+
+    SheetView::CreateDragBarNode(nullptr, operationColumn, sheetStyle, sheetNode);
+    ASSERT_EQ(operationColumn->children_.size(), 1);
+    auto childIterator = sheetNode->children_.begin();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(*childIterator);
+    ASSERT_NE(dragBarNode, nullptr);
+    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
+    EXPECT_EQ(dragBarLayoutProperty->propVisibility_, VisibleType::INVISIBLE);
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateDragBarNode004
+ * @tc.desc: Branch: if (sheetStyle.detents.size() == SHEET_DETENTS_TWO) = true
+ *           Branch: if ((!isSingleDetents && showDragIndicator && sheetPattern->IsSheetBottomStyle())
+ *               || sheetStyle.isTitleBuilder.has_value()) = false
+ *           Condition: !isSingleDetents = true, showDragIndicator = true,
+ *               sheetPattern->IsSheetBottomStyle() = true
+ *           Branch: if (sheetStyle.isTitleBuilder.has_value()) = true
+ *           Branch: if (titleColumn) = true
+ *           Branch: if ((titleBuilder) && (sheetStyle.isTitleBuilder.value())) = true
+ *           Condition: (titleBuilder) = true, (sheetStyle.isTitleBuilder.value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, CreateDragBarNode004, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.detents = {SheetHeight({ 300.0_vp }), SheetHeight({ 700.0_vp })};
+    sheetStyle.isTitleBuilder = true;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+
+    SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+    ASSERT_EQ(operationColumn->children_.size(), 1);
+    auto childIterator = sheetNode->children_.begin();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(*childIterator);
+    ASSERT_NE(dragBarNode, nullptr);
+    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
+    EXPECT_EQ(dragBarLayoutProperty->propVisibility_, VisibleType::INVISIBLE);
+    auto operationColumnChildIterator = operationColumn->children_.begin();
+    auto titleColumnNode = AceType::DynamicCast<FrameNode>(*operationColumnChildIterator);
+    ASSERT_NE(titleColumnNode, nullptr);
+    EXPECT_EQ(titleColumnNode->children_.size(), 1);
+    EXPECT_EQ(titleColumnNode->children_.front(), titleBuilder);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: CreateCloseIconButtonNode001
- * @tc.desc: Increase the coverage of SheetView::CreateCloseIconButtonNode function.
+ * @tc.desc: Branch: if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, CreateCloseIconButtonNode001, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
-    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->minPlatformVersion_;
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    EXPECT_TRUE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
-    SheetView::CreateCloseIconButtonNode(sheetNode, sheetStyle);
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    auto pipelineContext = sheetNode->GetContext();
+    int32_t minPlatformVersion = pipelineContext->minPlatformVersion_;
+    pipelineContext->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
 
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
-    EXPECT_FALSE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     SheetView::CreateCloseIconButtonNode(sheetNode, sheetStyle);
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = minPlatformVersion;
+    EXPECT_EQ(sheetNode->children_.size(), 1);
+    pipelineContext->minPlatformVersion_ = minPlatformVersion;
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateCloseIconButtonNode002
+ * @tc.desc: Branch: if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, CreateCloseIconButtonNode002, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    auto pipelineContext = sheetNode->GetContext();
+    int32_t minPlatformVersion = pipelineContext->minPlatformVersion_;
+    pipelineContext->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
+
+    SheetView::CreateCloseIconButtonNode(sheetNode, sheetStyle);
+    EXPECT_EQ(sheetNode->children_.size(), 0);
+    pipelineContext->minPlatformVersion_ = minPlatformVersion;
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: BuildMainTitle001
- * @tc.desc: Increase the coverage of SheetView::BuildMainTitle function.
+ * @tc.desc: Branch: if (textTheme && textTheme->GetIsTextFadeout()) = false
+ *           Condition: textTheme = false
+ *           Branch: if (sheetStyle.sheetTitle.has_value()) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, BuildMainTitle001, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
-    EXPECT_FALSE(sheetStyle.sheetTitle.has_value());
-    SheetView::BuildMainTitle(sheetNode, sheetStyle);
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    SheetOthersTestNg::textTheme_ = nullptr;
 
+    auto titleRow = SheetView::BuildMainTitle(sheetNode, sheetStyle);
+    ASSERT_NE(titleRow, nullptr);
+    ASSERT_EQ(titleRow->children_.size(), 1);
+    auto sheetTitleNode = AceType::DynamicCast<FrameNode>(titleRow->children_.front());
+    ASSERT_NE(sheetTitleNode, nullptr);
+    auto titleLayoutProperty = sheetTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    EXPECT_EQ(titleLayoutProperty->GetMaxLines(), SHEET_TITLE_MAX_LINES);
+    EXPECT_EQ(titleLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
+    EXPECT_EQ(titleLayoutProperty->GetContent(), std::nullopt);
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: BuildMainTitle002
+ * @tc.desc: Branch: if (textTheme && textTheme->GetIsTextFadeout()) = false
+ *           Condition: textTheme = true, textTheme->GetIsTextFadeout() = false
+ *           Branch: if (sheetStyle.sheetTitle.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, BuildMainTitle002, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
     sheetStyle.sheetTitle = "sheetTitle";
-    EXPECT_TRUE(sheetStyle.sheetTitle.has_value());
-    SheetView::BuildMainTitle(sheetNode, sheetStyle);
+    SheetOthersTestNg::textTheme_->isTextFadeout_ = false;
+
+    auto titleRow = SheetView::BuildMainTitle(sheetNode, sheetStyle);
+    ASSERT_NE(titleRow, nullptr);
+    ASSERT_EQ(titleRow->children_.size(), 1);
+    auto sheetTitleNode = AceType::DynamicCast<FrameNode>(titleRow->children_.front());
+    ASSERT_NE(sheetTitleNode, nullptr);
+    auto titleLayoutProperty = sheetTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    EXPECT_EQ(titleLayoutProperty->GetMaxLines(), SHEET_TITLE_MAX_LINES);
+    EXPECT_EQ(titleLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
+    auto titleContent = titleLayoutProperty->GetContent();
+    ASSERT_TRUE(titleContent.has_value());
+    EXPECT_EQ(titleContent.value(), u"sheetTitle");
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: BuildMainTitle003
+ * @tc.desc: Branch: if (textTheme && textTheme->GetIsTextFadeout()) = true
+ *           Condition: textTheme = true, textTheme->GetIsTextFadeout() = true
+ *           Branch: if (sheetStyle.sheetTitle.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, BuildMainTitle003, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    sheetStyle.sheetTitle = "sheetTitle";
+    SheetOthersTestNg::textTheme_->isTextFadeout_ = true;
+
+    auto titleRow = SheetView::BuildMainTitle(sheetNode, sheetStyle);
+    ASSERT_NE(titleRow, nullptr);
+    ASSERT_EQ(titleRow->children_.size(), 1);
+    auto sheetTitleNode = AceType::DynamicCast<FrameNode>(titleRow->children_.front());
+    ASSERT_NE(sheetTitleNode, nullptr);
+    auto titleLayoutProperty = sheetTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    EXPECT_EQ(titleLayoutProperty->GetTextOverflow(), TextOverflow::MARQUEE);
+    EXPECT_EQ(titleLayoutProperty->GetTextMarqueeStartPolicy(), MarqueeStartPolicy::ON_FOCUS);
+    auto titleContent = titleLayoutProperty->GetContent();
+    ASSERT_TRUE(titleContent.has_value());
+    EXPECT_EQ(titleContent.value(), u"sheetTitle");
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: BuildSubTitle001
- * @tc.desc: Increase the coverage of SheetView::BuildSubTitle function.
+ * @tc.desc: Branch: if (textTheme && textTheme->GetIsTextFadeout()) = false
+ *           Condition: textTheme = false
+ *           Branch: if (sheetStyle.sheetSubtitle.has_value()) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, BuildSubTitle001, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
-    EXPECT_FALSE(sheetStyle.sheetSubtitle.has_value());
-    SheetView::BuildSubTitle(sheetNode, sheetStyle);
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    SheetOthersTestNg::textTheme_ = nullptr;
 
+    auto subtitleRow = SheetView::BuildSubTitle(sheetNode, sheetStyle);
+    ASSERT_NE(subtitleRow, nullptr);
+    ASSERT_EQ(subtitleRow->children_.size(), 1);
+    auto sheetSubtitleNode = AceType::DynamicCast<FrameNode>(subtitleRow->children_.front());
+    ASSERT_NE(sheetSubtitleNode, nullptr);
+    auto subtitleLayoutProperty = sheetSubtitleNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(subtitleLayoutProperty, nullptr);
+    EXPECT_EQ(subtitleLayoutProperty->GetMaxLines(), SHEET_TITLE_MAX_LINES);
+    EXPECT_EQ(subtitleLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
+    EXPECT_EQ(subtitleLayoutProperty->GetContent(), std::nullopt);
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: BuildSubTitle002
+ * @tc.desc: Branch: if (textTheme && textTheme->GetIsTextFadeout()) = false
+ *           Condition: textTheme = true, textTheme->GetIsTextFadeout() = false
+ *           Branch: if (sheetStyle.sheetSubtitle.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, BuildSubTitle002, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
     sheetStyle.sheetSubtitle = "sheetSubtitle";
-    EXPECT_TRUE(sheetStyle.sheetSubtitle.has_value());
-    SheetView::BuildSubTitle(sheetNode, sheetStyle);
+    SheetOthersTestNg::textTheme_->isTextFadeout_ = false;
+
+    auto subtitleRow = SheetView::BuildSubTitle(sheetNode, sheetStyle);
+    ASSERT_NE(subtitleRow, nullptr);
+    ASSERT_EQ(subtitleRow->children_.size(), 1);
+    auto sheetSubtitleNode = AceType::DynamicCast<FrameNode>(subtitleRow->children_.front());
+    ASSERT_NE(sheetSubtitleNode, nullptr);
+    auto subtitleLayoutProperty = sheetSubtitleNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(subtitleLayoutProperty, nullptr);
+    EXPECT_EQ(subtitleLayoutProperty->GetMaxLines(), SHEET_TITLE_MAX_LINES);
+    EXPECT_EQ(subtitleLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
+    auto subtitleContent = subtitleLayoutProperty->GetContent();
+    ASSERT_TRUE(subtitleContent.has_value());
+    EXPECT_EQ(subtitleContent.value(), u"sheetSubtitle");
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: BuildSubTitle003
+ * @tc.desc: Branch: if (textTheme && textTheme->GetIsTextFadeout()) = true
+ *           Condition: textTheme = true, textTheme->GetIsTextFadeout() = true
+ *           Branch: if (sheetStyle.sheetSubtitle.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, BuildSubTitle003, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    sheetStyle.sheetSubtitle = "sheetSubtitle";
+    SheetOthersTestNg::textTheme_->isTextFadeout_ = true;
+
+    auto subtitleRow = SheetView::BuildSubTitle(sheetNode, sheetStyle);
+    ASSERT_NE(subtitleRow, nullptr);
+    ASSERT_EQ(subtitleRow->children_.size(), 1);
+    auto sheetSubtitleNode = AceType::DynamicCast<FrameNode>(subtitleRow->children_.front());
+    ASSERT_NE(sheetSubtitleNode, nullptr);
+    auto subtitleLayoutProperty = sheetSubtitleNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(subtitleLayoutProperty, nullptr);
+    EXPECT_EQ(subtitleLayoutProperty->GetTextOverflow(), TextOverflow::MARQUEE);
+    EXPECT_EQ(subtitleLayoutProperty->GetTextMarqueeStartPolicy(), MarqueeStartPolicy::ON_FOCUS);
+    auto subtitleContent = subtitleLayoutProperty->GetContent();
+    ASSERT_TRUE(subtitleContent.has_value());
+    EXPECT_EQ(subtitleContent.value(), u"sheetSubtitle");
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: BuildTitleColumn001
- * @tc.desc: Increase the coverage of SheetView::BuildTitleColumn function.
+ * @tc.desc: Branch: if (GetFontScale() == GetSheetNormalScale() || isTitleCustombuilder) = true
+ *           Condition: GetFontScale() == GetSheetNormalScale() = true
+ *           Branch: if (sheetStyle.sheetTitle.has_value()) = false
+ *           Branch: else if (sheetStyle.isTitleBuilder.has_value()) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, BuildTitleColumn001, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateSheetStyle(sheetStyle);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale() + 1;
-    sheetStyle.isTitleBuilder = false;
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 50.0_vp;
 
-    EXPECT_NE(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_FALSE(sheetStyle.isTitleBuilder.value());
-    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    auto titleColumn = SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    ASSERT_NE(titleColumn, nullptr);
+    auto titleLayoutProperty = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    ASSERT_NE(titleLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    ASSERT_TRUE(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    EXPECT_EQ(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(50.0_vp));
+    EXPECT_EQ(titleColumn->children_.size(), 0);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: BuildTitleColumn002
- * @tc.desc: Increase the coverage of SheetView::BuildTitleColumn function.
+ * @tc.desc: Branch: if (GetFontScale() == GetSheetNormalScale() || isTitleCustombuilder) = true
+ *           Condition: GetFontScale() == GetSheetNormalScale() = false, isTitleCustombuilder = true
+ *           Branch: if (sheetStyle.sheetTitle.has_value()) = true
+ *           Branch: if (sheetStyle.sheetSubtitle.has_value()) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, BuildTitleColumn002, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    sheetStyle.sheetTitle = "sheetTitle";
+    sheetStyle.isTitleBuilder = true;
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateSheetStyle(sheetStyle);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale() + 1;
-    sheetStyle.isTitleBuilder = true;
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale() + 10.0f;
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 50.0_vp;
 
-    EXPECT_NE(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.value());
-    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    auto titleColumn = SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    ASSERT_NE(titleColumn, nullptr);
+    auto titleLayoutProperty = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    ASSERT_NE(titleLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    ASSERT_TRUE(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    EXPECT_EQ(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(50.0_vp));
+    EXPECT_EQ(titleColumn->children_.size(), 1);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: BuildTitleColumn003
- * @tc.desc: Increase the coverage of SheetView::BuildTitleColumn function.
+ * @tc.desc: Branch: if (GetFontScale() == GetSheetNormalScale() || isTitleCustombuilder) = false
+ *           Condition: GetFontScale() == GetSheetNormalScale() = false, isTitleCustombuilder = false
+ *           Branch: if (sheetStyle.sheetTitle.has_value()) = true
+ *           Branch: if (sheetStyle.sheetSubtitle.has_value()) = true
+ *           Branch: if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, BuildTitleColumn003, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    sheetStyle.sheetTitle = "sheetTitle";
+    sheetStyle.sheetSubtitle = "sheetSubtitle";
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateSheetStyle(sheetStyle);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale() + 10.0f;
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 50.0_vp;
 
-    EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
-    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    auto titleColumn = SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    ASSERT_NE(titleColumn, nullptr);
+    auto titleLayoutProperty = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    ASSERT_NE(titleLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    EXPECT_FALSE(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    EXPECT_EQ(titleColumn->children_.size(), 2);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: BuildTitleColumn004
- * @tc.desc: Increase the coverage of SheetView::BuildTitleColumn function.
+ * @tc.desc: Branch: if (GetFontScale() == GetSheetNormalScale() || isTitleCustombuilder) = true
+ *           Condition: GetFontScale() == GetSheetNormalScale() = true
+ *           Branch: if (sheetStyle.sheetTitle.has_value()) = true
+ *           Branch: if (sheetStyle.sheetSubtitle.has_value()) = true
+ *           Branch: if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) = true
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, BuildTitleColumn004, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    sheetStyle.sheetTitle = "sheetTitle";
+    sheetStyle.sheetSubtitle = "sheetSubtitle";
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 50.0_vp;
 
-    EXPECT_FALSE(sheetStyle.sheetTitle.has_value());
-    EXPECT_FALSE(sheetStyle.isTitleBuilder.has_value());
-    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    auto titleColumn = SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    ASSERT_NE(titleColumn, nullptr);
+    auto titleLayoutProperty = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    ASSERT_NE(titleLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    ASSERT_TRUE(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    EXPECT_EQ(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(68.0_vp));
+    EXPECT_EQ(titleColumn->children_.size(), 2);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: BuildTitleColumn005
- * @tc.desc: Increase the coverage of SheetView::BuildTitleColumn function.
+ * @tc.desc: Branch: if (GetFontScale() == GetSheetNormalScale() || isTitleCustombuilder) = true
+ *           Condition: GetFontScale() == GetSheetNormalScale() = true
+ *           Branch: if (sheetStyle.sheetTitle.has_value()) = false
+ *           Branch: else if (sheetStyle.isTitleBuilder.has_value()) = true
+ *           Branch: if (isCustomBuilder) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, BuildTitleColumn005, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = false;
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetStyle.isTitleBuilder = false;
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 50.0_vp;
 
-    EXPECT_FALSE(sheetStyle.sheetTitle.has_value());
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_FALSE(sheetStyle.isTitleBuilder.value());
-    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    auto titleColumn = SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    ASSERT_NE(titleColumn, nullptr);
+    auto titleLayoutProperty = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    ASSERT_NE(titleLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    ASSERT_TRUE(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    EXPECT_EQ(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(50.0_vp));
+    EXPECT_EQ(titleColumn->children_.size(), 0);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: BuildTitleColumn006
- * @tc.desc: Increase the coverage of SheetView::BuildTitleColumn function.
+ * @tc.desc: Branch: if (GetFontScale() == GetSheetNormalScale() || isTitleCustombuilder) = true
+ *           Condition: GetFontScale() == GetSheetNormalScale() = true
+ *           Branch: if (sheetStyle.sheetTitle.has_value()) = false
+ *           Branch: else if (sheetStyle.isTitleBuilder.has_value()) = true
+ *           Branch: if (isCustomBuilder) = true
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, BuildTitleColumn006, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    SheetStyle sheetStyle;
     sheetStyle.isTitleBuilder = true;
-
-    EXPECT_FALSE(sheetStyle.sheetTitle.has_value());
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.value());
-    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
-    SheetOthersTestNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: BuildTitleColumn007
- * @tc.desc: Increase the coverage of SheetView::BuildTitleColumn function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetOthersTestNg, BuildTitleColumn007, TestSize.Level1)
-{
-    SheetOthersTestNg::SetUpTestCase();
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetStyle.sheetTitle = "sheetTitle";
+    auto pipelineContext = sheetNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = pipelineContext->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    SheetOthersTestNg::sheetTheme_->operationAreaHeight_ = 50.0_vp;
 
-    EXPECT_TRUE(sheetStyle.sheetTitle.has_value());
-    EXPECT_FALSE(sheetStyle.sheetSubtitle.has_value());
-    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
-    SheetOthersTestNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: BuildTitleColumn008
- * @tc.desc: Increase the coverage of SheetView::BuildTitleColumn function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetOthersTestNg, BuildTitleColumn008, TestSize.Level1)
-{
-    SheetOthersTestNg::SetUpTestCase();
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale() + 1;
-    sheetStyle.sheetTitle = "sheetTitle";
-    sheetStyle.sheetSubtitle = "sheetSubtitle";
-
-    EXPECT_TRUE(sheetStyle.sheetTitle.has_value());
-    EXPECT_TRUE(sheetStyle.sheetSubtitle.has_value());
-    EXPECT_NE(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
-    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
-    SheetOthersTestNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: BuildTitleColumn009
- * @tc.desc: Increase the coverage of SheetView::BuildTitleColumn function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetOthersTestNg, BuildTitleColumn009, TestSize.Level1)
-{
-    SheetOthersTestNg::SetUpTestCase();
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    NG::SheetStyle sheetStyle;
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
-    sheetStyle.sheetTitle = "sheetTitle";
-    sheetStyle.sheetSubtitle = "sheetSubtitle";
-
-    EXPECT_TRUE(sheetStyle.sheetTitle.has_value());
-    EXPECT_TRUE(sheetStyle.sheetSubtitle.has_value());
-    EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
-    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    auto titleColumn = SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    ASSERT_NE(titleColumn, nullptr);
+    auto titleLayoutProperty = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    ASSERT_NE(titleLayoutProperty->GetCalcLayoutConstraint(), nullptr);
+    ASSERT_TRUE(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    EXPECT_EQ(titleLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height(), CalcLength(50.0_vp));
+    EXPECT_EQ(titleLayoutProperty->GetMainAxisAlign(), FlexAlign::CENTER);
+    EXPECT_EQ(titleColumn->children_.size(), 0);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: GetOverlayFromPage001
- * @tc.desc: Increase the coverage of SheetManager::GetOverlayFromPage function.
+ * @tc.desc: Branch: if (rootNodeId <= 0) = true
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, GetOverlayFromPage001, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 101,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    RootNodeType rootNodeType = RootNodeType::PAGE_ETS_TAG;
-    int32_t rootNodeId = -1;
 
-    EXPECT_TRUE(rootNodeId <= 0);
-    SheetManager sheetManager;
-    sheetManager.GetOverlayFromPage(rootNodeId, rootNodeType);
+    auto overlayManager = SheetManager::GetOverlayFromPage(-1, RootNodeType::PAGE_ETS_TAG);
+    EXPECT_EQ(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: GetOverlayFromPage002
- * @tc.desc: Increase the coverage of SheetManager::GetOverlayFromPage function.
+ * @tc.desc: Branch: if (rootNodeId <= 0) = false
+ *           Branch: if (tag == V2::PAGE_ETS_TAG) = true
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, GetOverlayFromPage002, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 101,
+    int32_t rootNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto sheetNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, rootNodeId,
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    RootNodeType rootNodeType = RootNodeType::PAGE_ETS_TAG;
-    int32_t rootNodeId = 101;
+    auto sheetPattern = sheetNode->GetPattern<PagePattern>();
+    sheetPattern->CreateOverlayManager(true);
 
-    EXPECT_FALSE(rootNodeId <= 0);
-    EXPECT_NE(FrameNode::GetFrameNode(sheetNode->tag_, rootNodeId), nullptr);
-    SheetManager sheetManager;
-    sheetManager.GetOverlayFromPage(rootNodeId, rootNodeType);
+    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::PAGE_ETS_TAG);
+    EXPECT_NE(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: GetOverlayFromPage003
- * @tc.desc: Increase the coverage of SheetManager::GetOverlayFromPage function.
+ * @tc.desc: Branch: if (rootNodeId <= 0) = false
+ *           Branch: if (tag == V2::PAGE_ETS_TAG) = false
+ *           Branch: if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG) = true
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, GetOverlayFromPage003, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 101,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    RootNodeType rootNodeType = RootNodeType::NAVDESTINATION_VIEW_ETS_TAG;
-    int32_t rootNodeId = 101;
-    sheetNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
+    int32_t rootNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        rootNodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->CreateOverlayManager(true);
 
-    EXPECT_FALSE(rootNodeId <= 0);
-    EXPECT_NE(FrameNode::GetFrameNode(sheetNode->tag_, rootNodeId), nullptr);
-    SheetManager sheetManager;
-    sheetManager.GetOverlayFromPage(rootNodeId, rootNodeType);
+    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
+    EXPECT_NE(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: GetOverlayFromPage004
- * @tc.desc: Increase the coverage of SheetManager::GetOverlayFromPage function.
+ * @tc.desc: Branch: if (rootNodeId <= 0) = false
+ *           Branch: if (tag == V2::PAGE_ETS_TAG) = false
+ *           Branch: if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG) = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, GetOverlayFromPage004, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 101,
+    int32_t rootNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto windowSceneNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, rootNodeId,
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    RootNodeType rootNodeType = RootNodeType::WINDOW_SCENE_ETS_TAG;
-    int32_t rootNodeId = 101;
-    sheetNode->tag_ = V2::WINDOW_SCENE_ETS_TAG;
+    auto windowScenePattern = windowSceneNode->GetPattern<PagePattern>();
+    windowScenePattern->CreateOverlayManager(true);
 
-    EXPECT_FALSE(rootNodeId <= 0);
-    EXPECT_NE(FrameNode::GetFrameNode(sheetNode->tag_, rootNodeId), nullptr);
-    SheetManager sheetManager;
-    sheetManager.GetOverlayFromPage(rootNodeId, rootNodeType);
+    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::WINDOW_SCENE_ETS_TAG);
+    EXPECT_EQ(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
 
 /**
  * @tc.name: UpdateBindSheetByUIContext001
- * @tc.desc: Increase the coverage of SheetManager::UpdateBindSheetByUIContext function.
+ * @tc.desc: Branch: if (iter != overlayManagerMap_.end() &&
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end()) = false
+ *           Condition: iter != overlayManagerMap_.end() = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, UpdateBindSheetByUIContext001, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 201, AceType::MakeRefPtr<ScrollPattern>());
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 301,
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     contentNode->MountToParent(scrollNode);
     scrollNode->MountToParent(sheetNode);
@@ -641,7 +1009,6 @@ HWTEST_F(SheetOthersTestNg, UpdateBindSheetByUIContext001, TestSize.Level1)
     sheetManager.targetIdMap_.clear();
 
     SheetManager::SheetContentKey sheetContentKey(currentInstanceId, contentNode->GetId());
-    ASSERT_EQ(sheetManager.overlayManagerMap_.find(sheetContentKey), sheetManager.overlayManagerMap_.end());
     int32_t ret = sheetManager.UpdateBindSheetByUIContext(contentNode, sheetStyle, isPartialUpdate, currentInstanceId);
     EXPECT_EQ(ret, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
     SheetOthersTestNg::TearDownTestCase();
@@ -649,16 +1016,23 @@ HWTEST_F(SheetOthersTestNg, UpdateBindSheetByUIContext001, TestSize.Level1)
 
 /**
  * @tc.name: UpdateBindSheetByUIContext002
- * @tc.desc: Increase the coverage of SheetManager::UpdateBindSheetByUIContext function.
+ * @tc.desc: Branch: if (iter != overlayManagerMap_.end() &&
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end()) = false
+ *           Condition: iter != overlayManagerMap_.end() = true,
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end() = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 201, AceType::MakeRefPtr<ScrollPattern>());
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 301,
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     contentNode->MountToParent(scrollNode);
     scrollNode->MountToParent(sheetNode);
@@ -671,8 +1045,6 @@ HWTEST_F(SheetOthersTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
     SheetManager::SheetContentKey sheetContentKey(currentInstanceId, contentNode->GetId());
     sheetManager.overlayManagerMap_.emplace(sheetContentKey, nullptr);
 
-    ASSERT_NE(sheetManager.overlayManagerMap_.find(sheetContentKey), sheetManager.overlayManagerMap_.end());
-    ASSERT_EQ(sheetManager.targetIdMap_.find(sheetContentKey), sheetManager.targetIdMap_.end());
     int32_t ret = sheetManager.UpdateBindSheetByUIContext(contentNode, sheetStyle, isPartialUpdate, currentInstanceId);
     EXPECT_EQ(ret, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
     SheetOthersTestNg::TearDownTestCase();
@@ -680,16 +1052,23 @@ HWTEST_F(SheetOthersTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
 
 /**
  * @tc.name: UpdateBindSheetByUIContext003
- * @tc.desc: Increase the coverage of SheetManager::UpdateBindSheetByUIContext function.
+ * @tc.desc: Branch: if (iter != overlayManagerMap_.end() &&
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end()) = true
+ *           Condition: iter != overlayManagerMap_.end() = true,
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end() = true
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 201, AceType::MakeRefPtr<ScrollPattern>());
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 301,
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     contentNode->MountToParent(scrollNode);
     scrollNode->MountToParent(sheetNode);
@@ -706,8 +1085,6 @@ HWTEST_F(SheetOthersTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
     sheetManager.overlayManagerMap_.emplace(sheetContentKey, overlayManager);
     sheetManager.targetIdMap_.emplace(sheetContentKey, 0);
 
-    ASSERT_NE(sheetManager.overlayManagerMap_.find(sheetContentKey), sheetManager.overlayManagerMap_.end());
-    ASSERT_NE(sheetManager.targetIdMap_.find(sheetContentKey), sheetManager.targetIdMap_.end());
     int32_t ret = sheetManager.UpdateBindSheetByUIContext(contentNode, sheetStyle, isPartialUpdate, currentInstanceId);
     EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
     SheetOthersTestNg::TearDownTestCase();
@@ -715,16 +1092,22 @@ HWTEST_F(SheetOthersTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
 
 /**
  * @tc.name: CloseBindSheetByUIContext001
- * @tc.desc: Increase the coverage of SheetManager::CloseBindSheetByUIContext function.
+ * @tc.desc: Branch: if (iter != overlayManagerMap_.end() &&
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end()) = false
+ *           Condition: iter != overlayManagerMap_.end() = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, CloseBindSheetByUIContext001, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 201, AceType::MakeRefPtr<ScrollPattern>());
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 301,
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     contentNode->MountToParent(scrollNode);
     scrollNode->MountToParent(sheetNode);
@@ -734,7 +1117,6 @@ HWTEST_F(SheetOthersTestNg, CloseBindSheetByUIContext001, TestSize.Level1)
     sheetManager.targetIdMap_.clear();
 
     SheetManager::SheetContentKey sheetContentKey(currentInstanceId, contentNode->GetId());
-    ASSERT_EQ(sheetManager.overlayManagerMap_.find(sheetContentKey), sheetManager.overlayManagerMap_.end());
     int32_t ret = sheetManager.CloseBindSheetByUIContext(contentNode, currentInstanceId);
     EXPECT_EQ(ret, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
     SheetOthersTestNg::TearDownTestCase();
@@ -742,16 +1124,23 @@ HWTEST_F(SheetOthersTestNg, CloseBindSheetByUIContext001, TestSize.Level1)
 
 /**
  * @tc.name: CloseBindSheetByUIContext002
- * @tc.desc: Increase the coverage of SheetManager::CloseBindSheetByUIContext function.
+ * @tc.desc: Branch: if (iter != overlayManagerMap_.end() &&
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end()) = false
+ *           Condition: iter != overlayManagerMap_.end() = true,
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end() = false
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, CloseBindSheetByUIContext002, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 201, AceType::MakeRefPtr<ScrollPattern>());
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 301,
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     contentNode->MountToParent(scrollNode);
     scrollNode->MountToParent(sheetNode);
@@ -762,8 +1151,6 @@ HWTEST_F(SheetOthersTestNg, CloseBindSheetByUIContext002, TestSize.Level1)
     SheetManager::SheetContentKey sheetContentKey(currentInstanceId, contentNode->GetId());
     sheetManager.overlayManagerMap_.emplace(sheetContentKey, nullptr);
 
-    ASSERT_NE(sheetManager.overlayManagerMap_.find(sheetContentKey), sheetManager.overlayManagerMap_.end());
-    ASSERT_EQ(sheetManager.targetIdMap_.find(sheetContentKey), sheetManager.targetIdMap_.end());
     int32_t ret = sheetManager.CloseBindSheetByUIContext(contentNode, currentInstanceId);
     EXPECT_EQ(ret, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
     SheetOthersTestNg::TearDownTestCase();
@@ -771,16 +1158,23 @@ HWTEST_F(SheetOthersTestNg, CloseBindSheetByUIContext002, TestSize.Level1)
 
 /**
  * @tc.name: CloseBindSheetByUIContext003
- * @tc.desc: Increase the coverage of SheetManager::CloseBindSheetByUIContext function.
+ * @tc.desc: Branch: if (iter != overlayManagerMap_.end() &&
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end()) = true
+ *           Condition: iter != overlayManagerMap_.end() = true,
+ *               targetIdMap_.find(sheetContentKey) != targetIdMap_.end() = true
  * @tc.type: FUNC
  */
 HWTEST_F(SheetOthersTestNg, CloseBindSheetByUIContext003, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 201, AceType::MakeRefPtr<ScrollPattern>());
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 301,
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback)));
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     contentNode->MountToParent(scrollNode);
     scrollNode->MountToParent(sheetNode);
@@ -795,8 +1189,6 @@ HWTEST_F(SheetOthersTestNg, CloseBindSheetByUIContext003, TestSize.Level1)
     sheetManager.overlayManagerMap_.emplace(sheetContentKey, overlayManager);
     sheetManager.targetIdMap_.emplace(sheetContentKey, 0);
 
-    ASSERT_NE(sheetManager.overlayManagerMap_.find(sheetContentKey), sheetManager.overlayManagerMap_.end());
-    ASSERT_NE(sheetManager.targetIdMap_.find(sheetContentKey), sheetManager.targetIdMap_.end());
     int32_t ret = sheetManager.CloseBindSheetByUIContext(contentNode, currentInstanceId);
     EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
     SheetOthersTestNg::TearDownTestCase();
@@ -1312,7 +1704,102 @@ HWTEST_F(SheetOthersTestNg, CreateSheetMaskShowInSubwindowTest005, TestSize.Leve
     EXPECT_EQ(sheetPageNodeFromWrapper->GetId(), sheetNode->GetId());
     EXPECT_EQ(sheetPageNodeFromWrapper->GetTag(), sheetNode->GetTag());
 
+    // Set nullptr in advance, otherwise it will become a wild pointer and cause a crash.
+    maskNode->context_ = nullptr;
     MockContainer::TearDown();
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnBindSheet001
+ * @tc.desc: Branch: if (sheetStyle.enableFloatingDragBar.value_or(false))
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, OnBindSheet001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetOthersTestNg::SetUpTestCase();
+    auto targetNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create builder.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode =
+            FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> { return nullptr; };
+
+    /**
+     * @tc.steps: step3. create sheet node, set showDragBar false.
+     * @tc.expected: enableFloatingDragBar is false.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.enableFloatingDragBar = true;
+    sheetStyle.showDragBar = false;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->overlayManager_ = overlayManager;
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_EQ(sheetStyle.enableFloatingDragBar, false);
+
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetDragBarHeight001
+ * @tc.desc: Branch: (dragBarLayoutProperty->GetVisibility() == VisibleType::GONE)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, GetDragBarHeight001, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto titleBuilder = FrameNode::CreateFrameNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle sheetStyle;
+    sheetStyle.detents = { SheetHeight({ 300.0_vp }), SheetHeight({ 700.0_vp }) };
+    sheetStyle.isTitleBuilder = true;
+    sheetStyle.enableFloatingDragBar = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, titleBuilder, std::move(callback), sheetStyle);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+    auto childIterator = sheetNode->children_.begin();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(*childIterator);
+    ASSERT_NE(dragBarNode, nullptr);
+
+    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
+    ASSERT_NE(dragBarLayoutProperty, nullptr);
+
+    dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    EXPECT_EQ(sheetPattern->GetDragBarHeight(dragBarNode), 0.0_vp);
+
+    dragBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    EXPECT_EQ(sheetPattern->GetDragBarHeight(dragBarNode), 16.0_vp);
     SheetOthersTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

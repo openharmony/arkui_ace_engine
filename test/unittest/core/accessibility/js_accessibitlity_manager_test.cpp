@@ -20,6 +20,7 @@
 #define protected public
 #include "accessibility_system_ability_client.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -2213,5 +2214,184 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager040, TestSize.Level1)
      */
     frameNode->accessibilityId_ = frameNode->GetId() + 1;
     jsAccessibilityManager->DumpTreeNG(frameNode, 1, frameNode->GetId(), true);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager041
+ * @tc.desc: Test RegisterDynamicRenderGetParentRectHandler default
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager041, TestSize.Level1)
+{
+    HandlerReply reply;
+
+    RotateTransform rotateData(reply.GetParam<int32_t>("rotateDegree", 0),
+        reply.GetParam<int32_t>("centerX", 0),
+        reply.GetParam<int32_t>("centerY", 0),
+        reply.GetParam<int32_t>("innerCenterX", 0),
+        reply.GetParam<int32_t>("innerCenterY", 0));
+
+    AccessibilityParentRectInfo parentRectInfo;
+    EXPECT_EQ(parentRectInfo.rotateTransform.rotateDegree, 0);
+    EXPECT_EQ(parentRectInfo.rotateTransform.centerX, 0);
+    EXPECT_EQ(parentRectInfo.rotateTransform.centerY, 0);
+    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterX, 0);
+    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterY, 0);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager042
+ * @tc.desc: Test RegisterDynamicRenderGetParentRectHandler
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager042, TestSize.Level1)
+{
+    HandlerReply reply;
+
+    reply.SetParam<int32_t>("rotateDegree", 90);
+    reply.SetParam<int32_t>("centerX", 10);
+    reply.SetParam<int32_t>("centerY", 20);
+    reply.SetParam<int32_t>("innerCenterX", 30);
+    reply.SetParam<int32_t>("innerCenterY", 40);
+
+    RotateTransform rotateData(reply.GetParam<int32_t>("rotateDegree", 0),
+        reply.GetParam<int32_t>("centerX", 0),
+        reply.GetParam<int32_t>("centerY", 0),
+        reply.GetParam<int32_t>("innerCenterX", 0),
+        reply.GetParam<int32_t>("innerCenterY", 0));
+
+    AccessibilityParentRectInfo parentRectInfo;
+    EXPECT_EQ(parentRectInfo.rotateTransform.rotateDegree, 90);
+    EXPECT_EQ(parentRectInfo.rotateTransform.centerX, 10);
+    EXPECT_EQ(parentRectInfo.rotateTransform.centerY, 20);
+    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterX, 30);
+    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterY, 40);
+}
+
+#ifdef WEB_SUPPORTED
+/**
+ * @tc.name: GetWebAccessibilityIdBySurfaceId
+ * @tc.desc: Test GetWebAccessibilityIdBySurfaceId with valid and invalid surfaceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetWebAccessibilityIdBySurfaceId001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+
+    auto mainFrameNode = FrameNode::CreateFrameNode(
+        "main", 1, AceType::MakeRefPtr<NodeContainerPattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(mainFrameNode);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);    auto pipe = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(pipe);
+
+    pattern->surfaceId_ = 1U;
+
+    auto exportNode = AceType::MakeRefPtr<FrameNode>("exportNode", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(exportNode, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    exportNode->context_ = AceType::RawPtr(context);
+
+    pattern->exportTextureNode_ = AceType::WeakClaim(AceType::RawPtr(exportNode));
+    auto rootElement = context->GetRootElement();
+    ASSERT_NE(rootElement, nullptr);
+    rootElement->AddChild(exportNode);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    std::stringstream ss;
+    ss << 1U;
+    auto accessibilityId = jsAccessibilityManager->GetWebAccessibilityIdBySurfaceId(ss.str());
+    EXPECT_EQ(accessibilityId, -1);
+
+    auto accessibilityId2 = jsAccessibilityManager->GetWebAccessibilityIdBySurfaceId("not_exist_id");
+    EXPECT_EQ(accessibilityId2, -1);
+
+    MockPipelineContext::TearDown();
+}
+#endif
+
+/**
+ * @tc.name: CheckAndGetEmbedFrameNode
+ * @tc.desc: Test CheckAndGetEmbedFrameNode with normal and nullptr node
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, CheckAndGetEmbedFrameNode001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "embedNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    frameNode->context_ = AceType::RawPtr(context);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    int64_t ret = jsAccessibilityManager->CheckAndGetEmbedFrameNode(frameNode);
+    EXPECT_EQ(ret, -1);
+
+    RefPtr<NG::FrameNode> nullNode;
+    ret = jsAccessibilityManager->CheckAndGetEmbedFrameNode(nullNode);
+    EXPECT_EQ(ret, -1);
+
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: SearchElementInfoBySurfaceId001
+ * @tc.desc: Test SearchElementInfoBySurfaceId with valid surfaceId and different types
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoBySurfaceId001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto embedNode = FrameNode::CreateFrameNode(
+        "embedNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(embedNode, nullptr);
+    embedNode->context_ = AceType::RawPtr(context);
+    embedNode->isActive_ = true;
+
+    uint64_t surfaceId = embedNode->GetId();
+    ElementRegister::GetInstance()->RegisterEmbedNode(surfaceId, embedNode);
+
+    auto rootElement = context->GetRootElement();
+    ASSERT_NE(rootElement, nullptr);
+    rootElement->AddChild(embedNode);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->SetWindowId(1);
+
+    std::list<AccessibilityElementInfo> infos;
+    auto ret = jsAccessibilityManager->SearchElementInfoBySurfaceId(
+        std::to_string(surfaceId), 1, Framework::SearchSurfaceIdType::SEARCH_ALL, infos);
+    EXPECT_EQ(ret, Framework::SearchSurfaceIdRet::SEARCH_SUCCESS);
+    EXPECT_FALSE(infos.empty());
+
+    infos.clear();
+    ret = jsAccessibilityManager->SearchElementInfoBySurfaceId(
+        "not_exist_id", 1, Framework::SearchSurfaceIdType::SEARCH_ALL, infos);
+    EXPECT_EQ(ret, Framework::SearchSurfaceIdRet::NO_MATCH_NODE);
+    EXPECT_TRUE(infos.empty());
+
+    rootElement->RemoveChild(embedNode);
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

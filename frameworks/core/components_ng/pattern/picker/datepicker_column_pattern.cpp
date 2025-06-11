@@ -331,7 +331,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if ((NotLoopOptions() || !isLoop_) && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent(u"");
-            if (!isTossPlaying && selectedIndex == index) {
+            if (!isTossPlaying) {
                 textNode->MarkModifyDone();
                 textNode->MarkDirtyNode();
             }
@@ -341,7 +341,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         auto optionValue = DatePickerPattern::GetFormatString(date);
         textLayoutProperty->UpdateContent(optionValue);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        if (!isTossPlaying && selectedIndex == index) {
+        if (!isTossPlaying) {
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode();
         }
@@ -590,7 +590,7 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
     if (canLoop && !NotLoopOptions()) {
         return true;
     }
-    int totalOptionCount = GetOptionCount();
+    int totalOptionCount = static_cast<int>(GetOptionCount());
 
     auto datePickerColumnPattern = host->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(datePickerColumnPattern, false);

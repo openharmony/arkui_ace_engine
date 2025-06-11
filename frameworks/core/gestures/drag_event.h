@@ -358,7 +358,7 @@ public:
         return requestId_;
     }
 
-    void SetDragSource(std::string& bundleName)
+    void SetDragSource(const std::string& bundleName)
     {
         bundleName_ = bundleName;
     }
@@ -387,6 +387,16 @@ public:
     int32_t GetDisplayId() const
     {
         return displayId_;
+    }
+
+    void SetNeedDoInternalDropAnimation(bool needDoInternalDropAnimation)
+    {
+        needDoInternalDropAnimation_ = needDoInternalDropAnimation;
+    }
+
+    bool GetNeedDoInternalDropAnimation() const
+    {
+        return needDoInternalDropAnimation_;
     }
 
 private:
@@ -419,6 +429,7 @@ private:
     std::string bundleName_;
     bool isRemoteDev_ { false };
     int32_t displayId_ = -1;
+    bool needDoInternalDropAnimation_ = false;
 };
 
 class NotifyDragEvent : public DragEvent {

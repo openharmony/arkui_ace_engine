@@ -120,7 +120,17 @@ enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
-enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW };
+enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW, PASTE, ACCESSIBILITY, AI_WRITE, STYLUS };
+const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP = {
+    { OperationType::DEFAULT, TextChangeReason::INPUT },
+    { OperationType::DRAG, TextChangeReason::DRAG },
+    { OperationType::IME, TextChangeReason::INPUT },
+    { OperationType::FINISH_PREVIEW, TextChangeReason::INPUT },
+    { OperationType::PASTE, TextChangeReason::PASTE },
+    { OperationType::ACCESSIBILITY, TextChangeReason::ACCESSIBILITY },
+    { OperationType::AI_WRITE, TextChangeReason::AI_WRITE },
+    { OperationType::STYLUS, TextChangeReason::STYLUS },
+};
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
     {{ HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::FORWARD },
@@ -172,12 +182,34 @@ public:
     ~RichEditorPattern() override;
 
     struct OperationRecord {
-        OperationRecord() : beforeCaretPosition(-1), afterCaretPosition(-1), deleteCaretPostion(-1) {}
+        OperationRecord() : beforeCaretPosition(-1), afterCaretPosition(-1), deleteCaretPosition(-1) {}
         std::optional<std::u16string> addText;
         std::optional<std::u16string> deleteText;
         int32_t beforeCaretPosition;
         int32_t afterCaretPosition;
-        int32_t deleteCaretPostion;
+        int32_t deleteCaretPosition;
+
+        void Reset()
+        {
+            beforeCaretPosition = -1;
+            afterCaretPosition = -1;
+            deleteCaretPosition = -1;
+            addText = std::nullopt;
+            deleteText = std::nullopt;
+        }
+
+        std::string ToString() const
+        {
+            auto jsonValue = JsonUtil::Create(true);
+            JSON_STRING_PUT_INT(jsonValue, beforeCaretPosition);
+            JSON_STRING_PUT_INT(jsonValue, afterCaretPosition);
+            JSON_STRING_PUT_INT(jsonValue, deleteCaretPosition);
+            auto addLength = static_cast<int32_t>(addText.value_or(u"").length());
+            auto deleteLength = static_cast<int32_t>(deleteText.value_or(u"").length());
+            JSON_STRING_PUT_INT(jsonValue, addLength);
+            JSON_STRING_PUT_INT(jsonValue, deleteLength);
+            return jsonValue->ToString();
+        }
     };
 
     struct PreviewTextRecord {
@@ -386,7 +418,7 @@ public:
     {
         HandleSysScaleChanged();
         return MakeRefPtr<RichEditorLayoutAlgorithm>(
-            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder());
+            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder(), GetAISpanMap());
     }
 
     void HandleSysScaleChanged()
@@ -541,9 +573,8 @@ public:
     void ProcessStyledUndo(const UndoRedoRecord& record);
     void ProcessStyledRedo(const UndoRedoRecord& record);
     void ApplyRecordInStyledString(const UndoRedoRecord& record);
-    void ApplyRecordInSpans(const UndoRedoRecord& record);
-    void ApplyOptions(const OptionsList& optionsList, bool restoreBuilderSpan);
-    void AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan);
+    void ApplyRecordInSpans(const UndoRedoRecord& record, bool isUndo);
+    void ApplyOptions(const OptionsList& optionsList, bool restoreBuilderSpan, bool isUndo);
 
     void ResetBeforePaste();
     void ResetAfterPaste();
@@ -581,8 +612,32 @@ public:
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 1) override;
+    void DeleteBackward(int32_t length, TextChangeReason reason);
+#ifndef ACE_UNITTEST
+    void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
+    void AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan, TextChangeReason reason);
+    int32_t AddImageSpan(const ImageSpanOptions& options, TextChangeReason reason, bool isPaste = false,
+        int32_t index = -1, bool updateCaret = true);
+    int32_t AddTextSpan(TextSpanOptions options, TextChangeReason reason, bool isPaste = false, int32_t index = -1);
+    int32_t AddSymbolSpan(SymbolSpanOptions options, TextChangeReason reason, bool isPaste = false, int32_t index = -1);
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
+        TextChangeReason reason);
+#else
+    void DeleteSpans(const RangeOptions& options, TextChangeReason reason = TextChangeReason::UNKNOWN);
+    void AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan,
+        TextChangeReason reason = TextChangeReason::UNKNOWN);
+    int32_t AddImageSpan(const ImageSpanOptions& options, TextChangeReason reason = TextChangeReason::UNKNOWN,
+        bool isPaste = false, int32_t index = -1, bool updateCaret = true);
+    int32_t AddTextSpan(TextSpanOptions options, TextChangeReason reason = TextChangeReason::UNKNOWN,
+        bool isPaste = false, int32_t index = -1);
+    int32_t AddSymbolSpan(SymbolSpanOptions options, TextChangeReason reason = TextChangeReason::UNKNOWN,
+        bool isPaste = false, int32_t index = -1);
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
+        TextChangeReason reason = TextChangeReason::UNKNOWN);
+#endif
     std::u16string DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length = 1) override;
+    void DeleteForward(int32_t length, TextChangeReason reason);
     std::u16string DeleteForwardOperation(int32_t length, bool isIME = true);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
@@ -610,6 +665,7 @@ public:
     }
     void ClearOperationRecords();
     void ClearRedoOperationRecords();
+    void AddInsertOperationRecord(OperationRecord& record);
     void AddOperationRecord(const OperationRecord& record);
     void UpdateShiftFlag(const KeyEvent& keyEvent)override;
     bool HandleOnEscape() override;
@@ -687,7 +743,6 @@ public:
     int32_t TextSpanSplit(int32_t position, bool needLeadingMargin = false);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
     std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
-    void DeleteSpans(const RangeOptions& options);
     void DeleteSpansOperation(int32_t start, int32_t end);
     void DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info);
     void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
@@ -726,16 +781,11 @@ public:
     void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle);
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpanFromCollaboration(const ImageSpanOptions& options, bool updateCaret);
-    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
-        bool updateCaret = true);
-    int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
     void AdjustAddPosition(TextSpanOptions& options);
-    int32_t AddSymbolSpan(SymbolSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
-    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void AddOnPlaceholderHoverEvent(const RefPtr<PlaceholderSpanNode>& placeholderSpanNode);
     void OnPlaceholderHover(bool isHover);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
@@ -1132,6 +1182,7 @@ public:
     bool InsertOrDeleteSpace(int32_t index) override;
 
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
+    void DeleteRange(int32_t start, int32_t end, bool isIME, TextChangeReason reason);
     void HandleOnPageUp() override;
     void HandleOnPageDown() override;
     void HandlePageScroll(bool isPageUp);
@@ -1288,12 +1339,7 @@ public:
 
     const std::map<int32_t, AISpan>& GetAISpanMap() override
     {
-        auto& aiSpanMap = dataDetectorAdapter_->aiSpanMap_;
-        if (aiSpanMap != lastAISpanMap_) {
-            paragraphCache_.Clear();
-            lastAISpanMap_ = aiSpanMap;
-        }
-        return aiSpanMap;
+        return dataDetectorAdapter_->aiSpanMap_;
     }
 
     void SetTextDetectEnable(bool enable) override
@@ -1615,16 +1661,18 @@ private:
     bool CheckTripClickEvent(GestureEvent& info);
     void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
     TextStyleResult GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
+    void CopyTextLineStyleToTextStyleResult(const RefPtr<SpanItem>& spanItem, TextStyleResult& textStyle);
     ImageStyleResult GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     void SetSubMap(RefPtr<SpanString>& spanString);
     void OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData);
-    void AddSpanByPasteData(const RefPtr<SpanString>& spanString);
+    void AddSpanByPasteData(const RefPtr<SpanString>& spanString, TextChangeReason reason = TextChangeReason::PASTE);
     void CompleteStyledString(RefPtr<SpanString>& spanString);
     void InsertStyledString(const RefPtr<SpanString>& spanString, int32_t insertIndex, bool updateCaret = true);
     void InsertStyledStringByPaste(const RefPtr<SpanString>& spanString);
     void HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy = false);
-    void AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans);
+    void AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans,
+        TextChangeReason reason = TextChangeReason::PASTE);
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
@@ -1679,7 +1727,7 @@ private:
     void SetIsEnableSubWindowMenu();
     void OnReportRichEditorEvent(const std::string& event);
     void AsyncHandleOnCopyStyledStringHtml(RefPtr<SpanString>& subSpanString);
-    bool NeedShowPlaceholder();
+    bool NeedShowPlaceholder() const;
     bool IsSelectAll() override;
 #ifdef CROSS_PLATFORM
     bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
@@ -1732,6 +1780,7 @@ private:
 
     // still in progress
     RichEditorParagraphManager paragraphs_;
+    OperationRecord previewInputRecord_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
     std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
@@ -1835,6 +1884,7 @@ private:
     std::unique_ptr<StyleManager> styleManager_;
 #if defined(IOS_PLATFORM)
     TextCompose compose_;
+    bool unmarkText_;
 #endif    
 };
 } // namespace OHOS::Ace::NG

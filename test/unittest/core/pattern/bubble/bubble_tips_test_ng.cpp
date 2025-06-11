@@ -50,6 +50,7 @@ constexpr float HALF = 0.5f;
 constexpr float LINE_HEIGHT = 16.0f;
 constexpr float TEXT_WIDTH = 14.0f;
 constexpr float TEXT_PADDING = 12.0f;
+constexpr int32_t DOUBLE = 2;
 constexpr Dimension TIPS_MARGIN_SPACE = 8.0_vp;
 constexpr Dimension MOUSE_WIDTH = 16.0_vp;
 constexpr Dimension MOUSE_HEIGHT = 24.0_vp;
@@ -137,6 +138,7 @@ RefPtr<FrameNode> BubbleTipsTestNg::CreateTipsNode(const RefPtr<PopupParam>& par
     layoutAlgorithm->followCursor_ = true;
     layoutAlgorithm->marginStart_ = TIPS_MARGIN_SPACE.ConvertToPx();
     layoutAlgorithm->marginEnd_ = TIPS_MARGIN_SPACE.ConvertToPx();
+    layoutAlgorithm->targetSpace_ = TIPS_MARGIN_SPACE;
     auto property = tipsNode->GetLayoutProperty<BubbleLayoutProperty>();
     property->UpdateShowAtAnchor(TipsAnchorType::CURSOR);
     return tipsNode;
@@ -162,7 +164,7 @@ SizeF BubbleTipsTestNg::ConstructParagraphs(const std::u16string& text, int32_t 
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(lineCount));
     EXPECT_CALL(*paragraph, GetHeight())
         .WillRepeatedly(Return(std::min(lineCount * LINE_HEIGHT + TEXT_PADDING + TEXT_PADDING,
-            DEVICE_HEIGHT - TOP_INSET - BOTTOM_INSET - static_cast<float>(TIPS_MARGIN_SPACE.ConvertToPx()) * 2)));
+            DEVICE_HEIGHT - TOP_INSET - BOTTOM_INSET - static_cast<float>(TIPS_MARGIN_SPACE.ConvertToPx()) * DOUBLE)));
     EXPECT_CALL(*paragraph, PushStyle(_)).WillRepeatedly(Return());
     EXPECT_CALL(*paragraph, AddText(_)).WillRepeatedly(Return());
     pManager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = text.length() });
@@ -173,6 +175,9 @@ RefPtr<BubbleLayoutAlgorithm> BubbleTipsTestNg::MeasureTipsRegion(const std::u16
 {
     auto singleTextCount =
         (int32_t)((MAX_SIZE.Width() - TEXT_PADDING - TEXT_PADDING) / TEXT_WIDTH);
+    if (NearEqual(singleTextCount, 0)) {
+        return nullptr;
+    }
     int32_t lineCount = text.length() / singleTextCount + ((text.length() % singleTextCount) ? 1 : 0);
     auto tipsNode = CreateTipsNode(CreateTipsParamForCursor(), text);
     auto layoutAlgorithm =

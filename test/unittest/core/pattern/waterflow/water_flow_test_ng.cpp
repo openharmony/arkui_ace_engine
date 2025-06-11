@@ -89,6 +89,7 @@ void WaterFlowTestNg::TearDown()
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::GetCurrent()->SetResponseTime(INT32_MAX);
 }
 
 void WaterFlowTestNg::GetWaterFlow()
@@ -115,6 +116,7 @@ WaterFlowModelNG WaterFlowTestNg::CreateWaterFlow()
     RefPtr<ScrollControllerBase> positionController = model.CreateScrollController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.SetScroller(positionController, scrollBarProxy);
+    model.SetSyncLoad(true);
 #ifdef TEST_WATER_FLOW_SW
     model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
 #endif
@@ -203,6 +205,11 @@ WaterFlowItemModelNG WaterFlowTestNg::CreateWaterFlowItem(float mainSize)
         axis = Axis::HORIZONTAL;
     }
     SetSize(axis, CalcLength(FILL_LENGTH), CalcLength(mainSize));
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    frameNode->measureCallback_ = [](RefPtr<Kit::FrameNode>& node) {
+        NG::MockPipelineContext::GetCurrent()->DecResponseTime();
+    };
     return waterFlowItemModel;
 }
 
@@ -378,6 +385,40 @@ HWTEST_F(WaterFlowTestNg, Layout001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 7), RectF(0, 500, 240, 200)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 8), RectF(240, 500, 240, 100)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 9), RectF(240, 600, 240, 200)));
+}
+
+/**
+ * @tc.name: WaterFlowGetItemStartTest001
+ * @tc.desc: Test GetItemStart func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemStartTest001, TestSize.Level1)
+{
+    int32_t colNumber = 4;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * colNumber);
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->GetItemStart());
+    EXPECT_FALSE(pattern_->GetItemEnd());
+}
+
+/**
+ * @tc.name: WaterFlowGetItemStartTest002
+ * @tc.desc: Test GetItemStart func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemStartTest002, TestSize.Level1)
+{
+    int32_t colNumber = 1;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(colNumber);
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->GetItemStart());
+    EXPECT_TRUE(pattern_->GetItemEnd());
 }
 
 /**

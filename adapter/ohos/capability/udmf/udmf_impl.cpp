@@ -26,6 +26,7 @@
 #include "get_data_params_napi.h"
 #include "udmf_async_client.h"
 #include "unified_data_napi.h"
+#include "unified_meta.h"
 #include "utd_client.h"
 #include "video.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -349,9 +350,26 @@ bool UdmfClientImpl::AddFileUriRecord(const RefPtr<UnifiedData>& unifiedData, st
     CHECK_NULL_RETURN(udData->GetUnifiedData(), false);
 
     for (std::string u : uri) {
-        LOGI("DragDrop event AddFileUriRecord, uri:%{public}s", u.c_str());
-        auto record = std::make_shared<UDMF::Image>(u);
-        udData->GetUnifiedData()->AddRecord(record);
+        std::vector<std::string> types;
+        std::string belongsToType = "general.image";
+        char pointChar = '.';
+        size_t pos = u.rfind(pointChar);
+        std::string filenameExtension;
+        if (pos != std::string::npos) {
+            filenameExtension = u.substr(pos);
+            LOGI("DragDrop event AddFileUriRecord, filename extension is %{public}s", filenameExtension.c_str());
+        }
+        auto status = UDMF::UtdClient::GetInstance().GetUniformDataTypesByFilenameExtension(
+            filenameExtension, types, belongsToType);
+        if (status == UDMF::Status::E_OK && types.size() > 0) {
+            LOGI("DragDrop event AddFileUriRecord, extension type is %{public}s", types[0].c_str());
+            std::shared_ptr<UDMF::Object> obj = std::make_shared<UDMF::Object>();
+            obj->value_[UDMF::UNIFORM_DATA_TYPE] = "general.file-uri";
+            obj->value_[UDMF::FILE_URI_PARAM] = u;
+            obj->value_[UDMF::FILE_TYPE] = types[0];
+            auto record = std::make_shared<UDMF::UnifiedRecord>(UDMF::UDType::FILE_URI, obj);
+            udData->GetUnifiedData()->AddRecord(record);
+        }
     }
 
     return true;

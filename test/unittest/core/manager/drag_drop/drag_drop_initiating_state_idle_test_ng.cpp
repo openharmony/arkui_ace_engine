@@ -321,4 +321,52 @@ HWTEST_F(DragDropInitiatingStateIdleTestNG, DragDropInitiatingStateIdleTestNG002
     eventHub->SetOnDragStart(std::move(onDragStart));
     EXPECT_EQ(static_cast<DragDropInitiatingStatus>(machine->currentState_), DragDropInitiatingStatus::READY);
 }
+
+/**
+ * @tc.name: DragDropInitiatingStateIdleTestNG003
+ * @tc.desc: Test HideGatherNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateIdleTestNG, DragDropInitiatingStateIdleTestNG003, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto gatherNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(gatherNode, nullptr);
+    std::vector<GatherNodeChildInfo> gatherNodeInfo;
+    overlayManager->MountGatherNodeToRootNode(gatherNode, gatherNodeInfo);
+
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::IDLE)];
+    ASSERT_NE(state, nullptr);
+    auto idleState = AceType::DynamicCast<DragDropInitiatingStateIdle>(state);
+    ASSERT_NE(idleState, nullptr);
+
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.hasGatherNode = false;
+    idleState->HideGatherNode();
+    EXPECT_EQ(overlayManager->hasGatherNode_, true);
+
+    params.hasGatherNode = true;
+    idleState->HideGatherNode();
+    EXPECT_EQ(overlayManager->hasGatherNode_, false);
+}
 } // namespace OHOS::Ace::NG

@@ -35,6 +35,9 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
 
 void JSSecButtonBase::SetIconSize(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -68,6 +71,9 @@ void JSSecButtonBase::SetIconSize(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetIconColor(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -80,6 +86,9 @@ void JSSecButtonBase::SetIconColor(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetFontSize(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -93,7 +102,7 @@ void JSSecButtonBase::SetFontSize(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetFontStyle(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsNumber()) {
+    if ((info.Length() < 1) || (!info[0]->IsNumber())) {
         SecurityComponentModelNG::SetFontStyle(Ace::FontStyle::NORMAL);
         return;
     }
@@ -108,15 +117,25 @@ void JSSecButtonBase::SetFontStyle(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetFontWeight(const JSCallbackInfo& info)
 {
-    if (!(info[0]->IsString() || info[0]->IsNumber())) {
+    if ((info.Length() < 1) || !(info[0]->IsString() || info[0]->IsNumber() || info[0]->IsObject())) {
         return;
     }
-    std::string value = info[0]->ToString();
+    std::string value;
+    if (info[0]->IsNumber()) {
+        value = info[0]->ToString();
+    } else {
+        if (!ParseJsString(info[0], value)) {
+            return;
+        }
+    }
     SecurityComponentModelNG::SetFontWeight(ConvertStrToFontWeight(value));
 }
 
 void JSSecButtonBase::SetFontFamily(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
         fontFamilies.emplace_back("HarmonyOS Sans");
@@ -126,6 +145,9 @@ void JSSecButtonBase::SetFontFamily(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetFontColor(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -138,7 +160,7 @@ void JSSecButtonBase::SetFontColor(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetLayoutDirection(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsNumber()) {
+    if ((info.Length() < 1) || (!info[0]->IsNumber())) {
         SecurityComponentModelNG::SetTextIconLayoutDirection(
             SecurityComponentLayoutDirection::HORIZONTAL);
         return;
@@ -156,6 +178,9 @@ void JSSecButtonBase::SetLayoutDirection(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetBackgroundColor(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -168,7 +193,7 @@ void JSSecButtonBase::SetBackgroundColor(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetBackgroundBorderStyle(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsNumber()) {
+    if ((info.Length() < 1) || (!info[0]->IsNumber())) {
         SecurityComponentModelNG::SetBackgroundBorderStyle(BorderStyle::NONE);
         return;
     }
@@ -183,6 +208,9 @@ void JSSecButtonBase::SetBackgroundBorderStyle(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetBackgroundBorderWidth(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -196,6 +224,9 @@ void JSSecButtonBase::SetBackgroundBorderWidth(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetBackgroundBorderColor(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -208,6 +239,9 @@ void JSSecButtonBase::SetBackgroundBorderColor(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetBackgroundBorderRadius(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> topLeft;
         std::optional<CalcDimension> topRight;
@@ -250,6 +284,9 @@ void JSSecButtonBase::SetBackgroundBorderRadius(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetBackgroundPadding(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -289,6 +326,9 @@ void JSSecButtonBase::SetBackgroundPadding(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetTextIconSpace(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -302,6 +342,9 @@ void JSSecButtonBase::SetTextIconSpace(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetAlign(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     Alignment alignment;
     if (!info[0]->IsNumber()) {
         alignment = Alignment::CENTER;
@@ -344,6 +387,9 @@ void JSSecButtonBase::SetMinFontScale(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetMaxLines(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     JSRef<JSVal> args = info[0];
     auto value = Infinity<int32_t>();
     if (args->ToString() != "Infinity") {

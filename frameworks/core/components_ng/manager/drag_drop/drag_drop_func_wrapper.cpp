@@ -972,7 +972,7 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
 
     if (gestureHub->GetTextDraggable()) {
         auto pattern = frameNode->GetPattern<TextBase>();
-        if (pattern && !pattern->IsSelected()) {
+        if (pattern && !pattern->IsSelected() && !pattern->CanAIEntityDrag()) {
             TrySetDraggableStateAsync(frameNode, touchRestrict);
             TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, text is not selected.");
             return false;
@@ -988,7 +988,8 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
 }
 void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
 {
-    auto subWindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+    auto subWindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subWindow);
     auto overlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -1489,5 +1490,21 @@ void DragDropFuncWrapper::SetMenuSubWindowTouchable(bool touchable)
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subwindow);
     subwindow->SetWindowTouchable(touchable);
+}
+
+void DragDropFuncWrapper::HandleBackPressHideMenu()
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetIsDragNodeNeedClean(true);
+    auto container = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (container->IsUIExtensionWindow()) {
+        auto overlayManager = mainPipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->RemoveGatherNode();
+    }
 }
 } // namespace OHOS::Ace::NG

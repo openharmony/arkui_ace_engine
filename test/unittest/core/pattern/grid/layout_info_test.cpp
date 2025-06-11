@@ -556,6 +556,24 @@ HWTEST_F(GridLayoutInfoTest, OutOfEnd001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OutOfEnd002
+ * @tc.desc: Test GridLayoutInfo::OutOfEnd with different precision
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, OutOfEnd002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+
+    info.childrenCount_ = 5;
+    info.endIndex_ = 4;
+    info.contentEndPadding_ = 0.0f;
+    info.currentOffset_ = -1.666626f;
+    info.totalHeightOfItemsInView_ = 401.666626f;
+    info.lastMainSize_ = 400.000000f;
+    EXPECT_FALSE(info.IsOutOfEnd(0.0f, false));
+}
+
+/**
  * @tc.name: FindStartLineInMatrix001
  * @tc.desc: Test GridLayoutInfo::FindStartLineInMatrix
  * @tc.type: FUNC

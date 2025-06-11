@@ -1,0 +1,38 @@
+image: "nexus.bz-openlab.ru:10443/huawei/koala-ci:0.2.1"
+
+stages:
+  - install-deps
+  - prebuild
+  - build-compiler
+  - build
+  - test
+  - idlize
+  - build-with-idlize
+  - pre-deploy
+  - deploy
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+
+include:
+    - gitlab/setup.yml
+    - gitlab/npm.yml
+    - incremental/.gitlab-ci.yml
+    - incremental/build-common/.gitlab-ci.yml
+    - incremental/compat/.gitlab-ci.yml
+    - incremental/common/.gitlab-ci.yml
+    - incremental/harness/.gitlab-ci.yml
+    - incremental/compiler-plugin/.gitlab-ci.yml
+    - incremental/runtime/.gitlab-ci.yml
+    - incremental/demo-playground/.gitlab-ci.yml
+    - incremental/tools/fast-arktsc/.gitlab-ci.yml
+    - arkoala/.gitlab-ci.yml
+    - arkoala/ets-plugin/.gitlab-ci.yml
+    - arkoala/tools/peer-generator/.gitlab-ci.yml
+    - arkoala/loader/.gitlab-ci.yml
+    - arkoala-arkts/.gitlab-ci.yml
+    - arkoala-arkts/libarkts/.gitlab-ci.yml
+    - arkoala-arkts/memo-plugin/.gitlab-ci.yml
+    - interop/.gitlab-ci.yml

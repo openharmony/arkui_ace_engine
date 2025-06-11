@@ -29,7 +29,7 @@ namespace {
 #ifdef FFRT_SUPPORT
 constexpr uint32_t MAX_THREAD_NUM = 3;
 constexpr uint32_t ASYNC_UITASK_QOS = 5;
-std::unique_ptr<ffrt::queue> aysncUITaskQueue = nullptr;
+std::unique_ptr<ffrt::queue> asyncUITaskQueue = nullptr;
 #endif
 }
 thread_local bool MultiThreadBuildManager::isFreeNodeScope_ = false;
@@ -43,7 +43,7 @@ MultiThreadBuildManager& MultiThreadBuildManager::GetInstance()
 
 MultiThreadBuildManager::MultiThreadBuildManager()
 {
-    InitAysncUITaskQueue();
+    InitAsyncUITaskQueue();
 }
 
 void MultiThreadBuildManager::InitOnUIThread()
@@ -51,10 +51,10 @@ void MultiThreadBuildManager::InitOnUIThread()
     isUIThread_ = true;
 }
 
-void MultiThreadBuildManager::InitAysncUITaskQueue()
+void MultiThreadBuildManager::InitAsyncUITaskQueue()
 {
 #ifdef FFRT_SUPPORT
-    aysncUITaskQueue = std::make_unique<ffrt::queue>(ffrt::queue_concurrent,
+    asyncUITaskQueue = std::make_unique<ffrt::queue>(ffrt::queue_concurrent,
         "ArkUIAsyncUITask", ffrt::queue_attr().max_concurrency(MAX_THREAD_NUM));
 #endif
 }
@@ -117,11 +117,16 @@ bool MultiThreadBuildManager::TryPostUnSafeTask(NG::UINode* node, std::function<
 bool MultiThreadBuildManager::PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,
     std::function<void()>&& onFinishTask)
 {
+    ContainerScope scope(contextId);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
 #ifdef FFRT_SUPPORT
-    if (!aysncUITaskQueue) {
+    if (!asyncUITaskQueue) {
         return false;
     }
-    auto result = aysncUITaskQueue->submit_h([contextId,
+    auto result = asyncUITaskQueue->submit_h([contextId,
         asyncUITask = std::move(asyncUITask), onFinishTask = std::move(onFinishTask)]() {
         ContainerScope scope(contextId);
         asyncUITask();
@@ -136,11 +141,6 @@ bool MultiThreadBuildManager::PostAsyncUITask(int32_t contextId, std::function<v
     }, ffrt::task_attr().qos(ASYNC_UITASK_QOS));
     return result != nullptr;
 #else
-    ContainerScope scope(contextId);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, false);
     return taskExecutor->PostTask([contextId,
         asyncUITask = std::move(asyncUITask), onFinishTask = std::move(onFinishTask)]() {
         ContainerScope scope(contextId);

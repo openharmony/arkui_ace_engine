@@ -32,6 +32,29 @@ constexpr int NUM_5 = 5;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 constexpr int PARAM_ARR_LENGTH_1 = 1;
+
+std::string ParseFontSize(const EcmaVM* vm, const Local<JSValueRef>& fontSizeArgs,
+    RefPtr<ResourceObject>& fontSizeResObj)
+{
+    CalcDimension fontSizeData;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData, fontSizeResObj, true, false) ||
+        fontSizeData.Unit() == DimensionUnit::PERCENT) {
+        fontSizeData = Dimension(-1);
+    }
+    return fontSizeData.ToString();
+}
+
+std::string ParseFontFamily(const EcmaVM* vm, const Local<JSValueRef>& fontFamilyArgs,
+    RefPtr<ResourceObject>& fontFamilyResObj)
+{
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArgs, fontFamily, fontFamilyResObj) ||
+        fontFamily.empty()) {
+        fontFamily = DEFAULT_FAMILY;
+    }
+    return fontFamily;
+}
+
 ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -49,35 +72,37 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         GetArkUINodeModifiers()->getDatePickerModifier()->resetSelectedTextStyle(nativeNode);
     }
 
-    CalcDimension fontSizeData;
-    std::string fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData, true, false) ||
-        fontSizeData.Unit() == DimensionUnit::PERCENT) {
-        fontSizeData = Dimension(-1);
-    }
-    fontSize = fontSizeData.ToString();
+    RefPtr<ResourceObject> fontSizeResObj;
+    std::string fontSize = ParseFontSize(vm, fontSizeArgs, fontSizeResObj);
 
     std::string weight = "FontWeight.Medium";
     if (fontWeightArgs->IsString(vm) || fontWeightArgs->IsNumber()) {
         weight = fontWeightArgs->ToString(vm)->ToString(vm);
     }
 
-    std::string fontFamily;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArgs, fontFamily) || fontFamily.empty()) {
-        fontFamily = DEFAULT_FAMILY;
-    }
+    RefPtr<ResourceObject> fontFamilyResObj;
+    std::string fontFamily = ParseFontFamily(vm, fontFamilyArgs, fontFamilyResObj);
+
     int32_t fontStyle = 0;
     if (fontStyleArgs->IsNumber()) {
         fontStyle = fontStyleArgs->Int32Value(vm);
     }
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color)) {
+    RefPtr<ResourceObject> textColorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj)) {
         Color::ParseColorString("#ff0a59f7", color);
     }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-    GetArkUINodeModifiers()->getDatePickerModifier()->setSelectedTextStyle(
-        nativeNode, fontInfo.c_str(), color.GetValue(), fontStyle);
+
+    ArkUIPickerTextStyleStruct textStyleStruct;
+    textStyleStruct.textColor = color.GetValue();
+    textStyleStruct.fontStyle = fontStyle;
+    textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
+    textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    GetArkUINodeModifiers()->getDatePickerModifier()->setSelectedTextStyleWithResObj(nativeNode, &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -107,35 +132,38 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
         fontFamilyArgs->IsUndefined() && fontStyleArgs->IsUndefined()) {
         GetArkUINodeModifiers()->getDatePickerModifier()->resetSelectedTextStyle(nativeNode);
     }
-    CalcDimension fontSizeData;
-    std::string fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData, true, false) ||
-        fontSizeData.Unit() == DimensionUnit::PERCENT) {
-        fontSizeData = Dimension(-1);
-    }
-    fontSize = fontSizeData.ToString();
+
+    RefPtr<ResourceObject> fontSizeResObj;
+    std::string fontSize = ParseFontSize(vm, fontSizeArgs, fontSizeResObj);
 
     std::string weight = "FontWeight.Regular";
     if (fontWeightArgs->IsString(vm) || fontWeightArgs->IsNumber()) {
         weight = fontWeightArgs->ToString(vm)->ToString(vm);
     }
 
-    std::string fontFamily;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArgs, fontFamily) || fontFamily.empty()) {
-        fontFamily = DEFAULT_FAMILY;
-    }
+    RefPtr<ResourceObject> fontFamilyResObj;
+    std::string fontFamily = ParseFontFamily(vm, fontFamilyArgs, fontFamilyResObj);
+
     int32_t fontStyle = 0;
     if (fontStyleArgs->IsNumber()) {
         fontStyle = fontStyleArgs->Int32Value(vm);
     }
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color)) {
+    RefPtr<ResourceObject> textColorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj)) {
         Color::ParseColorString("#ff182431", color);
     }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-    GetArkUINodeModifiers()->getDatePickerModifier()->setDatePickerTextStyle(
-        nativeNode, fontInfo.c_str(), color.GetValue(), fontStyle);
+
+    ArkUIPickerTextStyleStruct textStyleStruct;
+    textStyleStruct.textColor = color.GetValue();
+    textStyleStruct.fontStyle = fontStyle;
+    textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
+    textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    GetArkUINodeModifiers()->getDatePickerModifier()->setDatePickerTextStyleWithResObj(nativeNode, &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -165,35 +193,38 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         fontFamilyArgs->IsUndefined() && fontStyleArgs->IsUndefined()) {
         GetArkUINodeModifiers()->getDatePickerModifier()->resetSelectedTextStyle(nativeNode);
     }
-    CalcDimension fontSizeData;
-    std::string fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData, true, false) ||
-        fontSizeData.Unit() == DimensionUnit::PERCENT) {
-        fontSizeData = Dimension(-1);
-    }
-    fontSize = fontSizeData.ToString();
+
+    RefPtr<ResourceObject> fontSizeResObj;
+    std::string fontSize = ParseFontSize(vm, fontSizeArgs, fontSizeResObj);
 
     std::string weight = "FontWeight.Regular";
     if (fontWeightArgs->IsString(vm) || fontWeightArgs->IsNumber()) {
         weight = fontWeightArgs->ToString(vm)->ToString(vm);
     }
 
-    std::string fontFamily;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArgs, fontFamily) || fontFamily.empty()) {
-        fontFamily = DEFAULT_FAMILY;
-    }
+    RefPtr<ResourceObject> fontFamilyResObj;
+    std::string fontFamily = ParseFontFamily(vm, fontFamilyArgs, fontFamilyResObj);
+
     int32_t fontStyle = 0;
     if (fontStyleArgs->IsNumber()) {
         fontStyle = fontStyleArgs->Int32Value(vm);
     }
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color)) {
+    RefPtr<ResourceObject> textColorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj)) {
         Color::ParseColorString("#ff182431", color);
     }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-    GetArkUINodeModifiers()->getDatePickerModifier()->setDisappearTextStyle(
-        nativeNode, fontInfo.c_str(), color.GetValue(), fontStyle);
+
+    ArkUIPickerTextStyleStruct textStyleStruct;
+    textStyleStruct.textColor = color.GetValue();
+    textStyleStruct.fontStyle = fontStyle;
+    textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
+    textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    GetArkUINodeModifiers()->getDatePickerModifier()->setDisappearTextStyleWithResObj(nativeNode, &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 

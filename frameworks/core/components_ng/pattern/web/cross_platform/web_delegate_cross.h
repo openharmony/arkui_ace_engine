@@ -443,6 +443,7 @@ public:
     void UpdateForceDarkAccess(const bool& access) override;
     void UpdateAudioResumeInterval(const int32_t& resumeInterval) override;
     void UpdateAudioExclusive(const bool& audioExclusive) override;
+    void UpdateAudioSessionType(const WebAudioSessionType& audioSessionType) override;
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled) override;
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled) override;
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled) override;

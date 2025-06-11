@@ -1090,10 +1090,38 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue018, TestSize.Level1)
 
 /**
  * @tc.name: DragEventTestNGIssue019
- * @tc.desc: Test IsCurrentNodeStatusSuitableForDragging function when OriginUIInputEventType is AXIS.
+ * @tc.desc: Test HandleStartDragAnimationFinish.
  * @tc.type: FUNC
  */
 HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue019, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. get DragDropManager.
+    */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto containerId = Container::CurrentId();
+
+    /**
+    * @tc.steps: step2. call HandleStartDragAnimationFinish function.
+    */
+    dragDropManager->ResetPullMoveReceivedForCurrentDrag(false);
+    dragDropManager->isDragFwkShow_ = false;
+    dragDropManager->HandleStartDragAnimationFinish(containerId);
+    EXPECT_EQ(dragDropManager->isDragFwkShow_, true);
+
+    dragDropManager->ResetPullMoveReceivedForCurrentDrag(true);
+    dragDropManager->isDragFwkShow_ = false;
+    dragDropManager->HandleStartDragAnimationFinish(containerId);
+    EXPECT_EQ(dragDropManager->isDragFwkShow_, false);
+};
+
+/**
+ * @tc.name: DragEventTestNGIssue020
+ * @tc.desc: Test IsCurrentNodeStatusSuitableForDragging function when OriginUIInputEventType is AXIS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create DragEventActuator.

@@ -282,4 +282,31 @@ HWTEST_F(ShapeContainerPatternTestNg, ShapeContainerModifier, TestSize.Level1)
     contentModifier->onDraw(context);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: IsEnableMatchParentTest
+ * @tc.desc: check ShapeContainerPattern IsEnableMatchParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeContainerPatternTestNg, IsEnableMatchParentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto shapeModel01 = ShapeModelNG();
+    shapeModel01.Create();
+    shapeModel01.SetViewPort(Dimension(ZERO), Dimension(ZERO), Dimension(ZERO), Dimension(ZERO));
+    shapeModel01.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Check Function IsEnableMatchParent's return value.
+     * @tc.expected: Function IsEnableMatchParent returns true.
+     */
+    EXPECT_TRUE(pattern->IsEnableMatchParent());
+}
 } // namespace OHOS::Ace::NG

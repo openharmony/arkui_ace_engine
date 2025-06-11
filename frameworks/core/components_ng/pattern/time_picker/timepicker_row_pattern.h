@@ -698,6 +698,7 @@ private:
     void InitDisabled();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
+    void AdjustFocusBoxOffset(double& centerX);
     void SetButtonIdeaSize();
     double SetAmPmButtonIdeaSize();
     void GetAllChildNodeWithSecond();

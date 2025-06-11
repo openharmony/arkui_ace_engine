@@ -1,0 +1,15 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/lib/unmemoized",
+        "rootDir": "./build/unmemoized",
+        "rootDirs": ["./build/unmemoized/src", "./build/unmemoized/test"],
+        "module": "CommonJS"
+    },
+    "include": ["./build/unmemoized/src/**/*"],
+    "references": [
+        { "path": "../compiler-plugin" },
+        { "path": "../common" },
+        { "path": "../compat" }
+    ]
+}

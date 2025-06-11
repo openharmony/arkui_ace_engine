@@ -40,6 +40,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "bridge/declarative_frontend/jsview/js_search.h"
+#include "bridge/declarative_frontend/jsview/js_textfield.h"
 
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -179,6 +181,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
         }
         auto context = container->GetPipelineContext();
         ContainerScope scope(container->GetInstanceId());
+        ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
         context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
@@ -241,6 +244,7 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
         }
         auto context = container->GetPipelineContext();
         ContainerScope scope(container->GetInstanceId());
+        ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
         context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
@@ -463,6 +467,7 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
     std::vector<KeyframeParam>& keyframes, const std::optional<int32_t>& count)
 {
     // flush build and flush ui tasks before open animation closure.
+    ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
     pipelineContext->FlushBuild();
     if (!pipelineContext->IsLayouting()) {
         pipelineContext->FlushUITasks(true);
@@ -482,6 +487,7 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
         AceTraceBeginWithArgs("keyframe duration%d", keyframe.duration);
         AnimationUtils::AddDurationKeyFrame(keyframe.duration, keyframe.curve, [&keyframe, &pipelineContext]() {
             keyframe.animationClosure();
+            ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
             pipelineContext->FlushBuild();
             if (!pipelineContext->IsLayouting()) {
                 pipelineContext->FlushUITasks(true);
@@ -650,6 +656,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     PrintAnimationInfo(option, AnimationInterface::ANIMATION, std::nullopt);
     AceScopedTrace paramTrace("duration:%d, curve:%s, iteration:%d", option.GetDuration(),
         option.GetCurve()->ToString().c_str(), option.GetIteration());
+    option.SetAnimationInterface(AnimationInterface::ANIMATION);
     ViewContextModel::GetInstance()->openAnimation(option);
     JankFrameReport::GetInstance().ReportJSAnimation();
 }
@@ -773,6 +780,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     option.SetOnFinishEvent(onFinishEvent);
+    option.SetAnimationInterface(
+        immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
                     << ",iteration:" << option.GetIteration()
@@ -867,6 +876,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     AceScopedTrace trace("KeyframeAnimateTo iteration:%d, delay:%d",
                          overallAnimationOption.GetIteration(), overallAnimationOption.GetDelay());
     PrintAnimationInfo(overallAnimationOption, AnimationInterface::KEYFRAME_ANIMATE_TO, count);
+    overallAnimationOption.SetAnimationInterface(AnimationInterface::KEYFRAME_ANIMATE_TO);
     if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
             "when call keyframeAnimateTo, node stack is not empty, not suitable for keyframeAnimateTo."
@@ -1363,6 +1373,25 @@ void JSViewContext::SetEnableSwipeBack(const JSCallbackInfo& info)
     pipelineContext->SetEnableSwipeBack(info[0]->ToBoolean());
 }
 
+void JSViewContext::JSSetKeyboardAppearanceConfig(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    auto nodeTag = frameNode->GetTag();
+    if (nodeTag == V2::TEXTINPUT_ETS_TAG) {
+        JSTextField::SetKeyboardAppearanceConfig(info);
+    } else if (nodeTag == V2::SEARCH_ETS_TAG) {
+        JSSearch::SetKeyboardAppearanceConfig(info);
+    }
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -1388,6 +1417,7 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod(
         "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
     JSClass<JSViewContext>::StaticMethod("enableSwipeBack", JSViewContext::SetEnableSwipeBack);
+    JSClass<JSViewContext>::StaticMethod("setKeyboardAppearanceConfig", JSViewContext::JSSetKeyboardAppearanceConfig);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

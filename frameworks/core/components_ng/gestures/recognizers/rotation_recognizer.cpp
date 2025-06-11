@@ -402,6 +402,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
+        HandleGestureAccept(info, type);
         callbackFunction(info);
         HandleReports(info, type);
     }

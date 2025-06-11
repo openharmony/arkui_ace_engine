@@ -142,6 +142,7 @@ enum TextHeightBehavior {
 struct ParagraphStyle {
     TextDirection direction = TextDirection::AUTO;
     TextAlign align = TextAlign::LEFT;
+    TextVerticalAlign verticalAlign = TextVerticalAlign::BASELINE;
     uint32_t maxLines = UINT32_MAX;
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
@@ -164,8 +165,8 @@ struct ParagraphStyle {
 
     bool operator==(const ParagraphStyle others) const
     {
-        return direction == others.direction && align == others.align && maxLines == others.maxLines &&
-               fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
+        return direction == others.direction && align == others.align && verticalAlign == others.verticalAlign &&
+               maxLines == others.maxLines && fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
                leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
                halfLeading == others.halfLeading && indent == others.indent &&
@@ -182,6 +183,8 @@ struct ParagraphStyle {
     {
         std::string result = "TextAlign: ";
         result += V2::ConvertWrapTextAlignToString(align);
+        result += ", TextVerticalAlign: ";
+        result += V2::ConvertWrapTextVerticalAlignToString(verticalAlign);
         result += ", maxLines: ";
         result += std::to_string(maxLines);
         result += ", wordBreak: ";

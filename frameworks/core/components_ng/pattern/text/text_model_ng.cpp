@@ -136,6 +136,15 @@ void TextModelNG::SetFontSize(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
 
+void TextModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, frameNode);
+    }
+}
+
 void TextModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     if (!value.IsValid()) {
@@ -175,19 +184,24 @@ void TextModelNG::ResetTextColor()
     textPattern->ResetCustomFontColor();
 }
 
-void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
+void TextModelNG::SetTextColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    Color color = value.value_or(GetDefaultColor(themeScopeId));
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColorByRender(value);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    textLayoutProperty->UpdateTextColorByRender(color);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->UpdateFontColor(value);
+    if (value) {
+        textPattern->UpdateFontColor(value.value());
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true, frameNode);
+    textPattern->UpdateFontColor(color);
 }
 
 void TextModelNG::ResetTextColor(FrameNode* frameNode)
@@ -213,24 +227,37 @@ void TextModelNG::SetItalicFontStyle(Ace::FontStyle value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value);
 }
 
-void TextModelNG::SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value)
+void TextModelNG::SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, frameNode);
+    }
 }
 
-void TextModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
+void TextModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, frameNode);
+    }
 }
 
-void TextModelNG::SetVariableFontWeight(FrameNode* frameNode, int32_t value)
+void TextModelNG::SetVariableFontWeight(FrameNode* frameNode, const std::optional<int32_t>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, value, frameNode);
+    auto variableFontWeight = value.value_or(DEFAULT_VARIABLE_FONT_WEIGHT);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, variableFontWeight, frameNode);
 }
 
-void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
+void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, const std::optional<bool>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, frameNode);
+    }
 }
 
 void TextModelNG::SetMinFontScale(const float value)
@@ -293,9 +320,13 @@ void TextModelNG::SetTextAlign(Ace::TextAlign value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value);
 }
 
-void TextModelNG::SetTextAlign(FrameNode* frameNode, Ace::TextAlign value)
+void TextModelNG::SetTextAlign(FrameNode* frameNode, const std::optional<Ace::TextAlign>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, frameNode);
+    }
 }
 
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
@@ -303,9 +334,13 @@ void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value);
 }
 
-void TextModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)
+void TextModelNG::SetTextOverflow(FrameNode* frameNode, const std::optional<Ace::TextOverflow>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, frameNode);
+    }
 }
 
 void TextModelNG::SetMaxLines(uint32_t value)
@@ -323,9 +358,13 @@ void TextModelNG::SetLineHeight(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value);
 }
 
-void TextModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
+void TextModelNG::SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, frameNode);
+    }
 }
 
 void TextModelNG::SetLineSpacing(const Dimension& value)
@@ -344,14 +383,27 @@ void TextModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines);
 }
 
+void TextModelNG::SetLineSpacing(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, frameNode);
+    }
+}
+
 void TextModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, {value});
 }
 
-void TextModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
+void TextModelNG::SetTextDecoration(FrameNode* frameNode, const std::optional<TextDecoration>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, {value}, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, {value.value()}, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, frameNode);
+    }
 }
 
 void TextModelNG::SetTextDecorationColor(const Color& value)
@@ -359,9 +411,13 @@ void TextModelNG::SetTextDecorationColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationColor, value);
 }
 
-void TextModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
+void TextModelNG::SetTextDecorationColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationColor, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationColor, frameNode);
+    }
 }
 
 void TextModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
@@ -369,9 +425,13 @@ void TextModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationStyle, value);
 }
 
-void TextModelNG::SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value)
+void TextModelNG::SetTextDecorationStyle(FrameNode* frameNode, const std::optional<TextDecorationStyle>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationStyle, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationStyle, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationStyle, frameNode);
+    }
 }
 
 void TextModelNG::SetLineThicknessScale(float value)
@@ -525,64 +585,112 @@ RefPtr<TextControllerBase> TextModelNG::InitTextController(FrameNode* frameNode)
     return textPattern->GetTextController();
 }
 
-void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
+void TextModelNG::SetTextCase(FrameNode* frameNode, const std::optional<Ace::TextCase>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, frameNode);
+    }
 }
 
-void TextModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
+void TextModelNG::SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, frameNode);
+    }
 }
 
-void TextModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
+void TextModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, frameNode);
+    }
 }
 
-void TextModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
+void TextModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, frameNode);
+    }
 }
 
-void TextModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+void TextModelNG::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, frameNode);
+    }
 }
 
-void TextModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+void TextModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, frameNode);
+    }
 }
 
-void TextModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+void TextModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, frameNode);
+    }
 }
 
-void TextModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
+void TextModelNG::SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOption)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption, frameNode);
+    if (copyOption) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, frameNode);
+    }
 }
 
-void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
+void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::optional<std::vector<Shadow>>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, frameNode);
+    }
 }
 
-void TextModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value)
+void TextModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, HeightAdaptivePolicy, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, HeightAdaptivePolicy, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, HeightAdaptivePolicy, frameNode);
+    }
 }
 
-void TextModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
+void TextModelNG::SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, frameNode);
+    }
 }
 
-void TextModelNG::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
+void TextModelNG::SetBaselineOffset(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, frameNode);
+    }
 }
 
 void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
@@ -602,32 +710,53 @@ void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
     SetEnableVariableFontWeight(frameNode, value.enableVariableFontWeight.value_or(false));
 }
 
-void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
+void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, frameNode);
+    }
 }
 
-void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
+void TextModelNG::SetWordBreak(FrameNode* frameNode, const std::optional<Ace::WordBreak>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, frameNode);
+    }
 }
 
-void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, Ace::LineBreakStrategy value)
+void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, const std::optional<Ace::LineBreakStrategy>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, frameNode);
+    }
 }
 
-void TextModelNG::SetTextSelectableMode(FrameNode* frameNode, Ace::TextSelectableMode value)
+void TextModelNG::SetTextSelectableMode(FrameNode* frameNode, const std::optional<Ace::TextSelectableMode>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, frameNode);
+    }
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetTextSelectableMode(value);
+    auto mode = value.value_or(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    textPattern->SetTextSelectableMode(mode);
 }
 
-void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
+void TextModelNG::SetEllipsisMode(FrameNode* frameNode, const std::optional<Ace::EllipsisMode>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, frameNode);
+    }
 }
 
 void TextModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
@@ -1078,9 +1207,13 @@ TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
     return value;
 }
 
-void TextModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
+void TextModelNG::SetCaretColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, frameNode);
+    }
 }
 
 Color TextModelNG::GetCaretColor(FrameNode* frameNode)
@@ -1104,14 +1237,18 @@ void TextModelNG::ResetCaretColor(FrameNode* frameNode)
     }
 }
 
-void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
+void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    Color color = value;
-    if (color.GetAlpha() == DEFAULT_ALPHA) {
-        // Default setting of 20% opacity
-        color = color.ChangeOpacity(DEFAULT_OPACITY);
+    if (value) {
+        Color color = value.value();
+        if (color.GetAlpha() == DEFAULT_ALPHA) {
+            // Default setting of 20% opacity
+            color = color.ChangeOpacity(DEFAULT_OPACITY);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, color, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, color, frameNode);
 }
 
 Color TextModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
@@ -1152,6 +1289,10 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
         textPattern->SetExternalParagraph(nullptr);
         textPattern->SetExternalSpanItem(spanItems);
         textPattern->SetExternalParagraphStyle(std::nullopt);
+        auto pManager = textPattern->GetParagraphManager();
+        if (pManager) {
+            pManager->Reset();
+        }
     } else {
         textPattern->SetExternalParagraph(value->paragraph);
     }
@@ -1190,12 +1331,13 @@ void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<v
     eventHub->SetOnSelectionChange(std::move(func));
 }
 
-void TextModelNG::SetSelectionMenuOptions(
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void TextModelNG::SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    textPattern->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void TextModelNG::OnCreateMenuCallbackUpdate(
@@ -1214,6 +1356,15 @@ void TextModelNG::OnMenuItemClickCallbackUpdate(
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+}
+
+void TextModelNG::OnPrepareMenuCallbackUpdate(
+    FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
 }
 
 void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
@@ -1357,6 +1508,35 @@ void TextModelNG::ResetTextGradient(FrameNode* frameNode)
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     if (textLayoutProperty) {
         textLayoutProperty->ResetGradientShaderStyle();
+    }
+}
+
+void TextModelNG::SetTextVerticalAlign(TextVerticalAlign verticalAlign)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextVerticalAlign, verticalAlign);
+}
+
+void TextModelNG::SetTextVerticalAlign(FrameNode* frameNode, TextVerticalAlign verticalAlign)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextVerticalAlign, verticalAlign, frameNode);
+}
+
+TextVerticalAlign TextModelNG::GetTextVerticalAlign(FrameNode* frameNode)
+{
+    TextVerticalAlign value = TextVerticalAlign::BASELINE;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, TextVerticalAlign, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
+    TextResponseType& responseType, std::function<void()>&& buildFunc, SelectMenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern) {
+        pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam);
     }
 }
 } // namespace OHOS::Ace::NG

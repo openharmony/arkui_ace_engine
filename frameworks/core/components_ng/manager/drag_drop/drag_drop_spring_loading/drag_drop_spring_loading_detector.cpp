@@ -56,7 +56,7 @@ void DragDropSpringLoadingDetector::NotifyMove(const SpringLoadingParams& params
     auto isMovementExceedThreshold = IsMovementExceedThreshold(params.curTimeStamp, params.movePoint);
     preMovePoint_ = params.movePoint;
     preTimeStamp_ = params.curTimeStamp;
-    if (preTargetFrameNode_ != params.dragFrameNode) {
+    if (!preTargetFrameNode_ || preTargetFrameNode_ != params.dragFrameNode) {
         preTargetFrameNode_ = params.dragFrameNode;
         stateMachine_->ResetMachine();
         stateMachine_->Begin(params.extraInfo);
@@ -74,29 +74,36 @@ void DragDropSpringLoadingDetector::NotifyMove(const SpringLoadingParams& params
 void DragDropSpringLoadingDetector::NotifyIntercept(std::string_view extraInfo)
 {
     TAG_LOGD(AceLogTag::ACE_DRAG, "SpringLoading detector intercept.");
-    CHECK_NULL_VOID(preTargetFrameNode_);
-    auto eventHub = preTargetFrameNode_->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    if (!eventHub->HasCustomerOnDragSpringLoading()) {
-        return;
-    }
-    if (stateMachine_->IsInSpringLoadingState()) {
-        if (stateMachine_->GetCurrentState() == DragDropSpringLoadingState::END) {
-            stateMachine_->ResetMachine();
-            return;
-        }
-        if (!stateMachine_->RequestStatusTransition(DragDropSpringLoadingState::CANCEL, extraInfo)) {
-            stateMachine_->ResetMachine();
-        }
-    }
+    bool shouldReset = true;
 
-    if (stateMachine_->IsWaitingForIdleFinish()) {
+    do {
+        if (!preTargetFrameNode_) {
+            break;
+        }
+
+        auto eventHub = preTargetFrameNode_->GetEventHub<EventHub>();
+        if (!eventHub || !eventHub->HasCustomerOnDragSpringLoading()) {
+            break;
+        }
+
+        if (stateMachine_->IsInSpringLoadingState()) {
+            if (stateMachine_->GetCurrentState() == DragDropSpringLoadingState::END) {
+                break;
+            }
+            stateMachine_->RequestStatusTransition(DragDropSpringLoadingState::CANCEL, extraInfo);
+            shouldReset = false;
+            break;
+        }
+
+        if (!stateMachine_->IsWaitingForIdleFinish()) {
+            shouldReset = false;
+        }
+    } while (0);
+
+    if (shouldReset) {
         stateMachine_->ResetMachine();
+        ResetState();
     }
-
-    preTargetFrameNode_ = nullptr;
-    preMovePoint_ = Point(0, 0);
-    preTimeStamp_ = 0;
 }
 
 void DragDropSpringLoadingDetector::Intercept(std::string extraInfo)
@@ -121,11 +128,13 @@ bool DragDropSpringLoadingDetector::IsMovementExceedThreshold(uint64_t curTimeSt
     if (timeDelta <= 0 || preTimeStamp_ == 0) {
         return false;
     };
-    auto deltaX = PipelineBase::Px2VpWithCurrentDensity((curMovePoint.GetX() - preMovePoint_.GetX())) / timeDelta;
+    auto deltaX =
+        PipelineBase::Px2VpWithCurrentDensity(std::abs(curMovePoint.GetX() - preMovePoint_.GetX())) / timeDelta;
     if (deltaX >= SPEED_THRESHOLD) {
         return true;
     }
-    auto deltaY = PipelineBase::Px2VpWithCurrentDensity((curMovePoint.GetY() - preMovePoint_.GetY())) / timeDelta;
+    auto deltaY =
+        PipelineBase::Px2VpWithCurrentDensity(std::abs(curMovePoint.GetY() - preMovePoint_.GetY())) / timeDelta;
     if (deltaY >= SPEED_THRESHOLD) {
         return true;
     }
@@ -133,4 +142,10 @@ bool DragDropSpringLoadingDetector::IsMovementExceedThreshold(uint64_t curTimeSt
     return speedSquared >= SPEED_THRESHOLD;
 }
 
+void DragDropSpringLoadingDetector::ResetState()
+{
+    preTargetFrameNode_ = nullptr;
+    preMovePoint_ = Point(0, 0);
+    preTimeStamp_ = 0;
+}
 } // namespace OHOS::Ace::NG

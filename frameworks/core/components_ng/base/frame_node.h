@@ -73,6 +73,7 @@ class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
 class DragDropRelatedConfigurations;
+class ScrollWindowAdapter;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -852,10 +853,7 @@ public:
     // Called to perform layout children.
     void Layout() override;
 
-    int32_t GetTotalChildCount() const override
-    {
-        return UINode::TotalChildCount();
-    }
+    int32_t GetTotalChildCount() const override;
 
     int32_t GetTotalChildCountWithoutExpanded() const
     {
@@ -1396,6 +1394,9 @@ public:
     void AddToOcclusionMap(bool enable);
     void MarkModifyDoneUnsafely();
     void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
+
+    ScrollWindowAdapter* GetScrollWindowAdapter() const;
+    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
 
 protected:
     void DumpInfo() override;

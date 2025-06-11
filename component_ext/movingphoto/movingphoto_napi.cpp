@@ -279,6 +279,7 @@ napi_value InitView(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("autoPlay", JsAutoPlay),
         DECLARE_NAPI_FUNCTION("repeatPlay", JsRepeatPlay),
         DECLARE_NAPI_FUNCTION("enableAnalyzer", JsEnableAnalyzer),
+        DECLARE_NAPI_FUNCTION("hdrBrightness", JsHdrBrightness),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -413,6 +414,23 @@ napi_value JsEnableAnalyzer(napi_env env, napi_callback_info info)
     }
     NG::MovingPhotoModelNG::GetInstance()->EnableAnalyzer(enabled);
 
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsHdrBrightness(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
+ 
+    float hdrBrightness = 1.0f;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_number)) {
+        hdrBrightness = static_cast<float>(ExtNapiUtils::GetDouble(env, argv[0]));
+        hdrBrightness = (hdrBrightness >= 0.0f && hdrBrightness <= 1.0f) ? hdrBrightness : 1.0f;
+    }
+    NG::MovingPhotoModelNG::GetInstance()->SetHdrBrightness(hdrBrightness);
+ 
     return ExtNapiUtils::CreateNull(env);
 }
 

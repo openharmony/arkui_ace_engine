@@ -21,5 +21,6 @@ ace_unittest("calendar_picker_test_ng") {
     "calendar_picker_test_ng.cpp",
     "calendar_picker_test_update.cpp",
     "calendar_picker_test_tojson.cpp",
+    "calendar_picker_resource_test.cpp",
   ]
 }

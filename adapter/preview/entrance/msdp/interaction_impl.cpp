@@ -126,4 +126,9 @@ int32_t  InteractionImpl::GetDragBundleInfo(DragBundleInfo& dragBundleInfo)
 {
     return -1;
 }
+
+int32_t InteractionImpl::EnableInternalDropAnimation(const std::string& animationInfo)
+{
+    return -1;
+}
 } // namespace OHOS::Ace

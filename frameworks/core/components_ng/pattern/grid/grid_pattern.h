@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,16 +22,20 @@
 #include "core/components_ng/pattern/grid/grid_focus.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT GridPattern : public ScrollablePattern {
-    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
+
+class ACE_EXPORT GridPattern : public ScrollablePattern, public LazyContainer {
+    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern, LazyContainer);
 
 public:
     GridPattern() = default;
+
+    void OnAttachToFrameNode() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -258,9 +262,16 @@ public:
         focusHandler_.ResetFocusIndex();
     }
 
+    std::optional<int32_t> GetFocusedIndex() const
+    {
+        return focusHandler_.GetFocusIndex();
+    }
+
     SizeF GetChildrenExpandedSize() override;
 
     void HandleOnItemFocus(int32_t index);
+
+    RefPtr<FillAlgorithm> CreateFillAlgorithm() final;
 
 private:
     /**
@@ -279,6 +290,8 @@ private:
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+
+    void UpdateOffsetHelper(float offset);
 
     void ClearMultiSelect() override;
     bool IsItemSelected(float offsetX, float offsetY) override;

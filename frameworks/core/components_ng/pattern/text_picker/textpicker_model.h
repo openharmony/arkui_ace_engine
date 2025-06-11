@@ -102,11 +102,6 @@ public:
     virtual void SetSelectedBackgroundStyle(const NG::PickerBackgroundStyle& value) = 0;
     virtual void UpdateUserSetSelectColor() = 0;
     virtual void ParseGradientHeight(const RefPtr<ResourceObject>& resObj) {};
-    virtual void ParseDividerResObj() {};
-    virtual void ParseDisappearTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
-    virtual void ParseSelectedTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
-    virtual void ParseNormalTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
-    virtual void ParseDefaultTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
     virtual void ParseColumnWidthsResourceObj(const std::vector<RefPtr<ResourceObject>>& widthResObjs) {};
     virtual void ParseSingleRangeResourceObj(const RefPtr<ResourceObject>& resultResObj,
         const RefPtr<ResourceObject>& valueResObj) {};

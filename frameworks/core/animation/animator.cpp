@@ -746,6 +746,7 @@ AnimationOption Animator::GetAnimationOption()
     option.SetIteration(iteration_);
     option.SetTempo(tempo_);
     option.SetFillMode(fillMode_);
+    option.SetAnimationInterface(GetAnimationType());
 
     AnimationDirection direction = direction_;
     if (GetInitAnimationDirection()) {

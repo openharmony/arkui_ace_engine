@@ -1100,7 +1100,7 @@ void JSNavigationStack::SetNeedBuildNewInstance(int32_t index, bool need)
     pathInfo->SetProperty<bool>("needBuildNewInstance", need);
 }
 
-JSRef<JSArray> JSNavigationStack::GetJsPathArray()
+JSRef<JSArray> JSNavigationStack::GetJsPathArray() const
 {
     if (dataSourceObj_->IsEmpty()) {
         return JSRef<JSArray>();
@@ -1113,7 +1113,7 @@ JSRef<JSArray> JSNavigationStack::GetJsPathArray()
     return JSRef<JSArray>::Cast(objArray);
 }
 
-JSRef<JSObject> JSNavigationStack::GetJsPathInfo(int32_t index)
+JSRef<JSObject> JSNavigationStack::GetJsPathInfo(int32_t index) const
 {
     auto navPathArray = GetJsPathArray();
     int32_t len = static_cast<int32_t>(navPathArray->Length());
@@ -1188,6 +1188,24 @@ std::string JSNavigationStack::GetStringifyParamByIndex(int32_t index) const
     return paramChar.get();
 }
 
+std::string JSNavigationStack::GetSerializedParamSafely(int32_t index) const
+{
+    std::string serializedEmpty = "{}";
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, serializedEmpty);
+    auto getSerializedParamSafelyFunc = dataSourceObj_->GetProperty("getSerializedParamSafely");
+    if (!getSerializedParamSafelyFunc->IsFunction()) {
+        return serializedEmpty;
+    }
+    JSRef<JSVal> arg[1] = { JSRef<JSVal>::Make(ToJSValue(index)) };
+    auto serializedParam = JSRef<JSFunc>::Cast(getSerializedParamSafelyFunc)->Call(dataSourceObj_, 1, arg);
+    if (serializedParam->IsString() || serializedParam->ToString().empty()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "current navDestination(index: %{public}d)'s param can't be serialized or is empty!", index);
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "serialize navDestination param success! its index: %{public}d", index);
+    return serializedParam->ToString();
+}
+
 void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
@@ -1208,6 +1226,33 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
     }
     dataSourceObj_->SetPropertyObject("pathArray", newPathArray);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set navPathArray by recovery info success");
+}
+
+void JSNavigationStack::CallPushDestinationInner(const NG::NavdestinationRecoveryInfo& navdestinationsInfo)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto pushNavDestinationFunc = dataSourceObj_->GetProperty("pushDestination");
+    if (!pushNavDestinationFunc->IsFunction()) {
+        return;
+    }
+    auto infoName = navdestinationsInfo.name;
+    auto infoParam = navdestinationsInfo.param;
+    auto infoMode = navdestinationsInfo.mode;
+
+    JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
+    navPathInfo->SetProperty<std::string>("name", infoName);
+    if (!infoParam.empty() && infoParam != JS_STRINGIFIED_UNDEFINED) {
+        navPathInfo->SetPropertyObject("param", JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str()));
+    }
+    navPathInfo->SetProperty<int32_t>("mode", infoMode);
+
+    auto func = JSRef<JSFunc>::Cast(pushNavDestinationFunc);
+    JSRef<JSVal> arg[1];
+    arg[0] = navPathInfo;
+    func->Call(dataSourceObj_, 1, arg);
 }
 
 bool JSNavigationStack::IsFromRecovery(int32_t index)

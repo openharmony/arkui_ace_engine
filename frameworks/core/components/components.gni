@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 template("build_component") {
@@ -132,6 +133,9 @@ template("build_component") {
             external_deps += [ "graphic_2d:2d_graphics" ]
           }
         }
+      }
+      if (use_new_skia) {
+        defines += [ "USE_NEW_SKIA" ]
       }
       part_name = ace_engine_part
       subsystem_name = ace_engine_subsystem

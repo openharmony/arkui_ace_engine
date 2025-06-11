@@ -127,6 +127,7 @@ private:
     void InitLineHeight(const std::string& key, const std::string& value, StyleValues& values);
     Dimension FromString(const std::string& str);
     TextAlign StringToTextAlign(const std::string& value);
+    TextVerticalAlign StringToTextVerticalAlign(const std::string& value);
     WordBreak StringToWordBreak(const std::string& value);
     TextOverflow StringToTextOverflow(const std::string& value);
     bool IsTextIndentAttr(const std::string& key);

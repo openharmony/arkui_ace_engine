@@ -182,6 +182,7 @@ public:
     void UpdateEnable(bool needToenable);
     float GetMaxFontScale();
     float GetMinFontScale();
+    void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config);
 
 private:
     void OnModifyDone() override;

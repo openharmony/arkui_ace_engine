@@ -92,6 +92,8 @@ protected:
     float GetFirstItemBottomPositionY(const RefPtr<FrameNode>& menu);
     float GetLastItemTopPositionY(const RefPtr<FrameNode>& menu);
     float GetMenuBottomPositionY(const RefPtr<FrameNode>& menu);
+    bool isContainerModal(const RefPtr<FrameNode>& node);
+    float GetContainerModalOffsetY(const RefPtr<FrameNode>& node);
 
     // position input is relative to main window left top point,
     // menu show position is relative to menuWrapper.
@@ -139,7 +141,7 @@ private:
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void CalcWrapperRectForHoverMode(const RefPtr<MenuPattern>& menuPattern);
     void UpdateWrapperRectForHoverMode(
-        const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, float creaseHeightOffset);
+        const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, double creaseHeightOffset);
     uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
         const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
@@ -261,6 +263,7 @@ private:
     void ModifyTargetOffset();
     OffsetF UpdateMenuPosition(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode,
         RefPtr<MenuPattern> menuPattern, const RefPtr<MenuLayoutProperty>& menuProp);
+    bool IsSelectMenuShowInSubWindow(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode);
 
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
@@ -282,8 +285,11 @@ private:
     std::string CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow);
     bool UpdateSelectOverlayMenuColumnInfo(
         const RefPtr<MenuPattern>& menuPattern, const RefPtr<GridColumnInfo>& columnInfo);
-    float CalcSubMenuMaxHeightConstraint(LayoutWrapper* layoutWrapper,
-        LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    float CalcSubMenuMaxHeightConstraint(LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    float CalcSubMenuMaxHeightWithPreview(RefPtr<FrameNode> parentMenu, LayoutConstraintF& childConstraint,
+        float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
+    float CalcSubMenuMaxHeightNoPreview(RefPtr<FrameNode> parentItem, LayoutConstraintF& childConstraint,
+        float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;

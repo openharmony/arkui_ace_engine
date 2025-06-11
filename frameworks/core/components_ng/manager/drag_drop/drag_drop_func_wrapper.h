@@ -85,6 +85,7 @@ public:
         const RefPtr<PipelineBase>& nodeContext, const RefPtr<Subwindow>& subWindow,
         bool isExpandDisplay, int32_t instanceId);
     static void SetMenuSubWindowTouchable(bool touchable);
+    static void HandleBackPressHideMenu();
 
     // multi drag
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);

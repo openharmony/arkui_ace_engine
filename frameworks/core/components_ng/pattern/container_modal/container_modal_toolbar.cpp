@@ -85,6 +85,19 @@ void ContainerModalToolBar::SetOnChangeCallback()
         toolbarManager_->SetSideBarColorChangeCallback(std::move(func));
         hasSetUpdateSideTitleBgColor_ = true;
     }
+    if (!hasSetNavigationModeChangeCallback_) {
+        std::function<void()> navigationModefunc = [weak = WeakClaim(this), toolbarMgr = toolbarManager_]() {
+            CHECK_NULL_VOID(toolbarMgr);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            NavigationMode navigationMode = toolbarMgr->GetNavigationMode();
+            if (navigationMode != NavigationMode::SPLIT) {
+                pattern->RemoveAllToolbarItem();
+            }
+        };
+        toolbarManager_->SetNavigationModeChangeCallback(std::move(navigationModefunc));
+        hasSetNavigationModeChangeCallback_ = true;
+    }
 }
 
 void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>& builder)
@@ -122,13 +135,13 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
     pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
         auto toolbar = weak.Upgrade();
         CHECK_NULL_VOID(toolbar);
-        if (!(toolbar->HasNavOrSideBarNodes())) {
-            if (toolbar->GetNavOrSideBarNodes()) {
+        if (toolbar->GetNavOrSideBarNodes()) {
+            if (!(toolbar->HasNavOrSideBarNodes())) {
                 toolbar->SetHasNavOrSideBarNodes(true);
                 toolbar->ToInitNavOrSideBarNode();
-            } else {
-                return;
             }
+        } else {
+            return;
         }
         toolbar->ParsePlacementType();
     });
@@ -136,6 +149,10 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
 
 void ContainerModalToolBar::ParsePlacementType()
 {
+    if (!GetNavOrSideBarNodes() || !HasNavOrSideBarNodes()) {
+        return;
+    }
+
     bool hasItem = false;
     for (auto it = itemsWillOnTree_.begin(); it != itemsWillOnTree_.end();) {
         auto parent = it->first;
@@ -155,12 +172,15 @@ void ContainerModalToolBar::ParsePlacementType()
 
 ItemPlacementType ContainerModalToolBar::GetItemTypeFromTag(const std::string& tag, uint32_t placement)
 {
-    if (tag == V2::SIDE_BAR_ETS_TAG)
+    if (tag == V2::SIDE_BAR_ETS_TAG) {
         return placement ? ItemPlacementType::SIDE_BAR_END : ItemPlacementType::SIDE_BAR_START;
-    if (tag == V2::NAVBAR_ETS_TAG)
+    }
+    if (tag == V2::NAVBAR_ETS_TAG) {
         return placement ? ItemPlacementType::NAV_BAR_END : ItemPlacementType::NAV_BAR_START;
-    if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG)
+    }
+    if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         return placement ? ItemPlacementType::NAVDEST_END : ItemPlacementType::NAVDEST_START;
+    }
     return ItemPlacementType::NONE;
 }
 
@@ -211,6 +231,22 @@ void ContainerModalToolBar::UpdateTitleAfterRemove()
                 PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         }
     }
+}
+
+void ContainerModalToolBar::RemoveAllToolbarItem()
+{
+    for (auto& [_, list] : itemsOnTree_) {
+        for (auto& item : list) {
+            auto parent = item->GetParent();
+            if (parent) {
+                parent->RemoveChild(item);
+                parent->MarkNeedSyncRenderTree();
+                parent->RebuildRenderContextTree();
+            }
+        }
+    }
+    itemsOnTree_.clear();
+    UpdateTitleLayout();
 }
 
 void ContainerModalToolBar::RemoveToolbarItem(const RefPtr<FrameNode>& frameNode)
@@ -563,9 +599,10 @@ void ContainerModalToolBar::RemoveToolbarRowContainers()
 
 void ContainerModalToolBar::OnToolBarLayoutChange()
 {
-    if (!toolbarManager_) {
+    if (!toolbarManager_ || !HasNavOrSideBarNodes()) {
         return;
     }
+
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto pipeline = pattern->GetContext();
@@ -845,22 +882,22 @@ bool ContainerModalToolBar::GetNavOrSideBarNodesParseChildren(const RefPtr<UINod
                 isSideBarFound = true;
                 isNavigationFound = true;
                 break;
-            } else if ((isSideBarFound || isNavigationFound) &&
-                       childFrameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            } else if ((isNavigationFound && isSideBarFound) || (isNavigationFound &&
+                childFrameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG)) {
                 isSideBarFound = true;
                 isNavigationFound = true;
                 isNavDestFound = true;
                 navDestNode_ = childFrameNode;
             }
-            if ((isSideBarFound || isNavigationFound) && isNavDestFound) {
+            if ((isNavigationFound && isSideBarFound) || (isNavigationFound && isNavDestFound)) {
                 break;
             }
         }
-        if ((isSideBarFound || isNavigationFound) && isNavDestFound) {
+        if ((isNavigationFound && isSideBarFound) || (isNavigationFound && isNavDestFound)) {
             break;
         }
     }
-    if (isSideBarFound || isNavigationFound || isNavDestFound) {
+    if ((isNavigationFound && isSideBarFound) || (isNavigationFound && isNavDestFound)) {
         return true;
     }
     return false;
@@ -887,12 +924,17 @@ bool ContainerModalToolBar::IsTragetNavigationNodeParse(const RefPtr<FrameNode>&
     float sideBarHeight, bool isNavigationFound, bool isSideBarFound)
 {
     CHECK_NULL_RETURN(childFrameNode, false);
+    CHECK_NULL_RETURN(toolbarManager_, false);
+
     if (!isNavigationFound && childFrameNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+        auto navigationPattern = childFrameNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_RETURN(navigationPattern, false);
+        NavigationMode navigationMode = navigationPattern->GetNavigationMode();
         if (!isSideBarFound) {
             auto geometryNode = childFrameNode->GetGeometryNode();
             CHECK_NULL_RETURN(geometryNode, false);
             auto childWidth = geometryNode->GetFrameSize().Width();
-            if (NearEqual(pageWidth, childWidth)) {
+            if (NearEqual(pageWidth, childWidth) && navigationMode == NavigationMode::SPLIT) {
                 navigationNode_ = childFrameNode;
                 return true;
             }
@@ -900,7 +942,8 @@ bool ContainerModalToolBar::IsTragetNavigationNodeParse(const RefPtr<FrameNode>&
             auto geometryNode = childFrameNode->GetGeometryNode();
             CHECK_NULL_RETURN(geometryNode, false);
             auto childHeight = geometryNode->GetFrameSize().Height();
-            if (NearEqual(sideBarHeight, childHeight) || NearEqual(sideBarHeight, 0.0f)) {
+            if ((NearEqual(sideBarHeight, childHeight) || NearEqual(sideBarHeight, 0.0f)) &&
+                navigationMode == NavigationMode::SPLIT) {
                 navigationNode_ = childFrameNode;
                 return true;
             }
@@ -953,7 +996,7 @@ void ContainerModalToolBar::UpdateSideTitleBgColor(
     ctx->UpdateBackBlurStyle(option);
 }
 
-void ContainerModalToolBar::SetcustomTitleRowBlurStyle(BlurStyle& blurStyle)
+void ContainerModalToolBar::SetCustomTitleRowBlurStyle(BlurStyle& blurStyle)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
@@ -1037,7 +1080,7 @@ void ContainerModalToolBar::UpdateTargetNodesBarMargin(bool reset)
         if (!isUpdateTargetNode_ && pattern->GetIsHaveToolBar() && pattern->IsExpandStackNode()) {
             ExpandStackNodeLayout();
             BlurStyle blurStyle = BlurStyle::THIN;
-            SetcustomTitleRowBlurStyle(blurStyle);
+            SetCustomTitleRowBlurStyle(blurStyle);
             toolbarManager_->SetIsMoveUp(true);
         }
         toolbarManager_->SetTitleHeight(pattern->titleHeight_);
@@ -1091,5 +1134,4 @@ void ContainerModalToolBar::ResetExpandStackNode()
     toolbarManager_->SetIsMoveUp(false);
     ExpandStackNodeLayout(true);
 }
-
 } // namespace OHOS::Ace::NG

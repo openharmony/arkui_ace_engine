@@ -16,15 +16,42 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_FONT_COLLECTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_FONT_COLLECTION_H
 
+#include <functional>
+
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
+using LoadFontCallback = std::function<void(const std::string&)>;
 
 class ACE_EXPORT FontCollection : public virtual AceType {
     DECLARE_ACE_TYPE(FontCollection, AceType)
 public:
     static RefPtr<FontCollection> Current();
+
+    const LoadFontCallback& GetUnloadFontFinishCallback()
+    {
+        return unloadFontFinishCallback_;
+    }
+
+    void RegisterUnloadFontFinishCallback(LoadFontCallback&& cb)
+    {
+        unloadFontFinishCallback_ = std::move(cb);
+    }
+
+    const LoadFontCallback& GetLoadFontFinishCallback()
+    {
+        return loadFontFinishCallback_;
+    }
+
+    void RegisterLoadFontFinishCallback(LoadFontCallback&& cb)
+    {
+        loadFontFinishCallback_ = std::move(cb);
+    }
+
+private:
+    LoadFontCallback unloadFontFinishCallback_;
+    LoadFontCallback loadFontFinishCallback_;
 };
 
 } // namespace OHOS::Ace::NG

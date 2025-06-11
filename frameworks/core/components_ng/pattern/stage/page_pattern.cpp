@@ -135,6 +135,7 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
         AnimationOption option(effect->GetCurve(), effect->GetDuration());
         option.SetDelay(effect->GetDelay());
         option.SetOnFinishEvent(wrappedOnFinish);
+        option.SetAnimationInterface(AnimationInterface::PAGE_TRANSITION);
         currCustomAnimation_ = AnimationUtils::StartAnimation(option, [weakPage = WeakPtr<FrameNode>(host)]() {
             auto pageNode = weakPage.Upgrade();
             CHECK_NULL_VOID(pageNode);
@@ -964,6 +965,7 @@ void PagePattern::TriggerDefaultTransition(const std::function<void()>& onFinish
     AnimationOption option;
     UpdateAnimationOption(transition, effect, option, type);
     option.SetOnFinishEvent(onFinish);
+    option.SetAnimationInterface(AnimationInterface::PAGE_TRANSITION);
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto pipelineContext = hostNode->GetContext();

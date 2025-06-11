@@ -61,6 +61,11 @@ public:
         float initHeight = 0.0f, bool isTypedNode = false);
     ~XComponentPattern() override = default;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     bool IsAtomicNode() const override
     {
         return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE || type_ == XComponentType::NODE;
@@ -462,6 +467,7 @@ private:
     void RegisterSurfaceCallbackModeEvent();
     void RegisterTransformHintCallback(PipelineContext* context);
     void RegisterSurfaceRenderContext();
+    void UnregisterSurfaceRenderContext();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -521,6 +527,8 @@ private:
     // record displaySync_->DelFromPipelineOnContainer() from OnDetachFromMainTree
     bool isNativeImageAnalyzing_ = false;
     WeakPtr<PipelineContext> initialContext_ = nullptr;
+    // record the initial surfaceId_ in InitSurface, this variable should not be modified after the initial assignment
+    std::string initialSurfaceId_;
 };
 } // namespace OHOS::Ace::NG
 

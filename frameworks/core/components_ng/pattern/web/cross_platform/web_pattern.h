@@ -361,6 +361,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceDarkAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioResumeInterval, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioExclusive, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioSessionType, WebAudioSessionType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
@@ -374,6 +375,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CssDisplayChangeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
@@ -504,7 +506,7 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder);
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
-
+    void SetDefaultBackgroundColor();
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -561,6 +563,7 @@ private:
     void OnForceDarkAccessUpdate(bool access);
     void OnAudioResumeIntervalUpdate(int32_t resumeInterval);
     void OnAudioExclusiveUpdate(bool audioExclusive);
+    void OnAudioSessionTypeUpdate(WebAudioSessionType value);
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
@@ -599,6 +602,7 @@ private:
     void UpdateSlideOffset(bool isNeedReset = false);
     void OnNativeEmbedModeEnabledUpdate(bool value) {};
     void OnIntrinsicSizeEnabledUpdate(bool value);
+    void OnCssDisplayChangeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnCopyOptionModeUpdate(const int32_t value);
@@ -690,6 +694,7 @@ private:
     int32_t rootLayerHeight_ = 0;
     bool richTextInit_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
+    bool needSetDefaultBackgroundColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 

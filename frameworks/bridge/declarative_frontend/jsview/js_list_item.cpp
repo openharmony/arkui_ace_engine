@@ -211,7 +211,6 @@ void JSListItem::SetSelected(const JSCallbackInfo& info)
 void JSListItem::JsParseDeleteArea(const JSRef<JSVal>& jsValue, bool isStartArea, NG::FrameNode* node)
 {
     auto deleteAreaObj = JSRef<JSObject>::Cast(jsValue);
-
     auto onAction = deleteAreaObj->GetProperty("onAction");
     std::function<void()> onActionCallback;
     if (onAction->IsFunction()) {
@@ -238,7 +237,18 @@ void JSListItem::JsParseDeleteArea(const JSRef<JSVal>& jsValue, bool isStartArea
     }
     auto actionAreaDistance = deleteAreaObj->GetProperty("actionAreaDistance");
     CalcDimension length;
-    if (!ParseJsDimensionVp(actionAreaDistance, length)) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!ParseJsDimensionVp(actionAreaDistance, length, resObj)) {
+            auto listItemTheme = GetTheme<ListItemTheme>();
+            length = listItemTheme->GetDeleteDistance();
+        }
+        if (isStartArea) {
+            ListItemModel::GetInstance()->ParseResObjStartArea(resObj);
+        } else {
+            ListItemModel::GetInstance()->ParseResObjEndArea(resObj);
+        }
+    } else if (!ParseJsDimensionVp(actionAreaDistance, length)) {
         auto listItemTheme = GetTheme<ListItemTheme>();
         length = listItemTheme->GetDeleteDistance();
     }

@@ -893,25 +893,34 @@ HWTEST_F(TabsTestNg, TabContentCreatePaddingWithResourceObj001, TestSize.Level1)
     EXPECT_TRUE(TabContentModelNG::CreatePaddingRightWithResourceObj(frameNode, nullptr));
     EXPECT_TRUE(TabContentModelNG::CreatePaddingTopWithResourceObj(frameNode, nullptr));
     EXPECT_TRUE(TabContentModelNG::CreatePaddingBottomWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateTextContentWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIconWithResourceObjWithKey(frameNode, "", nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateBoardStyleBorderRadiusWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorColorWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorHeightWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorWidthWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorBorderRadiusWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorMarginTopWithResourceObj(frameNode, nullptr));
 
-    RefPtr<ResourceObject> resObjLeft;
-    RefPtr<ResourceObject> resObjRight;
-    RefPtr<ResourceObject> resObjTop;
-    RefPtr<ResourceObject> resObjBottom;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    RefPtr<ResourceObject> resObjLeft = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    RefPtr<ResourceObject> resObjRight = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    RefPtr<ResourceObject> resObjTop = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    RefPtr<ResourceObject> resObjBottom = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
 
     EXPECT_TRUE(TabContentModelNG::CreatePaddingLeftWithResourceObj(frameNode, resObjLeft));
     EXPECT_TRUE(TabContentModelNG::CreatePaddingRightWithResourceObj(frameNode, resObjRight));
     EXPECT_TRUE(TabContentModelNG::CreatePaddingTopWithResourceObj(frameNode, resObjTop));
     EXPECT_TRUE(TabContentModelNG::CreatePaddingBottomWithResourceObj(frameNode, resObjBottom));
-
-    resObjLeft = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
-    resObjRight = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
-    resObjTop = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
-    resObjBottom = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
-
-    EXPECT_TRUE(TabContentModelNG::CreatePaddingLeftWithResourceObj(frameNode, resObjLeft));
-    EXPECT_TRUE(TabContentModelNG::CreatePaddingRightWithResourceObj(frameNode, resObjRight));
-    EXPECT_TRUE(TabContentModelNG::CreatePaddingTopWithResourceObj(frameNode, resObjTop));
-    EXPECT_TRUE(TabContentModelNG::CreatePaddingBottomWithResourceObj(frameNode, resObjBottom));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateTextContentWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIconWithResourceObjWithKey(frameNode, "", resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateBoardStyleBorderRadiusWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorColorWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorHeightWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorWidthWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorBorderRadiusWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorMarginTopWithResourceObj(frameNode, resObj));
 }
 } // namespace OHOS::Ace::NG

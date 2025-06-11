@@ -667,8 +667,13 @@ ArkUINativeModuleValue GridBridge::SetFriction(ArkUIRuntimeCallInfo* runtimeCall
     double friction = -1.0;
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
-    if (!ArkTSUtils::ParseJsDouble(vm, arg_friction, friction)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, arg_friction, friction, resObj)) {
         friction = -1.0;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getGridModifier()->createWithResourceObjFriction(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
     }
     GetArkUINodeModifiers()->getGridModifier()->setFriction(nativeNode, static_cast<ArkUI_Float32>(friction));
 
@@ -682,6 +687,9 @@ ArkUINativeModuleValue GridBridge::ResetFriction(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetFriction(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getGridModifier()->createWithResourceObjFriction(nativeNode, nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue GridBridge::SetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)

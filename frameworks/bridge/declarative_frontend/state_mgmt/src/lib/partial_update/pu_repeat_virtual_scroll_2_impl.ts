@@ -429,7 +429,7 @@ class __RepeatVirtualScroll2Impl<T> {
     }
 
     private totalCount(forceRetrieveTotalCount = false): number {
-        // when 'totalCount' is set as an ,observable', we call updateElement() just to
+        // when 'totalCount' is set as an observable', we call updateElement() just to
         // retrieve its actual value - prevent triggering re-render here
         if (forceRetrieveTotalCount && typeof this.totalCount_ === 'number') {
             this.preventReRender_ = true;

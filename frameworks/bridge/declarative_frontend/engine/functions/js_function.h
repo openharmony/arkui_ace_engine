@@ -62,6 +62,15 @@ public:
         return JSRef<JSVal>::Cast(eventInfo);
     }
 
+#ifdef USE_ARK_ENGINE
+    virtual JSRef<JSVal> ExecuteJSWithContext(
+        int argc, JSRef<JSVal> argv[], const JSExecutionContext& context, bool isAnimation = false)
+    {
+        JSRef<JSObject> eventInfo = JSRef<JSObject>::New();
+        return JSRef<JSVal>::Cast(eventInfo);
+    }
+#endif
+
 protected:
     JSWeak<JSVal> jsThis_;
 
@@ -92,6 +101,11 @@ public:
     }
     JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false) override;
 
+#ifdef USE_ARK_ENGINE
+    JSRef<JSVal> ExecuteJSWithContext(int argc, JSRef<JSVal> argv[],
+        const JSExecutionContext& context, bool isAnimation = false) override;
+#endif
+
 protected:
     JSRef<JSObject> GetTapLocation(const FingerInfo& fingerInfo);
     JSRef<JSFunc> jsFunction_;
@@ -118,6 +132,11 @@ public:
         return ExecuteJS(0, nullptr);
     }
     JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false) override;
+
+#ifdef USE_ARK_ENGINE
+    JSRef<JSVal> ExecuteJSWithContext(int argc, JSRef<JSVal> argv[],
+        const JSExecutionContext& context, bool isAnimation = false) override;
+#endif
 
 protected:
     JSWeak<JSFunc> jsWeakFunction_;

@@ -62,6 +62,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
 {
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle.align);
+    style.verticalAlignment = Constants::ConvertTxtTextVerticalAlign(paraStyle.verticalAlign);
     style.maxLines = paraStyle.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle.maxLines;
     style.fontSize = paraStyle.fontSize; // Rosen style.fontSize
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);

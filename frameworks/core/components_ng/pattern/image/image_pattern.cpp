@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 
+#include "base/image/image_perf.h"
 #include "base/log/dump_log.h"
 #include "base/network/download_manager.h"
 #include "core/common/ace_engine_ext.h"
@@ -103,6 +104,8 @@ constexpr float IMAGE_SENSITIVE_RADIUS = 80.0f;
 constexpr double IMAGE_SENSITIVE_SATURATION = 1.0;
 constexpr double IMAGE_SENSITIVE_BRIGHTNESS = 1.08;
 constexpr uint32_t MAX_SRC_LENGTH = 120; // prevent the Base64 image format from too long.
+constexpr int IMAGE_LOAD_FAIL = 0;
+constexpr int IMAGE_LOAD_SUCCESS = 1;
 
 ImagePattern::ImagePattern()
 {
@@ -127,9 +130,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. %{public}s."
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -148,9 +149,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. %{public}s."
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -170,9 +169,7 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. %{public}s."
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -192,9 +189,7 @@ OnCompleteInDataReadyNotifyTask ImagePattern::CreateCompleteCallBackInDataReady(
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. %{public}s."
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -221,7 +216,7 @@ void ImagePattern::OnCompleteInDataReady()
 
 void ImagePattern::TriggerFirstVisibleAreaChange()
 {
-    if (isComponentSnapshotNode_) {
+    if (isComponentSnapshotNode_ || isImageAnimator_) {
         OnVisibleAreaChange(true);
         return;
     }
@@ -424,6 +419,17 @@ void ImagePattern::ApplyAIModificationsToImage()
     }
 }
 
+void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int state)
+{
+    auto accessibilityId = host->GetAccessibilityId();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto type = loadingCtx_->GetSourceInfo().GetSrcType();
+    std::string srcType = GetSrcTypeToString(type);
+    std::pair<int, int> size(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    ImagePerf::GetPerfMonitor()->EndRecordImageLoadStat(accessibilityId, srcType, size, state);
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
@@ -434,7 +440,7 @@ void ImagePattern::OnImageLoadSuccess()
 
     image_ = loadingCtx_->MoveCanvasImage();
     if (!image_) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s OnImageLoadSuccess but Canvas image is null.",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s image is null.",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         return;
     }
@@ -471,10 +477,27 @@ void ImagePattern::OnImageLoadSuccess()
     }
     auto context = host->GetRenderContext();
     auto pixelMap = image_->GetPixelMap();
+    if (pixelMap) {
+        SetPixelMapMemoryName(pixelMap);
+    }
     if (context && pixelMap) {
         context->SetIsWideColorGamut(pixelMap->GetIsWideColorGamut());
     }
+    ReportPerfData(host, IMAGE_LOAD_SUCCESS);
     host->MarkNeedRenderOnly();
+}
+
+bool ImagePattern::SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto id = host->GetInspectorId();
+    if (id.has_value()) {
+        pixelMap->SetMemoryName(id.value());
+        hasSetPixelMapMemoryName_ = true;
+        return true;
+    }
+    return false;
 }
 
 bool ImagePattern::CheckIfNeedLayout()
@@ -548,6 +571,7 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg, const ImageError
     CHECK_NULL_VOID(imageEventHub);
     LoadImageFailEvent event(
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg, errorInfo);
+    ReportPerfData(host, IMAGE_LOAD_FAIL);
     imageEventHub->FireErrorEvent(event);
 }
 
@@ -796,6 +820,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     renderedImageInfo_.renderSuccess = false;
     // Reset the reload flag before loading the image to ensure a fresh state.
     isImageReloadNeeded_ = false;
+    ImagePerf::GetPerfMonitor()->StartRecordImageLoadStat(imageDfxConfig_.GetAccessibilityId());
     loadingCtx_->LoadImageData();
 }
 
@@ -975,7 +1000,7 @@ void ImagePattern::ControlAnimation(int32_t index)
         if (context) {
             animator_->AttachScheduler(context);
         } else {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "pipeline is null.");
         }
     }
     switch (status_) {
@@ -1172,9 +1197,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "alt image sourceInfo does not match, ignore current callback. %{public}s. current: %{private}s vs "
-                "callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentAltSourceInfo.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -1206,9 +1229,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
         auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSrc != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "alt image sourceInfo does not match, ignore current callback. %{public}s. current: %{private}s vs "
-                "callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt src not match, %{public}s: %{private}s - %{private}s",
                 pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(), currentAltSrc.ToString().c_str(),
                 sourceInfo.ToString().c_str());
             return;
@@ -1355,7 +1376,7 @@ void ImagePattern::OnWindowHide()
 
 void ImagePattern::OnWindowShow()
 {
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageReloadNeeded_ = %{public}d",
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageReloadNeeded_ = %{public}d",
         imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageReloadNeeded_);
     isShow_ = true;
     auto host = GetHost();
@@ -1871,6 +1892,17 @@ void ImagePattern::DumpOtherInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("selfOrientation: ").append(ConvertOrientationToString(selfOrientation_)));
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpMenmoryNameId();
+}
+
+void ImagePattern::DumpMenmoryNameId()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetInspectorId();
+    if (id.has_value() && hasSetPixelMapMemoryName_) {
+        DumpLog::GetInstance().AddDesc(std::string("PixelMapMemoryName id : ").append(id.value()));
+    }
 }
 
 void ImagePattern::DumpInfo()
@@ -2011,6 +2043,23 @@ std::string ImagePattern::GetImageColorFilterStr(const std::vector<float>& color
         result += ", " + std::to_string(colorFilter[idx]);
     }
     return result + "]";
+}
+
+std::string ImagePattern::GetSrcTypeToString(SrcType srcType)
+{
+    static const std::unordered_map<SrcType, std::string> typeMap = { { SrcType::UNSUPPORTED, "unsupported" },
+        { SrcType::FILE, "file" }, { SrcType::ASSET, "asset" }, { SrcType::NETWORK, "network" },
+        { SrcType::MEMORY, "memory" }, { SrcType::BASE64, "base64" }, { SrcType::INTERNAL, "internal" },
+        { SrcType::RESOURCE, "resource" }, { SrcType::DATA_ABILITY, "dataAbility" },
+        { SrcType::DATA_ABILITY_DECODED, "dataAbilityDecoded" }, { SrcType::RESOURCE_ID, "resourceId" },
+        { SrcType::PIXMAP, "pixmap" }, { SrcType::ASTC, "astc" } };
+
+    auto iter = typeMap.find(srcType);
+    if (iter != typeMap.end()) {
+        return iter->second;
+    }
+
+    return "";
 }
 
 void ImagePattern::EnableAnalyzer(bool value)
@@ -2261,8 +2310,7 @@ void ImagePattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNod
 void ImagePattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index)
 {
     if (index >= static_cast<int32_t>(images_.size())) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "PrepareImageInfo index error, index: %{public}d, size: %{public}zu", index,
-            images_.size());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "index error: %{public}d-%{public}zu", index, images_.size());
         return;
     }
     auto host = GetHost();
@@ -2393,7 +2441,7 @@ void ImagePattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameN
             }
             iter->isLoaded = true;
             if (pattern->nowImageIndex_ >= static_cast<int32_t>(pattern->images_.size())) {
-                TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnimator showImage index is invalid");
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "index is invalid");
                 return;
             }
             if (pattern->nowImageIndex_ == iter->index &&
@@ -2793,7 +2841,7 @@ void ImagePattern::OnActive()
             if (context) {
                 animator_->AttachScheduler(context);
             } else {
-                TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "pipeline is null.");
             }
         }
         animator_->Forward();

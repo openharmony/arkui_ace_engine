@@ -36,10 +36,14 @@ struct ImageProperties {
 
     bool operator==(const ImageProperties& info) const
     {
-        return src == info.src &&
-               ((!pixelMap && !info.pixelMap) ||
-                   (pixelMap->GetPixels() == info.pixelMap->GetPixels() &&
-                       pixelMap->GetRawPixelMapPtr() == info.pixelMap->GetRawPixelMapPtr())) &&
+        bool pixelMapEqual = false;
+        if (!pixelMap && !info.pixelMap) {
+            pixelMapEqual = true;
+        } else if (pixelMap && info.pixelMap) {
+            pixelMapEqual = pixelMap->GetPixels() == info.pixelMap->GetPixels() &&
+                            pixelMap->GetRawPixelMapPtr() == info.pixelMap->GetRawPixelMapPtr();
+        }
+        return src == info.src && pixelMapEqual &&
                bundleName == info.bundleName && moduleName == info.moduleName && width == info.width &&
                height == info.height && top == info.top && left == info.left && duration == info.duration;
     }

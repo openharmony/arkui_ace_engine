@@ -24,6 +24,8 @@ template("napi_observer_static") {
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     sources = [
+      "gesture/gesture_observer.cpp",
+      "gesture/gesture_observer_listener.cpp",
       "js_ui_observer.cpp",
       "ui_observer.cpp",
       "ui_observer_listener.cpp",

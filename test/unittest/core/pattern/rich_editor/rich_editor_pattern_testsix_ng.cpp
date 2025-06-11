@@ -255,6 +255,34 @@ HWTEST_F(RichEditorPatternTestSixNg, MouseRightFocus002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MouseRightFocus003
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, MouseRightFocus003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = PREVIEW_TEXT_VALUE2;
+    spanItem->spanItemType = SpanItemType::NORMAL;
+    spanItem->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    MouseInfo info;
+    info.SetGlobalLocation({ 0, 0 });
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    richEditorPattern->previewLongPress_ = true;
+    focusHub->RequestFocusImmediately();
+    EXPECT_EQ(richEditorPattern->isEditing_, false);
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_EQ(richEditorPattern->isEditing_, true);
+}
+
+/**
  * @tc.name: FromStyledString002
  * @tc.desc: test FromStyledString
  * @tc.type: FUNC
@@ -504,5 +532,27 @@ HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent002, TestSize.
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->ReportAfterContentChangeEvent();
     EXPECT_EQ(richEditorPattern->textCache_, "nihao");
+}
+
+/**
+ * @tc.name: ReportAfterContentChangeEvent003
+ * @tc.desc: Test ReportAfterContentChangeEvent non-span string mode with content modified
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    std::string firstText = "abcd";
+    AddSpan(firstText);
+    std::string space = " ";
+    std::string secondText = "content";
+    AddSpan(space + secondText);
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->textCache_ = "abcdefg";
+    richEditorPattern->ReportAfterContentChangeEvent();
+    EXPECT_EQ(richEditorPattern->textCache_, "abcd content");
 }
 } // namespace OHOS::Ace::NG

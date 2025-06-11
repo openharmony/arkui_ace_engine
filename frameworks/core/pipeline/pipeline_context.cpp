@@ -1541,7 +1541,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
+    ReportConfig config;
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallback(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);

@@ -510,7 +510,7 @@ bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vecto
     BuildToolbarMoreItemNode(barItemNode, itemNodeParam.enabled, itemNodeParam.hideText);
     MenuParam menuParam;
     menuParam.isShowInSubWindow = false;
-     if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
         menuParam.isShowInSubWindow = true;
         menuParam.placement = Placement::TOP_LEFT;
     }

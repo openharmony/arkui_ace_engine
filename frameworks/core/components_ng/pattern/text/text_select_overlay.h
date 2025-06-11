@@ -79,6 +79,7 @@ public:
         const RefPtr<ScrollablePattern> scrollableParent, const Offset& globalOffset, bool isStopAutoScroll);
     const RefPtr<ScrollablePattern> FindScrollableParent();
     std::optional<Color> GetHandleColor() override;
+    bool CheckTouchInHostNode(const PointF& touchPoint) override;
 
 protected:
     OffsetF GetHandleReferenceOffset(const RectF& handleRect);

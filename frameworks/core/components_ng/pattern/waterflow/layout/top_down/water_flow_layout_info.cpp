@@ -642,4 +642,16 @@ int32_t WaterFlowLayoutInfo::GetLastItem() const
     }
     return res;
 }
+
+void WaterFlowLayoutInfo::UpdateItemStart(bool canOverScrollStart)
+{
+    if (currentOffset_ >= 0) {
+        if (!canOverScrollStart) {
+            currentOffset_ = 0;
+        }
+        itemStart_ = true;
+    } else {
+        itemStart_ = false;
+    }
+}
 } // namespace OHOS::Ace::NG

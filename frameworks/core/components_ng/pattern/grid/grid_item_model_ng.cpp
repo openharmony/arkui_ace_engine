@@ -197,4 +197,12 @@ void GridItemModelNG::SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(onSelect));
 }
+
+void GridItemModelNG::SetSelectChangeEvent(FrameNode* frameNode, SelectFunc&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetSelectChangeEvent(std::move(changeEvent));
+}
 } // namespace OHOS::Ace::NG

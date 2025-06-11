@@ -485,6 +485,11 @@ public:
 
     void CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& layoutWrapper);
 
+    void SetDraggingIndex(int32_t index)
+    {
+        draggingIndex_ = index;
+    }
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -599,6 +604,10 @@ protected:
         index =  !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
         return layoutWrapper->GetChildByIndex(index, isCache);
     }
+    int32_t revertIndex(int32_t index) const
+    {
+        return !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
+    }
     virtual float GetLayoutFixOffset()
     {
         return 0.0f;
@@ -697,6 +706,7 @@ private:
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
 
     float chainInterval_ = 0.0f;
+    int32_t draggingIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

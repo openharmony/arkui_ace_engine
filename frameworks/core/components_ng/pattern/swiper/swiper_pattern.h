@@ -32,6 +32,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -74,8 +75,9 @@ constexpr float SWIPER_CURVE_MASS = 1.0f;
 constexpr float SWIPER_CURVE_STIFFNESS = 328.0f;
 constexpr float SWIPER_CURVE_DAMPING = 34.0f;
 
-class SwiperPattern : public NestableScrollContainer {
-    DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
+class SwiperPattern : public NestableScrollContainer, public LinearLazyContainer {
+    DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer, LinearLazyContainer);
+
 
 public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
@@ -653,8 +655,8 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
-    bool IsAtStart() const;
-    bool IsAtEnd() const;
+    ACE_FORCE_EXPORT bool IsAtStart() const;
+    ACE_FORCE_EXPORT bool IsAtEnd() const;
 
     bool IsIndicatorInteractive() const
     {
@@ -1232,6 +1234,7 @@ private:
     void SetIndicatorIsInFast(std::optional<bool> isInFast);
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+    void SetLayoutDisplayCount(const RefPtr<FrameNode>& swiperNode);
 
     float AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) const;
     void UpdateIgnoreBlankOffsetWithIndex();

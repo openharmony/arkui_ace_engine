@@ -152,6 +152,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnScreenCaptureRequest, void);
     ACE_WEB_EVENT_PROPERTY(OnSearchResultReceive, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowNew, void);
+    ACE_WEB_EVENT_PROPERTY(OnActivateContent, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowExit, void);
     ACE_WEB_EVENT_PROPERTY(OnPageVisible, void);
     ACE_WEB_EVENT_PROPERTY(OnDataResubmitted, void);

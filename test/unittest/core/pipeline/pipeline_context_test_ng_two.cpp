@@ -2293,5 +2293,127 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg200, TestSize.Level1)
         EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
     }
 }
+
+/**
+ * @tc.name: PipelineContextTestNg300
+ * @tc.desc: Test the function NotifyColorModeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg300, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call Function NotifyColorModeChange.
+     * @tc.expected: rootNode_->isDarkMode_ is false.
+     */
+    ASSERT_NE(context_, nullptr);
+    uint32_t colorMode = static_cast<uint32_t>(ColorMode::LIGHT);
+    context_->rootNode_->isDarkMode_ = false;
+    context_->NotifyColorModeChange(colorMode);
+    EXPECT_FALSE(context_->rootNode_->isDarkMode_);
+
+    context_->stageManager_->stageNode_->renderContext_ = nullptr;
+    context_->NotifyColorModeChange(colorMode);
+    EXPECT_FALSE(context_->stageManager_->stageNode_->HasPositionProp());
+
+    context_->stageManager_->stageNode_ = nullptr;
+    context_->NotifyColorModeChange(colorMode);
+    EXPECT_EQ(context_->stageManager_->GetStageNode(), nullptr);
+
+    context_->stageManager_ = nullptr;
+    context_->NotifyColorModeChange(colorMode);
+    EXPECT_EQ(context_->GetStageManager(), nullptr);
+
+    context_->rootNode_ = nullptr;
+    context_->NotifyColorModeChange(colorMode);
+    EXPECT_EQ(context_->GetRootElement(), nullptr);
+    context_->rootNode_ = frameNode_;
+}
+
+/* @tc.name: PipelineContextTestNg301
+ * @tc.desc: Test SetBackgroundColorModeUpdated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg301, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: check context_.
+     * @tc.expected: context_ is nullptr.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: SetBackgroundColorModeUpdated true.
+     * @tc.expected: backgroundColorModeUpdated_ is true.
+     */
+    context_->SetBackgroundColorModeUpdated(true);
+    EXPECT_TRUE(context_->backgroundColorModeUpdated_);
+
+    /**
+     * @tc.steps3: SetBackgroundColorModeUpdated false.
+     * @tc.expected: backgroundColorModeUpdated_ is false.
+     */
+    context_->SetBackgroundColorModeUpdated(false);
+    EXPECT_FALSE(context_->backgroundColorModeUpdated_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg400
+ * @tc.desc: Test the function RegisterAttachedNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg400, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
+    context_->RegisterAttachedNode(AceType::RawPtr(node));
+    auto& attachedNodeSet = context_->attachedNodeSet_;
+    bool found = false;
+    for (const auto& uiNode : attachedNodeSet) {
+        auto illegalNode = uiNode.Upgrade();
+        if (illegalNode && illegalNode == node) {
+            found = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(found);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg401
+ * @tc.desc: Test the function RemoveAttachedNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg401, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
+    context_->RegisterAttachedNode(AceType::RawPtr(node));
+
+    auto& attachedNodeSet = context_->attachedNodeSet_;
+    auto AttachedNum = attachedNodeSet.size();
+    context_->RemoveAttachedNode(AceType::RawPtr(node));
+    EXPECT_EQ(AttachedNum, attachedNodeSet.size() + 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg402
+ * @tc.desc: Test the function detaching node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg402, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
+    node->AttachContext(AceType::RawPtr(context_), false);
+    EXPECT_TRUE(context_->attachedNodeSet_.count(AceType::WeakClaim(AceType::RawPtr(node))));
+    node->DetachContext(false);
+    EXPECT_FALSE(context_->attachedNodeSet_.count(AceType::WeakClaim(AceType::RawPtr(node))));
+}
 } // namespace NG
 } // namespace OHOS::Ace

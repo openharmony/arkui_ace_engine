@@ -1305,6 +1305,47 @@ HWTEST_F(SwiperIndicatorTestNg, HandleLongPress002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleLongPress003
+ * @tc.desc: Test SwiperIndicator HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleLongPress003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step1. Touch and move right
+     * @tc.expected: Swipe to item(index:1)
+     */
+    LongPressIndicator(FIRST_POINT, FOURTH_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
+
+    /**
+     * @tc.steps: step1. Touch and move left
+     * @tc.expected: Swipe to item(index:0)
+     */
+    LongPressIndicator(FOURTH_POINT, SECOND_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    /**
+     * @tc.steps: step1. Touch and move left, when RealTotalCount equals displayCount
+     * @tc.expected: Swipe to item(index:0)
+     */
+    layoutProperty_->UpdateDisplayCount(4);
+    LongPressIndicator(FIRST_POINT, FOURTH_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    /**
+     * @tc.steps: step1. Touch and move left, when RealTotalCount smaller displayCount
+     * @tc.expected: Swipe to item(index:0)
+     */
+    layoutProperty_->UpdateDisplayCount(8);
+    LongPressIndicator(FIRST_POINT, FOURTH_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+}
+
+/**
  * @tc.name: CheckPointLocation001
  * @tc.desc: CheckPointLocation
  * @tc.type: FUNC

@@ -145,12 +145,14 @@ constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING = 0x98;
 constexpr uint8_t TLV_SPAN_STRING_MODE_FLAG = 0x99;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_LineThicknessScale = 0x9A;
 constexpr uint8_t TLV_FLOAT_TAG = 0x9B;
-constexpr uint8_t TLV_SUPERSCRIPT_TAG = 0x9C;
+constexpr uint8_t TLV_SPAN_URL_CONTENT = 0x9C;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_SUPERSCRIPT = 0x9D;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKEWIDTH = 0x9E;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKECOLOR = 0x9F;
+constexpr uint8_t TLV_SUPERSCRIPT_TAG = 0xA0;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN = 0xA1;
+constexpr uint8_t TLV_TEXTVERTICALALIGN_TAG = 0xA2;
 
-constexpr uint8_t TLV_SPAN_URL_CONTENT = 0X9C;
 
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
@@ -224,6 +226,7 @@ public:
     TLV_DEFINE_ENUM_TYPE(LineBreakStrategy, TLV_LINEBREAKSTRATEGY_TAG);
     TLV_DEFINE_ENUM_TYPE(VerticalAlign, TLV_VERTICALALIGN_TAG);
     TLV_DEFINE_ENUM_TYPE(ImageFit, TLV_IMAGEFIT_TAG);
+    TLV_DEFINE_ENUM_TYPE(TextVerticalAlign, TLV_TEXTVERTICALALIGN_TAG);
 
     static void WriteString(std::vector<uint8_t>& buff, const std::string& value);
     static std::string ReadString(std::vector<uint8_t>& buff, int32_t& cursor);

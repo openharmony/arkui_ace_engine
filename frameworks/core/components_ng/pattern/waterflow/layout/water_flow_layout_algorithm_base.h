@@ -79,6 +79,8 @@ protected:
         return (!isCache && layoutWrapper->CheckNeedForceMeasureAndLayout()) || expandSafeArea_;
     }
 
+    bool syncLoad_ = false;
+
 private:
     /**
      * @brief immediately create / measure a cache item during LayoutTask

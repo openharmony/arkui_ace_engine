@@ -833,7 +833,6 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     auto root = node->GetParent();
     CHECK_NULL_VOID(root);
     SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_CLOSE);
-    DeleteDialogHotAreas(node);
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove DialogNode/%{public}d from RootNode/%{public}d",
         node->GetId(), root->GetId());
     root->RemoveChild(node, node->GetIsUseTransitionAnimator());
@@ -848,6 +847,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
             SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
         }
     }
+    DeleteDialogHotAreas(node);
 }
 
 void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
@@ -1255,6 +1255,7 @@ void OverlayManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK
     }
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     menuWrapperPattern->CallMenuAppearCallback();
+    menuWrapperPattern->CallMenuOnDidAppearCallback();
     if (!menuWrapperPattern->IsHide()) {
         menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
     }
@@ -1283,6 +1284,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     if (!wrapperPattern->GetHoverScaleInterruption()) {
         wrapperPattern->CallMenuAboutToAppearCallback();
     }
+
     wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
     SetIsMenuShow(true, menu);
     ResetContextMenuDragHideFinished();
@@ -1395,7 +1397,6 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     eventHub->SetEnabledInternal(true);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto root = rootWeak.Upgrade();
     auto overlayManager = weak.Upgrade();
     CHECK_NULL_VOID(overlayManager);
 
@@ -1405,6 +1406,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     CHECK_NULL_VOID(menuWrapperPattern);
     if (MenuView::GetMenuHoverScaleStatus(menuWrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT) {
         menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->CallMenuOnDidDisappearCallback();
     }
     menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
     menuWrapperPattern->SetOnMenuDisappear(false);
@@ -1426,8 +1428,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     auto targetId = menuWrapperPattern->GetTargetId();
     overlayManager->EraseMenuInfo(targetId);
     if ((menuWrapperPattern->IsContextMenu() ||
-            (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu()))) &&
-        (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
+            (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu())))) {
         if (overlayManager->RemoveMenuInSubWindow(menu)) {
             overlayManager->SetIsMenuShow(false);
         }
@@ -1460,6 +1461,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 
     if (MenuView::GetMenuHoverScaleStatus(wrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT) {
         wrapperPattern->CallMenuAboutToDisappearCallback();
+        wrapperPattern->CallMenuOnWillDisappearCallback();
     }
 
     wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
@@ -4181,7 +4183,7 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<MenuWrapperPattern>(pattern)) {
-        SetDragNodeNeedClean();
+        DragDropFuncWrapper::HandleBackPressHideMenu();
         RemoveDragPreview(overlay);
         return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
@@ -5633,6 +5635,10 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         CloseSheet(SheetKey(targetId));
         return;
     }
+    if (sheetStyle.enableFloatingDragBar.value_or(false)) {
+        sheetStyle.enableFloatingDragBar =
+            (sheetStyle.showDragBar.value_or(true) && !SheetView::IsSingleDetents(sheetStyle)) ? true : false;
+    }
     SheetKey sheetKey(targetId);
     auto iter = sheetMap_.find(sheetKey);
     if (iter != sheetMap_.end()) {
@@ -5774,6 +5780,8 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     if (isStartByUIContext) {
         currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
         UpdateSheetProperty(sheetNode, currentStyle, isPartialUpdate);
+        sheetNodePattern->UpdateDragBarStatus();
+        sheetNodePattern->UpdateTitleColumnSize();
     } else {
         sheetNodePattern->UpdateOnAppear(std::move(onAppear));
         sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
@@ -5791,6 +5799,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
         UpdateSheetProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
     sheetNodePattern->SetBottomOffset(sheetStyle);
+    // onModifyDone, the sheetType_ is updated, and the sheetObject is also updated.
     sheetNode->MarkModifyDone();
 
     auto pipeline = sheetNode->GetContext();
@@ -5801,7 +5810,8 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
     ComputeSheetOffset(currentStyle, sheetNode);
-
+    // The animation generated by the developer actively switching the SheetType, does not rely on PlaySheetTransition,
+    // but on the above FlushUITasks, and ondirty.
     auto sheetType = sheetNodePattern->GetSheetType();
     if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess() &&
         sheetNodePattern->GetIsPlayTransition()) {
@@ -5820,9 +5830,16 @@ SheetStyle OverlayManager::UpdateSheetStyle(
     } else {
         auto currentShowInPage = currentStyle.showInPage;
         auto currentInstanceId = currentStyle.instanceId;
+        auto currentSheetTitle = currentStyle.sheetTitle;
+        auto currentSheetSubtitle = currentStyle.sheetSubtitle;
+
         currentStyle = sheetStyle;
         currentStyle.showInPage = currentShowInPage;
         currentStyle.instanceId = currentInstanceId;
+
+        currentStyle.sheetTitle = sheetStyle.sheetTitle.has_value() ? sheetStyle.sheetTitle : currentSheetTitle;
+        currentStyle.sheetSubtitle =
+            sheetStyle.sheetSubtitle.has_value() ? sheetStyle.sheetSubtitle : currentSheetSubtitle;
     }
     layoutProperty->UpdateSheetStyle(currentStyle);
     return currentStyle;
@@ -8130,7 +8147,7 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, co
     auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
     auto maskColor = maskEnable ? menuWrapperPattern->GetMenuMaskColor() : menuTheme->GetPreviewMenuMaskColor();
     BlurStyleOption styleOption;
-    styleOption.blurStyle = maskEnable ? menuWrapperPattern->GetMenuMaskblurStyle() : BlurStyle::BACKGROUND_THIN;
+    styleOption.blurStyle = maskEnable ? menuWrapperPattern->GetMenuMaskBlurStyle() : BlurStyle::BACKGROUND_THIN;
     styleOption.colorMode = ThemeColorMode::SYSTEM;
 
     AnimationOption option;

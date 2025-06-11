@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,7 @@ void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         json->PutExtAttr("itemConstraintSize", "0", filter);
     }
     json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
+    json->PutExtAttr("syncLoad", propSyncLoad_.value_or(false), filter);
 }
 
 std::string WaterFlowLayoutProperty::GetWaterflowDirectionStr() const
@@ -92,6 +93,7 @@ RefPtr<LayoutProperty> WaterFlowLayoutProperty::Clone() const
     value->propColumnsGap_ = CloneColumnsGap();
     value->propWaterflowDirection_ = CloneWaterflowDirection();
     value->propScrollEnabled_ = CloneScrollEnabled();
+    value->propSyncLoad_ = CloneSyncLoad();
     if (itemLayoutConstraint_) {
         value->itemLayoutConstraint_ = std::make_unique<MeasureProperty>(*itemLayoutConstraint_);
     }

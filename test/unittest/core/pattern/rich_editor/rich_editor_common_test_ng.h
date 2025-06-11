@@ -43,6 +43,7 @@ const Ace::FontWeight FONT_WEIGHT_BOLD = Ace::FontWeight::BOLD;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Ace::TextDecoration TEXT_DECORATION_VALUE = Ace::TextDecoration::INHERIT;
 const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
+const float TEXT_DECORATION_THICKNESS_SCALE = 5.0f;
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 const Dimension LINE_HEIGHT_VALUE = Dimension(20.1, DimensionUnit::PX);

@@ -695,6 +695,55 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     return pair.second;
 }
 
+RefPtr<FrameNode> ComponentSnapshot::GetRangeIDNode(const NodeIdentity& ID)
+{
+    if (!ID.first.empty()) {
+        return Inspector::GetFrameNodeByKey(ID.first);
+    }
+    return AceType::DynamicCast<FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(ID.second));
+}
+
+std::string ComponentSnapshot::GetRangeIDStr(const NodeIdentity& ID)
+{
+    return ID.first.empty() ? std::to_string(ID.second) : ID.first;
+}
+
+void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIdentity& endID, const bool& isStartRect,
+    JsCallback&& callback, const SnapshotOptions& options)
+{
+    CHECK_RUN_ON(UI);
+    auto startNode = GetRangeIDNode(startID);
+    auto endNode = GetRangeIDNode(endID);
+    if (!startNode || !endNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't find a component that startId or endId are " SEC_PLD(%{public}s) " and " SEC_PLD(%{public}s)
+            ", please check your parameters are correct",
+            SEC_PARAM(GetRangeIDStr(startID).c_str()), SEC_PARAM(GetRangeIDStr(endID).c_str()));
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        return;
+    }
+    auto rsStartNode = GetRsNode(startNode);
+    auto rsEndNode = GetRsNode(endNode);
+    if (!rsStartNode || !rsEndNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't find a component that startId or endId are " SEC_PLD(%{public}s) " and " SEC_PLD(%{public}s)
+            ", please check your parameters are correct",
+            SEC_PARAM(GetRangeIDStr(startID).c_str()), SEC_PARAM(GetRangeIDStr(endID).c_str()));
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        return;
+    }
+
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    auto isSystem = rsInterface.TakeUICaptureInRange(rsStartNode, rsEndNode, isStartRect,
+        std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
+        options.scale, options.scale, options.waitUntilRenderFinished);
+    if (!isSystem) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "No system permissions to take screenshot, please grant the permission to take screenshot");
+        callback(nullptr, ERROR_CODE_PERMISSION_DENIED, nullptr);
+    }
+}
+
 std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> ComponentSnapshot::GetSoloNode(
     const RefPtr<FrameNode>& node)
 {

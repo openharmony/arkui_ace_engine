@@ -1161,7 +1161,7 @@ bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>&
     result = dimension;
     auto jsRes = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "res"));
     if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
-        !jsRes->IsNull() && !jsRes->IsObject(vm)) {
+        !jsRes->IsNull() && jsRes->IsObject(vm)) {
         auto jsObjRes = jsRes->ToObject(vm);
         CompleteResourceObject(vm, jsObjRes);
         resourceObj = GetResourceObject(vm, jsObjRes);
@@ -2257,7 +2257,8 @@ RefPtr<PixelMap> ArkTSUtils::CreatePixelMapFromNapiValue(const EcmaVM* vm, Local
 #endif
 
 bool ArkTSUtils::ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm,
-    NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClickCallback)
+    NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
+    NG::OnPrepareMenuCallback& onPrepareMenuCallback)
 {
     Local<JSValueRef> firstArg = info->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = info->GetCallArgRef(NUM_1);
@@ -2272,6 +2273,8 @@ bool ArkTSUtils::ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const Ecm
     ParseOnCreateMenu(vm, frameNode, jsValueOnCreateMenu, onCreateMenuCallback);
     auto jsValueOnMenuItemClick = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMenuItemClick"));
     ParseOnMenuItemClick(vm, frameNode, jsValueOnMenuItemClick, onMenuItemClickCallback);
+    auto jsValueOnPrepareMenu = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onPrepareMenu"));
+    ParseOnPrepareMenu(vm, frameNode, jsValueOnPrepareMenu, onPrepareMenuCallback);
     return true;
 }
 
@@ -2289,10 +2292,18 @@ Local<panda::ArrayRef> ArkTSUtils::CreateJsSystemMenuItems(
 Local<panda::ObjectRef> ArkTSUtils::CreateJsTextMenuItem(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam)
 {
     Local<panda::ObjectRef> obj = CreateJsTextMenuId(vm, menuItemParam.menuOptionsParam.id);
-    const char* keys[] = { "content", "id" };
-    Local<JSValueRef> values[] = {
-        panda::StringRef::NewFromUtf8(vm, menuItemParam.menuOptionsParam.content.value_or("").c_str()), obj
-    };
+    const char* keys[] = { "content", "id", "labelInfo", "icon" };
+    auto hasSymbol =
+        menuItemParam.menuOptionsParam.symbolId.has_value() && menuItemParam.menuOptionsParam.symbolId.value() != 0;
+    auto contentRef = panda::StringRef::NewFromUtf8(vm, menuItemParam.menuOptionsParam.content.value_or("").c_str());
+    auto labelRef = panda::StringRef::NewFromUtf8(vm, menuItemParam.menuOptionsParam.labelInfo.value_or("").c_str());
+    if (hasSymbol) {
+        Local<JSValueRef> values[] = { contentRef, obj, labelRef,
+            panda::NumberRef::New(vm, menuItemParam.menuOptionsParam.symbolId.value()) };
+        return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    }
+    Local<JSValueRef> values[] = { contentRef, obj, labelRef,
+        panda::StringRef::NewFromUtf8(vm, menuItemParam.menuOptionsParam.icon.value_or("").c_str()) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
@@ -2357,14 +2368,41 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
         if (!menuItems->IsArray(vm)) {
             return menuParams;
         }
-        WrapMenuParams(vm, menuParams, menuItems);
+        WrapMenuParams(vm, menuParams, menuItems, false);
         return menuParams;
     };
     onCreateMenuCallback = jsCallback;
 }
 
-void ArkTSUtils::WrapMenuParams(
-    const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams, const Local<JSValueRef>& menuItems)
+void ArkTSUtils::ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
+    const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback)
+{
+    if (jsValueOnPrepareMenu.IsEmpty() || !jsValueOnPrepareMenu->IsFunction(vm)) {
+        return;
+    }
+    panda::Local<panda::FunctionRef> func = jsValueOnPrepareMenu->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
+                          const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+        ContainerScope scope(containerId);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(node);
+        std::vector<NG::MenuOptionsParam> menuParams;
+        auto textMenuItemArrayObj = CreateJsSystemMenuItems(vm, systemMenuItems);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { textMenuItemArrayObj };
+        auto menuItems = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (!menuItems->IsArray(vm)) {
+            return menuParams;
+        }
+        WrapMenuParams(vm, menuParams, menuItems, true);
+        return menuParams;
+    };
+    onPrepareMenuCallback = jsCallback;
+}
+
+void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
+    const Local<JSValueRef>& menuItems, bool enableLabelInfo)
 {
     auto menuItemsArray = Local<panda::ArrayRef>(menuItems);
     auto length = menuItemsArray->Length(vm);
@@ -2391,6 +2429,12 @@ void ArkTSUtils::WrapMenuParams(
             ParseJsString(vm, jsId, id);
         }
         menuOptionsParam.id = id;
+        if (enableLabelInfo) {
+            auto jsLabelInfo = menuItemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "labelInfo"));
+            std::string labelInfo;
+            ParseJsString(vm, jsLabelInfo, labelInfo);
+            menuOptionsParam.labelInfo = labelInfo;
+        }
         menuParams.emplace_back(menuOptionsParam);
     }
 }

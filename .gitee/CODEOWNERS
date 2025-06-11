@@ -716,6 +716,8 @@ frameworks/bridge/declarative_frontend/engine/functions/js_click_function.cpp @a
 frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h @huawei_g_five
+frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.cpp @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.cpp @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_focus_function.cpp @arkuievent
@@ -756,6 +758,8 @@ frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.cpp @a
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_intercept_function.cpp @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_touch_test_done_function.cpp @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_touch_test_done_function.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.cpp @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.h @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/engine/js_converter.h @arkuistatemgmt
@@ -1859,6 +1863,8 @@ frameworks/core/common/lru/count_limit_lru.inl @arkuiframework
 frameworks/core/common/manager_interface.h @arkuiframework
 frameworks/core/common/message_bridge.h @arkuiframework
 frameworks/core/common/modal_ui_extension.h @arkuiabilitygroup
+frameworks/core/common/multi_thread_build_manager.cpp @wangyang2022
+frameworks/core/common/multi_thread_build_manager.h @wangyang2022
 frameworks/core/common/page_url_checker.h @arkui_superman
 frameworks/core/common/page_viewport_config.h @arkui_superman
 frameworks/core/common/platform_bridge.cpp @arkuiframework
@@ -2990,6 +2996,8 @@ interfaces/native/node/node_adapter_impl.cpp @arkuiframework
 interfaces/native/node/node_animate.cpp @arkui_superman
 interfaces/native/node/node_extened.cpp @arkuiframework
 interfaces/native/node/node_extened.h @arkuiframework
+interfaces/native/node/node_model_safely.cpp @wangyang2022
+interfaces/native/node/node_model_safely.h @wangyang2022
 interfaces/native/node/node_model.cpp @arkuiframework
 interfaces/native/node/node_model.h @arkuiframework
 interfaces/native/node/node_node_relative_container.cpp @arkuilayout

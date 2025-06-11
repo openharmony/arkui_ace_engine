@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1232,18 +1232,19 @@ ArkUINativeModuleValue SelectBridge::SetOnSelect(ArkUIRuntimeCallInfo* runtimeCa
     if (!info[NUM_1]->IsFunction()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[NUM_1]));
+    auto jsFunc = JSRef<JSFunc>::Cast(info[NUM_1]);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+    auto onSelect = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](
                         int32_t index, const std::string& value) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("Select.onSelect");
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire change event %{public}d %{public}s", index, value.c_str());
         PipelineContext::SetCallBackNode(node);
-        JSRef<JSVal> params[NUM_2];
-        params[NUM_0] = JSRef<JSVal>::Make(ToJSValue(index));
-        params[NUM_1] = JSRef<JSVal>::Make(ToJSValue(value));
-        func->ExecuteJS(NUM_2, params);
+        panda::Local<panda::JSValueRef> params[NUM_2] = { panda::NumberRef::New(vm, index),
+            panda::StringRef::NewFromUtf8(vm, value.c_str()) };
+        func->Call(vm, func.ToLocal(), params, NUM_2);
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect");
     };
     SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));

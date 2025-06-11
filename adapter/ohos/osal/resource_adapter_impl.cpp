@@ -713,4 +713,13 @@ uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
     return result;
 }
 
+uint32_t ResourceAdapterImpl::GetResId(const std::string &resTypeName) const
+{
+    uint32_t resId = -1;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, -1);
+    manager->GetResId(resTypeName, resId);
+    return resId;
+}
+
 } // namespace OHOS::Ace

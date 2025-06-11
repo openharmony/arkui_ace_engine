@@ -28,6 +28,7 @@ const float RK356_WIDTH = 720.0f;
 const float RK356_HEIGHT = 1136.0f;
 const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 const float ZERO = 0.0f;
+const float INFINITY_NUM = 1000000.0f;
 const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
 } // namespace
 class FlexNewTestNG : public FlexBaseTestNG {
@@ -968,5 +969,34 @@ HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea004, TestSize.Level1)
     EXPECT_EQ(column1->GetGeometryNode()->GetFrameOffset(), OffsetF(200.0f, 190.0f));
     EXPECT_EQ(column2->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
     EXPECT_EQ(column2->GetGeometryNode()->GetFrameOffset(), OffsetF(190.0f, 240.0f));
+}
+
+/**
+ * @tc.name: FlexInfinityPercentHeight001
+ * @tc.desc: test flex ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, FlexInfinityPercentHeight001, TestSize.Level1)
+{
+    auto frameNode = CreateColumn([this](ColumnModelNG model) {});
+    auto flexColumn = CreateFlexRow([this](FlexModelNG model) { model.SetDirection(FlexDirection::COLUMN); });
+    auto flexRow = CreateFlexRow([this](FlexModelNG model) { model.SetDirection(FlexDirection::ROW); });
+    LayoutConstraintF parentConstraint { .percentReference { RK356_WIDTH, RK356_HEIGHT },
+        .maxSize { RK356_WIDTH, INFINITY_NUM } };
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateLayoutConstraint(parentConstraint);
+    auto res = layoutProperty->GetPercentSensitive();
+    EXPECT_EQ(res.first, false);
+    EXPECT_EQ(res.second, false);
+    auto flexColumnLayoutProperty = flexColumn->GetLayoutProperty();
+    flexColumnLayoutProperty->UpdateLayoutConstraint(parentConstraint);
+    auto flexColumnSensitive = flexColumnLayoutProperty->GetPercentSensitive();
+    EXPECT_EQ(flexColumnSensitive.first, false);
+    EXPECT_EQ(flexColumnSensitive.second, true);
+    auto flexRowLayoutProperty = flexRow->GetLayoutProperty();
+    flexRowLayoutProperty->UpdateLayoutConstraint(parentConstraint);
+    auto flexRowSensitive = flexRowLayoutProperty->GetPercentSensitive();
+    EXPECT_EQ(flexRowSensitive.first, true);
+    EXPECT_EQ(flexRowSensitive.second, false);
 }
 } // namespace OHOS::Ace::NG

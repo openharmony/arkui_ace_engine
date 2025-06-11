@@ -146,6 +146,14 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return promise;
     }
+
+    getWithRange(start, end, isStartRect, options)
+    {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getWithRange(start, end, isStartRect, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
 }
 
 class DragController {
@@ -224,6 +232,16 @@ class UIObserver {
     off(...args) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_observer.off(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    addGlobalGestureListener(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer?.addGlobalGestureListener(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    removeGlobalGestureListener(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer?.removeGlobalGestureListener(...args);
         __JSScopeUtil__.restoreInstanceId();
     }
 }
@@ -844,6 +862,13 @@ class UIContext {
         
     isAvailable() {
         return __availableInstanceIds__.has(this.instanceId_);
+    }
+
+    setKeyboardAppearanceConfig(uniqueId, config) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByUniqueId(uniqueId);
+        Context.setKeyboardAppearanceConfig(nodePtr, config);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 

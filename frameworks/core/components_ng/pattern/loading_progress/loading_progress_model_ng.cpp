@@ -88,10 +88,15 @@ uint32_t LoadingProgressModelNG::GetColor(FrameNode* frameNode)
     return value.GetValue();
 }
 
-void LoadingProgressModelNG::SetColor(FrameNode* frameNode, const Color& value)
+void LoadingProgressModelNG::SetColor(FrameNode* frameNode, const std::optional<Color>& valueOpt)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, valueOpt.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    }
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }

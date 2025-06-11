@@ -46,7 +46,7 @@ public:
     void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) override;
 
 #ifdef ENABLE_ROSEN_BACKEND
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRSUIDirector() const override
     {
         return rsUIDirector_;
     }

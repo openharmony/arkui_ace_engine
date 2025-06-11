@@ -558,6 +558,26 @@ std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextAlign>& object
     return ToHtmlStyleFormat("text-align", table[index].value);
 }
 
+std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextVerticalAlign>& object)
+{
+    if (!object.has_value()) {
+        return "";
+    }
+
+    static const LinearEnumMapNode<TextVerticalAlign, std::string> table[] = {
+        { TextVerticalAlign::BASELINE, "baseline" },
+        { TextVerticalAlign::BOTTOM, "bottom" },
+        { TextVerticalAlign::CENTER, "middle" },
+        { TextVerticalAlign::TOP, "top" },
+    };
+    auto index = BinarySearchFindIndex(table, ArraySize(table), *object);
+    if (index < 0) {
+        return "";
+    }
+
+    return ToHtmlStyleFormat("vertical-align", table[index].value);
+}
+
 std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::WordBreak>& object)
 {
     if (!object.has_value()) {
@@ -614,6 +634,7 @@ std::string SpanToHtml::LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle& 
 std::string SpanToHtml::ParagraphStyleToHtml(const OHOS::Ace::NG::TextLineStyle& textLineStyle)
 {
     auto details = ToHtml(textLineStyle.GetTextAlign());
+    details += ToHtml(textLineStyle.GetTextVerticalAlign());
     details += ToHtml("text-indent", textLineStyle.GetTextIndent());
     details += ToHtml(textLineStyle.GetWordBreak());
     details += ToHtml(textLineStyle.GetTextOverflow());

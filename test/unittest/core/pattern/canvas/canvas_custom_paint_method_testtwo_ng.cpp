@@ -123,7 +123,7 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo004, Te
 
     Ace::Gradient gradient;
     gradient.SetType(Ace::GradientType::LINEAR);
-    EXPECT_EQ(paintMethod->MakeConicGradient(gradient), nullptr);
+    EXPECT_EQ(paintMethod->MakeConicGradient(gradient, nullptr), nullptr);
 }
 
 /**
@@ -844,5 +844,30 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo028, Te
     paintMethod->isPath2dChanged_ = false;
     paintMethod->Path2DRoundRect(args);
     EXPECT_TRUE(paintMethod->isPath2dChanged_);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo029
+ * @tc.desc: Test the function 'UpdatePaintShader' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo029, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Ace::Gradient gradient;
+    gradient.type_ = Ace::GradientType::LINEAR;
+    Color colorRed = Color::RED;
+    colorRed.colorSpace_ = ColorSpace::DISPLAY_P3;
+    OHOS::Ace::GradientColor gradientColorRed(colorRed);
+    gradient.colors_.emplace_back(gradientColorRed);
+    Color colorBlue = Color ::BLUE;
+    colorBlue.colorSpace_ = ColorSpace::DISPLAY_P3;
+    OHOS::Ace::GradientColor gradientColorBlue(colorBlue);
+    gradient.colors_.emplace_back(gradientColorBlue);
+    paintMethod->UpdatePaintShader(nullptr, nullptr, gradient);
+    ColorSpace beginColorSpace = gradient.GetColors().front().GetColor().GetColorSpace();
+    ColorSpace backColorSpace = gradient.GetColors().back().GetColor().GetColorSpace();
+    EXPECT_TRUE(beginColorSpace == backColorSpace);
 }
 } // namespace OHOS::Ace::NG

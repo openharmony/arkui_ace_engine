@@ -136,6 +136,7 @@ AxisInfo::AxisInfo(const AxisEvent& event, const Offset& localLocation, const Ev
     SetDeviceId(event.deviceId);
     SetSourceDevice(event.sourceType);
     SetTarget(target);
+    SetTargetDisplayId(event.targetDisplayId);
 }
 
 void AxisInfo::SetAction(AxisAction action)
@@ -265,6 +266,7 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.deviceId = GetDeviceId();
     // modifierkeystates
     axisEvent.modifierKeyState = CalculateModifierKeyState(GetPressedKeyCodes());
+    axisEvent.targetDisplayId = GetTargetDisplayId();
     return axisEvent;
 }
 

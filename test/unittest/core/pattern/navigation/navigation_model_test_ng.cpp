@@ -329,6 +329,7 @@ HWTEST_F(NavigationModelTestNg, RegisterToolbarHotZoneEvent001, TestSize.Level1)
     gestureEvent.deviceType_ = SourceType::KEYBOARD;
     EXPECT_EQ(gestureEvent.GetSourceDevice(), SourceType::KEYBOARD);
     event(gestureEvent);
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**
@@ -381,6 +382,7 @@ HWTEST_F(NavigationModelTestNg, RegisterToolbarHotZoneEvent002, TestSize.Level1)
     ASSERT_NE(clickListener->callback_, nullptr);
     clickListener->callback_(info);
     EXPECT_FALSE(isClick);
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**

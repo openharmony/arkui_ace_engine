@@ -1,0 +1,57 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+demo-playground (TS):
+    stage: test
+    interruptible: true
+    extends: .linux-vm-shell-task
+    before_script:
+        - !reference [.setup, script]
+        - cd incremental/demo-playground
+    script:
+        - npm run run
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+        - build common
+        - build compat
+        - build compiler-plugin
+        - build runtime
+    artifacts:
+        expire_in: 2 days
+        paths:
+            - incremental/demo-playground/build
+
+demo-playground (ArkTS):
+    stage: test
+    interruptible: true
+    extends: .linux-vm-shell-task
+    before_script:
+        - !reference [.setup, script]
+        - cd incremental/demo-playground
+        - npm run panda:sdk:install
+    script:
+        - npm run run:panda:unmemoizing
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+    artifacts:
+        expire_in: 2 days
+        paths:
+            - incremental/demo-playground/unmemoized
+            - incremental/demo-playground/build
+

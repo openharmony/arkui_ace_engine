@@ -16,10 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_PARSE_SVG_DEFS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_PARSE_SVG_DEFS_H
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/pathops/SkPathOps.h"
-#endif
-
 #include "frameworks/core/components/svg/parse/svg_mask.h"
 #include "frameworks/core/components/svg/parse/svg_pattern.h"
 #include "frameworks/core/components/svg/parse/svg_filter.h"
@@ -68,17 +64,6 @@ public:
         children_.emplace_back(child);
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override
-    {
-        SkPath path;
-        for (auto child : children_) {
-            const SkPath childPath = child->AsPath(viewPort);
-            Op(path, childPath, kUnion_SkPathOp, &path);
-        }
-        return path;
-    }
-#else
     RSPath AsPath(const Size& viewPort) const override
     {
         RSPath path;
@@ -88,7 +73,6 @@ public:
         }
         return path;
     }
-#endif
 };
 
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
@@ -88,6 +89,9 @@ public:
     }
 
     virtual void ResetSections() {}
+    virtual void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) {};
+
+    virtual void SetSyncLoad(bool syncLoad) {}
 
 private:
     static std::unique_ptr<WaterFlowModel> instance_;

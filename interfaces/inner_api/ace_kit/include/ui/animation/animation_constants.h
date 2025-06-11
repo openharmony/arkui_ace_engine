@@ -96,10 +96,14 @@ enum class FinishCallbackType {
 };
 
 enum class AnimationInterface : int32_t {
-    ANIMATION = 0,
+    UNKNOWN = -1,
+    ANIMATION,
     ANIMATE_TO,
     ANIMATE_TO_IMMEDIATELY,
     KEYFRAME_ANIMATE_TO,
+    TRANSITION,
+    SHARED_TRANSITION,
+    PAGE_TRANSITION,
 };
 
 enum class AnimationPropertyType : int32_t {

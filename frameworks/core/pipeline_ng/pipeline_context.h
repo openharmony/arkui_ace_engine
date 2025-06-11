@@ -891,10 +891,7 @@ public:
 
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;
-    void SetVsyncListener(VsyncCallbackFun vsync)
-    {
-        vsyncListener_ = std::move(vsync);
-    }
+    void SetVsyncListener(VsyncCallbackFun vsync);
 
     void SetOnceVsyncListener(VsyncCallbackFun vsync)
     {
@@ -1286,6 +1283,7 @@ private:
     {
         isEventsPassThrough_ = isEnable;
     }
+    void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) override;
 
     void FlushTouchEvents();
     void FlushWindowPatternInfo();
@@ -1446,6 +1444,7 @@ private:
     uint64_t resampleTimeStamp_ = 0;
     bool touchAccelarate_ = false;
     bool isEventsPassThrough_ = false;
+    bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
@@ -1531,7 +1530,7 @@ private:
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
     AxisEventChecker axisEventChecker_;
-    std::unordered_set<UINode*> attachedNodeSet_;
+    std::set<WeakPtr<UINode>> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
     int32_t frameCountForNotCallJSCleanUp_ = 0;

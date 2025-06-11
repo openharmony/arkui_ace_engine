@@ -521,6 +521,10 @@ ImageSpanAttribute TLVUtil::ReadImageSpanAttribute(std::vector<uint8_t>& buff, i
                 break;
         }
     }
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) &&
+        l.verticalAlign == VerticalAlign::FOLLOW_PARAGRAPH) {
+        l.verticalAlign = VerticalAlign::BOTTOM;
+    }
     return l;
 }
 

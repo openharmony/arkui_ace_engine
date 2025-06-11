@@ -169,6 +169,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("keyboardAppearance", &JSSearch::SetKeyboardAppearance);
     JSClass<JSSearch>::StaticMethod("onWillChange", &JSSearch::SetOnWillChange);
     JSClass<JSSearch>::StaticMethod("enableAutoSpacing", &JSSearch::SetEnableAutoSpacing);
+    JSClass<JSSearch>::StaticMethod("onWillAttachIME", &JSSearch::SetOnWillAttachIME);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1423,8 +1424,10 @@ void JSSearch::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
-    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
+    SearchModel::GetInstance()->SetSelectionMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void JSSearch::SetEnablePreviewText(const JSCallbackInfo& info)
@@ -1549,5 +1552,37 @@ void JSSearch::SetEnableAutoSpacing(const JSCallbackInfo& info)
         enabled = info[0]->ToBoolean();
     }
     SearchModel::GetInstance()->SetEnableAutoSpacing(enabled);
+}
+
+void JSSearch::SetOnWillAttachIME(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsOnWillAttachIMEFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
+    auto onWillAttachIME = [execCtx = info.GetExecutionContext(), func = std::move(jsOnWillAttachIMEFunc)](
+        const IMEClient& imeClientInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onWillAttachIME");
+        JSRef<JSObject> imeClientObj = JSRef<JSObject>::New();
+        imeClientObj->SetProperty<int32_t>("nodeId", imeClientInfo.nodeId);
+        JSRef<JSVal> argv[] = { imeClientObj };
+        func->ExecuteJS(1, argv);
+    };
+    SearchModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));
+}
+
+void JSSearch::SetKeyboardAppearanceConfig(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    NG::KeyboardAppearanceConfig config = JSTextField::ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
+    NG::SearchModelNG::SetKeyboardAppearanceConfig(frameNode, config);
 }
 } // namespace OHOS::Ace::Framework

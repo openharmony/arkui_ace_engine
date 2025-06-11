@@ -399,8 +399,9 @@ public:
     virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) = 0;
     virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) = 0;
     virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) = 0;
-    virtual void SetSelectionMenuOptions(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) {};
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetStopBackPress(bool isStopBackPress) {};
@@ -409,6 +410,7 @@ public:
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
+    virtual void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;
