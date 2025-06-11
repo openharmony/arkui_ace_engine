@@ -726,7 +726,8 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg016, TestSize.L
     auto patternUpgrade = sessionWrapper->hostPattern_.Upgrade();
 
     auto instanceId = pattern->GetInstanceIdFromHost();
-    sessionWrapper->instanceId_  = 200;
+    sessionWrapper->instanceId_ = 200;
+    sessionWrapper->UpdateInstanceId(instanceId);
     auto ret = sessionWrapper->GetInstanceId();
     EXPECT_EQ(ret, instanceId);
 }
