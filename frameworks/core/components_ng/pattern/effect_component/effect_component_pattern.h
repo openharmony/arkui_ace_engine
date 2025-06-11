@@ -44,10 +44,16 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::EFFECT};
+        if (independentLayer_) {
+            return RenderContext::ContextParam { RenderContext::ContextType::COMPOSITE_COMPONENT };
+        }
+        return RenderContext::ContextParam { RenderContext::ContextType::EFFECT };
     }
 
+    void SetIndependentLayer(bool independentLayer);
+
 private:
+    bool independentLayer_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(EffectComponentPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -27,4 +27,9 @@ void EffectComponentPattern::AlwaysSnapshot(bool enable) const
     CHECK_NULL_VOID(context);
     context->SetAlwaysSnapshot(enable);
 }
+
+void EffectComponentPattern::SetIndependentLayer(bool independentLayer)
+{
+    independentLayer_ = independentLayer;
+}
 } // namespace OHOS::Ace::NG

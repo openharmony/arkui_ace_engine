@@ -45,9 +45,18 @@ EffectComponentModel* EffectComponentModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-void JSEffectComponent::Create()
+void JSEffectComponent::Create(const JSCallbackInfo& info)
 {
-    EffectComponentModel::GetInstance()->Create();
+    auto independentLayer = false;
+    auto tmpInfo = info[0];
+    if (tmpInfo->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(tmpInfo);
+        auto independentLayerVal = obj->GetProperty("independentLayer");
+        if (independentLayerVal->IsBoolean()) {
+            independentLayer = independentLayerVal->ToBoolean();
+        }
+    }
+    EffectComponentModel::GetInstance()->Create(independentLayer);
 }
 
 void JSEffectComponent::AlwaysSnapshot(const JSCallbackInfo& info)

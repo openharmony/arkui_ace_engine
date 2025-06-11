@@ -30,7 +30,7 @@ public:
     static EffectComponentModel* GetInstance();
     virtual ~EffectComponentModel() = default;
 
-    virtual void Create();
+    virtual void Create(bool independentLayer);
     virtual void AlwaysSnapshot(bool enable);
     
 private:

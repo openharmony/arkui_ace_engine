@@ -23,7 +23,7 @@
 namespace OHOS::Ace::Framework {
 class EffectComponentModelImpl : public EffectComponentModel {
 public:
-    void Create() override;
+    void Create(bool independentLayer) override;
     void AlwaysSnapshot(bool enable) override;
 };
 } // namespace OHOS::Ace::Framework

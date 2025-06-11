@@ -505,6 +505,13 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNode, rsContext);
             break;
+        case ContextType::COMPOSITE_COMPONENT: {
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+                .isTextureExportNode = isTextureExportNode };
+            rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+            // rsNode_->SetCompositeLayer("CompositeComponent");
+            break;
+        }
         case ContextType::INCREMENTAL_CANVAS: {
 #ifdef ACE_ENABLE_HYBRID_RENDER
             if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
