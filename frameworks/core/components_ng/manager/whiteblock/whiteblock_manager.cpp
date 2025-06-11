@@ -22,9 +22,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string WHITE_BLOCK_PARAM_INDEX = "presist.resourceschedule.whiteblock.index";
-const std::string WHITE_BLOCK_PARAM_IDLE = "presist.resourceschedule.whiteblock.idle";
-const std::string WHITE_BLOCK_PARAM_CACHED_COUNT = "presist.resourceschedule.whiteblock.cachedcount";
+const std::string WHITE_BLOCK_PARAM_INDEX = "persist.resourceschedule.whiteblock.index";
+const std::string WHITE_BLOCK_PARAM_IDLE = "persist.resourceschedule.whiteblock.idle";
+const std::string WHITE_BLOCK_PARAM_CACHED_COUNT = "persist.resourceschedule.whiteblock.cachedcount";
 const std::string WHITE_BLOCK_SITWCH_OPEN = "1";
 const std::string WHITE_BLOCK_SITWCH_CLOSE = "0";
 const std::string WHITE_BLOCK_PARAM_INDEX_DEFAULT = "0";
