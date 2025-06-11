@@ -1136,6 +1136,7 @@ void JSText::SetTextVerticalAlign(const JSCallbackInfo& info)
 void JSText::SetShaderStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
+        TextModel::GetInstance()->ResetGradientShaderStyle();
         return;
     }
     NG::Gradient gradient;
@@ -1146,15 +1147,14 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
 {
     CalcDimension value;
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> center = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CENTER));
-    JSRef<JSVal> radius = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
-    JSRef<JSVal> colors = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS));
-    if (center->IsArray() && (radius->IsNumber() || radius->IsString())) {
+    if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NewJsRadialGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
-    } else if (colors->IsArray()) {
+    } else if (shaderStyleObj->HasProperty("colors")) {
         NewJsLinearGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else {
+        TextModel::GetInstance()->ResetGradientShaderStyle();
     }
 }
 

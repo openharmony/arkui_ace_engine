@@ -1349,6 +1349,11 @@ void TextModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient);
 }
 
+void TextModelNG::ResetGradientShaderStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle);
+}
+
 void TextModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
 {
     CHECK_NULL_VOID(frameNode);

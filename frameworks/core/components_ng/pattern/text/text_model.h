@@ -161,6 +161,7 @@ public:
     virtual void SetLineThicknessScale(float value) = 0;
     virtual void SetGradientShaderStyle(NG::Gradient& gradient) = 0;
     virtual void SetTextVerticalAlign(TextVerticalAlign verticalAlign) = 0;
+    virtual void ResetGradientShaderStyle() = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;
