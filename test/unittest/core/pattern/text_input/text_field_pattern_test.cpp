@@ -984,6 +984,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern039, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->GetFocusHub()->currentFocus_ = true;
     pattern->focusIndex_ = FocuseIndex::CANCEL;
     pattern->PerformAction(TextInputAction::NEW_LINE, false);
     pattern->focusIndex_ = FocuseIndex::UNIT;
@@ -2455,7 +2456,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern106, TestSize.Level1)
  * @tc.desc: Test TextPattern HandleSelectionParagraghEnd
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTest, TextPattern107, TestSize.Level1)
+HWTEST_F(TextFieldPatternTest, TextPattern108, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and test pattern IsShowHandle
