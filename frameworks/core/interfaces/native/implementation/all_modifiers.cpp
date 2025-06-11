@@ -205,6 +205,7 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier();
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier();
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
+const GENERATED_ArkUIBindSheetOpsAccessor* GetBindSheetOpsAccessor();
 const GENERATED_ArkUIBaseContextAccessor* GetBaseContextAccessor();
 const GENERATED_ArkUIContextAccessor* GetContextAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
@@ -543,6 +544,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
 {
     static const GENERATED_ArkUIAccessors accessorsImpl = {
         GetAnimationExtenderAccessor,
+        GetBindSheetOpsAccessor,
         GetBaseContextAccessor,
         GetContextAccessor,
         GetUnifiedDataAccessor,

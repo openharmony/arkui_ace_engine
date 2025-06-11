@@ -35114,6 +35114,56 @@ Ark_NativePointer impl_VisualEffect_getFinalizer() {
         return GetAccessors()->getVisualEffectAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(VisualEffect_getFinalizer, Ark_NativePointer)
+Ark_NativePointer impl_BindSheetOps_registerShowCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        ShowCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ShowCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ShowCallback))))};;
+        
+        const auto builder_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_CustomNodeBuilder builder_value_buf = {};
+        builder_value_buf.tag = builder_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (builder_value_buf_runtimeType))
+        {
+            builder_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
+        }
+        Opt_CustomNodeBuilder builder_value = builder_value_buf;;
+
+        const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SheetOptions options_value_buf = {};
+        options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (options_value_buf_runtimeType))
+        {
+            options_value_buf.value = thisDeserializer.readSheetOptions();
+        }
+        Opt_SheetOptions options_value = options_value_buf;;
+
+        return GetAccessors()->getBindSheetOpsAccessor()->registerBindSheetShowCallback(node, value, (const ShowCallback*)&callback_value, (const Opt_CustomNodeBuilder*)&builder_value, (const Opt_SheetOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_4(BindSheetOps_registerShowCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_BindSheetOps_registerBindContentCoverCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        ShowCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ShowCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ShowCallback))))};;
+        
+        const auto builder_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_CustomNodeBuilder builder_value_buf = {};
+        builder_value_buf.tag = builder_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (builder_value_buf_runtimeType))
+        {
+            builder_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
+        }
+        Opt_CustomNodeBuilder builder_value = builder_value_buf;;
+
+        const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ContentCoverOptions options_value_buf = {};
+        options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (options_value_buf_runtimeType))
+        {
+            options_value_buf.value = thisDeserializer.readContentCoverOptions();
+        }
+        Opt_ContentCoverOptions options_value = options_value_buf;;
+
+        return GetAccessors()->getBindSheetOpsAccessor()->registerContentCoverShowCallback(node, value, (const ShowCallback*)&callback_value, (const Opt_CustomNodeBuilder*)&builder_value, (const Opt_ContentCoverOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_4(BindSheetOps_registerBindContentCoverCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_VisualEffect_backgroundColorBlender(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_VisualEffect self = reinterpret_cast<Ark_VisualEffect>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
