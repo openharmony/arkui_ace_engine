@@ -155,7 +155,7 @@ public:
     bool UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight = std::nullopt);
 
     /**
-     * @brief Updates a mirror of safe area to accommodate the keyboard from web 
+     * @brief Updates a mirror of safe area to accommodate the keyboard from web
      *
      * Third-party platform may use SafeArea, so web_pattern using safearea to keep menu away
      * from keyboard might lead to several problem.This function is called to update a mirror of
