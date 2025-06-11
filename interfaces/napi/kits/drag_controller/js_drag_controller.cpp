@@ -24,6 +24,7 @@
 #include "napi/native_common.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_value.h"
+#include "core/common/udmf/data_load_params.h"
 
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 #include "jsnapi.h"
@@ -97,6 +98,7 @@ struct DragControllerAsyncCtx {
     napi_value customBuilder;
     std::vector<napi_ref> customBuilderList;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData;
+    RefPtr<OHOS::Ace::DataLoadParams> dataLoadParams;
     std::string extraParams;
     int32_t instanceId = -1;
     int32_t errCode = -1;
@@ -1154,6 +1156,9 @@ void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSi
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
+    if (asyncCtx->dataLoadParams) {
+        UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
+    }
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
         dataSize = badgeNumber.value();
@@ -1263,6 +1268,21 @@ bool ParseTouchPoint(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_valu
         return false;
     }
     return true;
+}
+
+bool ParseDataLoadParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_valuetype& valueType)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    napi_value dataLoadParamsNApi = nullptr;
+    napi_get_named_property(asyncCtx->env, asyncCtx->argv[1], "dataLoadParams", &dataLoadParamsNApi);
+    napi_typeof(asyncCtx->env, dataLoadParamsNApi, &valueType);
+    if (valueType == napi_object) {
+        auto dataLoadParams = UdmfClient::GetInstance()->TransformDataLoadParams(asyncCtx->env, dataLoadParamsNApi);
+        CHECK_NULL_RETURN(dataLoadParams, false);
+        asyncCtx->dataLoadParams = dataLoadParams;
+        return true;
+    }
+    return false;
 }
 
 bool ParseDragItemInfoParam(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::string& errMsg)
@@ -1746,6 +1766,8 @@ bool ParseDragInfoParam(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::s
 
     GetCurrentDipScale(asyncCtx);
     asyncCtx->hasTouchPoint = ParseTouchPoint(asyncCtx, valueType);
+
+    ParseDataLoadParams(asyncCtx, valueType);
     return true;
 }
 

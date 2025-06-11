@@ -21,6 +21,7 @@
 #include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
@@ -399,6 +400,16 @@ public:
         return needDoInternalDropAnimation_;
     }
 
+    void SetDataLoadParams(const RefPtr<DataLoadParams>& dataLoadParams)
+    {
+        dataLoadParams_ = dataLoadParams;
+    }
+
+    RefPtr<DataLoadParams> GetDataLoadParams() const
+    {
+        return dataLoadParams_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -430,6 +441,7 @@ private:
     bool isRemoteDev_ { false };
     int32_t displayId_ = -1;
     bool needDoInternalDropAnimation_ = false;
+    RefPtr<DataLoadParams> dataLoadParams_ = nullptr;
 };
 
 class NotifyDragEvent : public DragEvent {

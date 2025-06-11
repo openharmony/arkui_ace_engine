@@ -15,6 +15,8 @@
 
 #include "udmf_impl.h"
 
+#include "data_load_params_napi.h"
+#include "data_params_conversion.h"
 #include "html.h"
 #include "image.h"
 #include "link.h"
@@ -27,6 +29,7 @@
 #include "udmf_async_client.h"
 #include "unified_data_napi.h"
 #include "unified_meta.h"
+#include "unified_types.h"
 #include "utd_client.h"
 #include "video.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -60,6 +63,16 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(napi_value napiValue)
     auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
     udData->SetUnifiedData(unifiedData->value_);
     return udData;
+}
+
+RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParams(napi_env env, napi_value napiValue)
+{
+    UDMF::DataLoadParams dataLoadParams;
+    UDMF::DataLoadParamsNapi::Convert2NativeValue(env, napiValue, dataLoadParams);
+    auto udDataLoadParams = AceType::MakeRefPtr<DataLoadParamsImpl>();
+    CHECK_NULL_RETURN(udDataLoadParams, nullptr);
+    udDataLoadParams->SetDataLoadParams(std::make_shared<UDMF::DataLoadParams>(dataLoadParams));
+    return udDataLoadParams;
 }
 
 napi_value UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData)
@@ -103,6 +116,21 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataForNative(void* rawData)
     return udData;
 }
 
+RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParamsForNative(void* rawData)
+{
+    CHECK_NULL_RETURN(rawData, nullptr);
+    auto udDataLoadParams = AceType::MakeRefPtr<DataLoadParamsImpl>();
+    auto udmfDataLoadParams = static_cast<OH_UdmfDataLoadParams*>(rawData);
+    CHECK_NULL_RETURN(udmfDataLoadParams, nullptr);
+    UDMF::DataLoadParams dataLoadParams;
+    auto status = OHOS::UDMF::DataParamsConversion::GetDataLoaderParams(*udmfDataLoadParams, dataLoadParams);
+    if (status) {
+        return nullptr;
+    }
+    udDataLoadParams->SetDataLoadParams(std::make_shared<UDMF::DataLoadParams>(dataLoadParams));
+    return udDataLoadParams;
+}
+
 napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summary)
 {
     auto engine = EngineHelper::GetCurrentEngine();
@@ -130,6 +158,19 @@ int32_t UdmfClientImpl::SetData(const RefPtr<UnifiedData>& unifiedData, std::str
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_RETURN(udData, UDMF::E_ERROR);
     int32_t ret = client.SetData(udCustomOption, *udData->GetUnifiedData(), key);
+    return ret;
+}
+
+int32_t UdmfClientImpl::SetDelayInfo(RefPtr<DataLoadParams> dataLoadParams, std::string& key)
+{
+    CHECK_NULL_RETURN(dataLoadParams, UDMF::E_ERROR);
+    auto& client = UDMF::UdmfClient::GetInstance();
+    UDMF::CustomOption udCustomOption;
+    udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
+    auto udDataLoadParams = AceType::DynamicCast<DataLoadParamsImpl>(dataLoadParams);
+    CHECK_NULL_RETURN(udDataLoadParams, UDMF::E_ERROR);
+    CHECK_NULL_RETURN(udDataLoadParams->GetDataLoadParams(), UDMF::E_ERROR);
+    int32_t ret = client.SetDelayInfo(*udDataLoadParams->GetDataLoadParams(), key);
     return ret;
 }
 
@@ -214,6 +255,19 @@ std::shared_ptr<UDMF::UnifiedData> UnifiedDataImpl::GetUnifiedData()
 void UnifiedDataImpl::SetUnifiedData(std::shared_ptr<UDMF::UnifiedData> unifiedData)
 {
     unifiedData_ = unifiedData;
+}
+
+std::shared_ptr<UDMF::DataLoadParams> DataLoadParamsImpl::GetDataLoadParams()
+{
+    if (dataLoadParams_ == nullptr) {
+        dataLoadParams_ = std::make_shared<UDMF::DataLoadParams>();
+    }
+    return dataLoadParams_;
+}
+
+void DataLoadParamsImpl::SetDataLoadParams(const std::shared_ptr<UDMF::DataLoadParams>& dataLoadParams)
+{
+    dataLoadParams_ = dataLoadParams;
 }
 
 void UdmfClientImpl::AddFormRecord(
