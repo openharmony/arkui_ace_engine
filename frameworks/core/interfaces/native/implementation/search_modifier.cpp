@@ -738,7 +738,7 @@ void OnWillChangeImpl(Ark_NativePointer node,
             .content = Converter::ArkValue<Ark_String>(value.value, &ctx),
             .previewText = {
                 .tag = INTEROP_TAG_OBJECT,
-                .value = Converter::ArkValue<Ark_PreviewText>(value.previewText),
+                .value = Converter::ArkValue<Ark_PreviewText>(value.previewText, &ctx),
             },
             .options = {
                 .tag = INTEROP_TAG_OBJECT,

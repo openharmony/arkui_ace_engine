@@ -272,6 +272,7 @@ typedef enum CallbackKind {
     Kind_SearchValueCallback = 2049289694,
     Kind_SelectedCallback = -1480175598,
     Kind_ShouldBuiltInRecognizerParallelWithCallback = -250780276,
+    Kind_ShowCallback = 63936248,
     Kind_SizeChangeCallback = -1716637992,
     Kind_SliderTriggerChangeCallback = 711649376,
     Kind_StyledStringMarshallCallback = 1095217433,

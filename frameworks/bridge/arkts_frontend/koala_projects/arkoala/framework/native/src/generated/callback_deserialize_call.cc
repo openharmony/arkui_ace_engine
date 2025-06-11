@@ -4682,7 +4682,8 @@ void deserializeAndCallOnCheckboxChangeCallback(KSerializerBuffer thisArray, Ark
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointer());
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId,
+        const Ark_Boolean value)>(thisDeserializer.readPointer());
     thisDeserializer.readPointer();
     Ark_Boolean value = thisDeserializer.readBoolean();
     _call(_resourceId, value);
@@ -4692,7 +4693,8 @@ void deserializeAndCallSyncOnCheckboxChangeCallback(Ark_VMContext vmContext, KSe
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointer());
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId,
+        const Ark_Boolean value)>(thisDeserializer.readPointer());
     Ark_Boolean value = thisDeserializer.readBoolean();
     _callSync(vmContext, _resourceId, value);
 }
@@ -6030,6 +6032,28 @@ void deserializeAndCallSyncShouldBuiltInRecognizerParallelWithCallback(Ark_VMCon
     Callback_GestureRecognizer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureRecognizer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureRecognizer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureRecognizer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureRecognizer_Void))))};
     _callSync(vmContext, _resourceId, current, others, _continuation);
 }
+
+void deserializeAndCallShowCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId,
+        const Ark_Boolean value)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Boolean value = thisDeserializer.readBoolean();
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncShowCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId,
+        const Ark_Boolean value)>(thisDeserializer.readPointer());
+    Ark_Boolean value = thisDeserializer.readBoolean();
+    _callSync(vmContext, _resourceId, value);
+}
+
 void deserializeAndCallSizeChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -7077,6 +7101,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case 2049289694/*Kind_SearchValueCallback*/: return deserializeAndCallSearchValueCallback(thisArray, thisLength);
         case -1480175598/*Kind_SelectedCallback*/: return deserializeAndCallSelectedCallback(thisArray, thisLength);
         case -250780276/*Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisArray, thisLength);
+        case 63936248/*Kind_ShowCallback*/: return deserializeAndCallShowCallback(thisArray, thisLength);
         case -1716637992/*Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisArray, thisLength);
         case 711649376/*Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisArray, thisLength);
         case 1095217433/*Kind_StyledStringMarshallCallback*/: return deserializeAndCallStyledStringMarshallCallback(thisArray, thisLength);

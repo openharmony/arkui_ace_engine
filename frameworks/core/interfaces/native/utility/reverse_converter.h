@@ -305,9 +305,10 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorSpanPosition& dst, const SpanPosition& src);
     void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src);
     void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, ConvContext *ctx);
-    void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src);
+    void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& src, ConvContext *ctx);
+    void AssignArkValue(Ark_RichEditorUrlStyle& dst, const std::u16string& src, ConvContext *ctx);
     void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);

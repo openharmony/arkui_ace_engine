@@ -1609,6 +1609,8 @@ typedef struct SelectedCallback SelectedCallback;
 typedef struct Opt_SelectedCallback Opt_SelectedCallback;
 typedef struct ShouldBuiltInRecognizerParallelWithCallback ShouldBuiltInRecognizerParallelWithCallback;
 typedef struct Opt_ShouldBuiltInRecognizerParallelWithCallback Opt_ShouldBuiltInRecognizerParallelWithCallback;
+typedef struct ShowCallback ShowCallback;
+typedef struct Opt_ShowCallback Opt_ShowCallback;
 typedef struct SizeChangeCallback SizeChangeCallback;
 typedef struct Opt_SizeChangeCallback Opt_SizeChangeCallback;
 typedef struct SliderTriggerChangeCallback SliderTriggerChangeCallback;
@@ -11506,6 +11508,15 @@ typedef struct Opt_ShouldBuiltInRecognizerParallelWithCallback {
     Ark_Tag tag;
     ShouldBuiltInRecognizerParallelWithCallback value;
 } Opt_ShouldBuiltInRecognizerParallelWithCallback;
+typedef struct ShowCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Boolean value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Boolean value);
+} ShowCallback;
+typedef struct Opt_ShowCallback {
+    Ark_Tag tag;
+    ShowCallback value;
+} Opt_ShowCallback;
 typedef struct SizeChangeCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_SizeOptions oldValue, const Ark_SizeOptions newValue);
@@ -24574,6 +24585,19 @@ typedef struct GENERATED_ArkUIBaseEventAccessor {
                                const Ark_Number* targetDisplayId);
 } GENERATED_ArkUIBaseEventAccessor;
 
+typedef struct GENERATED_ArkUIBindSheetOpsAccessor {
+    Ark_NativePointer (*registerBindSheetShowCallback)(Ark_NativePointer node,
+                                              Ark_Boolean value,
+                                              const ShowCallback* callback,
+                                              const Opt_CustomNodeBuilder* builder,
+                                              const Opt_SheetOptions* options);
+    Ark_NativePointer (*registerContentCoverShowCallback)(Ark_NativePointer node,
+                                            Ark_Boolean value,
+                                            const ShowCallback* callback,
+                                            const Opt_CustomNodeBuilder* builder,
+                                            const Opt_ContentCoverOptions* options);
+} GENERATED_ArkUIBindSheetOpsAccessor;
+
 typedef struct GENERATED_ArkUIClickEventAccessor {
     void (*destroyPeer)(Ark_ClickEvent peer);
     Ark_ClickEvent (*ctor)();
@@ -27109,6 +27133,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
 
 typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIAnimationExtenderAccessor* (*getAnimationExtenderAccessor)();
+    const GENERATED_ArkUIBindSheetOpsAccessor* (*getBindSheetOpsAccessor)();
     const GENERATED_ArkUIBaseContextAccessor* (*getBaseContextAccessor)();
     const GENERATED_ArkUIContextAccessor* (*getContextAccessor)();
     const GENERATED_ArkUIUnifiedDataAccessor* (*getUnifiedDataAccessor)();

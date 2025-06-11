@@ -32,7 +32,7 @@ import {
 import { ArkUINativeModule } from "#components"
 import { KPointer, runtimeType, RuntimeType } from "@koalaui/interop"
 import router from "@ohos/router"
-import { EntryPoint, UserView, UserViewBuilder } from "../UserView"
+import { EntryPoint, UserView, UserViewBuilder } from "arkui/UserView"
 import { InteropNativeModule, nullptr } from "@koalaui/interop"
 import { PeerNode } from "../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
@@ -160,7 +160,7 @@ class ArkRouter implements Router {
         catch (e: Error) {
             InteropNativeModule._NativeLog("AceRouter: catch RunPage error: " + e)
         }
-        return undefined
+        return new EntryPoint()
     }
 
     UpdateVisiblePagePeerNode(node: PeerNode, index: number = -1): void {

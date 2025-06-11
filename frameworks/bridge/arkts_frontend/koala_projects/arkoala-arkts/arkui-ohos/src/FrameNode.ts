@@ -130,7 +130,7 @@ export class FrameNode implements MaterializedBase {
                 this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this));
                 return;
             }
-            const instanceId = this.instanceId_ as (int32);
+            const instanceId = this.instanceId_!.toInt();
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
             if (this.getType() === undefined || this.getType() === "CustomFrameNode") {
                 this.renderNode_ = new RenderNode('CustomFrameNode')
@@ -190,7 +190,7 @@ export class FrameNode implements MaterializedBase {
     }
     convertToFrameNode(node: FrameNode, nodeId: number = -1): FrameNode {
         if (nodeId === -1) {
-            const instanceId = this.instanceId_ as (int32);
+            const instanceId = this.instanceId_!.toInt();
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
             nodeId = this.getIdByFrameNode_serialize(node);
             ArkUIAniModule._Common_Restore_InstanceId();
@@ -464,7 +464,7 @@ export class FrameNode implements MaterializedBase {
             // @ts-ignore
             exactRetValue.push(new Byte(retval[i]));
         }
-        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length!.toInt());
         const returnResult: Position = retvalDeserializer.readGraphicsPosition();
         return returnResult;
     }
@@ -517,15 +517,15 @@ export class FrameNode implements MaterializedBase {
         return retval;
     }
     public static getAttachedFrameNodeById(id: string): FrameNode {
-        const id_casted = id as (string);
+        const id_casted = id;
         return FrameNode.getAttachedFrameNodeById_serialize(id_casted);
     }
     public static getFrameNodeById(id: number): FrameNode {
-        const id_casted = id as (number);
+        const id_casted = id;
         return FrameNode.getFrameNodeById_serialize(id_casted);
     }
     public static getFrameNodeByUniqueId(id: number): FrameNode {
-        const id_casted = id as (number);
+        const id_casted = id;
         return FrameNode.getFrameNodeByUniqueId_serialize(id_casted);
     }
     private static getAttachedFrameNodeById_serialize(id: string): FrameNode {
@@ -657,14 +657,14 @@ export class FrameNode implements MaterializedBase {
         if (this._commonAttribute === undefined) {
             let baseNode = new ArkBaseNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(this))
-            let peer = new ArkFrameNodePeer(retval, this._nodeId as int32, "FrameNode", 0);
+            let peer = new ArkFrameNodePeer(retval, this._nodeId!.toInt(), "FrameNode", 0);
             baseNode.setPeer(peer);
             this._commonAttribute = baseNode as CommonAttribute;
         }
         return this._commonAttribute!;
     }
     public static createTypedFrameNode(type: string): FrameNode {
-        const type_casted = type as (string)
+        const type_casted = type
         return FrameNode.createTypedFrameNode_serialize(type_casted)
     }
     private static createTypedFrameNode_serialize(type: string): FrameNode {
@@ -809,7 +809,7 @@ export namespace typeNode {
         return new ListFrameNode(context, 'List', (node: FrameNode, type: ModifierType): ArkListNode => {
             let arknode = new ArkListNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
-            const peer = new ArkListPeer(retval, node._nodeId as int32, "List", 0);
+            const peer = new ArkListPeer(retval, node._nodeId!.toInt(), "List", 0);
             arknode.setPeer(peer);
             return arknode;
         });

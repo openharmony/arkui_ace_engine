@@ -25,6 +25,7 @@ import { Tracer, TransformerOptions } from "./util"
 import { DumpVisitor } from './dump-visitor';
 import { ThisTransformer } from './this-transformer';
 import { ReturnTransformer } from './return-transformer';
+import { AsExpressionTransformer } from './as-expression-transformer';
 
 function getUnmemoizedPath(sourcePath: string, root: string, extension: string | undefined, unmemoizedDir?: string) {
     let relativePath = path.relative(root, sourcePath)
@@ -50,6 +51,7 @@ export function memoTransform(
     const thisTransformer = new ThisTransformer(tracer, typeChecker, sourceFile, rewrite.positionalIdTracker, rewrite.functionTable, ctx)
     const variableTransformer = new VariableTypeTransformer(tracer, typeChecker, sourceFile, rewrite, ctx)
     const returnTransformer = new ReturnTransformer(typeChecker, sourceFile, rewrite.functionTable, ctx)
+    const asExpressionTransformer = new AsExpressionTransformer(typeChecker, ctx)
 
     analysisVisitor.visitor(sourceFile)
     diagnosticsVisitor.visitor(sourceFile)
@@ -60,7 +62,8 @@ export function memoTransform(
     const transformedParameters = parameterTransformer.visitor(transformedFunctions)
     const transformedThis = thisTransformer.visitor(transformedParameters)
     const transformedReturn = returnTransformer.visitor(transformedThis)
-    return variableTransformer.visitor(transformedReturn) as ts.SourceFile
+    const transformedAsExpression = asExpressionTransformer.visitor(transformedReturn)
+    return variableTransformer.visitor(transformedAsExpression) as ts.SourceFile
 }
 
 export default function koala_transformer(program: ts.Program, pluginOptions: TransformerOptions, extras: ts.TransformerExtras) {

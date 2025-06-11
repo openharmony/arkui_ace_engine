@@ -4866,20 +4866,19 @@ KNativePointer impl_ClassDefinitionFunctionalReferenceReferencedMethodConst(KNat
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
     const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    auto result = GetImpl()->ClassDefinitionFunctionalReferenceReferencedMethodConst(_context, _receiver);
-    return StageArena::strdup(result);
+    return GetImpl()->ClassDefinitionFunctionalReferenceReferencedMethodConst(_context, _receiver);
 }
 KOALA_INTEROP_2(ClassDefinitionFunctionalReferenceReferencedMethodConst, KNativePointer, KNativePointer, KNativePointer);
 
-void impl_ClassDefinitionSetFunctionalReferenceReferencedMethod(KNativePointer context, KNativePointer receiver, KStringPtr& functionalReferenceReferencedMethod)
+void impl_ClassDefinitionSetFunctionalReferenceReferencedMethod(KNativePointer context, KNativePointer receiver, KNativePointer functionalReferenceReferencedMethod)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
     const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _functionalReferenceReferencedMethod = getStringCopy(functionalReferenceReferencedMethod);
+    const auto _functionalReferenceReferencedMethod = reinterpret_cast<es2panda_AstNode*>(functionalReferenceReferencedMethod);
     GetImpl()->ClassDefinitionSetFunctionalReferenceReferencedMethod(_context, _receiver, _functionalReferenceReferencedMethod);
     return ;
 }
-KOALA_INTEROP_V3(ClassDefinitionSetFunctionalReferenceReferencedMethod, KNativePointer, KNativePointer, KStringPtr);
+KOALA_INTEROP_V3(ClassDefinitionSetFunctionalReferenceReferencedMethod, KNativePointer, KNativePointer, KNativePointer);
 
 KNativePointer impl_ClassDefinitionLocalPrefixConst(KNativePointer context, KNativePointer receiver)
 {

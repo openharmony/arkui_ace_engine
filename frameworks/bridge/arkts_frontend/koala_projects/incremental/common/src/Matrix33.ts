@@ -19,7 +19,7 @@ export function mat33(array?: Float32Array): Matrix33 {
     return (array == undefined) ? new Matrix33 () : new Matrix33(array)
 }
 
-const tolerance: float32 = (1.0 / (1 << 12))
+const tolerance: float32 = (1.0 / (1 << 12)).toFloat()
 
 export class Matrix33 {
     public readonly array: Float32Array
@@ -36,11 +36,11 @@ export class Matrix33 {
     }
 
     static makeTranslate(dx: float32, dy: float32): Matrix33 {
-        return new Matrix33(new Float32Array(Array_from_number([1.0, 0.0, dx as float64, 0.0, 1.0, dy as float64, 0.0, 0.0, 1.0])))
+        return new Matrix33(new Float32Array(Array_from_number([1.0, 0.0, dx.toDouble(), 0.0, 1.0, dy.toDouble(), 0.0, 0.0, 1.0])))
     }
 
     static makeScale(dx: float32, dy: float32 = dx): Matrix33 {
-        return new Matrix33(new Float32Array(Array_from_number([dx as float64, 0.0, 0.0, 0.0, dy as float64, 0.0, 0.0, 0.0, 1.0])))
+        return new Matrix33(new Float32Array(Array_from_number([dx.toDouble(), 0.0, 0.0, 0.0, dy.toDouble(), 0.0, 0.0, 0.0, 1.0])))
     }
 
     static makeRotate(degrees: float32, pivotX?: float32, pivotY?: float32): Matrix33 {

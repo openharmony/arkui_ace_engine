@@ -1519,10 +1519,10 @@ export class Es2pandaNativeModule {
     _ClassDefinitionLocalIndexConst(context: KNativePointer, receiver: KNativePointer): KInt {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _ClassDefinitionFunctionalReferenceReferencedMethodConst(context: KNativePointer, receiver: KNativePointer): KStringPtr {
+    _ClassDefinitionFunctionalReferenceReferencedMethodConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _ClassDefinitionSetFunctionalReferenceReferencedMethod(context: KNativePointer, receiver: KNativePointer, functionalReferenceReferencedMethod: KStringPtr): void {
+    _ClassDefinitionSetFunctionalReferenceReferencedMethod(context: KNativePointer, receiver: KNativePointer, functionalReferenceReferencedMethod: KNativePointer): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _ClassDefinitionLocalPrefixConst(context: KNativePointer, receiver: KNativePointer): KStringPtr {

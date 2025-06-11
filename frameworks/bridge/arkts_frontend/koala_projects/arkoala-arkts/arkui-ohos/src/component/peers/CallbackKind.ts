@@ -266,6 +266,7 @@ export enum CallbackKind {
     Kind_SearchSubmitCallback = 1717691617,
     Kind_SearchValueCallback = 2049289694,
     Kind_SelectedCallback = -1480175598,
+    Kind_ShowCallback = 63936248,
     Kind_ShouldBuiltInRecognizerParallelWithCallback = -250780276,
     Kind_SizeChangeCallback = -1716637992,
     Kind_SliderTriggerChangeCallback = 711649376,
