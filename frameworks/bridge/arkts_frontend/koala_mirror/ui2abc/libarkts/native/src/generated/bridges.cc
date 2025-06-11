@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2966,15 +2966,16 @@ void impl_TSTypeAliasDeclarationSetTypeParameters(KNativePointer context, KNativ
 }
 KOALA_INTEROP_V3(TSTypeAliasDeclarationSetTypeParameters, KNativePointer, KNativePointer, KNativePointer);
 
-KNativePointer impl_TSTypeAliasDeclarationAnnotations(KNativePointer context, KNativePointer receiver)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    std::size_t length;
-    auto result = GetImpl()->TSTypeAliasDeclarationAnnotations(_context, _receiver, &length);
-    return StageArena::cloneVector(result, length);
-}
-KOALA_INTEROP_2(TSTypeAliasDeclarationAnnotations, KNativePointer, KNativePointer, KNativePointer);
+// no TSTypeAliasDeclarationAnnotations
+//KNativePointer impl_TSTypeAliasDeclarationAnnotations(KNativePointer context, KNativePointer receiver)
+//{
+//    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+//    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+//    std::size_t length;
+//    auto result = GetImpl()->TSTypeAliasDeclarationAnnotations(_context, _receiver, &length);
+//    return StageArena::cloneVector(result, length);
+//}
+//KOALA_INTEROP_2(TSTypeAliasDeclarationAnnotations, KNativePointer, KNativePointer, KNativePointer);
 
 KNativePointer impl_TSTypeAliasDeclarationAnnotationsConst(KNativePointer context, KNativePointer receiver)
 {
@@ -3603,15 +3604,16 @@ void impl_ScriptFunctionClearFlag(KNativePointer context, KNativePointer receive
 }
 KOALA_INTEROP_V3(ScriptFunctionClearFlag, KNativePointer, KNativePointer, KInt);
 
-void impl_ScriptFunctionAddModifier(KNativePointer context, KNativePointer receiver, KInt flags)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _flags = static_cast<Es2pandaModifierFlags>(flags);
-    GetImpl()->ScriptFunctionAddModifier(_context, _receiver, _flags);
-    return ;
-}
-KOALA_INTEROP_V3(ScriptFunctionAddModifier, KNativePointer, KNativePointer, KInt);
+// no ScriptFunctionAddModifier
+// void impl_ScriptFunctionAddModifier(KNativePointer context, KNativePointer receiver, KInt flags)
+// {
+//     const auto _context = reinterpret_cast<es2panda_Context*>(context);
+//     const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+//     const auto _flags = static_cast<Es2pandaModifierFlags>(flags);
+//     GetImpl()->ScriptFunctionAddModifier(_context, _receiver, _flags);
+//     return ;
+// }
+// KOALA_INTEROP_V3(ScriptFunctionAddModifier, KNativePointer, KNativePointer, KInt);
 
 KUInt impl_ScriptFunctionFormalParamsLengthConst(KNativePointer context, KNativePointer receiver)
 {
@@ -7282,15 +7284,16 @@ KNativePointer impl_ImportDeclarationSpecifiersConst(KNativePointer context, KNa
 }
 KOALA_INTEROP_2(ImportDeclarationSpecifiersConst, KNativePointer, KNativePointer, KNativePointer);
 
-KNativePointer impl_ImportDeclarationSpecifiers(KNativePointer context, KNativePointer receiver)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    std::size_t length;
-    auto result = GetImpl()->ImportDeclarationSpecifiers(_context, _receiver, &length);
-    return StageArena::cloneVector(result, length);
-}
-KOALA_INTEROP_2(ImportDeclarationSpecifiers, KNativePointer, KNativePointer, KNativePointer);
+// node ImportDeclarationSpecifiers
+//KNativePointer impl_ImportDeclarationSpecifiers(KNativePointer context, KNativePointer receiver)
+//{
+//   const auto _context = reinterpret_cast<es2panda_Context*>(context);
+//    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+//    std::size_t length;
+//    auto result = GetImpl()->ImportDeclarationSpecifiers(_context, _receiver, &length);
+//    return StageArena::cloneVector(result, length);
+//}
+//KOALA_INTEROP_2(ImportDeclarationSpecifiers, KNativePointer, KNativePointer, KNativePointer);
 
 KBoolean impl_ImportDeclarationIsTypeKindConst(KNativePointer context, KNativePointer receiver)
 {
@@ -7440,14 +7443,15 @@ KBoolean impl_ETSImportDeclarationIsPureDynamicConst(KNativePointer context, KNa
 }
 KOALA_INTEROP_2(ETSImportDeclarationIsPureDynamicConst, KBoolean, KNativePointer, KNativePointer);
 
-KNativePointer impl_ETSImportDeclarationAssemblerName(KNativePointer context, KNativePointer receiver)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    auto result = GetImpl()->ETSImportDeclarationAssemblerName(_context, _receiver);
-    return StageArena::strdup(result);
-}
-KOALA_INTEROP_2(ETSImportDeclarationAssemblerName, KNativePointer, KNativePointer, KNativePointer);
+// no ETSImportDeclarationAssemblerName
+//KNativePointer impl_ETSImportDeclarationAssemblerName(KNativePointer context, KNativePointer receiver)
+//{
+//    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+//    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+//    auto result = GetImpl()->ETSImportDeclarationAssemblerName(_context, _receiver);
+//    return StageArena::strdup(result);
+//}
+//KOALA_INTEROP_2(ETSImportDeclarationAssemblerName, KNativePointer, KNativePointer, KNativePointer);
 
 KNativePointer impl_ETSImportDeclarationAssemblerNameConst(KNativePointer context, KNativePointer receiver)
 {

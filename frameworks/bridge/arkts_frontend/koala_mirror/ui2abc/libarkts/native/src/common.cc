@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,6 +157,56 @@ inline KUInt unpackUInt(const KByte* bytes)
     );
 }
 
+void impl_MemInitialize()
+{
+    GetImpl()->MemInitialize();
+}
+KOALA_INTEROP_V0(MemInitialize)
+
+void impl_MemFinalize()
+{
+    GetImpl()->MemFinalize();
+}
+KOALA_INTEROP_V0(MemFinalize)
+
+KNativePointer impl_CreateGlobalContext(KNativePointer configPtr, KStringArray externalFileListPtr,
+    KInt fileNum, KBoolean lspUsage)
+{
+    auto config = reinterpret_cast<es2panda_Config*>(configPtr);
+
+    const std::size_t headerLen = 4;
+
+    const char** externalFileList = new const char* [fileNum];
+    std::size_t position = headerLen;
+    std::size_t strLen;
+    for (std::size_t i = 0; i < static_cast<std::size_t>(fileNum); ++i) {
+        strLen = unpackUInt(externalFileListPtr + position);
+        position += headerLen;
+        externalFileList[i] = strdup(std::string(
+            reinterpret_cast<const char*>(externalFileListPtr + position), strLen).c_str());
+        position += strLen;
+    }
+
+    return GetImpl()->CreateGlobalContext(config, externalFileList, fileNum, lspUsage);
+}
+KOALA_INTEROP_4(CreateGlobalContext, KNativePointer, KNativePointer, KStringArray, KInt, KBoolean)
+
+void impl_DestroyGlobalContext(KNativePointer globalContextPtr)
+{
+    auto context = reinterpret_cast<es2panda_GlobalContext*>(globalContextPtr);
+    GetImpl()->DestroyGlobalContext(context);
+}
+KOALA_INTEROP_V1(DestroyGlobalContext, KNativePointer)
+
+KNativePointer impl_CreateCacheContextFromFile(KNativePointer configPtr, KStringPtr& fileName,
+    KNativePointer globalContext, KBoolean isExternal)
+{
+    auto config = reinterpret_cast<es2panda_Config*>(configPtr);
+    auto context = reinterpret_cast<es2panda_GlobalContext*>(globalContext);
+    return GetImpl()->CreateCacheContextFromFile(config, getStringCopy(fileName), context, isExternal);
+}
+KOALA_INTEROP_4(CreateCacheContextFromFile, KNativePointer, KNativePointer, KStringPtr, KNativePointer, KBoolean)
+
 KNativePointer impl_CreateConfig(KInt argc, KStringArray argvPtr) {
     const std::size_t headerLen = 4;
 
@@ -230,8 +280,20 @@ TODO: NOT FROM API (shouldn't be there)
 -----------------------------------------------------------------------------------------------------------------------------
 */
 
-es2panda_AstNode * cachedParentNode;
-es2panda_Context * cachedContext;
+KNativePointer impl_AstNodeProgram(KNativePointer contextPtr, KNativePointer instancePtr)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(contextPtr);
+    auto _receiver = reinterpret_cast<es2panda_AstNode*>(instancePtr);
+
+    if (GetImpl()->AstNodeIsProgramConst(_context, _receiver)) {
+        return GetImpl()->ETSModuleProgram(_context, _receiver);
+    }
+    return impl_AstNodeProgram(_context, GetImpl()->AstNodeParent(_context, _receiver));
+}
+KOALA_INTEROP_2(AstNodeProgram, KNativePointer, KNativePointer, KNativePointer)
+
+thread_local es2panda_AstNode *cachedParentNode;
+thread_local es2panda_Context *cachedContext;
 
 static void changeParent(es2panda_AstNode *child)
 {
@@ -266,7 +328,7 @@ KNativePointer impl_AstNodeUpdateChildren(KNativePointer contextPtr, KNativePoin
 }
 KOALA_INTEROP_2(AstNodeUpdateChildren, KNativePointer, KNativePointer, KNativePointer)
 
-std::vector<void*> cachedChildren;
+thread_local std::vector<void*> cachedChildren;
 
 static void visitChild(es2panda_AstNode *node)
 {
