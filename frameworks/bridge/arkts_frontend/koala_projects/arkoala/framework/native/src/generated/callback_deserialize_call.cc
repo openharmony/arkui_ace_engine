@@ -5960,24 +5960,6 @@ void deserializeAndCallSyncSearchSubmitCallback(Ark_VMContext vmContext, KSerial
     Opt_SubmitEvent event = event_buf;
     _callSync(vmContext, _resourceId, searchContent, event);
 }
-void deserializeAndCallSearchValueCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String value)>(thisDeserializer.readPointer());
-    thisDeserializer.readPointer();
-    Ark_String value = static_cast<Ark_String>(thisDeserializer.readString());
-    _call(_resourceId, value);
-}
-void deserializeAndCallSyncSearchValueCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    thisDeserializer.readPointer();
-    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String value)>(thisDeserializer.readPointer());
-    Ark_String value = static_cast<Ark_String>(thisDeserializer.readString());
-    _callSync(vmContext, _resourceId, value);
-}
 void deserializeAndCallSelectedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -6209,52 +6191,6 @@ void deserializeAndCallSyncTextAreaSubmitCallback(Ark_VMContext vmContext, KSeri
     }
     Opt_SubmitEvent event = event_buf;
     _callSync(vmContext, _resourceId, enterKeyType, event);
-}
-void deserializeAndCallTextFieldValueCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointer());
-    thisDeserializer.readPointer();
-    const Ark_Int8 value_buf_selector = thisDeserializer.readInt8();
-    Ark_ResourceStr value_buf = {};
-    value_buf.selector = value_buf_selector;
-    if (value_buf_selector == 0) {
-        value_buf.selector = 0;
-        value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
-    }
-    else if (value_buf_selector == 1) {
-        value_buf.selector = 1;
-        value_buf.value1 = thisDeserializer.readResource();
-    }
-    else {
-        INTEROP_FATAL("One of the branches for value_buf has to be chosen through deserialisation.");
-    }
-    Ark_ResourceStr value = static_cast<Ark_ResourceStr>(value_buf);
-    _call(_resourceId, value);
-}
-void deserializeAndCallSyncTextFieldValueCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    thisDeserializer.readPointer();
-    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointer());
-    const Ark_Int8 value_buf_selector = thisDeserializer.readInt8();
-    Ark_ResourceStr value_buf = {};
-    value_buf.selector = value_buf_selector;
-    if (value_buf_selector == 0) {
-        value_buf.selector = 0;
-        value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
-    }
-    else if (value_buf_selector == 1) {
-        value_buf.selector = 1;
-        value_buf.value1 = thisDeserializer.readResource();
-    }
-    else {
-        INTEROP_FATAL("One of the branches for value_buf has to be chosen through deserialisation.");
-    }
-    Ark_ResourceStr value = static_cast<Ark_ResourceStr>(value_buf);
-    _callSync(vmContext, _resourceId, value);
 }
 void deserializeAndCallTextPickerEnterSelectedAreaCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -7098,7 +7034,6 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case -1265626662/*Kind_ScrollOnScrollCallback*/: return deserializeAndCallScrollOnScrollCallback(thisArray, thisLength);
         case -721521596/*Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallScrollOnWillScrollCallback(thisArray, thisLength);
         case 1717691617/*Kind_SearchSubmitCallback*/: return deserializeAndCallSearchSubmitCallback(thisArray, thisLength);
-        case 2049289694/*Kind_SearchValueCallback*/: return deserializeAndCallSearchValueCallback(thisArray, thisLength);
         case -1480175598/*Kind_SelectedCallback*/: return deserializeAndCallSelectedCallback(thisArray, thisLength);
         case -250780276/*Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisArray, thisLength);
         case 63936248/*Kind_ShowCallback*/: return deserializeAndCallShowCallback(thisArray, thisLength);
@@ -7109,7 +7044,6 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case -712186065/*Kind_SubmitCallback*/: return deserializeAndCallSubmitCallback(thisArray, thisLength);
         case 221706282/*Kind_TabsCustomContentTransitionCallback*/: return deserializeAndCallTabsCustomContentTransitionCallback(thisArray, thisLength);
         case -401980571/*Kind_TextAreaSubmitCallback*/: return deserializeAndCallTextAreaSubmitCallback(thisArray, thisLength);
-        case 18061455/*Kind_TextFieldValueCallback*/: return deserializeAndCallTextFieldValueCallback(thisArray, thisLength);
         case -202014218/*Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisArray, thisLength);
         case -1928298699/*Kind_TextPickerScrollStopCallback*/: return deserializeAndCallTextPickerScrollStopCallback(thisArray, thisLength);
         case 2057659801/*Kind_TextTimerAttribute_onTimer_event_type*/: return deserializeAndCallTextTimerAttribute_onTimer_event_type(thisArray, thisLength);
@@ -7395,7 +7329,6 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -1265626662/*Kind_ScrollOnScrollCallback*/: return deserializeAndCallSyncScrollOnScrollCallback(vmContext, thisArray, thisLength);
         case -721521596/*Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallSyncScrollOnWillScrollCallback(vmContext, thisArray, thisLength);
         case 1717691617/*Kind_SearchSubmitCallback*/: return deserializeAndCallSyncSearchSubmitCallback(vmContext, thisArray, thisLength);
-        case 2049289694/*Kind_SearchValueCallback*/: return deserializeAndCallSyncSearchValueCallback(vmContext, thisArray, thisLength);
         case -1480175598/*Kind_SelectedCallback*/: return deserializeAndCallSyncSelectedCallback(vmContext, thisArray, thisLength);
         case -250780276/*Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallSyncShouldBuiltInRecognizerParallelWithCallback(vmContext, thisArray, thisLength);
         case -1716637992/*Kind_SizeChangeCallback*/: return deserializeAndCallSyncSizeChangeCallback(vmContext, thisArray, thisLength);
@@ -7405,7 +7338,6 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -712186065/*Kind_SubmitCallback*/: return deserializeAndCallSyncSubmitCallback(vmContext, thisArray, thisLength);
         case 221706282/*Kind_TabsCustomContentTransitionCallback*/: return deserializeAndCallSyncTabsCustomContentTransitionCallback(vmContext, thisArray, thisLength);
         case -401980571/*Kind_TextAreaSubmitCallback*/: return deserializeAndCallSyncTextAreaSubmitCallback(vmContext, thisArray, thisLength);
-        case 18061455/*Kind_TextFieldValueCallback*/: return deserializeAndCallSyncTextFieldValueCallback(vmContext, thisArray, thisLength);
         case -202014218/*Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallSyncTextPickerEnterSelectedAreaCallback(vmContext, thisArray, thisLength);
         case -1928298699/*Kind_TextPickerScrollStopCallback*/: return deserializeAndCallSyncTextPickerScrollStopCallback(vmContext, thisArray, thisLength);
         case 2057659801/*Kind_TextTimerAttribute_onTimer_event_type*/: return deserializeAndCallSyncTextTimerAttribute_onTimer_event_type(vmContext, thisArray, thisLength);

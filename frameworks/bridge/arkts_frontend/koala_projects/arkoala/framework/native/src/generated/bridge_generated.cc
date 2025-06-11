@@ -35241,12 +35241,6 @@ void impl_NavExtender_subTitle(Ark_NativePointer navigation, const KStringPtr& s
         GetAccessors()->getNavExtenderAccessor()->subTitle(navigation, (const Ark_String*) (&subTitle));
 }
 KOALA_INTEROP_V2(NavExtender_subTitle, Ark_NativePointer, KStringPtr)
-Ark_NativePointer impl_SearchOps_registerSearchValueCallback(Ark_NativePointer node, const KStringPtr& value, KSerializerBuffer thisArray, int32_t thisLength) {
-        Deserializer thisDeserializer(thisArray, thisLength);
-        SearchValueCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SearchValueCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SearchValueCallback))))};;
-        return GetAccessors()->getSearchOpsAccessor()->registerSearchValueCallback(node, (const Ark_String*) (&value), (const SearchValueCallback*)&callback_value);
-}
-KOALA_INTEROP_4(SearchOps_registerSearchValueCallback, Ark_NativePointer, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
 void impl_NavExtender_pushPath(Ark_NativePointer pathStack, Ark_NativePointer info, KSerializerBuffer thisArray, int32_t thisLength)
 {
     Deserializer thisDeserializer(thisArray, thisLength);
@@ -35307,27 +35301,6 @@ void impl_EventEmulator_emitTextInputEvent(Ark_NativePointer node, const KString
         GetAccessors()->getEventEmulatorAccessor()->emitTextInputEvent(node, (const Ark_String*) (&text));
 }
 KOALA_INTEROP_V2(EventEmulator_emitTextInputEvent, Ark_NativePointer, KStringPtr)
-Ark_NativePointer impl_TextFieldOps_registerTextFieldValueCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();
-        Ark_ResourceStr value_value_buf = {};
-        value_value_buf.selector = value_value_buf_selector;
-        if (value_value_buf_selector == 0) {
-            value_value_buf.selector = 0;
-            value_value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
-        }
-        else if (value_value_buf_selector == 1) {
-            value_value_buf.selector = 1;
-            value_value_buf.value1 = thisDeserializer.readResource();
-        }
-        else {
-            INTEROP_FATAL("One of the branches for value_value_buf has to be chosen through deserialisation.");
-        }
-        Ark_ResourceStr value_value = static_cast<Ark_ResourceStr>(value_value_buf);;
-        TextFieldValueCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextFieldValueCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextFieldValueCallback))))};;
-        return GetAccessors()->getTextFieldOpsAccessor()->registerTextFieldValueCallback(node, (const Ark_ResourceStr*)&value_value, (const TextFieldValueCallback*)&callback_value);
-}
-KOALA_INTEROP_DIRECT_3(TextFieldOps_registerTextFieldValueCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ActionSheet_show(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         Ark_ActionSheetOptions value_value = thisDeserializer.readActionSheetOptions();;

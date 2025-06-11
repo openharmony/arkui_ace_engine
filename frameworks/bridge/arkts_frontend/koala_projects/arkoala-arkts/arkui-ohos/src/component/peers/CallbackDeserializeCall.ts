@@ -91,8 +91,6 @@ import { PageTransitionCallback, RouteType } from "./../pageTransition"
 import { PasteButtonCallback, PasteButtonOnClickResult } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData } from "./../pluginComponent"
 import { SaveButtonCallback, SaveButtonOnClickResult } from "./../saveButton"
-import { SearchValueCallback } from "./../searchops"
-import { TextFieldValueCallback } from "./../textfieldops"
 import { SelectedCallback } from "./../griditemops"
 import { TypeChecker } from "#components"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
@@ -2228,12 +2226,6 @@ export function deserializeAndCallSearchSubmitCallback(thisDeserializer: Deseria
     let event : SubmitEvent | undefined = event_buf
     _call(searchContent, event)
 }
-export function deserializeAndCallSearchValueCallback(thisDeserializer: Deserializer): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as SearchValueCallback)
-    let value : string = (thisDeserializer.readString() as string)
-    _call(value)
-}
 export function deserializeAndCallSelectedCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as SelectedCallback)
@@ -2319,23 +2311,6 @@ export function deserializeAndCallTextAreaSubmitCallback(thisDeserializer: Deser
     }
     let event : SubmitEvent | undefined = event_buf
     _call(enterKeyType, event)
-}
-export function deserializeAndCallTextFieldValueCallback(thisDeserializer: Deserializer): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as TextFieldValueCallback)
-    const value_buf_selector : int32 = thisDeserializer.readInt8()
-    let value_buf : string | Resource | undefined
-    if (value_buf_selector == 0) {
-        value_buf = (thisDeserializer.readString() as string)
-    }
-    else if (value_buf_selector == 1) {
-        value_buf = thisDeserializer.readResource()
-    }
-    else {
-        throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
-    }
-    let value : ResourceStr = (value_buf as string | Resource)
-    _call(value)
 }
 export function deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2819,7 +2794,6 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -1265626662/*CallbackKind.Kind_ScrollOnScrollCallback*/: return deserializeAndCallScrollOnScrollCallback(thisDeserializer);
         case -721521596/*CallbackKind.Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallScrollOnWillScrollCallback(thisDeserializer);
         case 1717691617/*CallbackKind.Kind_SearchSubmitCallback*/: return deserializeAndCallSearchSubmitCallback(thisDeserializer);
-        case 2049289694/*CallbackKind.Kind_SearchValueCallback*/: return deserializeAndCallSearchValueCallback(thisDeserializer);
         case -1480175598/*CallbackKind.Kind_SelectedCallback*/: return deserializeAndCallSelectedCallback(thisDeserializer);
         case -250780276/*CallbackKind.Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer);
         case 63936248/*CallbackKind.Kind_ShowCallback*/: return deserializeAndCallShowCallback(thisDeserializer);
@@ -2830,7 +2804,6 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -712186065/*CallbackKind.Kind_SubmitCallback*/: return deserializeAndCallSubmitCallback(thisDeserializer);
         case 221706282/*CallbackKind.Kind_TabsCustomContentTransitionCallback*/: return deserializeAndCallTabsCustomContentTransitionCallback(thisDeserializer);
         case -401980571/*CallbackKind.Kind_TextAreaSubmitCallback*/: return deserializeAndCallTextAreaSubmitCallback(thisDeserializer);
-        case 18061455/*CallbackKind.Kind_TextFieldValueCallback*/: return deserializeAndCallTextFieldValueCallback(thisDeserializer);
         case -202014218/*CallbackKind.Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeserializer);
         case -1928298699/*CallbackKind.Kind_TextPickerScrollStopCallback*/: return deserializeAndCallTextPickerScrollStopCallback(thisDeserializer);
         case 2057659801/*CallbackKind.Kind_TextTimerAttribute_onTimer_event_type*/: return deserializeAndCallTextTimerAttribute_onTimer_event_type(thisDeserializer);

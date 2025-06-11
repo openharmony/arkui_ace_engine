@@ -4603,8 +4603,6 @@ export class ArkUIGeneratedNativeModule {
     native static _NavExtender_title(navigation: KPointer, title: KStringPtr, hasSubTitle: KInt): void
     @ani.unsafe.Quick
     native static _NavExtender_subTitle(navigation: KPointer, subTitle: KStringPtr): void
-    @ani.unsafe.Quick
-    native static _SearchOps_registerSearchValueCallback(node: KPointer, value: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _NavExtender_pushPath(pathStack: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4627,8 +4625,6 @@ export class ArkUIGeneratedNativeModule {
     native static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void
     @ani.unsafe.Quick
     native static _EventEmulator_emitTextInputEvent(node: KPointer, text: KStringPtr): void
-    @ani.unsafe.Direct
-    native static _TextFieldOps_registerTextFieldValueCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _ActionSheet_show(thisArray: KSerializerBuffer, thisLength: int32): undefined
     @ani.unsafe.Direct

@@ -14333,19 +14333,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // NavExtenderAccessor
-    namespace SearchOpsAccessor {
-    Ark_NativePointer RegisterSearchValueCallbackImpl(Ark_NativePointer node,
-                                                      const Ark_String* value,
-                                                      const SearchValueCallback* callback)
-    {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(node);
-        //auto convValue = Converter::OptConvert<type>(node); // for enums
-        //undefinedModelNG::SetRegisterSearchValueCallback(frameNode, convValue);
-        return {};
-    }
-    } // SearchOpsAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
                                 const Ark_String* text)
@@ -14357,19 +14344,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //undefinedModelNG::SetEmitTextInputEvent(frameNode, convValue);
     }
     } // EventEmulatorAccessor
-    namespace TextFieldOpsAccessor {
-    Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
-                                                         const Ark_ResourceStr* value,
-                                                         const TextFieldValueCallback* callback)
-    {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(node);
-        //auto convValue = Converter::OptConvert<type>(node); // for enums
-        //undefinedModelNG::SetRegisterTextFieldValueCallback(frameNode, convValue);
-        return {};
-    }
-    } // TextFieldOpsAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* value)
     {
@@ -21710,14 +21684,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &NavExtenderAccessorImpl;
     }
 
-    const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor()
-    {
-        static const GENERATED_ArkUISearchOpsAccessor SearchOpsAccessorImpl {
-            SearchOpsAccessor::RegisterSearchValueCallbackImpl,
-        };
-        return &SearchOpsAccessorImpl;
-    }
-
     const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()
     {
         static const GENERATED_ArkUIEventEmulatorAccessor EventEmulatorAccessorImpl {
@@ -21725,14 +21691,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventEmulatorAccessor::EmitTextInputEventImpl,
         };
         return &EventEmulatorAccessorImpl;
-    }
-
-    const GENERATED_ArkUITextFieldOpsAccessor* GetTextFieldOpsAccessor()
-    {
-        static const GENERATED_ArkUITextFieldOpsAccessor TextFieldOpsAccessorImpl {
-            TextFieldOpsAccessor::RegisterTextFieldValueCallbackImpl,
-        };
-        return &TextFieldOpsAccessorImpl;
     }
 
     const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
@@ -24629,9 +24587,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetFilterAccessor,
             GetVisualEffectAccessor,
             GetNavExtenderAccessor,
-            GetSearchOpsAccessor,
             GetEventEmulatorAccessor,
-            GetTextFieldOpsAccessor,
             GetActionSheetAccessor,
             GetAlertDialogAccessor,
             GetSpringPropAccessor,

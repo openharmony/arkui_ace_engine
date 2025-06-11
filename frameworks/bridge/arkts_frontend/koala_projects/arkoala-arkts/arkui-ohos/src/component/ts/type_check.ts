@@ -19247,12 +19247,6 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof WebNavigationType")
         }
     }
-    static isBindableString(value: Object | string | number | undefined): boolean {
-        throw new Error("Can not discriminate value typeof Bindable<String>")
-    }
-    static isBindableResourceStr(value: Object | string | number | undefined): boolean {
-        throw new Error("Can not discriminate value typeof Bindable<ResourceStr>")
-    }
     static isWebOptions(value: Object | string | number | undefined | boolean, duplicated_src: boolean, duplicated_controller: boolean, duplicated_renderMode: boolean, duplicated_incognitoMode: boolean, duplicated_sharedRenderProcessToken: boolean): boolean {
         if ((!duplicated_src) && (value?.hasOwnProperty("src"))) {
             return true

@@ -1603,8 +1603,6 @@ typedef struct OnWillScrollCallback OnWillScrollCallback;
 typedef struct Opt_OnWillScrollCallback Opt_OnWillScrollCallback;
 typedef struct SearchSubmitCallback SearchSubmitCallback;
 typedef struct Opt_SearchSubmitCallback Opt_SearchSubmitCallback;
-typedef struct SearchValueCallback SearchValueCallback;
-typedef struct Opt_SearchValueCallback Opt_SearchValueCallback;
 typedef struct SelectedCallback SelectedCallback;
 typedef struct Opt_SelectedCallback Opt_SelectedCallback;
 typedef struct ShouldBuiltInRecognizerParallelWithCallback ShouldBuiltInRecognizerParallelWithCallback;
@@ -1625,8 +1623,6 @@ typedef struct TabsCustomContentTransitionCallback TabsCustomContentTransitionCa
 typedef struct Opt_TabsCustomContentTransitionCallback Opt_TabsCustomContentTransitionCallback;
 typedef struct TextAreaSubmitCallback TextAreaSubmitCallback;
 typedef struct Opt_TextAreaSubmitCallback Opt_TextAreaSubmitCallback;
-typedef struct TextFieldValueCallback TextFieldValueCallback;
-typedef struct Opt_TextFieldValueCallback Opt_TextFieldValueCallback;
 typedef struct TextPickerEnterSelectedAreaCallback TextPickerEnterSelectedAreaCallback;
 typedef struct Opt_TextPickerEnterSelectedAreaCallback Opt_TextPickerEnterSelectedAreaCallback;
 typedef struct TextPickerScrollStopCallback TextPickerScrollStopCallback;
@@ -11481,15 +11477,6 @@ typedef struct Opt_SearchSubmitCallback {
     Ark_Tag tag;
     SearchSubmitCallback value;
 } Opt_SearchSubmitCallback;
-typedef struct SearchValueCallback {
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_String value);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String value);
-} SearchValueCallback;
-typedef struct Opt_SearchValueCallback {
-    Ark_Tag tag;
-    SearchValueCallback value;
-} Opt_SearchValueCallback;
 typedef struct SelectedCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Boolean selected);
@@ -11580,15 +11567,6 @@ typedef struct Opt_TextAreaSubmitCallback {
     Ark_Tag tag;
     TextAreaSubmitCallback value;
 } Opt_TextAreaSubmitCallback;
-typedef struct TextFieldValueCallback {
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_ResourceStr value);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ResourceStr value);
-} TextFieldValueCallback;
-typedef struct Opt_TextFieldValueCallback {
-    Ark_Tag tag;
-    TextFieldValueCallback value;
-} Opt_TextFieldValueCallback;
 typedef struct TextPickerEnterSelectedAreaCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index);
@@ -24422,24 +24400,12 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
                             Ark_Boolean animated);
 } GENERATED_ArkUINavExtenderAccessor;
 
-typedef struct GENERATED_ArkUISearchOpsAccessor {
-    Ark_NativePointer (*registerSearchValueCallback)(Ark_NativePointer node,
-                                                     const Ark_String* value,
-                                                     const SearchValueCallback* callback);
-} GENERATED_ArkUISearchOpsAccessor;
-
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
     void (*emitClickEvent)(Ark_NativePointer node,
                            Ark_ClickEvent event);
     void (*emitTextInputEvent)(Ark_NativePointer node,
                                const Ark_String* text);
 } GENERATED_ArkUIEventEmulatorAccessor;
-
-typedef struct GENERATED_ArkUITextFieldOpsAccessor {
-    Ark_NativePointer (*registerTextFieldValueCallback)(Ark_NativePointer node,
-                                                        const Ark_ResourceStr* value,
-                                                        const TextFieldValueCallback* callback);
-} GENERATED_ArkUITextFieldOpsAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {
     void (*show)(const Ark_ActionSheetOptions* value);
@@ -27178,9 +27144,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
     const GENERATED_ArkUINavExtenderAccessor* (*getNavExtenderAccessor)();
-    const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();
-    const GENERATED_ArkUITextFieldOpsAccessor* (*getTextFieldOpsAccessor)();
     const GENERATED_ArkUIActionSheetAccessor* (*getActionSheetAccessor)();
     const GENERATED_ArkUIAlertDialogAccessor* (*getAlertDialogAccessor)();
     const GENERATED_ArkUISpringPropAccessor* (*getSpringPropAccessor)();
