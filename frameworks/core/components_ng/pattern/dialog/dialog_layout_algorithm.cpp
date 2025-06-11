@@ -690,7 +690,8 @@ void DialogLayoutAlgorithm::AvoidScreen(
     auto container = AceEngine::Get().GetContainer(containerId);
     Rect availableRect;
     // In superFoldDisplayDevice, the rect is the full screen's available rect when the displayId is 0.
-    if (SystemProperties::IsSuperFoldDisplayDevice() && container->GetDisplayId() == 0 && !isShowInSubWindow_) {
+    if (SystemProperties::IsSuperFoldDisplayDevice() && container->GetDisplayId() == 0 &&
+        (!isShowInSubWindow_ || (isUIExtensionSubWindow_ && isModal_))) {
         availableRect = container->GetFoldExpandAvailableRect();
     } else {
         availableRect = OverlayManager::GetDisplayAvailableRect(dialogNode,
