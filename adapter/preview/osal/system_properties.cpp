@@ -439,4 +439,24 @@ void SystemProperties::SetMultiInstanceEnabled(bool enabled)
 {
 }
 
+bool SystemProperties::IsWhiteBlockEnabled()
+{
+    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
+}
+
+bool SystemProperties::IsWhiteBlockIdleChange()
+{
+    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock.idle", "0") == "1";
+}
+
+std::string SystemProperties::GetWhiteBlockIndexValue()
+{
+    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock.index", "0");
+}
+
+std::string SystemProperties::GetWhiteBlockCacheCountValue()
+{
+    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock.cachedcount", "0");
+}
+
 } // namespace OHOS::Ace
