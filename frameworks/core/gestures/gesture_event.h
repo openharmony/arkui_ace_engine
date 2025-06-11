@@ -385,8 +385,9 @@ private:
     Offset localLocation_;
     // Will be used in drag.
     Offset screenLocation_;
-    // Raw last touchPoint global location.
+    // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;
+    // Raw last touchPoint global location.
     Offset rawGlobalLocation_;
     Offset pinchCenter_;
     Offset delta_;

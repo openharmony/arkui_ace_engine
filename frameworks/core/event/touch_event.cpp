@@ -957,8 +957,8 @@ TouchEvent TouchEventInfo::ConvertToTouchEvent() const
         touchEvent.screenY = static_cast<float>(changedTouches_.front().GetScreenLocation().GetY());
         touchEvent.localX = static_cast<float>(changedTouches_.front().GetLocalLocation().GetX());
         touchEvent.localY = static_cast<float>(changedTouches_.front().GetLocalLocation().GetY());
-        touchEvent.globalDisplayX = static_cast<float>(changedTouches_.front().GetGlobalDisplayLocation().GetX());
-        touchEvent.globalDisplayY = static_cast<float>(changedTouches_.front().GetGlobalDisplayLocation().GetY());
+        touchEvent.globalDisplayX = static_cast<double>(changedTouches_.front().GetGlobalDisplayLocation().GetX());
+        touchEvent.globalDisplayY = static_cast<double>(changedTouches_.front().GetGlobalDisplayLocation().GetY());
         touchEvent.id = changedTouches_.front().GetFingerId();
         touchEvent.force = changedTouches_.front().GetForce();
         touchEvent.type = changedTouches_.front().GetTouchType();

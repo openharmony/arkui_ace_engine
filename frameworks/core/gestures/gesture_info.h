@@ -274,6 +274,7 @@ struct FingerInfo {
 
     //screen position at which the touch point contacts the screen.
     Offset screenLocation_;
+    // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;
     SourceType sourceType_ = SourceType::NONE;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;

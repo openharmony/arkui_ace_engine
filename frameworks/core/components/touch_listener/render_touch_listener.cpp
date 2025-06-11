@@ -169,7 +169,7 @@ bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
         float localX = pointPair.second.x - coordinateOffset_.GetX();
         float localY = pointPair.second.y - coordinateOffset_.GetY();
         double globalDisplayX = pointPair.second.globalDisplayX;
-        double globalDisplayY = pointPair.second.globalDisplayX;
+        double globalDisplayY = pointPair.second.globalDisplayY;
         TouchLocationInfo info("onTouch", pointPair.second.id);
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));

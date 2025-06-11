@@ -2121,8 +2121,8 @@ void DragDropManager::UpdateNotifyDragEvent(
     notifyEvent->SetY((double)point.GetY());
     notifyEvent->SetScreenX((double)point.GetScreenX());
     notifyEvent->SetScreenY((double)point.GetScreenY());
-    notifyEvent->SetGlobalDisplayX((double)point.GetGlobalDisplayX());
-    notifyEvent->SetGlobalDisplayY((double)point.GetGlobalDisplayY());
+    notifyEvent->SetGlobalDisplayX(point.GetGlobalDisplayX());
+    notifyEvent->SetGlobalDisplayY(point.GetGlobalDisplayY());
     if (dragEventType != DragEventType::START) {
         if (dragEventType != DragEventType::DROP) {
             notifyEvent->SetVelocity(velocityTracker_.GetVelocity());
@@ -3324,7 +3324,7 @@ void DragDropManager::HandleTouchEvent(const TouchEvent& event)
             return;
         }
         auto pointerEvent = DragPointerEvent(
-            event.x, event.y, event.screenX, event.screenY, event.globalDisplayX, event.globalDisplayX);
+            event.x, event.y, event.screenX, event.screenY, event.globalDisplayX, event.globalDisplayY);
         SetDragAnimationPointerEvent(pointerEvent);
     } else if ((event.type == TouchType::UP) || (event.type == TouchType::CANCEL)) {
         ResetDraggingStatus(event);

@@ -8883,9 +8883,9 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
             historyLoaction.GetScreenLocation().GetX() / density;
         points[i].screenY = NearEqual(density, 0.0) ? 0.0f :
             historyLoaction.GetScreenLocation().GetY() / density;
-        points[i].globalDisplayX = NearEqual(density, 0.0) ? 0.0f :
+        points[i].globalDisplayX = NearEqual(density, 0.0) ? 0.0 :
             historyLoaction.GetGlobalDisplayLocation().GetX() / density;
-        points[i].globalDisplayY = NearEqual(density, 0.0) ? 0.0f :
+        points[i].globalDisplayY = NearEqual(density, 0.0) ? 0.0 :
             historyLoaction.GetGlobalDisplayLocation().GetY() / density;
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;

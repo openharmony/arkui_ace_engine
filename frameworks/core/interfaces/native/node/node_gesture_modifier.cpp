@@ -475,7 +475,7 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     mouseEvent.actionTouchPoint.windowY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetY();
     mouseEvent.actionTouchPoint.screenX = tempMouseEvent.screenX;
     mouseEvent.actionTouchPoint.screenY = tempMouseEvent.screenY;
-    mouseEvent.actionTouchPoint.globalDisplayX = tempMouseEvent.globalDisplayY;
+    mouseEvent.actionTouchPoint.globalDisplayX = tempMouseEvent.globalDisplayX;
     mouseEvent.actionTouchPoint.globalDisplayY = tempMouseEvent.globalDisplayY;
     mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempMouseEvent.sourceTool);
     mouseEvent.targetDisplayId = info.GetTargetDisplayId();
@@ -514,9 +514,9 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.actionTouchPoint.screenX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetX();
     axisEvent.actionTouchPoint.screenY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetY();
     axisEvent.actionTouchPoint.globalDisplayX =
-        fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalDisplayLocation_.GetX();
+        fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetX();
     axisEvent.actionTouchPoint.globalDisplayY =
-        fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalDisplayLocation_.GetY();
+        fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetY();
     axisEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempAxisEvent.sourceTool);
     axisEvent.targetDisplayId = info.GetTargetDisplayId();
 }

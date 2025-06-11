@@ -168,7 +168,7 @@ private:
     // current node which has the recognizer.
     Offset localLocation_;
     Offset screenLocation_;
-    // The location where the touch point touches the screen when there are multiple screens
+    // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;
 };
 

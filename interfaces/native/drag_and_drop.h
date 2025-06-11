@@ -446,7 +446,24 @@ float OH_ArkUI_DragEvent_GetTouchPointXToDisplay(ArkUI_DragEvent* event);
  */
 float OH_ArkUI_DragEvent_GetTouchPointYToDisplay(ArkUI_DragEvent* event);
 
+/**
+ * @brief Obtains the X coordinate of the touch point relative to the global display from a drag event.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @return Returns the X coordinate of the touch point relative to the global display, in px.
+ *         Returns the default value <b>0</b> if the input parameter is invalid.
+ * @since 20
+ */
 float OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(ArkUI_DragEvent* event);
+
+/**
+ * @brief Obtains the Y coordinate of the touch point relative to the global display from a drag event.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @return Returns the Y coordinate of the touch point relative to the global display, in px.
+ *         Returns the default value <b>0</b> if the input parameter is invalid.
+ * @since 20
+ */
 float OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(ArkUI_DragEvent* event);
 
 /**

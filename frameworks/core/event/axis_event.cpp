@@ -329,7 +329,7 @@ bool AxisEventTarget::HandleAxisEvent(const AxisEvent& event)
         event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
     AxisInfo info = AxisInfo(event, localLocation, GetEventTarget().value_or(EventTarget()));
     info.SetScreenLocation(Offset(event.screenX, event.screenY));
-    info.SetGlobalDisplayLocation(Offset(event.screenX, event.screenY));
+    info.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     info.SetSourceTool(event.sourceTool);
     info.SetStopPropagation(true);
     onAxisCallback_(info);
