@@ -1079,9 +1079,44 @@ public:
         underlineColor_ = underlineColor;
     }
 
+    void SetTypingUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.typing = normalColor;
+    }
+
+    void ResetTypingUnderlineColor()
+    {
+        userUnderlineColor_.typing = std::nullopt;
+    }
+
     void SetNormalUnderlineColor(const Color& normalColor)
     {
         userUnderlineColor_.normal = normalColor;
+    }
+
+    void ResetNormalUnderlineColor()
+    {
+        userUnderlineColor_.normal = std::nullopt;
+    }
+
+    void SetErrorUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.error = normalColor;
+    }
+
+    void ResetErrorUnderlineColor()
+    {
+        userUnderlineColor_.error = std::nullopt;
+    }
+
+    void SetDisableUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.disable = normalColor;
+    }
+
+    void ResetDisableUnderlineColor()
+    {
+        userUnderlineColor_.disable = std::nullopt;
     }
 
     void SetUserUnderlineColor(UserUnderlineColor userUnderlineColor)
@@ -1621,6 +1656,7 @@ public:
     void AddInsertCommand(const std::u16string& insertValue, InputReason reason);
     void AddInputCommand(const InputCommandInfo& inputCommandInfo);
     void ExecuteInputCommand(const InputCommandInfo& inputCommandInfo);
+    void FilterInitializeText();
     void SetIsFilterChanged(bool isFilterChanged)
     {
         isFilterChanged_ = isFilterChanged;
@@ -1644,6 +1680,12 @@ public:
         imeGradientMode_ = config.gradientMode;
         imeFluidLightMode_ = config.fluidLightMode;
     }
+
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
+    void UpdateBorderResource() override;
+    void UpdateMarginResource() override;
+    void SetBackBorderRadius();
+    void OnColorModeChange(uint32_t colorMode) override;
 
 protected:
     virtual void InitDragEvent();
@@ -1779,8 +1821,6 @@ private:
     bool FireOnTextChangeEvent();
     void AddTextFireOnChange();
     void RecordTextInputEvent();
-
-    void FilterInitializeText();
 
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();

@@ -34,6 +34,9 @@ public:
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
 
+    void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
+        const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr) override;
+
     void SetFontFamilies(std::vector<std::string>& familyNames) override;
     void SetSymbolType(SymbolType value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

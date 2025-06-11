@@ -2346,13 +2346,6 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest035, TestSize.Level1)
     };
     eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
 
-    bool fireOnWillInsert = false;
-    auto onWillInsert = [&fireOnWillInsert](const InsertValueInfo& info) {
-        fireOnWillInsert = true;
-        return true;
-    };
-    eventHub_->SetOnWillInsertValueEvent(std::move(onWillInsert));
-
     /**
      * @tc.steps: step2. change text with ExecuteInsertValueCommand
      * @tc.expected: return value is valid

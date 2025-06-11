@@ -35,6 +35,11 @@ void SpanModelImpl::Create(const std::u16string& content)
     Create(UtfUtils::Str16DebugToStr8(content));
 }
 
+void SpanModelImpl::Create(const std::u16string& content, RefPtr<ResourceObject>& resObj)
+{
+    Create(UtfUtils::Str16DebugToStr8(content));
+}
+
 void SpanModelImpl::SetFont(const Font& value) {}
 
 void SpanModelImpl::SetFontSize(const Dimension& value)

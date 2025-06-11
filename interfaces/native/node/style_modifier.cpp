@@ -892,10 +892,10 @@ int32_t SetBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             node->uiNodeHandle, item->value[NUM_0].u32);
     } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputBackgroundColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBackgroundColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundColor(
             node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
@@ -1083,10 +1083,10 @@ int32_t SetPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     struct ArkUISizeType left = { item->value[leftIndex].f32, unit };
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPadding(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPadding(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(
             node->uiNodeHandle, &top, &right, &bottom, &left);
@@ -1191,10 +1191,10 @@ int32_t SetMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputMargin(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMargin(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left);
     }
@@ -3709,10 +3709,10 @@ int32_t SetMarginPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     struct ArkUISizeType left = { item->value[leftIndex].f32, UNIT_PERCENT };
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputMargin(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMargin(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left);
     }
@@ -4097,13 +4097,14 @@ int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     switch (node->type) {
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontColor(
-                node->uiNodeHandle, item->value[0].u32);
+                node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setFontColor(node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_SPAN:
-            fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontColor(node->uiNodeHandle, item->value[0].u32);
+            fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontColor(
+                node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_BUTTON:
             fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontColor(
@@ -4111,7 +4112,7 @@ int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontColor(
-                node->uiNodeHandle, item->value[0].u32);
+                node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         default:
             return ERROR_CODE_PARAM_INVALID;
@@ -4153,7 +4154,7 @@ int32_t SetFontWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             fullImpl->getNodeModifiers()->getTextModifier()->setFontWeight(node->uiNodeHandle, item->value[0].i32);
             break;
         case ARKUI_NODE_SPAN:
-            fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontWeight(node->uiNodeHandle, item->value[0].i32);
+            fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontWeight(node->uiNodeHandle, item->value[0].i32, nullptr);
             break;
         case ARKUI_NODE_BUTTON:
             fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontWeightEnum(
@@ -4211,18 +4212,21 @@ int32_t SetFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     int32_t unit = GetDefaultUnit(node, UNIT_FP);
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         struct ArkUILengthType fontSize = { nullptr, item->value[0].f32, unit };
-        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontSize(node->uiNodeHandle, &fontSize);
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontSize(
+            node->uiNodeHandle, &fontSize, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT) {
-        fullImpl->getNodeModifiers()->getTextModifier()->setFontSize(node->uiNodeHandle, item->value[0].f32, unit, nullptr);
+        fullImpl->getNodeModifiers()->getTextModifier()->setFontSize(
+            node->uiNodeHandle, item->value[0].f32, unit, nullptr);
     } else if (node->type == ARKUI_NODE_SPAN) {
         fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontSize(
-            node->uiNodeHandle, item->value[0].f32, unit);
+            node->uiNodeHandle, item->value[0].f32, unit, nullptr);
     } else if (node->type == ARKUI_NODE_BUTTON) {
         fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontSize(node->uiNodeHandle,
             item->value[0].f32, unit);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         struct ArkUIResourceLength fontSize = { item->value[0].f32, unit, nullptr };
-        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontSize(node->uiNodeHandle, &fontSize);
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontSize(
+            node->uiNodeHandle, &fontSize, nullptr);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -4353,10 +4357,10 @@ int32_t SetCaretColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaretColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaCaretColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -4402,7 +4406,7 @@ int32_t SetCaretStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaret(
-        node->uiNodeHandle, item->value[NUM_0].f32, unit);
+        node->uiNodeHandle, item->value[NUM_0].f32, unit, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4534,10 +4538,10 @@ int32_t SetPlaceholderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPlaceholderColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -4690,7 +4694,7 @@ int32_t SetSelectedBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputSelectedBackgroundColor(
-        node->uiNodeHandle, item->value[0].u32);
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4783,7 +4787,7 @@ int32_t SetTextInputCancelButton(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     }
     
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCancelButton(node->uiNodeHandle,
-        item->value[NUM_0].i32, &size, color, str.c_str());
+        item->value[NUM_0].i32, &size, color, str.c_str(), nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4879,7 +4883,7 @@ int32_t SetTextInputUnderlineColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
     ArkUI_Bool hasValues[NUM_4] = { 1, 1, 1, 1 };
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(
-        node->uiNodeHandle, values, hasValues, NUM_4);
+        node->uiNodeHandle, values, hasValues, NUM_4, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5440,7 +5444,7 @@ int32_t SetTextAreaLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     }
     int32_t unit = GetDefaultUnit(node, UNIT_FP);
     fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaLineHeight(
-        node->uiNodeHandle, static_cast<ArkUI_Float32>(item->value[0].i32), unit);
+        node->uiNodeHandle, static_cast<ArkUI_Float32>(item->value[0].i32), unit, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5468,7 +5472,7 @@ int32_t SetTextInputLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     }
     int32_t unit = GetDefaultUnit(node, UNIT_FP);
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputLineHeight(
-        node->uiNodeHandle, static_cast<ArkUI_Float32>(item->value[0].i32), unit);
+        node->uiNodeHandle, static_cast<ArkUI_Float32>(item->value[0].i32), unit, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7703,9 +7707,11 @@ int32_t SetTextShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         item->value[3].f32, item->value[4].f32 };
     shadows.emplace_back(shadow);
     if (node->type == ARKUI_NODE_TEXT) {
-        fullImpl->getNodeModifiers()->getTextModifier()->setTextShadow(node->uiNodeHandle, &shadows[0], shadows.size());
+        fullImpl->getNodeModifiers()->getTextModifier()->setTextShadow(node->uiNodeHandle, &shadows[0], shadows.size(),
+            nullptr, nullptr, nullptr, nullptr);
     } else if (node->type == ARKUI_NODE_SPAN) {
-        fullImpl->getNodeModifiers()->getSpanModifier()->setTextShadow(node->uiNodeHandle, &shadows[0], shadows.size());
+        fullImpl->getNodeModifiers()->getSpanModifier()->setTextShadow(node->uiNodeHandle, &shadows[0], shadows.size(),
+            nullptr, nullptr, nullptr, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -7731,10 +7737,10 @@ int32_t SetTextMinFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputAdaptMinFontSize(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaAdaptMinFontSize(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -7777,10 +7783,10 @@ int32_t SetTextMaxFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputAdaptMaxFontSize(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaAdaptMaxFontSize(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -8956,15 +8962,16 @@ int32_t SetTextFontFamily(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontFamily(
-            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size());
+            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size(), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->setTextFontFamily(
             node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size(), nullptr);
     } else if (node->type == ARKUI_NODE_SPAN) {
         fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontFamily(
-            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size());
+            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size(), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
-        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontFamily(node->uiNodeHandle, item->string);
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontFamily(
+            node->uiNodeHandle, item->string, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -11197,15 +11204,15 @@ int32_t SetLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanLineHeight(
-                node->uiNodeHandle, item->value[0].f32, unit);
+                node->uiNodeHandle, item->value[0].f32, unit, nullptr);
             break;
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputLineHeight(
-                node->uiNodeHandle, item->value[0].f32, unit);
+                node->uiNodeHandle, item->value[0].f32, unit, nullptr);
             break;
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaLineHeight(
-                node->uiNodeHandle, item->value[0].f32, unit);
+                node->uiNodeHandle, item->value[0].f32, unit, nullptr);
             break;
         default:
             break;
@@ -11239,7 +11246,7 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanDecoration(
-                node->uiNodeHandle, decoration, decorationColor, decorationStyle, 1.0f);
+                node->uiNodeHandle, decoration, decorationColor, nullptr, decorationStyle, 1.0f);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextDecoration(
@@ -11285,7 +11292,7 @@ int32_t SetLetterSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanLetterSpacing(
-                node->uiNodeHandle, &letterSpacingValue);
+                node->uiNodeHandle, &letterSpacingValue, nullptr);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextLetterSpacing(
@@ -11293,11 +11300,11 @@ int32_t SetLetterSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputLetterSpacing(
-                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
             break;
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaLetterSpacing(
-                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
             break;
         default:
             break;
@@ -11744,7 +11751,7 @@ int32_t SetSpanTextBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
     }
 
     fullImpl->getNodeModifiers()->getSpanModifier()->setSpanTextBackgroundStyle(
-        node->uiNodeHandle, item->value[NUM_0].u32, radiusVals, radiusUnits, NUM_4);
+        node->uiNodeHandle, item->value[NUM_0].u32, radiusVals, radiusUnits, NUM_4, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 

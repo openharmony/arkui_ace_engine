@@ -52,6 +52,7 @@
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1145,6 +1146,9 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
             PaddingProperty &padding = const_cast<PaddingProperty &>(value);
             padding.ReloadResources();
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
+            if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG || frameNode->GetTag() ==V2::TEXTINPUT_ETS_TAG) {
+                ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, padding, frameNode);
+            }
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("padding", resObj, std::move(updateFunc));
@@ -1186,6 +1190,9 @@ void ViewAbstract::SetPadding(const RefPtr<ResourceObject>& resObj)
         PaddingProperty paddingProperty;
         paddingProperty.SetEdges(paddingLength);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddingProperty, frameNode);
+        if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG || frameNode->GetTag() ==V2::TEXTINPUT_ETS_TAG) {
+            ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddingProperty, frameNode);
+        }
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
     };
     updateFunc(resObj);
@@ -1282,6 +1289,9 @@ void ViewAbstract::SetMargin(const MarginProperty& value)
             MarginProperty &margin = const_cast<MarginProperty &>(value);
             margin.ReloadResources();
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
+            auto pattern = frameNode->GetPattern<Pattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateMarginResource();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("margin", resObj, std::move(updateFunc));
@@ -1321,6 +1331,7 @@ void ViewAbstract::SetMargin(const RefPtr<ResourceObject>& resObj)
         MarginProperty marginProperty;
         marginProperty.SetEdges(marginLength);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, marginProperty, frameNode);
+        pattern->UpdateMarginResource();
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
     };
     updateFunc(resObj);
@@ -1355,6 +1366,9 @@ void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
             BorderRadiusProperty &borderRadius = const_cast<BorderRadiusProperty &>(value);
             borderRadius.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
+            auto pattern = frameNode->GetPattern<Pattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateBorderResource();
         };
         pattern->AddResObj("borderRadius.edges", resObj, std::move(updateFunc));
     }
@@ -1387,6 +1401,7 @@ void ViewAbstract::SetBorderRadius(const RefPtr<ResourceObject>& resObj)
         borderRadiusProperty.SetRadius(borderRadius);
         borderRadiusProperty.multiValued = false;
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadiusProperty, frameNode);
+        pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
     pattern->AddResObj("borderRadius", resObj, std::move(updateFunc));
@@ -1419,6 +1434,9 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
             BorderColorProperty &borderColor = const_cast<BorderColorProperty &>(value);
             borderColor.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
+            auto pattern = frameNode->GetPattern<Pattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateBorderResource();
             frameNode->MarkModifyDone();
         };
         pattern->AddResObj("borderColor.edges", resObj, std::move(updateFunc));
@@ -1451,6 +1469,7 @@ void ViewAbstract::SetBorderColor(const RefPtr<ResourceObject>& resObj)
         BorderColorProperty borderColorProperty;
         borderColorProperty.SetColor(borderColor);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
+        pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
     pattern->AddResObj("borderColor", resObj, std::move(updateFunc));
@@ -1489,6 +1508,9 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
             borderWidth.ReloadResources();
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+            auto pattern = frameNode->GetPattern<Pattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateBorderResource();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("borderWidth.edges", resObj, std::move(updateFunc));
@@ -1527,6 +1549,7 @@ void ViewAbstract::SetBorderWidth(const RefPtr<ResourceObject>& resObj)
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
+        pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
     pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
