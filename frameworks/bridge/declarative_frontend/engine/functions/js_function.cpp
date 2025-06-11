@@ -150,6 +150,7 @@ JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAni
     return result;
 }
 
+#ifdef USE_ARK_ENGINE
 JSRef<JSVal> JsWeakFunction::ExecuteJSWithContext(
     int argc, JSRef<JSVal> argv[], const JSExecutionContext& context, bool isAnimation)
 {
@@ -185,6 +186,7 @@ JSRef<JSVal> JsFunction::ExecuteJSWithContext(
     JSRef<JSVal> result = jsFunction_->Call(jsObject, argc, argv, isAnimation);
     return result;
 }
+#endif
 
 JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAnimation)
 {
