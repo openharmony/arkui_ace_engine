@@ -1895,6 +1895,35 @@ HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StaticImageDecoder001
+ * @tc.desc: Test MakeCanvasImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, StaticImageDecoder001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_THUMBNAIL);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+
+    SizeF size(LENGTH_100, LENGTH_100);
+    auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
+    auto pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, true);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+}
+
+/**
  * @tc.name: ImageProviderCancelTask002
  * @tc.desc: Test ImageProvider::CancelTask when context is not registered
  * @tc.type: FUNC
