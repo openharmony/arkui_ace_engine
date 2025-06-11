@@ -342,7 +342,7 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = true;
     }
-
+    bool detectFlag = !isSelectAll_;
     if (isSelectAll_) {
         selectInfo.menuInfo.showCopyAll = false;
     }
@@ -360,11 +360,7 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     canShowAIMenu_ = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
                      (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
     canShowAIMenu_ = canShowAIMenu_ && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT);
-    if (canShowAIMenu_) {
-        if (auto adapter = pattern->webDataDetectorAdapter_) {
-            adapter->DetectSelectedText(value);
-        }
-    }
+    DetectSelectedText(detectFlag ? value : std::string());
 }
 
 void WebSelectOverlay::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
@@ -942,11 +938,7 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
-    if (canShowAIMenu_) {
-        if (auto adapter = pattern->webDataDetectorAdapter_) {
-            adapter->DetectSelectedText(GetSelectedText());
-        }
-    }
+    DetectSelectedText(GetSelectedText());
     TouchInfo touchPoint;
     touchPoint.id = 0;
     touchPoint.x = rect.GetX() - pattern->webOffset_.GetX();
@@ -1150,7 +1142,21 @@ void WebSelectOverlay::UpdateSelectMenuOptions()
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
 }
 
-void WebSelectOverlay::UpdateAISelectMenu(TextDataDetectType type, std::string content)
+void WebSelectOverlay::DetectSelectedText(const std::string& text)
+{
+    if (!canShowAIMenu_) {
+        return;
+    }
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto adapter = pattern->webDataDetectorAdapter_;
+    CHECK_NULL_VOID(adapter);
+    aiMenuType_ = TextDataDetectType::INVALID;
+    webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
+    adapter->DetectSelectedText(text);
+}
+
+void WebSelectOverlay::UpdateAISelectMenu(TextDataDetectType type, const std::string& content)
 {
     TAG_LOGI(
         AceLogTag::ACE_WEB, "WebDataDetectorAdapter::UpdateAISelectMenu type: %{public}d", static_cast<int32_t>(type));
