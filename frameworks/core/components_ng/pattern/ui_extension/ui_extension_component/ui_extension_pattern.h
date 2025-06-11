@@ -266,6 +266,7 @@ public:
     {
         avoidInfo_ = info;
     }
+    bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
