@@ -44,6 +44,8 @@ struct AppInfo {
     const char* enterMethodSig;
     const char* emitEventMethodName;
     const char* emitEventMethodSig;
+    const char* checkCallbackMethodName;
+    const char* checkCallbackEventMethodSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
@@ -57,6 +59,8 @@ const AppInfo KOALA_APP_INFO = {
     "IIJ:Z",
     "emitEvent",
     "IIII:V",
+    "checkCallbacks",
+    ":V",
 };
 
 // void TryEmitError(EtsEnv& env)
@@ -142,6 +146,21 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
     // if (terminate) {
     //     exit(0);
     // }
+}
+
+// fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
+void FireAllArkoalaAsyncEvents(ani_env* env, ani_ref app)
+{
+    ani_class appClass;
+    ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
+
+    ani_method checkCallbacks = nullptr;
+    ANI_CALL(env,
+        Class_FindMethod(appClass, KOALA_APP_INFO.checkCallbackMethodName, KOALA_APP_INFO.checkCallbackEventMethodSig,
+            &checkCallbacks),
+        return);
+
+    ANI_CALL(env, Object_CallMethod_Void(static_cast<ani_object>(app), checkCallbacks), return);
 }
 } // namespace
 
@@ -280,6 +299,12 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     pipeline_->SetVsyncListener([vm = vm_, app = app_]() {
         auto* env = ArktsAniUtils::GetAniEnv(vm);
         RunArkoalaEventLoop(env, app);
+    });
+
+    // register one hook method to pipeline, which will be called at the tail of vsync
+    pipeline_->SetAsyncEventsHookListener([vm = vm_, app = app_]() {
+        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        FireAllArkoalaAsyncEvents(env, app);
     });
 
     return UIContentErrorCode::NO_ERRORS;
