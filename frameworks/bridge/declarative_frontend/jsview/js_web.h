@@ -168,6 +168,16 @@ public:
     static JSRef<JSVal> CreateFileSelectorParamHandler(const FileSelectorEvent& eventInfo);
     static JSRef<JSVal> CreateContextMenuParamHandler(const ContextMenuEvent& eventInfo);
     static JSRef<JSVal> CreateContextMenuResultHandler(const ContextMenuEvent& eventInfo);
+    static JSRef<JSVal> CreateErrorReceiveRequestHandler(const ReceivedErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateErrorReceiveErrorHandler(const ReceivedErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateLoadInterceptHandler(const LoadInterceptEvent& eventInfo);
+    static JSRef<JSVal> CreateHttpErrorReceiveRequestHandler(const ReceivedHttpErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateHttpErrorReceiveResponseHandler(const ReceivedHttpErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateOverrideUrlLoadingHandler(const LoadOverrideEvent& eventInfo);
+    static JSRef<JSVal> CreateHttpAuthRequestHandler(const WebHttpAuthEvent& eventInfo);
+    static JSRef<JSVal> CreateConsoleHandler(const LoadWebConsoleLogEvent& eventInfo);
+    static JSRef<JSVal> CreateSslErrorEventHandler(const WebAllSslErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateDataResubmittedHandler(const DataResubmittedEvent& eventInfo);
 
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;

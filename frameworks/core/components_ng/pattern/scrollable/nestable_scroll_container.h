@@ -113,7 +113,7 @@ public:
         }
     }
 
-    bool GetWebNestedScrollExisted()
+    bool GetWebNestedScrollExisted() const
     {
         return webNestedScrollExisted_;
     }

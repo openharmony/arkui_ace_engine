@@ -1596,4 +1596,24 @@ HWTEST_F(TabBarEventTestNg, HandleDragOverScroll003, TestSize.Level1)
     DragEnd(0);
     EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
 }
+
+/**
+ * @tc.name: TabBarPatternCheckSvg001
+ * @tc.desc: test CheckSvg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternCheckSvg001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    int32_t index = 1;
+
+    /**
+     * @tc.steps: step2. Test function TabBarPatternCheckSvg001.
+     * @tc.expected: Related function runs ok.
+     */
+    auto ret = tabBarPattern_->CheckSvg(index);
+    EXPECT_EQ(ret, false);
+}
 } // namespace OHOS::Ace::NG

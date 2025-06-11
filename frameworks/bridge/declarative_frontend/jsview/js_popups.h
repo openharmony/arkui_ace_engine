@@ -16,6 +16,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_POPUPS_H
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/select/select_model.h"
 namespace OHOS::Ace::Framework {
 class JSViewPopups {
 public:

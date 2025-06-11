@@ -1047,8 +1047,12 @@ void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     auto renderContext = frameNode->GetRenderContext();
-    textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
-    textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
+    if (!textFieldPaintProperty->HasCaretColorFlagByUser()) {
+        textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    }
+    if (!textFieldPaintProperty->HasCursorWidth()) {
+        textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
+    }
     PaddingProperty padding({ CalcLength(0.0), CalcLength(0.0), CalcLength(0.0), CalcLength(0.0),
         std::nullopt, std::nullopt });
     textFieldLayoutProperty->UpdatePadding(padding);

@@ -2080,4 +2080,52 @@ HWTEST_F(RosenRenderContextTest, ClearModifiers001, TestSize.Level1)
     rotateZ = rsNode->GetStagingProperties().GetRotation();
     EXPECT_EQ(rotateZ, 0);
 }
+
+/**
+ * @tc.name: RemoveFromTreeTest001
+ * @tc.desc: Test RosenRenderContext RemoveFromTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RemoveFromTreeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a rosenRenderContext
+     */
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+
+     /**
+     * @tc.steps: step2. test RemoveFromTree function
+     */
+    rosenRenderContext->RemoveFromTree();
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+}
+
+/**
+ * @tc.name: RemoveFromTreeTest002
+ * @tc.desc: Test RosenRenderContext RemoveFromTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RemoveFromTreeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a RemoveFromTree
+     */
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+    std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
+    rosenRenderContext->InitContext(true, contextParamValue);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+
+    /**
+     * @tc.steps: step2. test RemoveFromTree function
+     */
+    rosenRenderContext->RemoveFromTree();
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+    EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTreeInit_, true);
+    EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTree_, false);
+}
 } // namespace OHOS::Ace::NG

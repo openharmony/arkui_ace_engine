@@ -1891,11 +1891,12 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CaretStyle caretStyle;
+        caretStyle.caretWidth = 3.0_vp;
         model.SetCaretStyle(frameNode, caretStyle);
     });
     auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
     EXPECT_NE(paintProperty2, nullptr);
-    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(123.0f)), Dimension(0.0f));
+    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(0.0f)), 3.0_vp);
 }
 
 /**

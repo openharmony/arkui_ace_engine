@@ -3266,7 +3266,7 @@ HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
 
 /**
  * @tc.name: TextShiftMultipleSelection001
- * @tc.desc: test text_pattern.cpp shift multiple selection function
+ * @tc.desc: test text_pattern.cpp shift multiple selection function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, TextShiftMultipleSelection001, TestSize.Level1)

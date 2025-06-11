@@ -1272,8 +1272,8 @@ HWTEST_F(NavigationPatternTestFourNg, GetAllNodes001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     navigationStack->Add(PAGE01, text01Node);
 
-    std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
-    std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
+    std::vector<WeakPtr<NavDestinationNodeBase>> invisibleNodes;
+    std::vector<WeakPtr<NavDestinationNodeBase>> visibleNodes;
     navigationPattern->GetAllNodes(invisibleNodes, visibleNodes);
     EXPECT_EQ(invisibleNodes.size(), 0);
     EXPECT_EQ(visibleNodes.size(), 0);
@@ -1305,8 +1305,8 @@ HWTEST_F(NavigationPatternTestFourNg, GetAllNodes002, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationStack->Add(PAGE01, navDestination01Node);
 
-    std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
-    std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
+    std::vector<WeakPtr<NavDestinationNodeBase>> invisibleNodes;
+    std::vector<WeakPtr<NavDestinationNodeBase>> visibleNodes;
     navigationPattern->GetAllNodes(invisibleNodes, visibleNodes);
     EXPECT_EQ(invisibleNodes.size(), 0);
     EXPECT_EQ(visibleNodes.size(), 2);
@@ -1338,8 +1338,8 @@ HWTEST_F(NavigationPatternTestFourNg, GetAllNodes003, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationStack->Add(PAGE01, navDestination01Node);
 
-    std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
-    std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
+    std::vector<WeakPtr<NavDestinationNodeBase>> invisibleNodes;
+    std::vector<WeakPtr<NavDestinationNodeBase>> visibleNodes;
     navigationPattern->GetAllNodes(invisibleNodes, visibleNodes);
     EXPECT_EQ(invisibleNodes.size(), 2);
     EXPECT_EQ(visibleNodes.size(), 0);
@@ -1398,6 +1398,37 @@ HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish002, TestSiz
     ASSERT_NE(navigationManager, nullptr);
     EXPECT_EQ(navigationManager->beforeOrientationChangeTasks_.size(), 0);
     NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+
+/**
+ * @tc.name: OnAllTransitionAnimationFinish003
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (visibleNodes.empty()) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish003, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto refCount = tempNode->RefCount();
+    navigationPattern->OnAllTransitionAnimationFinish();
+    EXPECT_EQ(refCount, tempNode->RefCount());
 }
 
 /**

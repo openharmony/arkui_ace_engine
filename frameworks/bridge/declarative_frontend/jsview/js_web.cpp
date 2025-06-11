@@ -2107,6 +2107,17 @@ JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& event
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateConsoleHandler(const LoadWebConsoleLogEvent& eventInfo)
+{
+    JSRef<JSObject> messageObj = JSClass<JSWebConsoleLog>::NewInstance();
+    auto jsWebConsoleLog = Referenced::Claim(messageObj->Unwrap<JSWebConsoleLog>());
+    if (!jsWebConsoleLog) {
+        return messageObj;
+    }
+    jsWebConsoleLog->SetMessage(eventInfo.GetMessage());
+    return messageObj;
+}
+
 JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -2214,6 +2225,17 @@ JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateLoadInterceptHandler(const LoadInterceptEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetLoadInterceptEvent(eventInfo);
+    return requestObj;
+}
+
 JSRef<JSVal> LoadWebGeolocationHideEventToJSValue(const LoadWebGeolocationHideEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetOrigin()));
@@ -2267,6 +2289,17 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("realm", eventInfo.GetRealm());
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateHttpAuthRequestHandler(const WebHttpAuthEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSWebHttpAuth>::NewInstance();
+    auto jsWebHttpAuth = Referenced::Claim(resultObj->Unwrap<JSWebHttpAuth>());
+    if (!jsWebHttpAuth) {
+        return resultObj;
+    }
+    jsWebHttpAuth->SetResult(eventInfo.GetResult());
+    return resultObj;
 }
 
 JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
@@ -2340,6 +2373,17 @@ JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateSslErrorEventHandler(const WebAllSslErrorEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSWebAllSslError>::NewInstance();
+    auto jsWebAllSslError = Referenced::Claim(resultObj->Unwrap<JSWebAllSslError>());
+    if (!jsWebAllSslError) {
+        return resultObj;
+    }
+    jsWebAllSslError->SetResult(eventInfo.GetResult());
+    return resultObj;
+}
+
 JSRef<JSVal> WebSslSelectCertEventToJSValue(const WebSslSelectCertEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -2388,6 +2432,17 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadOverrideEvent(eventInfo);
     return JSRef<JSVal>::Cast(requestObj);
+}
+
+JSRef<JSVal> JSWeb::CreateOverrideUrlLoadingHandler(const LoadOverrideEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetLoadOverrideEvent(eventInfo);
+    return requestObj;
 }
 
 JSRef<JSVal> AdsBlockedEventToJSValue(const AdsBlockedEvent& eventInfo)
@@ -3099,6 +3154,28 @@ JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateErrorReceiveRequestHandler(const ReceivedErrorEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetErrorEvent(eventInfo);
+    return requestObj;
+}
+
+JSRef<JSVal> JSWeb::CreateErrorReceiveErrorHandler(const ReceivedErrorEvent& eventInfo)
+{
+    JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
+    auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
+    if (!errorEvent) {
+        return errorObj;
+    }
+    errorEvent->SetEvent(eventInfo);
+    return errorObj;
+}
+
 JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -3115,6 +3192,28 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
     obj->SetPropertyObject("response", responseObj);
 
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateHttpErrorReceiveRequestHandler(const ReceivedHttpErrorEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetHttpErrorEvent(eventInfo);
+    return requestObj;
+}
+
+JSRef<JSVal> JSWeb::CreateHttpErrorReceiveResponseHandler(const ReceivedHttpErrorEvent& eventInfo)
+{
+    JSRef<JSObject> responseObj = JSClass<JSWebResourceResponse>::NewInstance();
+    auto responseEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
+    if (!responseEvent) {
+        return responseObj;
+    }
+    responseEvent->SetEvent(eventInfo);
+    return responseObj;
 }
 
 void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
@@ -3640,6 +3739,12 @@ void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
         enable = enableJsValue->ToBoolean();
         WebModel::GetInstance()->SetIntrinsicSizeEnabled(*enable);
     }
+
+    auto cssDisplayChangeObj = paramObject->GetProperty("supportCssDisplayChange");
+    if (cssDisplayChangeObj->IsBoolean()) {
+        bool cssDisplayChange = cssDisplayChangeObj->ToBoolean();
+        WebModel::GetInstance()->SetCssDisplayChangeEnabled(cssDisplayChange);
+    }
 }
 
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
@@ -4046,9 +4151,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
+        WebModel::GetInstance()->SetDefaultBackgroundColor();
+    } else {
+        WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
     }
-    WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 void JSWeb::InitialScale(float scale)
@@ -4539,6 +4645,17 @@ JSRef<JSVal> DataResubmittedEventToJSValue(const DataResubmittedEvent& eventInfo
     jsDataResubmitted->SetHandler(eventInfo.GetHandler());
     obj->SetPropertyObject("handler", resultObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateDataResubmittedHandler(const DataResubmittedEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSDataResubmitted>::NewInstance();
+    auto geolocationEvent = Referenced::Claim(resultObj->Unwrap<JSDataResubmitted>());
+    if (!geolocationEvent) {
+        return resultObj;
+    }
+    geolocationEvent->SetHandler(eventInfo.GetHandler());
+    return resultObj;
 }
 
 void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)

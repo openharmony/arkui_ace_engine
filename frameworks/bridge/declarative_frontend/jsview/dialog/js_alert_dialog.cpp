@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,14 +122,8 @@ void ParseBackgroundColorPropsUpdate(const JSRef<JSVal>& jsVal, ButtonInfo& butt
     }
 }
 
-void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSVal> jsVal,
-    const std::string& property, bool isPrimaryButtonValid)
+void ParseButtonInfo(JSRef<JSObject>& objInner, ButtonInfo& buttonInfo)
 {
-    if (!jsVal->IsObject()) {
-        return;
-    }
-    auto objInner = JSRef<JSObject>::Cast(jsVal);
-    ButtonInfo buttonInfo;
     auto textValue = objInner->GetProperty("value");
     ParseTextPropsUpdate(textValue, buttonInfo);
 
@@ -153,25 +147,36 @@ void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& pr
 
     ParseFontColorPropsUpdate(objInner->GetProperty("fontColor"), buttonInfo);
     ParseBackgroundColorPropsUpdate(objInner->GetProperty("backgroundColor"), buttonInfo);
+}
 
+void ParseButtonObj(const panda::ecmascript::EcmaVM* vm, DialogProperties& properties, JSRef<JSVal> jsVal,
+    const std::string& property, bool isPrimaryButtonValid)
+{
+    if (!jsVal->IsObject()) {
+        return;
+    }
+    auto objInner = JSRef<JSObject>::Cast(jsVal);
+    ButtonInfo buttonInfo;
+    ParseButtonInfo(objInner, buttonInfo);
     auto actionValue = objInner->GetProperty("action");
     if (actionValue->IsFunction()) {
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-        auto eventFunc = [execCtx = execContext, func = std::move(actionFunc), property, node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto jsFunc = JSRef<JSFunc>::Cast(actionValue);
+        auto func = jsFunc->GetLocalHandle();
+        auto eventFunc = [vm, func = panda::CopyableGlobal(vm, func), property, node = frameNode]() {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
             ACE_SCORING_EVENT("AlertDialog.[" + property + "].onAction");
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
-            func->Execute();
+            func->Call(vm, func.ToLocal(), nullptr, 0);
         };
         AlertDialogModel::GetInstance()->SetParseButtonObj(eventFunc, buttonInfo, properties, property);
     }
 
     if (!buttonInfo.defaultFocus && isPrimaryButtonValid) {
-        if (strcmp(property.c_str(), "confirm") == 0 ||
-        strcmp(property.c_str(), "primaryButton") == 0) {
+        if (strcmp(property.c_str(), "confirm") == 0 || strcmp(property.c_str(), "primaryButton") == 0) {
             buttonInfo.isPrimary = true;
         } else {
             auto primaryButton = objInner->GetProperty("primary");
@@ -186,7 +191,7 @@ void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& pr
     }
 }
 
-void ParseButtonArray(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj,
+void ParseButtonArray(const panda::ecmascript::EcmaVM* vm, DialogProperties& properties, JSRef<JSObject> obj,
     const std::string& property)
 {
     auto jsVal = obj->GetProperty(property.c_str());
@@ -220,26 +225,26 @@ void ParseButtonArray(const JsiExecutionContext& execContext, DialogProperties& 
         if (!buttonItem->IsObject()) {
             break;
         }
-        ParseButtonObj(execContext, properties, buttonItem, property + std::to_string(i), isPrimaryButtonValid);
+        ParseButtonObj(vm, properties, buttonItem, property + std::to_string(i), isPrimaryButtonValid);
     }
 }
 
-void ParseButtons(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj)
+void ParseButtons(const panda::ecmascript::EcmaVM* vm, DialogProperties& properties, JSRef<JSObject> obj)
 {
     properties.buttons.clear();
     if (obj->GetProperty("confirm")->IsObject()) {
         // Parse confirm.
         auto objInner = obj->GetProperty("confirm");
-        ParseButtonObj(execContext, properties, objInner, "confirm", true);
+        ParseButtonObj(vm, properties, objInner, "confirm", true);
     } else if (obj->GetProperty("buttons")->IsArray()) {
         // Parse buttons array.
-        ParseButtonArray(execContext, properties, obj, "buttons");
+        ParseButtonArray(vm, properties, obj, "buttons");
     } else {
         // Parse primaryButton and secondaryButton.
         auto objInner = obj->GetProperty("primaryButton");
-        ParseButtonObj(execContext, properties, objInner, "primaryButton", true);
+        ParseButtonObj(vm, properties, objInner, "primaryButton", true);
         objInner = obj->GetProperty("secondaryButton");
-        ParseButtonObj(execContext, properties, objInner, "secondaryButton", true);
+        ParseButtonObj(vm, properties, objInner, "secondaryButton", true);
     }
 
     // Parse buttons direction.
@@ -546,10 +551,10 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
     if (args[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(args[0]);
         auto dialogNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto execContext = args.GetExecutionContext();
+        auto vm = args.GetVm();
 
         ParseDialogTitleAndMessage(properties, obj);
-        ParseButtons(execContext, properties, obj);
+        ParseButtons(vm, properties, obj);
         ParseAlertShadow(properties, obj);
         ParseAlertBorderWidthAndColor(properties, obj);
         ParseAlertRadius(properties, obj);
@@ -559,20 +564,21 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         ParseAlertMaskRect(properties, obj);
         ParseAlertDialogLevelMode(properties, obj);
 
-        auto onLanguageChange = [execContext, obj, parseContent = ParseDialogTitleAndMessage,
+        auto onLanguageChange = [vm, obj, parseContent = ParseDialogTitleAndMessage,
                                     parseButton = ParseButtons, parseShadow = ParseAlertShadow,
                                     parseBorderProps = ParseAlertBorderWidthAndColor,
                                     parseRadius = ParseAlertRadius, parseAlignment = ParseAlertAlignment,
                                     parseOffset = ParseAlertOffset, parseMaskRect = ParseAlertMaskRect,
                                     parseDialogLevelMode = ParseAlertDialogLevelMode,
                                     node = dialogNode](DialogProperties& dialogProps) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
             ACE_SCORING_EVENT("AlertDialog.property.onLanguageChange");
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             parseContent(dialogProps, obj);
-            parseButton(execContext, dialogProps, obj);
+            parseButton(vm, dialogProps, obj);
             parseShadow(dialogProps, obj);
             parseBorderProps(dialogProps, obj);
             parseRadius(dialogProps, obj);
@@ -598,14 +604,16 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         // Parse cancel.
         auto cancelValue = obj->GetProperty("cancel");
         if (cancelValue->IsFunction()) {
-            auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
-            auto eventFunc = [execContext, func = std::move(cancelFunc), node = dialogNode]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
+            auto jsFunc = JSRef<JSFunc>::Cast(cancelValue);
+            auto func = jsFunc->GetLocalHandle();
+            auto eventFunc = [vm, func = panda::CopyableGlobal(vm, func), node = dialogNode]() {
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
                 ACE_SCORING_EVENT("AlertDialog.property.cancel");
                 auto pipelineContext = PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipelineContext);
                 pipelineContext->UpdateCurrentActiveNode(node);
-                func->Execute();
+                func->Call(vm, func.ToLocal(), nullptr, 0);
             };
             AlertDialogModel::GetInstance()->SetOnCancel(eventFunc, properties);
         }

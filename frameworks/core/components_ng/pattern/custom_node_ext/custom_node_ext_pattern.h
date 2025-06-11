@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_NODE_EXT_CUSTOM_NODE_EXT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_NODE_EXT_CUSTOM_NODE_EXT_PATTERN_H
 
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/custom_node_ext/custom_node_ext_layout_algorithm.h"
 #include "core/components_ng/pattern/custom_node_ext/custom_node_ext_modifier.h"
@@ -33,7 +34,7 @@ enum ConfigurationType {
     FONT_SCALE_UPDATE = 7,
 };
 
-class CustomNodeExtPattern : public Pattern {
+class CustomNodeExtPattern : public Pattern, public IAvoidInfoListener {
     DECLARE_ACE_TYPE(CustomNodeExtPattern, Pattern);
 public:
     CustomNodeExtPattern() = default;
@@ -70,13 +71,52 @@ public:
     {
         onModifyDoneCallback_ = std::move(onModifyDone);
     }
+    
+    void SetOnWindowFocusedCallback(std::function<void()>&& onWindowFocusedCallback)
+    {
+        onWindowFocusedCallback_ = std::move(onWindowFocusedCallback);
+    }
+    
+    void SetOnWindowUnfocusedCallback(std::function<void()>&& onWindowUnfocusedCallback)
+    {
+        onWindowUnfocusedCallback_ = std::move(onWindowUnfocusedCallback);
+    }
+    
+    void SetOnAttachToMainTreeCallback(std::function<void()>&& onAttachToMainTreeCallback)
+    {
+        onAttachToMainTreeCallback_ = std::move(onAttachToMainTreeCallback);
+    }
+    
+    void SetOnDetachFromMainTreeCallback(std::function<void()>&& onDetachFromMainTreeCallback)
+    {
+        onDetachFromMainTreeCallback_ = std::move(onDetachFromMainTreeCallback);
+    }
+    
+    void SetOnAvoidInfoChangeCallback(std::function<void()>&& onAvoidInfoChangeCallback)
+    {
+        onAvoidInfoChangeCallback_ = std::move(onAvoidInfoChangeCallback);
+    }
+    
+    void SetIsNeedRegisterAvoidInfoChangeListener(bool isNeedRegisterAvoidInfoChangeListener)
+    {
+        isNeedRegisterAvoidInfoChangeListener_ = isNeedRegisterAvoidInfoChangeListener;
+    }
 
     void SetOnDirtyLayoutWrapperSwap(std::function<void(const DirtySwapConfig& config)>&& onDirtySwap)
     {
         onDirtySwap_ = std::move(onDirtySwap);
     }
+    void SetBeforeCreateLayoutWrapperCallback(std::function<void()>&& beforeCreateLayoutWrapper)
+    {
+        beforeCreateLayoutWrapperCallback_ = std::move(beforeCreateLayoutWrapper);
+    }
 
     void OnModifyDone() override;
+    void OnWindowFocused() override;
+    void OnWindowUnfocused() override;
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnregisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
     void OnMountToParentDone() override {}
     bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -88,11 +128,12 @@ public:
     void OnFontConfigurationUpdate() override;
     void OnFontScaleConfigurationUpdate() override;
 
-    void OnAttachToMainTree() override {}
-    void OnDetachFromMainTree() override {}
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void BeforeCreateLayoutWrapper() override;
 protected:
-    void OnDetachFromFrameNode(FrameNode* frameNode) override {}
-    void OnAttachToFrameNode() override {}
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToFrameNode() override;
 private:
     std::function<void(LayoutConstraintF constraints)> measureCallback_;
     std::function<void(RectF rect)> layoutCallback_;
@@ -102,7 +143,15 @@ private:
     std::function<void(ConfigurationType configType)> onConfigUpdate_;
     std::function<void()> onModifyDoneCallback_;
     std::function<void(const DirtySwapConfig& config)> onDirtySwap_;
+    std::function<void()> onWindowFocusedCallback_;
+    std::function<void()> onWindowUnfocusedCallback_;
+    std::function<void()> onAttachToMainTreeCallback_;
+    std::function<void()> onDetachFromMainTreeCallback_;
+    std::function<void()> onAvoidInfoChangeCallback_;
+    std::function<void()> beforeCreateLayoutWrapperCallback_;
 
+    bool isNeedRegisterAvoidInfoChangeListener_ = false;
+    
     bool isAtomic_ = true;
 };
 } // OHOS::Ace::NG

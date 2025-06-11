@@ -15,11 +15,12 @@
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 
-class BuilderNode {
+class BuilderNode extends Disposable {
   private _JSBuilderNode: JSBuilderNode;
   // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   private nodePtr_: NodePtr;
   constructor(uiContext: UIContext, options: RenderOptions) {
+    super();
     let jsBuilderNode = new JSBuilderNode(uiContext, options);
     this._JSBuilderNode = jsBuilderNode;
     let id = Symbol('BuilderRootFrameNode');
@@ -55,7 +56,11 @@ class BuilderNode {
     return ret;
   }
   public dispose(): void {
+    super.dispose();
     this._JSBuilderNode.dispose();
+  }
+  public isDisposed(): boolean {
+    return super.isDisposed() && (this._JSBuilderNode ? this._JSBuilderNode.isDisposed() : true);
   }
   public reuse(param?: Object): void {
     this._JSBuilderNode.reuse(param);
@@ -74,7 +79,7 @@ class BuilderNode {
   }
 }
 
-class JSBuilderNode extends BaseNode {
+class JSBuilderNode extends BaseNode implements IDisposable {
   private params_: Object;
   private uiContext_: UIContext;
   private frameNode_: FrameNode;
@@ -82,12 +87,14 @@ class JSBuilderNode extends BaseNode {
   private _supportNestingBuilder: boolean;
   private _proxyObjectParam: Object;
   private bindedViewOfBuilderNode:ViewPU;
+  private disposable_: Disposable;
 
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
     this.updateFuncByElmtId = new UpdateFuncsByElmtId();
     this._supportNestingBuilder = false;
+    this.disposable_ = new Disposable();
   }
   public reuse(param: Object): void {
     this.updateStart();
@@ -390,7 +397,11 @@ class JSBuilderNode extends BaseNode {
     return this._nativeRef?.getNativeHandle();
   }
   public dispose(): void {
+    this.disposable_.dispose();
     this.frameNode_?.dispose();
+  }
+  public isDisposed(): boolean {
+    return this.disposable_.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
   }
   public disposeNode(): void {
     super.disposeNode();

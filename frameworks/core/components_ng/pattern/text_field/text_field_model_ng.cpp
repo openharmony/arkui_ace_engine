@@ -86,10 +86,14 @@ void TextFieldModelNG::CreateNode(
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     pattern->SetHoverPressBgColorEnabled(textFieldTheme->GetHoverAndPressBgColorEnabled());
-    textfieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
-    CaretStyle caretStyle;
-    caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
-    SetCaretStyle(caretStyle);
+    if (!textfieldPaintProperty->HasCaretColorFlagByUser()) {
+        textfieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    }
+    if (!textfieldPaintProperty->HasCursorWidth()) {
+        CaretStyle caretStyle;
+        caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
+        SetCaretStyle(caretStyle);
+    }
     AddDragFrameNodeToManager();
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipeline->GetDraggable<TextFieldTheme>();

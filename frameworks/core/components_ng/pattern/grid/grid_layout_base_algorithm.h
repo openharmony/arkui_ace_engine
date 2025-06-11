@@ -67,6 +67,10 @@ public:
     }
 
     static void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
+    bool MeasureInNextFrame() const
+    {
+        return measureInNextFrame_;
+    }
 
 protected:
     void AdjustChildrenHeight(LayoutWrapper* layoutWrapper);
@@ -89,7 +93,8 @@ protected:
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
     GridLayoutInfo info_;
-
+    bool measureInNextFrame_ = false;
+    bool syncLoad_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);
 };
 

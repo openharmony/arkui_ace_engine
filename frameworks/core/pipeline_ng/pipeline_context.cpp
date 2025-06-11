@@ -706,7 +706,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
-    if (!onShow_) {
+    // the application is in the background and the dark and light colors are switched.
+    if (!onShow_ && backgroundColorModeUpdated_) {
+        backgroundColorModeUpdated_ = false;
         FlushMessages([window = window_]() {
             if (window) {
                 window->NotifySnapshotUpdate();
@@ -3553,6 +3555,12 @@ void PipelineContext::FlushTouchEvents()
         }
         eventManager_->SetIdToTouchPoint(std::move(idToTouchPoints));
     }
+}
+
+
+void PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated)
+{
+    backgroundColorModeUpdated_ = backgroundColorModeUpdated;
 }
 
 void PipelineContext::ConsumeTouchEvents(

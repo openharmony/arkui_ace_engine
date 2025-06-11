@@ -59,7 +59,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE };
 
-bool ParseJsDimensionArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result)
+bool ParseJsDimensionArray(
+    const JSRef<JSVal>& jsValue, std::vector<Dimension>& result, std::vector<RefPtr<ResourceObject>>& resObjs)
 {
     if (!jsValue->IsArray()) {
         return false;
@@ -68,8 +69,10 @@ bool ParseJsDimensionArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& 
     for (size_t i = 0; i < array->Length(); i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
         CalcDimension dimension;
-        if (JSViewAbstract::ParseJsDimensionVp(value, dimension)) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsDimensionVp(value, dimension, resObj)) {
             result.emplace_back(static_cast<Dimension>(dimension));
+            resObjs.emplace_back(resObj);
         } else {
             return false;
         }
@@ -311,8 +314,12 @@ void JSScroll::SetNestedScroll(const JSCallbackInfo& args)
 void JSScroll::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
-    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+    RefPtr<ResourceObject> resObj;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction, resObj)) {
         friction = -1.0;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ScrollModel::GetInstance()->CreateWithResourceObjFriction(resObj);
     }
     ScrollModel::GetInstance()->SetFriction(friction);
 }
@@ -333,12 +340,18 @@ void JSScroll::SetScrollSnap(const JSCallbackInfo& args)
 
     auto paginationValue = obj->GetProperty("snapPagination");
     CalcDimension intervalSize;
+    RefPtr<ResourceObject> resObj;
     std::vector<Dimension> snapPaginations;
-    if (!ParseJsDimensionVp(paginationValue, intervalSize) || intervalSize.IsNegative()) {
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    if (!ParseJsDimensionVp(paginationValue, intervalSize, resObj) || intervalSize.IsNegative()) {
         intervalSize = CalcDimension(0.0);
     }
-    if (!ParseJsDimensionArray(paginationValue, snapPaginations) || !CheckSnapPaginations(snapPaginations)) {
+    if (!ParseJsDimensionArray(paginationValue, snapPaginations, resObjs) || !CheckSnapPaginations(snapPaginations)) {
         std::vector<Dimension>().swap(snapPaginations);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ScrollModel::GetInstance()->CreateWithResourceObjIntervalSize(resObj);
+        ScrollModel::GetInstance()->CreateWithResourceObjSnapPaginations(resObjs);
     }
 
     bool enableSnapToStart = true;

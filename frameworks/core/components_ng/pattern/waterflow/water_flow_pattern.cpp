@@ -368,6 +368,17 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     isInitialized_ = true;
 
+    if (layoutInfo_->measureInNextFrame_) {
+        GetContext()->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
+            ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
+            auto waterFlow = weak.Upgrade();
+            if (waterFlow) {
+                waterFlow->MarkDirtyNodeSelf();
+                waterFlow->layoutInfo_->measureInNextFrame_ = false;
+            }
+        });
+    }
+
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
     }

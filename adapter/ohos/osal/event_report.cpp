@@ -52,28 +52,8 @@ constexpr char EVENT_KEY_ABILITY_NAME[] = "ABILITY_NAME";
 constexpr char EVENT_KEY_PAGE_URL[] = "PAGE_URL";
 constexpr char EVENT_KEY_JANK_STATS[] = "JANK_STATS";
 constexpr char EVENT_KEY_JANK_STATS_VER[] = "JANK_STATS_VER";
-constexpr char EVENT_KEY_APP_PID[] = "APP_PID";
-constexpr char EVENT_KEY_SCENE_ID[] = "SCENE_ID";
-constexpr char EVENT_KEY_INPUT_TIME[] = "INPUT_TIME";
-constexpr char EVENT_KEY_ANIMATION_START_LATENCY[] = "ANIMATION_START_LATENCY";
-constexpr char EVENT_KEY_ANIMATION_END_LATENCY[] = "ANIMATION_END_LATENCY";
-constexpr char EVENT_KEY_E2E_LATENCY[] = "E2E_LATENCY";
-constexpr char EVENT_KEY_UNIQUE_ID[] = "UNIQUE_ID";
 constexpr char EVENT_KEY_MODULE_NAME[] = "MODULE_NAME";
-constexpr char EVENT_KEY_DURITION[] = "DURITION";
-constexpr char EVENT_KEY_TOTAL_FRAMES[] = "TOTAL_FRAMES";
-constexpr char EVENT_KEY_TOTAL_MISSED_FRAMES[] = "TOTAL_MISSED_FRAMES";
-constexpr char EVENT_KEY_MAX_FRAMETIME[] = "MAX_FRAMETIME";
-constexpr char EVENT_KEY_MAX_FRAMETIME_SINCE_START[] = "MAX_FRAMETIME_SINCE_START";
-constexpr char EVENT_KEY_MAX_HITCH_TIME[] = "MAX_HITCH_TIME";
-constexpr char EVENT_KEY_MAX_HITCH_TIME_SINCE_START[] = "MAX_HITCH_TIME_SINCE_START";
-constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
-constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
-constexpr char EVENT_KEY_NOTE[] = "NOTE";
 constexpr char ACTION_NAME[] = "ACTION_NAME";
-constexpr char EVENT_KEY_DISPLAY_ANIMATOR[] = "DISPLAY_ANIMATOR";
-constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
-constexpr char EVENT_KEY_REAL_SKIPPED_FRAME_TIME[] = "REAL_SKIPPED_FRAME_TIME";
 constexpr char EVENT_KEY_PAGE_NODE_COUNT[] = "PAGE_NODE_COUNT";
 constexpr char EVENT_KEY_PAGE_NODE_THRESHOLD[] = "PAGE_NODE_THRESHOLD";
 constexpr char EVENT_KEY_PAGE_DEPTH[] = "PAGE_DEPTH";
@@ -94,7 +74,6 @@ constexpr char EVENT_KEY_CLIPBOARD_FAIL_TYPE[] = "EVENT_KEY_CLIPBOARD_FAIL_TYPE"
 constexpr char EVENT_KEY_FRAME_NODE_ID[] = "FRAME_NODE_ID";
 constexpr char EVENT_KEY_CLIPBOARD_FAIL[] = "CLIPBOARD_FAIL";
 constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
-constexpr char EVENT_KEY_FILTER_TYPE[] = "FILTER_TYPE";
 constexpr char EVENT_KEY_FORM_NAME[] = "FORM_NAME";
 constexpr char EVENT_KEY_DIMENSION[] = "DIMENSION";
 constexpr char EVENT_KEY_SCENE[] = "SCENE";
@@ -109,9 +88,6 @@ constexpr int32_t FRAME_90 = 90;
 constexpr int32_t FRAME_120 = 120;
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
-#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-constexpr int32_t MAX_JANK_FRAME_TIME = 32;
-#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 
 constexpr char DUMP_LOG_COMMAND[] = "B";
 
@@ -524,208 +500,6 @@ void EventReport::ReportRichEditorInfo(const RichEditorInfo& richEditorInfo)
         EVENT_KEY_SPAN_LENGTH, richEditorInfo.spanLength,
         EVENT_KEY_TEXT_LENGTH, richEditorInfo.textLength,
         EVENT_KEY_SPAN_INDEX, richEditorInfo.spanIndex);
-}
-
-void EventReport::ReportEventComplete(DataBase& data)
-{
-    std::string eventName = "INTERACTION_COMPLETED_LATENCY";
-    const auto& appPid = data.baseInfo.pid;
-    const auto& bundleName = data.baseInfo.bundleName;
-    const auto& processName = data.baseInfo.processName;
-    const auto& abilityName = data.baseInfo.abilityName;
-    const auto& pageUrl = data.baseInfo.pageUrl;
-    const auto& versionCode = data.baseInfo.versionCode;
-    const auto& versionName = data.baseInfo.versionName;
-    const auto& pageName = data.baseInfo.pageName;
-    const auto& sceneId = data.sceneId;
-    const auto& sourceType = GetSourceTypeName(data.sourceType);
-    auto inputTime = data.inputTime;
-    ConvertRealtimeToSystime(data.inputTime, inputTime);
-    const auto& animationStartLantency = (data.beginVsyncTime - data.inputTime) / NS_TO_MS;
-    const auto& animationEndLantency = (data.endVsyncTime - data.beginVsyncTime) / NS_TO_MS;
-    const auto& e2eLatency = animationStartLantency + animationEndLantency;
-    const auto& note = data.baseInfo.note;
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_APP_PID, appPid,
-        EVENT_KEY_BUNDLE_NAME, bundleName,
-        EVENT_KEY_PROCESS_NAME, processName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_PAGE_URL, pageUrl,
-        EVENT_KEY_VERSION_CODE, versionCode,
-        EVENT_KEY_VERSION_NAME, versionName,
-        EVENT_KEY_PAGE_NAME, pageName,
-        EVENT_KEY_SCENE_ID, sceneId,
-        EVENT_KEY_SOURCE_TYPE, sourceType,
-        EVENT_KEY_INPUT_TIME, static_cast<uint64_t>(inputTime),
-        EVENT_KEY_ANIMATION_START_LATENCY, static_cast<uint64_t>(animationStartLantency),
-        EVENT_KEY_ANIMATION_END_LATENCY, static_cast<uint64_t>(animationEndLantency),
-        EVENT_KEY_E2E_LATENCY, static_cast<uint64_t>(e2eLatency),
-        EVENT_KEY_NOTE, note);
-    ACE_SCOPED_TRACE("INTERACTION_COMPLETED_LATENCY: sceneId =%s, inputTime=%lld(ms),"
-        "e2eLatency=%lld(ms)", sceneId.c_str(),
-        static_cast<long long>(inputTime), static_cast<long long>(e2eLatency));
-}
-
-#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-void EventReport::ReportAppFrameDropToRss(const bool isInteractionJank, const std::string &bundleName,
-    const int64_t maxFrameTime)
-{
-    uint32_t eventType = ResourceSchedule::ResType::RES_TYPE_APP_FRAME_DROP;
-    int32_t subType = isInteractionJank ? ResourceSchedule::ResType::AppFrameDropType::INTERACTION_APP_JANK
-                                        : ResourceSchedule::ResType::AppFrameDropType::JANK_FRAME_APP;
-    std::unordered_map<std::string, std::string> payload = {
-        { "bundleName", bundleName },
-        { "maxFrameTime", std::to_string(maxFrameTime) },
-    };
-    ResourceSchedule::ResSchedClient::GetInstance().ReportData(eventType, subType, payload);
-}
-#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
-
-void EventReport::ReportEventJankFrame(DataBase& data)
-{
-    std::string eventName = "INTERACTION_APP_JANK";
-    const auto& uniqueId = data.beginVsyncTime / NS_TO_MS;
-    const auto& sceneId = data.sceneId;
-    const auto& bundleName = data.baseInfo.bundleName;
-    const auto& processName = data.baseInfo.processName;
-    const auto& abilityName = data.baseInfo.abilityName;
-    auto startTime = data.beginVsyncTime;
-    ConvertRealtimeToSystime(data.beginVsyncTime, startTime);
-    const auto& durition = (data.endVsyncTime - data.beginVsyncTime) / NS_TO_MS;
-    const auto& totalFrames = data.totalFrames;
-    const auto& totalMissedFrames = data.totalMissed;
-    const auto& maxFrameTime = data.maxFrameTime / NS_TO_MS;
-    const auto& maxFrameTimeSinceStart = data.maxFrameTimeSinceStart;
-    const auto& maxHitchTime = data.maxHitchTime;
-    const auto& maxHitchTimeSinceStart = data.maxHitchTimeSinceStart;
-    const auto& maxSeqMissedFrames = data.maxSuccessiveFrames;
-    const auto& note = data.baseInfo.note;
-    const auto& isDisplayAnimator = data.isDisplayAnimator;
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_UNIQUE_ID, static_cast<int32_t>(uniqueId),
-        EVENT_KEY_SCENE_ID, sceneId,
-        EVENT_KEY_PROCESS_NAME, processName,
-        EVENT_KEY_MODULE_NAME, bundleName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_PAGE_URL, data.baseInfo.pageUrl,
-        EVENT_KEY_VERSION_CODE, data.baseInfo.versionCode,
-        EVENT_KEY_VERSION_NAME, data.baseInfo.versionName,
-        EVENT_KEY_PAGE_NAME, data.baseInfo.pageName,
-        EVENT_KEY_STARTTIME, static_cast<uint64_t>(startTime),
-        EVENT_KEY_DURITION, static_cast<uint64_t>(durition),
-        EVENT_KEY_TOTAL_FRAMES, totalFrames,
-        EVENT_KEY_TOTAL_MISSED_FRAMES, totalMissedFrames,
-        EVENT_KEY_MAX_FRAMETIME, static_cast<uint64_t>(maxFrameTime),
-        EVENT_KEY_MAX_FRAMETIME_SINCE_START, static_cast<uint64_t>(maxFrameTimeSinceStart),
-        EVENT_KEY_MAX_HITCH_TIME, static_cast<uint64_t>(maxHitchTime),
-        EVENT_KEY_MAX_HITCH_TIME_SINCE_START, static_cast<uint64_t>(maxHitchTimeSinceStart),
-        EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames,
-        EVENT_KEY_NOTE, note,
-        EVENT_KEY_DISPLAY_ANIMATOR, isDisplayAnimator);
-    ACE_SCOPED_TRACE("INTERACTION_APP_JANK: sceneId =%s, startTime=%lld(ms),"
-        "maxFrameTime=%lld(ms)， pageName=%s", sceneId.c_str(), static_cast<long long>(startTime),
-        static_cast<long long>(maxFrameTime), data.baseInfo.pageName.c_str());
-#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    if (isDisplayAnimator && maxFrameTime > MAX_JANK_FRAME_TIME) {
-        ReportAppFrameDropToRss(true, bundleName, maxFrameTime);
-    }
-#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
-}
-
-void EventReport::ReportJankFrameApp(JankInfo& info)
-{
-    std::string eventName = "JANK_FRAME_APP";
-    const auto& bundleName = info.baseInfo.bundleName;
-    const auto& processName = info.baseInfo.processName;
-    const auto& abilityName = info.baseInfo.abilityName;
-    const auto& pageUrl = info.baseInfo.pageUrl;
-    const auto& versionCode = info.baseInfo.versionCode;
-    const auto& versionName = info.baseInfo.versionName;
-    const auto& pageName = info.baseInfo.pageName;
-    const auto& skippedFrameTime = info.skippedFrameTime;
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PROCESS_NAME, processName,
-        EVENT_KEY_MODULE_NAME, bundleName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_PAGE_URL, pageUrl,
-        EVENT_KEY_VERSION_CODE, versionCode,
-        EVENT_KEY_VERSION_NAME, versionName,
-        EVENT_KEY_PAGE_NAME, pageName,
-        EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
-    ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime=%lld(ms)", static_cast<long long>(skippedFrameTime / NS_TO_MS));
-#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    ReportAppFrameDropToRss(false, bundleName);
-#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
-}
-
-void EventReport::ReportJankFrameFiltered(JankInfo& info)
-{
-    std::string eventName = "JANK_FRAME_FILTERED";
-    const auto& bundleName = info.baseInfo.bundleName;
-    const auto& processName = info.baseInfo.processName;
-    const auto& abilityName = info.baseInfo.abilityName;
-    const auto& pageUrl = info.baseInfo.pageUrl;
-    const auto& versionCode = info.baseInfo.versionCode;
-    const auto& versionName = info.baseInfo.versionName;
-    const auto& pageName = info.baseInfo.pageName;
-    const auto& skippedFrameTime = info.skippedFrameTime;
-    const auto& windowName = info.windowName;
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_PROCESS_NAME, processName,
-        EVENT_KEY_MODULE_NAME, bundleName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_PAGE_URL, pageUrl,
-        EVENT_KEY_VERSION_CODE, versionCode,
-        EVENT_KEY_VERSION_NAME, versionName,
-        EVENT_KEY_PAGE_NAME, pageName,
-        EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
-    ACE_SCOPED_TRACE("JANK_FRAME_FILTERED: skipppedFrameTime=%lld(ms), windowName=%s",
-        static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str());
-}
-
-void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
-{
-    std::string eventName = "JANK_FRAME_UNFILTERED";
-    const auto& bundleName = info.baseInfo.bundleName;
-    const auto& processName = info.baseInfo.processName;
-    const auto& abilityName = info.baseInfo.abilityName;
-    const auto& pageUrl = info.baseInfo.pageUrl;
-    const auto& versionCode = info.baseInfo.versionCode;
-    const auto& versionName = info.baseInfo.versionName;
-    const auto& pageName = info.baseInfo.pageName;
-    const auto& skippedFrameTime = info.skippedFrameTime;
-    const auto& realSkippedFrameTime = info.realSkippedFrameTime;
-    const auto& windowName = info.windowName;
-    const auto& filterType = info.filterType;
-    const auto& sceneId = info.sceneId;
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_PROCESS_NAME, processName,
-        EVENT_KEY_MODULE_NAME, bundleName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_PAGE_URL, pageUrl,
-        EVENT_KEY_VERSION_CODE, versionCode,
-        EVENT_KEY_VERSION_NAME, versionName,
-        EVENT_KEY_PAGE_NAME, pageName,
-        EVENT_KEY_FILTER_TYPE, filterType,
-        EVENT_KEY_SCENE_ID, sceneId,
-        EVENT_KEY_REAL_SKIPPED_FRAME_TIME, static_cast<uint64_t>(realSkippedFrameTime),
-        EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
-    ACE_SCOPED_TRACE("JANK_FRAME_UNFILTERED: skipppedFrameTime=%lld(ms), windowName=%s, filterType=%d",
-        static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str(), filterType);
-}
-
-void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
-                                    const std::string& pageName)
-{
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, "APP_PAGE_INFO_UPDATE",
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_PAGE_URL, pageUrl, EVENT_KEY_BUNDLE_NAME, bundleName,
-        EVENT_KEY_PAGE_NAME, pageName);
 }
 
 void EventReport::ReportDoubleClickTitle(int32_t stateChange)

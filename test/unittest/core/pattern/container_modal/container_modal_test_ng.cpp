@@ -978,4 +978,25 @@ HWTEST_F(ContainerModelTestNg, IsContainerModalTransparent, TestSize.Level1)
     ret = pattern_->IsContainerModalTransparent();
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: SetWindowContainerColor
+ * @tc.desc: Test SetWindowContainerColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, SetWindowContainerColor, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto title = pattern_->GetCustomTitleRow();
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(parentNode, nullptr);
+
+    pattern_->SetWindowContainerColor(Color::RED, Color::RED);
+    bool ret = pattern_->IsContainerModalTransparent();
+    EXPECT_FALSE(ret);
+
+    pattern_->SetWindowContainerColor(Color::TRANSPARENT, Color::TRANSPARENT);
+    ret = pattern_->IsContainerModalTransparent();
+    EXPECT_TRUE(ret);
+}
 } // namespace OHOS::Ace::NG

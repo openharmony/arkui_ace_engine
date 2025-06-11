@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,14 +101,16 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         MenuItemModel::GetInstance()->Create(nullptr);
         return;
     }
+    auto vm = info.GetVm();
     // custom menu item
     if (info[0]->IsFunction()) {
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
-        CHECK_NULL_VOID(builderFunc);
+        auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
+        auto func = jsFunc->GetLocalHandle();
+        auto builderFunc = panda::CopyableGlobal(vm, func);
         RefPtr<NG::UINode> customNode;
         {
             ViewStackModel::GetInstance()->NewScope();
-            builderFunc->Execute();
+            builderFunc->Call(vm, builderFunc.ToLocal(), nullptr, 0);
             customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
         }
         CHECK_NULL_VOID(customNode);
@@ -119,15 +121,15 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         ParseMenuItemOptionsResource(info, menuItemObj, menuItemProps);
         auto builder = menuItemObj->GetProperty("builder");
         if (!builder.IsEmpty() && builder->IsFunction()) {
-            auto subBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-            CHECK_NULL_VOID(subBuilderFunc);
+            auto jsFunc = JSRef<JSFunc>::Cast(builder);
+            auto func = jsFunc->GetLocalHandle();
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto subBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(subBuilderFunc),
-                                    node = targetNode]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto subBuildFunc = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
                 ACE_SCORING_EVENT("MenuItem SubBuilder");
                 PipelineContext::SetCallBackNode(node);
-                func->ExecuteJS();
+                func->Call(vm, func.ToLocal(), nullptr, 0);
             };
             menuItemProps.buildFunc = std::move(subBuildFunc);
         }
@@ -144,7 +146,6 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
 
     JSClass<JSMenuItem>::StaticMethod("selected", &JSMenuItem::IsSelected, opt);
     JSClass<JSMenuItem>::StaticMethod("selectIcon", &JSMenuItem::SelectIcon, opt);
-    JSClass<JSMenuItem>::StaticMethod("onChange", &JSMenuItem::OnChange, opt);
     JSClass<JSMenuItem>::StaticMethod("contentFont", &JSMenuItem::ContentFont, opt);
     JSClass<JSMenuItem>::StaticMethod("contentFontColor", &JSMenuItem::ContentFontColor, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFont", &JSMenuItem::LabelFont, opt);
@@ -160,16 +161,17 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
 void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
-
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = info.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onSelected = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                          bool selected) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+    auto onSelected = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool selected) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("MenuItem.SelectedChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(selected));
-        func->ExecuteJS(1, &newJSVal);
+        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, selected) };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     MenuItemModel::GetInstance()->SetSelectedChangeEvent(std::move(onSelected));
 }
@@ -219,25 +221,6 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
     MenuItemModel::GetInstance()->SetSelectIcon(isShow);
     MenuItemModel::GetInstance()->SetSelectIconSrc(icon);
     MenuItemModel::GetInstance()->SetSelectIconSymbol(std::move(symbolApply));
-}
-
-void JSMenuItem::OnChange(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool selected) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("MenuItem.onChange");
-        PipelineContext::SetCallBackNode(node);
-        JSRef<JSVal> params[1];
-        params[0] = JSRef<JSVal>::Make(ToJSValue(selected));
-        func->ExecuteJS(1, params);
-    };
-    MenuItemModel::GetInstance()->SetOnChange(std::move(onChange));
-    info.ReturnSelf();
 }
 
 void JSMenuItem::ContentFont(const JSCallbackInfo& info)

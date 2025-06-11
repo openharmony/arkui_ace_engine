@@ -3183,6 +3183,71 @@ HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnCssDisplayChangeEnabledUpdate_001
+ * @tc.desc: OnCssDisplayChangeEnabledUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnCssDisplayChangeEnabledUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnCssDisplayChangeEnabledUpdate(true);
+#endif
+}
+
+/**
+ * @tc.name: OnCssDisplayChangeEnabledUpdate_002
+ * @tc.desc: OnCssDisplayChangeEnabledUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnCssDisplayChangeEnabledUpdate_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnCssDisplayChangeEnabledUpdate(false);
+#endif
+}
+
+/**
+ * @tc.name: OnCssDisplayChangeEnabledUpdate_003
+ * @tc.desc: OnCssDisplayChangeEnabledUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnCssDisplayChangeEnabledUpdate_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->delegate_ = nullptr;
+    webPattern->OnCssDisplayChangeEnabledUpdate(true);
+#endif
+}
+
+/**
  * @tc.name: OnBypassVsyncConditionUpdate_001
  * @tc.desc: OnBypassVsyncConditionUpdate.
  * @tc.type: FUNC
@@ -3202,6 +3267,31 @@ HWTEST_F(WebPatternTestNg, OnBypassVsyncConditionUpdate_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->OnBypassVsyncConditionUpdate(WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
     EXPECT_EQ(webPattern->webBypassVsyncCondition_, WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
+#endif
+}
+
+/**
+ * @tc.name: SetDefaultBackgroundColor001
+ * @tc.desc: SetDefaultBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, SetDefaultBackgroundColor001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->SetDefaultBackgroundColor();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+
+    webPattern->OnBackgroundColorUpdate(Color::RED.GetValue());
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -1272,6 +1272,31 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HtmlConvertPriorityText
+ * @tc.desc: This test case checks the conversion priority of html text
+ *           where inner attribute has the higher priority.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertPriorityText, TestSize.Level1)
+{
+    const std::string html = "<p style=\"font-size: 20px; color: blue\">\n"
+        "test1\n<span style=\"color: red;\">test2</span>\ntest3\n<strong>strong1</strong>\ntest4\n</p>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
+    EXPECT_EQ(spans.size(), 9);
+    auto it = spans.begin();
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(20, DimensionUnit::VP));
+    ++it;
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), Color::RED);
+    ++it;
+    ++it;
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::BOLD);
+}
+
+/**
  * @tc.name: HtmlConverter001
  * @tc.desc: This test case checks the conversion of a span string with a font-family property applied.
  *           It verifies that the font-family attribute is correctly parsed and converted into a SpanItem.
@@ -1432,7 +1457,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConverter006, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
     EXPECT_EQ(spans.size(), 2);
     auto it = spans.begin();
-    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(50, DimensionUnit::VP));
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(100, DimensionUnit::VP));
 }
 
 /**

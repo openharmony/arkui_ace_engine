@@ -345,6 +345,10 @@ public:
     }
     void DrawStepPoint(float x, float y, int32_t index, RSCanvas& canvas, int32_t numberOfSteps);
 
+    void SetUpdateAccessibilityCallback(const std::function<void()>&& callback)
+    {
+        updateAccessibilityVirtualNode_ = std::move(callback);
+    }
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
@@ -366,6 +370,7 @@ private:
 private:
     std::function<void(float)> updateImageCenterX_;
     std::function<void(float)> updateImageCenterY_;
+    std::function<void()> updateAccessibilityVirtualNode_;
     WeakPtr<FrameNode> host_;
 
     // animatable property

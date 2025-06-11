@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
@@ -388,6 +389,24 @@ float WaterFlowModelNG::GetScrollBarWidth(FrameNode* frameNode)
     return value.ConvertToVp();
 }
 
+void WaterFlowModelNG::SetSyncLoad(bool syncLoad)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad);
+}
+
+void WaterFlowModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad, frameNode);
+}
+
+bool WaterFlowModelNG::GetSyncLoad(FrameNode* frameNode)
+{
+    bool result = false;
+    CHECK_NULL_RETURN(frameNode, result);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, SyncLoad, result, frameNode, false);
+    return result;
+}
+
 RefPtr<WaterFlowSections> WaterFlowModelNG::GetOrCreateWaterFlowSections()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -744,6 +763,30 @@ WaterFlowLayoutMode WaterFlowModelNG::GetLayoutMode(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_RETURN(pattern, WaterFlowLayoutMode::TOP_DOWN);
     return pattern->GetLayoutMode();
+}
+
+void WaterFlowModelNG::ParseResObjFriction(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjFriction(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("waterflow.Friction");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {
+        double result;
+        if (!ResourceParseUtils::ParseResourceToDouble(resObj, result)) {
+            return;
+        }
+        pattern->SetFriction(result);
+    };
+    pattern->AddResObj("waterflow.Friction", resObj, std::move(updateFunc));
 }
 
 void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& footer)

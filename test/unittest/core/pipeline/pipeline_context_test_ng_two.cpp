@@ -2329,12 +2329,39 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg300, TestSize.Level1)
     context_->rootNode_ = frameNode_;
 }
 
-/**
- * @tc.name: PipelineContextTestNg301
- * @tc.desc: Test the function RegisterAttachedNode.
+/* @tc.name: PipelineContextTestNg301
+ * @tc.desc: Test SetBackgroundColorModeUpdated.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg301, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: check context_.
+     * @tc.expected: context_ is nullptr.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: SetBackgroundColorModeUpdated true.
+     * @tc.expected: backgroundColorModeUpdated_ is true.
+     */
+    context_->SetBackgroundColorModeUpdated(true);
+    EXPECT_TRUE(context_->backgroundColorModeUpdated_);
+
+    /**
+     * @tc.steps3: SetBackgroundColorModeUpdated false.
+     * @tc.expected: backgroundColorModeUpdated_ is false.
+     */
+    context_->SetBackgroundColorModeUpdated(false);
+    EXPECT_FALSE(context_->backgroundColorModeUpdated_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg400
+ * @tc.desc: Test the function RegisterAttachedNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg400, TestSize.Level1)
 {
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
@@ -2354,11 +2381,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg301, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg302
+ * @tc.name: PipelineContextTestNg401
  * @tc.desc: Test the function RemoveAttachedNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg302, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg401, TestSize.Level1)
 {
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
@@ -2373,11 +2400,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg302, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg303
+ * @tc.name: PipelineContextTestNg402
  * @tc.desc: Test the function detaching node.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg303, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg402, TestSize.Level1)
 {
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();

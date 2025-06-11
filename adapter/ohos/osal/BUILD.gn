@@ -35,10 +35,13 @@ template("ace_osal_ohos_source_set") {
       external_deps = [
         "hilog:libhilog",
         "hitrace:hitrace_meter",
-        "imf:inputmethod_client",
         "init:libbeget_proxy",
         "init:libbegetutil",
       ]
+      if (defined(config.enable_standard_input) &&
+          config.enable_standard_input) {
+        external_deps += [ "imf:inputmethod_client" ]
+      }
       configs = [ "$ace_root:ace_config" ]
     } else {
       external_deps = [
@@ -103,6 +106,7 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "ability_runtime:app_manager",
       "hicollie:libhicollie",
+      "hiview:libperfmonitor",
       "i18n:intl_util",
       "init:libbegetutil",
     ]

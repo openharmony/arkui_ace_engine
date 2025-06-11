@@ -57,22 +57,29 @@ ArkUINativeModuleValue ListItemGroupBridge::SetDivider(ArkUIRuntimeCallInfo* run
     auto listTheme = themeManager->GetTheme<ListTheme>();
     CHECK_NULL_RETURN(listTheme, panda::NativePointerRef::New(vm, nullptr));
 
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth, true) ||
+    RefPtr<ResourceObject> resObjStrokeWidth;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth, resObjStrokeWidth, true) ||
         LessNotEqual(dividerStrokeWidth.Value(), 0.0f) || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
         dividerStrokeWidth.Reset();
     }
 
     Color colorObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj)) {
+    RefPtr<ResourceObject> resObjColor;
+    bool setByUser = false;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, resObjColor)) {
         color = listTheme->GetDividerColor().GetValue();
+        setByUser = false;
     } else {
         color = colorObj.GetValue();
+        setByUser = true;
     }
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
+    RefPtr<ResourceObject> resObjStartMargin;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin, resObjStartMargin) ||
         LessNotEqual(dividerStartMargin.Value(), 0.0f) || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
         dividerStartMargin.Reset();
     }
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
+    RefPtr<ResourceObject> resObjEndMargin;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin, resObjEndMargin) ||
         LessNotEqual(dividerEndMargin.Value(), 0.0f) || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
         dividerEndMargin.Reset();
     }
@@ -85,6 +92,17 @@ ArkUINativeModuleValue ListItemGroupBridge::SetDivider(ArkUIRuntimeCallInfo* run
     units[NODE_INDEX] = static_cast<int32_t>(dividerStrokeWidth.Unit());
     units[STROKE_WIDTH_INDEX] = static_cast<int32_t>(dividerStartMargin.Unit());
     units[COLOR_INDEX] = static_cast<int32_t>(dividerEndMargin.Unit());
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerStrokeWidth(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObjStrokeWidth)));
+        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerColor(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObjColor)));
+        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerStartMargin(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObjStartMargin)));
+        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerEndMargin(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObjEndMargin)));
+        ListItemGroupModel::GetInstance()->SetDividerColorByUser(setByUser);
+    }
     GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupSetDivider(
         nativeNode, color, values, units, size);
 
@@ -98,6 +116,12 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetDivider(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerStrokeWidth(nativeNode, nullptr);
+        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerColor(nativeNode, nullptr);
+        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerStartMargin(nativeNode, nullptr);
+        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerEndMargin(nativeNode, nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

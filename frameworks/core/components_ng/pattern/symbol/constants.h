@@ -29,6 +29,8 @@ enum class SymbolEffectType {
     BOUNCE,
     PULSE,
     REPLACE,
+    Disable,
+    QuickReplace,
 };
 
 // need check

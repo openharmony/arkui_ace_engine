@@ -56,12 +56,16 @@ RefPtr<SelectContentOverlayPattern> GetSelectHandlePattern(const WeakPtr<SelectC
 RefPtr<UINode> FindAccessibleFocusNode(const RefPtr<UINode>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
+    bool isPasteOption = SelectContentOverlayManager::IsPasteOption(node);
+    auto child = node->GetFirstChild();
+    if (isPasteOption && child) {
+        return child->GetFirstChild();
+    }
     if (node->GetTag() == V2::MENU_ITEM_ETS_TAG || node->GetTag() == "SelectMenuButton" ||
         node->GetTag() == V2::PASTE_BUTTON_ETS_TAG || node->GetTag() == V2::OPTION_ETS_TAG ||
         node->GetTag() == V2::BUTTON_ETS_TAG) {
         return node;
     }
-    auto child = node->GetFirstChild();
     CHECK_NULL_RETURN(child, nullptr);
     return FindAccessibleFocusNode(child);
 }
@@ -1456,5 +1460,24 @@ bool SelectContentOverlayManager::IsSelectOverlaySubWindowMenu()
     auto selectOverlayPattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     CHECK_NULL_RETURN(selectOverlayPattern, false);
     return selectOverlayPattern->GetIsMenuShowInSubWindow();
+}
+
+bool SelectContentOverlayManager::IsPasteOption(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    if (node->GetTag() != V2::OPTION_ETS_TAG) {
+        return false;
+    }
+
+    auto child = node->GetFirstChild();
+    CHECK_NULL_RETURN(child, false);
+    if (child->GetTag() != V2::ROW_ETS_TAG) {
+        return false;
+    }
+    auto grandChild = child->GetFirstChild();
+    if (grandChild && grandChild->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

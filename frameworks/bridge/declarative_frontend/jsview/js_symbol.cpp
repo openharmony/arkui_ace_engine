@@ -47,6 +47,8 @@ const std::map<std::string, Ace::SymbolEffectType> SYMBOL_EFFECT_TYPE_MAP = {
     { "BounceSymbolEffect", SymbolEffectType::BOUNCE },
     { "ReplaceSymbolEffect", SymbolEffectType::REPLACE },
     { "PulseSymbolEffect", SymbolEffectType::PULSE },
+    { "QuickReplaceSymbolEffect", SymbolEffectType::QuickReplace },
+    { "DisableSymbolEffect", SymbolEffectType::Disable },
 };
 
 void JSSymbol::JSBind(BindingTarget globalObj)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -572,6 +572,27 @@ HWTEST_F(WaterFlowSegmentCommonTest, InsertAndJump001, TestSize.Level1)
     info_->NotifyDataChange(4, 2);
     ScrollToIndex(12, false, ScrollAlign::START, 20.0f);
     EXPECT_EQ(GetChildY(frameNode_, 12), -20.0f);
+}
+
+/**
+ * @tc.name: SyncLoad001
+ * @tc.desc: test load items frame by frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, SyncLoad001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetSyncLoad(false);
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 1);
 }
 
 /**
@@ -1334,8 +1355,8 @@ HWTEST_F(WaterFlowSegmentCommonTest, CustomNode001, TestSize.Level1)
     secObj->ChangeData(0, 0, newSection);
 
     FlushUITasks();
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? -1 : 9);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, TOP_TO_DOWN ? 0 : Infinity<int32_t>());
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, -1);
     EXPECT_EQ(pattern_->layoutInfo_->childrenCount_, 10);
 }
 } // namespace OHOS::Ace::NG

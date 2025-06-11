@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,6 +44,13 @@ void ListModelNG::Create(bool isCreateArc)
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->ResetDividerColorSetByUser();
+    }
 }
 
 RefPtr<FrameNode> ListModelNG::CreateFrameNode(int32_t nodeId, bool isCreateArc)
@@ -161,6 +169,12 @@ void ListModelNG::SetEditMode(bool editMode)
 void ListModelNG::SetDivider(const V2::ItemDivider& divider)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);
+}
+
+void ListModelNG::SetDividerColorByUser(bool isByUser)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, DividerColorSetByUser, isByUser);
 }
 
 void ListModelNG::SetChainAnimation(bool enableChainAnimation)
@@ -630,6 +644,83 @@ void ListModelNG::SetListFriction(FrameNode* frameNode, double friction)
     pattern->SetFriction(friction);
 }
 
+void ListModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("ListFriction");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
+            pattern->SetFriction(friction);
+        }
+    };
+    pattern->AddResObj("ListFriction", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("LaneGutter");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CalcDimension laneGutter;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, laneGutter)) {
+            ListModelNG::SetLaneGutter(AceType::RawPtr(frameNode), laneGutter);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    pattern->AddResObj("LaneGutter", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::CreateWithResourceObjLaneConstrain(
+    const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("ListMinLength");
+    pattern->RemoveResObj("ListMaxLength");
+    if (resObjMinLengthValue) {
+        auto&& minLengthupdateFunc = [weak = AceType::WeakClaim(frameNode)](
+                                         const RefPtr<ResourceObject>& resObjMinLengthValue) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            CalcDimension minLengthValue;
+            if (ResourceParseUtils::ParseResDimensionVp(resObjMinLengthValue, minLengthValue)) {
+                ListModelNG::SetLaneMinLength(AceType::RawPtr(frameNode), minLengthValue);
+                frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+        };
+        pattern->AddResObj("ListMinLength", resObjMinLengthValue, std::move(minLengthupdateFunc));
+    }
+    if (resObjMaxLengthValue) {
+        auto&& maxLengthupdateFunc = [weak = AceType::WeakClaim(frameNode)](
+                                         const RefPtr<ResourceObject>& resObjMaxLengthValue) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            CalcDimension maxLengthValue;
+            if (ResourceParseUtils::ParseResDimensionVp(resObjMaxLengthValue, maxLengthValue)) {
+                ListModelNG::SetLaneMaxLength(AceType::RawPtr(frameNode), maxLengthValue);
+                frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+        };
+        pattern->AddResObj("ListMaxLength", resObjMaxLengthValue, std::move(maxLengthupdateFunc));
+    }
+}
+
 void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
 {
     CHECK_NULL_VOID(frameNode);
@@ -662,6 +753,12 @@ NestedScrollOptions ListModelNG::GetListNestedScroll(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, defaultOptions);
     return pattern->GetNestedScroll();
+}
+
+void ListModelNG::SetDividerColorByUser(FrameNode* frameNode, bool colorSetByUser)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, DividerColorSetByUser, colorSetByUser, frameNode);
 }
 
 int32_t ListModelNG::GetListScrollBar(FrameNode* frameNode)
@@ -1146,5 +1243,214 @@ void ListModelNG::ScrollToItemInGroup(
         align = ScrollAlign::START;
     }
     listPattern->ScrollToItemInGroup(index, indexInGroup, smooth, align);
+}
+
+void ListModelNG::ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("list.divider.strokeWidth");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.strokeWidth = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.strokeWidth", resObj, std::move(updateFunc));
+}
+
+
+void ListModelNG::ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("list.divider.color");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.color = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.color", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("list.divider.startMargin");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.startMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.startMargin", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("list.divider.endMargin");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.endMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.endMargin", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("ListFriction");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
+            pattern->SetFriction(friction);
+        }
+    };
+    pattern->AddResObj("ListFriction", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::ParseResObjDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("list.divider.strokeWidth");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.strokeWidth = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.strokeWidth", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::ParseResObjDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("list.divider.color");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.color = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.color", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::ParseResObjDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("list.divider.startMargin");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.startMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.startMargin", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::ParseResObjDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("list.divider.endMargin");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.endMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.endMargin", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::CreateWithResourceObjLaneConstrain(FrameNode* frameNode,
+    const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("ListMinLength");
+    pattern->RemoveResObj("ListMaxLength");
+    CHECK_NULL_VOID(resObjMinLengthValue || resObjMaxLengthValue);
+    auto&& minLengthupdateFunc = [weak = AceType::WeakClaim(frameNode)](
+                                     const RefPtr<ResourceObject>& resObjMinLengthValue) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CalcDimension minLengthValue;
+        if (ResourceParseUtils::ParseResDimensionVp(resObjMinLengthValue, minLengthValue)) {
+            ListModelNG::SetLaneMinLength(AceType::RawPtr(frameNode), minLengthValue);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    pattern->AddResObj("ListMinLength", resObjMinLengthValue, std::move(minLengthupdateFunc));
+
+    auto&& maxLengthupdateFunc = [weak = AceType::WeakClaim(frameNode)](
+                                     const RefPtr<ResourceObject>& resObjMaxLengthValue) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CalcDimension maxLengthValue;
+        if (ResourceParseUtils::ParseResDimensionVp(resObjMaxLengthValue, maxLengthValue)) {
+            ListModelNG::SetLaneMaxLength(AceType::RawPtr(frameNode), maxLengthValue);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    pattern->AddResObj("ListMaxLength", resObjMaxLengthValue, std::move(maxLengthupdateFunc));
 }
 } // namespace OHOS::Ace::NG

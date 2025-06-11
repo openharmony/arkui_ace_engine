@@ -55,13 +55,14 @@ build_component_ng("web_pattern_ng") {
       "graphic_2d:EGL",
       "graphic_2d:GLESv3",
       "graphic_2d:librender_service_client",
-      "imf:inputmethod_client",
       "init:libbegetutil",
       "input:libmmi-client",
       "ipc:ipc_core",
       "webview:libnweb",
-      "window_manager:libwm",
       "window_manager:libpip_ndk",
+      "window_manager:libwm",
     ]
+
+    standard_input_deps = [ "imf:inputmethod_client" ]
   }
 }

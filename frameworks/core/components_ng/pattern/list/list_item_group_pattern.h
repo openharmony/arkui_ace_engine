@@ -365,6 +365,9 @@ public:
         return footer_.Upgrade();
     }
 
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdateDefaultColor();
+
 private:
     RefPtr<FillAlgorithm> CreateFillAlgorithm() override
     {

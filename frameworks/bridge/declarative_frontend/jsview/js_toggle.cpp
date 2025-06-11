@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,6 @@ void JSToggle::JSBind(BindingTarget globalObj)
 {
     JSClass<JSToggle>::Declare("Toggle");
     JSClass<JSToggle>::StaticMethod("create", &JSToggle::Create);
-    JSClass<JSToggle>::StaticMethod("onChange", &JSToggle::OnChange);
     JSClass<JSToggle>::StaticMethod("selectedColor", &JSToggle::SelectedColor);
     JSClass<JSToggle>::StaticMethod("width", &JSToggle::JsWidth);
     JSClass<JSToggle>::StaticMethod("height", &JSToggle::JsHeight);
@@ -93,15 +92,17 @@ void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = info.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                             bool isOn) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+    auto onChangeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool isOn) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("Toggle.onChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
-        func->ExecuteJS(1, &newJSVal);
+        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, isOn) };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     ToggleModel::GetInstance()->OnChangeEvent(std::move(onChangeEvent));
 }
@@ -236,26 +237,6 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
     JsWidth(sizeObj->GetProperty("width"));
     JsHeight(sizeObj->GetProperty("height"));
-}
-
-void JSToggle::OnChange(const JSCallbackInfo& args)
-{
-    auto jsVal = args[0];
-    if (!jsVal->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(jsVal));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool isOn) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Toggle.onChange");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
-        func->ExecuteJS(1, &newJSVal);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Toggle.onChange");
-    };
-    ToggleModel::GetInstance()->OnChange(std::move(onChange));
-    args.ReturnSelf();
 }
 
 void JSToggle::SelectedColor(const JSCallbackInfo& info)

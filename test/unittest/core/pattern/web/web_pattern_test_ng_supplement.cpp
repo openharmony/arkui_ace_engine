@@ -2298,6 +2298,37 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEvent_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnNestedScroll_001
+ * @tc.desc: OnNestedScroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnNestedScroll_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent } };
+    webPattern->expectedScrollAxis_ = Axis::VERTICAL;
+    float x = 1.0f, y = 0.5f, xVelocity = 0.0f, yVelocity = 0.0f;
+    bool isAvailable = false;
+    EXPECT_FALSE(webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable));
+    EXPECT_TRUE(x == 0.0f);
+    EXPECT_TRUE(isAvailable);
+#endif
+}
+
+/**
  * @tc.name: OnContextMenuShow_001
  * @tc.desc: OnContextMenuShow.
  * @tc.type: FUNC

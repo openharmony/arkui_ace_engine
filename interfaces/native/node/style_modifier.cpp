@@ -1041,10 +1041,10 @@ int32_t SetBackgroundImageResizableWithSlice(ArkUI_NodeHandle node, const ArkUI_
         options[i * NUM_3 + NUM_2] = { GetDefaultUnit(node, UNIT_VP), nullptr };
     }
 
-    std::vector<void*> bgImageResizableArray;
+    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjs;
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageResizable(
-        node->uiNodeHandle, options, static_cast<ArkUI_Int32>(NUM_12), bgImageResizableArray);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageResizable(node->uiNodeHandle, options,
+        static_cast<ArkUI_Int32>(NUM_12), static_cast<void*>(&bgImageResizableResObjs));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5628,7 +5628,7 @@ int32_t SetScrollFriction(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollFriction(node->uiNodeHandle, friction);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
-        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowFriction(node->uiNodeHandle, friction);
+        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowFriction(node->uiNodeHandle, friction, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
