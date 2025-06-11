@@ -190,8 +190,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
     void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src);
-    void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
-    void AssignArkValue(Ark_DecorationStyleResult& dst, const TextStyleResult& src);
+    void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx);
+    void AssignArkValue(Ark_DecorationStyleResult& dst, const TextStyleResult& src, ConvContext *ctx);
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
     void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src);
     void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src);
@@ -303,7 +303,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorSelection& dst, const SelectionInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorSpanPosition& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_RichEditorSpanPosition& dst, const SpanPosition& src);
-    void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src);
+    void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src);
