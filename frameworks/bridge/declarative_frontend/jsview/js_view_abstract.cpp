@@ -9291,6 +9291,7 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
             const auto& extensionHandler = frameNode->GetExtensionHandler();
             if (extensionHandler) {
                 extensionHandler->InvalidateRender();
+                extensionHandler->ForegroundRender();
             } else {
                 frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
             }
@@ -9303,6 +9304,7 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
         const auto& extensionHandler = frameNode->GetExtensionHandler();
         if (extensionHandler) {
             extensionHandler->InvalidateRender();
+            extensionHandler->ForegroundRender();
         } else {
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
         }
@@ -9343,6 +9345,7 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
     drawModifier->drawBehindFunc = getDrawModifierFunc("drawBehind");
     drawModifier->drawContentFunc = getDrawModifierFunc("drawContent");
     drawModifier->drawFrontFunc = getDrawModifierFunc("drawFront");
+    drawModifier->drawForegroundFunc = getDrawModifierFunc("drawForeground");
 
     ViewAbstractModel::GetInstance()->SetDrawModifier(drawModifier);
     AddInvalidateFunc(jsDrawModifier, frameNode);
