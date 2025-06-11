@@ -105,7 +105,7 @@ std::function<void()> ParseFinishCallback(const panda::Local<panda::ObjectRef>& 
     panda::Local<panda::JSValueRef> onFinishValue = obj->Get(vm, "onFinish");
     if (onFinishValue->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> onFinish = onFinishValue->ToObject(vm);
-        finishCount = GetAnimationFinshCount();
+        finishCount = GetAnimationFinishCount();
         return [func = panda::CopyableGlobal(vm, onFinish), id = Container::CurrentIdSafely(),
                    node = AceType::WeakClaim(frameNode), count = finishCount.value(), vm]() mutable {
             if (func.IsEmpty()) {

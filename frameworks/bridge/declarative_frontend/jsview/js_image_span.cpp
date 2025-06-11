@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
 namespace OHOS::Ace::Framework {

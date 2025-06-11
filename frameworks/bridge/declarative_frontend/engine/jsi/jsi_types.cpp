@@ -395,7 +395,7 @@ JsiFunction::JsiFunction(panda::Local<panda::FunctionRef> val) : JsiType(val) {}
 
 JsiFunction::JsiFunction(const EcmaVM *vm, panda::Local<panda::FunctionRef> val) : JsiType(vm, val) {}
 
-JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[], bool isAnimation) const
+JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
     int32_t id = -1;
     if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
@@ -406,30 +406,17 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     panda::JsiFastNativeScope fastNativeScope(vm);
     LocalScope scope(vm);
     panda::TryCatch trycatch(vm);
-    bool traceEnabled = false;
+    std::string funcName;
     if (SystemProperties::GetDebugEnabled()) {
-        traceEnabled = AceTraceBeginWithArgs("ExecuteJS[%s]", GetHandle()->GetName(vm)->ToString(vm).c_str());
+        funcName = GetHandle()->GetName(vm)->ToString(vm);
     }
+    ACE_SCOPED_TRACE("ExecuteJS[%s]", funcName.c_str());
     std::vector<panda::Local<panda::JSValueRef>> arguments;
     for (int i = 0; i < argc; ++i) {
         arguments.emplace_back(argv[i].Get().GetLocalHandle());
     }
     auto thisObj = thisVal.Get().GetLocalHandle();
-    if (isAnimation) {
-        if (GetHandle().IsEmpty() || !GetHandle()->IsFunction(vm) || trycatch.HasCaught()) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION,
-                "call function handle is empty or not function, empty: %{public}d, hasError: %{public}d",
-                GetHandle().IsEmpty(), trycatch.HasCaught());
-        } else {
-            TAG_LOGI(
-                AceLogTag::ACE_ANIMATION, "call function: %{public}s", GetHandle()->GetName(vm)->ToString(vm).c_str());
-        }
-    }
     auto result = GetHandle()->Call(vm, thisObj, arguments.data(), argc);
-    if (isAnimation && !result.IsEmpty()) {
-        TAG_LOGI(
-            AceLogTag::ACE_ANIMATION, "call function result: %{public}s", result->ToString(vm)->ToString(vm).c_str());
-    }
     JSNApi::ExecutePendingJob(vm);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (result.IsEmpty() || trycatch.HasCaught()) {
@@ -437,9 +424,6 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
             trycatch.HasCaught());
         runtime->HandleUncaughtException(trycatch);
         result = JSValueRef::Undefined(vm);
-    }
-    if (traceEnabled) {
-        AceTraceEnd();
     }
     return JsiRef<JsiValue>::Make(result);
 }

@@ -29,7 +29,7 @@ public:
 
     ~JsTabsFunction() override {};
 
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

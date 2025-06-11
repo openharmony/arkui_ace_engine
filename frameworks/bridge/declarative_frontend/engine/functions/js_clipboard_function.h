@@ -26,7 +26,7 @@ class JsClipboardFunction : public JsFunction {
 public:
     explicit JsClipboardFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsClipboardFunction() override = default;
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

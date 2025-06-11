@@ -23,19 +23,20 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/gestures/gesture_info.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_common_gesture_function.h"
 
 namespace OHOS::Ace::Framework {
 using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
-class JsGestureJudgeFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsGestureJudgeFunction, JsFunction)
+class JsGestureJudgeFunction : public JsCommonGestureFunction {
+    DECLARE_ACE_TYPE(JsGestureJudgeFunction, JsCommonGestureFunction)
 
 public:
-    explicit JsGestureJudgeFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
+    explicit JsGestureJudgeFunction(const JSRef<JSFunc>& jsFunction)
+        : JsCommonGestureFunction(jsFunction) {}
 
     ~JsGestureJudgeFunction() override = default;
 
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

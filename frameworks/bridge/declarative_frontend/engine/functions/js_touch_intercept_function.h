@@ -27,7 +27,7 @@ public:
 
     ~JsTouchInterceptFunction() override = default;
 
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

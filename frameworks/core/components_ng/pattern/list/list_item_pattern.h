@@ -215,7 +215,7 @@ public:
 
     void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
 
-    void FireOnFinshEvent() const
+    void FireOnFinishEvent() const
     {
         if (onFinishEvent_) {
             onFinishEvent_();

@@ -16,8 +16,10 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"
 
 namespace OHOS::Ace::Framework {
+using namespace OHOS::Ace::Framework::CommonUtils;
 void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
 {
     JSRef<JSVal> isHoverParam = JSRef<JSVal>::Make(ToJSValue(isHover));

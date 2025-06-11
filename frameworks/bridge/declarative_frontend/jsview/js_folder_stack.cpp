@@ -23,6 +23,7 @@
 #include "core/common/container.h"
 #include "core/common/display_info.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_event_info.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/stack_model_impl.h"

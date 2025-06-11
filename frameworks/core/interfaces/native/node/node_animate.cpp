@@ -237,7 +237,7 @@ void AnimateTo(ArkUIContext* context, ArkUIAnimateOption option, void (*event)(v
     std::optional<int32_t> count;
     std::function<void()> onFinishEvent;
     if (option.onFinishCallback) {
-        count = GetAnimationFinshCount();
+        count = GetAnimationFinishCount();
         onFinishEvent = [option, count]() {
             ACE_SCOPED_TRACE("nodeAnimate:onFinish[cnt:%d]", count.value());
             TAG_LOGI(AceLogTag::ACE_ANIMATION, "nodeAnimate:animateTo finish, cnt:%{public}d", count.value());
@@ -299,7 +299,7 @@ void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animat
     AnimationOption option;
     std::optional<int32_t> count;
     if (animateOption->onFinish) {
-        count = GetAnimationFinshCount();
+        count = GetAnimationFinishCount();
         auto onFinishEvent = [onFinish = animateOption->onFinish, userData = animateOption->userData,
                                  id = context->id]() {
             ContainerScope scope(id);

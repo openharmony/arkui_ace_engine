@@ -19,6 +19,7 @@
 #endif
 
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_common_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
@@ -32,6 +33,7 @@ using OHOS::Ace::NG::SecurityComponentModelNG;
 using OHOS::Ace::NG::SecurityComponentTheme;
 
 namespace OHOS::Ace::Framework {
+using namespace OHOS::Ace::Framework::CommonUtils;
 
 bool JSSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
     SaveButtonSaveDescription& text, SaveButtonIconStyle& icon, int32_t& bg)

@@ -17,6 +17,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_tabs_function.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"

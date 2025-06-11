@@ -32,7 +32,7 @@ public:
     {}
     ~JsTouchFunction() override {};
 
-    void Execute() override
+    void Execute()
     {
         JsFunction::Execute();
     }

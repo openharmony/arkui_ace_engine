@@ -24,9 +24,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-#if defined(XCOMPONENT_SUPPORTED)
-#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
-#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -34,230 +31,64 @@ class ACE_EXPORT JsFunctionBase : public virtual AceType {
     DECLARE_ACE_TYPE(JsFunctionBase, AceType);
 
 public:
-    virtual void Execute()
+    JsFunctionBase(const JSRef<JSObject>& jsObject)
+        : jsThis_(jsObject) {}
+
+    void Execute()
     {
         ExecuteJS();
     }
 
-    void Execute(const JSRef<JSObject>& jsParamsObject);
     void Execute(const std::vector<std::string>& keys, const std::string& param);
-    void ExecuteWithContext(
-        const std::vector<std::string>& keys, const std::string& param, const JSExecutionContext& context);
-    void ExecuteNew(const std::vector<std::string>& keys, const std::string& param);
 
-    virtual JSRef<JSVal> ExecuteJS(int argc)
-    {
-        return ExecuteJS(argc, nullptr);
-    }
-    virtual JSRef<JSVal> ExecuteJS(JSRef<JSVal>* argv)
-    {
-        return ExecuteJS(0, argv);
-    }
-    virtual JSRef<JSVal> ExecuteJS()
+    JSRef<JSVal> ExecuteJS()
     {
         return ExecuteJS(0, nullptr);
     }
-    // Empty realization in JsFunctionBase
-    virtual JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false)
-    {
-        JSRef<JSObject> eventInfo = JSRef<JSObject>::New();
-        return JSRef<JSVal>::Cast(eventInfo);
-    }
 
-#ifdef USE_ARK_ENGINE
-    virtual JSRef<JSVal> ExecuteJSWithContext(
-        int argc, JSRef<JSVal> argv[], const JSExecutionContext& context, bool isAnimation = false)
-    {
-        JSRef<JSObject> eventInfo = JSRef<JSObject>::New();
-        return JSRef<JSVal>::Cast(eventInfo);
-    }
-#endif
+    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal> argv[]);
 
 protected:
+    JSRef<JSVal> This()
+    {
+        return jsThis_.Lock();
+    }
+    virtual JSRef<JSFunc> GetFunction() = 0;
+
+private:
     JSWeak<JSVal> jsThis_;
-
-private:
-    void ExecuteInternal(const std::unique_ptr<JsonValue>& value, const std::string& key,
-    const JSRef<JSObject>& eventInfo);
 };
 
-class ACE_EXPORT JsFunction : public virtual JsFunctionBase {
-    DECLARE_ACE_TYPE(JsFunction, JsFunctionBase);
+template<template<typename> class Ref = JSRef>
+class ACE_EXPORT JsFunctionT : public JsFunctionBase {
+    DECLARE_ACE_TYPE(JsFunctionT, JsFunctionBase);
 
 public:
-    explicit JsFunction(const JSRef<JSFunc>& jsFunction);
-    JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
-    ~JsFunction() override;
-
-    JSRef<JSVal> ExecuteJS(int argc) override
-    {
-        return ExecuteJS(argc, nullptr);
-    }
-    JSRef<JSVal> ExecuteJS(JSRef<JSVal>* argv) override
-    {
-        return ExecuteJS(0, argv);
-    }
-    JSRef<JSVal> ExecuteJS() override
-    {
-        return ExecuteJS(0, nullptr);
-    }
-    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false) override;
-
-#ifdef USE_ARK_ENGINE
-    JSRef<JSVal> ExecuteJSWithContext(int argc, JSRef<JSVal> argv[],
-        const JSExecutionContext& context, bool isAnimation = false) override;
-#endif
+    explicit JsFunctionT(const JSRef<JSFunc>& jsFunction)
+        : JsFunctionT({}, jsFunction) {}
+    JsFunctionT(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction)
+        : JsFunctionBase(jsObject), jsFunction_(jsFunction) {}
+    ~JsFunctionT() override = default;
 
 protected:
-    JSRef<JSObject> GetTapLocation(const FingerInfo& fingerInfo);
-    JSRef<JSFunc> jsFunction_;
+    JSRef<JSFunc> GetFunction() override;
+    Ref<JSFunc> jsFunction_;
 };
 
-class ACE_EXPORT JsWeakFunction : public virtual JsFunctionBase {
-    DECLARE_ACE_TYPE(JsWeakFunction, JsFunctionBase);
+using JsFunction = JsFunctionT<JSRef>;
+using JsWeakFunction = JsFunctionT<JSWeak>;
 
-public:
-    explicit JsWeakFunction(const JSRef<JSFunc>& jsFunction);
-    JsWeakFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
-    ~JsWeakFunction() override = default;
+template<>
+inline JSRef<JSFunc> JsWeakFunction::GetFunction()
+{
+    return jsFunction_.Lock();
+}
 
-    JSRef<JSVal> ExecuteJS(int argc) override
-    {
-        return ExecuteJS(argc, nullptr);
-    }
-    JSRef<JSVal> ExecuteJS(JSRef<JSVal>* argv) override
-    {
-        return ExecuteJS(0, argv);
-    }
-    JSRef<JSVal> ExecuteJS() override
-    {
-        return ExecuteJS(0, nullptr);
-    }
-    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false) override;
-
-#ifdef USE_ARK_ENGINE
-    JSRef<JSVal> ExecuteJSWithContext(int argc, JSRef<JSVal> argv[],
-        const JSExecutionContext& context, bool isAnimation = false) override;
-#endif
-
-protected:
-    JSWeak<JSFunc> jsWeakFunction_;
-};
-
-template<class T, int32_t ARGC = 0>
-class ACE_EXPORT JsCitedEventFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsCitedEventFunction, JsFunction);
-
-public:
-    using ParseFunc = std::function<JSRef<JSVal>(T&)>;
-    JsCitedEventFunction() = delete;
-    JsCitedEventFunction(const JSRef<JSFunc>& jsFunction, ParseFunc parser)
-        : JsFunction(JSRef<JSObject>(), jsFunction), parser_(parser)
-    {}
-    ~JsCitedEventFunction() override = default;
-
-    void Execute() override
-    {
-        JsFunction::ExecuteJS();
-    }
-
-    void Execute(T& eventInfo)
-    {
-        JSRef<JSVal> param;
-        if (parser_) {
-            param = parser_(eventInfo);
-        }
-        JsFunction::ExecuteJS(ARGC, &param);
-    }
-
-    void Execute(const std::string& val, T& eventInfo)
-    {
-        JSRef<JSVal> jsVal = JSRef<JSVal>::Make(ToJSValue(val));
-        JSRef<JSVal> itemInfo;
-        if (parser_) {
-            itemInfo = parser_(eventInfo);
-        }
-        JSRef<JSVal> params[] = { jsVal, itemInfo };
-        JsFunction::ExecuteJS(ARGC, params);
-    }
-
-    void Execute(const std::u16string& val, T& eventInfo)
-    {
-        JSRef<JSVal> jsVal = JSRef<JSVal>::Make(ToJSValue(val));
-        JSRef<JSVal> itemInfo;
-        if (parser_) {
-            itemInfo = parser_(eventInfo);
-        }
-        JSRef<JSVal> params[] = { jsVal, itemInfo };
-        JsFunction::ExecuteJS(ARGC, params);
-    }
-
-private:
-    ParseFunc parser_;
-};
-
-template<class T, int32_t ARGC = 0>
-class ACE_EXPORT JsCommonEventFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsCommonEventFunction, JsFunction);
-
-public:
-    JsCommonEventFunction() = delete;
-    JsCommonEventFunction(const JSRef<JSFunc>& jsFunction)
-        : JsFunction(JSRef<JSObject>(), jsFunction)
-    {}
-    ~JsCommonEventFunction() override = default;
-
-    void Execute() override
-    {
-        JsFunction::ExecuteJS();
-    }
-
-    void Execute(JSRef<JSVal>* argv)
-    {
-        JsFunction::ExecuteJS(ARGC, argv);
-    }
-};
-
-template<class T, int32_t ARGC = 0>
-class ACE_EXPORT JsEventFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsEventFunction, JsFunction);
-
-public:
-    using ParseFunc = std::function<JSRef<JSVal>(const T&)>;
-    JsEventFunction() = delete;
-    JsEventFunction(const JSRef<JSFunc>& jsFunction, ParseFunc parser)
-        : JsFunction(JSRef<JSObject>(), jsFunction), parser_(parser)
-    {}
-    ~JsEventFunction() override = default;
-
-    void Execute() override
-    {
-        JsFunction::ExecuteJS();
-    }
-
-    void Execute(const T& eventInfo)
-    {
-        JSRef<JSVal> param;
-        if (parser_) {
-            param = parser_(eventInfo);
-        }
-        JsFunction::ExecuteJS(ARGC, &param);
-    }
-
-    JSRef<JSVal> ExecuteWithValue(const T& eventInfo)
-    {
-        JSRef<JSVal> param;
-        if (parser_) {
-            param = parser_(eventInfo);
-        }
-        return JsFunction::ExecuteJS(ARGC, &param);
-    }
-
-private:
-    ParseFunc parser_;
-};
-
-JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info);
+template<>
+inline JSRef<JSFunc> JsFunction::GetFunction()
+{
+    return jsFunction_;
+}
 
 } // namespace OHOS::Ace::Framework
 
