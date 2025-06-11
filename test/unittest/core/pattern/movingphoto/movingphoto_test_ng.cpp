@@ -987,7 +987,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest023, TestSize.Level1)
     movingphotoPattern->RepeatPlay(false);
     EXPECT_EQ(movingphotoPattern->historyAutoAndRepeatLevel_, oldHistoryAutoAndRepeatLevel_);
     EXPECT_EQ(movingphotoPattern->autoAndRepeatLevel_, oldAutoAndRepeatLevel_);
-
     movingphotoPattern->RepeatPlay(true);
     EXPECT_EQ(movingphotoPattern->historyAutoAndRepeatLevel_, PlaybackMode::REPEAT);
     EXPECT_EQ(movingphotoPattern->autoAndRepeatLevel_, PlaybackMode::REPEAT);
