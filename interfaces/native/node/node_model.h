@@ -25,8 +25,8 @@
 #include "native_node.h"
 #include "native_type.h"
 
-#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/core/common/ace_application_info.h"
+#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
 extern "C" {
