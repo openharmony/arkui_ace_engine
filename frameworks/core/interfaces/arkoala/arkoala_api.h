@@ -6841,6 +6841,8 @@ struct ArkUIBasicAPI {
 
     ArkUI_Int32 (*postIdleCallback)(ArkUI_Int32 instanceId, void* userData,
     void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData));
+
+    ArkUI_Int32 (*greatOrEqualTargetAPIVersion)(ArkUI_Int32 version);
 };
 
 struct ArkUIMultiThreadManagerAPI {
