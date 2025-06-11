@@ -1530,7 +1530,7 @@ private:
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
     AxisEventChecker axisEventChecker_;
-    std::unordered_set<UINode*> attachedNodeSet_;
+    std::set<WeakPtr<UINode>> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
     int32_t frameCountForNotCallJSCleanUp_ = 0;
