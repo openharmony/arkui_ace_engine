@@ -705,6 +705,7 @@ public:
     void ToJsonValueForFontFeature(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForStroke(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::u16string content);
     bool InitValueText(std::u16string content);
@@ -928,6 +929,8 @@ public:
     bool CloseCustomKeyboard();
 
     // xts
+    std::string GetStrokeWidth() const;
+    std::string GetStrokeColor() const;
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
     std::string AutoCapTypeToString() const;
