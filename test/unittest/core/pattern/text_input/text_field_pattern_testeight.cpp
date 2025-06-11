@@ -1869,4 +1869,21 @@ HWTEST_F(TextFieldPatternTestEight, ScrollToSafeArea001, TestSize.Level0)
     pattern_->ScrollToSafeArea();
     EXPECT_TRUE(pipeline->UsingCaretAvoidMode());
 }
+
+/**
+ * @tc.name: TextFieldPattern Handle keyEvent.
+ * @tc.desc: test ConvertCodeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ConvertCodeToString, TestSize.Level0)
+{
+    KeyEvent event;
+    event.code = KeyCode::KEY_A;
+    event.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_A };
+    EXPECT_EQ(event.ConvertCodeToString(), "A");
+    event.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_A };
+    EXPECT_EQ(event.ConvertCodeToString(), "A");
+    event.enableCapsLock = true;
+    EXPECT_EQ(event.ConvertCodeToString(), "a");
+}
 } // namespace OHOS::Ace::NG,
