@@ -2590,7 +2590,7 @@ HWTEST_F(SheetPresentationTestNg, CalculateSheetRadius002, TestSize.Level1)
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     BorderRadiusProperty sheetRadius(sheetTheme->GetSheetRadius());
     SheetStyle sheetStyle;
-    sheetStyle.radius->SetRadius(Dimension(100.0));
+    sheetStyle.radius = BorderRadiusProperty(Dimension(100.0));
     layoutProperty->UpdateSheetStyle(sheetStyle);
     auto geometryNode = sheetNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
