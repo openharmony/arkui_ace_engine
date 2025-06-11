@@ -744,6 +744,11 @@ public:
 
     static int32_t getFormSharedImageCacheThreshold();
 
+    static bool IsWhiteBlockEnabled();
+    static bool IsWhiteBlockIdleChange();
+    static std::string GetWhiteBlockIndexValue();
+    static std::string GetWhiteBlockCacheCountValue();
+
     static WidthLayoutBreakPoint GetWidthLayoutBreakpoints()
     {
         return widthLayoutBreakpoints_;

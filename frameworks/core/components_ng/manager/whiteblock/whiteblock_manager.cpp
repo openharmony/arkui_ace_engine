@@ -16,19 +16,10 @@
 #include "whiteblock_manager.h"
 
 #include "base/log/log.h"
-#include "parameter.h"
-#include "parameters.h"
+#include "base/utils/system_properties.h"
 #include <iostream>
 
 namespace OHOS::Ace::NG {
-namespace {
-const std::string WHITE_BLOCK_PARAM_INDEX = "persist.resourceschedule.whiteblock.index";
-const std::string WHITE_BLOCK_PARAM_IDLE = "persist.resourceschedule.whiteblock.idle";
-const std::string WHITE_BLOCK_PARAM_CACHED_COUNT = "persist.resourceschedule.whiteblock.cachedcount";
-const std::string WHITE_BLOCK_SITWCH_OPEN = "1";
-const std::string WHITE_BLOCK_SITWCH_CLOSE = "0";
-const std::string WHITE_BLOCK_PARAM_INDEX_DEFAULT = "0";
-} //namespace
 
 WhiteBlockManager& WhiteBlockManager::GetInstance()
 {
@@ -38,7 +29,7 @@ WhiteBlockManager& WhiteBlockManager::GetInstance()
 
 ScrollState WhiteBlockManager::ChangeScrollStateIfNeed(ScrollState scrollState)
 {
-    if (!GetSwitch()) {
+    if (!SystemProperties::IsWhiteBlockIdleChange()) {
         return scrollState;
     }
     if ((scrollState == ScrollState::SCROLL && !idle_) ||
@@ -58,21 +49,14 @@ ScrollState WhiteBlockManager::ChangeScrollStateIfNeed(ScrollState scrollState)
     return scrollState;
 }
 
-bool WhiteBlockManager::GetSwitch()
-{
-    std::string whiteBlockParamValue = OHOS::system::GetParameter(WHITE_BLOCK_PARAM_IDLE, WHITE_BLOCK_SITWCH_CLOSE);
-    return whiteBlockParamValue == WHITE_BLOCK_SITWCH_OPEN;
-}
-
 int32_t WhiteBlockManager::AdjustEndIndex(int32_t endIndex)
 {
-    return endIndex + std::stoi(OHOS::system::GetParameter(WHITE_BLOCK_PARAM_INDEX, WHITE_BLOCK_PARAM_INDEX_DEFAULT));
+    return endIndex + std::stoi(SystemProperties::GetWhiteBlockIndexValue());
 }
 
 int32_t WhiteBlockManager::AdjustCachedCount(int32_t cachedCount)
 {
-    return cachedCount + std::stoi(OHOS::system::GetParameter(WHITE_BLOCK_PARAM_CACHED_COUNT,
-    WHITE_BLOCK_PARAM_INDEX_DEFAULT));
+    return cachedCount + std::stoi(SystemProperties::GetWhiteBlockCacheCountValue());
 }
 
 }

@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
-#include "parameters.h"
 #include "base/geometry/axis.h"
 #include "base/geometry/point.h"
 #include "base/log/dump_log.h"
@@ -23,6 +22,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -65,9 +65,6 @@ const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
 const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
 const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
-const std::string WHITE_BLOCK_PARAM = "presist.resourceschedule.whiteblock";
-const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
-const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
@@ -2891,7 +2888,7 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     auto offsetPX = Dimension(finalOffset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
     auto scrollState = GetScrollState();
-    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (SystemProperties::IsWhiteBlockEnabled()) {
         scrollState = WhiteBlockManager::GetInstance().ChangeScrollStateIfNeed(scrollState);
     }
     bool isTriggered = false;

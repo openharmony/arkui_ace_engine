@@ -649,9 +649,8 @@ build_component_ng("pattern_ng") {
     ]
   }
 
-  external_deps = [
-    "init:libbegetutil",
-  ]
+  external_deps = []
+
   deps = [
     "app_bar/interfaces:custom_app_bar",
     "container_modal/interfaces:customtitle",

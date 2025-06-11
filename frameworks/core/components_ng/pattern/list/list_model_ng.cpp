@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
-#include "parameters.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -26,11 +26,6 @@
 #include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const std::string WHITE_BLOCK_PARAM = "persist.resourceschedule.whiteblock";
-const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
-const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
-} // namespace
 
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 
@@ -239,8 +234,8 @@ void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
 
 void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 {
-    int count = cachedCount;
-    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    int32_t count = cachedCount;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
         count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count);
@@ -583,7 +578,7 @@ void ListModelNG::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
 void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
     int32_t count = cachedCount;
-    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (SystemProperties::IsWhiteBlockEnabled()) {
         count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count, frameNode);

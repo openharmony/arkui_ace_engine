@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 #include <string>
-#include "parameters.h"
 #include "base/geometry/dimension.h"
+#include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -28,11 +28,6 @@
 #include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const std::string WHITE_BLOCK_PARAM = "persist.resourceschedule.whiteblock";
-const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
-const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
-} // namespace
 
 void WaterFlowModelNG::Create()
 {
@@ -304,7 +299,7 @@ void WaterFlowModelNG::SetFriction(double friction)
 void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 {
     int32_t count = value;
-    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+    if (SystemProperties::IsWhiteBlockEnabled()) {
         count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count);
@@ -316,7 +311,7 @@ void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, const std::optional<
     CHECK_NULL_VOID(frameNode);
     if (value) {
         int32_t count = value.value();
-        if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+        if (SystemProperties::IsWhiteBlockEnabled()) {
             count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count, frameNode);

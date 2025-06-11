@@ -64,7 +64,4 @@ build_component_ng("manager_ng") {
     "toolbar/toolbar_manager.cpp",
     "whiteblock/whiteblock_manager.cpp"
   ]
-  external_deps = [
-    "init:libbegetutil",
-  ]
 }
