@@ -556,29 +556,10 @@ void RefreshPattern::FireOnOffsetChange(float value)
         value = 0.0f;
     }
     if (!NearEqual(lastScrollOffset_, value)) {
-        UpdateCustomBuilderVisibility();
         auto refreshEventHub = GetEventHub<RefreshEventHub>();
         CHECK_NULL_VOID(refreshEventHub);
         refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
         lastScrollOffset_ = value;
-    }
-}
-
-void RefreshPattern::UpdateCustomBuilderVisibility()
-{
-    if (!isCustomBuilderExist_) {
-        return;
-    }
-    CHECK_NULL_VOID(customBuilder_);
-    auto customBuilderLayoutProperty = customBuilder_->GetLayoutProperty();
-    CHECK_NULL_VOID(customBuilderLayoutProperty);
-    if (customBuilderLayoutProperty->IsUserSetVisibility()) {
-        return;
-    }
-    if (LessOrEqual(scrollOffset_, 0.0f)) {
-        customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    } else {
-        customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
 }
 
@@ -621,7 +602,6 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     }
     customBuilder_ = AceType::DynamicCast<FrameNode>(builder);
     isCustomBuilderExist_ = true;
-    UpdateCustomBuilderVisibility();
 }
 
 void RefreshPattern::SetAccessibilityAction()
