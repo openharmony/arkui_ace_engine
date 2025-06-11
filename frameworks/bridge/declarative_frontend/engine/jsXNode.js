@@ -1821,6 +1821,36 @@ const __attributeMap__ = new Map([
         }
         node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
+    }],
+    ['Text', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkTextComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['TextInput', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkTextInputComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['TextArea', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkTextAreaComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
     }]
 ]);
 const __eventMap__ = new Map(
@@ -1891,6 +1921,15 @@ const __bindControllerCallbackMap__ = new Map(
         }],
         ['Grid', (node, controller) => {
             getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller);
+        }],
+        ['Text', (node, controller) => {
+            getUINativeModule().text.setTextController(node.getNodePtr(), { controller: controller });
+        }],
+        ['TextInput', (node, controller) => {
+            getUINativeModule().textInput.setController(node.getNodePtr(), controller);
+        }],
+        ['TextArea', (node, controller) => {
+            getUINativeModule().textArea.setController(node.getNodePtr(), controller);
         }]
     ]
 )

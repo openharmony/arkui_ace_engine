@@ -2894,4 +2894,38 @@ ArkUINativeModuleValue TextAreaBridge::ResetEnableAutoSpacing(ArkUIRuntimeCallIn
     GetArkUINodeModifiers()->getTextAreaModifier()->resetEnableAutoSpacing(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TextAreaBridge::SetController(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (!controllerVal->IsUndefined() && !controllerVal->IsNull()) {
+        auto* jsController = Framework::JSRef<Framework::JSObject>(Framework::JSObject(controllerVal->ToObject(vm)))
+                                 ->Unwrap<Framework::JSTextEditableController>();
+        if (jsController) {
+            auto pointer = TextFieldModelNG::GetJSTextEditableController(frameNode);
+            auto preController = reinterpret_cast<Framework::JSTextEditableController*>(Referenced::RawPtr(pointer));
+            if (preController) {
+                preController->SetController(nullptr);
+            }
+            TextFieldModelNG::SetJSTextEditableController(frameNode, Referenced::Claim((Referenced*)jsController));
+            auto controller = TextFieldModelNG::GetOrCreateController(frameNode);
+            jsController->SetController(controller);
+        }
+    } else {
+        auto pointer = TextFieldModelNG::GetJSTextEditableController(frameNode);
+        auto preController = reinterpret_cast<Framework::JSTextEditableController*>(Referenced::RawPtr(pointer));
+        if (preController) {
+            preController->SetController(nullptr);
+        }
+        TextFieldModelNG::SetJSTextEditableController(frameNode, nullptr);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

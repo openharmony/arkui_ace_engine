@@ -1166,7 +1166,37 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       }
       node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
-    }]
+    }],
+    ['Text', (node: FrameNode): ArkTextComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkTextComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['TextInput', (node: FrameNode): ArkTextInputComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkTextInputComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['TextArea', (node: FrameNode): ArkTextAreaComponent => {
+        if (node._componentAttribute) {
+          return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+          return undefined;
+        }
+        node._componentAttribute = new ArkTextAreaComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+      }]
   ]
 )
 
@@ -1223,7 +1253,9 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
   ]
 )
 
-const __bindControllerCallbackMap__ = new Map<string, (node: FrameNode, controller: Scroller | SwiperController) => void>(
+type Controller = Scroller | SwiperController | TextController | TextInputController | TextAreaController
+
+const __bindControllerCallbackMap__ = new Map<string, (node: FrameNode, controller: Controller) => void>(
   [
     ['Swiper', (node: FrameNode, controller: SwiperController) => {
       getUINativeModule().swiper.setSwiperInitialize(node.getNodePtr(), controller);
@@ -1239,6 +1271,15 @@ const __bindControllerCallbackMap__ = new Map<string, (node: FrameNode, controll
     }],
     ['Grid', (node: FrameNode, controller: Scroller) => {
       getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller);
+    }],
+    ['Text', (node: FrameNode, controller: TextController) => {
+        getUINativeModule().text.setTextController(node.getNodePtr(), { controller: controller });
+    }],
+    ['TextInput', (node: FrameNode, controller: TextInputController) => {
+        getUINativeModule().textInput.setController(node.getNodePtr(), controller);
+    }],
+    ['TextArea', (node: FrameNode, controller: TextAreaController) => {
+        getUINativeModule().textArea.setController(node.getNodePtr(), controller);
     }]
   ]
 )
@@ -1277,7 +1318,7 @@ class typeNode {
     return event(node);
   } 
 
-  static bindController(node: FrameNode, controller: Scroller | SwiperController, nodeType: string): void {
+  static bindController(node: FrameNode, controller: Controller, nodeType: string): void {
     if (node === undefined || node === null || controller === undefined || controller === null ||
       node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
       if (nodeType === undefined || nodeType === null || nodeType === 'Scroll') {
