@@ -1478,6 +1478,7 @@ ohos_source_set("ace_components_pattern") {
     "bounds_checking_function:libsec_static",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
+    "init:libbegetutil",
   ]
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {

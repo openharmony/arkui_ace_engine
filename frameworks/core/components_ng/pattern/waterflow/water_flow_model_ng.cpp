@@ -303,7 +303,7 @@ void WaterFlowModelNG::SetFriction(double friction)
 
 void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 {
-    int count = value;
+    int32_t count = value;
     if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
         count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
     }
@@ -315,7 +315,7 @@ void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, const std::optional<
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
-        int count = value.value();
+        int32_t count = value.value();
         if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
             count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
         }
