@@ -1730,7 +1730,12 @@ void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecogn
 void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src)
 {
     auto tagOpt = src.GetTag();
-    dst.tag = ArkValue<Opt_String>(tagOpt);
+    if (tagOpt.has_value()) {
+        dst.tag.tag = InteropTag::INTEROP_TAG_STRING;
+        dst.tag.value = Converter::ArkValue<Ark_String>(tagOpt.value(), Converter::FC);
+    } else {
+        dst.tag.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+    }
     dst.type = ArkValue<Ark_GestureControl_GestureType>(src.GetType());
     dst.isSystemGesture = ArkValue<Ark_Boolean>(src.IsSystemGesture());
 }
@@ -1891,9 +1896,9 @@ void ResponseRegionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
-        // ViewAbstract::SetResponseRegion(frameNode, *convArray);
+        ViewAbstract::SetResponseRegion(frameNode, *convArray);
     } else {
-        // ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
+        ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
     }
 }
 void MouseResponseRegionImpl(Ark_NativePointer node,
@@ -1902,9 +1907,9 @@ void MouseResponseRegionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
-        // ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
+        ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
     } else {
-        // ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
+        ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
     }
 }
 void SizeImpl(Ark_NativePointer node,
@@ -1957,7 +1962,7 @@ void TouchableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetTouchable(frameNode, *convValue);
+    ViewAbstract::SetTouchable(frameNode, *convValue);
 }
 void HitTestBehaviorImpl(Ark_NativePointer node,
                          const Opt_HitTestMode* value)
@@ -1969,7 +1974,7 @@ void HitTestBehaviorImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetHitTestMode(frameNode, *convValue);
+    ViewAbstract::SetHitTestMode(frameNode, *convValue);
 }
 void OnChildTouchTestImpl(Ark_NativePointer node,
                           const Opt_Callback_Array_TouchTestInfo_TouchResult* value)
@@ -2707,7 +2712,7 @@ void HoverEffectImpl(Ark_NativePointer node,
     auto hoverEffect = Converter::OptConvertPtr<OHOS::Ace::HoverEffectType>(value);
     // TODO: Reset value
     if (hoverEffect) {
-        // ViewAbstract::SetHoverEffect(frameNode, hoverEffect.value());
+        ViewAbstract::SetHoverEffect(frameNode, hoverEffect.value());
     }
 }
 void OnMouseImpl(Ark_NativePointer node,
@@ -2751,7 +2756,7 @@ void OnKeyEvent0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // ViewAbstract::DisableOnKeyEvent(frameNode);
+        ViewAbstract::DisableOnKeyEvent(frameNode);
         return;
     } else {
         auto weakNode = AceType::WeakClaim(frameNode);
@@ -2761,7 +2766,7 @@ void OnKeyEvent0Impl(Ark_NativePointer node,
             arkCallback.InvokeSync(event.ArkValue());
             return false;
         };
-        // ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
+        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
     }
 }
 void OnKeyEvent1Impl(Ark_NativePointer node,
@@ -2771,7 +2776,7 @@ void OnKeyEvent1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // ViewAbstract::DisableOnKeyEvent(frameNode);
+        ViewAbstract::DisableOnKeyEvent(frameNode);
         return;
     } else {
         auto weakNode = AceType::WeakClaim(frameNode);
@@ -2781,7 +2786,7 @@ void OnKeyEvent1Impl(Ark_NativePointer node,
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
-        // ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
+        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
     }
 }
 void OnDigitalCrownImpl(Ark_NativePointer node,
@@ -2841,7 +2846,7 @@ void OnKeyEventDispatchImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // ViewAbstract::DisableOnKeyEventDispatch(frameNode);
+        ViewAbstract::DisableOnKeyEventDispatch(frameNode);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -2851,7 +2856,7 @@ void OnKeyEventDispatchImpl(Ark_NativePointer node,
         auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
         return Converter::Convert<bool>(arkResult);
     };
-    // ViewAbstract::SetOnKeyEventDispatch(frameNode, std::move(onKeyEvent));
+    ViewAbstract::SetOnKeyEventDispatch(frameNode, std::move(onKeyEvent));
 }
 void OnFocusAxisEventImpl(Ark_NativePointer node,
                           const Opt_Callback_FocusAxisEvent_Void* value)
@@ -2899,7 +2904,7 @@ void FocusableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetFocusable(frameNode, *convValue);
+    ViewAbstract::SetFocusable(frameNode, *convValue);
 }
 void NextFocusImpl(Ark_NativePointer node,
                    const Opt_FocusMovement* value)
@@ -2940,7 +2945,7 @@ void TabStopImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetTabStop(frameNode, *convValue);
+    ViewAbstract::SetTabStop(frameNode, *convValue);
 }
 void OnFocusImpl(Ark_NativePointer node,
                  const Opt_Callback_Void* value)
@@ -2982,7 +2987,7 @@ void TabIndexImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetTabIndex(frameNode, *convValue);
+    ViewAbstract::SetTabIndex(frameNode, *convValue);
 }
 void DefaultFocusImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -2994,7 +2999,7 @@ void DefaultFocusImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetDefaultFocus(frameNode, *convValue);
+    ViewAbstract::SetDefaultFocus(frameNode, *convValue);
 }
 void GroupDefaultFocusImpl(Ark_NativePointer node,
                            const Opt_Boolean* value)
@@ -3006,7 +3011,7 @@ void GroupDefaultFocusImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetGroupDefaultFocus(frameNode, *convValue);
+    ViewAbstract::SetGroupDefaultFocus(frameNode, *convValue);
 }
 void FocusOnTouchImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -3018,7 +3023,7 @@ void FocusOnTouchImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetFocusOnTouch(frameNode, *convValue);
+    ViewAbstract::SetFocusOnTouch(frameNode, *convValue);
 }
 void FocusBoxImpl(Ark_NativePointer node,
                   const Opt_FocusBoxStyle* value)
@@ -4301,7 +4306,7 @@ void KeyImpl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    // ViewAbstract::SetInspectorId(frameNode, *convValue);
+    ViewAbstract::SetInspectorId(frameNode, *convValue);
 }
 void IdImpl(Ark_NativePointer node,
             const Opt_String* value)
@@ -4313,7 +4318,7 @@ void IdImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetInspectorId(frameNode, *id);
+    ViewAbstract::SetInspectorId(frameNode, *id);
 }
 void GeometryTransition0Impl(Ark_NativePointer node,
                              const Opt_String* value)
@@ -4892,7 +4897,7 @@ void OnSizeChangeImpl(Ark_NativePointer node,
         newSize.height = Converter::ArkValue<Opt_Length>(newRect.Height());
         callback.Invoke(oldSize, newSize);
     };
-    // ViewAbstract::SetOnSizeChanged(frameNode, std::move(onSizeChange));
+    ViewAbstract::SetOnSizeChanged(frameNode, std::move(onSizeChange));
 }
 void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
                                      const Opt_FocusDrawLevel* value)
@@ -5705,7 +5710,7 @@ void OnVisibleAreaChangeImpl(Ark_NativePointer node,
             PipelineContext::SetCallBackNode(node);
             arkCallback.Invoke(isExpanding, currentRatio);
         };
-    // ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
+    ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
 void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
                                         const Opt_VisibleAreaEventOptions* options,
@@ -5751,8 +5756,8 @@ void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
         arkCallback.Invoke(isExpanding, currentRatio);
     };
-    // ViewAbstract::SetOnVisibleAreaApproximateChange(
-        // frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
+    ViewAbstract::SetOnVisibleAreaApproximateChange(
+        frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
 }
 void KeyboardShortcutImpl(Ark_NativePointer node,
                           const Opt_Union_String_FunctionKey* value,

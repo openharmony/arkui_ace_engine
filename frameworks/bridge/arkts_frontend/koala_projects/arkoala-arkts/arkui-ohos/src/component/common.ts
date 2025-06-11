@@ -7885,7 +7885,7 @@ export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
     showInSubWindow?: boolean;
 }
-export interface TouchTestInfo {
+export class TouchTestInfo {
     windowX: number;
     windowY: number;
     parentX: number;
@@ -7894,10 +7894,23 @@ export interface TouchTestInfo {
     y: number;
     rect: RectResult;
     id: string;
+    constructor() {
+        this.windowX = 0;
+        this.windowY = 0;
+        this.parentX = 0;
+        this.parentY = 0;
+        this.x = 0;
+        this.y = 0;
+        this.rect = { x: 0, y: 0, width: 0, height: 0 };
+        this.id = "";
+    }
 }
-export interface TouchResult {
+export class TouchResult {
     strategy: TouchTestStrategy;
     id?: string;
+    constructor() {
+        this.strategy = TouchTestStrategy.DEFAULT;
+    }
 }
 export interface PixelStretchEffectOptions {
     top?: Length;
