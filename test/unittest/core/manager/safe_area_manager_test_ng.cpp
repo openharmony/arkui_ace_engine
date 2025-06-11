@@ -1408,6 +1408,7 @@ HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInsetTest, TestSize.Level1)
     EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
 }
 
+/**
  * @tc.name: IsModeResizeOrIsModeOffset
  * @tc.desc: Test IsModeResize and IsModeOffset
  * @tc.type: FUNC
