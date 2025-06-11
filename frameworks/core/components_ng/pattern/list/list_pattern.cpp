@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_pattern.h"
 
+#include "parameters.h"
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -47,6 +49,9 @@ constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr int DEFAULT_HEADER_VALUE = 2;
 constexpr int DEFAULT_FOOTER_VALUE = 3;
+const std::string WHITE_BLOCK_PARAM = "presist.resourceschedule.whiteblock";
+const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
+const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
 #endif
@@ -582,6 +587,9 @@ void ListPattern::FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent&
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
     int32_t startIndex = startIndex_ == -1 ? 0 : startIndex_;
     int32_t endIndex = endIndex_ == -1 ? 0 : endIndex_;
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+        endIndex = WhiteBlockManager::GetInstance().AdjustEndIndex(endIndex);
+    }
     onScrollIndex(startIndex, endIndex, centerIndex_);
     ReportOnItemListScrollEvent("onScrollIndex", startIndex, endIndex);
 }

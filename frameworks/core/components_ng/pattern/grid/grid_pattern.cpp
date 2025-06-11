@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include "parameters.h"
 #include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -30,12 +31,15 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/grid/grid_fill_algorithm.h"
+#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
-
+const std::string WHITE_BLOCK_PARAM = "presist.resourceschedule.whiteblock";
+const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
+const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
 const int32_t MAX_NUM_SIZE = 4;
 } // namespace
 
@@ -400,7 +404,11 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
 void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
 {
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
-    onScrollIndex(info_.startIndex_, info_.endIndex_);
+    int32_t endIndex = info_.endIndex_;
+    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
+        endIndex = WhiteBlockManager::GetInstance().AdjustEndIndex(info_.endIndex_);
+    }
+    onScrollIndex(info_.startIndex_, endIndex);
 }
 
 SizeF GridPattern::GetContentSize() const
