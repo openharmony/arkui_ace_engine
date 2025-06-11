@@ -255,6 +255,9 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/frameworks/bridge/cj_frontend:cj_frontend_ohos"
+                },
+                {
+                    "name": "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/inner_api:copy_arkui_ets"
                 }
             ],
             "test": [
