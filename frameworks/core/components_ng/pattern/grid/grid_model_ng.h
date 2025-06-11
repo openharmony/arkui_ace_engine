@@ -23,7 +23,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/grid/grid_model.h"
 
 namespace OHOS::Ace::NG {
