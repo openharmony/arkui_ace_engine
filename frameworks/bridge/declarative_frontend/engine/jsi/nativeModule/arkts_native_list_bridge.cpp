@@ -835,7 +835,7 @@ ArkUINativeModuleValue ListBridge::SetInitialScroller(ArkUIRuntimeCallInfo* runt
         Framework::JSScroller* scroller =
             Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSScroller>();
         RefPtr<Framework::JSScroller> jsScroller = Referenced::Claim(scroller);
-        jsScroller->SetInstanceId(Container::CurrentId());
+        jsScroller->SetInstanceId(Container::CurrentIdSafely());
         SetScroller(runtimeCallInfo, jsScroller);
     }
     return panda::JSValueRef::Undefined(vm);
