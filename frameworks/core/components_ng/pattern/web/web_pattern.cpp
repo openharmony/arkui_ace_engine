@@ -1047,6 +1047,16 @@ void WebPattern::OnDetachFromMainTree()
     isAttachedToMainTree_ = false;
     // report component is in background.
     delegate_->OnRenderToBackground();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto frontend = pipelineContext->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->ReleasePageEvent(host, true, true);
 }
 
 void WebPattern::OnAttachToFrameNode()
