@@ -1334,6 +1334,11 @@ void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
     // cross platform is not support now;
 }
 
+void WebPattern::OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     // cross platform is not support now;
