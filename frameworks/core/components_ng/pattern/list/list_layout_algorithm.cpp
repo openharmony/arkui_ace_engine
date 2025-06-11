@@ -1141,7 +1141,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     auto currentIndex = startIndex - 1;
     auto chainOffset = 0.0f;
     do {
-        if (!itemPosition_.empty() && syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if (!itemPosition_.empty() && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             return;
         }
@@ -1231,7 +1231,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     auto currentIndex = endIndex + 1;
     auto chainOffset = 0.0f;
     do {
-        if (!itemPosition_.empty() && syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if (!itemPosition_.empty() && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             return;
         }
@@ -1620,12 +1620,12 @@ int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrappe
 bool ListLayoutAlgorithm::IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const
 {
     bool syncLoad = property->GetSyncLoad().value_or(SystemProperties::IsSyncLoadEnabled());
-    return (syncLoad && NearZero(currentDelta_) && !targetIndex_.has_value() && mainSizeIsDefined_);
+    return !(!syncLoad && NearZero(currentDelta_) && !targetIndex_.has_value() && mainSizeIsDefined_);
 }
 
 void ListLayoutAlgorithm::CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& wrapper)
 {
-    if (!syncLoad_) {
+    if (syncLoad_) {
         return;
     }
     CHECK_NULL_VOID(wrapper);

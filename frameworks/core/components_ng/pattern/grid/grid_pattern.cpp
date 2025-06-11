@@ -572,6 +572,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     RequestReset(info_.jumpForRecompose_, -info_.currentOffset_);
     info_.jumpForRecompose_ = EMPTY_JUMP_INDEX;
     isInitialized_ = true;
+    if (gridLayoutAlgorithm->MeasureInNextFrame()) {
+        ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
+        MarkDirtyNodeSelf();
+    }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
     return paintProperty->GetFadingEdge().value_or(false) || paintProperty->HasContentClip();

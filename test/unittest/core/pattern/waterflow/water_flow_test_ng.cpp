@@ -89,6 +89,7 @@ void WaterFlowTestNg::TearDown()
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::GetCurrent()->SetResponseTime(INT32_MAX);
 }
 
 void WaterFlowTestNg::GetWaterFlow()
@@ -115,6 +116,7 @@ WaterFlowModelNG WaterFlowTestNg::CreateWaterFlow()
     RefPtr<ScrollControllerBase> positionController = model.CreateScrollController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.SetScroller(positionController, scrollBarProxy);
+    model.SetSyncLoad(true);
 #ifdef TEST_WATER_FLOW_SW
     model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
 #endif
@@ -203,6 +205,11 @@ WaterFlowItemModelNG WaterFlowTestNg::CreateWaterFlowItem(float mainSize)
         axis = Axis::HORIZONTAL;
     }
     SetSize(axis, CalcLength(FILL_LENGTH), CalcLength(mainSize));
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    frameNode->measureCallback_ = [](RefPtr<Kit::FrameNode>& node) {
+        NG::MockPipelineContext::GetCurrent()->DecResponseTime();
+    };
     return waterFlowItemModel;
 }
 
