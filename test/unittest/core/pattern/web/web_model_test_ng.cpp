@@ -1798,9 +1798,13 @@ HWTEST_F(WebModelTestNg, SetEditMenuOptions005, TestSize.Level1)
         callCount++;
         return false;
     };
+    auto onPrepareMenuCallback =
+        [](const std::vector<OHOS::Ace::NG::MenuItemParam>& /*items*/) -> std::vector<OHOS::Ace::NG::MenuOptionsParam> {
+        return {};
+    };
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
-    webModelNG.SetEditMenuOptions(onCreateMenuCallback, onMenuItemClick);
+    webModelNG.SetEditMenuOptions(onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
     webPattern->onMenuItemClick_({});
     EXPECT_NE(callCount, 0);
 #endif
