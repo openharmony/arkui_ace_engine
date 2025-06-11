@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
-#include "parameters.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
@@ -26,15 +25,8 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
-#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const std::string WHITE_BLOCK_PARAM = "presist.resourceschedule.whiteblock";
-const std::string WHITE_BLOCK_FEATURE_OPEN = "1";
-const std::string WHITE_BLOCK_FEATURE_CLOSE = "0";
-} // namespace
-
 void WaterFlowPattern::OnAttachToFrameNode()
 {
     auto* context = GetContext();
@@ -347,11 +339,7 @@ void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFun
     CHECK_NULL_VOID(indexChanged);
     itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
     CHECK_NULL_VOID(onScrollIndex);
-    int32_t endIndex = layoutInfo_->endIndex_;
-    if (OHOS::system::GetParameter(WHITE_BLOCK_PARAM, WHITE_BLOCK_FEATURE_CLOSE) == WHITE_BLOCK_FEATURE_OPEN) {
-        endIndex = WhiteBlockManager::GetInstance().AdjustEndIndex(layoutInfo_->endIndex_);
-    }
-    onScrollIndex(layoutInfo_->FirstIdx(), endIndex);
+    onScrollIndex(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
