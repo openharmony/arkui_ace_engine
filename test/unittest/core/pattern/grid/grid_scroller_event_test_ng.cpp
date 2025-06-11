@@ -1915,6 +1915,7 @@ HWTEST_F(GridScrollerEventTestNg, SpringAnimationTest001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0.f);
     EXPECT_EQ(reachEndTimes, 2);
