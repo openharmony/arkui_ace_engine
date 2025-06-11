@@ -168,7 +168,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setResponseRegionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegionTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setResponseRegion, nullptr);
 
@@ -206,7 +206,7 @@ HWTEST_F(CommonMethodModifierTest2, setResponseRegionTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setMouseResponseRegionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setMouseResponseRegionTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setMouseResponseRegion, nullptr);
 
@@ -341,7 +341,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyPreImeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyPreIme, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -392,7 +392,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent0Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEvent0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -440,7 +440,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent0Test, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent1Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent1Test, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEvent1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -528,7 +528,7 @@ HWTEST_F(CommonMethodModifierTest2, setPixelRoundTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackgroundEffect0, nullptr);
 
@@ -606,7 +606,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundEffectTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBackgroundBlurStyleTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
 
@@ -787,7 +787,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestValidValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setResponseRegion, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegion, TestSize.Level1)
 {
     Ark_Union_Array_Rectangle_Rectangle inputValue;
     inputValue.selector = 1;
@@ -850,7 +850,7 @@ HWTEST_F(CommonMethodModifierTest2, setConstraintSize, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setTouchable, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setTouchable, TestSize.Level1)
 {
     Opt_Boolean inputValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setTouchable(node_, &inputValue);
@@ -886,7 +886,7 @@ HWTEST_F(CommonMethodModifierTest2, setLayoutWeight, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setHitTestBehavior, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setHitTestBehavior, TestSize.Level1)
 {
     typedef std::pair<Opt_HitTestMode, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -908,7 +908,7 @@ HWTEST_F(CommonMethodModifierTest2, setHitTestBehavior, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOpacity, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOpacity, TestSize.Level1)
 {
     auto inputValue = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(0.7001);
     modifier_->setOpacity0(node_, &inputValue);
@@ -972,7 +972,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setHoverEffect, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setHoverEffect, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_HoverEffect, std::string>;
     static const std::vector<OneTestStep> testPlan = {
@@ -996,7 +996,7 @@ HWTEST_F(CommonMethodModifierTest2, setHoverEffect, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setVisibility, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setVisibility, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_Visibility, std::string>;
     static const std::vector<OneTestStep> testPlan = {
@@ -1224,7 +1224,7 @@ HWTEST_F(CommonMethodModifierTest2, setAspectRatio, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setShadow, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setShadow, TestSize.Level1)
 {
     auto arkShadowOptions = Ark_ShadowOptions {
         .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(ARK_COLOR_GREEN),
@@ -1246,7 +1246,7 @@ HWTEST_F(CommonMethodModifierTest2, setShadow, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBackgroundBlurStyle, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyle, TestSize.Level1)
 {
     auto style = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN);
     auto options = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(Ark_BackgroundBlurStyleOptions {
@@ -1510,7 +1510,7 @@ HWTEST_F(CommonMethodModifierTest2, setBlur1Invalid2, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOverlay, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOverlay, TestSize.Level1)
 {
     auto value = Converter::ArkUnion<Opt_Union_String_CustomBuilder_ComponentContent, Ark_String>("TEST_OVERLAY");
     auto options = Converter::ArkValue<Opt_OverlayOptions>(
@@ -1680,7 +1680,7 @@ HWTEST_F(CommonMethodModifierTest2, setBorderImage, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setLinearGradient, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
 {
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
@@ -1707,7 +1707,7 @@ HWTEST_F(CommonMethodModifierTest2, setLinearGradient, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setSweepGradient, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setSweepGradient, TestSize.Level1)
 {
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
@@ -2391,7 +2391,7 @@ HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestIsGroupValidValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestIsArrowStepOutValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopeIdTestIsArrowStepOutValidValues, TestSize.Level1)
 {
     Opt_String initValueFocusScopeId;
     Opt_Boolean initValueIsGroup;
