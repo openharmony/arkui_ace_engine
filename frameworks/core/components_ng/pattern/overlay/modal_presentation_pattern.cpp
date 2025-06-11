@@ -67,7 +67,12 @@ void ModalPresentationPattern::BeforeCreateLayoutWrapper()
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto inset = context->GetSafeAreaWithoutProcess();
-        builderLayoutProperty->UpdateSafeAreaInsets(inset);
+        NG::CalcLength safeAreaPaddingTop(inset.top_.Length());
+        NG::CalcLength safeAreaPaddingBottom(inset.bottom_.Length());
+        PaddingProperty safeAreaPadding;
+        safeAreaPadding.top = safeAreaPaddingTop;
+        safeAreaPadding.bottom = safeAreaPaddingBottom;
+        modalNodeLayoutProperty->UpdateSafeAreaPadding(safeAreaPadding);
         inset.top_ = { 0, 0 };
         inset.bottom_ = { 0, 0 };
         modalNodeLayoutProperty->UpdateSafeAreaInsets(inset);

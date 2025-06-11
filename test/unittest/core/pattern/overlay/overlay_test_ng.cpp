@@ -2757,4 +2757,62 @@ HWTEST_F(OverlayTestNg, BeforeCreateLayoutWrapperTest001, TestSize.Level1)
     topModalPattern->BeforeCreateLayoutWrapper();
     EXPECT_FALSE(topModalPattern->enableSafeArea_);
 }
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapperTest002
+ * @tc.desc: Test OverlayManager::BeforeCreateLayoutWrapper safeAreaPadding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, BeforeCreateLayoutWrapperTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create target node.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        IgnoreLayoutSafeAreaOpts opts;
+        opts.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM | NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
+        frameNode->layoutProperty_->UpdateIgnoreLayoutSafeAreaOpts(opts);
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create modal node and get modal node, get pattern.
+     * @tc.expected: related function is called.
+     */
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = ModalTransition::NONE;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, ContentCoverParam(), targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_NE(topModalNode, nullptr);
+    auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    topModalPattern->SetEnableSafeArea(true);
+    EXPECT_TRUE(topModalPattern->enableSafeArea_);
+    topModalPattern->BeforeCreateLayoutWrapper();
+    auto modalNodeLayoutProperty = topModalNode->layoutProperty_;
+    ASSERT_NE(modalNodeLayoutProperty, nullptr);
+    const std::unique_ptr<PaddingProperty>& modalSafeAreaPaddingProp =
+        modalNodeLayoutProperty->GetSafeAreaPaddingProperty();
+    ASSERT_NE(modalSafeAreaPaddingProp, nullptr);
+}
 } // namespace OHOS::Ace::NG
