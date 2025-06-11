@@ -9179,15 +9179,12 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
         end = (rangeEnd == PREVIEW_TEXT_RANGE_DEFAULT) ? end : rangeEnd;
     }
 
-    auto oldHasPreviewText = hasPreviewText_;
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldPreviewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
     changeValueInfo.oldContent = GetBodyTextValue();
     changeValueInfo.rangeBefore = TextRange { GetPreviewTextStart(), GetPreviewTextStart() };
     changeValueInfo.rangeAfter = TextRange { GetPreviewTextStart(), GetPreviewTextStart() };
-    auto originCaretIndex =
-            TextRange { changeValueInfo.oldPreviewText.offset, changeValueInfo.oldPreviewText.offset };
     bool hasInsertValue = false;
     auto originLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) - (end - start);
     auto attemptInsertLength = static_cast<int32_t>(info.text.length()) - (end - start);
@@ -9212,12 +9209,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     changeValueInfo.value = GetBodyTextValue();
     changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
-    bool isWillChange = FireOnWillChange(changeValueInfo);
-    if (!isWillChange && !info.isIme) {
-        RecoverTextValueAndCaret(changeValueInfo.oldContent, originCaretIndex);
-        hasPreviewText_ = oldHasPreviewText;
-        return;
-    }
+    FireOnWillChange(changeValueInfo);
     if (HasFocus()) {
         cursorVisible_ = true;
         StartTwinkling();
@@ -9254,9 +9246,6 @@ void TextFieldPattern::FinishTextPreviewOperation()
         HandleCountStyle();
     }
 
-    auto oldValue = contentController_->GetTextUtf16Value();
-    auto originCaretIndex =
-            TextRange { selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex() };
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldPreviewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
@@ -9279,7 +9268,8 @@ void TextFieldPattern::FinishTextPreviewOperation()
     changeValueInfo.previewText.value = GetPreviewTextValue();
     bool isWillChange = FireOnWillChange(changeValueInfo);
     if (!isWillChange) {
-        RecoverTextValueAndCaret(oldValue, originCaretIndex);
+        contentController_->SetTextValueOnly(changeValueInfo.oldContent);
+        selectController_->UpdateHandleIndex(start, start);
         return;
     }
     if (HasFocus()) {
