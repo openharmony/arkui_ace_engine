@@ -614,7 +614,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew020, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    auto property = std::make_shared<Rosen::RSPropertyBase>();
+    auto property = std::make_shared<Rosen::RSProperty<bool>>();
     std::shared_ptr<Rosen::RSModifier> modifier = std::make_shared<Rosen::RSBackgroundShaderModifier>(property);
     rosenRenderContext->AddModifier(modifier);
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
@@ -662,7 +662,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew021, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    auto property = std::make_shared<Rosen::RSPropertyBase>();
+    auto property = std::make_shared<Rosen::RSProperty<bool>>();
     std::shared_ptr<Rosen::RSModifier> modifier = std::make_shared<Rosen::RSBackgroundShaderModifier>(property);
     rosenRenderContext->AddModifier(modifier);
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
