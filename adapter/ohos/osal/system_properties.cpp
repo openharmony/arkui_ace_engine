@@ -302,6 +302,11 @@ bool IsGridCacheEnabled()
     return (system::GetParameter("persist.ace.grid.cache.enabled", "1") == "1");
 }
 
+bool IsGridIrregularLayoutEnabled()
+{
+    return (system::GetParameter("persist.ace.grid.irregular.enabled", "false") == "true");
+}
+
 bool IsSideBarContainerBlurEnable()
 {
     return (system::GetParameter("persist.ace.sidebar.blur.enabled", "0") == "1");
@@ -669,6 +674,7 @@ bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::configChangePerform_ = IsConfigChangePerform();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
+bool SystemProperties::gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
@@ -846,6 +852,7 @@ void SystemProperties::InitDeviceInfo(
     configChangePerform_ = IsConfigChangePerform();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
+    gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
     faultInjectEnabled_  = IsFaultInjectEnabled();
@@ -1049,7 +1056,7 @@ bool SystemProperties::GetGridCacheEnabled()
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return system::GetBoolParameter("persist.ace.grid.irregular.enabled", false);
+    return gridIrregularLayoutEnable_;
 }
 
 bool SystemProperties::WaterFlowUseSegmentedLayout()

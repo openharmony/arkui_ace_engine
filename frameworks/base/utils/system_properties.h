@@ -827,6 +827,7 @@ private:
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
+    static bool gridIrregularLayoutEnable_;
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
