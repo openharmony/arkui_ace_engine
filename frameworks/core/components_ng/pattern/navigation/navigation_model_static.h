@@ -22,6 +22,7 @@
 #include "core/components_ng/base/navigation_register.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 
@@ -62,6 +63,7 @@ public:
     static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
     static void SetCustomMenu(FrameNode* frameNode, const RefPtr<UINode>& customNode);
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
+    static void SetOnNavBarWidthChangeEvent(FrameNode* frameNode, OnNavBarWidthChangeEvent event);
     static void SetCustomTransition(FrameNode* frameNode, NavigationTransitionEvent&& customTransition);
     static void SetCustomTitle(FrameNode* frameNode, const RefPtr<UINode>& customNode);
     static void SetCustomToolBar(FrameNode* frameNode, const RefPtr<UINode>& customNode);

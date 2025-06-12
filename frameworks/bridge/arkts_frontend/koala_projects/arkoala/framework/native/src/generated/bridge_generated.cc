@@ -35177,6 +35177,13 @@ Ark_NativePointer impl_VisualEffect_backgroundColorBlender(Ark_NativePointer thi
         return GetAccessors()->getVisualEffectAccessor()->backgroundColorBlender(self, (const Ark_BrightnessBlender*)&blender_value);
 }
 KOALA_INTEROP_DIRECT_3(VisualEffect_backgroundColorBlender, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_NavigationOps_registerNavBarWidthCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Length value = thisDeserializer.readLength();
+        NavBarWidthCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Length navBarWidth)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavBarWidthCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Length navBarWidth)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavBarWidthCallback))))};;
+        return GetAccessors()->getNavigationOpsAccessor()->registerNavBarWidthCallback(node, (const Ark_Length*)&value, (const NavBarWidthCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(NavigationOps_registerNavBarWidthCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavExtender_setUpdateStackCallback(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         NavExtender_OnUpdateStack callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String name)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavExtender_OnUpdateStack)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String name)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavExtender_OnUpdateStack))))};;
@@ -35305,6 +35312,24 @@ Ark_Number impl_NavExtender_popToName(Ark_NativePointer pathStack, const KString
     return GetAccessors()->getNavExtenderAccessor()->popToName(static_cast<Ark_NavPathStack>(pathStack), (const Ark_String*)(&name), animated);
 }
 KOALA_INTEROP_3(NavExtender_popToName, KInteropNumber, Ark_NativePointer, KStringPtr, Ark_Boolean)
+Ark_NativePointer impl_SideBarContainerOps_registerShowSideBarCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        ShowSideBarCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean showSideBar)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ShowSideBarCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean showSideBar)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ShowSideBarCallback))))};;
+        return GetAccessors()->getSideBarContainerOpsAccessor()->registerShowSideBarCallback(node, value, (const ShowSideBarCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(SideBarContainerOps_registerShowSideBarCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SideBarContainerOps_registerSideBarWidthCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        SideBarWidthCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number sideBarWidth)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SideBarWidthCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number sideBarWidth)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SideBarWidthCallback))))};;
+        return GetAccessors()->getSideBarContainerOpsAccessor()->registerSideBarWidthCallback(node, (const Ark_Number*) (&value), (const SideBarWidthCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(SideBarContainerOps_registerSideBarWidthCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_StepperOps_registerStepperIndexCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        StepperIndexCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number stepperIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_StepperIndexCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number stepperIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_StepperIndexCallback))))};;
+        return GetAccessors()->getStepperOpsAccessor()->registerStepperIndexCallback(node, (const Ark_Number*) (&value), (const StepperIndexCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(StepperOps_registerStepperIndexCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
 void impl_EventEmulator_emitClickEvent(Ark_NativePointer node, Ark_NativePointer event) {
         GetAccessors()->getEventEmulatorAccessor()->emitClickEvent(node, static_cast<Ark_ClickEvent>(event));
 }
