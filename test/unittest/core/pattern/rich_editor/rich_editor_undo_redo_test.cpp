@@ -110,7 +110,7 @@ HWTEST_F(RichEditorUndoRedoTest, UndoDrag001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     RichEditorPattern::OperationRecord record;
-    record.deleteCaretPostion = 0;
+    record.deleteCaretPosition = 0;
     record.addText = u"test123";
     richEditorPattern->UndoDrag(record);
     EXPECT_EQ(richEditorPattern->caretPosition_, 7);
@@ -144,7 +144,7 @@ HWTEST_F(RichEditorUndoRedoTest, RedoDrag002, TestSize.Level1)
     eventHub->SetOnWillChange(onWillChange);
 
     RichEditorPattern::OperationRecord record;
-    record.deleteCaretPostion = 0;
+    record.deleteCaretPosition = 0;
     record.addText = u"test123";
     richEditorPattern->RedoDrag(record);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
@@ -164,7 +164,7 @@ HWTEST_F(RichEditorUndoRedoTest, UndoDrag003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorPattern::OperationRecord record;
     record.addText = u"test123\n";
-    record.deleteCaretPostion = 1;
+    record.deleteCaretPosition = 1;
     auto caretPosition = richEditorPattern->caretPosition_;
     richEditorPattern->UndoDrag(record);
     EXPECT_NE(richEditorPattern->caretPosition_, caretPosition);
@@ -181,7 +181,7 @@ HWTEST_F(RichEditorUndoRedoTest, RedoDrag003, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorPattern::OperationRecord record;
-    record.deleteCaretPostion = 1;
+    record.deleteCaretPosition = 1;
     auto caretPosition = richEditorPattern->caretPosition_;
     richEditorPattern->RedoDrag(record);
     EXPECT_EQ(richEditorPattern->caretPosition_, caretPosition);
@@ -211,7 +211,7 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction001, TestSize.Level2)
     EXPECT_EQ(changeReason, TextChangeReason::UNKNOWN);
     RichEditorPattern::OperationRecord firstRecord;
     firstRecord.addText = u"first Record helloWorld";
-    firstRecord.deleteCaretPostion = 3;
+    firstRecord.deleteCaretPosition = 3;
     richEditorPattern->redoOperationRecords_.emplace_back(firstRecord);
     changeReason = TextChangeReason::UNKNOWN;
     richEditorPattern->HandleOnRedoAction();
@@ -259,7 +259,7 @@ HWTEST_F(RichEditorUndoRedoTest, UndoDrag002, TestSize.Level1)
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
     RichEditorPattern::OperationRecord record;
-    record.deleteCaretPostion = -1;
+    record.deleteCaretPosition = -1;
     richEditorPattern->UndoDrag(record);
     EXPECT_FALSE(record.addText.has_value());
 }
@@ -299,7 +299,7 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction001, TestSize.Level2)
 
     RichEditorPattern::OperationRecord secondRecord;
     secondRecord.addText = u"second Record helloWorld";
-    secondRecord.deleteCaretPostion = 3;
+    secondRecord.deleteCaretPosition = 3;
     richEditorPattern->operationRecords_.clear();
     richEditorPattern->operationRecords_.emplace_back(secondRecord);
     changeReason = TextChangeReason::UNKNOWN;
@@ -347,7 +347,7 @@ HWTEST_F(RichEditorUndoRedoTest, InsertValueOperation, TestSize.Level2)
 
     RichEditorPattern::OperationRecord secondRecord;
     secondRecord.addText = u"second Record helloWorld";
-    secondRecord.deleteCaretPostion = 3;
+    secondRecord.deleteCaretPosition = 3;
     richEditorPattern->operationRecords_.clear();
     richEditorPattern->operationRecords_.emplace_back(secondRecord);
     changeReason = TextChangeReason::UNKNOWN;
@@ -430,13 +430,13 @@ HWTEST_F(RichEditorUndoRedoTest, BeforeRedo001, TestSize.Level1)
     /**
      * @tc.steps: step2. change parameters and call function.
      */
-    record.deleteCaretPostion = 0;
+    record.deleteCaretPosition = 0;
     richEditorPattern->BeforeRedo(changeValue, innerPosition, record);
     EXPECT_NE(innerPosition, 0);
     /**
      * @tc.steps: step3. change parameters and call function.
      */
-    record.deleteCaretPostion = -1;
+    record.deleteCaretPosition = -1;
     record.deleteText = u"test\n";
     richEditorPattern->BeforeRedo(changeValue, innerPosition, record);
     EXPECT_NE(innerPosition, 0);
@@ -466,17 +466,59 @@ HWTEST_F(RichEditorUndoRedoTest, BeforeUndo001, TestSize.Level1)
     /**
      * @tc.steps: step2. change parameters and call function.
      */
-    record.deleteCaretPostion = 0;
+    record.deleteCaretPosition = 0;
     richEditorPattern->BeforeUndo(changeValue, innerPosition, record);
     EXPECT_NE(innerPosition, 0);
     /**
      * @tc.steps: step3. change parameters and call function.
      */
-    record.deleteCaretPostion = -1;
+    record.deleteCaretPosition = -1;
     record.deleteText = u"test\n";
     richEditorPattern->BeforeUndo(changeValue, innerPosition, record);
     EXPECT_NE(innerPosition, 0);
 }
 
+/**
+ * @tc.name: AddInsertOperationRecord
+ * @tc.desc: test AddInsertOperationRecord With PreviewInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, AddInsertOperationRecord, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->isEditing_ = true;
+
+    // step1 insert value with shouldCommitInput is false
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->ProcessInsertValue(INIT_VALUE_1, OperationType::IME, false);
+    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
+
+    // step2 insert value with shouldCommitInput is true
+    richEditorPattern->DeleteForward(0, 6);
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->ProcessInsertValue(INIT_VALUE_1, OperationType::IME, true);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), 1);
+
+    // step3 insert value with selection and shouldCommitInput is false
+    richEditorPattern->ClearOperationRecords();
+    richEditorPattern->textSelector_.Update(0, 6);
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->ProcessInsertValue(INIT_VALUE_2, OperationType::IME, false);
+    ASSERT_TRUE(richEditorPattern->previewInputRecord_.deleteText.has_value());
+    EXPECT_EQ(richEditorPattern->previewInputRecord_.deleteText.value(), INIT_VALUE_1);
+    EXPECT_EQ(richEditorPattern->previewInputRecord_.beforeCaretPosition, 0);
+
+    // step4 AddInsertOperationRecord with previewInputRecord has value
+    RichEditorPattern::OperationRecord record;
+    record.addText = INIT_VALUE_1;
+    record.afterCaretPosition = 6;
+    richEditorPattern->AddInsertOperationRecord(record);
+    ASSERT_EQ(richEditorPattern->operationRecords_.size(), 1);
+    auto firstRecord = richEditorPattern->operationRecords_.back();
+    ASSERT_TRUE(firstRecord.deleteText.has_value());
+    EXPECT_EQ(firstRecord.deleteText.value(), INIT_VALUE_1);
+    EXPECT_EQ(firstRecord.beforeCaretPosition, 0);
+}
 
 } // namespace OHOS::Ace::NG

@@ -243,6 +243,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     bubblePattern->SetMessageColor(textColor.has_value());
     bubblePattern->SetHasTransition(param->GetHasTransition());
     bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
+    bubblePattern->SetAvoidTarget(param->GetAvoidTarget());
+    bubblePattern->SetHasWidth(param->GetChildWidth().has_value());
+    bubblePattern->SetHasPlacement(param->HasPlacement());
     bubblePattern->SetOutlineLinearGradient(param->GetOutlineLinearGradient());
     bubblePattern->SetOutlineWidth(param->GetOutlineWidth());
     bubblePattern->SetInnerBorderLinearGradient(param->GetInnerBorderLinearGradient());
@@ -286,6 +289,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
         textPadding.right = CalcLength(padding.Right());
         textPadding.top = CalcLength(padding.Top());
         textPadding.bottom = CalcLength(padding.Bottom());
+        bubblePattern->SetTextPadding(textPadding);
         layoutProps->UpdatePadding(textPadding);
         layoutProps->UpdateAlignment(Alignment::CENTER);
         UpdateTextProperties(param, layoutProps, columnNode);
@@ -434,6 +438,9 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     }
     popupPattern->SetHasTransition(param->GetHasTransition());
     popupPattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
+    popupPattern->SetAvoidTarget(param->GetAvoidTarget());
+    popupPattern->SetHasWidth(param->GetChildWidth().has_value());
+    popupPattern->SetHasPlacement(param->HasPlacement());
     popupPattern->SetOutlineLinearGradient(param->GetOutlineLinearGradient());
     popupPattern->SetOutlineWidth(param->GetOutlineWidth());
     popupPattern->SetInnerBorderLinearGradient(param->GetInnerBorderLinearGradient());
@@ -793,6 +800,9 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();
     bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
+    bubblePattern->SetAvoidTarget(param->GetAvoidTarget());
+    bubblePattern->SetHasWidth(param->GetChildWidth().has_value());
+    bubblePattern->SetHasPlacement(param->HasPlacement());
 
     if (!(param->GetIsPartialUpdate().has_value())) {
         bubblePattern->SetHasTransition(param->GetHasTransition());
@@ -894,6 +904,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         textPadding.left = CalcLength(popupTheme->GetAgingTextLeftPadding());
         textPadding.right = CalcLength(popupTheme->GetAgingTextRightPadding());
     }
+    bubblePattern->SetTextPadding(textPadding);
     textLayoutProps->UpdatePadding(textPadding);
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
     UpdateTextProperties(param, textLayoutProps, columnNode);

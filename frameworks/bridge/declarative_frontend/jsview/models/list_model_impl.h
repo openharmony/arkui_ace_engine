@@ -75,6 +75,7 @@ public:
     void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+    void SetDividerColorByUser(bool isByUser) override {};
 
     DisplayMode GetDisplayMode() const override
     {

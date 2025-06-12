@@ -73,11 +73,11 @@ const float NEGATIVE_SCALE_VALUE = -1.0f;
 const float MAX_SCALE_NORMAL = 1.0f;
 
 struct CreateWithPara createWithPara = { std::make_optional(true), std::make_optional(CREATE_VALUE),
-    std::make_optional(true), std::make_optional(ButtonType::CAPSULE), std::make_optional(true), std::nullopt,
+    std::make_optional(true), std::make_optional(BUTTON_TYPE_CAPSULE_VALUE), std::make_optional(true), std::nullopt,
     std::nullopt, std::nullopt };
 struct CreateWithPara createWithParaByRoundedRect = { std::make_optional(true), std::make_optional(CREATE_VALUE),
-    std::make_optional(true), std::make_optional(ButtonType::ROUNDED_RECTANGLE), std::make_optional(true), std::nullopt,
-    std::nullopt, std::nullopt };
+    std::make_optional(true), std::make_optional(BUTTON_TYPE_ROUNDED_RECTANGLE_VALUE), std::make_optional(true),
+    std::nullopt, std::nullopt, std::nullopt };
 } // namespace
 
 struct TestProperty {

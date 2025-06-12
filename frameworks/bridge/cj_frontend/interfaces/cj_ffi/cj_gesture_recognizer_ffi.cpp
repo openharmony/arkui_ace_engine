@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -23,7 +23,7 @@ using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
-std::string CJGestureRecognizer::getTag()
+std::string CJGestureRecognizer::GetTag() const
 {
     std::string tag;
     auto recognizer = recognizer_.Upgrade();
@@ -36,7 +36,7 @@ std::string CJGestureRecognizer::getTag()
     return tag;
 }
 
-int32_t CJGestureRecognizer::getType()
+int32_t CJGestureRecognizer::GetType() const
 {
     GestureTypeName type = GestureTypeName::UNKNOWN;
     auto recognizer = recognizer_.Upgrade();
@@ -47,17 +47,17 @@ int32_t CJGestureRecognizer::getType()
     return static_cast<int32_t>(type);
 }
 
-int32_t CJGestureRecognizer::getFingers()
+int32_t CJGestureRecognizer::GetFingers() const
 {
     return fingers_;
 }
 
-bool CJGestureRecognizer::isFingerCountLimit()
+bool CJGestureRecognizer::IsFingerCountLimit() const
 {
     return isLimitFingerCount_;
 }
 
-bool CJGestureRecognizer::isBuiltIn()
+bool CJGestureRecognizer::IsBuiltIn() const
 {
     bool isBuiltIn = false;
     auto recognizer = recognizer_.Upgrade();
@@ -68,7 +68,7 @@ bool CJGestureRecognizer::isBuiltIn()
     return isBuiltIn;
 }
 
-bool CJGestureRecognizer::isEnabled()
+bool CJGestureRecognizer::IsEnabled() const
 {
     bool isEnabled = false;
     auto recognizer = recognizer_.Upgrade();
@@ -78,7 +78,7 @@ bool CJGestureRecognizer::isEnabled()
     return isEnabled;
 }
 
-bool CJGestureRecognizer::isValid()
+bool CJGestureRecognizer::IsValid() const
 {
     bool isValid = false;
     auto recognizer = recognizer_.Upgrade();
@@ -88,24 +88,24 @@ bool CJGestureRecognizer::isValid()
     return isValid;
 }
 
-void CJGestureRecognizer::setEnabled(bool enabled)
+void CJGestureRecognizer::SetEnabled(bool enabled)
 {
     auto recognizer = recognizer_.Upgrade();
     CHECK_NULL_VOID(recognizer);
     recognizer->SetEnabled(enabled);
 }
 
-CJGestureRecognizerState CJGestureRecognizer::getRefereeState()
+CJGestureRecognizerState CJGestureRecognizer::GetRefereeState() const
 {
     CJGestureRecognizerState state = CJGestureRecognizerState::FAILED;
     auto recognizer = recognizer_.Upgrade();
     if (recognizer) {
-        state = convertRefereeState(recognizer->GetRefereeState());
+        state = ConvertRefereeState(recognizer->GetRefereeState());
     }
     return state;
 }
 
-sptr<CJEventTargetInfo> CJGestureRecognizer::getEventTargetInfo()
+sptr<CJEventTargetInfo> CJGestureRecognizer::GetEventTargetInfo() const
 {
     auto recognizer = recognizer_.Upgrade();
     if (!recognizer) {
@@ -116,44 +116,50 @@ sptr<CJEventTargetInfo> CJGestureRecognizer::getEventTargetInfo()
         return nullptr;
     }
     RefPtr<NG::Pattern> pattern;
-    auto scrollablePattern = attachNode->GetPattern<NG::ScrollablePattern>();
-    if (scrollablePattern) {
+    if (auto scrollablePattern = attachNode->GetPattern<NG::ScrollablePattern>()) {
         pattern = scrollablePattern;
+    }
+    if (auto swiperPattern = attachNode->GetPattern<NG::SwiperPattern>()) {
+        pattern = swiperPattern;
     }
     if (pattern) {
         auto scrollableTarget = FFIData::Create<CJScrollableTargetInfo>();
-        scrollableTarget->setPattern(pattern);
-        scrollableTarget->setId(attachNode->GetInspectorIdValue(""));
-        scrollableTarget->setType(CJEventTargetInfoType::SCROLLABLE);
+        scrollableTarget->SetPattern(pattern);
+        scrollableTarget->SetId(attachNode->GetInspectorIdValue(""));
+        scrollableTarget->SetType(CJEventTargetInfoType::SCROLLABLE);
         return scrollableTarget;
     }
     auto eventTargetInfo = FFIData::Create<CJEventTargetInfo>();
-    eventTargetInfo->setId(attachNode->GetInspectorIdValue(""));
+    eventTargetInfo->SetId(attachNode->GetInspectorIdValue(""));
     return eventTargetInfo;
 }
 
-bool CJScrollableTargetInfo::isBegin()
+bool CJScrollableTargetInfo::IsBegin() const
 {
     auto pattern = pattern_.Upgrade();
     if (!pattern) {
         return false;
     }
-    auto scrollablePattern = AceType::DynamicCast<NG::ScrollablePattern>(pattern);
-    if (scrollablePattern) {
+    if (auto scrollablePattern = AceType::DynamicCast<NG::ScrollablePattern>(pattern)) {
         return scrollablePattern->IsAtTop();
+    }
+    if (auto swiperPattern = AceType::DynamicCast<NG::SwiperPattern>(pattern)) {
+        return swiperPattern->IsAtStart();
     }
     return false;
 }
 
-bool CJScrollableTargetInfo::isEnd()
+bool CJScrollableTargetInfo::IsEnd() const
 {
     auto pattern = pattern_.Upgrade();
     if (!pattern) {
         return false;
     }
-    auto scrollablePattern = AceType::DynamicCast<NG::ScrollablePattern>(pattern);
-    if (scrollablePattern) {
+    if (auto scrollablePattern = AceType::DynamicCast<NG::ScrollablePattern>(pattern)) {
         return scrollablePattern->IsAtBottom();
+    }
+    if (auto swiperPattern = AceType::DynamicCast<NG::SwiperPattern>(pattern)) {
+        return swiperPattern->IsAtEnd();
     }
     return false;
 }
@@ -166,7 +172,7 @@ ExternalString FfiOHOSAceFrameworkGestureRecognizerGetTag(int64_t id)
         LOGE("FfiOHOSAceFrameworkGestureRecognizerGetTag: invalid id");
         return {};
     }
-    auto tag = gestureRecognizer->getTag();
+    auto tag = gestureRecognizer->GetTag();
     return ::Utils::MallocCString(tag);
 }
 
@@ -177,7 +183,7 @@ int32_t FfiOHOSAceFrameworkGestureRecognizerGetType(int64_t id)
         LOGE("FfiOHOSAceFrameworkGestureRecognizerGetType: invalid id");
         return FFI_ERROR_CODE;
     }
-    return gestureRecognizer->getType();
+    return gestureRecognizer->GetType();
 }
 
 bool FfiOHOSAceFrameworkGestureRecognizerIsBuiltIn(int64_t id)
@@ -187,7 +193,7 @@ bool FfiOHOSAceFrameworkGestureRecognizerIsBuiltIn(int64_t id)
         LOGE("FfiOHOSAceFrameworkGestureRecognizerIsBuiltIn: invalid id");
         return false;
     }
-    return gestureRecognizer->isBuiltIn();
+    return gestureRecognizer->IsBuiltIn();
 }
 
 bool FfiOHOSAceFrameworkGestureRecognizerIsEnabled(int64_t id)
@@ -197,7 +203,7 @@ bool FfiOHOSAceFrameworkGestureRecognizerIsEnabled(int64_t id)
         LOGE("FfiOHOSAceFrameworkGestureRecognizerIsEnabled: invalid id");
         return false;
     }
-    return gestureRecognizer->isEnabled();
+    return gestureRecognizer->IsEnabled();
 }
 
 bool FfiOHOSAceFrameworkGestureRecognizerIsValid(int64_t id)
@@ -207,7 +213,7 @@ bool FfiOHOSAceFrameworkGestureRecognizerIsValid(int64_t id)
         LOGE("FfiOHOSAceFrameworkGestureRecognizerIsValid: invalid id");
         return false;
     }
-    return gestureRecognizer->isValid();
+    return gestureRecognizer->IsValid();
 }
 
 void FfiOHOSAceFrameworkGestureRecognizerSetEnabled(int64_t id, bool enabled)
@@ -217,7 +223,7 @@ void FfiOHOSAceFrameworkGestureRecognizerSetEnabled(int64_t id, bool enabled)
         LOGE("FfiOHOSAceFrameworkGestureRecognizerSetEnabled: invalid id");
         return;
     }
-    gestureRecognizer->setEnabled(enabled);
+    gestureRecognizer->SetEnabled(enabled);
 }
 
 int32_t FfiOHOSAceFrameworkGestureRecognizerGetState(int64_t id)
@@ -227,7 +233,7 @@ int32_t FfiOHOSAceFrameworkGestureRecognizerGetState(int64_t id)
         LOGE("FfiOHOSAceFrameworkGestureRecognizerGestState: invalid id");
         return FFI_ERROR_CODE;
     }
-    auto state = gestureRecognizer->getRefereeState();
+    auto state = gestureRecognizer->GetRefereeState();
     return static_cast<int32_t>(state);
 }
 
@@ -238,7 +244,7 @@ int64_t FfiOHOSAceFrameworkGestureRecognizerGetEventTargetInfo(int64_t id)
         LOGE("FfiOHOSAceFrameworkGestureRecognizerGetEventTargetInfo: invalid id");
         return FFI_ERROR_CODE;
     }
-    auto eventTargetInfo = gestureRecognizer->getEventTargetInfo();
+    auto eventTargetInfo = gestureRecognizer->GetEventTargetInfo();
     if (eventTargetInfo == nullptr) {
         LOGE("FfiOHOSAceFrameworkGestureRecognizerGetEventTargetInfo: invalid eventTargetInfo");
         return FFI_ERROR_CODE;
@@ -253,7 +259,7 @@ ExternalString FfiOHOSAceFrameworkEventTargetInfoGetId(int64_t id)
         LOGE("FfiOHOSAceFrameworkEventTargetInfoGetId: invalid id");
         return {};
     }
-    auto targetId = eventTargetInfo->getId();
+    auto targetId = eventTargetInfo->GetId();
     return ::Utils::MallocCString(targetId);
 }
 
@@ -264,7 +270,7 @@ int32_t FfiOHOSAceFrameworkEventTargetInfoGetType(int64_t id)
         LOGE("FfiOHOSAceFrameworkEventTargetInfoGetType: invalid id");
         return FFI_ERROR_CODE;
     }
-    auto type = eventTargetInfo->getType();
+    auto type = eventTargetInfo->GetType();
     return static_cast<int32_t>(type);
 }
 
@@ -275,7 +281,7 @@ int64_t FfiOHOSAceFrameworkPanRecognizerGetPanGestureOptions(int64_t id)
         LOGE("FfiOHOSAceFrameworkPanRecognizerGetPanGestureOptions: invalid id");
         return FFI_ERROR_CODE;
     }
-    auto panGestureOptions = panRecognizer->getPanGestureOptions();
+    auto panGestureOptions = panRecognizer->GetPanGestureOptions();
     return panGestureOptions->GetID();
 }
 
@@ -286,7 +292,7 @@ bool FfiOHOSAceFrameworkScrollableTargetInfoIsBegin(int64_t id)
         LOGE("FfiOHOSAceFrameworkScrollableTargetInfoIsBegin: invalid id");
         return false;
     }
-    return scrollableTargetInfo->isBegin();
+    return scrollableTargetInfo->IsBegin();
 }
 
 bool FfiOHOSAceFrameworkScrollableTargetInfoIsEnd(int64_t id)
@@ -296,13 +302,13 @@ bool FfiOHOSAceFrameworkScrollableTargetInfoIsEnd(int64_t id)
         LOGE("FfiOHOSAceFrameworkScrollableTargetInfoIsEnd: invalid id");
         return false;
     }
-    return scrollableTargetInfo->isEnd();
+    return scrollableTargetInfo->IsEnd();
 }
 
 int64_t FfiOHOSAceFrameworkGestureRecognizerCtor()
 {
     auto gestureRecognizer = FFIData::Create<CJGestureRecognizer>();
-    if(gestureRecognizer == nullptr) {
+    if (gestureRecognizer == nullptr) {
         LOGE("FfiOHOSAceFrameworkGestureRecognizerCtor: create fail");
         return FFI_ERROR_CODE;
     }

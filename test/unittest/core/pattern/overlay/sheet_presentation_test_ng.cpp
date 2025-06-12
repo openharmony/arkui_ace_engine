@@ -2185,6 +2185,11 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition001, TestSize.Level1)
     /**
      * @tc.steps: step4. set params of isNeedProcessHeight_, test ModifyFireSheetTransition.
      */
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     sheetPattern->isNeedProcessHeight_ = true;
     sheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(sheetPattern->isNeedProcessHeight_);
@@ -2252,6 +2257,11 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition002, TestSize.Level1)
     /**
      * @tc.steps: step4. set params of isNeedProcessHeight_, test ModifyFireSheetTransition.
      */
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     sheetPattern->isAnimationProcess_ = true;
     sheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(sheetPattern->isAnimationProcess_);

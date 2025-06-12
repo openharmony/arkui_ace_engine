@@ -25,6 +25,7 @@
 #include "native_node.h"
 #include "native_type.h"
 
+#include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
@@ -146,6 +147,7 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId);
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData);
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType);
+bool GreatOrEqualTargetAPIVersion(OHOS::Ace::PlatformVersion platfromVersion);
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event));
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event));
 void UnregisterOnEvent();

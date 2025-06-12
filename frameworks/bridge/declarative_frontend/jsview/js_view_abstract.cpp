@@ -3098,10 +3098,8 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
         if (!ParseJsColor(info[0], backgroundColor, backgroundColorResObj)) {
             backgroundColor = Color::TRANSPARENT;
         }
-        if (backgroundColorResObj) {
-            ViewAbstractModel::GetInstance()->SetBackgroundColorWithResourceObj(backgroundColorResObj);
-            return;
-        }
+        ViewAbstractModel::GetInstance()->SetBackgroundColorWithResourceObj(backgroundColor, backgroundColorResObj);
+        return;
     } else {
         if (!ParseJsColor(info[0], backgroundColor)) {
             backgroundColor = Color::TRANSPARENT;
@@ -3129,11 +3127,13 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
         src = jsBackgroundImage->ToString();
         ViewAbstractModel::GetInstance()->SetBackgroundImage(
             ImageSourceInfo { src, bundle, module }, GetThemeConstants());
+        ViewAbstractModel::GetInstance()->ClearResObj("backgroundImageSrc");
     } else if (ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId, backgroundImageResObj)) {
-        if (!SystemProperties::ConfigChangePerform() || !backgroundImageResObj) {
+        if (!SystemProperties::ConfigChangePerform()) {
             ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo{src, bundle, module}, nullptr);
         } else {
-            ViewAbstractModel::GetInstance()->SetBackgroundImageWithResourceObj(backgroundImageResObj, bundle, module, nullptr);
+            ViewAbstractModel::GetInstance()->SetBackgroundImageWithResourceObj(
+                backgroundImageResObj, ImageSourceInfo { src, bundle, module }, nullptr);
         }
     } else {
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -3144,6 +3144,7 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
         }
 #endif
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
+        ViewAbstractModel::GetInstance()->ClearResObj("backgroundImageSrc");
     }
     if (info.Length() == 2) { // 2 is background image info length
         auto jsImageRepeat = info[1];
@@ -3682,6 +3683,7 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         bgImgSize.SetSizeTypeX(BackgroundImageSizeType::AUTO);
         bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
         ViewAbstractModel::GetInstance()->SetBackgroundImageSize(bgImgSize);
+        ViewAbstractModel::GetInstance()->ClearResObj("backgroundImageSize");
         return;
     }
     if (jsVal->IsNumber()) {
@@ -3692,6 +3694,7 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         }
         bgImgSize.SetSizeTypeX(sizeType);
         bgImgSize.SetSizeTypeY(sizeType);
+        ViewAbstractModel::GetInstance()->ClearResObj("backgroundImageSize");
     } else {
         CalcDimension width;
         CalcDimension height;
@@ -3738,8 +3741,13 @@ void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t a
 void SetBackgroundImagePositionUpdateFunc(
     BackgroundImagePosition& bgImgPosition, const RefPtr<ResourceObject>& resObj, const std::string direction)
 {
-    CHECK_NULL_VOID(resObj);
     if (direction.empty()) {
+        return;
+    }
+    auto& updater = bgImgPosition.GetResObjUpdater();
+    if (!resObj) {
+        (direction == "x") ? updater.RemoveResource("backgroundImagePositionX")
+                        : updater.RemoveResource("backgroundImagePositionY");
         return;
     }
     auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
@@ -3756,10 +3764,11 @@ void SetBackgroundImagePositionUpdateFunc(
         }
         AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
         (direction == "x") ? position.SetSizeX(AnimatableDimension(value, type, option))
-                           : position.SetSizeY(AnimatableDimension(value, type, option));
+                        : position.SetSizeY(AnimatableDimension(value, type, option));
     };
-    (direction == "x") ? bgImgPosition.AddResource("backgroundImagePositionX", resObj, std::move(updateFunc))
-                       : bgImgPosition.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
+    updater.BindResObj(&bgImgPosition);
+    (direction == "x") ? updater.AddResource("backgroundImagePositionX", resObj, std::move(updateFunc))
+                    : updater.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
 }
 
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
@@ -3770,12 +3779,14 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsBackgroundImagePosition", jsVal, checkList)) {
         SetBgImgPosition(DimensionUnit::PX, DimensionUnit::PX, 0.0, 0.0, bgImgPosition);
         ViewAbstractModel::GetInstance()->SetBackgroundImagePosition(bgImgPosition);
+        ViewAbstractModel::GetInstance()->ClearResObj("backgroundImagePosition");
         return;
     }
     if (jsVal->IsNumber()) {
         int32_t align = jsVal->ToNumber<int32_t>();
         bgImgPosition.SetIsAlign(true);
         SetBgImgPositionWithAlign(bgImgPosition, align);
+        ViewAbstractModel::GetInstance()->ClearResObj("backgroundImagePosition");
     } else {
         CalcDimension x;
         CalcDimension y;
@@ -9280,6 +9291,7 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
             const auto& extensionHandler = frameNode->GetExtensionHandler();
             if (extensionHandler) {
                 extensionHandler->InvalidateRender();
+                extensionHandler->ForegroundRender();
             } else {
                 frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
             }
@@ -9292,6 +9304,7 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
         const auto& extensionHandler = frameNode->GetExtensionHandler();
         if (extensionHandler) {
             extensionHandler->InvalidateRender();
+            extensionHandler->ForegroundRender();
         } else {
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
         }
@@ -9332,6 +9345,7 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
     drawModifier->drawBehindFunc = getDrawModifierFunc("drawBehind");
     drawModifier->drawContentFunc = getDrawModifierFunc("drawContent");
     drawModifier->drawFrontFunc = getDrawModifierFunc("drawFront");
+    drawModifier->drawForegroundFunc = getDrawModifierFunc("drawForeground");
 
     ViewAbstractModel::GetInstance()->SetDrawModifier(drawModifier);
     AddInvalidateFunc(jsDrawModifier, frameNode);
@@ -11748,8 +11762,15 @@ void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
 void SetBackgroundImageResizableUpdateFunc(
     ImageResizableSlice& sliceResult, const RefPtr<ResourceObject>& resObj, std::string direction)
 {
-    CHECK_NULL_VOID(resObj);
+    if (direction.empty()) {
+        return;
+    }
+    if (!resObj) {
+        sliceResult.RemoveResource("backgroundImageResizable");
+        return;
+    }
     auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, ImageResizableSlice& sliceResult) {
+        CHECK_NULL_VOID(resObj);
         CalcDimension sliceDimension;
         ResourceParseUtils::ParseResDimensionVp(resObj, sliceDimension);
         if (direction == "Left") {
@@ -11771,11 +11792,13 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
     ImageResizableSlice sliceResult;
     if (!infoObj->IsObject()) {
         ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
+        ViewAbstractModel::GetInstance()->ClearResObj("backgroundImageResizableSlice");
         return;
     }
     JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
     if (resizableObject->IsEmpty()) {
         ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
+        ViewAbstractModel::GetInstance()->ClearResObj("backgroundImageResizableSlice");
         return;
     }
     auto sliceValue = resizableObject->GetProperty("slice");
@@ -11785,14 +11808,13 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
     JSRef<JSObject> sliceObj = JSRef<JSObject>::Cast(sliceValue);
     if (sliceObj->IsEmpty()) {
         ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
+        ViewAbstractModel::GetInstance()->ClearResObj("backgroundImageResizableSlice");
         return;
     }
-    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjArray;
     for (uint32_t i = 0; i < SLICE_KEYS.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(SLICE_KEYS.at(i).c_str());
         CalcDimension sliceDimension;
         RefPtr<ResourceObject> resObj;
-        bgImageResizableResObjArray.push_back(resObj);
         if (!ParseJsDimensionVp(sliceSize, sliceDimension, resObj)) {
             continue;
         }
@@ -12068,7 +12090,8 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 
     // parse background options
     Alignment alignment = Alignment::CENTER;
-    NG::LayoutSafeAreaEdge ignoreLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    NG::LayoutSafeAreaEdge ignoreLayoutSafeAreaEdges =
+        (BackgroundType::COLOR == backgroundType) ? NG::LAYOUT_SAFE_AREA_EDGE_ALL : NG::LAYOUT_SAFE_AREA_EDGE_NONE;
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[1]);
         if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::ALIGN))) {
@@ -12079,12 +12102,8 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
         if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::IGNORES_LAYOUT_SAFE_AREA_EDGES))) {
             auto safeAreaEdgesArray =
                 object->GetProperty(static_cast<int32_t>(ArkUIIndex::IGNORES_LAYOUT_SAFE_AREA_EDGES));
-            ignoreLayoutSafeAreaEdges = ParseJsLayoutSafeAreaEdgeArray(safeAreaEdgesArray);
+            ignoreLayoutSafeAreaEdges = ParseJsLayoutSafeAreaEdgeArray(safeAreaEdgesArray, ignoreLayoutSafeAreaEdges);
         }
-    }
-
-    if (BackgroundType::COLOR == backgroundType && NG::LAYOUT_SAFE_AREA_EDGE_NONE == ignoreLayoutSafeAreaEdges) {
-        ignoreLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
     }
 
     // parameters parsed, set the properties parsed above
@@ -12131,11 +12150,11 @@ bool JSViewAbstract::ParseBackgroundBuilder(
     return true;
 }
 
-NG::LayoutSafeAreaEdge JSViewAbstract::ParseJsLayoutSafeAreaEdgeArray(const JSRef<JSArray>& jsSafeAreaEdges)
+NG::LayoutSafeAreaEdge JSViewAbstract::ParseJsLayoutSafeAreaEdgeArray(
+    const JSRef<JSArray>& jsSafeAreaEdges, NG::LayoutSafeAreaEdge defaultVal)
 {
-    NG::LayoutSafeAreaEdge edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
     if (!jsSafeAreaEdges->IsArray()) {
-        return edges;
+        return defaultVal;
     }
 
     static std::vector<uint32_t> layoutEdgeEnum {
@@ -12148,10 +12167,11 @@ NG::LayoutSafeAreaEdge JSViewAbstract::ParseJsLayoutSafeAreaEdgeArray(const JSRe
         NG::LAYOUT_SAFE_AREA_EDGE_ALL
     };
 
+    NG::LayoutSafeAreaEdge edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
     for (size_t i = 0; i < jsSafeAreaEdges->Length(); ++i) {
         if (!jsSafeAreaEdges->GetValueAt(i)->IsNumber() ||
             jsSafeAreaEdges->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
-            return false;
+            return defaultVal;
         }
         edges |= layoutEdgeEnum[jsSafeAreaEdges->GetValueAt(i)->ToNumber<uint32_t>()];
     }

@@ -1421,7 +1421,7 @@ bool ParseCalcDimension(const EcmaVM* vm,
 
 void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
     std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue,
-    std::vector<RefPtr<ResourceObject>>& bgImageResizableResObjArray)
+    std::vector<RefPtr<ResourceObject>>& bgImageResizableResObjs)
 {
     auto end = offset + count;
     auto argsNumber = runtimeCallInfo->GetArgsNumber();
@@ -1440,7 +1440,7 @@ void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_
         } else {
             optCalcDimension = defaultDimension;
         }
-        bgImageResizableResObjArray.push_back(resObj);
+        bgImageResizableResObjs.push_back(resObj);
         results.push_back(optCalcDimension);
     }
 }
@@ -3327,16 +3327,12 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageResizable(ArkUIRuntimeCal
 
     std::vector<ArkUIStringAndFloat> options;
     std::vector<std::optional<CalcDimension>> sliceDimensions;
-    std::vector<void*> bgImageResizableArray;
-    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjArray;
-    ParseResizableCalcDimensions(runtimeCallInfo, NUM_1, NUM_4, sliceDimensions, CalcDimension(0.0), bgImageResizableResObjArray);
-    for (unsigned int index = 0; index < NUM_4; index++) {
-        auto bgImageResizableRawPtr = AceType::RawPtr(bgImageResizableResObjArray[index]);
-        bgImageResizableArray.push_back(bgImageResizableRawPtr);
-    }
+    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjs;
+    ParseResizableCalcDimensions(
+        runtimeCallInfo, NUM_1, NUM_4, sliceDimensions, CalcDimension(0.0), bgImageResizableResObjs);
     PushDimensionsToVector(options, sliceDimensions);
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageResizable(nativeNode, options.data(),
-        static_cast<ArkUI_Int32>(options.size()), bgImageResizableArray);
+        static_cast<ArkUI_Int32>(options.size()), static_cast<void*>(&bgImageResizableResObjs));
     return panda::JSValueRef::Undefined(vm);
 }
 

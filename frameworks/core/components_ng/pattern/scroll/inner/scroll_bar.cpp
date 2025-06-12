@@ -271,7 +271,9 @@ void ScrollBar::SetRectTrickRegion(
     // Avoid crossing the top or bottom boundary.
     double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize) +
         NormalizeToPx(startReservedHeight_) + scrollBarMarginStart;
-    activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset;
+    activeMainOffset = !isReverse_ ? activeMainOffset
+                                   : barRegionSize_ - activeSize - activeMainOffset +
+                                         NormalizeToPx(startReservedHeight_) + NormalizeToPx(endReservedHeight_);
     bool canUseAnimation = NearZero(outBoundary_) && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
     double inactiveSize = 0.0;
     double inactiveMainOffset = 0.0;
@@ -521,6 +523,8 @@ void ScrollBar::CalcReservedHeight()
     float padding = 0.f;
     float startRadiusHeight = 0.f;
     float endRadiusHeight = 0.f;
+    auto lastStartReservedHeight = startReservedHeight_;
+    auto lastEndReservedHeight = endReservedHeight_;
     GetRadiusAndPadding(startRadius, endRadius, padding);
     if (std::isnan(startRadius)) {
         startRadius = 0.f;
@@ -543,6 +547,11 @@ void ScrollBar::CalcReservedHeight()
         endReservedHeight_ = Dimension(endRadiusHeight + (endRadius / barMargin), DimensionUnit::PX);
     }
     FlushBarWidth();
+
+    if (!NearEqual(lastStartReservedHeight, startReservedHeight_) ||
+        !NearEqual(lastEndReservedHeight, endReservedHeight_)) {
+        MarkNeedRender();
+    }
 }
 
 void ScrollBar::GetRadiusAndPadding(float& startRadius, float& endRadius, float& padding)

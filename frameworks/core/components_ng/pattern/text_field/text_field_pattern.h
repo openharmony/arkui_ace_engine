@@ -964,6 +964,7 @@ public:
     std::u16string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
     uint32_t GetMaxLines() const;
+    uint32_t GetMinLines() const;
     std::string GetInputFilter() const;
     std::string GetCopyOptionString() const;
     std::string GetInputStyleString() const;
@@ -1814,6 +1815,7 @@ private:
     void SetAccessibilityAction() override;
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityActionOverlayAndSelection();
+    void SetAccessibilityEditAction();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
@@ -1956,7 +1958,6 @@ private:
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
-    std::pair<std::string, std::string> GetTextDiffObscured(const std::string& latestContent);
     void FireOnWillAttachIME();
 
     RectF frameRect_;

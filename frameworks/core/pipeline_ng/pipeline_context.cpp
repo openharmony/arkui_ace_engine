@@ -706,7 +706,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
-    if (!onShow_) {
+    // the application is in the background and the dark and light colors are switched.
+    if (!onShow_ && backgroundColorModeUpdated_) {
+        backgroundColorModeUpdated_ = false;
         FlushMessages([window = window_]() {
             if (window) {
                 window->NotifySnapshotUpdate();
@@ -2163,7 +2165,7 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
     auto frameNode = DynamicCast<FrameNode>(uiNode);
-    attachedNodeSet_.erase(RawPtr(uiNode));
+    attachedNodeSet_.erase(WeakPtr(uiNode));
     CHECK_NULL_VOID(frameNode);
 
     RemoveStoredNode(frameNode->GetRestoreId());
@@ -3555,6 +3557,12 @@ void PipelineContext::FlushTouchEvents()
     }
 }
 
+
+void PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated)
+{
+    backgroundColorModeUpdated_ = backgroundColorModeUpdated;
+}
+
 void PipelineContext::ConsumeTouchEvents(
     std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints)
 {
@@ -4550,10 +4558,13 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
-    std::unordered_set<UINode*> nodeSet;
+    std::set<WeakPtr<UINode>> nodeSet;
     std::swap(nodeSet, attachedNodeSet_);
-    for (auto& node : nodeSet) {
-        node->DetachFromMainTree();
+    for (const auto& node : nodeSet) {
+        auto illegalNode = node.Upgrade();
+        if (illegalNode) {
+            illegalNode->DetachFromMainTree();
+        }
     }
     rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
@@ -6063,12 +6074,12 @@ bool PipelineContext::FlushModifierAnimation(uint64_t nanoTimestamp)
 
 void PipelineContext::RegisterAttachedNode(UINode* uiNode)
 {
-    attachedNodeSet_.emplace(uiNode);
+    attachedNodeSet_.emplace(WeakClaim(uiNode));
 }
 
 void PipelineContext::RemoveAttachedNode(UINode* uiNode)
 {
-    attachedNodeSet_.erase(uiNode);
+    attachedNodeSet_.erase(WeakClaim(uiNode));
 }
 
 ScopedLayout::ScopedLayout(PipelineContext* pipeline)

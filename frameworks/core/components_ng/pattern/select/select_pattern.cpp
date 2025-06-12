@@ -78,6 +78,8 @@ constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
 
+constexpr int32_t FIRST_NODE_INDEX = 0;
+
 static std::string ConvertControlSizeToString(ControlSize controlSize)
 {
     std::string result;
@@ -1304,13 +1306,13 @@ void SelectPattern::SetShowDefaultSelectedIcon(bool show)
     auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateShowDefaultSelectedIcon(show);
-    if (show) {
-        ResetOptionProps();
-    }
     for (size_t i = 0; i < options_.size(); ++i) {
         auto menuItemPattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(menuItemPattern);
         menuItemPattern->SetShowDefaultSelectedIcon(show);
+    }
+    if (show) {
+        ResetOptionProps();
     }
 }
 
@@ -1349,6 +1351,16 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
     if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
         newSelected->SetCheckMarkVisibleType(VisibleType::VISIBLE);
+        if (index != static_cast<int32_t>(GetOptions().size()) - 1) {
+            newSelected->UpdateNextNodeDivider(true);
+        }
+        if (index != FIRST_NODE_INDEX) {
+            auto newSelectedNode = newSelected->GetHost();
+            CHECK_NULL_VOID(newSelectedNode);
+            auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
+            CHECK_NULL_VOID(newSelectedPros);
+            newSelectedPros->UpdateNeedDivider(true);
+        }
         return;
     }
     newSelected->UpdateNextNodeDivider(false);

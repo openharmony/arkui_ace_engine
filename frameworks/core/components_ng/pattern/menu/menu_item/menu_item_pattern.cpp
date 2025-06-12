@@ -3235,7 +3235,7 @@ RefPtr<FrameNode> MenuItemPattern::CreateCheckMarkNode(const RefPtr<FrameNode>& 
     checkLayoutProperty->UpdateFontSize(selectTheme->GetCheckMarkFontSize());
     checkLayoutProperty->UpdateFontWeight(selectTheme->GetCheckMarkFontWeight());
 
-    checkLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    checkLayoutProperty->UpdateAlignment(Alignment::CENTER_RIGHT);
 
     checkMarkNode->MountToParent(parent, index);
     checkMarkNode->MarkModifyDone();
@@ -3377,9 +3377,9 @@ void MenuItemPattern::ApplySelectedThemeStyles()
     auto selectedColor = selectTheme->GetSelectedColor();
     auto selectedBorderColor = selectTheme->GetOptionSelectedBorderColor();
     auto selectedBorderWidth = selectTheme->GetOptionSelectedBorderWidth();
-    SetFontColor(selectedColorText);
     SetFontSize(selectedFontSizeText);
     if (!showDefaultSelectedIcon_) {
+        SetFontColor(selectedColorText);
         SetBgColor(selectedColor);
     }
     SetBorderColor(selectedBorderColor);
@@ -3402,6 +3402,8 @@ void MenuItemPattern::ApplyOptionThemeStyles()
     SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
     SetBorderColor(GetBorderColor());
     SetBorderWidth(GetBorderWidth());
-    SetBgColor(selectTheme->GetBackgroundColor());
+    if (!(IsSelectOption() && showDefaultSelectedIcon_ && !selectTheme->GetMenuBlendBgColor())) {
+        SetBgColor(selectTheme->GetBackgroundColor());
+    }
 }
 } // namespace OHOS::Ace::NG

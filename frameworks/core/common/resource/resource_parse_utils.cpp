@@ -173,7 +173,7 @@ std::string GetReplaceContentStr(int pos, const std::string& type,
     const std::vector<ResourceObjectParams> params, int32_t containCount)
 {
     auto index = pos + containCount;
-    if (index < 0 || index >= params.size()) {
+    if (index < 0 || (index >= static_cast<int32_t>(params.size()))) {
         return std::string();
     }
 
@@ -712,17 +712,17 @@ bool ResourceParseUtils::ParseResResource(const RefPtr<ResourceObject>& resObj, 
 
     auto resourceWrapper = CreateResourceWrapper();
     CHECK_NULL_RETURN(resourceWrapper, false);
-    if (type == static_cast<uint32_t>(ResourceType::STRING)) {
+    if (type == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resIdNum);
         return StringUtils::StringToCalcDimensionNG(value, result, false);
     }
-    if (type == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceWrapper->GetInt(resIdNum));
         StringUtils::StringToDimensionWithUnitNG(value, result);
         return true;
     }
 
-    if (type == static_cast<uint32_t>(ResourceType::FLOAT)) {
+    if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDimension(resIdNum);
         return true;
     }

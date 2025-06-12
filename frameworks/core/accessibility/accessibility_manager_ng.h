@@ -59,6 +59,15 @@ enum class HandleHoverRet : int32_t {
     IN_TIME_LIMIT,
 };
 
+class AccessibilityHoverStateManager {
+public:
+    AccessibilityHoverState& GetHoverState(int64_t accessibilityId);
+    void ResetHoverState(AccessibilityHoverState& hoverState);
+
+private:
+    std::unordered_map<int64_t, AccessibilityHoverState> hoverStateMap_;
+};
+
 class AccessibilityManagerNG final: public AceType {
     DECLARE_ACE_TYPE(AccessibilityManagerNG, AceType);
 
@@ -100,14 +109,15 @@ private:
         const HandleHoverEventParam& param,
         const TouchEvent& event);
 
-    void ResetHoverState();
     bool IgnoreCurrentHoveringNode(const RefPtr<FrameNode> &node);
     static bool NotifyHoverEventToNodeSession(
         const RefPtr<FrameNode>& node,
         const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
         SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time);
 
-    bool IsEventTypeChangeDirectHandleHover(AccessibilityHoverEventType eventType);
+    bool IsEventTypeChangeDirectHandleHover(
+        AccessibilityHoverEventType eventType,
+        AccessibilityHoverEventType prevEventType);
     bool IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root);
     void HandlePipelineAccessibilityHoverEnter(
         const RefPtr<NG::FrameNode>& root,
@@ -122,7 +132,7 @@ private:
     bool ExecuteChildNodeHoverTransparentCallback(const RefPtr<FrameNode>& root,  const PointF& point,
         const TouchEvent& event);
 
-    AccessibilityHoverState hoverState_;
+    AccessibilityHoverStateManager hoverStateManager_;
 };
 } // namespace NG
 } // namespace OHOS::Ace

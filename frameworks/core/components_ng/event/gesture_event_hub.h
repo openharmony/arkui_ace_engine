@@ -519,6 +519,7 @@ private:
     bool monopolizeEvents_ = false;
     float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
     bool isDragNewFwk_ = false;
+    bool isRestoreDrag_ = false;
 };
 
 } // namespace OHOS::Ace::NG

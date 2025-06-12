@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,15 +72,16 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
         }
         auto builderObject = paramObject->GetProperty("indicatorBuilder");
         if (builderObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderObject));
-            CHECK_NULL_VOID(builderFunc);
+            auto vm = info.GetVm();
+            auto jsFunc = JSRef<JSFunc>::Cast(builderObject);
+            auto func = jsFunc->GetLocalHandle();
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto callbackFunc = [execCtx = info.GetExecutionContext(),
-                func = std::move(builderFunc), node = targetNode]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto callbackFunc = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
                 ACE_SCORING_EVENT("CheckBox.builder");
                 PipelineContext::SetCallBackNode(node);
-                func->Execute();
+                func->Call(vm, func.ToLocal(), nullptr, 0);
             };
             customBuilderFunc = std::move(callbackFunc);
         }
@@ -96,7 +97,6 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("create", &JSCheckbox::Create);
     JSClass<JSCheckbox>::StaticMethod("select", &JSCheckbox::SetSelect);
     JSClass<JSCheckbox>::StaticMethod("shape", &JSCheckbox::SetCheckboxStyle);
-    JSClass<JSCheckbox>::StaticMethod("onChange", &JSCheckbox::SetOnChange);
     JSClass<JSCheckbox>::StaticMethod("selectedColor", &JSCheckbox::SelectedColor);
     JSClass<JSCheckbox>::StaticMethod("unselectedColor", &JSCheckbox::UnSelectedColor);
     JSClass<JSCheckbox>::StaticMethod("mark", &JSCheckbox::Mark);
@@ -117,14 +117,17 @@ void ParseSelectObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEve
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = info.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool param) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+    auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool param) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("CheckBox.ChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
-        func->ExecuteJS(1, &newJSVal);
+        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, param) };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     CheckBoxModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
@@ -154,24 +157,6 @@ void JSCheckbox::SetSelect(const JSCallbackInfo& info)
     if (changeEventVal->IsFunction()) {
         ParseSelectObject(info, changeEventVal);
     }
-}
-
-void JSCheckbox::SetOnChange(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool select) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("CheckBox.onChange");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(select));
-        func->ExecuteJS(1, &newJSVal);
-    };
-    CheckBoxModel::GetInstance()->SetOnChange(onChange);
-    args.ReturnSelf();
 }
 
 void JSCheckbox::JsResponseRegion(const JSCallbackInfo& info)

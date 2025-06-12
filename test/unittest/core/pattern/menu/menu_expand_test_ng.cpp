@@ -910,4 +910,26 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg021, TestSize.Level1)
     menuPattern->DuplicateMenuNode(menuNode, menuParam);
     EXPECT_TRUE(menuLayoutProperty->GetBorderRadius().has_value());
 }
+
+/**
+ * @tc.name: MenuExpandTestNg022
+ * @tc.desc: Test LayoutOtherDeviceLeftPreviewRightMenuLessThan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg022, TestSize.Level1)
+{
+    MenuLayoutAlgorithm menuLayoutAlgorithm;
+    RefPtr<GeometryNode> previewGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<GeometryNode> menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    SizeF totalSize(TEN_FLOAT, TEN_FLOAT);
+    menuLayoutAlgorithm.placement_ = Placement::LEFT_BOTTOM;
+    menuLayoutAlgorithm.LayoutOtherDeviceLeftPreviewRightMenuLessThan(previewGeometryNode, menuGeometryNode, totalSize);
+    EXPECT_EQ(previewGeometryNode->GetMarginFrameOffset().x_, ZERO_FLOAT);
+    menuLayoutAlgorithm.placement_ = Placement::BOTTOM;
+    menuLayoutAlgorithm.LayoutOtherDeviceLeftPreviewRightMenuLessThan(previewGeometryNode, menuGeometryNode, totalSize);
+    EXPECT_EQ(previewGeometryNode->GetMarginFrameOffset().x_, ZERO_FLOAT);
+    menuLayoutAlgorithm.placement_ = Placement::RIGHT_BOTTOM;
+    menuLayoutAlgorithm.LayoutOtherDeviceLeftPreviewRightMenuLessThan(previewGeometryNode, menuGeometryNode, totalSize);
+    EXPECT_EQ(previewGeometryNode->GetMarginFrameOffset().y_, ZERO_FLOAT);
+}
 } // namespace OHOS::Ace::NG

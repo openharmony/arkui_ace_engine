@@ -3329,7 +3329,9 @@ void AceContainer::UpdateColorMode(uint32_t colorMode)
 
 void AceContainer::CheckForceVsync(const ParsedConfig& parsedConfig)
 {
+    // the application is in the background and the dark and light colors are switched.
     if (pipelineContext_ && !pipelineContext_->GetOnShow() && !parsedConfig.colorMode.empty()) {
+        pipelineContext_->SetBackgroundColorModeUpdated(true);
         auto window = pipelineContext_->GetWindow();
         if (window) {
             window->SetForceVsyncRequests(true);

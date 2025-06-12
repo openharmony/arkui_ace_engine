@@ -2580,6 +2580,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     auto navigationTransition = ExecuteTransition(preTopNavDestination, newTopNavDestination, isPopPage);
     if (!navigationTransition.isValid) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom transition value is invalid, do default animation");
+        RemoveProxyById(proxyId);
         return false;
     }
     ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy, navigationTransition);
@@ -4514,8 +4515,8 @@ void NavigationPattern::OnFinishOneTransitionAnimation()
 }
 
 void NavigationPattern::GetAllNodes(
-    std::vector<RefPtr<NavDestinationNodeBase>>& invisibleNodes,
-    std::vector<RefPtr<NavDestinationNodeBase>>& visibleNodes)
+    std::vector<WeakPtr<NavDestinationNodeBase>>& invisibleNodes,
+    std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationNode);
@@ -4553,12 +4554,11 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     }
 
     ShowOrRestoreSystemBarIfNeeded();
-
-    std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
-    std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
+    std::vector<WeakPtr<NavDestinationNodeBase>> invisibleNodes;
+    std::vector<WeakPtr<NavDestinationNodeBase>> visibleNodes;
     GetAllNodes(invisibleNodes, visibleNodes);
-
-    for (auto& node : invisibleNodes) {
+    for (auto& weakNode : invisibleNodes) {
+        auto node = weakNode.Upgrade();
         CHECK_NULL_CONTINUE(node);
         node->RestoreRenderContext();
     }
@@ -4567,8 +4567,9 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
         ClearPageAndNavigationConfig();
         return;
     }
-
-    auto context = visibleNodes[0]->GetContext();
+    auto firstVisibleNode = visibleNodes[0].Upgrade();
+    CHECK_NULL_VOID(firstVisibleNode);
+    auto context = firstVisibleNode->GetContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -4576,10 +4577,11 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     CHECK_NULL_VOID(navigationMgr);
     auto windowMgr = context->GetWindowManager();
     CHECK_NULL_VOID(windowMgr);
-    auto targetOrientation = visibleNodes[0]->GetOrientation();
+    auto targetOrientation = firstVisibleNode->GetOrientation();
     auto restoreTask = [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this), animationAborted]() {
         ACE_SCOPED_TRACE("NavigationPattern restoreTask");
-        for (auto& node : nodes) {
+        for (auto& weakNode : nodes) {
+            auto node = weakNode.Upgrade();
             CHECK_NULL_CONTINUE(node);
             node->RestoreRenderContext();
         }
@@ -4611,14 +4613,16 @@ void NavigationPattern::UpdatePageLevelConfigForSizeChanged()
             return;
         }
         // full page -> partial page
-        std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
-        std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
+        std::vector<WeakPtr<NavDestinationNodeBase>> invisibleNodes;
+        std::vector<WeakPtr<NavDestinationNodeBase>> visibleNodes;
         GetAllNodes(invisibleNodes, visibleNodes);
-        for (auto& node: invisibleNodes) {
+        for (auto& weakNode : invisibleNodes) {
+            auto node = weakNode.Upgrade();
             CHECK_NULL_CONTINUE(node);
             node->RestoreRenderContext();
         }
-        for (auto& node: visibleNodes) {
+        for (auto& weakNode : visibleNodes) {
+            auto node = weakNode.Upgrade();
             CHECK_NULL_CONTINUE(node);
             node->RestoreRenderContext();
             node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

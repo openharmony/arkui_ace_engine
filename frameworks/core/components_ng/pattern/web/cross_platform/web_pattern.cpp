@@ -1337,6 +1337,11 @@ void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
     // cross platform is not support now;
 }
 
+void WebPattern::OnCssDisplayChangeEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     // cross platform is not support now;
@@ -1440,6 +1445,11 @@ void WebPattern::OnEnableDataDetectorUpdate(bool enable)
 }
 
 void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::SetDefaultBackgroundColor()
 {
     // cross platform is not support now;
 }

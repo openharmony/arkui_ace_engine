@@ -79,6 +79,8 @@ namespace OHOS::NWeb {
     class NWebMessage;
     class NWebKeyEvent;
     class NWebSelectMenuBound;
+    class NWebUpdateScrollUpdateData;
+    class NWebNestedScrollUpdateDataImpl;
     enum class CursorType;
 }
 namespace OHOS::Ace::NG {
@@ -118,7 +120,6 @@ struct PipInfo {
 };
 
 using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
-
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
                    public Magnifier,
@@ -511,6 +512,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CssDisplayChangeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BypassVsyncCondition, WebBypassVsyncCondition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
@@ -653,6 +655,7 @@ public:
         return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeById(int64_t accessibilityId);
     std::shared_ptr<NG::TransitionalNodeInfo> GetFocusedAccessibilityNode(int64_t accessibilityId,
         bool isAccessibilityFocus);
@@ -822,6 +825,7 @@ public:
     void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
     void SendPipEvent(int delegateId, int childId, int frameRoutingId, int event);
+    void SetDefaultBackgroundColor();
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -919,6 +923,7 @@ private:
     void OnMetaViewportUpdate(bool value);
     void OnNativeEmbedModeEnabledUpdate(bool value);
     void OnIntrinsicSizeEnabledUpdate(bool value);
+    void OnCssDisplayChangeEnabledUpdate(bool value);
     void OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
@@ -1316,6 +1321,7 @@ private:
     int32_t rotationEndCallbackId_ = 0;
 
     WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
+    bool needSetDefaultBackgroundColor_ = false;
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;

@@ -574,6 +574,7 @@ const ArkUIGridModifier* GetGridModifier()
         .resetOnGridItemDragLeave = ResetOnGridItemDragLeave,
         .setOnGridItemDrop = SetOnGridItemDrop,
         .resetOnGridItemDrop = ResetOnGridItemDrop,
+        .createWithResourceObjFriction = CreateWithResourceObjGridFriction,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -787,6 +788,15 @@ void ResetOnGridItemDrop(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetOnItemDrop(frameNode, nullptr);
+}
+
+void CreateWithResourceObjGridFriction(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    GridModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

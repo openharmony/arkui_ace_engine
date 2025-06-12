@@ -559,7 +559,6 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate007, TestSize.Level1)
     // Make detentSize greater than 0
     sheetPattern->sheetDetentHeight_.emplace_back(1800.0f);
     // Make height - currentOffset_ less than maxDetentSize
-    sheetPattern->height_ = 1000;
     sheetPattern->sheetHeightUp_ = 0;
     sheetPattern->bottomOffsetY_ = 0;
     // Make mainDelta less than 0
@@ -569,6 +568,7 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate007, TestSize.Level1)
     sheetPattern->currentOffset_ = 0;
     // Make offset greater than pageHeight - sheetMaxHeight_
     sheetPattern->sheetMaxHeight_ = 1800.0f;
+    sheetPattern->height_ = 2000.0f;
     // Make isNeedChangeScrollHeight true
     sheetPattern->scrollSizeMode_ = ScrollSizeMode::CONTINUOUS;
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
@@ -578,7 +578,7 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate007, TestSize.Level1)
     ASSERT_TRUE(sheetPattern->sheetDetentHeight_.size() > 0);
     auto height = sheetPattern->height_ + sheetPattern->sheetHeightUp_ - sheetPattern->bottomOffsetY_;
     auto maxDetentSize = sheetPattern->sheetDetentHeight_[sheetPattern->sheetDetentHeight_.size() - 1];
-    EXPECT_FALSE(GreatNotEqual((height - sheetPattern->currentOffset_), maxDetentSize));
+    EXPECT_TRUE(GreatNotEqual((height - sheetPattern->currentOffset_), maxDetentSize));
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     EXPECT_TRUE(LessNotEqual(mainDelta, 0));
     // Ensure IsSheetBottomStyle returns true

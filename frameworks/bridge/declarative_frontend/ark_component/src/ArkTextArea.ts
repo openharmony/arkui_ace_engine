@@ -601,7 +601,13 @@ class TextAreaCaretStyleModifier extends ModifierWithKey<CaretStyle> {
     }
   }
   checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
+    if (isObject(this.stageValue) && isObject(this.value)) {
+      return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+        !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+    }
+    else {
+      return true;
+    }
   }
 }
 

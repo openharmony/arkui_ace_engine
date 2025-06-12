@@ -98,6 +98,7 @@ public:
     DrawModifierFunc drawBehindFunc;
     DrawModifierFunc drawContentFunc;
     DrawModifierFunc drawFrontFunc;
+    DrawModifierFunc drawForegroundFunc;
 };
 
 template<typename T>
