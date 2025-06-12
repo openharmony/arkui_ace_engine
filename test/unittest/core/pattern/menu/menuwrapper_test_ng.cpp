@@ -745,6 +745,10 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg014, TestSize.Level1)
     menu->GetGeometryNode()->SetFrameSize(SizeF(0, 0));
     wrapperPattern->HandleInteraction(info);
     EXPECT_EQ(wrapperPattern->GetLastTouchItem(), nullptr);
+
+    wrapperPattern->isClearLastMenuItem_ = false;
+    wrapperPattern->HandleInteraction(info);
+    EXPECT_EQ(wrapperPattern->GetLastTouchItem(), nullptr);
 }
 
 /**
@@ -2083,6 +2087,8 @@ HWTEST_F(MenuWrapperTestNg, HandleInteraction001, TestSize.Level1)
     wrapperPattern->isClearLastMenuItem_ = false;
     wrapperPattern->HandleInteraction(info);
     EXPECT_EQ(wrapperPattern->lastTouchItem_, wrapperPattern->currentTouchItem_);
+
+    EXPECT_EQ(wrapperPattern->isClearLastMenuItem_, true);
 
     wrapperPattern->currentTouchItem_ = menuItemNode2;
     wrapperPattern->HandleInteraction(info);

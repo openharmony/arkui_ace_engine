@@ -5953,7 +5953,8 @@ void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
     NG::OnMenuItemClickCallback onMenuItemClick;
     NG::OnPrepareMenuCallback onPrepareMenuCallback;
     JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
-    WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    WebModel::GetInstance()->SetEditMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)

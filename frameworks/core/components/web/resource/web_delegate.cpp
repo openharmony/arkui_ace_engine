@@ -6685,12 +6685,40 @@ bool WebDelegate::GetPendingSizeStatus()
     return false;
 }
 
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter)
+void WebDelegate::HandleAccessibilityHoverEvent(
+    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time)
 {
     ACE_DCHECK(nweb_ != nullptr);
-    if (nweb_) {
-        nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
+    CHECK_NULL_VOID(nweb_);
+    int32_t x = point.GetX();
+    int32_t y = point.GetY();
+    std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
+    for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
+        CHECK_NULL_CONTINUE(dataInfo);
+        auto embedInfo = dataInfo->GetNativeEmbedInfo();
+        CHECK_NULL_CONTINUE(embedInfo);
+        int embedX = embedInfo->GetX();
+        int embedY = embedInfo->GetY();
+        int embedWidth = embedInfo->GetWidth();
+        int embedHeight = embedInfo->GetHeight();
+        if (x >= embedX && y >= embedY && x <= embedX + embedWidth && y <= embedY + embedHeight) {
+            NG::PointF mutablePoint = point;
+            mutablePoint.SetX(x - embedX);
+            mutablePoint.SetY(y - embedY);
+            NG::HandleHoverEventParam param = { mutablePoint, source, eventType, time };
+            auto context = context_.Upgrade();
+            CHECK_NULL_VOID(context);
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+            CHECK_NULL_VOID(pipeline);
+            auto accessibilityManagerNG = pipeline->GetAccessibilityManagerNG();
+            CHECK_NULL_VOID(accessibilityManagerNG);
+            accessibilityManagerNG->HandleAccessibilityHoverEventBySurfaceId(dataInfo->GetSurfaceId(), param);
+            return;
+        }
     }
+    bool isHoverEnter = (eventType != NG::AccessibilityHoverEventType::EXIT);
+    nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
 }
 
 void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
@@ -7226,6 +7254,7 @@ void WebDelegate::OnNativeEmbedAllDestory()
     if (!isEmbedModeEnabled_) {
         return;
     }
+    std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
     auto iter = embedDataInfo_.begin();
     for (; iter != embedDataInfo_.end(); iter++) {
         EmbedInfo info;
@@ -7252,6 +7281,47 @@ void WebDelegate::OnNativeEmbedAllDestory()
     embedDataInfo_.clear();
 }
 
+std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
+{
+    std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
+    for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
+        CHECK_NULL_CONTINUE(dataInfo);
+        auto embedInfo = dataInfo->GetNativeEmbedInfo();
+        if (embedInfo && embedInfo->GetId() == htmlElementId) {
+            std::string surfaceId = dataInfo->GetSurfaceId();
+            return surfaceId;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "GetSurfaceIdByHtmlElementId surfaceId is empty");
+    return "";
+}
+
+std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceId)
+{
+    std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
+    for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
+        CHECK_NULL_CONTINUE(dataInfo);
+        std::string surfaceIdInData = dataInfo->GetSurfaceId();
+        if (surfaceIdInData == surfaceId) {
+            auto embedInfo = dataInfo->GetNativeEmbedInfo();
+            CHECK_NULL_RETURN(embedInfo, "");
+            return embedInfo->GetId();
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "GetHtmlElementIdBySurfaceId html element id is empty");
+    return "";
+}
+
+int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
+{
+    CHECK_NULL_RETURN(nweb_, -1);
+    std::string htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
+    int64_t webAccessibilityId = nweb_->GetWebAccessibilityIdByHtmlElementId(htmlElementId);
+    return webAccessibilityId;
+}
+
 void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo)
 {
     if (!isEmbedModeEnabled_) {
@@ -7266,18 +7336,25 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         embedId = dataInfo->GetEmbedId();
         surfaceId = dataInfo->GetSurfaceId();
         status = static_cast<OHOS::Ace::NativeEmbedStatus>(dataInfo->GetStatus());
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto accessibilityManager = context->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
 
         auto embedInfo = dataInfo->GetNativeEmbedInfo();
         if (embedInfo) {
-            info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
-                embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
-                embedInfo->GetHeight(), embedInfo->GetX(), embedInfo->GetY(),
-                embedInfo->GetParams()};
+            info = { embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(), embedInfo->GetUrl(),
+                embedInfo->GetTag(), embedInfo->GetWidth(), embedInfo->GetHeight(), embedInfo->GetX(),
+                embedInfo->GetY(), embedInfo->GetParams() };
         }
 
         if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE) {
+            accessibilityManager->SetWebPatternBySurfaceId(surfaceId, webPattern_);
+            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
             embedDataInfo_.insert_or_assign(embedId, dataInfo);
         } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
+            accessibilityManager->RemoveWebPatternBySurfaceId(surfaceId);
+            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
             auto iter = embedDataInfo_.find(embedId);
             if (iter != embedDataInfo_.end()) {
                 embedDataInfo_.erase(iter);
@@ -7842,6 +7919,7 @@ std::string WebDelegate::GetSelectInfo() const
 
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {
+    std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
     auto iter = embedDataInfo_.find(embedId);
     if (iter != embedDataInfo_.end()) {
         std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;

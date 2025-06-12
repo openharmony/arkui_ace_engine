@@ -4391,9 +4391,8 @@ void  WebPattern::OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMen
     }
 }
 
-void WebPattern::UpdateEditMenuOptions(
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     onCreateMenuCallback_ = std::move(onCreateMenuCallback);
     onMenuItemClick_ = [weak = AceType::WeakClaim(this), action = std::move(onMenuItemClick)] (
@@ -4409,6 +4408,9 @@ void WebPattern::UpdateEditMenuOptions(
         }
         return result;
     };
+    if (onPrepareMenuCallback) {
+        onPrepareMenuCallback_ = std::move(onPrepareMenuCallback);
+    }
 }
 
 void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
@@ -7365,10 +7367,23 @@ void WebPattern::DestroyAnalyzerOverlay()
     awaitingOnTextSelected_ = false;
 }
 
-void WebPattern::OnAccessibilityHoverEvent(const PointF& point, bool isHoverEnter)
+void WebPattern::OnAccessibilityHoverEvent(
+    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time)
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->HandleAccessibilityHoverEvent(point.GetX(), point.GetY(), isHoverEnter);
+    delegate_->HandleAccessibilityHoverEvent(point, source, eventType, time);
+}
+
+std::string WebPattern::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
+{
+    CHECK_NULL_RETURN(delegate_, "");
+    return delegate_->GetSurfaceIdByHtmlElementId(htmlElementId);
+}
+
+int64_t WebPattern::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
+{
+    CHECK_NULL_RETURN(delegate_, -1);
+    return delegate_->GetWebAccessibilityIdBySurfaceId(surfaceId);
 }
 
 void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)

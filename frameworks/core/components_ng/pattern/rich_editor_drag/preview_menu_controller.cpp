@@ -50,7 +50,7 @@ constexpr Dimension MENU_WIDTH = 224.0_vp;
 constexpr Dimension AVATAR_SIZE = 40.0_vp;
 constexpr Dimension PADDING_SIZE = 12.0_vp;
 constexpr Dimension MARGIN_SIZE = 16.0_vp;
-constexpr Dimension PREVIEW_MIN_HEIGHT = 60.0_vp;
+constexpr Dimension PREVIEW_MIN_HEIGHT = 64.0_vp;
 constexpr Dimension FAILED_TEXT_LINE_SPACING = 8.0_vp;
 constexpr float MAX_HEIGHT_PROPORTIONS = 0.65;
 } // namespace
@@ -227,7 +227,7 @@ RefPtr<FrameNode> PreviewMenuController::CreateContactNode(
     auto context = frameNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto padding = CalcLength(PADDING_SIZE);
-    flexLayoutProperty->UpdatePadding({ padding, padding, padding, padding });
+    flexLayoutProperty->UpdatePadding({ padding, padding, std::nullopt, std::nullopt });
     flexLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
     flexLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     auto windowRect = context->GetDisplayWindowRectInfo();
@@ -278,6 +278,7 @@ void PreviewMenuController::UpdateNonLinkNodeProperty(const RefPtr<ImageLayoutPr
     imageSourceInfo.SetSrc(iconPath);
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     auto endMargin = CalcLength(MARGIN_SIZE);
+    imageLayoutProperty->UpdateFlexShrink(0);
     imageLayoutProperty->UpdateMargin(
         { std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, endMargin });
 
