@@ -615,15 +615,13 @@ private:
     void ReportOnItemListEvent(const std::string& event);
     void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
-    bool ScrollToLastFocusIndex(KeyCode keyCode);
+    bool ScrollToLastFocusIndex(const KeyEvent& event);
     bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
     bool IsInViewport(int32_t index) const;
     void FireFocus();
     void FireFocusInListItemGroup();
-    void ProcessFocusEvent(const KeyEvent& event, bool indexChanged);
+    void ProcessFocusEvent(bool indexChanged);
     void RequestFocusForItem();
-    bool needTriggerFocus_ = false;
-    bool triggerFocus_ = false;
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
     float prevStartOffset_ = 0.f;
