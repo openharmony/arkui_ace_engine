@@ -13,21 +13,40 @@
  * limitations under the License.
  */
 
-import { __context, StateManager } from '@koalaui/runtime';
-import { ArkStructBase } from '../ArkStructBase';
-import { ArkCommonMethodComponent } from './common';
-import { UIContext } from '@ohos/arkui/UIContext';
-import { ExtendableComponent } from './extendableComponent';
-import { ContextRecord } from 'arkui/handwritten/UIContextImpl';
+import { __context, StateManager } from "@koalaui/runtime";
+import { int32 } from "@koalaui/common"
+import { UIContext } from "@ohos/arkui/UIContext"
+import { ContextRecord } from "arkui/handwritten/UIContextImpl";
+import { ArkStructBase } from "../ArkStructBase"
+import { ExtendableComponent, IExtendableComponent } from "./extendableComponent";
+import { GeometryInfo, Layoutable, Measurable, SizeResult, Theme } from "./common"
+import { ConstraintSizeOptions } from "./units"
 
+export interface PageLifeCycle {
+    onPageShow(): void {}
+    onPageHide(): void {}
+    onBackPress(): boolean { return false }
+    pageTransition(): void {}
+    onNewParam(param: object | undefined | null): void {}
+}
 
-class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
-    ArkStructBase<CustomDelegate<T, T_Options>, T_Options> {
-    private instance: CustomComponent<T, T_Options>;
+export interface LayoutCallback {
+    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {}
+    onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
+        return {width: 0, height: 0} as SizeResult
+    }
+}
 
-    constructor(instance: CustomComponent<T, T_Options>) {
+class CustomDelegate<T extends ExtendableComponent, T_Options> extends
+    ArkStructBase<CustomDelegate<T, T_Options>, T_Options> implements IExtendableComponent{
+    private uiContext: UIContext | undefined;
+    private instance: ExtendableComponent;
+
+    constructor(uiContext: UIContext | undefined, instance: ExtendableComponent) {
         super();
+        this.uiContext = uiContext;
         this.instance = instance;
+        this.instance.setDelegate(this);
     }
 
     aboutToAppear(): void {
@@ -36,48 +55,107 @@ class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
     aboutToDisappear(): void {
         this.instance.aboutToDisappear();
     }
-
     onDidBuild(): void {
         this.instance.onDidBuild();
     }
-    onPageShow(): void {
-        this.instance.onPageShow();
-    }
-
-    onPageHide(): void {
-        this.instance.onPageHide();
-    }
-
-    onBackPress(): boolean {
-        return this.instance.onBackPress();
-    }
-
-    aboutToRecycle(): void {
-        return this.instance.aboutToRecycle()
-    }
-
-    aboutToReuse(params: Record<string, Object>): void {
-        this.instance.aboutToReuse(params)
-    }
-    __toRecord(param: Object): Record<string, Object> {
-        return this.instance.__toRecord(param)
-    }
-    getUniquedId(): number {
-        return -1;
-    }
-
     /** @memo */
-    __build(
-        /** @memo */
-        attributes: undefined | ((instance: ArkCommonMethodComponent) => void),
-        /** @memo */
-        content?: () => void,
-        initializers?: T_Options
-    ): void {
+    build(): void {
         const current = ExtendableComponent.current;
-        ExtendableComponent.current = this.instance as Object;
-        this.instance._build(undefined, content, initializers);
+        ExtendableComponent.current = this.instance as object;
+        this.instance.build();
         ExtendableComponent.current = current;
+    }
+
+    onPageShow(): void {
+        if (this.instance instanceof PageLifeCycle) {
+            const page = this.instance as PageLifeCycle;
+            page.onPageShow();
+        } else {
+            throw new Error("not an entry custom component");
+        }
+    }
+    onPageHide(): void {
+        if (this.instance instanceof PageLifeCycle) {
+            const page = this.instance as PageLifeCycle;
+            page.onPageHide();
+        } else {
+            throw new Error("not an entry custom component");
+        }
+    }
+    onBackPress(): boolean {
+        if (this.instance instanceof PageLifeCycle) {
+            const page = this.instance as PageLifeCycle;
+            return page.onBackPress();
+        } else {
+            throw new Error("not an entry custom component");
+        }
+    }
+    pageTransition(): void {
+        if (this.instance instanceof PageLifeCycle) {
+            const page = this.instance as PageLifeCycle;
+            page.pageTransition();
+        } else {
+            // TODO: Avoid running problem
+            // throw new Error("not an entry custom component");
+        }
+    }
+    onNewParam(param: object | undefined | null): void {
+        if (this.instance instanceof PageLifeCycle) {
+            const page = this.instance as PageLifeCycle;
+            page.onNewParam(param);
+        } else {
+            throw new Error("not an entry custom component");
+        }
+    }
+
+    aboutToReuse(initializers?: T_Options): void {
+        if (this.instance instanceof ReusableLifeCycle) {
+            const reusable = this.instance as ReusableLifeCycle;
+            if (initializers === undefined) {
+                reusable.aboutToReuse({});
+            } else {
+                const component = this.instance as BaseCustomComponent<T_Options>;
+                const data: T_Options = initializers as T_Options;
+                const params: Record<string, object> = component.__toRecord(data! as object);
+                reusable.aboutToReuse(params);
+            }
+        } else if (this.instance instanceof ReusableV2LifeCycle) {
+            const reusable = this.instance as ReusableV2LifeCycle;
+            reusable.aboutToReuse();
+        } else {
+            throw new Error("not an custom component");
+        }
+    }
+    aboutToRecycle(): void {
+        if (this.instance instanceof BaseCustomComponent<T_Options>) {
+            const component = this.instance as BaseCustomComponent<T_Options>;
+            component.aboutToRecycle()
+        } else {
+            throw new Error("not an custom component");
+        }
+    }
+
+    // Custom layout
+    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
+        if (this.instance instanceof LayoutCallback) {
+            const layout = this.instance as LayoutCallback;
+            layout.onPlaceChildren(selfLayoutInfo, children, constraint);
+        } else {
+            throw new Error("not a custom layout component");
+        }
+    }
+    onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
+        if (this.instance instanceof LayoutCallback) {
+            const layout = this.instance as LayoutCallback;
+            return layout.onMeasureSize(selfLayoutInfo, children, constraint);
+        } else {
+            throw new Error("not a custom layout component");
+        }
+    }
+
+    // Theme
+    onWillApplyTheme(theme: Theme): void {
+        // TODO: this.instance.onWillApplyTheme(theme);
     }
 
     protected __initializeStruct(
@@ -85,38 +163,46 @@ class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
         content?: () => void,
         initializers?: T_Options
     ): void {
-        this.instance.__initializeStruct(initializers, content);
+        if (this.instance instanceof BaseCustomComponent<T_Options>) {
+            const component = this.instance as BaseCustomComponent<T_Options>;
+            component.__initializeStruct(initializers, content);
+        } else {
+            throw new Error("not an custom component");
+        }
     }
 
     /** @memo */
     protected __updateStruct(
         initializers?: T_Options
     ): void {
-        this.instance.__updateStruct(initializers);
+        if (this.instance instanceof BaseCustomComponent<T_Options>) {
+            const component = this.instance as BaseCustomComponent<T_Options>;
+            component.__updateStruct(initializers);
+        } else {
+            throw new Error("not an custom component");
+        }
+    }
+
+    getUniqueId(): int32 {
+        const peer = this.getPeer();
+        return peer ? peer.getId() : -1;
+    }
+
+    getUIContext(): UIContext {
+        return this.uiContext!;
     }
 }
 
-export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T_Options> extends ExtendableComponent {
-    private uiContext: UIContext | undefined = undefined
-    constructor() {
-        super();
-    }
-    /** @memo */
-    static _instantiateImpl<S extends CustomComponent<S, S_Options>, S_Options>(
-        /** @memo */
-        style: ((instance: S) => void) | undefined,
-        factory: () => S,
-        initializers?: S_Options,
-        reuseKey?: string,
-        /** @memo */
-        content?: () => void
-    ): void {
-        const context: StateManager = __context() as StateManager;
-        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
-        let instance: S = factory();
-        instance.uiContext = data?.uiContext;
-        CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(instance), content, initializers, reuseKey);
-    }
+function createInstance<T extends BaseCustomComponent<T_Options>, T_Options>(
+    uiContext: UIContext | undefined,
+    factory: () => T,
+    initializers?: T_Options
+): CustomDelegate<T, T_Options> {
+    return new CustomDelegate<T, T_Options>(uiContext, factory());
+}
+
+export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent {
+    aboutToRecycle(): void {}
 
     __initializeStruct(
         initializers?: T_Options,
@@ -124,32 +210,60 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         content?: () => void
     ): void {}
 
+    /** @memo */
     __updateStruct(
         initializers?: T_Options
     ): void {}
 
-    // Life cycle for custom component
-    aboutToAppear(): void {}
-    aboutToDisappear(): void {}
-    onDidBuild(): void {}
+    __toRecord(param: object): Record<string, object> { return {} }
+}
 
-    onPageShow(): void {}
-    onPageHide(): void {}
-    onBackPress(): boolean { return false; }
-    getUIContext(): UIContext { return this.uiContext!; }
+interface ReusableLifeCycle {
+    aboutToReuse(params: Record<string, object>): void;
+}
 
-    aboutToReuse(param: Record<string, Object>): void {}
-    aboutToRecycle(): void {}
-    __toRecord(param: Object): Record<string, Object> { return {} }
-
-    build(): void {};
-
+export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableLifeCycle {
     /** @memo */
-    _build(
+    static _instantiateImpl(
         /** @memo */
-        style: ((instance: T) => T) | undefined,
+        style: ((instance: T) => void) | undefined,
+        factory: () => T,
+        initializers?: T_Options,
+        reuseKey?: string,
         /** @memo */
-        content: (()=> void) | undefined,
-        initializers: T_Options | undefined
-    ): void {}
+        content?: () => void
+    ): void {
+        const context: StateManager = __context() as StateManager;
+        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+        const uiContext = data?.uiContext;
+        CustomDelegate._instantiate(
+            () => createInstance(uiContext, factory, initializers), content, initializers, reuseKey);
+    }
+
+    aboutToReuse(params: Record<string, object>): void {}
+}
+
+interface ReusableV2LifeCycle {
+    aboutToReuse(): void;
+}
+
+export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableV2LifeCycle {
+    /** @memo */
+    static _instantiateImpl(
+        /** @memo */
+        style: ((instance: T) => void) | undefined,
+        factory: () => T,
+        initializers?: T_Options,
+        reuseKey?: string,
+        /** @memo */
+        content?: () => void
+    ): void {
+        const context: StateManager = __context() as StateManager;
+        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+        const uiContext = data?.uiContext;
+        CustomDelegate._instantiate(
+            () => createInstance(uiContext, factory, initializers), content, initializers, reuseKey);
+    }
+
+    aboutToReuse(): void {}
 }
