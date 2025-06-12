@@ -722,7 +722,10 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
-    void OnAccessibilityHoverEvent(const PointF& point, bool isHoverEnter);
+    void OnAccessibilityHoverEvent(
+        const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
+    std::string GetSurfaceIdByHtmlElementId(const std::string& htmlElementId);
+    int64_t GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId);
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const
