@@ -1498,6 +1498,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     menuWrapperPattern->SetMenuParam(menuParam);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
 
+    ReloadMenuParam(menuParam);
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
@@ -1526,6 +1527,26 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         SetFilter(targetNode, wrapperNode);
     }
     return wrapperNode;
+}
+
+void MenuView::ReloadMenuParam(const MenuParam& menuParam)
+{
+    MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
+    if (SystemProperties::ConfigChangePerform()) {
+        menuParamValue.ReloadResources();
+        if (menuParamValue.borderRadius) {
+            menuParamValue.borderRadius->ReloadResources();
+        }
+        if (menuParamValue.previewBorderRadius) {
+            menuParamValue.previewBorderRadius->ReloadResources();
+        }
+        if (menuParamValue.outlineColor) {
+            menuParamValue.outlineColor->ReloadResources();
+        }
+        if (menuParamValue.outlineWidth) {
+            menuParamValue.outlineWidth->ReloadResources();
+        }
+    }
 }
 
 void MenuView::UpdateMenuParam(

@@ -424,6 +424,7 @@ public:
     void UpdateCheckMarkColor(const Color& color);
     void SetShowDefaultSelectedIcon(bool show);
     void SetCheckMarkVisibleType(VisibleType type);
+    void OnColorConfigurationUpdate() override;
 
 protected:
     void RegisterOnKeyEvent();

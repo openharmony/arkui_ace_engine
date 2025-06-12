@@ -33,6 +33,7 @@ namespace OHOS::Ace::NG {
 struct MenuItemLabelFontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontColorSetByUser, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelItalicFontStyle, Ace::FontStyle);
@@ -133,6 +134,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(LabelFontStyle, MenuItemLabelFontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelFontColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelFontColorSetByUser, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelFontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelFontFamily, std::vector<std::string>,
         PROPERTY_UPDATE_MEASURE);

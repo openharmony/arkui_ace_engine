@@ -5665,6 +5665,70 @@ bool JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimensi
     return false;
 }
 
+#define ADDRESOURCE_UPDATE_FUNC(property, resObj, radiusMember, resourceName) \
+    RefPtr<ResourceObject> resObj; \
+    ParseJsDimensionVp(object->GetProperty(#property), property, resObj); \
+    if (resObj) { \
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& (resObj), NG::BorderRadiusProperty& borderRadiusProperty) { \
+            CalcDimension property; \
+            ResourceParseUtils::ParseResDimensionVp(resObj, property); \
+            if (LessNotEqual((property).Value(), 0.0f)) { \
+                (property).Reset(); \
+            } \
+            borderRadiusProperty.radiusMember = property; \
+        }; \
+        borderRadius.AddResource(resourceName, resObj, std::move(updateFunc)); \
+    }
+
+void JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius)
+{
+    CalcDimension topLeft;
+    CalcDimension topRight;
+    CalcDimension bottomLeft;
+    CalcDimension bottomRight;
+    bool hasSetBorderRadius = false;
+    if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
+        object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
+        CalcDimension topStart;
+        CalcDimension topEnd;
+        CalcDimension bottomStart;
+        CalcDimension bottomEnd;
+        GetBorderRadiusByLengthMetrics(TOP_START_PROPERTY, object, topStart);
+        GetBorderRadiusByLengthMetrics(TOP_END_PROPERTY, object, topEnd);
+        GetBorderRadiusByLengthMetrics(BOTTOM_START_PROPERTY, object, bottomStart);
+        GetBorderRadiusByLengthMetrics(BOTTOM_END_PROPERTY, object, bottomEnd);
+        topLeft = topStart;
+        topRight = topEnd;
+        bottomLeft = bottomStart;
+        bottomRight = bottomEnd;
+        hasSetBorderRadius = true;
+    }
+    else {
+        ADDRESOURCE_UPDATE_FUNC(topLeft, topLeftResObj, radiusTopLeft, "borderRadius.topLeft")
+        ADDRESOURCE_UPDATE_FUNC(topRight, topRightResObj, radiusTopRight, "borderRadius.topRight")
+        ADDRESOURCE_UPDATE_FUNC(bottomLeft, bottomLeftResObj, radiusBottomLeft, "borderRadius.bottomLeft")
+        ADDRESOURCE_UPDATE_FUNC(bottomRight, bottomRightResObj, radiusBottomRight, "borderRadius.bottomRight")
+    }
+    if (LessNotEqual(topLeft.Value(), 0.0f)) {
+        topLeft.Reset();
+    }
+    if (LessNotEqual(topRight.Value(), 0.0f)) {
+        topRight.Reset();
+    }
+    if (LessNotEqual(bottomLeft.Value(), 0.0f)) {
+        bottomLeft.Reset();
+    }
+    if (LessNotEqual(bottomRight.Value(), 0.0f)) {
+        bottomRight.Reset();
+    }
+    auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+    borderRadius.radiusTopLeft = isRtl ? topRight : topLeft;
+    borderRadius.radiusTopRight = isRtl ? topLeft : topRight;
+    borderRadius.radiusBottomLeft = isRtl ? bottomRight : bottomLeft;
+    borderRadius.radiusBottomRight = isRtl ? bottomLeft : bottomRight;
+    borderRadius.multiValued = true;
+}
+
 void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)
 {
     ParseBorderStyle(info[0]);

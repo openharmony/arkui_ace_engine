@@ -2278,8 +2278,8 @@ struct ArkUICommonModifier {
     void (*setTranslate)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTranslate)(ArkUINodeHandle node);
-    void (*setScale)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const ArkUI_Int32* units,
-        ArkUI_Int32 unitLength);
+    void (*setScale)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
+        const ArkUI_Int32* units, ArkUI_Int32 unitLength);
     void (*setScaleWithoutTransformCenter)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength);
     void (*resetScale)(ArkUINodeHandle node);
     void (*setRotate)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
@@ -5079,23 +5079,29 @@ struct ArkUIImageSpanModifier {
 };
 
 struct ArkUIMenuModifier {
-    void (*setMenuFontColor)(ArkUINodeHandle node, ArkUI_Uint32 colorVal);
+    void (*setMenuFontColor)(ArkUINodeHandle node, ArkUI_Uint32 colorVal, void* colorRawPtr);
     void (*resetMenuFontColor)(ArkUINodeHandle node);
-    void (*setFont)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    void (*setFont)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal, void* fontSizeRawPtr,
+        void* fontFamilyRawPtr);
     void (*resetFont)(ArkUINodeHandle node);
-    void (*setRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
+    void (*setRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, void** resObjs,
+        size_t unitSize);
     void (*resetRadius)(ArkUINodeHandle node);
     void (*setMenuWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetMenuWidth)(ArkUINodeHandle node);
     void (*setMenuItemDivider)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo);
+    void (*setMenuItemDividerWithResource)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo,
+        void* colorRawPtr);
     void (*resetMenuItemDivider)(ArkUINodeHandle node);
     void (*setMenuItemGroupDivider)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemGroupDividerInfo);
+    void (*setMenuItemGroupDividerWithResource)(ArkUINodeHandle node,
+        ArkUIMenuDividerOptions* menuItemGroupDividerInfo, void* colorRawPtr);
     void (*resetMenuItemGroupDivider)(ArkUINodeHandle node);
     void (*setSubMenuExpandingMode)(ArkUINodeHandle node, ArkUI_Int32 modeParam);
     void (*resetSubMenuExpandingMode)(ArkUINodeHandle node);
     void (*setSubMenuExpandSymbol)(ArkUINodeHandle node, void* symbolFunction);
     void (*resetSubMenuExpandSymbol)(ArkUINodeHandle node);
-    void (*setMenuFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setMenuFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr);
     void (*resetMenuFontSize)(ArkUINodeHandle node);
 };
 
@@ -5183,17 +5189,19 @@ struct ArkUIWaterFlowModifier {
 struct ArkUIMenuItemModifier {
     void (*setMenuItemSelected)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetMenuItemSelected)(ArkUINodeHandle node);
-    void (*setLabelFontColor)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal);
+    void (*setLabelFontColor)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal, void* colorRawPtr);
     void (*resetLabelFontColor)(ArkUINodeHandle node);
-    void (*setContentFontColor)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal);
+    void (*setContentFontColor)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal, void* colorRawPtr);
     void (*resetContentFontColor)(ArkUINodeHandle node);
-    void (*setLabelFont)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    void (*setLabelFont)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal, void* fontSizeRawPtr,
+        void* fontFamilyRawPtr);
     void (*resetLabelFont)(ArkUINodeHandle node);
-    void (*setContentFont)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    void (*setContentFont)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal, void* fontSizeRawPtr,
+        void* fontFamilyRawPtr);
     void (*resetContentFont)(ArkUINodeHandle node);
     void (*setSelectIcon)(ArkUINodeHandle node, ArkUI_Bool showIcon);
     void (*resetSelectIcon)(ArkUINodeHandle node);
-    void (*setSelectIconSrc)(ArkUINodeHandle node, ArkUI_CharPtr iconSrc);
+    void (*setSelectIconSrc)(ArkUINodeHandle node, ArkUI_CharPtr iconSrc, void* iconRawPtr);
     void (*resetSelectIconSrc)(ArkUINodeHandle node);
     void (*setSelectIconSymbol)(ArkUINodeHandle node, void* symbolFunction);
     void (*resetSelectIconSymbol)(ArkUINodeHandle node);

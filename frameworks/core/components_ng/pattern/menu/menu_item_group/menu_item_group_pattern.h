@@ -91,12 +91,17 @@ public:
     void OnExtItemPressed(bool press, bool beforeGroup);
     void OnIntItemPressed(int32_t index, bool press);
     void ModifyDivider();
+    void SetHeaderContent(const std::string& str);
+    void SetFooterContent(const std::string& str);
+    void OnColorConfigurationUpdate() override;
 
 protected:
     void OnMountToParentDone() override;
 
 private:
     void ModifyFontSize();
+    void UpdateHeaderColor();
+    void UpdateFooterColor();
 
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;

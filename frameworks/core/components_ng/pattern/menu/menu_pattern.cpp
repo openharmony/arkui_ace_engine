@@ -2197,6 +2197,15 @@ void MenuPattern::OnColorConfigurationUpdate()
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     host->SetNeedCallChildrenUpdate(false);
+
+    auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProperty);
+    if (SystemProperties::ConfigChangePerform() && !menuLayoutProperty->GetFontColorSetByUser().value_or(false)) {
+        auto themeFontColor = menuTheme->GetMenuFontColor();
+        menuLayoutProperty->UpdateFontColor(themeFontColor);
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
