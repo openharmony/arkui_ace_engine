@@ -471,7 +471,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest008, TestSize.Level1)
     // set MovingPhotoEvent
     auto movingPhotoEventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     ASSERT_TRUE(movingPhotoEventHub);
-
     auto movingPhotoLayoutProperty = pattern->GetLayoutProperty<MovingPhotoLayoutProperty>();
 
     /**

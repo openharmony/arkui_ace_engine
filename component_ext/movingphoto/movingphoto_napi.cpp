@@ -387,11 +387,11 @@ napi_value JsAutoPlayPeriod(napi_env env, napi_callback_info info)
 
     int64_t startTime = 0;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_number)) {
-        startTime = static_cast<int64_t>(ExtNapiUtils::GetCDouble(env, argv[PARAM_INDEX_ZERO]) * US_CONVERT);
+        startTime = static_cast<int64_t>(ExtNapiUtils::GetDouble(env, argv[PARAM_INDEX_ZERO]) * US_CONVERT);
     }
     int64_t endTime = 0;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ONE], napi_number)) {
-        endTime = static_cast<int64_t>(ExtNapiUtils::GetCDouble(env, argv[PARAM_INDEX_ONE]) * US_CONVERT);
+        endTime = static_cast<int64_t>(ExtNapiUtils::GetDouble(env, argv[PARAM_INDEX_ONE]) * US_CONVERT);
     }
     NG::MovingPhotoModelNG::GetInstance()->AutoPlayPeriod(startTime, endTime);
 
