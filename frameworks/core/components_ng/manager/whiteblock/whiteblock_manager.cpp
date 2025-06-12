@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "whiteblock_manager.h"
+#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
 
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
@@ -30,6 +30,7 @@ WhiteBlockManager& WhiteBlockManager::GetInstance()
 ScrollState WhiteBlockManager::ChangeScrollStateIfNeed(ScrollState scrollState)
 {
     if (!SystemProperties::IsWhiteBlockIdleChange()) {
+        LOGD("WhiteBlockManager Idle Change is false");
         return scrollState;
     }
     if ((scrollState == ScrollState::SCROLL && !idle_) ||
@@ -51,12 +52,16 @@ ScrollState WhiteBlockManager::ChangeScrollStateIfNeed(ScrollState scrollState)
 
 int32_t WhiteBlockManager::AdjustEndIndex(int32_t endIndex)
 {
-    return endIndex + std::stoi(SystemProperties::GetWhiteBlockIndexValue());
+    LOGD("WhiteBlockManager GetWhiteBlockIndexValue is %{public}s",
+    SystemProperties::GetWhiteBlockIndexValue().c_str());
+    return endIndex + SystemProperties::GetWhiteBlockIndexValue();
 }
 
 int32_t WhiteBlockManager::AdjustCachedCount(int32_t cachedCount)
 {
-    return cachedCount + std::stoi(SystemProperties::GetWhiteBlockCacheCountValue());
+    LOGD("WhiteBlockManager GetWhiteBlockCacheCountValue is %{public}s",
+    SystemProperties::GetWhiteBlockCacheCountValue().c_str());
+    return cachedCount + SystemProperties::GetWhiteBlockCacheCountValue();
 }
 
 }

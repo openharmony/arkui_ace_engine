@@ -333,14 +333,14 @@ bool SystemProperties::IsWhiteBlockIdleChange()
     return true;
 }
 
-std::string SystemProperties::GetWhiteBlockIndexValue()
+int32_t SystemProperties::GetWhiteBlockIndexValue()
 {
-    return "1";
+    return 1;
 }
 
-std::string SystemProperties::GetWhiteBlockCacheCountValue()
+int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 {
-    return "1";
+    return 1;
 }
 
 } // namespace OHOS::Ace
