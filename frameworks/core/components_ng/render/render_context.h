@@ -826,6 +826,8 @@ public:
 
     virtual void SyncRSPropertyToRenderContext(AnimationPropertyType property) {}
 
+    virtual void RemoveFromTree() {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

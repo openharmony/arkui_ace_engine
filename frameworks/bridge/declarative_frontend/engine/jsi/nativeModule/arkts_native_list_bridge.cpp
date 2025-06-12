@@ -69,14 +69,21 @@ ArkUINativeModuleValue ListBridge::SetListLanes(ArkUIRuntimeCallInfo* runtimeCal
         maxLengthType.value = maxLength.Value();
         maxLengthType.units = static_cast<int32_t>(maxLength.Unit());
     }
+    RefPtr<ResourceObject> resObjMinLengthValue;
+    RefPtr<ResourceObject> resObjMaxLengthValue;
     if (!minLengthArg->IsUndefined() && !maxLengthArg->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionVp(vm, minLengthArg, minLength) &&
-        ArkTSUtils::ParseJsDimensionVp(vm, maxLengthArg, maxLength)) {
+        ArkTSUtils::ParseJsDimensionVp(vm, minLengthArg, minLength, resObjMinLengthValue) &&
+        ArkTSUtils::ParseJsDimensionVp(vm, maxLengthArg, maxLength, resObjMaxLengthValue)) {
         laneNum = -1;
         minLengthType.value = minLength.Value();
         minLengthType.units = static_cast<int32_t>(minLength.Unit());
         maxLengthType.value = maxLength.Value();
         maxLengthType.units = static_cast<int32_t>(maxLength.Unit());
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getListModifier()->createWithResourceObjLaneConstrain(nativeNode,
+            reinterpret_cast<void*>(AceType::RawPtr(resObjMinLengthValue)),
+            reinterpret_cast<void*>(AceType::RawPtr(resObjMaxLengthValue)));
     }
     GetArkUINodeModifiers()->getListModifier()->setListLanes(
         nativeNode, laneNum, &minLengthType, &maxLengthType, &gutterType);
@@ -90,6 +97,9 @@ ArkUINativeModuleValue ListBridge::ResetListLanes(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetListLanes(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getListModifier()->createWithResourceObjLaneConstrain(nativeNode, nullptr, nullptr);
+    }
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -332,12 +342,18 @@ ArkUINativeModuleValue ListBridge::SetListFriction(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
 
+    RefPtr<ResourceObject> resObj;
     double friction = -1.0;
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsUndefined() || secondArg->IsNull() || !ArkTSUtils::ParseJsDouble(vm, secondArg, friction)) {
+    if (secondArg->IsUndefined() || secondArg->IsNull() ||
+        !ArkTSUtils::ParseJsDouble(vm, secondArg, friction, resObj)) {
         friction = -1.0;
     }
     GetArkUINodeModifiers()->getListModifier()->setListFriction(nativeNode, friction);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getListModifier()->createWithResourceObjFriction(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -665,21 +681,28 @@ ArkUINativeModuleValue ListBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     auto listTheme = themeManager->GetTheme<ListTheme>();
     CHECK_NULL_RETURN(listTheme, panda::NativePointerRef::New(vm, nullptr));
 
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
+    RefPtr<ResourceObject> resObjStrokeWidth;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, dividerStrokeWidthArgs, dividerStrokeWidth, resObjStrokeWidth) ||
         LessNotEqual(dividerStrokeWidth.Value(), 0.0f) || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
         dividerStrokeWidth.Reset();
     }
     Color colorObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj)) {
+    RefPtr<ResourceObject> resObjColor;
+    bool setByUser = false;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, resObjColor)) {
         color = listTheme->GetDividerColor().GetValue();
+        setByUser = false;
     } else {
         color = colorObj.GetValue();
+        setByUser = true;
     }
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
+    RefPtr<ResourceObject> resObjStartMargin;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin, resObjStartMargin) ||
         LessNotEqual(dividerStartMargin.Value(), 0.0f) || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
         dividerStartMargin.Reset();
     }
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
+    RefPtr<ResourceObject> resObjEndMargin;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin, resObjEndMargin) ||
         LessNotEqual(dividerEndMargin.Value(), 0.0f) || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
         dividerEndMargin.Reset();
     }
@@ -693,7 +716,16 @@ ArkUINativeModuleValue ListBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     units[LIST_ARG_INDEX_1] = static_cast<int32_t>(dividerStartMargin.Unit());
     units[LIST_ARG_INDEX_2] = static_cast<int32_t>(dividerEndMargin.Unit());
     GetArkUINodeModifiers()->getListModifier()->listSetDivider(nativeNode, color, values, units, size);
-
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getListModifier()->parseResObjDividerStrokeWidth(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObjStrokeWidth)));
+        GetArkUINodeModifiers()->getListModifier()->parseResObjDividerColor(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObjColor)));
+        GetArkUINodeModifiers()->getListModifier()->parseResObjDividerStartMargin(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObjStartMargin)));
+        ListModel::GetInstance()->ParseResObjDividerEndMargin(resObjEndMargin);
+        ListModel::GetInstance()->SetDividerColorByUser(setByUser);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -867,7 +899,7 @@ ArkUINativeModuleValue ListBridge::SetInitialScroller(ArkUIRuntimeCallInfo* runt
         Framework::JSScroller* scroller =
             Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSScroller>();
         RefPtr<Framework::JSScroller> jsScroller = Referenced::Claim(scroller);
-        jsScroller->SetInstanceId(Container::CurrentId());
+        jsScroller->SetInstanceId(Container::CurrentIdSafely());
         SetScroller(runtimeCallInfo, jsScroller);
     }
     return panda::JSValueRef::Undefined(vm);

@@ -6806,6 +6806,38 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnInterceptKeyEvent));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnInterceptKeyEvent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnInterceptKeyEvent));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnErrorReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnErrorReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnErrorReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnErrorReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnLoadIntercept"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnLoadIntercept));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnLoadIntercept"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnLoadIntercept));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnHttpErrorReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnHttpErrorReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnHttpErrorReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnHttpErrorReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnOverrideUrlLoading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnOverrideUrlLoading));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnOverrideUrlLoading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnOverrideUrlLoading));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnHttpAuthRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnHttpAuthRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnHttpAuthRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnHttpAuthRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnConsole"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnConsole));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnConsole"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnConsole));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSslErrorEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnSslErrorEvent));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSslErrorEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnSslErrorEvent));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDataResubmitted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnDataResubmitted));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDataResubmitted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnDataResubmitted));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

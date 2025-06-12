@@ -16,6 +16,8 @@
 #include <dlfcn.h>
 
 #include "base/ressched/ressched_report.h"
+#include <unistd.h>
+#include <sys/syscall.h>
 
 namespace OHOS::Ace {
 namespace {
@@ -48,5 +50,20 @@ ReportSyncEventFunc LoadReportSyncEventFunc()
     }
     LOGI("dlsym function ReportSyncEvent success.");
     return func;
+}
+
+int64_t ResSchedReport::GetTid()
+{
+    return gettid();
+}
+
+int64_t ResSchedReport::GetPid()
+{
+    return getpid();
+}
+
+pthread_t ResSchedReport::GetPthreadSelf()
+{
+    return pthread_self();
 }
 } // namespace OHOS::Ace

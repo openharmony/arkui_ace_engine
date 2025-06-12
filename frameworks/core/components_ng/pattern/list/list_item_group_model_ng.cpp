@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 
@@ -30,6 +31,13 @@ void ListItemGroupModelNG::Create(V2::ListItemGroupStyle listItemGroupStyle)
             return AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, itemGroupStyle);
         });
     stack->Push(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->ResetDividerColorSetByUser();
+    }
 }
 
 RefPtr<FrameNode> ListItemGroupModelNG::CreateFrameNode(int32_t nodeId)
@@ -46,6 +54,8 @@ void ListItemGroupModelNG::SetSpace(const Dimension& space)
 
 void ListItemGroupModelNG::SetDivider(const V2::ItemDivider& divider)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider);
 }
 
@@ -226,5 +236,173 @@ bool ListItemGroupModelNG::HasHeader(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->IsHasHeader();
+}
+
+void ListItemGroupModelNG::ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("listItemGroup.divider.strokeWidth");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.strokeWidth = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("listItemGroup.divider.strokeWidth", resObj, std::move(updateFunc));
+}
+
+void ListItemGroupModelNG::ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("listItemGroup.divider.color");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.color = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("listItemGroup.divider.color", resObj, std::move(updateFunc));
+}
+
+void ListItemGroupModelNG::ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("listItemGroup.divider.startMargin");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.startMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("listItemGroup.divider.startMargin", resObj, std::move(updateFunc));
+}
+void ListItemGroupModelNG::ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("listItemGroup.divider.endMargin");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.endMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("listItemGroup.divider.endMargin", resObj, std::move(updateFunc));
+}
+
+void ListItemGroupModelNG::ParseResObjDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("listItemGroup.divider.strokeWidth");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.strokeWidth = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("listItemGroup.divider.strokeWidth", resObj, std::move(updateFunc));
+}
+
+void ListItemGroupModelNG::ParseResObjDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("listItemGroup.divider.color");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.color = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("listItemGroup.divider.color", resObj, std::move(updateFunc));
+}
+
+void ListItemGroupModelNG::ParseResObjDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("listItemGroup.divider.startMargin");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.startMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("listItemGroup.divider.startMargin", resObj, std::move(updateFunc));
+}
+
+void ListItemGroupModelNG::ParseResObjDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("listItemGroup.divider.endMargin");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.endMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("listItemGroup.divider.endMargin", resObj, std::move(updateFunc));
+}
+
+void ListItemGroupModelNG::SetDividerColorByUser(bool isByUser)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, DividerColorSetByUser, isByUser);
+}
+
+void ListItemGroupModelNG::SetDividerColorByUser(FrameNode* frameNode, bool colorSetByUser)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, DividerColorSetByUser, colorSetByUser, frameNode);
 }
 } // namespace OHOS::Ace::NG

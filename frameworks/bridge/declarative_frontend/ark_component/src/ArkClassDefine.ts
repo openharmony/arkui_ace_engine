@@ -1121,6 +1121,23 @@ class ArkNestedScrollOptionsExt {
   }
 }
 
+class ArkWebScriptItem {
+  scripts: Array<string> | undefined;
+  scriptRules: Array<Array<string>> | undefined;
+
+  constructor() {
+    this.scripts = undefined;
+    this.scriptRules = undefined;
+  }
+
+  isEqual(another: ArkWebScriptItem): boolean {
+    return (
+      this.scripts === another.scripts &&
+      this.scriptRules === another.scriptRules
+    );
+  }
+}
+
 class ArkConstraintSizeOptions {
   minWidth?: Length | undefined;
   maxWidth?: Length | undefined;

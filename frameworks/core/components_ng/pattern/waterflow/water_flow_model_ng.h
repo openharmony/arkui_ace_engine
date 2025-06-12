@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,9 +61,11 @@ public:
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
+    void SetSyncLoad(bool syncLoad) override;
 
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections() override;
     void ResetSections() override;
+    void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
@@ -123,7 +125,10 @@ public:
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
     static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
     static WaterFlowLayoutMode GetLayoutMode(FrameNode* frameNode);
+    static void ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetFooter(FrameNode* frameNode, std::function<void()>&& footer);
+    static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
+    static bool GetSyncLoad(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

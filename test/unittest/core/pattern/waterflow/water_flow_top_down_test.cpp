@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/animation/mock_animation_manager.h"
 #include "water_flow_test_ng.h"
+// mock
+#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
@@ -158,6 +160,26 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 5)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 6)->IsActive());
+}
+
+/**
+ * @tc.name: SyncLoad001
+ * @tc.desc: test load items frame by frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, SyncLoad001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetSyncLoad(false);
+
+    CreateRandomWaterFlowItems(10);
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 1);
 }
 
 /**

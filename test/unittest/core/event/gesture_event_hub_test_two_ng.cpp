@@ -511,6 +511,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
      /**
      * @tc.steps: step5. call OnDragStart
      */
+    gestureHub->isRestoreDrag_ = true;
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
     EXPECT_NE(gestureHub->pixelMap_, nullptr);
     EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
@@ -937,5 +938,41 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest034, TestSize.Level1)
     gestureEventHub->gestureHierarchy_.emplace_back(recognizerGroup);
     gestureEventHub->ProcessTouchTestHierarchy(
         COORDINATE_OFFSET, touchRestrict, innerTargets3, finalResult, TOUCH_ID, nullptr, responseLinkResult);
+}
+
+/**
+ * @tc.name: OnDragStart035
+ * @tc.desc: Test OnDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, OnDragStart035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto [frameNode, columnNode] = InitFrameNodes("frameNode");
+    auto pipline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(pipline, nullptr);
+    pipline->SetupRootElement();
+    frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. create OnDragStart params
+     */
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    DragDropInfo dragDropInfo;
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+     /**
+     * @tc.steps: step3. call OnDragStart block
+     */
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    gestureHub->isRestoreDrag_ = false;
+    gestureHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
+    EXPECT_EQ(info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
 }
 } // namespace OHOS::Ace::NG

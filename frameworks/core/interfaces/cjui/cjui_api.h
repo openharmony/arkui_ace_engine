@@ -419,8 +419,8 @@ struct CJUICommonModifier {
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
     void (*resetMask)(ArkUINodeHandle node);
     ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
-    void (*setBackgroundImageResizable)(ArkUINodeHandle node, ArkUIStringAndFloat* options,  ArkUI_Int32 optionsSize,
-        std::vector<void*>& bgImageResizableArray);
+    void (*setBackgroundImageResizable)(
+        ArkUINodeHandle node, ArkUIStringAndFloat* options, ArkUI_Int32 optionsSize, void* bgImageResizableResObjs);
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
     void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
         ArkUI_Int32 unit);
@@ -2081,6 +2081,22 @@ struct CJUIWebModifier {
     void (*resetWebNestedScrollExt)(ArkUINodeHandle node);
     void (*setOnInterceptKeyEventCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnInterceptKeyEventCallBack)(ArkUINodeHandle node);
+    void (*setOnErrorReceive)(ArkUINodeHandle node, void* callback);
+    void (*resetOnErrorReceive)(ArkUINodeHandle node);
+    void (*setOnLoadIntercept)(ArkUINodeHandle node, void* callback);
+    void (*resetOnLoadIntercept)(ArkUINodeHandle node);
+    void (*setOnHttpErrorReceive)(ArkUINodeHandle node, void* callback);
+    void (*resetOnHttpErrorReceive)(ArkUINodeHandle node);
+    void (*setOnOverrideUrlLoading)(ArkUINodeHandle node, void* callback);
+    void (*resetOnOverrideUrlLoading)(ArkUINodeHandle node);
+    void (*setOnHttpAuthRequest)(ArkUINodeHandle node, void* callback);
+    void (*resetOnHttpAuthRequest)(ArkUINodeHandle node);
+    void (*setOnConsole)(ArkUINodeHandle node, void* callback);
+    void (*resetOnConsole)(ArkUINodeHandle node);
+    void (*setOnSslErrorEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetOnSslErrorEvent)(ArkUINodeHandle node);
+    void (*setOnDataResubmitted)(ArkUINodeHandle node, void* callback);
+    void (*resetOnDataResubmitted)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
@@ -2231,7 +2247,7 @@ struct CJUIWaterFlowModifier {
     void (*resetLayoutDirection)(ArkUINodeHandle node);
     void (*setWaterFlowNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 scrollForward, ArkUI_Int32 scrollBackward);
     void (*resetWaterFlowNestedScroll)(ArkUINodeHandle node);
-    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
+    void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction, void* frictionRawPtr);
     void (*resetWaterFlowFriction)(ArkUINodeHandle node);
     ArkUI_Int32 (*getLayoutDirection)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getColumnsTemplate)(ArkUINodeHandle node);

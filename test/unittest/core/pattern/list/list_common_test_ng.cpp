@@ -19,6 +19,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
@@ -534,6 +535,49 @@ RefPtr<ListItemDragManager> ListCommonTestNg::GetRepeatItemDragManager(int32_t i
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
     auto listItemPattern = listItem->GetPattern<ListItemPattern>();
     return listItemPattern->dragManager_;
+}
+
+/**
+* @tc.name: OnMoveDragManager001
+* @tc.desc: Test ListItemDragManager IsNeedMove
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, OnMoveDragManager001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List
+     */
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    CreateForEachList(3, 1, onMoveEvent);
+    CreateDone();
+    auto manager = GetForEachItemDragManager(0);
+
+    /**
+     * @tc.steps: step2. Test IsNeedMove
+     */
+    RectF nearRect = RectF(0.f, 0.f, 100.f, 400.f);
+    RectF rect = RectF(0.f, 400.f, 100.f, 100.f);
+    Axis axis = Axis::VERTICAL;
+
+    float axisDelta = -100.f;
+    bool needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, false);
+
+    axisDelta = -300.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, true);
+
+    nearRect = RectF(0.f, 100.f, 100.f, 400.f);
+    rect = RectF(0.f, 0.f, 100.f, 100.f);
+    axis = Axis::VERTICAL;
+
+    axisDelta = 100.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, false);
+
+    axisDelta = 300.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, true);
 }
 
 /**
@@ -3317,6 +3361,34 @@ HWTEST_F(ListCommonTestNg, ChainAnimation004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetChainDelta(1), -10);
     FlushUITasks();
     EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
+/**
+ * @tc.name: UpdateDefaultColorTest
+ * @tc.desc: Test ListPattern UpdateDefaultColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, UpdateDefaultColorTest, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<FrameNode> hostNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listPattern);
+    auto listTheme = MockPipelineContext::pipeline_->GetTheme<ListTheme>();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, DividerColorSetByUser, false, hostNode);
+    V2::ItemDivider value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, hostNode, value);
+    value.color = Color::RED;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, value, hostNode);
+    listPattern->UpdateDefaultColor();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, hostNode, value);
+    EXPECT_NE(value.color, Color::RED);
+
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, DividerColorSetByUser, true, hostNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, hostNode, value);
+    value.color = Color::RED;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, value, hostNode);
+    listPattern->UpdateDefaultColor();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, hostNode, value);
+    EXPECT_EQ(value.color, Color::RED);
 }
 
 /**

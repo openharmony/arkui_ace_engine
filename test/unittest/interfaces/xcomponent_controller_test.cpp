@@ -70,14 +70,14 @@ HWTEST_F(XComponentControllerTest, SetRenderFitBySurfaceIdErrorCodeTest, TestSiz
     std::string surfaceId = SURFACE_ID;
     int32_t renderFitNumberInvalid = -1;
     auto code = XComponentController::SetRenderFitBySurfaceId(surfaceId, renderFitNumberInvalid, true);
-    EXPECT_TRUE(code != 0);
+    EXPECT_NE(code, 0);
     /**
      * @tc.step2: Test SetRenderFitBySurfaceId when renderFitNumber is larger than fifteen.
      * @tc.expected: the error code indicates parameter invalid or load ace lib failed.
      */
     renderFitNumberInvalid = 16;
     code = XComponentController::SetRenderFitBySurfaceId(surfaceId, renderFitNumberInvalid, true);
-    EXPECT_TRUE(code != 0);
+    EXPECT_NE(code, 0);
 }
 
 /**
@@ -95,6 +95,6 @@ HWTEST_F(XComponentControllerTest, GetRenderFitBySurfaceIdErrorCodeTest, TestSiz
     int32_t renderFitNumber = -1;
     bool isEnable = false;
     auto code = XComponentController::GetRenderFitBySurfaceId(surfaceId, renderFitNumber, isEnable);
-    EXPECT_TRUE(code != 0);
+    EXPECT_NE(code, 0);
 }
 } // namespace OHOS::Ace

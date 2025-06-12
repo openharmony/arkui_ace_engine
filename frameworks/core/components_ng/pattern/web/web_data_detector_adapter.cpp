@@ -618,7 +618,7 @@ void WebDataDetectorAdapter::OnClickAIMenuOption(
             func(containerId, info.content);
         } else if constexpr (std::is_same_v<T, std::function<void(int32_t, std::string, std::string, int32_t,
                                                    std::string)>>) { // datetime
-            func(containerId, "", bundleName, 0, info.content);
+            func(containerId, info.content, bundleName, 0, info.content);
         }
     };
     std::visit(visitor, menuOption.second);

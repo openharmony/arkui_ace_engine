@@ -150,7 +150,6 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
         return rsProp;
     }
 
-    LOGE("ConvertToRSProperty failed!");
     return nullptr;
 }
 

@@ -1856,6 +1856,10 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
     }
     if (params[index].value == buttonPasteText) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
+        auto accessibilityProperty = option->GetAccessibilityProperty<AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        }
     } else {
         CreateOption(optionsHasIcon, params, index, row, option);
     }
@@ -1884,6 +1888,10 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
     }
     if (value.content == buttonPasteText) {
         CreatePasteButton(value.optionsHasIcon, option, row, onClickFunc, icon);
+        auto accessibilityProperty = option->GetAccessibilityProperty<AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        }
     } else {
         CreateOption({ .optionsHasIcon = value.optionsHasIcon,
                        .content = value.content, .isAIMenuOption = value.isAIMenuOption },

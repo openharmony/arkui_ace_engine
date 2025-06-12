@@ -840,12 +840,13 @@ HWTEST_F(BubbleTestOneNg, FitToScreenNew001, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
     size_t index = 0;
     SizeF childSize;
-    OffsetF testF = layoutAlgorithm->FitToScreenNew(OffsetF(10.0f, 10.0f), 0, index, childSize);
+    OffsetF arrowPosition;
+    OffsetF testF = layoutAlgorithm->FitToScreenNew(OffsetF(10.0f, 10.0f), 0, index, childSize, arrowPosition);
     EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
-    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, true);
+    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, arrowPosition, true);
     EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
     layoutAlgorithm->arrowPlacement_ = Placement::BOTTOM;
-    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, true);
+    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, arrowPosition, true);
     EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
 }
 
@@ -1373,6 +1374,7 @@ HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest003, TestSize.Level1)
     auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
     bubbleLayoutAlgorithm->targetSecurity_ = 0;
     OffsetF position(ZERO, ZERO);
+    OffsetF arrowPosition;
     size_t i = 1;
     SizeF childSize(CHILD_SIZE_X, CHILD_SIZE_Y);
     std::vector<Placement> curPlaceStates = { Placement::LEFT, Placement::RIGHT, Placement::TOP,
@@ -1383,7 +1385,7 @@ HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest003, TestSize.Level1)
      */
     for (auto &placement : curPlaceStates) {
         bubbleLayoutAlgorithm->placement_ = placement;
-        auto ret = bubbleLayoutAlgorithm->CheckPosition(position, childSize, 1, i);
+        auto ret = bubbleLayoutAlgorithm->CheckPosition(position, childSize, 1, i, arrowPosition);
         if (placement == Placement::NONE)
             EXPECT_FALSE(ret);
     }

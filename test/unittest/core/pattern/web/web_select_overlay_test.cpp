@@ -5439,6 +5439,37 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAIMenuTest001
+ * @tc.desc: Test AIMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, UpdateAIMenuTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+
+    WebSelectOverlay overlay(webPattern);
+    overlay.DetectSelectedText("13323332333");
+    overlay.canShowAIMenu_ = true;
+    overlay.DetectSelectedText("13323332333");
+
+    auto adapter = webPattern->GetDataDetectorAdapter();
+    ASSERT_NE(adapter, nullptr);
+    overlay.aiMenuType_ = TextDataDetectType::PHONE_NUMBER;
+    overlay.DetectSelectedText("13323332333");
+    EXPECT_EQ(overlay.aiMenuType_, TextDataDetectType::INVALID);
+    overlay.UpdateAISelectMenu(TextDataDetectType::PHONE_NUMBER, "13323332333");
+    EXPECT_EQ(overlay.aiMenuType_, TextDataDetectType::PHONE_NUMBER);
+}
+
+/**
  * @tc.name: SetMenuOptionsTest001
  * @tc.desc: Test SetMenuOptions.
  * @tc.type: FUNC

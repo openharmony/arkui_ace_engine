@@ -40,6 +40,11 @@ public:
     void SetFooterComponent(const RefPtr<NG::UINode>& footerComponent) override;
     void RemoveHeader() override;
     void RemoveFooter() override;
+    void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) override;
+    void SetDividerColorByUser(bool isByUser) override;
 
     static void SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -55,6 +60,11 @@ public:
     static void RemoveFooter(FrameNode* frameNode);
     static bool HasFooter(FrameNode* frameNode);
     static bool HasHeader(FrameNode* frameNode);
+    static void ParseResObjDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetDividerColorByUser(FrameNode* frameNode, bool isByUser);
 };
 
 } // namespace OHOS::Ace::NG

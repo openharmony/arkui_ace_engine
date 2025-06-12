@@ -4408,6 +4408,12 @@ void RosenRenderContext::AddRsNodeForCapture()
     }
 }
 
+void RosenRenderContext::RemoveFromTree()
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->RemoveFromTree();
+}
+
 void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
 {
     if (!rsNode_ || !isNeedRebuildRSTree_) {
