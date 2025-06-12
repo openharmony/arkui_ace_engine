@@ -7085,13 +7085,12 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
     return ParseJsIntegerArray(jsValue, result, resObj, resObjArray);
 }
 
-bool JSViewAbstract::ParseJsIntegerArrayInternal(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
+bool JSViewAbstract::ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,
     std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
-    for (size_t i = 0; i < array->Length(); i++) {
+    for (size_t i = 0; i < jsArray->Length(); i++) {
         RefPtr<ResourceObject> resObj;
-        JSRef<JSVal> value = array->GetValueAt(i);
+        JSRef<JSVal> value = jsArray->GetValueAt(i);
         if (value->IsNumber()) {
             result.emplace_back(value->ToNumber<uint32_t>());
         } else if (value->IsObject()) {
@@ -7118,7 +7117,8 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
     if (jsValue->IsArray()) {
-        return ParseJsIntegerArrayInternal(jsValue, result, resObjArray);
+        JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
+        return ParseJsIntegerArrayInternal(jsArray, result, resObjArray);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
@@ -7167,13 +7167,12 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
     return ParseJsStrArray(jsValue, result, resObj, resObjArray);
 }
 
-bool JSViewAbstract::ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+bool JSViewAbstract::ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
     std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
-    for (size_t i = 0; i < array->Length(); i++) {
+    for (size_t i = 0; i < jsArray->Length(); i++) {
         RefPtr<ResourceObject> resObj;
-        JSRef<JSVal> value = array->GetValueAt(i);
+        JSRef<JSVal> value = jsArray->GetValueAt(i);
         if (value->IsString()) {
             result.emplace_back(value->ToString());
         } else if (value->IsObject()) {
@@ -7200,7 +7199,8 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         return false;
     }
     if (jsValue->IsArray()) {
-        return ParseJsStrArrayInternal(jsValue, result, resObjArray);
+        JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
+        return ParseJsStrArrayInternal(jsArray, result, resObjArray);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
