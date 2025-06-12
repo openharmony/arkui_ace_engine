@@ -592,6 +592,9 @@ ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
     CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
     static const std::vector<const char*> nodeTypeArray = {
         OHOS::Ace::V2::SCROLL_ETS_TAG,
+        OHOS::Ace::V2::TEXT_ETS_TAG,
+        OHOS::Ace::V2::TEXTINPUT_ETS_TAG,
+        OHOS::Ace::V2::TEXTAREA_ETS_TAG,
     };
     auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), currentNode->GetTag());
     if (pos == nodeTypeArray.end()) {
