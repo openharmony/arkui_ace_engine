@@ -3812,6 +3812,11 @@ void SheetPresentationPattern::UpdateSheetType()
 {
     auto sheetType = GetSheetType();
     if (sheetType_ != sheetType) {
+        // It can only be MarkOuterBorder When the SheetType switches and the sheetType_ was SHEET_POPUP
+        if (sheetType_ == SheetType::SHEET_POPUP) {
+            // Clear the current double outline, as it is drawn on the sheetWrapper.
+            MarkSheetPageNeedRender();
+        }
         sheetType_ = sheetType;
         typeChanged_ = true;
     }
@@ -3866,6 +3871,8 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType type)
 void SheetPresentationPattern::ResetLayoutInfo()
 {
     height_ = 0.0f;
+    property_.Reset();
+    animation_.reset();
 }
 
 void SheetPresentationPattern::ResetScrollUserDefinedIdealSize(

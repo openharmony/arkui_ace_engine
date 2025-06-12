@@ -83,7 +83,8 @@ void SheetSideObject::UpdateSidePosition()
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
 
-    if (!sheetPattern->IsOnAppearing() && !sheetPattern->IsOnDisappearing()) {
+    if (!sheetPattern->IsOnAppearing()
+        && !sheetPattern->IsOnDisappearing() && !sheetPattern->IsDragging()) {
         sheetPattern->FireOnWidthDidChange();
         sheetPattern->FireOnHeightDidChange();
         bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -400,7 +401,6 @@ void SheetSideObject::HandleDragUpdateForLTR(const GestureEvent& info)
     auto offsetX = sheetMaxWidth_ - sheetWidth_ + currentOffset_;
     renderContext->UpdateTransformTranslate({ offsetX, 0.0f, 0.0f });
     sheetPattern->onWidthDidChange(sheetWidth_ - currentOffset_);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SheetSideObject::HandleDragUpdateForRTL(const GestureEvent& info)
@@ -423,7 +423,6 @@ void SheetSideObject::HandleDragUpdateForRTL(const GestureEvent& info)
     auto offsetX = currentOffset_ < 0 ? currentOffset_ : 0.0f;
     renderContext->UpdateTransformTranslate({ offsetX, 0.0f, 0.0f });
     sheetPattern->onWidthDidChange(sheetWidth_ + currentOffset_);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SheetSideObject::HandleDragEnd(float dragVelocity)
@@ -446,27 +445,22 @@ void SheetSideObject::HandleDragEndForLTR(float dragVelocity)
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
-    auto currentSheetWidth = GreatNotEqual((sheetWidth_ - currentOffset_), sheetMaxWidth_) ?
-        sheetMaxWidth_ : (sheetWidth_ - currentOffset_);
-
-    float leftWidth = sheetWidth_;
-    float rightWidth = 0.0f;
-
-    // return to the original state in the opposite direction
-    if (LessNotEqual(dragVelocity, 0.0f)) {
-        sheetPattern->SheetTransition(true, std::abs(dragVelocity));
-        return;
-    }
+    auto currentOffset = currentOffset_;
 
     if (LessNotEqual(std::abs(dragVelocity), SHEET_VELOCITY_THRESHOLD)) {
-        if (GreatNotEqual(std::abs(currentSheetWidth - leftWidth), std::abs(currentSheetWidth - rightWidth))) {
+        if (GreatNotEqual(std::abs(currentOffset), sheetWidth_ - std::abs(currentOffset))) {
             sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::SLIDE, std::abs(dragVelocity));
         } else {
-            sheetPattern->ModifyFireSheetTransition(std::abs(dragVelocity));
+            ModifyFireSheetTransition(std::abs(dragVelocity));
         }
     } else {
-        // when drag velocity is over the threshold
-        sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::SLIDE, std::abs(dragVelocity));
+        if (LessNotEqual(dragVelocity, 0.0f)) {
+            // return to the original state in the opposite direction.
+            ModifyFireSheetTransition(std::abs(dragVelocity));
+        } else {
+            // when drag velocity is over the threshold.
+            sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::SLIDE, std::abs(dragVelocity));
+        }
     }
 }
 
@@ -474,33 +468,28 @@ void SheetSideObject::HandleDragEndForRTL(float dragVelocity)
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
-    auto currentSheetWidth = GreatNotEqual((sheetWidth_ + currentOffset_), sheetMaxWidth_) ?
-        sheetMaxWidth_ : (sheetWidth_ + currentOffset_);
-
-    float leftWidth = 0.0f;
-    float rightWidth = sheetWidth_;
-
-    // return to the original state in the opposite direction
-    if (GreatNotEqual(dragVelocity, 0.0f)) {
-        sheetPattern->SheetTransition(true, std::abs(dragVelocity));
-        return;
-    }
+    auto currentOffset = currentOffset_;
 
     if (LessNotEqual(std::abs(dragVelocity), SHEET_VELOCITY_THRESHOLD)) {
-        if (GreatNotEqual(std::abs(currentSheetWidth - rightWidth), std::abs(currentSheetWidth - leftWidth))) {
+        if (GreatNotEqual(std::abs(currentOffset), sheetWidth_ - std::abs(currentOffset))) {
             sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::SLIDE, std::abs(dragVelocity));
         } else {
-            sheetPattern->ModifyFireSheetTransition(std::abs(dragVelocity));
+            ModifyFireSheetTransition(std::abs(dragVelocity));
         }
     } else {
-        // when drag velocity is over the threshold
-        sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::SLIDE, std::abs(dragVelocity));
+        if (LessNotEqual(dragVelocity, 0.0f)) {
+            // when drag velocity is over the threshold.
+            sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::SLIDE, std::abs(dragVelocity));
+        } else {
+            // return to the original state in the opposite direction.
+            ModifyFireSheetTransition(std::abs(dragVelocity));
+        }
     }
 }
 
 void SheetSideObject::ModifyFireSheetTransition(float dragVelocity)
 {
-    TAG_LOGD(AceLogTag::ACE_SHEET, "ModifyFireSheetTransition function enter");
+    TAG_LOGD(AceLogTag::ACE_SHEET, "SideSheet ModifyFireSheetTransition");
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
     auto host = sheetPattern->GetHost();
@@ -541,17 +530,25 @@ void SheetSideObject::ModifyFireSheetTransition(float dragVelocity)
         ref->SetSpringBack(false);
     };
 
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    auto interactive = sheetStyle.interactive.value_or(false);
     sheetPattern->SetAnimationProcess(true);
     property->Set(width - std::abs(currentOffset_));
-    AnimationUtils::StartAnimation(option,
-        [weak = AceType::WeakClaim(RawPtr(sheetPattern)), renderContext, offsetX, width]() {
+    std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(option,
+        [weak = AceType::WeakClaim(RawPtr(sheetPattern)),
+            renderContext, offsetX, width, interactive]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
-            if (renderContext) {
+            if (interactive) {
                 ref->GetProperty()->Set(width);
+            }
+            if (renderContext) {
                 renderContext->UpdateTransformTranslate({ offsetX, 0.0, 0.0f });
             }
         }, finishCallback);
+    sheetPattern->SetAnimation(animation);
 }
 
 void SheetSideObject::CreatePropertyCallback()
