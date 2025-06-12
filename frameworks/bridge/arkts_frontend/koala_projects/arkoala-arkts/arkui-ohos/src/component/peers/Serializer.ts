@@ -12151,7 +12151,7 @@ export class Serializer extends SerializerBase {
         const value_force  = value.force
         valueSerializer.writeNumber(value_force)
         const value_timestamp  = value.timestamp
-        valueSerializer.writeInt64(value_timestamp)
+        valueSerializer.writeNumber(value_timestamp)
     }
     writeHoverEvent(value: HoverEvent): void {
         let valueSerializer : Serializer = this

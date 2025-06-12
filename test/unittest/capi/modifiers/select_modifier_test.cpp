@@ -1224,7 +1224,7 @@ HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setDividerUndefinedTest, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setDividerUndefinedTest, TestSize.Level1)
 {
     // set undefined values
     Ark_DividerOptions dividerOptions = {

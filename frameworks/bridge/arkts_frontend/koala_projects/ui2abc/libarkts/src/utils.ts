@@ -296,6 +296,7 @@ function fixNamespace(code: string) {
     code = code.replaceAll(/public static (restoreDefault)/g, "export function $1")
     code = code.replaceAll(/public static (requestFocus\(value)/g, "export function $1")
     code = code.replaceAll(/public static (createUIObserver\(id)/g, "export function $1")
+    code = code.replaceAll(/public static (matchMediaSync\(condition)/g, "export function $1")
     code = code.replaceAll(/public static (createComponentObserver\(id)/g, "export function $1")
     code = code.replaceAll(/public static (registerPage\(page)/g, "export function $1")
     code = code.replaceAll(/public static (error\(prefix)/g, "export function $1")

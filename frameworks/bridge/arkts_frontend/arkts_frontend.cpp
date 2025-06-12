@@ -368,6 +368,53 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
     return result;
 }
 
+void* ArktsFrontend::PushExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo);
+    return pageNode.GetRawPtr()
+}
+
+void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& params, std::function<void()>&& finishCallback)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(finishCallback));
+    return pageNode.GetRawPtr()
+}
+
+void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo);
+    return pageNode.GetRawPtr()
+}
+
+void ArktsFrontend::BackExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    pageRouterManager_->BackWithTarget(routerPageInfo);
+}
+
+void ArktsFrontend::ClearExtender()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->Clear();
+}
+
 void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
 {
     std::shared_ptr<ani_ref> shared_ptr(context);

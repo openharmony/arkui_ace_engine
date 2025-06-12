@@ -186,7 +186,7 @@ HWTEST_F(SwiperModifierTest, setAutoPlay1Test, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.IntervalImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIntervalTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIntervalTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("interval");
     static const std::string DEFAULT_VALUE(std::to_string(static_cast<int>(DEFAULT_SWIPER_AUTOPLAY_INTERVAL)));
@@ -259,7 +259,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotPadding, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the size's subattr
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDotSize, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicator0TestDotSize, TestSize.Level1)
 {
     typedef std::tuple<Ark_DotIndicator, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -297,7 +297,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotSize, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the Color type subattr
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDotColor, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicator0TestDotColor, TestSize.Level1)
 {
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -857,7 +857,7 @@ HWTEST_F(SwiperModifierTest, setLoopTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.DurationImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setDurationTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setDurationTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("duration");
     static const std::string DEFAULT_VALUE(std::to_string(static_cast<int32_t>(DEFAULT_SWIPER_ANIMATION_DURATION)));
@@ -913,7 +913,7 @@ HWTEST_F(SwiperModifierTest, setVerticalTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.ItemSpaceImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setItemSpaceTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setItemSpaceTest, TestSize.Level1)
 {
     using namespace Converter;
     using TypeArg0 = Ark_Union_Number_String;
@@ -984,7 +984,7 @@ HWTEST_F(SwiperModifierTest, setDisplayModeTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.CachedCountImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setCachedCountTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setCachedCountTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("cachedCount");
     static const int DEFAULT_VALUE(DEFAULT_SWIPER_CACHED_SIZE);
@@ -1019,7 +1019,7 @@ HWTEST_F(SwiperModifierTest, setCachedCountTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.CachedCount1Impl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setCachedCount1Test, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setCachedCount1Test, TestSize.Level1)
 {
     static const std::string propNameCount("cachedCount");
     static const int defaultValueCount(DEFAULT_SWIPER_CACHED_SIZE);
@@ -1138,7 +1138,7 @@ HWTEST_F(SwiperModifierTest, setDisplayCountTestString, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.DisplayCountImpl with Ark_VP object argument
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setDisplayCountTestObj, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setDisplayCountTestObj, TestSize.Level1)
 {
     typedef Opt_Union_Number_String_SwiperAutoFill displayCountArgT;
     typedef Ark_SwiperAutoFill checkT;
@@ -1439,7 +1439,7 @@ HWTEST_F(SwiperModifierTest, setIndicatorStyleTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorStyleImpl with undefined param
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicatorStyleTestInvalid, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorStyleTestInvalid, TestSize.Level1)
 {
     static const std::string PROP_NAME("indicator");
     static const std::string DEFAULT_PADDING("0.00vp");

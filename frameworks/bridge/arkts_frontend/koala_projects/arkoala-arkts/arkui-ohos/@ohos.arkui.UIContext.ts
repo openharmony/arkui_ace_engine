@@ -41,6 +41,7 @@ import { TextMenuOptions } from "arkui/component/textCommon"
 import { Nullable } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
 import { uiObserver } from "@ohos/arkui/observer"
+import { mediaquery } from '@ohos/mediaquery'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
 import inspector from "@ohos/arkui/inspector"
@@ -83,6 +84,19 @@ export class Font {
         let fontInfo : FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
         ArkUIAniModule._Common_Restore_InstanceId();
         return fontInfo;
+    }
+}
+
+export class MediaQuery {
+    instanceId_: int32 = 100000;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+    public matchMediaSync(condition: string): mediaquery.MediaQueryListener {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let mediaQueryListener = mediaquery.matchMediaSync(condition);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return mediaQueryListener;
     }
 }
 
@@ -299,6 +313,11 @@ export class UIContext {
     public getFont() : Font {
         return this.font_;
     }
+
+    public getMediaQuery(): MediaQuery {
+        return new MediaQuery(this.instanceId_);
+    }
+
     public getMeasureUtils() : MeasureUtils {
         return this.measureUtils_;
     }
@@ -340,7 +359,7 @@ export class UIContext {
             return null;
         }
         let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
-        if (node) {
+        if (!node) {
             node = FrameNodeUtils.createFrameNode(this, retval);
         }
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -354,7 +373,7 @@ export class UIContext {
             return null;
         }
         let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
-        if (node) {
+        if (!node) {
             node = FrameNodeUtils.createFrameNode(this, retval);
         }
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -368,7 +387,7 @@ export class UIContext {
             return null;
         }
         let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
-        if (node) {
+        if (!node) {
             node = FrameNodeUtils.createFrameNode(this, retval);
         }
         ArkUIAniModule._Common_Restore_InstanceId();

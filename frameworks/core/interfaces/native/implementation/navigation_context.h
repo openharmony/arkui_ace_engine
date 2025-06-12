@@ -85,6 +85,7 @@ struct PopInfo {
 };
 
 using PushDestinationResultType = int32_t;
+using ReplaceDestinationResultType = int32_t;
 
 class NavigationStack;
 
@@ -122,6 +123,8 @@ public:
         const std::optional<NavigationOptions>& optionParam);
     void ReplacePath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     void ReplacePathByName(std::string name, const ParamType&  param, const std::optional<bool>& animated);
+    ReplaceDestinationResultType ReplaceDestination(PathInfo info,
+        const std::optional<NavigationOptions>& optionParam);
     void SetIsReplace(enum IsReplace value);
     void SetAnimated(bool value);
     PathInfo Pop(bool isAnimated);

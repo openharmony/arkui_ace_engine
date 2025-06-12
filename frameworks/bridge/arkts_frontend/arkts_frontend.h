@@ -25,8 +25,10 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
+#include "frameworks/bridge/common/media_query/media_query_info.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
@@ -38,6 +40,7 @@ typedef struct __ani_vm ani_vm;
 
 namespace OHOS::Ace {
 using InspectorFunc = std::function<void()>;
+using MediaQueryCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 class InspectorEvent : public virtual AceType {
     DECLARE_ACE_TYPE(InspectorEvent, AceType)
 public:
@@ -65,9 +68,23 @@ public:
     explicit ArktsFrontend(void* runtime);
     ~ArktsFrontend() override = default;
 
+    void SetMediaQueryCallback(MediaQueryCallback&& mediaQueryCallback)
+    {
+        mediaQueryCallbacks_ = mediaQueryCallback;
+    }
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override
     {
         taskExecutor_ = taskExecutor;
+
+        auto mediaQueryCallback = [weakEngine = AceType::WeakClaim(this)](
+                                         const std::string& callbackId, const std::string& args) {
+            auto arktsFrontend = weakEngine.Upgrade();
+            if (!arktsFrontend) {
+                return;
+            }
+            arktsFrontend->CallbackMediaQuery(callbackId, args);
+        };
+        SetMediaQueryCallback(std::move(mediaQueryCallback));
         return true;
     }
 
@@ -91,6 +108,13 @@ public:
     void PushPage(const std::string& url, const std::string& params) override {}
 
     void AddPage(const RefPtr<AcePage>& page) override {}
+
+    void* PushExtender(const std::string& url, const std::string& params) override;
+    void* ReplaceExtender(
+        const std::string& url, const std::string& params, std::function<void()>&& finishCallback) override;
+    void* RunPageExtender(const std::string& url, const std::string& params) override;
+    void BackExtender(const std::string& url, const std::string& params) override;
+    void ClearExtender() override;
 
     RefPtr<AcePage> GetPage(int32_t /*pageId*/) const override
     {
@@ -132,7 +156,9 @@ public:
     }
     void OnShow() override {}
     void OnHide() override {}
-    void OnConfigurationUpdated(const std::string& data) override {}
+    void OnConfigurationUpdated(const std::string& data) override {
+        OnMediaQueryUpdate();
+    }
     void OnSaveAbilityState(std::string& data) override {}
     void OnRestoreAbilityState(const std::string& data) override {}
     void OnNewWant(const std::string& data) override {}
@@ -153,7 +179,42 @@ public:
     void OnNewRequest(const std::string& data) override {}
     void OnMemoryLevel(const int32_t level) override {}
     void CallRouterBack() override {}
-    void OnSurfaceChanged(int32_t width, int32_t height) override {}
+    void OnSurfaceChanged(int32_t width, int32_t height) override {
+        if (mediaQueryInfo_->GetIsInit()) {
+            mediaQueryInfo_->SetIsInit(false);
+        }
+        mediaQueryInfo_->EnsureListenerIdValid();
+        OnMediaQueryUpdate(true);
+    }
+    void OnMediaQueryUpdate(bool isSynchronous = false)
+    {
+        auto containerId = Container::CurrentIdSafely();
+        bool isInSubwindow = containerId >= 1000000;
+        if (isInSubwindow) {
+            return;
+        }
+        if (mediaQueryInfo_->GetIsInit()) {
+            return;
+        }
+
+        auto callback = [weak = AceType::WeakClaim(this)] {
+            auto frontend = weak.Upgrade();
+            if (!frontend) {
+                return;
+            }
+            const auto& info = frontend->mediaQueryInfo_->GetMediaQueryInfo();
+            const auto& listenerId = frontend->mediaQueryInfo_->GetListenerId();
+            frontend->mediaQueryCallbacks_(listenerId, info);
+            frontend->mediaQueryInfo_->ResetListenerId();
+        };
+        auto container = Container::Current();
+        if (container && container->IsUseStageModel() && isSynchronous) {
+            callback();
+            return;
+        }
+        taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
+    }
+    
     void OnLayoutCompleted(const std::string& componentId) override
     {
         auto iter = layoutCallbacks_.find(componentId);
@@ -271,6 +332,24 @@ public:
         drawCallbacks_.erase(componentId);
     }
 
+
+    virtual void CallbackMediaQuery(const std::string& callbackId, const std::string& args)
+    {
+        if (mediaUpdateCallback_) {
+            mediaUpdateCallback_(this);
+        }
+    }
+
+    void RegisterMediaUpdateCallback(std::function<void(ArktsFrontend*)> cb)
+    {
+        mediaUpdateCallback_ = std::move(cb);
+    }
+
+    void UnregisterMediaUpdateCallback()
+    {
+        mediaUpdateCallback_ = nullptr;
+    }
+
     ani_object CallGetUIContextFunc();
 
     void SetAniContext(int32_t instanceId, ani_ref* context);
@@ -296,6 +375,9 @@ private:
     
     std::map<std::string, RefPtr<InspectorEvent>> layoutCallbacks_;
     std::map<std::string, RefPtr<InspectorEvent>> drawCallbacks_;
+    MediaQueryCallback mediaQueryCallbacks_;
+    RefPtr<Framework::MediaQueryInfo> mediaQueryInfo_ = AceType::MakeRefPtr<Framework::MediaQueryInfo>();
+    std::function<void(ArktsFrontend*)> mediaUpdateCallback_;
 };
 
 } // namespace OHOS::Ace

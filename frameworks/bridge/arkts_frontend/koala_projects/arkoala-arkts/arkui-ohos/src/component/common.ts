@@ -295,7 +295,7 @@ export class TransitionEffect implements MaterializedBase {
 }
 export interface BaseEvent {
     target: EventTarget
-    timestamp: int64
+    timestamp: number
     source: SourceType
     axisHorizontal?: number | undefined
     axisVertical?: number | undefined
@@ -319,10 +319,10 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     set target(target: EventTarget) {
         this.setTarget(target)
     }
-    get timestamp(): int64 {
+    get timestamp(): number {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: int64) {
+    set timestamp(timestamp: number) {
         this.setTimestamp(timestamp)
     }
     get source(): SourceType {
@@ -421,11 +421,11 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setTarget_serialize(target_casted)
         return
     }
-    private getTimestamp(): int64 {
+    private getTimestamp(): number {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: int64): void {
-        const timestamp_casted = timestamp as (int64)
+    private setTimestamp(timestamp: number): void {
+        const timestamp_casted = timestamp as (number)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -539,12 +539,12 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setTarget(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getTimestamp_serialize(): int64 {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTimestamp(this.peer!.ptr)
+    private getTimestamp_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTimestamp(this.peer!.ptr) as number
         return retval
     }
-    private setTimestamp_serialize(timestamp: int64): void {
-        ArkUIGeneratedNativeModule._BaseEvent_setTimestamp(this.peer!.ptr, timestamp)
+    private setTimestamp_serialize(timestamp: number): void {
+        ArkUIGeneratedNativeModule._BaseEvent_setTimestamp(this.peer!.ptr, timestamp as int64)
     }
     private getSource_serialize(): SourceType {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getSource(this.peer!.ptr)
@@ -984,7 +984,7 @@ export interface KeyEvent {
     keySource: KeySource
     deviceId: number
     metaKey: number
-    timestamp: int64
+    timestamp: number
     stopPropagation: (() => void)
     intentionCode: IntentionCode
     unicode?: number | undefined
@@ -1031,10 +1031,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set metaKey(metaKey: number) {
         this.setMetaKey(metaKey)
     }
-    get timestamp(): int64 {
+    get timestamp(): number {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: int64) {
+    set timestamp(timestamp: number) {
         this.setTimestamp(timestamp)
     }
     get stopPropagation(): (() => void) {
@@ -1119,11 +1119,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setMetaKey_serialize(metaKey_casted)
         return
     }
-    private getTimestamp(): int64 {
+    private getTimestamp(): number {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: int64): void {
-        const timestamp_casted = timestamp as (int64)
+    private setTimestamp(timestamp: number): void {
+        const timestamp_casted = timestamp as (number)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -1204,12 +1204,12 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     private setMetaKey_serialize(metaKey: number): void {
         ArkUIGeneratedNativeModule._KeyEvent_setMetaKey(this.peer!.ptr, metaKey)
     }
-    private getTimestamp_serialize(): int64 {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr)
+    private getTimestamp_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr) as number
         return retval
     }
-    private setTimestamp_serialize(timestamp: int64): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
+    private setTimestamp_serialize(timestamp: number): void {
+        ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp as int64)
     }
     private getStopPropagation_serialize(): (() => void) {
         // @ts-ignore

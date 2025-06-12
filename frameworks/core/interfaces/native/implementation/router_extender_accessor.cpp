@@ -34,20 +34,12 @@ Ark_NativePointer PushImpl(const Ark_String* url)
     if (pushUrl.empty()) {
         return nullptr;
     }
-    NG::RouterPageInfo routerPageInfo;
-    routerPageInfo.url = pushUrl;
-    routerPageInfo.params = "";
-    routerPageInfo.recoverable = true;
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
     auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
     CHECK_NULL_RETURN(delegate, nullptr);
-    auto pageRouterManager = delegate->GetPageRouterManager();
-    if (!pageRouterManager) {
-        return nullptr;
-    }
-    auto pageNode = pageRouterManager->PushExtender(routerPageInfo);
-    return pageNode.GetRawPtr();
+    auto pageNode = delegate->PushExtender(pushUrl, "");
+    return pageNode;
 }
 
 Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Callback_Void* finishCallback)
@@ -58,26 +50,18 @@ Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Callback_Void* fi
     if (pushUrl.empty()) {
         return nullptr;
     }
-    NG::RouterPageInfo routerPageInfo;
-    routerPageInfo.url = pushUrl;
-    routerPageInfo.params = "";
-    routerPageInfo.recoverable = true;
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
     auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
     CHECK_NULL_RETURN(delegate, nullptr);
-    auto pageRouterManager = delegate->GetPageRouterManager();
-    if (!pageRouterManager) {
-        return nullptr;
-    }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED){
         callback = [finish = CallbackHelper(finishCallback->value)]() {
             finish.Invoke();
         };
     }
-    auto pageNode = pageRouterManager->ReplaceExtender(routerPageInfo, std::move(callback));
-    return pageNode.GetRawPtr();
+    auto pageNode = delegate->ReplaceExtender(pushUrl, "", std::move(callback));
+    return pageNode;
 }
 
 void MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pageNode)
@@ -108,14 +92,7 @@ void BackImpl()
     CHECK_NULL_VOID(container);
     auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
     CHECK_NULL_VOID(delegate);
-    auto pageRouterManager = delegate->GetPageRouterManager();
-    if (!pageRouterManager) {
-        return;
-    }
-    NG::RouterPageInfo routerPageInfo;
-    routerPageInfo.url = "";
-    routerPageInfo.params = "";
-    pageRouterManager->BackWithTarget(routerPageInfo);
+    delegate->BackExtender("", "");
 }
 
 Ark_NativePointer RunPageImpl(const Ark_String* url)
@@ -125,19 +102,12 @@ Ark_NativePointer RunPageImpl(const Ark_String* url)
     if (pushUrl.empty()) {
         return nullptr;
     }
-    NG::RouterPageInfo routerPageInfo;
-    routerPageInfo.url = pushUrl;
-    routerPageInfo.params = "";
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
     auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
     CHECK_NULL_RETURN(delegate, nullptr);
-    auto pageRouterManager = delegate->GetPageRouterManager();
-    if (!pageRouterManager) {
-        return nullptr;
-    }
-    auto pageNode = pageRouterManager->RunPageExtender(routerPageInfo);
-    return pageNode.GetRawPtr();
+    auto pageNode = delegate->RunPageExtender(pushUrl, "");
+    return pageNode;
 }
 
 void ClearImpl()
@@ -146,14 +116,7 @@ void ClearImpl()
     CHECK_NULL_VOID(container);
     auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
     CHECK_NULL_VOID(delegate);
-    auto pageRouterManager = delegate->GetPageRouterManager();
-    if (!pageRouterManager) {
-        return;
-    }
-    NG::RouterPageInfo routerPageInfo;
-    routerPageInfo.url = "";
-    routerPageInfo.params = "";
-    pageRouterManager->Clear();
+    delegate->ClearExtender();
 }
 }
 

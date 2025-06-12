@@ -8895,6 +8895,17 @@ declare class ComponentObserver {
 declare class UIInspector {
     createComponentObserver(id: string): ComponentObserver;
 }
+declare class MediaQueryResult {
+    readonly matches: boolean;
+    readonly media: string;
+}
+declare class MediaQueryListener {
+    on(type: 'change', callback: Callback<MediaQueryResult>): void;
+    off(type: 'change', callback?: Callback<MediaQueryResult>): void;
+}
+declare class MediaQuery {
+    matchMediaSync(condition: string): MediaQueryListener;
+}
 declare class UIObserver {
     on(type: string, callback: () => void): void;
     off(type: string, callback?: () => void): void;
