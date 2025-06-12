@@ -147,11 +147,12 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     auto isInRegion = GetInnerMenu(innerMenuNode, position);
     CHECK_NULL_VOID(innerMenuNode);
 
-    if (isClearLastMenuItem_) {
+    if (isClearLastMenuItem_ || isInRegion) {
         ClearLastMenuItem();
     }
     // get menuNode's touch region
     if (isInRegion) {
+        isClearLastMenuItem_ = true;
         currentTouchItem_ = FindTouchedMenuItem(innerMenuNode, position);
         ChangeCurMenuItemBgColor();
         lastTouchItem_ = currentTouchItem_;
