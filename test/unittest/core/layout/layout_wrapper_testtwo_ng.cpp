@@ -964,6 +964,176 @@ HWTEST_F(LayoutWrapperTestTwoNg, IgnoreLayoutProcessTagFuncs, TestSize.Level0)
     EXPECT_EQ(layoutWrapper->GetIgnoreLayoutProcess(), false);
 }
 /**
+ * @tc.name: EdgeControlOnGetAccumulatedSafeAreaExpand
+ * @tc.desc: Test GetAccumulatedSafeAreaExpand with edges options
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, EdgeControlOnGetAccumulatedSafeAreaExpand, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto [node0, layoutWrapper0] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    auto [child, layoutWrapper1] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_1, RectF(10.0f, 20.0f, 75.0f, 55.0f));
+    child->MountToParent(node0);
+
+    PaddingProperty safeAreaPadding = {
+        .left = CalcLength(10.0f),
+        .right = CalcLength(15.0f),
+        .top = CalcLength(20.0f),
+        .bottom = CalcLength(25.0f)
+    };
+    layoutWrapper0->GetLayoutProperty()->UpdateSafeAreaPadding(safeAreaPadding);
+
+    ExpandEdges expectedRes = {
+        .left = std::make_optional<float>(10.0f),
+        .right = std::nullopt,
+        .top = std::make_optional<float>(20.0f),
+        .bottom = std::nullopt
+    };
+
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_START | NG::LAYOUT_SAFE_AREA_EDGE_TOP
+    }), expectedRes);
+}
+
+/**
+ * @tc.name: TypeControlOnGetAccumulatedSafeAreaExpand
+ * @tc.desc: Test GetAccumulatedSafeAreaExpand with Types options
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, TypeControlOnGetAccumulatedSafeAreaExpand, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto [parent, parentWrapper] =
+        CreateNodeAndWrapper(V2::STAGE_ETS_TAG, NODE_ID_0, RectF(0.0f, 0.0f, 200.0f, 200.0f));
+    auto [node0, layoutWrapper0] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_1, RectF(0.0f, 30.0f, 100.0f, 140.0f));
+    node0->MountToParent(parent);
+    auto [child, layoutWrapper1] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_2, RectF(10.0f, 20.0f, 75.0f, 95.0f));
+    child->MountToParent(node0);
+    
+    pipeline->stageManager_ = AceType::MakeRefPtr<StageManager>(parent);
+    pipeline->safeAreaManager_->SetIgnoreSafeArea(false);
+    pipeline->safeAreaManager_->SetIsFullScreen(false);
+    pipeline->safeAreaManager_->SetIsNeedAvoidWindow(true);
+    pipeline->safeAreaManager_->UpdateSystemSafeArea(
+        NG::SafeAreaInsets({0.0f, 0.0f}, {0.0f, 30.0f}, {0.0f, 0.0f}, {170.0f, 200.0f}));
+
+    PaddingProperty safeAreaPadding = {
+        .left = CalcLength(10.0f),
+        .right = CalcLength(15.0f),
+        .top = CalcLength(20.0f),
+        .bottom = CalcLength(25.0f)
+    };
+    layoutWrapper0->GetLayoutProperty()->UpdateSafeAreaPadding(safeAreaPadding);
+
+    ExpandEdges expectedRes = {
+        .top = std::make_optional<float>(50.0f),
+        .bottom = std::make_optional<float>(55.0f),
+        .left = std::make_optional<float>(10.0f),
+        .right = std::make_optional<float>(15.0f)
+    };
+
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }), expectedRes);
+
+    expectedRes.top = std::make_optional<float>(20.0f);
+    expectedRes.bottom = std::make_optional<float>(25.0f);
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }), expectedRes);
+}
+
+/**
+ * @tc.name: StrategyControlOnGetAccumulatedSafeAreaExpand001
+ * @tc.desc: Test GetAccumulatedSafeAreaExpand with Strategy options
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto [node0, layoutWrapper0] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, RectF(0.0f, 0.0f, 200.0f, 200.0f));
+    auto [child, layoutWrapper1] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_1, RectF(10.0f, 20.0f, 165.0f, 145.0f));
+    child->MountToParent(node0);
+    PresetSceneForStrategyTest(layoutWrapper0, layoutWrapper1);
+
+    ExpandEdges expectedRes;
+    /**
+     * @tc.steps: step1. base scene
+     */
+    expectedRes = {
+        .left = std::make_optional<float>(10.0f),
+        .right = std::nullopt,
+        .top = std::make_optional<float>(20.0f),
+        .bottom = std::nullopt
+    };
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }), expectedRes);
+
+    /**
+     * @tc.steps: step2. from self
+     */
+    expectedRes = {
+        .left = std::make_optional<float>(20.0f),
+        .right = std::make_optional<float>(15.0f),
+        .top = std::make_optional<float>(30.0f),
+        .bottom = std::make_optional<float>(15.0f)
+    };
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(true, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }), expectedRes);
+}
+
+/**
+ * @tc.name: StrategyControlOnGetAccumulatedSafeAreaExpand002
+ * @tc.desc: Test GetAccumulatedSafeAreaExpand with Strategy options
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand002, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto [node0, layoutWrapper0] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, RectF(0.0f, 0.0f, 200.0f, 200.0f));
+    auto [child, layoutWrapper1] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_1, RectF(10.0f, 20.0f, 165.0f, 145.0f));
+    child->MountToParent(node0);
+    PresetSceneForStrategyTest(layoutWrapper0, layoutWrapper1);
+
+    ExpandEdges expectedRes = {
+        .left = std::make_optional<float>(10.0f),
+        .right = std::make_optional<float>(15.0f),
+        .top = std::make_optional<float>(20.0f),
+        .bottom = std::make_optional<float>(25.0f)
+    };
+    /**
+     * @tc.steps: step3. from margin
+     */
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }, IgnoreStrategy::FROM_MARGIN), expectedRes);
+
+    /**
+     * @tc.steps: step4. from margin, with invalid fromSelf
+     */
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(true, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }, IgnoreStrategy::FROM_MARGIN), expectedRes);
+}
+
+/**
  * @tc.name: StrategyControlOnGetAccumulatedSafeAreaExpand003
  * @tc.desc: Test GetAccumulatedSafeAreaExpand with Strategy options
  * @tc.type: FUNC
@@ -1014,5 +1184,70 @@ HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand00
         .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
         .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
     }, IgnoreStrategy::FROM_MARGIN), expectedRes);
+}
+/**
+ * @tc.name: OverBorderPaddingOnGetAccumulatedSafeAreaExpand
+ * @tc.desc: Test GetAccumulatedSafeAreaExpand over borderPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, OverBorderPaddingOnGetAccumulatedSafeAreaExpand, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto [parent, parentWrapper] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, RectF(0.0f, 0.0f, 200.0f, 200.0f));
+    auto [node0, layoutWrapper0] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_1, RectF(25.0f, 25.0f, 150.0f, 150.0f));
+    node0->MountToParent(parent);
+    auto [child, layoutWrapper1] =
+        CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_2, RectF(25.0f, 25.0f, 100.0f, 100.0f));
+    child->MountToParent(node0);
+
+    PaddingProperty safeAreaPadding = {
+        .left = CalcLength(30.0f),
+        .right = CalcLength(30.0f),
+        .top = CalcLength(30.0f),
+        .bottom = CalcLength(30.0f)
+    };
+    parentWrapper->GetLayoutProperty()->UpdateSafeAreaPadding(safeAreaPadding);
+    layoutWrapper0->GetLayoutProperty()->UpdateSafeAreaPadding(safeAreaPadding);
+
+    PaddingProperty padding0 = {
+        .left = CalcLength(1.0f),
+        .right = CalcLength(1.0f),
+        .top = CalcLength(1.0f),
+        .bottom = CalcLength(1.0f)
+    };
+    layoutWrapper0->GetLayoutProperty()->UpdatePadding(padding0);
+
+    ExpandEdges expectedRes;
+    /**
+     * @tc.steps: step1. overlay with whole borderPadding
+     */
+    expectedRes = {
+        .left = std::make_optional<float>(24.0f),
+        .right = std::make_optional<float>(24.0f),
+        .top = std::make_optional<float>(24.0f),
+        .bottom = std::make_optional<float>(24.0f)
+    };
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }), expectedRes);
+
+    /**
+     * @tc.steps: step2. overlay without whole borderPadding
+     */
+    padding0.left = CalcLength(0.0f);
+    layoutWrapper0->GetLayoutProperty()->UpdatePadding(padding0);
+    expectedRes = {
+        .left = std::make_optional<float>(50.0f),
+        .right = std::make_optional<float>(50.0f),
+        .top = std::make_optional<float>(50.0f),
+        .bottom = std::make_optional<float>(50.0f)
+    };
+    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    }), expectedRes);
 }
 }
