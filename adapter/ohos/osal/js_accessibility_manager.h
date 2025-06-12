@@ -235,6 +235,11 @@ public:
         const int64_t nodeId,
         const RefPtr<PipelineBase>& context,
         GetInfoByNodeId& infoOfNode);
+    bool CachePageEventByController(
+        const AccessibilityEvent& accessibilityEvent,
+        const std::string& componentType,
+        int32_t pageId,
+        int32_t containerId);
 
     void SendCacheAccessibilityEvent(int32_t instanceId);
     void SendCacheAccessibilityEventForHost(const int32_t pageId);
@@ -752,10 +757,12 @@ private:
         const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
         const std::vector<std::string> pagePaths);
     
-    bool CheckPageEventValidInCache();
-    bool CheckPageEventByPageInCache(int32_t pageId);
-    void ReleaseAllCacheAccessibilityEvent();
-    void ReleaseCacheAccessibilityEvent(const int32_t pageId);
+    bool CheckPageEventValidInCache(int32_t containerId);
+    bool CheckPageEventByPageInCache(int32_t containerId, int32_t pageId);
+    void ReleaseAllCacheAccessibilityEvent(int32_t containerId);
+    void ReleaseCacheAccessibilityEvent(int32_t containerId, int32_t pageId);
+    void ReleaseAccessibilityEventList(
+        const std::list<std::pair<int32_t, AccessibilityEvent>>& eventList);
 
     SearchSurfaceIdRet SearchElementInfoBySurfaceId(
         const std::string& surfaceId, const int32_t windowId,
