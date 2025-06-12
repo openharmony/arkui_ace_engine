@@ -53,14 +53,14 @@ bool ScrollAdjustmanager::ChangeScrollStateIfNeed(ScrollState scrollState)
 int32_t ScrollAdjustmanager::AdjustEndIndex(int32_t endIndex)
 {
     LOGD("ScrollAdjustmanager GetWhiteBlockIndexValue is %{public}d",
-        SystemProperties::GetWhiteBlockIndexValue().c_str());
+        SystemProperties::GetWhiteBlockIndexValue());
     return endIndex + SystemProperties::GetWhiteBlockIndexValue();
 }
 
 int32_t ScrollAdjustmanager::AdjustCachedCount(int32_t cachedCount)
 {
     LOGD("ScrollAdjustmanager GetWhiteBlockCacheCountValue is %{public}d",
-        SystemProperties::GetWhiteBlockCacheCountValue().c_str());
+        SystemProperties::GetWhiteBlockCacheCountValue());
     return cachedCount + SystemProperties::GetWhiteBlockCacheCountValue();
 }
 
