@@ -1620,8 +1620,9 @@ HWTEST_F(TextPatternTestNg, ActSetSelection001, TestSize.Level1)
     int32_t start = 1;
     int32_t end = 1;
     textPattern->textForDisplay_ = u"asdfghjkl";
+    OffsetF offset = {0, 0};
     textPattern->ActSetSelection(start, end);
-    EXPECT_EQ(textPattern->textForDisplay_.length(), 9);
+    EXPECT_EQ(textPattern->parentGlobalOffset_, offset);
 }
 
 /**
@@ -1638,8 +1639,9 @@ HWTEST_F(TextPatternTestNg, ActSetSelection002, TestSize.Level1)
     int32_t start = 1;
     int32_t end = 10;
     textPattern->textForDisplay_ = u"asdfghjkl";
+    OffsetF offset = {0, 0};
     textPattern->ActSetSelection(start, end);
-    EXPECT_EQ(textPattern->textForDisplay_.length(), 9);
+    EXPECT_EQ(textPattern->parentGlobalOffset_, offset);
 }
 
 /**
@@ -1661,7 +1663,7 @@ HWTEST_F(TextPatternTestNg, ActSetSelection003, TestSize.Level1)
     textPattern->textSelector_.firstHandle = { 1, 2, 1, 2 };
     textPattern->textSelector_.secondHandle = { 1, 2, 1, 2 };
     textPattern->ActSetSelection(start, end);
-    EXPECT_EQ(textPattern->textForDisplay_.length(), 9);
+    EXPECT_EQ(textPattern->selectOverlay_, 1);
 }
 
 /**
@@ -1683,7 +1685,7 @@ HWTEST_F(TextPatternTestNg, ActSetSelection004, TestSize.Level1)
     textPattern->textSelector_.firstHandle = { 1, 2, 1, 2 };
     textPattern->textSelector_.secondHandle = {};
     textPattern->ActSetSelection(start, end);
-    EXPECT_EQ(textPattern->textForDisplay_.length(), 9);
+    EXPECT_EQ(textPattern->selectOverlay_, 1);
 }
 
 /**
@@ -1697,9 +1699,7 @@ HWTEST_F(TextPatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    auto frameNode_ = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    RefPtr<LayoutWrapperNode> dirty = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> dirty = frameNode->CreateLayoutWrapper(false, false);
     ASSERT_NE(dirty, nullptr);
     DirtySwapConfig config;
     config.skipMeasure = true;
@@ -1719,9 +1719,7 @@ HWTEST_F(TextPatternTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    auto frameNode_ = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    RefPtr<LayoutWrapperNode> dirty = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> dirty = frameNode->CreateLayoutWrapper(false, false);
     ASSERT_NE(dirty, nullptr);
     DirtySwapConfig config;
     config.skipMeasure = false;
@@ -1741,9 +1739,7 @@ HWTEST_F(TextPatternTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    auto frameNode_ = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    RefPtr<LayoutWrapperNode> dirty = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> dirty = frameNode->CreateLayoutWrapper(false, false);
     ASSERT_NE(dirty, nullptr);
     DirtySwapConfig config;
     config.skipMeasure = true;
@@ -1763,9 +1759,7 @@ HWTEST_F(TextPatternTestNg, OnDirtyLayoutWrapperSwap004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    auto frameNode_ = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    RefPtr<LayoutWrapperNode> dirty = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> dirty = frameNode->CreateLayoutWrapper(false, false);
     ASSERT_NE(dirty, nullptr);
     DirtySwapConfig config;
     config.skipMeasure = false;
