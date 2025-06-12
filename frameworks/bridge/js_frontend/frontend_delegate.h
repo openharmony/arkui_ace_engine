@@ -282,7 +282,7 @@ public:
         return {};
     }
 
-    virtual void GetSnapshotWithRange(const NG::NodeIdentity startID, const NG::NodeIdentity endID,
+    virtual void GetSnapshotWithRange(const NG::NodeIdentity& startID, const NG::NodeIdentity& endID,
         const bool isStartRect,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         const NG::SnapshotOptions& options)
