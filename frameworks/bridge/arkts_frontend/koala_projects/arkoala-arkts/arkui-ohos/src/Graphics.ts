@@ -66,11 +66,30 @@ export enum LengthUnit {
     PERCENT = 3,
     LPX = 4
 }
-
-export class LengthMetrics {
+export class LengthMetricsInternal {
+    public static fromPtr(ptr: KPointer): LengthMetrics {
+        const obj: LengthMetrics = new LengthMetrics(0)
+        obj.peer = new Finalizable(ptr, LengthMetrics.getFinalizer())
+        return obj
+    }
+}
+export class LengthMetrics implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
     public unit: LengthUnit;
     public value: number;
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    static ctor_lengthmetrics(): KPointer {
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_ctor()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._LengthMetrics_getFinalizer()
+    }
     constructor(value: number, unit?: LengthUnit) {
+        const ctorPtr: KPointer = LengthMetrics.ctor_lengthmetrics()
+        this.peer = new Finalizable(ctorPtr, LengthMetrics.getFinalizer())
         this.value = value;
         if (!unit || unit < LengthUnit.PX || unit > LengthUnit.LPX) {
             this.unit = LengthUnit.VP;
@@ -79,6 +98,8 @@ export class LengthMetrics {
             this.unit = unit!;
             this.value = value;
         }
+        this.setValue(this.value);
+        this.setUnit(this.unit);
     }
     static px(value: number) {
         return new LengthMetrics(value, LengthUnit.PX);
@@ -98,6 +119,22 @@ export class LengthMetrics {
     static resource(res: Resource) {
         //   let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
         return new LengthMetrics(0, LengthUnit.PX);
+    }
+    private setUnit(unit: LengthUnit): void {
+        const unit_casted = unit as (LengthUnit)
+        this.setUnit_serialize(unit_casted)
+        return
+    }
+    private setValue(value: number): void {
+        const value_casted = value as (number)
+        this.setValue_serialize(value_casted)
+        return
+    }
+    private setUnit_serialize(unit: LengthUnit): void {
+        ArkUIGeneratedNativeModule._LengthMetrics_setUnit(this.peer!.ptr, unit.valueOf())
+    }
+    private setValue_serialize(value: number): void {
+        ArkUIGeneratedNativeModule._LengthMetrics_setValue(this.peer!.ptr, value)
     }
   }
 
