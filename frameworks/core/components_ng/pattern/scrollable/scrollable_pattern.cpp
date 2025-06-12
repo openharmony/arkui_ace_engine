@@ -2888,8 +2888,9 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     auto offsetPX = Dimension(finalOffset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
     auto scrollState = GetScrollState();
-    if (SystemProperties::IsWhiteBlockEnabled()) {
-        scrollState = ScrollAdjustmanager::GetInstance().ChangeScrollStateIfNeed(scrollState);
+    if (SystemProperties::IsWhiteBlockEnabled() &&
+        ScrollAdjustmanager::GetInstance().ChangeScrollStateIfNeed(scrollState)) {
+        onScroll(0.0_vp, ScrollState::IDLE);
     }
     bool isTriggered = false;
     if (!NearZero(finalOffset)) {

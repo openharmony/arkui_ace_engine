@@ -25,7 +25,7 @@ public:
     static ScrollAdjustmanager& GetInstance();
     ScrollAdjustmanager() = default;
     ~ScrollAdjustmanager() = default;
-    ScrollState ChangeScrollStateIfNeed(ScrollState scrollState);
+    bool ChangeScrollStateIfNeed(ScrollState scrollState);
     int32_t AdjustEndIndex(int32_t endIndex);
     int32_t AdjustCachedCount(int32_t cachedCount);
 private:

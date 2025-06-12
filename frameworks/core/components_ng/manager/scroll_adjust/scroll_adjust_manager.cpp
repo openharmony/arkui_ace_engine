@@ -27,40 +27,40 @@ ScrollAdjustmanager& ScrollAdjustmanager::GetInstance()
     return scrollAdjustmanager;
 }
 
-ScrollState ScrollAdjustmanager::ChangeScrollStateIfNeed(ScrollState scrollState)
+bool ScrollAdjustmanager::ChangeScrollStateIfNeed(ScrollState scrollState)
 {
     if (!SystemProperties::IsWhiteBlockIdleChange()) {
         LOGD("ScrollAdjustmanager Idle Change is false");
-        return scrollState;
+        return false;
     }
     if ((scrollState == ScrollState::SCROLL && !idle_) ||
         (scrollState == ScrollState::FLING && idle_) ||
         (scrollState == ScrollState::IDLE && idle_)) {
-        return  scrollState;
+        return  false;
     }
     if (scrollState == ScrollState::SCROLL && idle_) {
         LOGD("ScrollAdjustmanager ChangeScrollStateIfNeed return IDLE");
         idle_ = false;
-        return ScrollState::IDLE;
+        return true;
     }
     if ((scrollState == ScrollState::FLING && !idle_) ||
         (scrollState == ScrollState::IDLE && !idle_)) {
         idle_ = true;
     }
-    return scrollState;
+    return false;
 }
 
 int32_t ScrollAdjustmanager::AdjustEndIndex(int32_t endIndex)
 {
-    LOGD("ScrollAdjustmanager GetWhiteBlockIndexValue is %{public}s",
-    SystemProperties::GetWhiteBlockIndexValue().c_str());
+    LOGD("ScrollAdjustmanager GetWhiteBlockIndexValue is %{public}d",
+        SystemProperties::GetWhiteBlockIndexValue().c_str());
     return endIndex + SystemProperties::GetWhiteBlockIndexValue();
 }
 
 int32_t ScrollAdjustmanager::AdjustCachedCount(int32_t cachedCount)
 {
-    LOGD("ScrollAdjustmanager GetWhiteBlockCacheCountValue is %{public}s",
-    SystemProperties::GetWhiteBlockCacheCountValue().c_str());
+    LOGD("ScrollAdjustmanager GetWhiteBlockCacheCountValue is %{public}d",
+        SystemProperties::GetWhiteBlockCacheCountValue().c_str());
     return cachedCount + SystemProperties::GetWhiteBlockCacheCountValue();
 }
 
