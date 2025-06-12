@@ -3294,7 +3294,6 @@ RectF RosenRenderContext::AdjustPaintRect()
             resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
         rect.SetLeft(resultX.ConvertToPx() - anchorX.value_or(0));
         rect.SetTop(resultY.ConvertToPx() - anchorY.value_or(0));
-        geometryNode->SetFrameOffset(rect.GetOffset());
         geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
         return rect;
     }
@@ -3304,7 +3303,6 @@ RectF RosenRenderContext::AdjustPaintRect()
             GetRectOffsetWithPositionEdges(positionEdges, widthPercentReference, heightPercentReference);
         rect.SetLeft(rectOffset.GetX() - anchorX.value_or(0));
         rect.SetTop(rectOffset.GetY() - anchorY.value_or(0));
-        geometryNode->SetFrameOffset(rect.GetOffset());
         geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
         return rect;
     }
