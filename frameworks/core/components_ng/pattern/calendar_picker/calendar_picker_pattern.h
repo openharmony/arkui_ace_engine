@@ -33,6 +33,11 @@ public:
     CalendarPickerPattern() : LinearLayoutPattern(false) {};
     ~CalendarPickerPattern() override = default;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     void OnColorModeChange(uint32_t colorMode) override
     {
         LinearLayoutPattern::OnColorModeChange(colorMode);
@@ -235,7 +240,7 @@ private:
     uint32_t yearPrefixZeroCount_ = 0;
     uint32_t monthPrefixZeroCount_ = 0;
     uint32_t dayPrefixZeroCount_ = 0;
-	
+
     int32_t yearIndex_ = 0;
     int32_t monthIndex_ = 2;
     int32_t dayIndex_ = 4;
