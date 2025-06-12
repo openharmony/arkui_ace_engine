@@ -12,16 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { WatchFuncType, WatchIdType, ISubscribedWatches } from "../decorator";
-import { StateMgmtConsole } from "../tools/stateMgmtDFX";
+import { WatchFuncType, WatchIdType, ISubscribedWatches } from '../decorator';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 // WatchFunc: Representaton of a @Watch function isnide V1 decorator class
 export class WatchFunc {
     private static nextWatchId_: WatchIdType = 1;
-    private static readonly watchId2WatchFunc: Map<WatchIdType, WatchFunc>
-        = new Map<WatchIdType, WatchFunc>();
-    private static readonly watchFinalizer: FinalizationRegistry<WatchIdType>
-        = new FinalizationRegistry<WatchIdType>((watchId: WatchIdType) => {
+    private static readonly watchId2WatchFunc: Map<WatchIdType, WatchFunc> =
+        new Map<WatchIdType, WatchFunc>();
+    private static readonly watchFinalizer: FinalizationRegistry<WatchIdType> =
+        new FinalizationRegistry<WatchIdType>((watchId: WatchIdType) => {
             // remove @Watch id from watchId2WatchFunc Map to avoid memory growth
             WatchFunc.watchId2WatchFunc.delete(watchId);
         });
@@ -54,23 +54,23 @@ export class WatchFunc {
         WatchFunc.watchFinalizer.register(this, this.id_);
     }
 
-    public id() {
+    public id(): WatchIdType {
         return this.id_
     }
 
     // replace the watch function 
     // needed for mkProp
-    public setFunc(newFunc : WatchFuncType) : void {
+    public setFunc(newFunc: WatchFuncType): void {
         this.func_ = newFunc;
     }
 
     // register to given object 
     // when object changes it will call Execute 
     // for each subscriber
-    registerMeTo(obj: ISubscribedWatches) {
+    registerMeTo(obj: ISubscribedWatches): void {
         obj.addWatchSubscriber(this.id_);
     }
-    unregisterMeFrom(obj: ISubscribedWatches) {
+    unregisterMeFrom(obj: ISubscribedWatches): void {
         obj.removeWatchSubscriber(this.id_);
     }
     execute(propertyName: string): void {

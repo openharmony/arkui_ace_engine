@@ -53,7 +53,7 @@ function deepCopy<T>(value: T): T {
     // when object property
     return propDeepCopy<T>(value) as T;
 }
- 
+
 export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     implements IPropDecoratedVariable<T> {
     private __soruceValue: IBackingValue<T>;
@@ -61,14 +61,11 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     // initValue is the init value either from parent @Component or local initialized value
     // constructor takes a copy of it
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
-        super("@Prop", owningView, varName, watchFunc);
-        // if (this.validateValue(localInitValue) === false) {
-        //     throw new Error("@State Object-type Value must be ObservedObject")
-        // }
+        super('@Prop', owningView, varName, watchFunc);
         const deepCopyValue = deepCopy<T>(initValue);
         this.__localValue = new DecoratorBackingValue<T>(varName, deepCopyValue)
         // if initValue not from parent, this __sourceValue should never changed
-        this.__soruceValue = new DecoratorBackingValue<T>(varName, initValue); 
+        this.__soruceValue = new DecoratorBackingValue<T>(varName, initValue);
         this.registerWatchForObservedObjectChanges(initValue);
     }
 
@@ -87,10 +84,6 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     public set(newValue: T): void {
         const value = this.__localValue.get(false);
         if (value !== newValue) {
-            // if (this.validateValue(locanewValueInitValue) === false) {
-            //     throw new Error("@State Object-type Value must be ObservedObject")
-            // }
-
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec

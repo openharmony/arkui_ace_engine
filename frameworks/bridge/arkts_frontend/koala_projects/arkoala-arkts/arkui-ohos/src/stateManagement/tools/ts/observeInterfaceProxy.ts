@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import { WatchIdType, ISubscribedWatches } from "../../decorator";
-import { IObservedObject, RenderIdType } from "../../decorator";
-import { SubscribedWatches } from "../../decoratorImpl/decoratorWatch";
-import { IMutableStateMeta } from "../../decorator";
-import { STATE_MGMT_FACTORY } from "../../decorator";
-import { OBSERVE } from "../../decorator";
-import { NullableObject } from "../../base/types";
+import { WatchIdType, ISubscribedWatches } from '../../decorator';
+import { IObservedObject, RenderIdType } from '../../decorator';
+import { SubscribedWatches } from '../../decoratorImpl/decoratorWatch';
+import { IMutableStateMeta } from '../../decorator';
+import { STATE_MGMT_FACTORY } from '../../decorator';
+import { OBSERVE } from '../../decorator';
+import { NullableObject } from '../../base/types';
 
 export class InterfaceProxyHandler<T extends Object> implements ProxyHandler<T>, IObservedObject, ISubscribedWatches {
     private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
@@ -45,7 +45,7 @@ export class InterfaceProxyHandler<T extends Object> implements ProxyHandler<T>,
     }
     public get(target: T, name: string): NullableObject {
         const value = Reflect.get(target, name) as NullableObject;
-        if ((typeof value !== "function") && (this.shouldAddRef())) {
+        if ((typeof value !== 'function') && (this.shouldAddRef())) {
             this.__meta.addRef();
         }
         return value;

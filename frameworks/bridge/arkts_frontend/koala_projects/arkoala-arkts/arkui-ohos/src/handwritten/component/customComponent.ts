@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { ArkStructBase } from "../ArkStructBase"
-import { ArkCommonMethodComponent } from "./common"
-import { UIContext } from "@ohos/arkui/UIContext"
-import { ExtendableComponent } from "./extendableComponent";
+import { ArkStructBase } from '../ArkStructBase';
+import { ArkCommonMethodComponent } from './common';
+import { UIContext } from '@ohos/arkui/UIContext';
+import { ExtendableComponent } from './extendableComponent';
 
 
 class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
