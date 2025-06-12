@@ -446,7 +446,7 @@ public:
     HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
         TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
 
-    void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
+    ACE_NON_VIRTUAL void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
         const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
         TouchRestrict& touchRestrict);
 
