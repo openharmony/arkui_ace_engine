@@ -1851,6 +1851,56 @@ const __attributeMap__ = new Map([
         }
         node._componentAttribute = new ArkTextAreaComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
+    }],
+    ['Button', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkButtonComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Checkbox', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Radio', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkRadioComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Slider', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkSliderComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Toggle', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkToggleComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
     }]
 ]);
 const __eventMap__ = new Map(
