@@ -58,12 +58,15 @@ void HideTitleBar0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     NavDestinationModelStatic::SetHideTitleBar(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
 }
 void HideTitleBar1Impl(Ark_NativePointer node, const Opt_Boolean* hide, const Opt_Boolean* animated)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(hide);
+    CHECK_NULL_VOID(animated);
     NavDestinationModelStatic::SetHideTitleBar(frameNode, Converter::OptConvert<bool>(*hide).value_or(false),
         Converter::OptConvert<bool>(*animated).value_or(false));
 }
@@ -72,8 +75,8 @@ void HideBackButtonImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetHideBackButton(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    NavDestinationModelStatic::SetHideBackButton(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
 }
 void OnShownImpl(Ark_NativePointer node,
                  const Opt_Callback_Void* value)
@@ -700,9 +703,18 @@ void EnableStatusBarImpl(Ark_NativePointer node, const Opt_Boolean* enabled, con
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::Convert<type>(enabled);
-    // auto convValue = Converter::OptConvert<type>(enabled); // for enums
-    // NavDestinationModelNG::SetEnableStatusBar(frameNode, convValue);
+    CHECK_NULL_VOID(enabled);
+    CHECK_NULL_VOID(animated);
+    std::optional<std::pair<bool, bool>> statusBar;
+    if (enabled->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto enable = Converter::Convert<bool>(enabled->value);
+        bool animate = false;
+        if (animated->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            animate = Converter::Convert<bool>(animated->value);
+        }
+        auto statusBar = std::make_pair(enable, animate);
+    }
+    NavDestinationModelStatic::SetEnableStatusBar(frameNode, statusBar);
 }
 } // namespace NavDestinationAttributeModifier
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()

@@ -66,7 +66,10 @@ public:
     static void SetCustomTitle(FrameNode* frameNode, const RefPtr<UINode>& customNode);
     static void SetCustomToolBar(FrameNode* frameNode, const RefPtr<UINode>& customNode);
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid = true);
-
+    static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
+    static void SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable);
+    static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>& recoverable);
+    static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
 private:
     static bool navBarWidthDoubleBind_;
 };
