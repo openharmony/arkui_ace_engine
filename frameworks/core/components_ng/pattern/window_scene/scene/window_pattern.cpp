@@ -540,6 +540,7 @@ void WindowPattern::UpdateSnapshotWindowProperty()
         session_->GetPersistentId(), persistentImageFit);
     auto imageFit = static_cast<ImageFit>(persistentImageFit);
     if (isPersistentImageFit) {
+        // ImageFit type COVER_TOP_LEFT is not support for api interface
         imageLayoutProperty->UpdateImageFit(imageFit == ImageFit::COVER_TOP_LEFT ? ImageFit::MATRIX : imageFit);
     } else {
         imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
