@@ -7166,6 +7166,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_BackgroundImageResizable_001, TestSize.L
     EXPECT_EQ(sliceVal->value[1].f32, top);
     EXPECT_EQ(sliceVal->value[2].f32, right);
     EXPECT_EQ(sliceVal->value[3].f32, bottom);
+    EXPECT_EQ(sliceVal->size, 4);
 }
 
 /**

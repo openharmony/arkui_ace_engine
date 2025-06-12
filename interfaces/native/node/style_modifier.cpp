@@ -1062,6 +1062,7 @@ const ArkUI_AttributeItem* GetBackgroundImageResizableWithSlice(ArkUI_NodeHandle
     g_numberValues[NUM_1].f32 = slice.top;
     g_numberValues[NUM_2].f32 = slice.right;
     g_numberValues[NUM_3].f32 = slice.bottom;
+    g_attributeItem.size = NUM_4;
     return &g_attributeItem;
 }
 
