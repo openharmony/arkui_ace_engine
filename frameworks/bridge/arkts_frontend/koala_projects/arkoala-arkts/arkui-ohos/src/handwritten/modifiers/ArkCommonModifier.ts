@@ -19,13 +19,12 @@ import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy
 import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges } from '../../component/units'
 import { Resource } from "global.resource"
 import { LengthMetrics } from "../../Graphics"
-import { PixelMap } from '#external'
+import { PixelMap, UniformDataType } from '#external'
 import { ResizableOptions } from "../../component/image"
 import { VisualEffect, Filter, BrightnessBlender } from "../../component/arkui-uieffect"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "../../component/arkui-external"
 import { FocusBoxStyle, FocusPriority } from "../../component/focus"
 import { TransformationMatrix } from "../../component/arkui-common"
-import { UniformDataType } from "../../component/arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
 import { ComponentContent } from "../../component/arkui-custom"
 import { BlendMode } from "../../component/arkui-drawing"
@@ -1653,7 +1652,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
   public onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
       return this
   }
-  public allowDrop(value: Array<UniformDataType> | undefined): this {
+  public allowDrop(value: Array<UniformDataType> | null | undefined): this {
       return this
   }
   public draggable(value: boolean | undefined): this {

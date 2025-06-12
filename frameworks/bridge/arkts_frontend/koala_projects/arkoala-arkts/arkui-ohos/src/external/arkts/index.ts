@@ -19,6 +19,7 @@ import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import pointer from '@ohos.multimodalInput.pointer'
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
+import uniformTypeDescriptor from "@ohos.data.uniformTypeDescriptor"
 
 export * from "@ohos.base"
 export * from "@ohos.arkui.drawableDescriptor"
@@ -30,3 +31,4 @@ export type Context = common.Context
 export type PointerStyle = pointer.PointerStyle
 export type UnifiedData = unifiedDataChannel.UnifiedData
 export type Summary = unifiedDataChannel.Summary
+export type UniformDataType = uniformTypeDescriptor.UniformDataType
