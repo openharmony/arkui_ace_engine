@@ -7326,31 +7326,31 @@ HWTEST_F(TimePickerPatternTestNg, ParseDirectionKey001, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerGetCurrentOption001, TestSize.Level1)
 {
-auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-ASSERT_NE(frameNode, nullptr);
-frameNode->MarkModifyDone();
-auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-ASSERT_NE(timePickerRowPattern, nullptr);
-timePickerRowPattern->UpdateAllChildNode();
-auto allChildNode = timePickerRowPattern->GetAllChildNode();
-auto minuteColumnNode = allChildNode["minute"].Upgrade();
-ASSERT_NE(minuteColumnNode, nullptr);
-auto minuteColumnPattern = minuteColumnNode->GetPattern<TimePickerColumnPattern>();
-minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumnNode = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumnNode, nullptr);
+    auto minuteColumnPattern = minuteColumnNode->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
 
-auto options = minuteColumnPattern->GetOptions();
-options[minuteColumnNode] = 0;
-minuteColumnPattern->SetOptions(options);
-EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "");
+    auto options = minuteColumnPattern->GetOptions();
+    options[minuteColumnNode] = 0;
+    minuteColumnPattern->SetOptions(options);
+    EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "");
 
-options[minuteColumnNode] = DEFAULT_VALUE.size();
-minuteColumnPattern->SetOptions(options);
-EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "03");
+    options[minuteColumnNode] = DEFAULT_VALUE.size();
+    minuteColumnPattern->SetOptions(options);
+    EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "03");
 
-options.erase(minuteColumnNode);
-minuteColumnPattern->SetOptions(options);
-EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "");
+    options.erase(minuteColumnNode);
+    minuteColumnPattern->SetOptions(options);
+    EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "");
 }
 } // namespace OHOS::Ace::NG
