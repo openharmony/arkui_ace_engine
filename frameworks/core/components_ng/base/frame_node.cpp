@@ -3383,7 +3383,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
     return HitTestResult::BUBBLING;
 }
 
-bool CheckChildHitTestReslut(HitTestResult childHitResult, const RefPtr<OHOS::Ace::NG::FrameNode>& child,
+bool CheckChildHitTestResult(HitTestResult childHitResult, const RefPtr<OHOS::Ace::NG::FrameNode>& child,
     bool& preventBubbling, bool& consumed, bool isExclusiveEventForChild)
 {
     consumed = false;
@@ -3436,14 +3436,14 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
             continue;
         }
         auto childHitResult = child->AxisTest(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets);
-        if (CheckChildHitTestReslut(childHitResult, child, preventBubbling, consumed, IsExclusiveEventForChild())) {
+        if (CheckChildHitTestResult(childHitResult, child, preventBubbling, consumed, IsExclusiveEventForChild())) {
             break;
         }
     }
     CollectSelfAxisResult(
-        globalPoint, localPoint, consumed, revertPoint, axisResult, preventBubbling, testResult, touchRestrict);
+        globalPoint, localPoint, consumed, revertPoint, newComingTargets, preventBubbling, testResult, touchRestrict);
 
-    axisResult.splice(axisResult.begin(), std::move(newComingTargets));
+    axisResult.splice(axisResult.end(), std::move(newComingTargets));
     if (!consumed) {
         return testResult;
     }
