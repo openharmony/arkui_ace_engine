@@ -4847,7 +4847,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             isLayoutDirtyMarked_ = true;
         }
         needSyncRsNode = false;
-    } else {
+    } else if (frameSizeChange && renderContext_->IsSynced()) {
         auto borderRadius = renderContext_->GetBorderRadius();
         if (borderRadius.has_value()) {
             renderContext_->SetBorderRadius(borderRadius.value());
