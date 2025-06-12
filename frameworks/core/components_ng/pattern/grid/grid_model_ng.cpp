@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -141,7 +141,7 @@ void GridModelNG::SetCachedCount(int32_t value, bool show)
 {
     int32_t count = value;
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, show);
@@ -470,7 +470,7 @@ void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
     if (cachedCount >= 0) {
         int32_t count = cachedCount;
         if (SystemProperties::IsWhiteBlockEnabled()) {
-            count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+            count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count, frameNode);
     } else {

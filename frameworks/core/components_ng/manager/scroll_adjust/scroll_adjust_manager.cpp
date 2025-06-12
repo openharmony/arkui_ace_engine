@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
@@ -21,16 +21,16 @@
 
 namespace OHOS::Ace::NG {
 
-WhiteBlockManager& WhiteBlockManager::GetInstance()
+ScrollAdjustmanager& ScrollAdjustmanager::GetInstance()
 {
-    static WhiteBlockManager whiteBlockManager;
-    return whiteBlockManager;
+    static ScrollAdjustmanager scrollAdjustmanager;
+    return scrollAdjustmanager;
 }
 
-ScrollState WhiteBlockManager::ChangeScrollStateIfNeed(ScrollState scrollState)
+ScrollState ScrollAdjustmanager::ChangeScrollStateIfNeed(ScrollState scrollState)
 {
     if (!SystemProperties::IsWhiteBlockIdleChange()) {
-        LOGD("WhiteBlockManager Idle Change is false");
+        LOGD("ScrollAdjustmanager Idle Change is false");
         return scrollState;
     }
     if ((scrollState == ScrollState::SCROLL && !idle_) ||
@@ -39,7 +39,7 @@ ScrollState WhiteBlockManager::ChangeScrollStateIfNeed(ScrollState scrollState)
         return  scrollState;
     }
     if (scrollState == ScrollState::SCROLL && idle_) {
-        LOGD("WhiteBlockManager ChangeScrollStateIfNeed return IDLE");
+        LOGD("ScrollAdjustmanager ChangeScrollStateIfNeed return IDLE");
         idle_ = false;
         return ScrollState::IDLE;
     }
@@ -50,16 +50,16 @@ ScrollState WhiteBlockManager::ChangeScrollStateIfNeed(ScrollState scrollState)
     return scrollState;
 }
 
-int32_t WhiteBlockManager::AdjustEndIndex(int32_t endIndex)
+int32_t ScrollAdjustmanager::AdjustEndIndex(int32_t endIndex)
 {
-    LOGD("WhiteBlockManager GetWhiteBlockIndexValue is %{public}s",
+    LOGD("ScrollAdjustmanager GetWhiteBlockIndexValue is %{public}s",
     SystemProperties::GetWhiteBlockIndexValue().c_str());
     return endIndex + SystemProperties::GetWhiteBlockIndexValue();
 }
 
-int32_t WhiteBlockManager::AdjustCachedCount(int32_t cachedCount)
+int32_t ScrollAdjustmanager::AdjustCachedCount(int32_t cachedCount)
 {
-    LOGD("WhiteBlockManager GetWhiteBlockCacheCountValue is %{public}s",
+    LOGD("ScrollAdjustmanager GetWhiteBlockCacheCountValue is %{public}s",
     SystemProperties::GetWhiteBlockCacheCountValue().c_str());
     return cachedCount + SystemProperties::GetWhiteBlockCacheCountValue();
 }

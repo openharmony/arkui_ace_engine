@@ -43,7 +43,7 @@
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2889,7 +2889,7 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
     auto scrollState = GetScrollState();
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        scrollState = WhiteBlockManager::GetInstance().ChangeScrollStateIfNeed(scrollState);
+        scrollState = ScrollAdjustmanager::GetInstance().ChangeScrollStateIfNeed(scrollState);
     }
     bool isTriggered = false;
     if (!NearZero(finalOffset)) {

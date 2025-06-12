@@ -31,7 +31,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/grid/grid_fill_algorithm.h"
-#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -404,7 +404,7 @@ void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& on
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
     int32_t endIndex = info_.endIndex_;
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        endIndex = WhiteBlockManager::GetInstance().AdjustEndIndex(info_.endIndex_);
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(info_.endIndex_);
     }
     onScrollIndex(info_.startIndex_, endIndex);
 }

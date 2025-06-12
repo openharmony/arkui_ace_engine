@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_WHITEBLOCK_WHITEBLOCK_MANAGER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_WHITEBLOCK_WHITEBLOCK_MANAGER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_SCROLLADJUST_SCROLL_ADJUST_MANAGER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_SCROLLADJUST_SCROLL_ADJUST_MANAGER_H
 
 #include <string>
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
-class WhiteBlockManager {
+class ScrollAdjustmanager {
 public:
-    static WhiteBlockManager& GetInstance();
-    WhiteBlockManager() = default;
-    ~WhiteBlockManager() = default;
+    static ScrollAdjustmanager& GetInstance();
+    ScrollAdjustmanager() = default;
+    ~ScrollAdjustmanager() = default;
     ScrollState ChangeScrollStateIfNeed(ScrollState scrollState);
     int32_t AdjustEndIndex(int32_t endIndex);
     int32_t AdjustCachedCount(int32_t cachedCount);
@@ -32,4 +32,4 @@ private:
     bool idle_ = true;
 };
 } //namespace OHOS::ACE:NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_WHITEBLOCK_WHITEBLOCK_MANAGER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_SCROLLADJUST_SCROLL_ADJUST_MANAGER_H

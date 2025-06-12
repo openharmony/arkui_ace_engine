@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -300,7 +300,7 @@ void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 {
     int32_t count = value;
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show);
@@ -312,7 +312,7 @@ void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, const std::optional<
     if (value) {
         int32_t count = value.value();
         if (SystemProperties::IsWhiteBlockEnabled()) {
-            count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+            count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count, frameNode);
     } else {

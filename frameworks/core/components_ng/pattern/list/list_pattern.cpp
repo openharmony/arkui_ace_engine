@@ -37,7 +37,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -585,7 +585,7 @@ void ListPattern::FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent&
     int32_t startIndex = startIndex_ == -1 ? 0 : startIndex_;
     int32_t endIndex = endIndex_ == -1 ? 0 : endIndex_;
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        endIndex = WhiteBlockManager::GetInstance().AdjustEndIndex(endIndex);
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(endIndex);
     }
     onScrollIndex(startIndex, endIndex, centerIndex_);
     ReportOnItemListScrollEvent("onScrollIndex", startIndex, endIndex);

@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -236,7 +236,7 @@ void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 {
     int32_t count = cachedCount;
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
@@ -579,7 +579,7 @@ void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
     int32_t count = cachedCount;
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        count = WhiteBlockManager::GetInstance().AdjustCachedCount(count);
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count, frameNode);
 }

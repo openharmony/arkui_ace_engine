@@ -26,7 +26,7 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
-#include "core/components_ng/manager/whiteblock/whiteblock_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -344,7 +344,7 @@ void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFun
     CHECK_NULL_VOID(onScrollIndex);
     int32_t endIndex = layoutInfo_->endIndex_;
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        endIndex = WhiteBlockManager::GetInstance().AdjustEndIndex(layoutInfo_->endIndex_);
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(layoutInfo_->endIndex_);
     }
     onScrollIndex(layoutInfo_->FirstIdx(), endIndex);
 }
