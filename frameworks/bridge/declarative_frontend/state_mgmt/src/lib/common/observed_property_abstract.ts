@@ -36,7 +36,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   protected subscribers_: Set<number>;
   private id_: number;
   protected info_?: PropertyInfo;
-
+  protected isFake_: boolean = false;
   constructor(subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
     super();
     this.subscribers_ = new Set<number>();
@@ -66,6 +66,14 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
     if (propName && propName !== '') {
       this.info_ = propName;
     }
+  }
+
+  public __isFake_ObservedPropertyAbstract_Internal(): boolean {
+    return this.isFake_;
+  }
+
+  public __setIsFake_ObservedPropertyAbstract_Internal(isFake: boolean): void {
+    this.isFake_ = isFake;
   }
 
   // Partial Update "*PU" classes will overwrite
