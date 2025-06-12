@@ -181,6 +181,10 @@ public:
     bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
 
     void InitializeSafeArea();
+    void SetFollowParentWindowLayoutEnabled(bool enable) override
+    {
+        window_->SetFollowParentWindowLayoutEnabled(enable);
+    }
     bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
 
     void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -213,6 +217,14 @@ public:
     {
         detachState_ = t;
     }
+
+    void SwitchFollowParentWindowLayout(bool freeMultiWindowEnable) override;
+    bool NeedFollowParentWindowLayout() override
+    {
+        return !followParentWindowLayoutNodeIds_.empty();
+    }
+    void AddFollowParentWindowLayoutNode(int32_t nodeId) override;
+    void RemoveFollowParentWindowLayoutNode(int32_t nodeId) override;
 
 private:
     RefPtr<StackElement> GetStack();
@@ -288,6 +300,7 @@ private:
     std::mutex eventRunnerMutex_;
     MenuWindowState attachState_ = MenuWindowState::DEFAULT;
     MenuWindowState detachState_ = MenuWindowState::DEFAULT;
+    std::list<int32_t> followParentWindowLayoutNodeIds_;
 };
 
 class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {
