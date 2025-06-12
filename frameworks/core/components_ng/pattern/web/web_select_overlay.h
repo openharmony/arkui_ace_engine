@@ -162,6 +162,7 @@ public:
     void UpdateAISelectMenu(TextDataDetectType type, const std::string& content);
 private:
     void UpdateSelectMenuOptions();
+    void UpdateIsSelectAll();
     bool isShowHandle_ = false;
     bool needResetHandleReverse_ = false;
     bool isSelectAll_ = false;

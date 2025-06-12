@@ -4387,9 +4387,8 @@ void  WebPattern::OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMen
     }
 }
 
-void WebPattern::UpdateEditMenuOptions(
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     onCreateMenuCallback_ = std::move(onCreateMenuCallback);
     onMenuItemClick_ = [weak = AceType::WeakClaim(this), action = std::move(onMenuItemClick)] (
@@ -4405,6 +4404,9 @@ void WebPattern::UpdateEditMenuOptions(
         }
         return result;
     };
+    if (onPrepareMenuCallback) {
+        onPrepareMenuCallback_ = std::move(onPrepareMenuCallback);
+    }
 }
 
 void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)

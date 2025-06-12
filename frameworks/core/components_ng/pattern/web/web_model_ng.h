@@ -232,7 +232,8 @@ public:
     void SetOverlayScrollbarEnabled(bool isEnabled) override;
     void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) override;
     void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback = nullptr) override;
     void SetEnabledHapticFeedback(bool isEnabled) override;
     void SetOptimizeParserBudgetEnabled(bool enable) override;
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;

@@ -678,7 +678,7 @@ public:
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     void UpdateDataDetectorConfig(const TextDetectConfig& config);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
@@ -1328,6 +1328,7 @@ private:
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
+    OnPrepareMenuCallback onPrepareMenuCallback_;
 };
 } // namespace OHOS::Ace::NG
 
