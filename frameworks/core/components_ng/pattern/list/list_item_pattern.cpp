@@ -1388,9 +1388,8 @@ void ListItemPattern::HandleFocusEvent()
     pattern->SetFocusIndex(GetIndexInList());
     if (groupIndex >= 0) {
         pattern->SetGroupFocusIndex(groupIndex);
-        pattern->SetFocusIndexChangedByListItemGroup(true);
     } else {
-        pattern->SetFocusIndexChangedByListItemGroup(false);
+        pattern->ResetGroupFocusIndex();
     }
 }
 

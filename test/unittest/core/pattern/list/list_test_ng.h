@@ -161,6 +161,7 @@ protected:
     RefPtr<ListPattern> pattern_;
     RefPtr<ListEventHub> eventHub_;
     RefPtr<ListLayoutProperty> layoutProperty_;
+    std::vector<RefPtr<ListItemGroupPattern>> itemGroupPatters_;
 };
 
 class ListItemGroupPatternTestNg : public TestNG {
