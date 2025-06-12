@@ -535,11 +535,12 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     }
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    int32_t imageFit = 0;
+    int32_t persistentImageFit = 0;
     auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-            session_->GetPersistentId(), imageFit);
+            session_->GetPersistentId(), persistentImageFit);
+    auto imageFit = static_cast<ImageFit>(persistentImageFit);
     if (isPersistentImageFit) {
-        imageLayoutProperty->UpdateImageFit(static_cast<ImageFit>(imageFit));
+        imageLayoutProperty->UpdateImageFit(imageFit == ImageFit::COVER_TOP_LEFT ? ImageFit::MATRIX : imageFit);
     } else {
         imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
     }
