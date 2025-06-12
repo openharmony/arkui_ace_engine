@@ -799,6 +799,11 @@ public:
     void InitDataDetector();
     void CloseDataDetectorMenu();
 
+    void SetAILinkMenuShow(bool isAILinkMenuShow)
+    {
+        isAILinkMenuShow_ = isAILinkMenuShow;
+    }
+
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath);
     void RemoveSnapshotFrameNode();
 
@@ -1289,6 +1294,7 @@ private:
     bool isRegisterJsObject_ = false;
 
     // properties for AI data detector
+    bool isAILinkMenuShow_ = false;
     RefPtr<WebDataDetectorAdapter> webDataDetectorAdapter_ = nullptr;
     int lastDragOperation_;
 
