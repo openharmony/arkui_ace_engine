@@ -170,6 +170,11 @@ bool Container::IsFoldable()
     return MockContainer::Current()->GetMockDisplayInfo()->GetIsFoldable();
 }
 
+RefPtr<Container> Container::GetByWindowId(uint32_t windowId)
+{
+    return MockContainer::Current();
+}
+
 FoldStatus Container::GetCurrentFoldStatus()
 {
     return MockContainer::Current()->GetMockDisplayInfo()->GetFoldStatus();
