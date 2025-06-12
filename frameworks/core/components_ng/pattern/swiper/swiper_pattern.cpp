@@ -4164,7 +4164,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
         const auto& turnPageRateCallback = swiper->swiperController_->GetTurnPageRateCallback();
         auto firstItem = swiper->GetFirstItemInfoInVisibleArea();
         auto translateLength = firstItem.second.endPos - firstItem.second.startPos;
-        if (turnPageRateCallback && !NearZero(translateLength)) {
+        if (turnPageRateCallback && !NearZero(translateLength) && swiper->propertyAnimationIsRunning_) {
             turnPageRateCallback(firstItem.first, (-firstItem.second.startPos - value) / translateLength);
         }
     });
