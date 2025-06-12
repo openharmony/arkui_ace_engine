@@ -30,7 +30,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 
 export interface DividerStyle {
     strokeWidth: Length;

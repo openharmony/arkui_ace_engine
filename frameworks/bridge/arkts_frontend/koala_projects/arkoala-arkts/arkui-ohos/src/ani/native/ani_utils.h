@@ -26,6 +26,7 @@ public:
     static bool CheckType(ani_env *env, ani_object obj, const std::string& type);
     static bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value);
     static bool GetBoolOrUndefined(ani_env *env, ani_object param, const char *name);
+    static std::string ANIStringToStdString(ani_env* env, ani_string ani_str);
 };
 } // namespace OHOS::Ace::Ani
 

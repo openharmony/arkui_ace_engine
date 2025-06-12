@@ -24,7 +24,7 @@ import { CallbackTransformer } from "./CallbackTransformer"
 import { AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallback, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, Callback_AxisEvent_Void, AxisEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, Callback_ClickEvent_Void, ClickEvent, Callback_CrownEvent_Void, CrownEvent, CustomBuilder, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, ItemDragInfo, Callback_KeyEvent_Boolean, KeyEvent, Callback_KeyEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_MouseEvent_Void, MouseEvent, Callback_PreDragStatus_Void, PreDragStatus, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, SheetType, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, TouchEvent, Callback_TouchEvent_Void, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ScrollResult, OnWillScrollCallback } from "./../common"
 import { AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, TextRange, DeleteValue, EditableTextChangeValue, InsertValue, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnDidChangeCallback } from "./../textCommon"
 import { AsyncCallback_image_PixelMap_Void, ReceiveCallback } from "./../arkui-external"
-import { PixelMap } from "./../arkui-pixelmap"
+import { PixelMap } from "#external"
 import { ButtonTriggerClickCallback } from "./../button"
 import { Callback_Any_Void, Callback_FormCallbackInfo_Void, FormCallbackInfo, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg } from "./../formComponent"
 import { Area, ResourceStr, SizeOptions, VoidCallback } from "./../units"
@@ -61,7 +61,7 @@ import { Callback_Opt_Boolean_Void, OnCheckboxChangeCallback } from "./../checkb
 import { Resource } from "global/resource"
 import { StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../styledString"
 import { TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../tabs"
-import { Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Callback_CreateItem } from "./../arkui-custom"
+import { Callback_onDragStart, Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Callback_CreateItem } from "./../arkui-custom"
 import { Callback_RefreshStatus_Void, RefreshStatus } from "./../refresh"
 import { Callback_String_Number_Void, Callback_TextPickerResult_Void, TextPickerResult, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback, Type_TextPickerAttribute_onChange_callback } from "./../textPicker"
 import { Callback_String_Void } from "./../gridRow"
@@ -824,6 +824,14 @@ export function deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeseria
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((parameter: OnDownloadStartEvent) => void))
     let parameter : OnDownloadStartEvent = thisDeserializer.readOnDownloadStartEvent()
     _call(parameter)
+}
+export function deserializeAndCallCallback_onDragStart(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_onDragStart)
+    let node : KPointer = thisDeserializer.readPointer()
+    let dragEvent : DragEvent = (thisDeserializer.readDragEvent() as DragEvent)
+    let extraParam : string = (thisDeserializer.readString() as string)
+    _call(node, dragEvent, extraParam)
 }
 export function deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2651,6 +2659,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 332449533/*CallbackKind.Kind_Callback_OnContextMenuShowEvent_Boolean*/: return deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisDeserializer);
         case 118631204/*CallbackKind.Kind_Callback_OnDataResubmittedEvent_Void*/: return deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisDeserializer);
         case 1834611702/*CallbackKind.Kind_Callback_OnDownloadStartEvent_Void*/: return deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeserializer);
+        case 921313525/*CallbackKind.Kind_Callback_onDragStart*/: return deserializeAndCallCallback_onDragStart(thisDeserializer);
         case -1792851375/*CallbackKind.Kind_Callback_OnErrorReceiveEvent_Void*/: return deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisDeserializer);
         case -243916553/*CallbackKind.Kind_Callback_OnFaviconReceivedEvent_Void*/: return deserializeAndCallCallback_OnFaviconReceivedEvent_Void(thisDeserializer);
         case -1852060212/*CallbackKind.Kind_Callback_OnFirstContentfulPaintEvent_Void*/: return deserializeAndCallCallback_OnFirstContentfulPaintEvent_Void(thisDeserializer);

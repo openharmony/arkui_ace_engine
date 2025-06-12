@@ -3356,6 +3356,28 @@ void deserializeAndCallSyncCallback_StateStylesChange(Ark_VMContext vmContext, K
     Ark_Int32 currentState = thisDeserializer.readInt32();
     _callSync(vmContext, _resourceId, currentState);
 }
+void deserializeAndCallCallback_onDragStart(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer node, const Ark_DragEvent dragEvent, const Ark_String extraParam)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_NativePointer node = thisDeserializer.readPointer();
+    Ark_DragEvent dragEvent = static_cast<Ark_DragEvent>(thisDeserializer.readDragEvent());
+    Ark_String extraParam = static_cast<Ark_String>(thisDeserializer.readString());
+    _call(_resourceId, node, dragEvent, extraParam);
+}
+void deserializeAndCallSyncCallback_onDragStart(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer node, const Ark_DragEvent dragEvent, const Ark_String extraParam)>(thisDeserializer.readPointer());
+    Ark_NativePointer node = thisDeserializer.readPointer();
+    Ark_DragEvent dragEvent = static_cast<Ark_DragEvent>(thisDeserializer.readDragEvent());
+    Ark_String extraParam = static_cast<Ark_String>(thisDeserializer.readString());
+    _callSync(vmContext, _resourceId, node, dragEvent, extraParam);
+}
 void deserializeAndCallCallback_String_Number_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -6930,6 +6952,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case 332449533/*Kind_Callback_OnContextMenuShowEvent_Boolean*/: return deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisArray, thisLength);
         case 118631204/*Kind_Callback_OnDataResubmittedEvent_Void*/: return deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisArray, thisLength);
         case 1834611702/*Kind_Callback_OnDownloadStartEvent_Void*/: return deserializeAndCallCallback_OnDownloadStartEvent_Void(thisArray, thisLength);
+        case 921313525/*Kind_Callback_onDragStart*/: return deserializeAndCallCallback_onDragStart(thisArray, thisLength);
         case -1792851375/*Kind_Callback_OnErrorReceiveEvent_Void*/: return deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisArray, thisLength);
         case -243916553/*Kind_Callback_OnFaviconReceivedEvent_Void*/: return deserializeAndCallCallback_OnFaviconReceivedEvent_Void(thisArray, thisLength);
         case -1852060212/*Kind_Callback_OnFirstContentfulPaintEvent_Void*/: return deserializeAndCallCallback_OnFirstContentfulPaintEvent_Void(thisArray, thisLength);
@@ -7227,6 +7250,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case 332449533/*Kind_Callback_OnContextMenuShowEvent_Boolean*/: return deserializeAndCallSyncCallback_OnContextMenuShowEvent_Boolean(vmContext, thisArray, thisLength);
         case 118631204/*Kind_Callback_OnDataResubmittedEvent_Void*/: return deserializeAndCallSyncCallback_OnDataResubmittedEvent_Void(vmContext, thisArray, thisLength);
         case 1834611702/*Kind_Callback_OnDownloadStartEvent_Void*/: return deserializeAndCallSyncCallback_OnDownloadStartEvent_Void(vmContext, thisArray, thisLength);
+        case 921313525/*Kind_Callback_onDragStart*/: return deserializeAndCallSyncCallback_onDragStart(vmContext, thisArray, thisLength);
         case -1792851375/*Kind_Callback_OnErrorReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnErrorReceiveEvent_Void(vmContext, thisArray, thisLength);
         case -243916553/*Kind_Callback_OnFaviconReceivedEvent_Void*/: return deserializeAndCallSyncCallback_OnFaviconReceivedEvent_Void(vmContext, thisArray, thisLength);
         case -1852060212/*Kind_Callback_OnFirstContentfulPaintEvent_Void*/: return deserializeAndCallSyncCallback_OnFirstContentfulPaintEvent_Void(vmContext, thisArray, thisLength);

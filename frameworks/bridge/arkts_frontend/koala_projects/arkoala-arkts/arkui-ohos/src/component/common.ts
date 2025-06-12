@@ -25,9 +25,9 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
-import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
+import { ComponentContent, Context, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { Summary, IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
+import { IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global/resource"
@@ -40,7 +40,6 @@ import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
 import { UniformDataType } from "./arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
-import { PixelMap } from "./arkui-pixelmap"
 import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
@@ -60,7 +59,9 @@ import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
 import { rememberMutableState } from '@koalaui/runtime'
 import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
-import { PointerStyle } from '#external';
+import { hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
+import { ArkUIAniModule } from "arkui.ani"
+import { PointerStyle, UnifiedData, Summary, PixelMap } from "#external"
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -800,14 +801,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     public setData(unifiedData: UnifiedData): void {
         const unifiedData_casted = unifiedData as (UnifiedData)
-        this.setData_serialize(unifiedData_casted)
+        ArkUIAniModule._DragEvent_Set_Data(this.peer!.ptr, unifiedData_casted)
         return
     }
     public getData(): UnifiedData {
-        return this.getData_serialize()
+        const data = ArkUIAniModule._DragEvent_Get_Data(this.peer!.ptr)
+        return data
     }
     public getSummary(): Summary {
-        return this.getSummary_serialize()
+        const summary = ArkUIAniModule._DragEvent_Get_Summary(this.peer!.ptr)
+        return summary
     }
     public setResult(dragResult: DragResult): void {
         const dragResult_casted = dragResult as (DragResult)
@@ -883,20 +886,6 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     private getY_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getY(this.peer!.ptr)
         return retval
-    }
-    private setData_serialize(unifiedData: UnifiedData): void {
-        ArkUIGeneratedNativeModule._DragEvent_setData(this.peer!.ptr, toPeerPtr(unifiedData))
-    }
-    private getData_serialize(): UnifiedData {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getData(this.peer!.ptr)
-        const obj : UnifiedData = UnifiedDataInternal.fromPtr(retval)
-        return obj
-    }
-    private getSummary_serialize(): Summary {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Summary = retvalDeserializer.readSummary()
-        return returnResult
     }
     private setResult_serialize(dragResult: DragResult): void {
         ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, TypeChecker.DragResult_ToNumeric(dragResult))
@@ -10490,7 +10479,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         if (this.checkPriority("onDragStart")) {
             const value_casted = value as (((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)
-            this.getPeer()?.onDragStartAttribute(value_casted)
+            hookRegisterOnDragStartImpl(this.getPeer(), value_casted)
             return this
         }
         return this
