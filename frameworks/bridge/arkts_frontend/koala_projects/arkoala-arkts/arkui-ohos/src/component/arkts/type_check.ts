@@ -3433,6 +3433,12 @@ export class TypeChecker {
     static isWebNavigationType(value: Object | string | number | undefined): boolean {
         return value instanceof WebNavigationType
     }
+    static isBindableBoolean(value: Object | string | number | undefined): boolean {
+        return value instanceof Bindable<boolean>
+    }
+    static isBindableNumber(value: Object | string | number | undefined): boolean {
+        return value instanceof Bindable<number>
+    }
     static isBindableString(value: Object | string | number | undefined): boolean {
         return value instanceof Bindable<string>
     }

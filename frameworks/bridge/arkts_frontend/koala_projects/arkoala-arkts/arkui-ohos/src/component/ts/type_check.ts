@@ -19247,6 +19247,12 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof WebNavigationType")
         }
     }
+    static isBindableBoolean(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<boolean>")
+    }
+    static isBindableNumber(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<number>")
+    }
     static isBindableString(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<String>")
     }

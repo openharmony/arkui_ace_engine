@@ -28409,6 +28409,175 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return (Ark_VisualEffect) 300;
     }
     } // VisualEffectAccessor
+    namespace CheckboxGroupOpsAccessor {
+    Ark_NativePointer RegisterSelectAllCallbackImpl(Ark_NativePointer node,
+                                                    Ark_Boolean isAllSelected,
+                                                    const SelectAllCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerSelectAllCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, isAllSelected);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // CheckboxGroupOpsAccessor
+    namespace CheckboxOpsAccessor {
+    Ark_NativePointer RegisterSelectCallbackImpl(Ark_NativePointer node,
+                                                 Ark_Boolean isSelected,
+                                                 const SelectCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerSelectCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, isSelected);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // CheckboxOpsAccessor
+    namespace MenuItemOpsAccessor {
+    Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
+                                                   Ark_Boolean value,
+                                                   const MenuSelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // MenuItemOpsAccessor
+    namespace RadioOpsAccessor {
+    Ark_NativePointer RegisterCheckedCallbackImpl(Ark_NativePointer node,
+                                                  Ark_Boolean isChecked,
+                                                  const CheckedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerCheckedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, isChecked);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // RadioOpsAccessor
+    namespace RatingOpsAccessor {
+    Ark_NativePointer RegisterRatingCallbackImpl(Ark_NativePointer node,
+                                                 const Ark_Number* rating,
+                                                 const RatingCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerRatingCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, rating);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // RatingOpsAccessor
+    namespace SelectOpsAccessor {
+    Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
+                                                   const Ark_Union_Number_Resource* numCount,
+                                                   const SelectSelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, numCount);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer RegisterValueCallbackImpl(Ark_NativePointer node,
+                                                const Ark_ResourceStr* resStr,
+                                                const SelectValueCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerValueCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, resStr);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // SelectOpsAccessor
+    namespace SliderOpsAccessor {
+    Ark_NativePointer RegisterValueCallbackImpl(Ark_NativePointer node,
+                                                const Ark_Number* value,
+                                                const ValueCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerValueCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // SliderOpsAccessor
+    namespace ToggleOpsAccessor {
+    Ark_NativePointer RegisterIsOnCallbackImpl(Ark_NativePointer node,
+                                               Ark_Boolean isOn,
+                                               const IsOnCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerIsOnCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, isOn);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // ToggleOpsAccessor
     namespace NavigationOpsAccessor {
     Ark_NativePointer RegisterNavBarWidthCallbackImpl(Ark_NativePointer node,
                                                       const Ark_Length* value,
