@@ -5565,9 +5565,9 @@ HWTEST_F(WebSelectOverlayTest, UpdateTouchHandleForOverlayTestSelectAll, TestSiz
     CManager->shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(CManager->shareOverlayInfo_);
     EXPECT_NE(selectOverlayNode, nullptr);
-    selectOverlayNode_->parent_ = AceType::WeakClaim(AceType::RawPtr(frameNode1));
-    CManager->handleNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode1));
-    CManager->menuNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode1));
+    selectOverlayNode->parent_ = AceType::WeakClaim(AceType::RawPtr(selectOverlayNode));
+    CManager->handleNode_ = AceType::WeakClaim(AceType::RawPtr(selectOverlayNode));
+    CManager->menuNode_ = AceType::WeakClaim(AceType::RawPtr(selectOverlayNode));
     overlay.insertHandle_ = std::make_shared<NWebTouchHandleStateBeginTestImpl>();
     overlay.startSelectionHandle_ = std::make_shared<NWebTouchHandleStateEndTestImpl>();
     overlay.endSelectionHandle_ = std::make_shared<NWebTouchHandleStateEndTestImpl>();
