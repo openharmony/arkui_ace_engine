@@ -28,8 +28,13 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { NodeController } from "../NodeController"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { FrameNode } from "../FrameNode"
+import { UIContextImpl, ContextRecord } from "arkui/handwritten/UIContextImpl"
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
+import { FrameNode } from "arkui/FrameNode"
 import { Size } from "../Graphics"
+import { StateManager } from "@koalaui/runtime"
+import { __context } from "@koalaui/runtime"
+
 export type NodeContainer_AboutToResizeCallback = (size: Size) => void;
 export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -105,6 +110,10 @@ export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeC
 }
 export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements NodeContainerAttribute {
     private controller: NodeController | null = null;
+    private uiContext: UIContext
+    constructor(uiContext: UIContext) {
+        this.uiContext = uiContext
+    }
     getPeer(): ArkNodeContainerPeer {
         return (this.peer as ArkNodeContainerPeer)
     }
@@ -141,12 +150,12 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
             controller.onBind(this.getPeer().getId())
             // makeNode
             const makeNodeFunc = controller.__makeNode__
-            const child = makeNodeFunc(new UIContext(100000))
+            const child = makeNodeFunc(this.uiContext)
             this.getPeer().addNodeContainerRootNode(child)
         }
         return this
     }
-    
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -154,7 +163,7 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
     public rebuild(): void {
         if (this.controller) {
             const makeNodeFunc = this.controller!.__makeNode__
-            const child = makeNodeFunc(new UIContext(100000))
+            const child = makeNodeFunc(this.uiContext)
             this.getPeer().addNodeContainerRootNode(child)
         }
     }
@@ -167,8 +176,11 @@ export function NodeContainer(
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
+    const context: StateManager = __context() as StateManager;
+    const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+    let uiContext = data?.uiContext
     const receiver = remember(() => {
-        return new ArkNodeContainerComponent()
+        return new ArkNodeContainerComponent(uiContext!)
     })
     NodeAttach<ArkNodeContainerPeer>((): ArkNodeContainerPeer => ArkNodeContainerPeer.create(receiver), (_: ArkNodeContainerPeer) => {
         receiver.setNodeContainerOptions(controller)

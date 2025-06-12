@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { UIContext } from "@ohos/arkui/UIContext"
+import { UIContextImpl } from "arkui/handwritten/UIContextImpl"
 import { Position, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import {
@@ -81,7 +82,7 @@ function GetExactRetValue(data: KSerializerBuffer | KUint8ArrayPtr): Array<byte>
 
 export class FrameNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
-    uiContext: UIContext | undefined = undefined
+    uiContext: UIContextImpl | undefined = undefined
     renderNode_: RenderNode | undefined = undefined
     instanceId_?: number;
     _nodeId: number = -1;
@@ -117,8 +118,8 @@ export class FrameNode implements MaterializedBase {
     }
     constructor(uiContext?: UIContext, type?: string, ptr?: KPointer) {
         if ((uiContext) !== (undefined)) {
-            this.uiContext = uiContext;
-            this.instanceId_ = uiContext.instanceId_;
+            this.uiContext = uiContext as UIContextImpl;
+            this.instanceId_ = this.uiContext!.instanceId_;
             if (type === 'ProxyFrameNode') {
                 if (ptr) {
                     this.peer = new Finalizable(ptr, FrameNode.getFinalizer());

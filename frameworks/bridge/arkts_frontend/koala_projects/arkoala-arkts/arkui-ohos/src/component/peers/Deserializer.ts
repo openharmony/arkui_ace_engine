@@ -175,6 +175,7 @@ import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 import { drawing } from "@ohos/graphics/drawing"
 import promptAction from '@ohos/promptAction'
 import { PointerStyle } from '#external'
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
         super(data, length)
@@ -1129,7 +1130,8 @@ export class Deserializer extends DeserializerBase {
         // let valueDeserializer : Deserializer = this
         // let ptr : KPointer = valueDeserializer.readPointer()
         // return UIContextInternal.fromPtr(ptr)
-        return new UIContext(100000)
+        let uiContext = UIContextUtil.getOrCreateUIContextById(100000);
+        return uiContext
     }
     readUIExtensionProxy(): UIExtensionProxy {
         let valueDeserializer : Deserializer = this

@@ -41,6 +41,8 @@ export class ArkUIAniModule {
 
     native static _Common_Restore_InstanceId(): void
 
+    native static _Common_Get_Current_InstanceId(): KInt
+
     // for CustomNode
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
 
