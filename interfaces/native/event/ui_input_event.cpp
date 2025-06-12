@@ -1715,7 +1715,7 @@ float OH_ArkUI_PointerEvent_GetGlobalDisplayYByIndex(const ArkUI_UIInputEvent* e
         case C_AXIS_EVENT_ID: {
             const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
             if (!axisEvent || pointerIndex != 0) {
-                ETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             RETURN_RET_WITH_STATUS_CHECK(
                 static_cast<float>(axisEvent->actionTouchPoint.globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
