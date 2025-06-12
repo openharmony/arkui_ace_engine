@@ -80,6 +80,7 @@ public:
 private:
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
+    void OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize);
 
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
