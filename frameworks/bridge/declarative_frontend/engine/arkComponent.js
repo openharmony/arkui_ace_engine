@@ -30634,7 +30634,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onBeforeUnload(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnBeforeUnloadModifier.identity, WebOnBeforeUnloadModifier, callback);
+    return this;
   }
   onConfirm(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnConfirmModifier.identity, WebOnConfirmModifier, callback);
@@ -30702,7 +30703,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onInterceptRequest(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnInterceptRequestModifier.identity, WebOnInterceptRequestModifier, callback);
+    return this;
   }
   onPermissionRequest(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnPermissionRequestModifier.identity, WebOnPermissionRequestModifier, callback);
@@ -30729,14 +30731,16 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onSslErrorEventReceive(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnSslErrorEventReceiveModifier.identity, WebOnSslErrorEventReceiveModifier, callback);
+    return this;
   }
   onSslErrorEvent(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnSslErrorEventModifier.identity, WebOnSslErrorEventModifier, callback);
     return this;
   }
   onClientAuthenticationRequest(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnClientAuthenticationRequestModifier.identity, WebOnClientAuthenticationRequestModifier, callback);
+    return this;
   }
   onWindowNew(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnWindowNewModifier.identity, WebOnWindowNewModifier, callback);
@@ -30811,7 +30815,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onFaviconReceived(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnFaviconReceivedModifier.identity, WebOnFaviconReceivedModifier, callback);
+    return this;
   }
   onPageVisible(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnPageVisibleModifier.identity, WebOnPageVisibleModifier, callback);
@@ -30907,22 +30912,31 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   nestedScroll(value) {
-    let options = new ArkNestedScrollOptionsExt();
-    if (value) {
-      if (value.scrollUp) {
-        options.scrollUp = value.scrollUp;
-      }
-      if (value.scrollDown) {
-        options.scrollDown = value.scrollDown;
-      }
-      if (value.scrollLeft) {
-        options.scrollLeft = value.scrollLeft;
-      }
-      if (value.scrollRight) {
-        options.scrollRight = value.scrollRight;
-      }
-      modifierWithKey(this._modifiersWithKeys, WebNestedScrollModifier.identity, WebNestedScrollModifier, options);
+    if (!value) return this;
+    const options = new ArkNestedScrollOptionsExt();
+  
+    if ('scrollUp' in value) {
+      options.scrollUp = value.scrollUp;
     }
+    if ('scrollDown' in value) {
+      options.scrollDown = value.scrollDown;
+    }
+    if ('scrollLeft' in value) {
+      options.scrollLeft = value.scrollLeft;
+    }
+    if ('scrollRight' in value) {
+      options.scrollRight = value.scrollRight;
+    }
+  
+    if ('scrollForward' in value) {
+      options.scrollDown = value.scrollForward;
+      options.scrollRight = value.scrollForward;
+    }
+    if ('scrollBackward' in value) {
+      options.scrollUp = value.scrollBackward;
+      options.scrollLeft = value.scrollBackward;
+    }
+    modifierWithKey(this._modifiersWithKeys, WebNestedScrollModifier.identity, WebNestedScrollModifier, options);
     return this;
   }
   onOverrideUrlLoading(callback) {
@@ -32323,6 +32337,89 @@ class WebGestureFocusModeModifier extends ModifierWithKey {
   }
 }
 WebGestureFocusModeModifier.identity = Symbol('webGestureFocusModeModifier');
+
+
+class WebOnSslErrorEventReceiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      try{
+        getUINativeModule().web.resetOnSslErrorEventReceive(node);
+      } catch (error) {
+        console.error('Error in resetOnSslErrorEventReceive:', error)
+      }
+    } else {
+      try{
+        getUINativeModule().web.setOnSslErrorEventReceive(node);
+      } catch (error) {
+        console.error('Error in resetOnSslErrorEventReceive:', error)
+      }
+    }
+  }
+}
+WebOnSslErrorEventReceiveModifier.identity = Symbol('webOnSslErrorEventReceiveModifier');
+
+class WebOnClientAuthenticationRequestModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnClientAuthenticationRequest(node);
+    }
+    else {
+      getUINativeModule().web.setOnClientAuthenticationRequest(node, this.value);
+    }
+  }
+}
+WebOnClientAuthenticationRequestModifier.identity = Symbol('webOnClientAuthenticationRequestModifier');
+
+class WebOnInterceptRequestModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnInterceptRequest(node);
+    }
+    else {
+      getUINativeModule().web.setOnInterceptRequest(node, this.value);
+    }
+  }
+}
+WebOnInterceptRequestModifier.identity = Symbol('webOnInterceptRequestModifier');
+
+class WebOnFaviconReceivedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnFaviconReceived(node);
+    }
+    else {
+      getUINativeModule().web.setOnFaviconReceived(node, this.value);
+    }
+  }
+}
+WebOnFaviconReceivedModifier.identity = Symbol('webOnFaviconReceivedModifier');
+
+class WebOnBeforeUnloadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnBeforeUnload(node);
+    }
+    else {
+      getUINativeModule().web.setOnBeforeUnload(node, this.value);
+    }
+  }
+}
+WebOnBeforeUnloadModifier.identity = Symbol('webOnBeforeUnloadModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

@@ -20,6 +20,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/web/web_component.h"
+#include "frameworks/base/image/pixel_map.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
@@ -168,8 +169,8 @@ public:
     static JSRef<JSVal> CreateFileSelectorParamHandler(const FileSelectorEvent& eventInfo);
     static JSRef<JSVal> CreateContextMenuParamHandler(const ContextMenuEvent& eventInfo);
     static JSRef<JSVal> CreateContextMenuResultHandler(const ContextMenuEvent& eventInfo);
-    static JSRef<JSVal> CreateErrorReceiveRequestHandler(const ReceivedErrorEvent& eventInfo);
-    static JSRef<JSVal> CreateErrorReceiveErrorHandler(const ReceivedErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateRequestErrorHandler(const ReceivedErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateResponseErrorHandler(const ReceivedErrorEvent& eventInfo);
     static JSRef<JSVal> CreateLoadInterceptHandler(const LoadInterceptEvent& eventInfo);
     static JSRef<JSVal> CreateHttpErrorReceiveRequestHandler(const ReceivedHttpErrorEvent& eventInfo);
     static JSRef<JSVal> CreateHttpErrorReceiveResponseHandler(const ReceivedHttpErrorEvent& eventInfo);
@@ -178,6 +179,11 @@ public:
     static JSRef<JSVal> CreateConsoleHandler(const LoadWebConsoleLogEvent& eventInfo);
     static JSRef<JSVal> CreateSslErrorEventHandler(const WebAllSslErrorEvent& eventInfo);
     static JSRef<JSVal> CreateDataResubmittedHandler(const DataResubmittedEvent& eventInfo);
+    static JSRef<JSVal> CreateClientAuthenticationRequestHandler(const WebSslSelectCertEvent& eventInfo);
+    static JSRef<JSVal> CreateSslErrorEventReceiveHandler(const WebSslErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateInterceptRequestHandler(const OnInterceptRequestEvent& eventInfo);
+    static JSRef<JSObject> CreateFaviconReceivedHandler(const FaviconReceivedEvent& eventInfo);
+    static uint32_t GetBytesPerPixel(OHOS::Ace::PixelFormat format);
 
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;

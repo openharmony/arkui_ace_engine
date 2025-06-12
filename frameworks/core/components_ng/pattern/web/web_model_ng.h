@@ -359,6 +359,15 @@ public:
     static void SetOnDataResubmitted(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId);
     static void SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode);
+    static void SetOnSslErrorRequest(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnClientAuthenticationRequest(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnInterceptRequest(
+        FrameNode* frameNode, std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& jsCallback);
+    static void SetFaviconReceivedId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& faviconReceivedId);
+    static void SetOnBeforeUnload(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
