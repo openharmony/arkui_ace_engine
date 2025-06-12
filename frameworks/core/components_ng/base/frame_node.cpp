@@ -147,7 +147,7 @@ public:
             return;
         }
         totalCount_ = 0;
-        auto children = hostNode_->GetChildren();
+        const auto& children = hostNode_->GetChildren();
         int32_t startIndex = 0;
         int32_t count = 0;
         for (const auto& child : children) {
