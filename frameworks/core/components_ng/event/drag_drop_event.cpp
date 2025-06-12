@@ -120,6 +120,20 @@ void DragDropEventActuator::InitLongPressAction()
         });
 }
 
+const GestureEventFunc DragDropEventActuator::GetSequenceOnActionCancel()
+{
+    return [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Drag gesture has been canceled");
+        auto handler = weakHandler.Upgrade();
+        if (!handler) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "FrameNode has been destroyed, resetting");
+            DragEventActuator::ResetDragStatus();
+            return;
+        }
+        handler->NotifySequenceOnActionCancel(info);
+    };
+}
+
 void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
@@ -141,18 +155,12 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
     InitPanAction();
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-    auto sequenceOnActionCancel = [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](
-                                      GestureEvent& info) {
-        auto handler = weakHandler.Upgrade();
-        CHECK_NULL_VOID(handler);
-        handler->NotifySequenceOnActionCancel(info);
-    };
     if (touchRestrict.sourceType == SourceType::MOUSE) {
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
         SequencedRecognizer_->RemainChildOnResetStatus();
         SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        SequencedRecognizer_->SetOnActionCancel(sequenceOnActionCancel);
+        SequencedRecognizer_->SetOnActionCancel(GetSequenceOnActionCancel());
         SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         result.emplace_back(SequencedRecognizer_);
         return;
@@ -166,7 +174,7 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
     longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-    SequencedRecognizer_->SetOnActionCancel(sequenceOnActionCancel);
+    SequencedRecognizer_->SetOnActionCancel(GetSequenceOnActionCancel());
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     SequencedRecognizer_->SetIsEventHandoverNeeded(true);
     result.emplace_back(SequencedRecognizer_);
