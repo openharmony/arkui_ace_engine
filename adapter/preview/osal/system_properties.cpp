@@ -441,22 +441,22 @@ void SystemProperties::SetMultiInstanceEnabled(bool enabled)
 
 bool SystemProperties::IsWhiteBlockEnabled()
 {
-    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
+    return false;
 }
 
 bool SystemProperties::IsWhiteBlockIdleChange()
 {
-    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock.idle", "0") == "1";
+    return false;
 }
 
 std::string SystemProperties::GetWhiteBlockIndexValue()
 {
-    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock.index", "0");
+    return "0";
 }
 
 std::string SystemProperties::GetWhiteBlockCacheCountValue()
 {
-    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock.cachedcount", "0");
+    return "0";
 }
 
 } // namespace OHOS::Ace
