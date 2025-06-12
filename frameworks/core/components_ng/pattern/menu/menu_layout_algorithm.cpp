@@ -875,7 +875,7 @@ void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern
 
     auto menuMinWidth = theme->GetMenuMinWidth().ConvertToPx();
     auto menuDefaultWidth = theme->GetMenuDefaultWidth().ConvertToPx();
-    auto menuMaxWidth = theme->GetMenuMaxWidthRatio() * SystemProperties::GetDeviceWidth();
+    auto menuMaxWidth = theme->GetMenuMaxWidthRatio() * pipeline->GetDisplayWindowRectInfo().Width();
     double minWidth = 0.0f;
     double maxWidth = 0.0f;
 
