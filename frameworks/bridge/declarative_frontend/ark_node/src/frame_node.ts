@@ -1196,7 +1196,57 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         }
         node._componentAttribute = new ArkTextAreaComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
-      }]
+    }],
+    ['Button', (node: FrameNode): ArkButtonComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkButtonComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Checkbox', (node: FrameNode): ArkCheckboxComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Radio', (node: FrameNode): ArkRadioComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkRadioComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Slider', (node: FrameNode): ArkSliderComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkSliderComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Toggle', (node: FrameNode): ArkToggleComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkToggleComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }]
   ]
 )
 
