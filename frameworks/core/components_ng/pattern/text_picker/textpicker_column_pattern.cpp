@@ -1962,7 +1962,14 @@ bool TextPickerColumnPattern::InnerHandleScroll(
     HandleEventCallback(true);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(blendNode, false);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    accessibilityProperty->SetUserTextValue(GetOption(GetCurrentIndex()));
+    accessibilityProperty->SetAccessibilityText(GetOption(GetCurrentIndex()));
+    blendNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
     return true;
 }
 
@@ -2007,8 +2014,29 @@ void TextPickerColumnPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetAccessibilityCustomRole("TextPicker");
+    accessibilityProperty->SetUserTextValue(GetOption(GetCurrentIndex()));
+    accessibilityProperty->SetAccessibilityText(GetOption(GetCurrentIndex()));
+
+    accessibilityProperty->SetSpecificSupportActionCallback(
+        [weakPtr = WeakClaim(this), accessibilityPtr = WeakClaim(RawPtr(accessibilityProperty))]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        const auto& accessibilityProperty = accessibilityPtr.Upgrade();
+        CHECK_NULL_VOID(accessibilityProperty);
+        if (pattern->CanMove(true)) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+        if (pattern->CanMove(false)) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+    });
+
     accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
