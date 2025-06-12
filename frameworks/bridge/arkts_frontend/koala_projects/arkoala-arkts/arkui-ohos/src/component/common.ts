@@ -11169,9 +11169,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if ((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) {
+            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
                 const value_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (BackgroundBlurStyleOptions)
+                const options_casted = options as (BackgroundBlurStyleOptions | undefined)
                 this.getPeer()?.backgroundBlurStyle0Attribute(value_casted, options_casted)
                 return this
             }
@@ -11191,9 +11191,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if ((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) {
+            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
                 const value_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (ForegroundBlurStyleOptions)
+                const options_casted = options as (ForegroundBlurStyleOptions | undefined)
                 this.getPeer()?.foregroundBlurStyle0Attribute(value_casted, options_casted)
                 return this
             }
@@ -11331,7 +11331,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const sysOptions_type = runtimeType(sysOptions)
             if ((RuntimeType.NUMBER == radius_type) || (RuntimeType.UNDEFINED == radius_type)) {
                 const value_casted = radius as (number | undefined)
-                const options_casted = options as (BlurOptions)
+                const options_casted = options as (BlurOptions| undefined)
                 this.getPeer()?.backdropBlur0Attribute(value_casted, options_casted)
                 return this
             }
