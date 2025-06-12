@@ -121,7 +121,8 @@ function implementedPackages(kind: ArkUIImplementation): string[] {
         'ohos.animator',
         'ohos.arkui.componentUtils',
         'ohos.arkui.inspector',
-        'ohos.observer'
+        'ohos.observer',
+        'ohos.mediaquery'
     ]
 
     assertUnreachable(kind)
