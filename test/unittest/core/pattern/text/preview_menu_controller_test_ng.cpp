@@ -30,6 +30,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string APP_NAME_MAP = "app.name";
+constexpr Dimension PADDING_SIZE = 12.0_vp;
 } // namespace
 class PreviewMenuControllerTest : public testing::Test {
 public:
@@ -196,5 +197,26 @@ HWTEST_F(PreviewMenuControllerTest, CreateLinkingNodeTest, TestSize.Level1)
     // Test with ADDRESS type
     auto addrNode = controller.CreateLinkingNode(TextDataDetectType::ADDRESS, callback);
     EXPECT_NE(addrNode, nullptr);
+}
+
+/**
+ * @tc.name: CreateContactNodeTest001
+ * @tc.desc: Test layout properties are correctly set
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, CreateContactNodeTest001, TestSize.Level1)
+{
+    auto contactNode = PreviewMenuController::CreateContactNode("Test", nullptr);
+    auto flexLayoutProperty = contactNode->GetLayoutProperty<FlexLayoutProperty>();
+    
+    // Verify flex layout properties
+    EXPECT_EQ(flexLayoutProperty->GetFlexDirection(), FlexDirection::ROW);
+    EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), FlexAlign::CENTER);
+    
+    // Verify padding
+    const auto& padding = flexLayoutProperty->GetPaddingProperty();
+    EXPECT_NE(padding, nullptr);
+    EXPECT_EQ(padding->left.value_or(CalcLength(Dimension())), CalcLength(PADDING_SIZE));
+    EXPECT_EQ(padding->right.value_or(CalcLength(Dimension())), CalcLength(PADDING_SIZE));
 }
 } // namespace OHOS::Ace::NG
