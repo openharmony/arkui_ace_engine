@@ -603,10 +603,7 @@ public:
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
     /* Manipulation on node-tree is forbidden in operation. */
     bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
-    bool AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse = false,
-        bool checkOnMainTree = true);
-    bool AllChildFocusHubInMainTree(const std::function<void(const RefPtr<FocusHub>&)>& operation,
-        RefPtr<FocusHub>& lastFocusNode, bool isReverse = false);
+    bool AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
 
     bool IsChild() const
     {
