@@ -537,7 +537,7 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     CHECK_NULL_VOID(imageLayoutProperty);
     int32_t persistentImageFit = 0;
     auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-            session_->GetPersistentId(), persistentImageFit);
+        session_->GetPersistentId(), persistentImageFit);
     auto imageFit = static_cast<ImageFit>(persistentImageFit);
     if (isPersistentImageFit) {
         imageLayoutProperty->UpdateImageFit(imageFit == ImageFit::COVER_TOP_LEFT ? ImageFit::MATRIX : imageFit);
