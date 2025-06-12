@@ -56,12 +56,20 @@ void SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj)
     Framework::AniGraphicsModule::SetDrawCallback(env, ptr, fnObj);
 }
 
+ArkUI_Int32 GetCurrentInstanceId()
+{
+    return ContainerScope::CurrentId();
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
-    static const ArkUIAniCommonModifier impl = { .getHostContext = OHOS::Ace::NG::GetHostContext,
+    static const ArkUIAniCommonModifier impl = {
+        .getHostContext = OHOS::Ace::NG::GetHostContext,
         .syncInstanceId = OHOS::Ace::NG::SyncInstanceId,
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
-        .setDrawCallback = OHOS::Ace::NG::SetDrawCallback };
+        .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
+        .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId
+    };
     return &impl;
 }
 
