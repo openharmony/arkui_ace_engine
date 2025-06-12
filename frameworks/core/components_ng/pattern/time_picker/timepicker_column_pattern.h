@@ -152,6 +152,8 @@ public:
         return pressColor_;
     }
 
+    std::string GetCurrentOption() const override;
+
 private:
     void OnModifyDone() override;
     void SetDividerHeight(uint32_t showOptionCount);

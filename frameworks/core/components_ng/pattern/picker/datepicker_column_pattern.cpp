@@ -707,4 +707,23 @@ bool DatePickerColumnPattern::IsTossNeedToStop()
 {
     return !GetCanLoopFromLayoutProperty();
 }
+
+std::string DatePickerColumnPattern::GetCurrentOption() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, "");
+    auto pattern = frameNode->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_RETURN(pattern, "");
+    auto index = pattern->GetCurrentIndex();
+    auto options = pattern->GetOptions();
+    auto it = options.find(frameNode);
+    if (it != options.end()) {
+        if (it->second.size() <= index) {
+            return "";
+        }
+        auto date = it->second.at(index);
+        return DatePickerPattern::GetFormatString(date);
+    }
+    return "";
+}
 } // namespace OHOS::Ace::NG
