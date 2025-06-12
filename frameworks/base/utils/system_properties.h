@@ -746,8 +746,8 @@ public:
 
     static bool IsWhiteBlockEnabled();
     static bool IsWhiteBlockIdleChange();
-    static std::string GetWhiteBlockIndexValue();
-    static std::string GetWhiteBlockCacheCountValue();
+    static int32_t GetWhiteBlockIndexValue();
+    static int32_t GetWhiteBlockCacheCountValue();
 
     static WidthLayoutBreakPoint GetWidthLayoutBreakpoints()
     {
