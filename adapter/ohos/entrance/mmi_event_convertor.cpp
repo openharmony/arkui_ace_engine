@@ -590,6 +590,17 @@ static TouchType ConvertRawAxisActionToTouch(int32_t rawAxisAction)
     }
 }
 
+void SetAxisEvent(PointerEvent& axisFakePntEvt, TouchPoint& touchPoint)
+{
+    axisFakePntEvt.x = touchPoint.x;
+    axisFakePntEvt.y = touchPoint.y;
+    axisFakePntEvt.screenX = touchPoint.screenX;
+    axisFakePntEvt.screenY = touchPoint.screenY;
+    axisFakePntEvt.globalDisplayX = touchPoint.globalDisplayX;
+    axisFakePntEvt.globalDisplayY = touchPoint.globalDisplayY;
+    touchPoint.downTime = axisFakePntEvt.time;
+}
+
 static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     MMI::PointerEvent::PointerItem& pointerItem, TouchPoint& touchPoint, PointerEvent& axisFakePntEvt)
 {
@@ -637,13 +648,7 @@ static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent
         touchPoint.globalDisplayX = axisFakePntEvt.globalDisplayX - xOffset;
         touchPoint.globalDisplayY = axisFakePntEvt.globalDisplayY - yOffset;
     }
-    axisFakePntEvt.x = touchPoint.x;
-    axisFakePntEvt.y = touchPoint.y;
-    axisFakePntEvt.screenX = touchPoint.screenX;
-    axisFakePntEvt.screenY = touchPoint.screenY;
-    axisFakePntEvt.globalDisplayX = touchPoint.globalDisplayX;
-    axisFakePntEvt.globalDisplayY = touchPoint.globalDisplayY;
-    touchPoint.downTime = axisFakePntEvt.time;
+    SetAxisEvent(axisFakePntEvt, touchPoint);
 }
 
 void ConvertAxisEventToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvt,
