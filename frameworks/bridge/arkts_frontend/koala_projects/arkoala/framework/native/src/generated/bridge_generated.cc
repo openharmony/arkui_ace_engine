@@ -41903,6 +41903,50 @@ void impl_BounceSymbolEffect_setDirection(Ark_NativePointer thisPtr, Ark_Int32 d
         GetAccessors()->getBounceSymbolEffectAccessor()->setDirection(self, static_cast<Ark_EffectDirection>(direction));
 }
 KOALA_INTEROP_DIRECT_V2(BounceSymbolEffect_setDirection, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_BuilderNodeOps_ctor() {
+        return GetAccessors()->getBuilderNodeOpsAccessor()->ctor();
+}
+KOALA_INTEROP_DIRECT_0(BuilderNodeOps_ctor, Ark_NativePointer)
+Ark_NativePointer impl_BuilderNodeOps_getFinalizer() {
+        return GetAccessors()->getBuilderNodeOpsAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(BuilderNodeOps_getFinalizer, Ark_NativePointer)
+void impl_BuilderNodeOps_create(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_Void buildFunc_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
+        GetAccessors()->getBuilderNodeOpsAccessor()->create(self, (const Callback_Void*)&buildFunc_value);
+}
+KOALA_INTEROP_DIRECT_V3(BuilderNodeOps_create, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_BuilderNodeOps_disposeNode(Ark_NativePointer thisPtr) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        GetAccessors()->getBuilderNodeOpsAccessor()->disposeNode(self);
+}
+KOALA_INTEROP_DIRECT_V1(BuilderNodeOps_disposeNode, Ark_NativePointer)
+void impl_BuilderNodeOps_setUpdateConfigurationCallback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_Void configurationUpdateFunc_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
+        GetAccessors()->getBuilderNodeOpsAccessor()->setUpdateConfigurationCallback(self, (const Callback_Void*)&configurationUpdateFunc_value);
+}
+KOALA_INTEROP_DIRECT_V3(BuilderNodeOps_setUpdateConfigurationCallback, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_BuilderNodeOps_setOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_BuilderNodeOptions options_value = thisDeserializer.readBuilderNodeOptions();;
+        GetAccessors()->getBuilderNodeOpsAccessor()->setOptions(self, (const Ark_BuilderNodeOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_V3(BuilderNodeOps_setOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Boolean impl_BuilderNodeOps_postTouchEvent(Ark_NativePointer thisPtr, Ark_NativePointer event) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        return GetAccessors()->getBuilderNodeOpsAccessor()->postTouchEvent(self, static_cast<Ark_TouchEvent>(event));
+}
+KOALA_INTEROP_DIRECT_2(BuilderNodeOps_postTouchEvent, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_BuilderNodeOps_setRootFrameNodeInBuilderNode(Ark_NativePointer thisPtr, Ark_NativePointer node) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        return GetAccessors()->getBuilderNodeOpsAccessor()->setRootFrameNodeInBuilderNode(self, node);
+}
+KOALA_INTEROP_DIRECT_2(BuilderNodeOps_setRootFrameNodeInBuilderNode, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_PulseSymbolEffect_ctor() {
         return GetAccessors()->getPulseSymbolEffectAccessor()->ctor();
 }

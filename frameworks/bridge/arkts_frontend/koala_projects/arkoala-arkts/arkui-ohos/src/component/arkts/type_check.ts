@@ -48,7 +48,7 @@ import { ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDivider
 import { ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, Type_ImageAttribute_onComplete_callback_event, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
-import { ComponentContent, UnifiedData, SystemBarStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
+import { BuilderNodeOps, BuilderNodeOptions, ComponentContent, UnifiedData, SystemBarStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedBuilder_Args_Void } from "./../arkui-wrapper-builder"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
@@ -405,6 +405,12 @@ export class TypeChecker {
     }
     static isBreakpointsReference(value: Object | string | number | undefined): boolean {
         return value instanceof BreakpointsReference
+    }
+    static isBuilderNodeOps(value: Object | string | number | undefined): boolean {
+        return value instanceof BuilderNodeOps
+    }
+    static isBuilderNodeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof BuilderNodeOptions
     }
     static isBrightnessBlender(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof BrightnessBlender

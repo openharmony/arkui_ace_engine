@@ -34,8 +34,9 @@ import { ArkListNode } from './handwritten/modifiers/ArkListNode'
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
 import { Deserializer } from "./component/peers/Deserializer";
-
+import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
+import { JSBuilderNode } from "./BuilderNode"
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -85,9 +86,10 @@ export class FrameNode implements MaterializedBase {
     uiContext: UIContextImpl | undefined = undefined
     renderNode_: RenderNode | undefined = undefined
     instanceId_?: number;
-    _nodeId: number = -1;
+    public _nodeId: number = -1;
     protected _commonAttribute: CommonAttribute | undefined = undefined;
     protected _gestureEvent: UIGestureEvent | undefined = undefined;
+
     getType(): string {
         return 'CustomFrameNode';
     }
@@ -169,6 +171,31 @@ export class FrameNode implements MaterializedBase {
         const node_casted = node as (FrameNode)
         this.appendChild_serialize(node_casted)
         return
+    }
+    public addComponentContent<T = undefined>(content: ComponentContent<T>) {
+        if (content === undefined || content === null || content.getFrameNode() == undefined ||
+            content.getFrameNode() == null || content.getNodePtr() == undefined) {
+            return;
+        }
+        if (!this.isModifiable()) {
+            throw Error("The FrameNode is not modifiable.");
+        }
+        const instanceId = this.instanceId_!.toInt();
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        this.appendChild(content.getFrameNode()!);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        content.setAttachedParent(new WeakRef<FrameNode>(this));
+    }
+    public removeComponentContent<T = undefined>(content: ComponentContent<T>) {
+        if (content === undefined || content === null || content.getFrameNode() == undefined ||
+            content.getFrameNode() == null || content.getNodePtr() == undefined) {
+            return;
+        }
+        const instanceId = this.instanceId_!.toInt();
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        this.removeChild(content.getFrameNode()!);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        content.setAttachedParent(undefined);
     }
     public insertChildAfter(child: FrameNode, sibling: FrameNode | null): void {
         const child_casted = child as (FrameNode);
@@ -716,6 +743,29 @@ export class ProxyFrameNode extends ImmutableFrameNode {
         throw Error("The FrameNode is not modifiable.");
     }
 }
+export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
+    private __BuilderNodeOpt: WeakRef<JSBuilderNode<T>> | undefined = undefined;
+    constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: KPointer) {
+        super(uiContext, type, ptr);
+    }
+    getType(): string {
+        return 'BuilderRootFrameNode';
+    }
+    setJsBuilderNode(weak ?: WeakRef<JSBuilderNode<T>>){
+        this.__BuilderNodeOpt = weak;
+    }
+    public disposeNode(): void {
+        super.dispose();
+        this.__BuilderNodeOpt = undefined;
+        this._nodeId = -1;
+    }
+    public dispose(): void {
+        super.dispose();
+        this.__BuilderNodeOpt?.deref()?.disposeNode();
+        this.__BuilderNodeOpt = undefined;
+        this._nodeId = -1;
+    }
+}
 export interface ResultFrameNode {
     nodeId: int32;
     frameNode: FrameNode;
@@ -738,6 +788,17 @@ export class FrameNodeUtils {
             let frameNode = new ProxyFrameNode(uiContext, "ProxyFrameNode", ptr);
             frameNode._nodeId = nodeId;
             frameNode!.peer!.ptr = ptr;
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, frameNode);
+            return frameNode;
+        }
+        return null;
+    }
+    static createBuilderRootFrameNode<T = undefined>(uiContext: UIContext, ptr: KPointer): BuilderRootFrameNode<T> | null {
+        const nodeId = ArkUIGeneratedNativeModule._FrameNode_getIdByFrameNode(ptr, ptr);
+        if (nodeId !== -1 && !ArkUIGeneratedNativeModule._FrameNode_isModifiable(ptr)) {
+            let frameNode = new BuilderRootFrameNode<T>(uiContext, "BuilderRootFrameNode", ptr);
+            frameNode._nodeId = nodeId;
+            frameNode.peer = new Finalizable(ptr, FrameNode.getFinalizer());
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, frameNode);
             return frameNode;
         }

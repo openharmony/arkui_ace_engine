@@ -38782,6 +38782,98 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // BounceSymbolEffectAccessor
+    namespace BuilderNodeOpsAccessor {
+    void DestroyPeerImpl(Ark_BuilderNodeOps peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_BuilderNodeOps CtorImpl()
+    {
+        if (!needGroupedLog(1))
+            return (Ark_BuilderNodeOps) 100;
+        string out("new BuilderNodeOps(");
+        out.append(") \n");
+        out.append("[return (Ark_BuilderNodeOps) 100] \n");
+        appendGroupedLog(1, out);
+        return (Ark_BuilderNodeOps) 100;
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void CreateImpl(Ark_BuilderNodeOps peer,
+                    const Callback_Void* buildFunc)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("create(");
+        WriteToString(&out, buildFunc);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void DisposeNodeImpl(Ark_BuilderNodeOps peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("disposeNode(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer,
+                                            const Callback_Void* configurationUpdateFunc)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setUpdateConfigurationCallback(");
+        WriteToString(&out, configurationUpdateFunc);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOptionsImpl(Ark_BuilderNodeOps peer,
+                        const Ark_BuilderNodeOptions* options)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOptions(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer,
+                                   Ark_TouchEvent event)
+    {
+        if (!needGroupedLog(1))
+            return 0;
+        string out("postTouchEvent(");
+        WriteToString(&out, event);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_NativePointer SetRootFrameNodeInBuilderNodeImpl(Ark_BuilderNodeOps peer,
+                                                        Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("setRootFrameNodeInBuilderNode(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // BuilderNodeOpsAccessor
     namespace PulseSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
     {
@@ -46135,6 +46227,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct BounceSymbolEffectPeer {
         virtual ~BounceSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor()
+    {
+        static const GENERATED_ArkUIBuilderNodeOpsAccessor BuilderNodeOpsAccessorImpl {
+            BuilderNodeOpsAccessor::DestroyPeerImpl,
+            BuilderNodeOpsAccessor::CtorImpl,
+            BuilderNodeOpsAccessor::GetFinalizerImpl,
+            BuilderNodeOpsAccessor::CreateImpl,
+            BuilderNodeOpsAccessor::DisposeNodeImpl,
+            BuilderNodeOpsAccessor::SetUpdateConfigurationCallbackImpl,
+            BuilderNodeOpsAccessor::SetOptionsImpl,
+            BuilderNodeOpsAccessor::PostTouchEventImpl,
+            BuilderNodeOpsAccessor::SetRootFrameNodeInBuilderNodeImpl,
+        };
+        return &BuilderNodeOpsAccessorImpl;
+    }
+
+    struct BuilderNodeOpsPeer {
+        virtual ~BuilderNodeOpsPeer() = default;
+    };
     const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
@@ -47321,6 +47432,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAppearSymbolEffectAccessor,
             GetDisappearSymbolEffectAccessor,
             GetBounceSymbolEffectAccessor,
+            GetBuilderNodeOpsAccessor,
             GetPulseSymbolEffectAccessor,
             GetTabsControllerAccessor,
             GetTabContentTransitionProxyAccessor,

@@ -274,6 +274,9 @@ typedef struct BaseShapePeer* Ark_BaseShape;
 typedef struct Opt_BaseShape Opt_BaseShape;
 typedef struct Opt_Boolean Opt_Boolean;
 typedef struct Opt_Buffer Opt_Buffer;
+typedef struct BuilderNodeOpsPeer BuilderNodeOpsPeer;
+typedef struct BuilderNodeOpsPeer* Ark_BuilderNodeOps;
+typedef struct Opt_BuilderNodeOps Opt_BuilderNodeOps;
 typedef struct CalendarControllerPeer CalendarControllerPeer;
 typedef struct CalendarControllerPeer* Ark_CalendarController;
 typedef struct Opt_CalendarController Opt_CalendarController;
@@ -1723,6 +1726,8 @@ typedef struct BounceSymbolEffectPeer* Ark_BounceSymbolEffect;
 typedef struct Opt_BounceSymbolEffect Opt_BounceSymbolEffect;
 typedef struct Ark_BreakPoints Ark_BreakPoints;
 typedef struct Opt_BreakPoints Opt_BreakPoints;
+typedef struct Ark_BuilderNodeOptions Ark_BuilderNodeOptions;
+typedef struct Opt_BuilderNodeOptions Opt_BuilderNodeOptions;
 typedef struct Ark_BrightnessBlender Ark_BrightnessBlender;
 typedef struct Opt_BrightnessBlender Opt_BrightnessBlender;
 typedef struct Ark_BusinessError Ark_BusinessError;
@@ -6778,6 +6783,10 @@ typedef struct Opt_Buffer {
     Ark_Tag tag;
     Ark_Buffer value;
 } Opt_Buffer;
+typedef struct Opt_BuilderNodeOps {
+    Ark_Tag tag;
+    Ark_BuilderNodeOps value;
+} Opt_BuilderNodeOps;
 typedef struct Opt_CalendarController {
     Ark_Tag tag;
     Ark_CalendarController value;
@@ -12015,6 +12024,16 @@ typedef struct Opt_BreakPoints {
     Ark_Tag tag;
     Ark_BreakPoints value;
 } Opt_BreakPoints;
+typedef struct Ark_BuilderNodeOptions {
+    /* kind: Interface */
+    Opt_Size selfIdealSize;
+    Opt_Number type;
+    Opt_String surfaceId;
+} Ark_BuilderNodeOptions;
+typedef struct Opt_BuilderNodeOptions {
+    Ark_Tag tag;
+    Ark_BuilderNodeOptions value;
+} Opt_BuilderNodeOptions;
 typedef struct Ark_BrightnessBlender {
     Ark_Number cubicRate;
     Ark_Number quadraticRate;
@@ -24496,7 +24515,7 @@ typedef struct GENERATED_ArkUIUIContextImpAccessor {
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(const Ark_Number* id,
                           Ark_Boolean isFrozen);
-} GetRenderNodeAccessorGENERATED_ArkUIUIContextImpAccessor;
+} GENERATED_ArkUIUIContextImpAccessor;
 
 typedef struct GENERATED_ArkUIGridItemOpsAccessor {
     Ark_NativePointer (*registerSelectedCallback)(Ark_NativePointer node,
@@ -26442,6 +26461,23 @@ typedef struct GENERATED_ArkUIBounceSymbolEffectAccessor {
                          Ark_EffectDirection direction);
 } GENERATED_ArkUIBounceSymbolEffectAccessor;
 
+typedef struct GENERATED_ArkUIBuilderNodeOpsAccessor {
+    void (*destroyPeer)(Ark_BuilderNodeOps peer);
+    Ark_BuilderNodeOps (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*create)(Ark_BuilderNodeOps peer,
+                   const Callback_Void* buildFunc);
+    void (*disposeNode)(Ark_BuilderNodeOps peer);
+    void (*setUpdateConfigurationCallback)(Ark_BuilderNodeOps peer,
+                                           const Callback_Void* configurationUpdateFunc);
+    void (*setOptions)(Ark_BuilderNodeOps peer,
+                       const Ark_BuilderNodeOptions* options);
+    Ark_Boolean (*postTouchEvent)(Ark_BuilderNodeOps peer,
+                                  Ark_TouchEvent event);
+    Ark_NativePointer (*setRootFrameNodeInBuilderNode)(Ark_BuilderNodeOps peer,
+                                                       Ark_NativePointer node);
+} GENERATED_ArkUIBuilderNodeOpsAccessor;
+
 typedef struct GENERATED_ArkUIPulseSymbolEffectAccessor {
     void (*destroyPeer)(Ark_PulseSymbolEffect peer);
     Ark_PulseSymbolEffect (*ctor)();
@@ -27523,6 +27559,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIAppearSymbolEffectAccessor* (*getAppearSymbolEffectAccessor)();
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* (*getDisappearSymbolEffectAccessor)();
     const GENERATED_ArkUIBounceSymbolEffectAccessor* (*getBounceSymbolEffectAccessor)();
+    const GENERATED_ArkUIBuilderNodeOpsAccessor* (*getBuilderNodeOpsAccessor)();
     const GENERATED_ArkUIPulseSymbolEffectAccessor* (*getPulseSymbolEffectAccessor)();
     const GENERATED_ArkUITabsControllerAccessor* (*getTabsControllerAccessor)();
     const GENERATED_ArkUITabContentTransitionProxyAccessor* (*getTabContentTransitionProxyAccessor)();

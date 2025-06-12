@@ -14,6 +14,7 @@
  */
 
 export class WrappedBuilder<T> {
+    /** @memo */
     builder: T;
     constructor(t: T) {
         this.builder = t;

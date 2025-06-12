@@ -45,10 +45,11 @@ Ark_Boolean AddFrameNodeImpl(Ark_NodeContent peer, Ark_FrameNode node)
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->content, false);
     CHECK_NULL_RETURN(node, false);
-    CHECK_NULL_RETURN(node->node, false);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
+    CHECK_NULL_RETURN(frameNode, false);
     auto nodeContent = AceType::DynamicCast<NG::NodeContent>(peer->content);
     CHECK_NULL_RETURN(nodeContent, false);
-    auto childNode = AceType::DynamicCast<UINode>(node->node);
+    auto childNode = AceType::DynamicCast<UINode>(frameNode);
     CHECK_NULL_RETURN(childNode, false);
     nodeContent->AddNode(AceType::RawPtr(childNode));
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -59,10 +60,11 @@ Ark_Boolean RemoveFrameNodeImpl(Ark_NodeContent peer, Ark_FrameNode node)
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->content, false);
     CHECK_NULL_RETURN(node, false);
-    CHECK_NULL_RETURN(node->node, false);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
+    CHECK_NULL_RETURN(frameNode, false);
     auto nodeContent = AceType::DynamicCast<NG::NodeContent>(peer->content);
     CHECK_NULL_RETURN(nodeContent, false);
-    auto childNode = AceType::DynamicCast<UINode>(node->node);
+    auto childNode = AceType::DynamicCast<UINode>(frameNode);
     CHECK_NULL_RETURN(childNode, false);
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     nodeContent->RemoveNode(AceType::RawPtr(childNode));

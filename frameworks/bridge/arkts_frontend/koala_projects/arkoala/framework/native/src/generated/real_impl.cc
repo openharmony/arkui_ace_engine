@@ -18870,6 +18870,48 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // BounceSymbolEffectAccessor
+    namespace BuilderNodeOpsAccessor {
+    void DestroyPeerImpl(Ark_BuilderNodeOps peer)
+    {
+        auto peerImpl = reinterpret_cast<BuilderNodeOpsPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_BuilderNodeOps CtorImpl()
+    {
+        return new BuilderNodeOpsPeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void CreateImpl(Ark_BuilderNodeOps peer,
+                    const Callback_Void* buildFunc)
+    {
+    }
+    void DisposeNodeImpl(Ark_BuilderNodeOps peer)
+    {
+    }
+    void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer,
+                                            const Callback_Void* configurationUpdateFunc)
+    {
+    }
+    void SetOptionsImpl(Ark_BuilderNodeOps peer,
+                        const Ark_BuilderNodeOptions* options)
+    {
+    }
+    Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer,
+                                   Ark_TouchEvent event)
+    {
+        return {};
+    }
+    Ark_NativePointer SetRootFrameNodeInBuilderNodeImpl(Ark_BuilderNodeOps peer,
+                                                        Ark_NativePointer node)
+    {
+        return {};
+    }
+    } // BuilderNodeOpsAccessor
     namespace PulseSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
     {
@@ -23835,6 +23877,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct BounceSymbolEffectPeer {
         virtual ~BounceSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor()
+    {
+        static const GENERATED_ArkUIBuilderNodeOpsAccessor BuilderNodeOpsAccessorImpl {
+            BuilderNodeOpsAccessor::DestroyPeerImpl,
+            BuilderNodeOpsAccessor::CtorImpl,
+            BuilderNodeOpsAccessor::GetFinalizerImpl,
+            BuilderNodeOpsAccessor::CreateImpl,
+            BuilderNodeOpsAccessor::DisposeNodeImpl,
+            BuilderNodeOpsAccessor::SetUpdateConfigurationCallbackImpl,
+            BuilderNodeOpsAccessor::SetOptionsImpl,
+            BuilderNodeOpsAccessor::PostTouchEventImpl,
+            BuilderNodeOpsAccessor::SetRootFrameNodeInBuilderNodeImpl,
+        };
+        return &BuilderNodeOpsAccessorImpl;
+    }
+
+    struct BuilderNodeOpsPeer {
+        virtual ~BuilderNodeOpsPeer() = default;
+    };
     const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
@@ -25032,6 +25093,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAppearSymbolEffectAccessor,
             GetDisappearSymbolEffectAccessor,
             GetBounceSymbolEffectAccessor,
+            GetBuilderNodeOpsAccessor,
             GetPulseSymbolEffectAccessor,
             GetTabsControllerAccessor,
             GetTabContentTransitionProxyAccessor,

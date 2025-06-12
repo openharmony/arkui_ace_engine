@@ -82,6 +82,9 @@ export function currentPartialUpdateContext<T>(): T | undefined {
 // TODO: move to Application class.
 let detachedRoots: Map<KPointer, ComputableState<PeerNode>> = new Map<KPointer, ComputableState<PeerNode>>()
 
+// mark the tree create by BuilderNode
+let detachedStatMgt: Map<StateManager,ComputableState<PeerNode>> =new Map<StateManager,ComputableState<PeerNode>>()
+
 export function createUiDetachedRoot(
     peerFactory: () => PeerNode,
     /** @memo */
@@ -98,6 +101,24 @@ export function createUiDetachedRoot(
     return node.value
 }
 setUIDetachedRootCreator(createUiDetachedRoot)
+
+//used By BuilderNode
+export function createUiDetachedBuilderRoot(
+    peerFactory: () => PeerNode,
+    /** @memo */
+    builder: () => void,
+    manager : StateManager
+    ): ComputableState<PeerNode>{
+        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+            const frozen = manager.frozen
+            manager.frozen = true
+            memoEntry<void>(context, 0, builder)
+            manager.frozen = frozen
+        })
+    detachedRoots.set(node.value.peer.ptr, node)
+    detachedStatMgt.set(manager,node)
+    return node
+}
 
 export function destroyUiDetachedRoot(node: PeerNode): void {
     if (!detachedRoots.has(node.peer.ptr))
@@ -259,10 +280,17 @@ export class Application {
         }
         // Here we request to draw a frame and call custom components callbacks.
         let root = rootState.value;
+        // updateState in BuilderNode
+        for (const mgt of detachedStatMgt) {
+            this.updateStates(mgt[0]!, mgt[1]!);
+            mgt[1]?.value;
+        }
         if (root.peer.ptr) {
             ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr);
             callScheduledCallbacks();
         }
+        // Call callbacks and sync
+        callScheduledCallbacks()
     }
 
     updateStates(manager: StateManager, root: ComputableState<PeerNode>) {
