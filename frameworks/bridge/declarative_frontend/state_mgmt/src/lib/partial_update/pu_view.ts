@@ -333,12 +333,10 @@ abstract class ViewPU extends PUV2ViewBase
         this.onInactiveInternal();
       }
     }
-    for (const child of this.childrenWeakrefMap_.values()) {
-      const childView: IView | undefined = child.deref();
-      if (childView) {
-        childView.setActiveInternal(active, isReuse);
-      }
-    }
+    // Propagate state to all child View
+    this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+    // Propagate state to all child BuilderNode
+    this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
     stateMgmtProfiler.end();
   }
 
