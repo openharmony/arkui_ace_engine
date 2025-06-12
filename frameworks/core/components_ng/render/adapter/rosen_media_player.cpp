@@ -541,7 +541,7 @@ int32_t RosenMediaPlayer::SetPlayRangeWithMode(int64_t startTime, int64_t endTim
     return mediaPlayer_->SetPlayRangeWithMode(startTime, endTime, ConvertToMediaSeekMode(mode));
 }
 
-int32_t RosenMediaPlayer::SetPlayRangeUsWithMode(int64_t startTime, int64_t endTime, OHOS::Ace::SeekMode mode)
+int32_t RosenMediaPlayer::SetPlayRangeUsWithMode(int64_t startTime, int64_t endTime, SeekMode mode)
 {
     LOGI("Media player start to SetPlayRangeUsWithMode.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
