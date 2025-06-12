@@ -53,30 +53,38 @@ void PrevLabelImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::string>(*value);
-    if (!convValue) {
-        // TODO: Reset value
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        StepperItemModelStatic::ResetPrevLabel(frameNode);
         return;
     }
-    StepperItemModelStatic::SetPrevLabel(frameNode, *convValue);
+    auto convValue = Converter::Convert<std::string>(value->value);
+    StepperItemModelStatic::SetPrevLabel(frameNode, convValue);
 }
 void NextLabelImpl(Ark_NativePointer node,
                    const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::string>(*value);
-    if (!convValue) {
-        // TODO: Reset value
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        StepperItemModelStatic::ResetNextLabel(frameNode);
         return;
     }
-    StepperItemModelStatic::SetNextLabel(frameNode, *convValue);
+    auto convValue = Converter::Convert<std::string>(value->value);
+    StepperItemModelStatic::SetNextLabel(frameNode, convValue);
 }
 void StatusImpl(Ark_NativePointer node,
                 const Opt_ItemState* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        StepperItemModelStatic::SetStatus(
+            frameNode, StepperItemModelStatic::ITEM_STATE.at(StepperItemModelStatic::ItemState::NORMAL));
+        return;
+    }
     auto convValue = value ? Converter::OptConvert<StepperItemModelStatic::ItemState>(*value) : std::nullopt;
     if (convValue.has_value()) {
         StepperItemModelStatic::SetStatus(frameNode, StepperItemModelStatic::ITEM_STATE.at(convValue.value()));
