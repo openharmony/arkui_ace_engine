@@ -26,7 +26,6 @@ class ArkResource implements Resource {
     params?: Array<Object> | undefined;
     type?: number | undefined;
     _id: number = -1;
-    // @ts-ignore
     constructor(resourceName: string | null, bundleName: string, moduleName: string, ...params: Object[]) {
         this.bundleName = bundleName;
         this.moduleName = moduleName;
@@ -45,7 +44,6 @@ class ArkResource implements Resource {
             InteropNativeModule._NativeLog("UI-Plugin do not send resourceName when id is -1");
         }
     }
-    // @ts-ignore
     constructor(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]) {
         this._id = id;
         this.type = type;
@@ -113,24 +111,18 @@ class ArkResource implements Resource {
         return ResourceType.STRING;
     }
 }
-// @ts-ignore
 export function _r(bundleName: string, moduleName: string, name: string, ...params: Object[]): Resource {
     return new ArkResource(name, bundleName, moduleName, ...params)
 }
-// @ts-ignore
 export function _rawfile(bundleName: string, moduleName: string, name: string): Resource {
-    // @ts-ignore
     return new ArkResource(0, 30000, bundleName, moduleName, name);
 }
-// @ts-ignore
 export function _r(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]): Resource {
     if (id === -1) {
         return new ArkResource(null, bundleName, moduleName, ...params);
     }
-    // @ts-ignore
     return new ArkResource(id, type, bundleName, moduleName, ...params);
 }
-// @ts-ignore
 export function _rawfile(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]): Resource {
     const name: string = params[0] as string;
     return _rawfile(bundleName, moduleName, name);
