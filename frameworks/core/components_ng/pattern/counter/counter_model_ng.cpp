@@ -377,75 +377,98 @@ void CounterModelNG::CreateWithResourceObj(JsCounterResourceType jsResourceType,
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, jsResourceType, resObj);
+}
 
+void CounterModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, JsCounterResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
     auto pattern = frameNode->GetPattern<CounterPattern>();
     CHECK_NULL_VOID(pattern);
-
-    std::string key;
     switch (jsResourceType) {
-        case JsCounterResourceType::Height: {
-            key = "counter.height";
-            auto&& updateFunc = [pattern, key, this](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
-                Dimension height;
-                if (ResourceParseUtils::ConvertFromResObjNG(resObj, height)) {
-                    auto frameNode = pattern->GetHost();
-                    CHECK_NULL_VOID(frameNode);
-                    auto pipelineContext = frameNode->GetContext();
-                    CHECK_NULL_VOID(pipelineContext);
-                    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
-                        if (LessNotEqual(height.Value(), 0.0)) {
-                            return;
-                        }
-      SetHeight(AceType::RawPtr(frameNode), height);
-                    }
-                }
-            };
-            updateFunc(resObj, true);
-            pattern->AddResObj(key, resObj, std::move(updateFunc));
+        case JsCounterResourceType::Height:
+            HandleHeightResource(frameNode, resObj);
             break;
-        }
-        case JsCounterResourceType::Width: {
-            key = "counter.width";
-            auto&& updateFunc = [pattern, key, this](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
-                Dimension width;
-                if (ResourceParseUtils::ConvertFromResObjNG(resObj, width)) {
-                    auto frameNode = pattern->GetHost();
-                    CHECK_NULL_VOID(frameNode);
-                    auto pipelineContext = frameNode->GetContext();
-                    CHECK_NULL_VOID(pipelineContext);
-                    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
-                        if (LessNotEqual(width.Value(), 0.0)) {
-                            return;
-                        }
-                        SetWidth(AceType::RawPtr(frameNode), width);
-                    }
-                }
-            };
-            updateFunc(resObj, true);
-            pattern->AddResObj(key, resObj, std::move(updateFunc));
+        case JsCounterResourceType::Width:
+            HandleWidthResource(frameNode, resObj);
             break;
-        }
-        case JsCounterResourceType::BackgroundColor: {
-            key = "counter.backgroundColor";
-            auto&& updateFunc = [pattern, key, this](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
-                Color color;
-                if (ResourceParseUtils::ParseResColor(resObj, color)) {
-                    auto frameNode = pattern->GetHost();
-                    CHECK_NULL_VOID(frameNode);
-                    auto pipelineContext = frameNode->GetContext();
-                    CHECK_NULL_VOID(pipelineContext);
-                    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
-                        SetBackgroundColor(AceType::RawPtr(frameNode), color);
-                    }
-                }
-            };
-            updateFunc(resObj, true);
-            pattern->AddResObj(key, resObj, std::move(updateFunc));
+        case JsCounterResourceType::BackgroundColor:
+            HandleBackgroundColorResource(frameNode, resObj);
             break;
-        }
         default:
-            LOGE("Unsupported JsCounterResourceType");
             break;
     }
+}
+
+void CounterModelNG::HandleHeightResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "counter.height";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+        Dimension height;
+        if (!ResourceParseUtils::ConvertFromResObjNG(resObj, height)) {
+            return;
+        }
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        if (pipelineContext->IsSystmColorChange()) {
+            if (!LessNotEqual(height.Value(), 0.0)) {
+                SetHeight(AceType::RawPtr(frameNode), height);
+            }
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void CounterModelNG::HandleWidthResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "counter.width";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+        Dimension width;
+        if (!ResourceParseUtils::ConvertFromResObjNG(resObj, width)) {
+            return;
+        }
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        if (pipelineContext->IsSystmColorChange()) {
+            if (!LessNotEqual(width.Value(), 0.0)) {
+                SetWidth(AceType::RawPtr(frameNode), width);
+            }
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void CounterModelNG::HandleBackgroundColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "counter.backgroundColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+        Color color;
+        if (ResourceParseUtils::ParseResColor(resObj, color)) {
+            auto frameNode = pattern->GetHost();
+            CHECK_NULL_VOID(frameNode);
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            if (pipelineContext->IsSystmColorChange()) {
+                SetBackgroundColor(AceType::RawPtr(frameNode), color);
+            }
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

@@ -172,4 +172,44 @@ void DataPanelPattern::OnColorModeChange(uint32_t colorMode)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
+
+
+void DataPanelPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dataPanelTheme = pipeline->GetTheme<DataPanelTheme>();
+    CHECK_NULL_VOID(dataPanelTheme);
+    auto paintProperty = GetPaintProperty<DataPanelPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetTrackBackgroundSetByUser().value_or(false)) {
+        UpdateTrackBackground(dataPanelTheme->GetBackgroundColor(), false);
+    }
+    if (!paintProperty->GetStrokeWidthSetByUser().value_or(false)) {
+        UpdateStrokeWidth(dataPanelTheme->GetThickness(), false);
+    }
+    if (!paintProperty->GetValueColorsSetByUser().value_or(false)) {
+        auto themeColors = dataPanelTheme->GetColorsArray();
+        std::vector<OHOS::Ace::NG::Gradient> colors;
+        for (const auto& item : themeColors) {
+            OHOS::Ace::NG::Gradient gradient;
+            OHOS::Ace::NG::GradientColor gradientColorStart;
+            gradientColorStart.SetLinearColor(LinearColor(item.first));
+            gradientColorStart.SetDimension(Dimension(0.0));
+            gradient.AddColor(gradientColorStart);
+            OHOS::Ace::NG::GradientColor gradientColorEnd;
+            gradientColorEnd.SetLinearColor(LinearColor(item.second));
+            gradientColorEnd.SetDimension(Dimension(1.0));
+            gradient.AddColor(gradientColorEnd);
+            colors.emplace_back(gradient);
+        }
+        paintProperty->UpdateValueColors(colors);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
 } // namespace OHOS::Ace::NG

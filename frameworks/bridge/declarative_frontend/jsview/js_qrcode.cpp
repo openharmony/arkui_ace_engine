@@ -82,19 +82,20 @@ void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
         return;
     }
     Color qrcodeColor;
+    RefPtr<ResourceObject> resObj;
+
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         bool state = ParseJsColor(info[0], qrcodeColor, resObj);
-        if (resObj) {
-            QRCodeModel::GetInstance()->CreateWithResourceObj(QRCodeResourceType::COLOR, resObj);
-            return;
+        QRCodeModel::GetInstance()->CreateWithResourceObj(QRCodeResourceType::COLOR, resObj);
+        if (!resObj) {
+            if (!state && !JSQRCodeTheme::ObtainQRCodeColor(qrcodeColor)) {
+                RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
+                CHECK_NULL_VOID(qrcodeTheme);
+                qrcodeColor = qrcodeTheme->GetQrcodeColor();
+            }
+            QRCodeModel::GetInstance()->SetQRCodeColor(qrcodeColor);
         }
-        if (!state && !JSQRCodeTheme::ObtainQRCodeColor(qrcodeColor)) {
-            RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
-            CHECK_NULL_VOID(qrcodeTheme);
-            qrcodeColor = qrcodeTheme->GetQrcodeColor();
-        }
-        QRCodeModel::GetInstance()->SetQRCodeColor(qrcodeColor);
     } else {
         if (!ParseJsColor(info[0], qrcodeColor) && !JSQRCodeTheme::ObtainQRCodeColor(qrcodeColor)) {
             RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
@@ -114,16 +115,15 @@ void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         bool state = ParseJsColor(info[0], backgroundColor, resObj);
-        if (resObj) {
-            QRCodeModel::GetInstance()->CreateWithResourceObj(QRCodeResourceType::BACKGROUND_COLOR, resObj);
-            return;
+        QRCodeModel::GetInstance()->CreateWithResourceObj(QRCodeResourceType::BACKGROUND_COLOR, resObj);
+        if (!resObj) {
+            if (!state && !JSQRCodeTheme::ObtainBackgroundColor(backgroundColor)) {
+                RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
+                CHECK_NULL_VOID(qrcodeTheme);
+                backgroundColor = qrcodeTheme->GetBackgroundColor();
+            }
+            QRCodeModel::GetInstance()->SetQRBackgroundColor(backgroundColor);
         }
-        if (!state && !JSQRCodeTheme::ObtainBackgroundColor(backgroundColor)) {
-            RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
-            CHECK_NULL_VOID(qrcodeTheme);
-            backgroundColor = qrcodeTheme->GetBackgroundColor();
-        }
-        QRCodeModel::GetInstance()->SetQRBackgroundColor(backgroundColor);
     } else {
         if (!ParseJsColor(info[0], backgroundColor) && !JSQRCodeTheme::ObtainBackgroundColor(backgroundColor)) {
             RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();

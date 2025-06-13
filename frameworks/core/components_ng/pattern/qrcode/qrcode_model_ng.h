@@ -33,6 +33,8 @@ public:
     static void SetQRCodeColor(FrameNode* frameNode, const Color& color);
     static void SetQRBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetContentOpacity(FrameNode* frameNode, const double opacity);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, QRCodeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H

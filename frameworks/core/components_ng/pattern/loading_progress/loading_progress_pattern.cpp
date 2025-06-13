@@ -333,4 +333,24 @@ void LoadingProgressPattern::UpdateColor(const Color& color, bool isFirstLoad)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
+void LoadingProgressPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(pops);
+    if (!pops->HasColorSetByUser() || (pops->HasColorSetByUser() && !pops->GetColorSetByUserValue())) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            Color progressColor = theme->GetLoadingColor();
+            UpdateColor(progressColor);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

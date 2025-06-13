@@ -69,6 +69,7 @@ public:
     void UpdateTrackBackground(const Color& color, bool isFirstLoad = false);
     void UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad = false);
     void OnColorModeChange(uint32_t colorMode) override;
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnAttachToFrameNode() override;

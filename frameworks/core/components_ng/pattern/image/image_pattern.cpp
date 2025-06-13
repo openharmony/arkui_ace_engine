@@ -1957,6 +1957,25 @@ void ImagePattern::OnLanguageConfigurationUpdate()
 void ImagePattern::OnColorConfigurationUpdate()
 {
     OnConfigurationUpdate();
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetImageFillSetByUserValue(false)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+            return;
+        }
+        CHECK_NULL_VOID(theme);
+        auto color = theme->GetFillColor();
+        UpdateImageFill(color);
+    }
 }
 
 void ImagePattern::OnDirectionConfigurationUpdate()

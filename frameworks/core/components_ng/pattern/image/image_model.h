@@ -107,6 +107,7 @@ public:
     virtual void SetOrientation(ImageRotateOrientation orientation) = 0;
     virtual bool GetIsAnimation() = 0;
     virtual void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) = 0;
+    virtual void SetImageFillSetByUser(bool value) = 0;
 
 private:
     static std::unique_ptr<ImageModel> instance_;
