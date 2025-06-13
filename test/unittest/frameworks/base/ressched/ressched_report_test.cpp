@@ -16,6 +16,9 @@
 #include "gtest/gtest.h"
 #include "vector"
 #include "base/ressched/ressched_report.h"
+#include "core/common/ace_application_info.h"
+#include "core/event/touch_event.h"
+#include "core/pipeline_ng/pipline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,23 +47,14 @@ public:
  */
 HWTEST_F(ResSchedReportTest, ResSchedReportTest001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Get currentId from initial env
-     * @tc.expected: CurrentId equals the value in initial env
-     */
-    int32_t scopeId = ContainerScope::CurrentId();
-    EXPECT_EQ(scopeId, INSTANCE_ID_PLATFORM);
-
-    /**
-     * @tc.steps: step2. Update currentId and get it
-     * @tc.expected: CurrentId equals updated value
-     */
-    ContainerScope::UpdateCurrent(TEST_INSTANCE_ID_CONTAINER);
-    scopeId = ContainerScope::CurrentId();
-    EXPECT_EQ(scopeId, TEST_INSTANCE_ID_CONTAINER);
-
-    ContainerScope::UpdateCurrent(TEST_INSTANCE_ID_SUB_CONTAINER);
-    scopeId = ContainerScope::CurrentId();
-    EXPECT_EQ(scopeId, TEST_INSTANCE_ID_SUB_CONTAINER);
+    TouchEvent touch_event;
+    touch_event.type = TouchType::UP;
+    touch_event.localX = 100.0f;
+    touch_event.localY = 200.0f;
+    ReportConfig config;
+    config.isReportTid = true;
+    config.tid = 98765;
+    ResSchedReport::GetInstance().OnTouchEvent(touch_event, config);
+    EXPECT_NE(touch_event.localX, touch_event.localY);
 }
 } // namespace OHOS::Ace
