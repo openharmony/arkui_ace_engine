@@ -37,6 +37,7 @@ ace_unittest("list_test_ng") {
     "list_lanes_layout_test_ng.cpp",
     "list_layout_test_ng.cpp",
     "list_pattern_test_ng.cpp",
+    "list_pattern_test_ng_two.cpp",
     "list_position_map_test_ng.cpp",
     "list_scroller_event_test_ng.cpp",
     "list_scroller_test_ng.cpp",

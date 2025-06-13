@@ -414,6 +414,7 @@ HWTEST_F(ListItemGroupPatternTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level
         AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
     RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
         AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(0, 0, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true };
     RefPtr<ListItemGroupLayoutProperty> listItemGroupLayoutProperty =
         AceType::MakeRefPtr<ListItemGroupLayoutProperty>();
     V2::ItemDivider itemDivider;
