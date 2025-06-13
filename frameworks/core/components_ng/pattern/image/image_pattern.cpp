@@ -1783,9 +1783,7 @@ inline void ImagePattern::DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderP
     auto fillColor = renderProp->GetSvgFillColor();
     if (fillColor.has_value()) {
         auto color = fillColor.value();
-        DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
-    } else {
-        DumpLog::GetInstance().AddDesc("fillColor: Null");
+        DumpLog::GetInstance().AddDesc(std::string("fillColor_value: ").append(color.ToSvgFillColorKey()));
     }
 }
 
