@@ -200,12 +200,13 @@ bool NavigationGroupNode::ReorderNavDestination(
     auto context = GetContextRefPtr();
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_RETURN(pattern, false);
+    auto stack = pattern->GetNavigationStack();
     for (uint32_t i = 0; i != navDestinationNodes.size(); ++i) {
         const auto& childNode = navDestinationNodes[i];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
         if (navDestination == nullptr) {
-            if (pattern->GetNavigationStack()->IsFromRecovery(i) || pattern->GetNavigationStack()->GetIsForceSet(i)) {
+            if (stack && (stack->IsFromRecovery(i) || stack->GetIsForceSet(i))) {
                 continue;
             }
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get destination node failed");
@@ -216,6 +217,9 @@ bool NavigationGroupNode::ReorderNavDestination(
         navDestinationPattern->SetName(childNode.first);
         navDestinationPattern->SetCustomNode(uiNode);
         navDestinationPattern->SetIndex(static_cast<int32_t>(i));
+        if (stack) {
+            navDestinationPattern->UpdateSerializedParam(stack->GetSerializedParamSafely(static_cast<int32_t>(i)));
+        }
         SetBackButtonEvent(navDestination);
         navDestination->SetIndex(i);
         auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
