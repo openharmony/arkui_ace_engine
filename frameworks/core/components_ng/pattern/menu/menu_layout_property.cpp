@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
 void MenuLayoutProperty::BindToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -70,6 +71,36 @@ void MenuLayoutProperty::DividerToJsonValue(std::unique_ptr<JsonValue>& json) co
     }
 }
 
+void MenuLayoutProperty::MaskToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapperNode = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto filterColumnNode = menuWrapperPattern->GetFilterColumnNode();
+    auto jsonMask = JsonUtil::Create(true);
+    if (filterColumnNode) {
+        jsonMask->PutExtAttr("mask", "true", filter);
+        auto filterRenderContext = filterColumnNode->GetRenderContext();
+        CHECK_NULL_VOID(filterRenderContext);
+        auto maskColor = filterRenderContext->GetBackgroundColor();
+        if (maskColor.has_value()) {
+            jsonMask->PutExtAttr("color", maskColor.value().ColorToString().c_str(), filter);
+        }
+        auto maskBackgroundBlurStyle = filterRenderContext->GetBackBlurStyle();
+        if (maskBackgroundBlurStyle.has_value()) {
+            maskBackgroundBlurStyle.value().ToJsonValue(jsonMask, filter);
+        }
+    } else {
+        jsonMask->PutExtAttr("mask", "false", filter);
+    }
+    json->PutExtAttr("mask", jsonMask, filter);
+}
+
 void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
@@ -103,5 +134,6 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     }
     json->Put("subMenuExpandingMode", expandingMode);
     DividerToJsonValue(json);
+    MaskToJsonValue(json, filter);
 }
 } // namespace OHOS::Ace::NG
