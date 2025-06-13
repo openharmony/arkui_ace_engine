@@ -203,8 +203,10 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
 {
     if (shapeMode_ == ShapeMode::RECT) {
         double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
-        auto scrollBarMarginStart = scrollBarMargin_.value_or(ScrollBarMargin()).start_.ConvertToPxWithSize(mainSize);
-        auto scrollBarMarginEnd = scrollBarMargin_.value_or(ScrollBarMargin()).end_.ConvertToPxWithSize(mainSize);
+        auto scrollBarMarginStart =
+            scrollBarMargin_.has_value() ? scrollBarMargin_.value().start_.ConvertToPxWithSize(mainSize) : 0.0;
+        auto scrollBarMarginEnd =
+            scrollBarMargin_.has_value() ? scrollBarMargin_.value().end_.ConvertToPxWithSize(mainSize) : 0.0;
         double height = std::max(size.Height() - NormalizeToPx(startReservedHeight_) -
             NormalizeToPx(endReservedHeight_) - scrollBarMarginStart - scrollBarMarginEnd, 0.0);
         auto hoverWidth = isUserNormalWidth_ ? barWidth_ : NormalizeToPx(hoverWidth_);
@@ -228,8 +230,10 @@ void ScrollBar::SetRectTrickRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource)
 {
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
-    auto scrollBarMarginStart = scrollBarMargin_.value_or(ScrollBarMargin()).start_.ConvertToPxWithSize(mainSize);
-    auto scrollBarMarginEnd = scrollBarMargin_.value_or(ScrollBarMargin()).end_.ConvertToPxWithSize(mainSize);
+    auto scrollBarMarginStart =
+        scrollBarMargin_.has_value() ? scrollBarMargin_.value().start_.ConvertToPxWithSize(mainSize) : 0.0;
+    auto scrollBarMarginEnd =
+        scrollBarMargin_.has_value() ? scrollBarMargin_.value().end_.ConvertToPxWithSize(mainSize) : 0.0;
     barRegionSize_ = std::max(mainSize - NormalizeToPx(endReservedHeight_) - NormalizeToPx(startReservedHeight_) -
         scrollBarMarginStart - scrollBarMarginEnd, 0.0);
     if (LessOrEqual(estimatedHeight, 0.0)) {
@@ -237,7 +241,9 @@ void ScrollBar::SetRectTrickRegion(
     }
     double activeBarSize = barRegionSize_ * mainSize / estimatedHeight;
     double activeSize = activeBarSize - outBoundary_;
-    if (LessNotEqual(barRegionSize_, NormalizeToPx(minHeight_)) && scrollBarMargin_.has_value()) {
+    bool hideBarForSmallRegionWithMargin =
+        LessNotEqual(barRegionSize_, NormalizeToPx(minHeight_)) && scrollBarMargin_.has_value();
+    if (hideBarForSmallRegionWithMargin) {
         activeSize = 0.0;
     } else {
         if (!NearZero(outBoundary_)) {
@@ -275,7 +281,7 @@ void ScrollBar::SetRectTrickRegion(
     AddScrollBarLayoutInfo();
     // If the scrollBar length changes, start the adaptation animation
     if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation &&
-        !Negative(inactiveMainOffset) && !normalWidthUpdate_) {
+        !Negative(inactiveMainOffset) && !normalWidthUpdate_ && !hideBarForSmallRegionWithMargin) {
         PlayScrollBarAdaptAnimation();
     } else {
         needAdaptAnimation_ = false;
