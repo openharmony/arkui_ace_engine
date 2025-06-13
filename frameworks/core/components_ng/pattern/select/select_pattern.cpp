@@ -21,10 +21,12 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/utils/utf_helper.h"
 #include "core/animation/curves.h"
+#include "core/common/ace_engine.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
@@ -46,6 +48,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
+#include "core/components_ng/pattern/select/select_layout_property.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -214,6 +217,14 @@ void SelectPattern::ShowSelectMenu()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     UpdateTargetSize();
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false)) {
+        ShowSelectMenuInSubWindow();
+        return;
+    }
     auto offset = host->GetPaintRectOffset(false, true);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
@@ -224,6 +235,33 @@ void SelectPattern::ShowSelectMenu()
     ShowScrollBar();
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
     overlayManager->ShowMenu(host->GetId(), offset, menuWrapper_);
+}
+
+void SelectPattern::ShowSelectMenuInSubWindow()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto offset = host->GetPositionToScreenWithTransform();
+    auto offsetCustomTitleHeight = static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx());
+    offset.AddY(selectSize_.Height() + offsetCustomTitleHeight + CALIBERATE_Y.ConvertToPx());
+    offset.AddX(-CALIBERATE_X.ConvertToPx());
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateShowInSubWindow(true);
+    auto subwindowManager = SubwindowManager::GetInstance();
+    CHECK_NULL_VOID(subwindowManager);
+    MenuParam menuParam {};
+    menuParam.type = MenuType::MENU;
+    menuParam.isShowInSubWindow = true;
+    menuParam.isShow = true;
+    menuParam.setShow = true;
+    subwindowManager->ShowMenuNG(menuWrapper_, menuParam, host, offset);
 }
 
 void SelectPattern::UpdateOptionsWidth(float selectWidth)
@@ -258,6 +296,18 @@ void SelectPattern::RegisterOnClick()
         if (selected > -1 && selected < static_cast<int32_t>(pattern->GetOptions().size())) {
             pattern->UpdateSelectedProps(selected);
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+        CHECK_NULL_VOID(selectLayoutProps);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false) &&
+            NG::ViewAbstractModelNG::CheckSkipMenuShow(host)) {
+            return;
+        }
         pattern->ShowSelectMenu();
     };
     auto gestureHub = host->GetOrCreateGestureEventHub();
@@ -265,6 +315,72 @@ void SelectPattern::RegisterOnClick()
         return;
     }
     gestureHub->BindMenu(std::move(callback));
+
+    auto targetNode = RawPtr(host);
+    CHECK_NULL_VOID(targetNode);
+    BindMenuTouch(targetNode, gestureHub);
+}
+
+void SelectPattern::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto weakTarget = AceType::WeakClaim(targetNode);
+    auto touchCallback = [weakTarget](const TouchEventInfo& info) {
+        auto targetNode = weakTarget.Upgrade();
+        CHECK_NULL_VOID(targetNode);
+        const auto& touches = info.GetTouches();
+        CHECK_EQUAL_VOID(touches.empty(), true);
+        auto touchType = touches.front().GetTouchType();
+        auto targetId = targetNode->GetId();
+        auto subwindow =
+            SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+        CHECK_NULL_VOID(subwindow);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto subwindowPipline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(subwindowPipline);
+        auto subwindowOverlay = subwindowPipline->GetOverlayManager();
+        CHECK_NULL_VOID(subwindowOverlay);
+        if (touchType == TouchType::DOWN) {
+            auto wrapperNode = subwindowOverlay->GetMenuNode(targetId);
+            CHECK_NULL_VOID(wrapperNode);
+            auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
+            if (wrapperPattern->IsShow() || wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+                subwindowOverlay->SkipMenuShow(targetId);
+            }
+        } else if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) &&
+                   subwindowOverlay->CheckSkipMenuShow(targetId)) {
+            auto weakOverlay = AceType::WeakClaim(AceType::RawPtr(subwindowOverlay));
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weakOverlay, targetId]() mutable {
+                    auto subwindowOverlay = weakOverlay.Upgrade();
+                    CHECK_NULL_VOID(subwindowOverlay);
+                    subwindowOverlay->ResumeMenuShow(targetId);
+                },
+                TaskExecutor::TaskType::PLATFORM, "ArkUIResumeMenuShow");
+        }
+    };
+    gestrueHub->RegisterMenuOnTouch(touchCallback);
+}
+
+bool SelectPattern::CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+    CHECK_NULL_RETURN(subwindow, false);
+    auto childContainerId = subwindow->GetChildContainerId();
+    auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+    CHECK_NULL_RETURN(childContainer, false);
+    auto subwindowPipline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(subwindowPipline, false);
+    auto subwindowOverlay = subwindowPipline->GetOverlayManager();
+    CHECK_NULL_RETURN(subwindowOverlay, false);
+    return subwindowOverlay->CheckSkipMenuShow(targetNode->GetId());
 }
 
 void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
@@ -1091,18 +1207,32 @@ void SelectPattern::UpdateSelectedOptionCustomProperties(const RefPtr<MenuItemPa
 
 void SelectPattern::ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern)
 {
+    CHECK_NULL_VOID(optionPattern);
     optionPattern->SetSelected(false);
     optionPattern->UpdateNextNodeDivider(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    if (selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+        optionPattern->SetCheckMarkVisibleType(VisibleType::INVISIBLE);
+    }
 }
 
 void SelectPattern::ResetOptionProps()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
     for (const auto& option : options_) {
         auto pattern = option->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSelected(false);
         ResetOptionToInitProps(pattern);
         UpdateOptionCustomProperties(pattern);
+        if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+            pattern->SetCheckMarkVisibleType(VisibleType::INVISIBLE);
+        }
     }
 }
 
@@ -1133,6 +1263,74 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
     }
 }
 
+void SelectPattern::SetShowInSubWindow(bool isShowInSubWindow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    selectLayoutProps->UpdateShowInSubWindow(isShowInSubWindow);
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateShowInSubWindow(isShowInSubWindow);
+}
+
+void SelectPattern::ResetShowInSubWindow()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    bool isExpandDisplay = selectTheme->GetExpandDisplay();
+    bool isShowInSubWindow = isExpandDisplay;
+    SetShowInSubWindow(isShowInSubWindow);
+}
+
+void SelectPattern::SetShowDefaultSelectedIcon(bool show)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    selectLayoutProps->UpdateShowDefaultSelectedIcon(show);
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateShowDefaultSelectedIcon(show);
+    if (show) {
+        ResetOptionProps();
+    }
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto menuItemPattern = options_[i]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->SetShowDefaultSelectedIcon(show);
+    }
+}
+
+void SelectPattern::ResetShowDefaultSelectedIcon()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    selectLayoutProps->ResetShowDefaultSelectedIcon();
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->ResetShowDefaultSelectedIcon();
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto menuItemPattern = options_[i]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->SetShowDefaultSelectedIcon(false);
+    }
+}
+
 // update selected option props
 void SelectPattern::UpdateSelectedProps(int32_t index)
 {
@@ -1144,6 +1342,13 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     ResetSelectedOptionToInitProps(newSelected);
     UpdateSelectedOptionCustomProperties(newSelected);
     newSelected->SetSelected(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+        newSelected->SetCheckMarkVisibleType(VisibleType::VISIBLE);
+        return;
+    }
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
     CHECK_NULL_VOID(newSelectedNode);
@@ -1605,6 +1810,11 @@ void SelectPattern::OnColorConfigurationUpdate()
     for (auto child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
         optionsPattern->SetFontColor(selectTheme->GetFontColor());
+
+        auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+        if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+            optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
+        }
 
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

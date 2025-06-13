@@ -99,6 +99,10 @@ public:
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply) override;
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply) override;
     void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply) override;
+    void SetShowInSubWindow(bool isShowInSubWindow) override;
+    void ResetShowInSubWindow() override;
+    void SetShowDefaultSelectedIcon(bool show) override;
+    void ResetShowDefaultSelectedIcon() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
@@ -136,6 +140,8 @@ public:
     static void SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam);
+    static void SetShowInSubWindow(FrameNode* frameNode, bool isShowInSubWindow);
+    static void SetShowDefaultSelectedIcon(FrameNode* frameNode, bool show);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

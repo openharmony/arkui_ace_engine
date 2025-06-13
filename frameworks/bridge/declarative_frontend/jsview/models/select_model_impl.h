@@ -81,6 +81,10 @@ public:
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply) override {};
     void SetSelectedOptionTextModifier(
         const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply) override {};
+    void SetShowInSubWindow(bool isShowInSubWindow) override {};
+    void ResetShowInSubWindow() override {};
+    void SetShowDefaultSelectedIcon(bool show) override {};
+    void ResetShowDefaultSelectedIcon() override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

@@ -307,10 +307,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4200, TestSize.Level1)
      * @tc.expected: menu and preview bottom border distance TARGET_SECURITY, align the menu with the preview in the
      * center
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM);
     menuAlgorithm->placement_ = Placement::BOTTOM;
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
@@ -1731,5 +1727,213 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg043, TestSize.Level1)
     menuAlgorithm->wrapperRect_ = Rect(0, 0, size_f.Width(), size_f.Height());
     auto result = menuAlgorithm->VerticalLayout(size, clickPosition, true);
     EXPECT_EQ(result, clickPosition);
+}
+
+/**
+ *@tc.name : IsSelectMenuShowInSubWindow001
+ *@tc.desc: If menuNode is nullptr, return false
+ *@tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+
+    LayoutWrapperNode layoutWrapper(menuNode, menuGeometryNode, menuLayoutProperty);
+    menuNode = nullptr;
+    bool result = menuAlgorithm->IsSelectMenuShowInSubWindow(&layoutWrapper, menuNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsSelectMenuShowInSubWindow002
+ * @tc.desc: If pipelineContext is nullptr, return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+
+    LayoutWrapperNode layoutWrapper(menuNode, menuGeometryNode, menuLayoutProperty);
+    bool result = menuAlgorithm->IsSelectMenuShowInSubWindow(&layoutWrapper, menuNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsSelectMenuShowInSubWindow003
+ * @tc.desc: If theme is nullptr, return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+
+    LayoutWrapperNode layoutWrapper(menuNode, menuGeometryNode, menuLayoutProperty);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme = nullptr;
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>();
+    bool result = menuAlgorithm->IsSelectMenuShowInSubWindow(&layoutWrapper, menuNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsSelectMenuShowInSubWindow004
+ * @tc.desc: If menuLayoutProperty is nullptr, return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+
+    LayoutWrapperNode layoutWrapper(menuNode, menuGeometryNode, menuLayoutProperty);
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>();
+    bool result = menuAlgorithm->IsSelectMenuShowInSubWindow(&layoutWrapper, menuNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsSelectMenuShowInSubWindow005
+ * @tc.desc: If theme->GetExpandDisplay() is false, return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow005, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+
+    LayoutWrapperNode layoutWrapper(menuNode, menuGeometryNode, menuLayoutProperty);
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>();
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    menuLayoutProperty = AceType::MakeRefPtr<MenuLayoutProperty>();
+    theme->expandDisplay_ = false;
+    menuLayoutProperty->UpdateShowInSubWindow(true);
+    bool result = menuAlgorithm->IsSelectMenuShowInSubWindow(&layoutWrapper, menuNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsSelectMenuShowInSubWindow006
+ * @tc.desc: test theme->GetExpandDisplay()为true but menuLayoutProperty->GetShowInSubWindowValue(false) is false, return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow006, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+
+    LayoutWrapperNode layoutWrapper(menuNode, menuGeometryNode, menuLayoutProperty);
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>();
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    menuLayoutProperty = AceType::MakeRefPtr<MenuLayoutProperty>();
+    theme->expandDisplay_ = true;
+    menuLayoutProperty->UpdateShowInSubWindow(false);
+    bool result = menuAlgorithm->IsSelectMenuShowInSubWindow(&layoutWrapper, menuNode);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG
