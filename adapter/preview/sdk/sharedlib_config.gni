@@ -199,11 +199,6 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
       subsystem_name = "graphic"
       part_name = "graphic_2d"
     },
-    {
-      label = "//foundation/graphic/graphic_2d/utils/color_manager:color_manager"
-      subsystem_name = "graphic"
-      part_name = "graphic_2d"
-    },
   ]
 
   common_bin += [
