@@ -865,6 +865,7 @@ public:
     void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
     void UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled);
     void UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition);
+    void UpdateGestureFocusMode(const GestureFocusMode& mode);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);

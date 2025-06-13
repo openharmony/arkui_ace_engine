@@ -63,6 +63,7 @@ constexpr int32_t DEFAULT_RESUMEINTERVAL = 0;
 constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
 constexpr bool DEFAULT_BLOCK_NETWORK_ENABLED = false;
 constexpr OverScrollMode DEFAULT_OVERSCROLL_MODE = OverScrollMode::NEVER;
+constexpr GestureFocusMode DEFAULT_GESTURE_FOCUS_MODE = GestureFocusMode::DEFAULT;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1969,6 +1970,20 @@ void ResetOnDataResubmitted(ArkUINodeHandle node)
     WebModelNG::SetOnDataResubmitted(frameNode, nullptr);
 }
 
+void SetGestureFocusMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetGestureFocusMode(frameNode, GestureFocusMode(value));
+}
+
+void ResetGestureFocusMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetGestureFocusMode(frameNode, DEFAULT_GESTURE_FOCUS_MODE);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -2160,6 +2175,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnSslErrorEvent = ResetOnSslErrorEvent,
         .setOnDataResubmitted = SetOnDataResubmitted,
         .resetOnDataResubmitted = ResetOnDataResubmitted,
+        .setGestureFocusMode = SetGestureFocusMode,
+        .resetGestureFocusMode = ResetGestureFocusMode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2355,6 +2372,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnSslErrorEvent = ResetOnSslErrorEvent,
         .setOnDataResubmitted = SetOnDataResubmitted,
         .resetOnDataResubmitted = ResetOnDataResubmitted,
+        .setGestureFocusMode = SetGestureFocusMode,
+        .resetGestureFocusMode = ResetGestureFocusMode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

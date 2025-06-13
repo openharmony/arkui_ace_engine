@@ -30714,6 +30714,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnSafeBrowsingCheckResultModifier.identity, WebOnSafeBrowsingCheckResultModifier, callback);
     return this;
   }
+  gestureFocusMode(mode) {
+    modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -32049,6 +32053,22 @@ class WebOnDataResubmittedModifier extends ModifierWithKey {
   }
 }
 WebOnDataResubmittedModifier.identity = Symbol('webOnDataResubmittedModifier');
+
+class WebGestureFocusModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetGestureFocusMode(node);
+    }
+    else {
+      getUINativeModule().web.setGestureFocusMode(node, this.value);
+    }
+  }
+}
+WebGestureFocusModeModifier.identity = Symbol('webGestureFocusModeModifier');
+
 // @ts-ignore
 if (globalThis.Web !== undefined) {
   globalThis.Web.attributeModifier = function (modifier) {

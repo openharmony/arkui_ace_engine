@@ -2069,6 +2069,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
+    JSClass<JSWeb>::StaticMethod("gestureFocusMode", &JSWeb::GestureFocusMode);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -6060,5 +6061,16 @@ void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 {
     WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
+
+void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
+{
+    if (gestureFocusMode < static_cast<int32_t>(GestureFocusMode::DEFAULT) ||
+        gestureFocusMode > static_cast<int32_t>(GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GestureFocusMode param err");
+        return;
+    }
+    auto mode = static_cast<enum GestureFocusMode>(gestureFocusMode);
+    WebModel::GetInstance()->SetGestureFocusMode(mode);
 }
 } // namespace OHOS::Ace::Framework
