@@ -18,6 +18,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t EFFECT_EDGE_ZERO = 0;
 constexpr int32_t EFFECT_EDGE_ONE = 1;
 constexpr int32_t EFFECT_EDGE_TWO = 2;
+constexpr double DETENT_SELECTION_EDGE = 0.0f;
 using namespace OHOS::Ace::NG::Converter;
 
 std::pair<std::optional<OHOS::Ace::Dimension>, std::optional<OHOS::Ace::Dimension>> OffsetConvert(
@@ -166,7 +167,11 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
             break;
     }
     sheetStyle.radius = OptConvert<NG::BorderRadiusProperty>(sheetOptions.radius);
-    sheetStyle.detentSelection = OptConvert<SheetHeight>(sheetOptions.detentSelection);
+    if (LessNotEqual(sheetOptions.detentSelection.value.value1.value, DETENT_SELECTION_EDGE)) {
+        sheetStyle.detentSelection.reset();
+    } else {
+        sheetStyle.detentSelection = OptConvert<SheetHeight>(sheetOptions.detentSelection);
+    }
     sheetStyle.showInSubWindow = OptConvert<bool>(sheetOptions.showInSubWindow).value_or(false);
     sheetStyle.placement = OptConvert<Placement>(sheetOptions.placement);
     sheetStyle.placementOnTarget = OptConvert<bool>(sheetOptions.placementOnTarget).value_or(true);
