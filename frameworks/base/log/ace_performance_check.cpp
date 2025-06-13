@@ -193,7 +193,6 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9901");
     auto pageJson = JsonUtil::Create(true);
     pageJson->Put("eventTime", eventTime.c_str());
-    pageJson->Put("pagePath", codeInfo.sources.c_str());
     pageJson->Put("nodeCount", pageNodeCount);
     pageJson->Put("depth", pageDepth);
     // add children size > 100 of component to pageJson
@@ -202,6 +201,7 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
         componentJson->Put("name", iter.nodeTag.c_str());
         componentJson->Put("items", iter.childrenSize);
         componentJson->Put("sourceLine", GetCodeInfo(iter.codeRow, iter.codeCol).row);
+        componentJson->Put("pagePath", iter.pagePath.c_str());
         std::unique_ptr<JsonValue> componentsJson;
         if (pageJson->Contains("components")) {
             componentsJson = pageJson->GetValue("components");
@@ -260,6 +260,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
             componentJson->Put("name", node.second.nodeTag.c_str());
             componentJson->Put("costTime", layoutTime);
             componentJson->Put("sourceLine", GetCodeInfo(node.second.codeRow, node.second.codeCol).row);
+            componentJson->Put("pagePath", node.second.pagePath.c_str());
             std::unique_ptr<JsonValue> componentsJson;
             if (pageJson->Contains("components")) {
                 componentsJson = pageJson->GetValue("components");
@@ -291,6 +292,7 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(
         componentJson->Put("name", iter.second.nodeTag.c_str());
         componentJson->Put("items", iter.second.foreachItems + 1);
         componentJson->Put("sourceLine", GetCodeInfo(iter.second.codeRow, iter.second.codeCol).row);
+        componentJson->Put("pagePath", iter.second.pagePath.c_str());
         std::unique_ptr<JsonValue> componentsJson;
         if (pageJson->Contains("components")) {
             componentsJson = pageJson->GetValue("components");
@@ -321,6 +323,7 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
         componentJson->Put("name", node.nodeTag.c_str());
         componentJson->Put("flexTime", node.flexLayouts);
         componentJson->Put("sourceLine", GetCodeInfo(node.codeRow, node.codeCol).row);
+        componentJson->Put("pagePath", node.pagePath.c_str());
         std::unique_ptr<JsonValue> componentsJson;
         if (pageJson->Contains("components")) {
             componentsJson = pageJson->GetValue("components");

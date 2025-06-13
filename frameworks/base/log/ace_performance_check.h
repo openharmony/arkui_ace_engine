@@ -39,6 +39,7 @@ struct PerformanceCheckNode {
     bool isForEachItem = false; // foreach item
     int32_t foreachItems = 0;   // foreach item count
     std::string nodeTag;        // node tag
+    std::string pagePath;       // page path
 };
 
 struct CodeInfo {

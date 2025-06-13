@@ -72,14 +72,13 @@ public:
 
     static ScopedDelegate GetDefaultDelegate();
 
-    static std::pair<int32_t, int32_t> GetPositionOnJsCode();
+    static std::tuple<std::string, int32_t, int32_t> GetPositionOnJsCode();
 
     static ScopedDelegate GetDelegateByContainer(RefPtr<Container> container);
 
     static void RegisterRemoveUIContextFunc(const std::function<void(int32_t)>& removeUIContextFunc);
 
 private:
-    static std::pair<int32_t, int32_t> StringToPair(const std::string& match);
 
     static std::unordered_map<int32_t, WeakPtr<Framework::JsEngine>> engineWeakMap_;
     static std::shared_mutex mutex_;
