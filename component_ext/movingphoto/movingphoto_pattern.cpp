@@ -53,6 +53,7 @@ const std::string DEFAULT_EXIF_VALUE = "default_exif_value";
 constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 constexpr int32_t AVERAGE_VALUE = 2;
+constexpr int32_t US_CONVERT = 1000;
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
     : instanceId_(Container::CurrentId()), controller_(controller)
@@ -263,7 +264,7 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
         currentPlayStatus_ == PlaybackStatus::PAUSED)) {
         int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
-        SetAutoPlayPeriod(PERIOD_START, duration);
+        SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
     Start();
 }
@@ -1430,7 +1431,7 @@ void MovingPhotoPattern::StartPlayback()
         mediaPlayer_->GetDuration(duration);
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "StartPlayback duration:%{public}d.",
             duration);
-        SetAutoPlayPeriod(PERIOD_START, duration);
+        SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
     Start();
 }
@@ -1643,7 +1644,7 @@ void MovingPhotoPattern::StopAnimation()
 void MovingPhotoPattern::StopAnimationCallback()
 {
     if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO && autoPlayPeriodStartTime_ >= 0) {
-        Seek(static_cast<int32_t>(autoPlayPeriodStartTime_));
+        Seek(static_cast<int32_t>(autoPlayPeriodStartTime_ / US_CONVERT));
     } else {
         Seek(0);
     }
@@ -1710,7 +1711,7 @@ void MovingPhotoPattern::StartRepeatPlay()
     if (!isFirstRepeatPlay_ && isSetAutoPlayPeriod_) {
         int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
-        SetAutoPlayPeriod(PERIOD_START, duration);
+        SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
     Start();
 }
@@ -1756,7 +1757,7 @@ void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
     }
-    mediaPlayer_->SetPlayRangeWithMode(startTime, endTime, SeekMode::SEEK_CLOSEST);
+    mediaPlayer_->SetPlayRangeUsWithMode(startTime, endTime, SeekMode::SEEK_CLOSEST);
 }
 
 void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
@@ -1782,7 +1783,7 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
         currentPlayStatus_ == PlaybackStatus::PAUSED)) {
         int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
-        SetAutoPlayPeriod(PERIOD_START, duration);
+        SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
     Start();
 }

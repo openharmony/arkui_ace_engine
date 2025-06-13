@@ -740,6 +740,8 @@ public:
 
     static bool IsPageTransitionFreeze();
 
+    static bool IsSoftPageTransition();
+
     static bool IsFormSkeletonBlurEnabled();
 
     static int32_t getFormSharedImageCacheThreshold();
@@ -848,6 +850,7 @@ private:
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
     static bool pageTransitionFrzEnabled_;
+    static bool softPagetransition_;
     static bool formSkeletonBlurEnabled_;
     static int32_t formSharedImageCacheThreshold_;
     static WidthLayoutBreakPoint widthLayoutBreakpoints_;
