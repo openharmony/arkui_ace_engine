@@ -836,9 +836,9 @@ public:
     static void ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj);
 
 private:
-    static bool ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+    static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
-    static bool ParseJsIntegerArrayInternal(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
+    static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::string& result,
