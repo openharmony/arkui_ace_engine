@@ -1430,7 +1430,7 @@ void MenuItemPattern::OnHover(bool isHover)
         props->UpdateHover(isHover);
         UpdateDividerHoverStatus(isHover);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        if (isHover || !IsSelected()) {
+        if ((isHover || !IsSelected()) && !showDefaultSelectedIcon_) {
             UpdateNextNodeDivider(!isHover);
         }
         PlayBgColorAnimation();
@@ -2990,6 +2990,9 @@ void MenuItemPattern::OnPress(const UIState& state)
         props->UpdatePress(true);
         UpdateDividerPressStatus(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        if (isOptionPattern_ && showDefaultSelectedIcon_) {
+            return;
+        }
         // disable next option node's divider
         UpdateNextNodeDivider(false);
     } else if (state == UI_STATE_NORMAL) {
@@ -3402,8 +3405,10 @@ void MenuItemPattern::ApplyOptionThemeStyles()
     SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
     SetBorderColor(GetBorderColor());
     SetBorderWidth(GetBorderWidth());
-    if (!(IsSelectOption() && showDefaultSelectedIcon_ && !selectTheme->GetMenuBlendBgColor())) {
-        SetBgColor(selectTheme->GetBackgroundColor());
+    if (IsSelectOption() && showDefaultSelectedIcon_ && !selectTheme->GetMenuBlendBgColor()) {
+        SetBgColor(Color::TRANSPARENT);
+        return;
     }
+    SetBgColor(selectTheme->GetBackgroundColor());
 }
 } // namespace OHOS::Ace::NG
