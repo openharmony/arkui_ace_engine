@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/ace_application_info.h"
-#include "core/event/touchEvent.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 using namespace testing;
