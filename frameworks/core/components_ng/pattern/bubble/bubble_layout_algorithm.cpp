@@ -2206,7 +2206,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         auto geometryNode = targetNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         targetSize_ = geometryNode->GetFrameSize();
-        targetOffset_ = targetNode->GetPaintRectOffset();
+        targetOffset_ = targetNode->GetPaintRectOffset(false, false, true);
     }
 
     auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
@@ -2224,7 +2224,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         "followTransformOfTarget_: %{public}d",
         targetOffset_.ToString().c_str(), targetSize_.ToString().c_str(), followTransformOfTarget_);
     // Show in SubWindow
-    if (showInSubWindow) {
+    if (showInSubWindow && expandDisplay_) {
         auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
             pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
         targetOffset_ += displayWindowOffset;

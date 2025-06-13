@@ -549,7 +549,7 @@ public:
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
     // do not consider the transform of its ansestors
-    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false) const;
+    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false, bool checkScreen = false) const;
 
     // returns a node's offset relative to root.
     // and accumulate every ancestor node's graphic properties such as rotate and transform
@@ -1347,6 +1347,12 @@ public:
     {
         topWindowBoundary_ = topWindowBoundary;
     }
+
+    bool CheckTopScreen() const
+    {
+        return GetTag() == V2::SCREEN_ETS_TAG;
+    }
+
     bool CheckVisibleOrActive() override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)

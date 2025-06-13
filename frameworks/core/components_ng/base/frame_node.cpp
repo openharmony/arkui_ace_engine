@@ -3839,14 +3839,15 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf, bool checkBoundary) const
+OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf, bool checkBoundary, bool checkScreen) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTransform().GetOffset();
     auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
-        if (!checkBoundary && parent->CheckTopWindowBoundary()) {
+        if ((!checkBoundary && parent->CheckTopWindowBoundary()) ||
+            (checkScreen && parent->CheckTopScreen())) {
             break;
         }
         auto renderContext = parent->GetRenderContext();
