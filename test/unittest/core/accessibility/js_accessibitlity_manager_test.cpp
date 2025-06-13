@@ -2268,6 +2268,55 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager042, TestSize.Level1)
     EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterY, 40);
 }
 
+/**
+ * @tc.name: JsAccessibilityManager043
+ * @tc.desc: test UpdateVirtualNodeFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isAccessibilityVirtualNode_ = true;
+    frameNode->accessibilityId_ = 1;
+    jsAccessibilityManager->lastFrameNode_ = frameNode;
+    jsAccessibilityManager->currentFocusNodeId_ = frameNode->accessibilityId_;
+
+    /**
+     * @tc.steps: step2. construct parentNode
+     */
+    auto rootNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->accessibilityId_ = 0;
+    rootNode->children_.push_back(frameNode);
+    frameNode->SetAccessibilityVirtualNodeParent(rootNode);
+    EXPECT_EQ(rootNode->children_.size(), 1);
+
+    /**
+     * @tc.steps: step3. construct size
+     */
+    NG::SizeF size;
+    size.width_ = 123.0f;
+    size.height_ = 456.0f;
+    jsAccessibilityManager->oldGeometrySize_ = size;
+    frameNode->geometryNode_->SetFrameSize(size);
+
+    /**
+     * @tc.steps: step4. test UpdateVirtualNodeFocus
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityFocusState(false);
+    jsAccessibilityManager->UpdateVirtualNodeFocus();
+    EXPECT_EQ(accessibilityProperty->isAccessibilityFocused_, true);
+}
+
 #ifdef WEB_SUPPORTED
 /**
  * @tc.name: GetWebAccessibilityIdBySurfaceId
