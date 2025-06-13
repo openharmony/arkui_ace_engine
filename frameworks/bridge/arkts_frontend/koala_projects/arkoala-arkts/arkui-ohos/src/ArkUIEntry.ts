@@ -32,6 +32,10 @@ import { StateUpdateLoop } from "./stateManagement"
 import { Routed } from "./handwritten/Router"
 import { updateLazyItems } from "./handwritten/LazyForEachImpl"
 import router from "@ohos/router"
+import { UIContext } from "@ohos/arkui/UIContext"
+import { createStateManager } from "@koalaui/runtime"
+import { UIContextImpl, ContextRecord } from "arkui/handwritten/UIContextImpl"
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -198,6 +202,11 @@ export class Application {
         let root: PeerNode | undefined = undefined
         try {
             this.manager = GlobalStateManager.instance
+            let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            uiContext.stateMgr = this.manager
+            let uiData = new ContextRecord();
+            uiData.uiContext = uiContext;
+            this.manager!.contextData = uiData;
             this.timer = getAnimationTimer() ?? createAnimationTimer(this.manager!)
             /** @memo */
             let builder: UserViewBuilder
@@ -253,9 +262,10 @@ export class Application {
         // Here we request to draw a frame and call custom components callbacks.
         rootArray.forEach((element, index) => {
             let root = element.value
-            // router.UpdateVisiblePagePeerNode(root, index)
-            ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr)
-            callScheduledCallbacks()
+            if (root.peer.ptr) {
+                ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr)
+                callScheduledCallbacks()
+            }
         });
     }
 

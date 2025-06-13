@@ -25120,6 +25120,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {42};
     }
     } // UIContextAccessor
+    namespace DragDropOpsAccessor {
+    void RegisterOnDragStartImpl(Ark_NativePointer node,
+                                    const Callback_onDragStart* onDragStart)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("registerOnDragStart(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, onDragStart);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DragDropOpsAccessor
     namespace StateStylesOpsAccessor {
     void OnStateStyleChangeImpl(Ark_NativePointer node,
                                 const Callback_StateStylesChange* stateStyleChange)
@@ -43347,6 +43361,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &StateStylesOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUIDragDropOpsAccessor* GetDragDropOpsAccessor()
+    {
+        static const GENERATED_ArkUIDragDropOpsAccessor DragDropOpsAccessorImpl {
+            DragDropOpsAccessor::RegisterOnDragStartImpl,
+        };
+        return &DragDropOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor()
     {
         static const GENERATED_ArkUIUIContextAtomicServiceBarAccessor UIContextAtomicServiceBarAccessorImpl {
@@ -46917,6 +46939,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetRestrictedWorkerAccessor,
             GetUIContextAccessor,
             GetStateStylesOpsAccessor,
+            GetDragDropOpsAccessor,
             GetUIContextAtomicServiceBarAccessor,
             GetUIContextDispatchKeyEventAccessor,
             GetDrawableDescriptorAccessor,

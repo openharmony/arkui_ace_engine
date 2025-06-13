@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-export * from "./multimedia/image"
-export * from "./ui_extension/ui_extension"
-export * from "./web/webview"
-export * from "./application/context"
-export * from "./base/base"
-export * from "./multimodalInput/pointer"
-export * from "./drag_and_drop/drag_and_drop"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_DRAG_ANI_MODIFIER
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_DRAG_ANI_MODIFIER
+
+#include "core/interfaces/ani/ani_api.h"
+
+namespace OHOS::Ace::NG {
+const ArkUIAniDragModifier* GetDragAniModifier();
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_DRAG_ANI_MODIFIER

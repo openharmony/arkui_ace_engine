@@ -23,7 +23,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/core/interfaces/native/utility/callback_helper.h"
 
-#include <string.h>
+#include <cstring>
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RouterExtenderAccessor {
@@ -36,7 +36,7 @@ Ark_NativePointer PushImpl(const Ark_String* url)
     }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
-    auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
+    auto delegate = container->GetFrontend();
     CHECK_NULL_RETURN(delegate, nullptr);
     auto pageNode = delegate->PushExtender(pushUrl, "");
     return pageNode;
@@ -52,7 +52,7 @@ Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Callback_Void* fi
     }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
-    auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
+    auto delegate = container->GetFrontend();
     CHECK_NULL_RETURN(delegate, nullptr);
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED){
@@ -82,7 +82,6 @@ void MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pag
     
     pageFrameNode->MarkModifyDone();
     pageFrameNode->MarkDirtyNode();
-    common->MarkModifyDone();
     common->MarkDirtyNode();
 }
 
@@ -90,7 +89,7 @@ void BackImpl()
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
+    auto delegate = container->GetFrontend();
     CHECK_NULL_VOID(delegate);
     delegate->BackExtender("", "");
 }
@@ -104,7 +103,7 @@ Ark_NativePointer RunPageImpl(const Ark_String* url)
     }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
-    auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
+    auto delegate = container->GetFrontend();
     CHECK_NULL_RETURN(delegate, nullptr);
     auto pageNode = delegate->RunPageExtender(pushUrl, "");
     return pageNode;
@@ -114,7 +113,7 @@ void ClearImpl()
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto delegate = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
+    auto delegate = container->GetFrontend();
     CHECK_NULL_VOID(delegate);
     delegate->ClearExtender();
 }

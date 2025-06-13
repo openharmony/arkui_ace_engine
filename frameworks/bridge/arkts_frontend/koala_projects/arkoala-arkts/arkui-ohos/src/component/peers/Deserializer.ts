@@ -78,7 +78,7 @@ import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation,
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
 import { Resource } from "global/resource"
 import { AnimatedDrawableDescriptor, AnimatedDrawableDescriptorInternal, DrawableDescriptor, DrawableDescriptorInternal, AnimationOptions, LayeredDrawableDescriptor, LayeredDrawableDescriptorInternal, PixelMapDrawableDescriptor, PixelMapDrawableDescriptorInternal } from "./../arkui-drawabledescriptor"
-import { PixelMap, PixelMapInternal } from "./../arkui-pixelmap"
+import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
 import { BlendMode, DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, DrawingLattice, DrawingLatticeInternal, RectType } from "./../arkui-drawing"
@@ -175,6 +175,7 @@ import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 import { drawing } from "@ohos/graphics/drawing"
 import promptAction from '@ohos/promptAction'
 import { PointerStyle } from '#external'
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
         super(data, length)
@@ -676,9 +677,7 @@ export class Deserializer extends DeserializerBase {
         return PinchRecognizerInternal.fromPtr(ptr)
     }
     readPixelMap(): PixelMap {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return PixelMapInternal.fromPtr(ptr)
+        throw new Error("Interface with functions is not supported")
     }
     readPixelMapDrawableDescriptor(): PixelMapDrawableDescriptor {
         let valueDeserializer : Deserializer = this
@@ -1129,7 +1128,8 @@ export class Deserializer extends DeserializerBase {
         // let valueDeserializer : Deserializer = this
         // let ptr : KPointer = valueDeserializer.readPointer()
         // return UIContextInternal.fromPtr(ptr)
-        return new UIContext(100000)
+        let uiContext = UIContextUtil.getOrCreateUIContextById(100000);
+        return uiContext
     }
     readUIExtensionProxy(): UIExtensionProxy {
         let valueDeserializer : Deserializer = this

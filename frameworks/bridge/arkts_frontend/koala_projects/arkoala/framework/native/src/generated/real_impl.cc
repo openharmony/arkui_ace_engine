@@ -12715,6 +12715,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //undefinedModelNG::SetOnStateStyleChange(frameNode, convValue);
     }
     } // StateStylesOpsAccessor
+    namespace DragDropOpsAccessor {
+    void RegisterOnDragStartImpl(Ark_NativePointer node,
+                                    const Callback_onDragStart* onDragStart)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterOnDragStart(frameNode, convValue);
+    }
+    } // DragDropOpsAccessor
     namespace UIContextAtomicServiceBarAccessor {
     Ark_Frame GetBarRectImpl()
     {
@@ -21037,6 +21048,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &StateStylesOpsAccessorImpl;
     }
+    const GENERATED_ArkUIDragDropOpsAccessor* GetDragDropOpsAccessor()
+    {
+        static const GENERATED_ArkUIDragDropOpsAccessor DragDropOpsAccessorImpl {
+            DragDropOpsAccessor::RegisterOnDragStartImpl,
+        };
+        return &DragDropOpsAccessorImpl;
+    }
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor()
     {
         static const GENERATED_ArkUIUIContextAtomicServiceBarAccessor UIContextAtomicServiceBarAccessorImpl {
@@ -24613,6 +24631,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetRestrictedWorkerAccessor,
             GetUIContextAccessor,
             GetStateStylesOpsAccessor,
+            GetDragDropOpsAccessor,
             GetUIContextAtomicServiceBarAccessor,
             GetUIContextDispatchKeyEventAccessor,
             GetDrawableDescriptorAccessor,

@@ -219,6 +219,7 @@ const GENERATED_ArkUIWorkerEventListenerAccessor* GetWorkerEventListenerAccessor
 const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor();
 const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor();
 const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor();
+const GENERATED_ArkUIDragDropOpsAccessor* GetDragDropOpsAccessor();
 const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor();
 const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* GetUIContextDispatchKeyEventAccessor();
 const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor();
@@ -559,6 +560,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetRestrictedWorkerAccessor,
         GetUIContextAccessor,
         GetStateStylesOpsAccessor,
+        GetDragDropOpsAccessor,
         GetUIContextAtomicServiceBarAccessor,
         GetUIContextDispatchKeyEventAccessor,
         GetDrawableDescriptorAccessor,

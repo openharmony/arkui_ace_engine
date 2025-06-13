@@ -150,6 +150,7 @@ public:
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
 
+    // For ArkTS1.2
     virtual void* PushExtender(const std::string& url, const std::string& params) { return nullptr; };
     virtual void* ReplaceExtender(
         const std::string& url, const std::string& params, std::function<void()>&& finishCallback) { return nullptr; };

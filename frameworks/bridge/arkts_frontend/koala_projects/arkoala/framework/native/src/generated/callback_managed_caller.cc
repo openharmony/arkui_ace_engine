@@ -2310,6 +2310,30 @@ void callManagedCallback_OnDownloadStartEvent_VoidSync(Ark_VMContext vmContext, 
     argsSerializer.writeOnDownloadStartEvent(parameter);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedCallback_onDragStart(Ark_Int32 resourceId, Ark_NativePointer node, Ark_DragEvent dragEvent, Ark_String extraParam)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_onDragStart);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writePointer(node);
+    argsSerializer.writeDragEvent(dragEvent);
+    argsSerializer.writeString(extraParam);
+    enqueueCallback(&_buffer);
+}
+void callManagedCallback_onDragStartSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_NativePointer node, Ark_DragEvent dragEvent, Ark_String extraParam)
+{
+    uint8_t _buffer[4096];
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_Callback_onDragStart);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writePointer(node);
+    argsSerializer.writeDragEvent(dragEvent);
+    argsSerializer.writeString(extraParam);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
 void callManagedCallback_OnErrorReceiveEvent_Void(Ark_Int32 resourceId, Ark_OnErrorReceiveEvent parameter)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -7463,6 +7487,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_OnContextMenuShowEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnContextMenuShowEvent_Boolean);
         case Kind_Callback_OnDataResubmittedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnDataResubmittedEvent_Void);
         case Kind_Callback_OnDownloadStartEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnDownloadStartEvent_Void);
+        case Kind_Callback_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_onDragStart);
         case Kind_Callback_OnErrorReceiveEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnErrorReceiveEvent_Void);
         case Kind_Callback_OnFaviconReceivedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnFaviconReceivedEvent_Void);
         case Kind_Callback_OnFirstContentfulPaintEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnFirstContentfulPaintEvent_Void);
@@ -7760,6 +7785,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_OnContextMenuShowEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnContextMenuShowEvent_BooleanSync);
         case Kind_Callback_OnDataResubmittedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnDataResubmittedEvent_VoidSync);
         case Kind_Callback_OnDownloadStartEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnDownloadStartEvent_VoidSync);
+        case Kind_Callback_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_onDragStartSync);
         case Kind_Callback_OnErrorReceiveEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnErrorReceiveEvent_VoidSync);
         case Kind_Callback_OnFaviconReceivedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnFaviconReceivedEvent_VoidSync);
         case Kind_Callback_OnFirstContentfulPaintEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnFirstContentfulPaintEvent_VoidSync);

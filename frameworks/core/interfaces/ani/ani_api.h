@@ -50,11 +50,17 @@ struct ArkUIAniWebModifier {
         std::function<void(int32_t)>&& onNWebId,
         std::function<void(const std::string&)>&& onHapPath);
 };
+struct ArkUIAniDragModifier {
+    void (*setDragDropInfoPixelMap)(ani_ref event, ani_ref pixelMap);
+    void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
+    void (*setDragDropInfoExtraInfo)(ani_ref event, std::string& extraInfo);
+};
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);
+    ArkUI_Int32 (*getCurrentInstanceId)();
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
@@ -71,6 +77,7 @@ struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
     const ArkUIAniWebModifier* (*getWebAniModifier)();
+    const ArkUIAniDragModifier* (*getDragAniModifier) ();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();

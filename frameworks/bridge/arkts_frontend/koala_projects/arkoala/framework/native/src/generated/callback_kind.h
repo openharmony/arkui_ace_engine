@@ -100,6 +100,7 @@ typedef enum CallbackKind {
     Kind_Callback_OnContextMenuShowEvent_Boolean = 332449533,
     Kind_Callback_OnDataResubmittedEvent_Void = 118631204,
     Kind_Callback_OnDownloadStartEvent_Void = 1834611702,
+    Kind_Callback_onDragStart = 921313525,
     Kind_Callback_OnErrorReceiveEvent_Void = -1792851375,
     Kind_Callback_OnFaviconReceivedEvent_Void = -243916553,
     Kind_Callback_OnFirstContentfulPaintEvent_Void = -1852060212,

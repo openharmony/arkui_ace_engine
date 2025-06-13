@@ -3971,6 +3971,8 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_getMaxFontScale(ptr: KPointer): number
     @ani.unsafe.Direct
     native static _StateStylesOps_onStateStyleChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DragDropOps_registerOnDragStart(node: KPointer,  thisArray: KSerializerBuffer, thisLength: int32) : void
     @ani.unsafe.Quick
     native static _UIContextAtomicServiceBar_getBarRect(): KInteropReturnBuffer
     @ani.unsafe.Direct

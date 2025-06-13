@@ -376,7 +376,7 @@ void* ArktsFrontend::PushExtender(const std::string& url, const std::string& par
     routerPageInfo.params = params;
     routerPageInfo.recoverable = true;
     auto pageNode = pageRouterManager_->PushExtender(routerPageInfo);
-    return pageNode.GetRawPtr()
+    return pageNode.GetRawPtr();
 }
 
 void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& params, std::function<void()>&& finishCallback)
@@ -387,7 +387,7 @@ void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& 
     routerPageInfo.params = params;
     routerPageInfo.recoverable = true;
     auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(finishCallback));
-    return pageNode.GetRawPtr()
+    return pageNode.GetRawPtr();
 }
 
 void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params)
@@ -397,7 +397,7 @@ void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& 
     routerPageInfo.url = url;
     routerPageInfo.params = params;
     auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo);
-    return pageNode.GetRawPtr()
+    return pageNode.GetRawPtr();
 }
 
 void ArktsFrontend::BackExtender(const std::string& url, const std::string& params)

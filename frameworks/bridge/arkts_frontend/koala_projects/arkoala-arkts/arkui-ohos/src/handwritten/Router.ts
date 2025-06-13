@@ -258,10 +258,7 @@ class ArkRouter implements Router {
         this.peerNodeList.pop()
         RouterExtender.routerBack(options)
         this.visiblePages.pop()
-        let preNode = this.rootState.pop()
-        if (preNode) {
-            preNode?.dispose();
-        }
+        this.rootState.pop()
     }
 
     clear(): void {
@@ -341,14 +338,11 @@ class ArkRouter implements Router {
         })
 
         let pageNode = RouterExtender.routerRunPage(options)
-        let node: PeerNode = stateNode.value
         this.rootState.push(stateNode)
         this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
 
         let newPage = new VisiblePage(builder, options.url, this.getPathInfo(options.url), options.params)
         this.visiblePages.splice(0, 0, newPage)
-        this.visiblePages.value[this.showingPageIndex].updatePeerNode(node)
-        RouterExtender.moveCommonUnderPageNode(node.peer.ptr, this.peerNodeList[this.showingPageIndex])
     }
 }
 
