@@ -1299,6 +1299,7 @@ HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest009, Tes
     auto translate = node->CalcTranslateForTransitionPushEnd(frameSize, false);
     EXPECT_EQ(translate.GetX(), (-frameSize.Width() * HALF * HALF * isRTL));
     EXPECT_EQ(translate.GetY(), 0.0f);
+    SystemProperties::softPagetransition_ = false;
 }
 
 /**
@@ -1542,6 +1543,7 @@ HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest009, Te
     auto translate = node->CalcTranslateForTransitionPopStart(frameSize, true);
     EXPECT_EQ(translate.GetX(), (-frameSize.Width() * HALF * HALF * isRTL));
     EXPECT_EQ(translate.GetY(), 0.0f);
+    SystemProperties::softPagetransition_ = false;
 }
 
 /**
