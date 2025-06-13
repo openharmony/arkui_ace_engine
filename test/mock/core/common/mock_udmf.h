@@ -78,6 +78,9 @@ public:
         bool, GetFileUriEntry, (const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri), (override));
     MOCK_METHOD(std::vector<uint8_t>, GetSpanStringEntry, (const RefPtr<UnifiedData>& unifiedData), (override));
     MOCK_METHOD(bool, IsBelongsTo, (const std::string& summary, const std::string& allowDropType), (override));
+    MOCK_METHOD(RefPtr<DataLoadParams>, TransformDataLoadParams, (napi_env env, napi_value napiValue), (override));
+    MOCK_METHOD(RefPtr<DataLoadParams>, TransformDataLoadParamsForNative, (void* rawData), (override));
+    MOCK_METHOD(int32_t, SetDelayInfo, (RefPtr<DataLoadParams> dataLoadParams, std::string& key), (override));
 };
 class MockUnifiedData : public UnifiedData {
     DECLARE_ACE_TYPE(MockUnifiedData, UnifiedData);

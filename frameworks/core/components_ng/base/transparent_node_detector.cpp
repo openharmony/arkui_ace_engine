@@ -49,13 +49,15 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
     CHECK_NULL_VOID(executor);
     auto currentId = Container::CurrentIdSafely();
     auto container = Container::GetContainer(currentId);
-    if (!(container &&
-            (container->IsUIExtensionWindow() || container->IsHostSubWindow() || container->IsHostDialogWindow())) ||
-        !pipelineContext->GetOnFoucs()) {
+    CHECK_NULL_VOID(container);
+    bool isUECWindow = container->IsUIExtensionWindow();
+    if (!(isUECWindow || container->IsHostSubWindow() ||
+        container->IsHostDialogWindow()) || !pipelineContext->GetOnFoucs()) {
         return;
     }
     detectCount--;
-    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(rootNode)), detectCount, currentId, pageUrl]() {
+    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(rootNode)),
+        detectCount, currentId, pageUrl, isUECWindow]() {
         ContainerScope scope(currentId);
         auto root = weakNode.Upgrade();
         CHECK_NULL_VOID(root);
@@ -78,6 +80,9 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         std::string bundleName = container ? container->GetBundleName() : "";
         std::string moduleName = container ? container->GetModuleName() : "";
         EventReport::ReportUiExtensionTransparentEvent(pageUrl, bundleName, moduleName);
+        if (isUECWindow) {
+            window->NotifyExtensionTimeout(ERROR_CODE_UIEXTENSION_TRANSPARENT);
+        }
     };
     executor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME, "ExtensionTransparentDetector");
 }

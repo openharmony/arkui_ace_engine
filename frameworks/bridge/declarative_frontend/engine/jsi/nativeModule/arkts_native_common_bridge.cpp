@@ -7249,6 +7249,11 @@ Local<panda::ObjectRef> CommonBridge::SetUniqueAttributes(
 {
     double density = PipelineBase::GetCurrentDensity();
     switch (typeName) {
+        case OHOS::Ace::GestureTypeName::TAP_GESTURE: {
+            const char* keys[] = { "tapLocation" };
+            Local<JSValueRef> values[] = { CreateTapGestureLocationInfo(vm,info) };
+            return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        }
         case OHOS::Ace::GestureTypeName::LONG_PRESS_GESTURE: {
             auto* longPressGestureEvent = TypeInfoHelper::DynamicCast<LongPressGestureEvent>(info.get());
             if (longPressGestureEvent) {
@@ -9007,23 +9012,10 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo
         if (value->IsNumber()) {
             returnValue = static_cast<GestureJudgeResult>(value->ToNumber(vm)->Value());
         }
-        if (gestureInfo->GetType() == GestureTypeName::TAP_GESTURE) {
-            auto tapGuestureEventObj = CreateTapGestureLocationEvent(vm, gestureInfo->GetType(), info);
-            panda::Local<panda::JSValueRef> params[1] = { tapGuestureEventObj };
-            function->Call(vm, function.ToLocal(), params, 1);
-        }
         return returnValue;
     };
     NG::ViewAbstract::SetOnGestureJudgeBegin(frameNode, std::move(onGestureJudgeBegin));
     return panda::JSValueRef::Undefined(vm);
-}
-
-Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationEvent(
-    EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info)
-{
-    auto obj = SetUniqueAttributes(vm, typeName, info);
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tapLocation"), CreateTapGestureLocationInfo(vm, info));
-    return obj;
 }
 
 Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationInfo(

@@ -572,6 +572,23 @@ public:
                                                 referrer_(referrer),
                                                 isFatalError_(isFatalError),
                                                 isMainFrame_(isMainFrame) {}
+    WebAllSslErrorEvent(const RefPtr<AllSslErrorResult>& result,
+                        int32_t error,
+                        const std::string& url,
+                        const std::string& originalUrl,
+                        const std::string& referrer,
+                        bool isFatalError,
+                        bool isMainFrame,
+                        const std::vector<std::string>& certChainData
+    )
+        : BaseEventInfo("WebAllSslErrorEvent"), result_(result),
+                                                error_(error),
+                                                url_(url),
+                                                originalUrl_(originalUrl),
+                                                referrer_(referrer),
+                                                isFatalError_(isFatalError),
+                                                isMainFrame_(isMainFrame),
+                                                certChainData_(certChainData) {}
     ~WebAllSslErrorEvent() = default;
 
     const RefPtr<AllSslErrorResult>& GetResult() const
@@ -609,6 +626,11 @@ public:
         return isMainFrame_;
     }
 
+    const std::vector<std::string>& GetCertChainData() const
+    {
+        return certChainData_;
+    }
+
 private:
     RefPtr<AllSslErrorResult> result_;
     int32_t error_;
@@ -617,6 +639,7 @@ private:
     const std::string& referrer_;
     bool isFatalError_;
     bool isMainFrame_;
+    std::vector<std::string> certChainData_;
 };
 
 class ACE_EXPORT SslSelectCertResult : public AceType {

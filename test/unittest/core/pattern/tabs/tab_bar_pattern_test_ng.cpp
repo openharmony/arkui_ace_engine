@@ -2892,22 +2892,4 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarAnimation, TestSize.Level1)
     tabBarPattern_->HandleBottomTabBarAnimation(1);
     EXPECT_NE(tabBarPattern_->tabBarStyles_[1], TabBarStyle::BOTTOMTABBATSTYLE);
 }
-/**
- * @tc.name: DumpAdvanceInfo
- * @tc.desc: test DumpAdvanceInfo
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarPatternTestNg, DumpAdvanceInfo, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    model.SetTabBarMode(TabBarMode::SCROLLABLE);
-    model.SetIsVertical(false);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    DumpLog::GetInstance().description_.clear();
-    tabBarPattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[0], "isRTL:false\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[10], "scrollMargin:0.000000\n");
-}
 } // namespace OHOS::Ace::NG

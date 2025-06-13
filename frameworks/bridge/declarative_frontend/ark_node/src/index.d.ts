@@ -190,6 +190,12 @@ declare class SwiperController {}
 
 declare class Scroller {}
 
+declare class TextController {}
+
+declare class TextInputController {}
+
+declare class TextAreaController {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

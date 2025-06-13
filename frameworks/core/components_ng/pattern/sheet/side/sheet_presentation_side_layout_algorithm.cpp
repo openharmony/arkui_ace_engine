@@ -83,6 +83,7 @@ void SheetPresentationSideLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto padding = sheetPattern->GetSheetObject()->GetSheetSafeAreaPadding();
     auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.maxSize.SetWidth(sheetWidth_);
     auto childWidth = sheetWidth_ - padding.left.value_or(0.0f) - padding.right.value_or(0.0f);
     auto childHeight = sheetHeight_ - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f);
     childConstraint.parentIdealSize = OptionalSizeF(childWidth, childHeight);

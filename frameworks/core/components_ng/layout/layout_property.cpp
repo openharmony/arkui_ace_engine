@@ -1011,6 +1011,10 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     }
     host->AddVisibilityDumpInfo({ vsyncTime, { visible, isUserSet } });
 
+    if ((preVisibility != propVisibility_) && pipeline) {
+        pipeline->SetIsDisappearChangeNodeMinDepth(host->GetDepth());
+    }
+
     host->NotifyVisibleChange(preVisibility.value_or(VisibleType::VISIBLE), visible);
     if (allowTransition && preVisibility) {
         if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {

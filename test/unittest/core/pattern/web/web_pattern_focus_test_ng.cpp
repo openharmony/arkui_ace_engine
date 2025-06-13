@@ -606,7 +606,7 @@ HWTEST_F(WebPatternFocusTestNg, GetWebAccessibilityIdBySurfaceId001, TestSize.Le
     ASSERT_EQ(webPattern->delegate_, nullptr);
 
     std::string surfaceId = "testSurfaceId";
-    std::string result = webPattern->GetWebAccessibilityIdBySurfaceId(surfaceId);
+    auto result = webPattern->GetWebAccessibilityIdBySurfaceId(surfaceId);
     ASSERT_EQ(result, -1);
 #endif
 }
@@ -630,11 +630,11 @@ HWTEST_F(WebPatternFocusTestNg, GetWebAccessibilityIdBySurfaceId002, TestSize.Le
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
 
-    std::string result1 = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceId");
+    auto result1 = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceId");
     ASSERT_EQ(result1, 123);
-    std::string result2 = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceIdOther");
+    auto result2 = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceIdOther");
     ASSERT_EQ(result2, 456);
-    std::string result3 = webPattern->GetWebAccessibilityIdBySurfaceId("noexistSurfaceId");
+    auto result3 = webPattern->GetWebAccessibilityIdBySurfaceId("noexistSurfaceId");
     ASSERT_EQ(result3, -1);
 #endif
 }

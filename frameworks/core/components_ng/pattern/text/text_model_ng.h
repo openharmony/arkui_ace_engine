@@ -94,6 +94,7 @@ public:
     void SetLineThicknessScale(float value) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
     void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
+    void ResetGradientShaderStyle() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);

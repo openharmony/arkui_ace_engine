@@ -56,8 +56,15 @@ static napi_value JSRequestFocus(napi_env env, napi_callback_info info)
         napi_get_boolean(env, false, &obj);
         return obj;
     }
-    auto focusCallback = [env](NG::RequestFocusResult result) {
-        switch (result) {
+    std::optional<NG::RequestFocusResult> result;
+    auto focusCallback = [&result](NG::RequestFocusResult requestResult) {
+        result = requestResult;
+    }; // After ResetRequestFocusCallback, the reference to 'result' is no longer valid.
+    delegate->SetRequestFocusCallback(focusCallback);
+    delegate->RequestFocus(key, true);
+    delegate->ResetRequestFocusCallback();
+    if (result.has_value()) {
+        switch (result.value()) {
             case NG::RequestFocusResult::NON_FOCUSABLE:
                 NapiThrow(env, "This component is not focusable.", ERROR_CODE_NON_FOCUSABLE);
                 break;
@@ -65,18 +72,14 @@ static napi_value JSRequestFocus(napi_env env, napi_callback_info info)
                 NapiThrow(env, "This component has unfocusable ancestor.", ERROR_CODE_NON_FOCUSABLE_ANCESTOR);
                 break;
             case NG::RequestFocusResult::NON_EXIST:
-                NapiThrow(env,
-                    "The component doesn't exist, is currently invisible, or has been disabled.",
+                NapiThrow(env, "The component doesn't exist, is currently invisible, or has been disabled.",
                     ERROR_CODE_NON_EXIST);
                 break;
             default:
                 NapiThrow(env, "An internal error occurred.", ERROR_CODE_INTERNAL_ERROR);
                 break;
         }
-    };
-    delegate->SetRequestFocusCallback(focusCallback);
-    delegate->RequestFocus(key, true);
-    delegate->ResetRequestFocusCallback();
+    }
     napi_get_null(env, &obj);
     return obj;
 }

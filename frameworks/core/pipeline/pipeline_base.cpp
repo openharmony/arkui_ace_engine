@@ -1110,4 +1110,15 @@ void PipelineBase::SetUiDvsyncSwitch(bool on)
     }
     lastUiDvsyncStatus_ = on;
 }
+
+bool PipelineBase::CheckIfGetTheme()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto uIContentType = container->GetUIContentType();
+    if (isJsCard_ || (isFormRender_ && uIContentType != UIContentType::DYNAMIC_COMPONENT)) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace

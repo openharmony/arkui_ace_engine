@@ -308,6 +308,24 @@ public:
 
     void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);
 
+    void SetAreaChangeNodeMinDepth(int32_t depth)
+    {
+        if (areaChangeNodeMinDepth_ > 0) {
+            areaChangeNodeMinDepth_ = std::min(areaChangeNodeMinDepth_, depth);
+        } else {
+            areaChangeNodeMinDepth_ = depth;
+        }
+    }
+
+    void SetIsDisappearChangeNodeMinDepth(int32_t depth)
+    {
+        if (isDisappearChangeNodeMinDepth_ > 0) {
+            isDisappearChangeNodeMinDepth_ = std::min(isDisappearChangeNodeMinDepth_, depth);
+        } else {
+            isDisappearChangeNodeMinDepth_ = depth;
+        }
+    }
+
     void HandleSubwindow(bool isShow);
 
     void Destroy() override;
@@ -1417,6 +1435,13 @@ private:
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
+
+    // MinDepth < 0, do not work;
+    // MinDepth = 0, no Change Node from last frame;
+    // MinDepth > 0, represent Change MinDepth from last frame;
+    int32_t areaChangeNodeMinDepth_ = -1;
+    int32_t isDisappearChangeNodeMinDepth_ = -1;
+
     std::unordered_map<int32_t, std::vector<MouseEvent>> historyMousePointsById_;
     std::unordered_map<int32_t, std::vector<DragPointerEvent>> historyPointsEventById_;
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;

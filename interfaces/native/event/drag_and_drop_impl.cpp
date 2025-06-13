@@ -22,6 +22,7 @@
 #include "pixelmap_native_impl.h"
 #include "securec.h"
 #include "udmf_async_client.h"
+#include "udmf_client.h"
 #include "unified_types.h"
 
 #ifdef __cplusplus
@@ -271,6 +272,21 @@ int32_t OH_ArkUI_DragAction_SetDragPreviewOption(ArkUI_DragAction* dragAction, A
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     dragActions->dragPreviewOption = *options;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_DragAction_SetDataLoadParams(
+    ArkUI_DragAction* dragAction, OH_UdmfDataLoadParams* dataLoadParams)
+{
+    if (!dragAction || !dataLoadParams) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    if (!dragActions) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragActions->dataLoadParams = dataLoadParams;
+
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -750,6 +766,32 @@ int32_t OH_ArkUI_DragEvent_StartDataLoading(
     if (status != 0) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_DragEvent_SetDataLoadParams(ArkUI_DragEvent* event, OH_UdmfDataLoadParams* dataLoadParams)
+{
+    if (!event || !dataLoadParams) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    if (!dragEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    OH_UdmfDataLoadParams& ndkDataLoadParams = *dataLoadParams;
+    OHOS::UDMF::DataLoadParams udmfDataLoadParams;
+    auto status = static_cast<int32_t>(
+        OHOS::UDMF::DataParamsConversion::GetDataLoaderParams(ndkDataLoadParams, udmfDataLoadParams));
+    if (status != 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    std::string key = dragEvent->key;
+    status = OHOS::UDMF::UdmfClient::GetInstance().SetDelayInfo(udmfDataLoadParams, key);
+    if (status != 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 

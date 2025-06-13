@@ -834,6 +834,7 @@ ohos_unittest("drag_and_drop_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "udmf:udmf_client",
+    "udmf:libudmf",
   ]
 }
 

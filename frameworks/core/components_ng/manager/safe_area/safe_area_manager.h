@@ -155,6 +155,19 @@ public:
     bool UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight = std::nullopt);
 
     /**
+     * @brief Updates a mirror of safe area to accommodate the keyboard from web
+     *
+     * Third-party platform may use SafeArea, so web_pattern using safearea to keep menu away
+     * from keyboard might lead to several problem.This function is called to update a mirror of
+     * keyboardInset when the keyboard is shown or hidden by web. SelectOverlaylayoutAlgorithm will
+     * use it to calculate the position of menu, but not participate in other safearea calculation.
+     *
+     * @param keyboardHeight The height of the keyboard in pixels.
+     * @return true if the safe area was modified, false otherwise.
+     */
+    bool UpdateKeyboardWebSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight = std::nullopt);
+
+    /**
      * @brief Retrieves the inset of the safe area caused by the keyboard.
      *
      * @return The inset of the safe area caused by the keyboard.
@@ -166,6 +179,15 @@ public:
             return inset;
         }
         return keyboardInset_;
+    }
+
+    SafeAreaInsets::Inset GetKeyboardWebInset() const
+    {
+        if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
+            SafeAreaInsets::Inset inset;
+            return inset;
+        }
+        return keyboardWebInset_;
     }
 
     void UpdateKeyboardOffset(float offset)
@@ -370,6 +392,7 @@ private:
     SafeAreaInsets navSafeArea_;
     // keyboard is bottom direction only
     SafeAreaInsets::Inset keyboardInset_;
+    SafeAreaInsets::Inset keyboardWebInset_;
 
     std::optional<SafeAreaInsets> scbSystemSafeArea_;
     std::optional<SafeAreaInsets> scbCutoutSafeArea_;

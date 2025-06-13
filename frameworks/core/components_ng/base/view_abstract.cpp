@@ -533,6 +533,7 @@ void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const R
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    SetBackgroundColor(color);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -557,8 +558,6 @@ void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const R
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, backgroundColor, frameNode);
     };
     pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
-
-    SetBackgroundColor(color);
 }
 
 void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
@@ -618,6 +617,7 @@ void ViewAbstract::SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    SetBackgroundImage(src);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -649,8 +649,6 @@ void ViewAbstract::SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject
         }
     };
     pattern->AddResObj("backgroundImageSrc", resObj, std::move(updateFunc));
-
-    SetBackgroundImage(src);
 }
 
 void ViewAbstract::SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src)
