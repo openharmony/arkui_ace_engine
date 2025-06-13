@@ -901,8 +901,6 @@ public:
     static void SetPrivacySensitive(FrameNode* frameNode, bool flag);
 
 private:
-    static void AddDragFrameNodeToManager();
-    static void AddDragFrameNodeToManager(FrameNode* frameNode);
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
