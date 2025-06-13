@@ -1718,4 +1718,70 @@ HWTEST_F(InspectorTestNg, SimplifiedInspectorTest003, TestSize.Level1)
     EXPECT_TRUE(inspector->isBackground_);
     EXPECT_TRUE(inspector->isAsync_);
 }
+
+bool HasInternalIds(const std::unique_ptr<JsonValue>& children)
+{
+    auto hasInternalIds = false;
+    CHECK_NULL_RETURN(children, false);
+    for (size_t i = 0; i < children->GetArraySize(); i++) {
+        auto child = children->GetArrayItem(i);
+        if (child->GetValue("$type")->GetString() == "button") {
+            auto internal = child->Contains("$INTERNAL_IDS");
+            if (internal) {
+                hasInternalIds = true;
+                break;
+            }
+        }
+    }
+    return hasInternalIds;
+}
+
+/**
+ * @tc.name: InspectorTestNg027
+ * @tc.desc: Test the operation of GetInspector
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("sageNode", id, AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    stageNode->children_.clear();
+
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> pageA = FrameNode::CreateFrameNode("PageA", id2,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageA);
+    auto id3 = ElementRegister::GetInstance()->MakeUniqueId();
+    
+    auto button = FrameNode::CreateFrameNode("button", id3, AceType::MakeRefPtr<Pattern>(), true);
+    pageA->AddChild(button);
+
+    auto id4 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto text = FrameNode::CreateFrameNode("text", id4, AceType::MakeRefPtr<Pattern>(), true);
+    button->AddChild(text);
+    button->isActive_ = true;
+
+    std::string tree = Inspector::GetInspector();
+    auto jsonRoot  = JsonUtil::ParseJsonString(tree);
+    ASSERT_NE(jsonRoot, nullptr);
+    
+    auto children = jsonRoot->GetValue("$children");
+    ASSERT_TRUE(children->IsArray());
+    auto hasInternalIds = HasInternalIds(children);
+    ASSERT_FALSE(hasInternalIds);
+
+    text->SetInternal();
+    tree = Inspector::GetInspector();
+    jsonRoot  = JsonUtil::ParseJsonString(tree);
+    ASSERT_NE(jsonRoot, nullptr);
+    
+    children = jsonRoot->GetValue("$children");
+    ASSERT_TRUE(children->IsArray());
+    hasInternalIds = HasInternalIds(children);
+    ASSERT_TRUE(hasInternalIds);
+}
 } // namespace OHOS::Ace::NG
