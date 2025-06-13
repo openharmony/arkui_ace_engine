@@ -31,7 +31,7 @@ import { LengthMetrics } from "../Graphics"
 import { ShadowOptions, Callback_ClickEvent_Void, ClickEvent } from "./common"
 import { TextBackgroundStyle } from "./span"
 import { LeadingMarginPlaceholder } from "./richEditor"
-import { PixelMap, PixelMapInternal } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 import { DrawingColorFilter, DrawingColorFilterInternal } from "./arkui-drawing"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
@@ -818,9 +818,7 @@ export class ImageAttachment implements MaterializedBase {
         return this.getColorFilter_serialize()
     }
     private getValue_serialize(): PixelMap {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
-        const obj : PixelMap = PixelMapInternal.fromPtr(retval)
-        return obj
+        throw new Error("Object deserialization is not implemented.")
     }
     private getSize_serialize(): SizeOptions | undefined {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)

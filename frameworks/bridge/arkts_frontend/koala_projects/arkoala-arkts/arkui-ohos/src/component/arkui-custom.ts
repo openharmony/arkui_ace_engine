@@ -30,6 +30,7 @@ import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
 import { TextPickerDialogOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Frame } from "../Graphics"
+import { DragEvent } from '../component'
 
 export class BaseContextInternal {
     public static fromPtr(ptr: KPointer): BaseContext {
@@ -949,6 +950,21 @@ export class StateStylesOps {
     }
 }
 
+export class DragDropOps {
+    public static registerOnDragStart(node: KPointer, onDragStart: Callback_onDragStart): void {
+        const node_casted = node as (KPointer)
+        const onDragStart_casted = onDragStart as (Callback_onDragStart)
+        DragDropOps.registerOnDragStart_serialize(node_casted, onDragStart_casted)
+        return
+    }
+    private static registerOnDragStart_serialize(node: KPointer, onDragStart: Callback_onDragStart): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(onDragStart)
+        ArkUIGeneratedNativeModule._DragDropOps_registerOnDragStart(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+
 export class UIContextAtomicServiceBar {
     public static getBarRect(): Frame {
         return UIContextAtomicServiceBar.getBarRect_serialize()
@@ -1084,6 +1100,7 @@ export interface SystemBarStyle {
     statusBarContentColor?: string;
 }
 export type Callback_StateStylesChange = (currentState: int32) => void;
+export type Callback_onDragStart = (node: KPointer, dragEvent: DragEvent, extraParam: string) => void;
 export class ContextInternal {
     public static fromPtr(ptr: KPointer): Context {
         const obj : Context = new Context()

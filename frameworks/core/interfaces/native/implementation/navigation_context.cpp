@@ -226,6 +226,41 @@ void PathStack::ReplacePathByName(std::string name, const ParamType&  param, con
     InvokeOnStateChanged();
 }
 
+ReplaceDestinationResultType PathStack::ReplaceDestination(PathInfo info,
+    const std::optional<NavigationOptions>& optionParam)
+{
+    auto [launchMode, animated] = ParseNavigationOptions(optionParam);
+    auto it = pathArray_.end();
+    if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON || launchMode == LaunchMode::POP_TO_SINGLETON) {
+        it = FindNameInternal(info.name_);
+    }
+    if (it != pathArray_.end()) { // is it singleton ?
+        it->param_ = info.param_;
+        it->onPop_ = info.onPop_;
+        it->index_ = -1;
+        if (it == (pathArray_.end() - 1)) {
+            auto targetInfo = *it;
+            it = pathArray_.erase(it);
+            if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
+                pathArray_.pop_back();
+            } else {
+                pathArray_.erase(it, pathArray_.end());
+            }
+            pathArray_.push_back(targetInfo);
+        }
+    } else {
+        if (!pathArray_.empty()) {
+            pathArray_.pop_back();
+        }
+        pathArray_.push_back(info);
+        pathArray_.back().index_ = -1;
+    }
+    isReplace_ = BOTH_ANIM_AND_REPLACE;
+    animated_ = animated;
+    InvokeOnStateChanged();
+    return ERROR_CODE_NO_ERROR;
+}
+
 void PathStack::SetIsReplace(enum IsReplace value)
 {
     isReplace_ = value;

@@ -25,7 +25,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { Rect } from "./../Graphics"
-import { PixelMap, PixelMapInternal } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class DrawingColorFilterInternal {
     public static fromPtr(ptr: KPointer): DrawingColorFilter {

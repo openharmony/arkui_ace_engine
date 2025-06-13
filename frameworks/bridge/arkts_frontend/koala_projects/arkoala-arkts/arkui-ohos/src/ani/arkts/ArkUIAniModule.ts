@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt } from "@koalaui/interop"
+import { KPointer, KInt, KLong } from "@koalaui/interop"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
+import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { DrawContext } from "arkui/Graphics"
 import { DrawModifier } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
@@ -41,6 +42,8 @@ export class ArkUIAniModule {
 
     native static _Common_Restore_InstanceId(): void
 
+    native static _Common_Get_Current_InstanceId(): KInt
+
     // for CustomNode
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
 
@@ -54,4 +57,10 @@ export class ArkUIAniModule {
     native static _SetDrawModifier(ptr: KPointer, drawModifier: DrawModifier): void
     
     native static _Invalidate(ptr: KPointer): void
+    native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
+    native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
+    native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary
+    native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
+    native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
+    native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
 }

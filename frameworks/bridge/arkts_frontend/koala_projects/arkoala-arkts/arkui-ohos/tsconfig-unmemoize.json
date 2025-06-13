@@ -73,6 +73,9 @@
             "@ohos/arkui/observer": [
                 "./@ohos.arkui.observer.ts"
             ],
+            "@ohos/mediaquery": [
+                "./@ohos.mediaquery.ts"
+            ],
             "@ohos/graphics/common2D": [
                 "./@ohos.graphics.common2D.ts"
             ],
@@ -103,6 +106,7 @@
         "./global/**/*.ts",
         "./@ohos.router.ts",
         "./@ohos.arkui.observer.ts",
+        "./@ohos.mediaquery.ts",
         "./@ohos.graphics.common2D.ts",
         "./@ohos.graphics.drawing.ts",
         "./@ohos.arkui.graphics.ts",

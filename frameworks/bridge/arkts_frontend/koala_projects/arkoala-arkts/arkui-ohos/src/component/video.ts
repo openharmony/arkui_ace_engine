@@ -32,7 +32,7 @@ import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ColorMetrics } from "../Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 
 export class VideoControllerInternal {
     public static fromPtr(ptr: KPointer): VideoController {

@@ -27,9 +27,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/linear_gradient_peer.h"
 
-using namespace testing;
-using namespace testing::ext;
-
 namespace OHOS::Ace::NG {
 const auto ATTRIBUTE_BLOCK_SIZE_NAME = "blockSize";
 const auto ATTRIBUTE_SLIDE_RANGE_NAME = "slideRange";

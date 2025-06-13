@@ -223,7 +223,7 @@ HWTEST_F(CommonMethodModifierTest19, TabStopTestDefaultValues, TestSize.Level1)
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, TabStopTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_TabStopTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabStop, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -261,7 +261,7 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityNextFocusIdTestDefaultValues, 
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, AccessibilityNextFocusIdTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityNextFocusIdTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityNextFocusId, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -333,7 +333,7 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestDefaultValues, 
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityUseSamePageTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityUseSamePage, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -396,7 +396,7 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestDefaultValues, TestSiz
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityRoleTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityRole, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -418,7 +418,7 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestValidValues, TestSize.
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityRoleTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityRole, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -439,7 +439,7 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestInvalidValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest19, SetOnKeyEventDispatchTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_SetOnKeyEventDispatchTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEventDispatch, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

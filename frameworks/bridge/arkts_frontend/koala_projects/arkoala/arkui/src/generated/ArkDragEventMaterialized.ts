@@ -238,4 +238,10 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         obj.peer = new Finalizable(ptr, DragEventInternal.getFinalizer())
         return obj
     }
+    public executeDropAnimation(customDropAnimation: (() => void)): void {
+        throw new Error("Not implemented")
+    }
+    public startDataLoading(options: DataSyncOptions): string {
+        throw new Error("Not implemented")
+    }
 }

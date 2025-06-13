@@ -19,7 +19,7 @@ import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy
 import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges } from '../../component/units'
 import { Resource } from "global/resource"
 import { LengthMetrics } from "../../Graphics"
-import { PixelMap } from '../../component/arkui-pixelmap'
+import { PixelMap } from '#external'
 import { ResizableOptions } from "../../component/image"
 import { VisualEffect, Filter, BrightnessBlender } from "../../component/arkui-uieffect"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "../../component/arkui-external"

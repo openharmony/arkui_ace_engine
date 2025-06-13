@@ -25,9 +25,9 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
-import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
+import { ComponentContent, Context, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { Summary, IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
+import { IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global/resource"
@@ -40,7 +40,6 @@ import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
 import { UniformDataType } from "./arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
-import { PixelMap } from "./arkui-pixelmap"
 import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
@@ -60,7 +59,9 @@ import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
 import { rememberMutableState } from '@koalaui/runtime'
 import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
-import { PointerStyle } from '#external';
+import { hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
+import { ArkUIAniModule } from "arkui.ani"
+import { PointerStyle, UnifiedData, Summary, PixelMap } from "#external"
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -295,7 +296,7 @@ export class TransitionEffect implements MaterializedBase {
 }
 export interface BaseEvent {
     target: EventTarget
-    timestamp: int64
+    timestamp: number
     source: SourceType
     axisHorizontal?: number | undefined
     axisVertical?: number | undefined
@@ -319,10 +320,10 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     set target(target: EventTarget) {
         this.setTarget(target)
     }
-    get timestamp(): int64 {
+    get timestamp(): number {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: int64) {
+    set timestamp(timestamp: number) {
         this.setTimestamp(timestamp)
     }
     get source(): SourceType {
@@ -421,11 +422,11 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setTarget_serialize(target_casted)
         return
     }
-    private getTimestamp(): int64 {
+    private getTimestamp(): number {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: int64): void {
-        const timestamp_casted = timestamp as (int64)
+    private setTimestamp(timestamp: number): void {
+        const timestamp_casted = timestamp as (number)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -539,12 +540,12 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setTarget(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getTimestamp_serialize(): int64 {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTimestamp(this.peer!.ptr)
+    private getTimestamp_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTimestamp(this.peer!.ptr) as number
         return retval
     }
-    private setTimestamp_serialize(timestamp: int64): void {
-        ArkUIGeneratedNativeModule._BaseEvent_setTimestamp(this.peer!.ptr, timestamp)
+    private setTimestamp_serialize(timestamp: number): void {
+        ArkUIGeneratedNativeModule._BaseEvent_setTimestamp(this.peer!.ptr, timestamp as int64)
     }
     private getSource_serialize(): SourceType {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getSource(this.peer!.ptr)
@@ -800,14 +801,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     public setData(unifiedData: UnifiedData): void {
         const unifiedData_casted = unifiedData as (UnifiedData)
-        this.setData_serialize(unifiedData_casted)
+        ArkUIAniModule._DragEvent_Set_Data(this.peer!.ptr, unifiedData_casted)
         return
     }
     public getData(): UnifiedData {
-        return this.getData_serialize()
+        const data = ArkUIAniModule._DragEvent_Get_Data(this.peer!.ptr)
+        return data
     }
     public getSummary(): Summary {
-        return this.getSummary_serialize()
+        const summary = ArkUIAniModule._DragEvent_Get_Summary(this.peer!.ptr)
+        return summary
     }
     public setResult(dragResult: DragResult): void {
         const dragResult_casted = dragResult as (DragResult)
@@ -883,20 +886,6 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     private getY_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getY(this.peer!.ptr)
         return retval
-    }
-    private setData_serialize(unifiedData: UnifiedData): void {
-        ArkUIGeneratedNativeModule._DragEvent_setData(this.peer!.ptr, toPeerPtr(unifiedData))
-    }
-    private getData_serialize(): UnifiedData {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getData(this.peer!.ptr)
-        const obj : UnifiedData = UnifiedDataInternal.fromPtr(retval)
-        return obj
-    }
-    private getSummary_serialize(): Summary {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Summary = retvalDeserializer.readSummary()
-        return returnResult
     }
     private setResult_serialize(dragResult: DragResult): void {
         ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, TypeChecker.DragResult_ToNumeric(dragResult))
@@ -984,7 +973,7 @@ export interface KeyEvent {
     keySource: KeySource
     deviceId: number
     metaKey: number
-    timestamp: int64
+    timestamp: number
     stopPropagation: (() => void)
     intentionCode: IntentionCode
     unicode?: number | undefined
@@ -1031,10 +1020,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set metaKey(metaKey: number) {
         this.setMetaKey(metaKey)
     }
-    get timestamp(): int64 {
+    get timestamp(): number {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: int64) {
+    set timestamp(timestamp: number) {
         this.setTimestamp(timestamp)
     }
     get stopPropagation(): (() => void) {
@@ -1119,11 +1108,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setMetaKey_serialize(metaKey_casted)
         return
     }
-    private getTimestamp(): int64 {
+    private getTimestamp(): number {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: int64): void {
-        const timestamp_casted = timestamp as (int64)
+    private setTimestamp(timestamp: number): void {
+        const timestamp_casted = timestamp as (number)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -1204,12 +1193,12 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     private setMetaKey_serialize(metaKey: number): void {
         ArkUIGeneratedNativeModule._KeyEvent_setMetaKey(this.peer!.ptr, metaKey)
     }
-    private getTimestamp_serialize(): int64 {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr)
+    private getTimestamp_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr) as number
         return retval
     }
-    private setTimestamp_serialize(timestamp: int64): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
+    private setTimestamp_serialize(timestamp: number): void {
+        ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp as int64)
     }
     private getStopPropagation_serialize(): (() => void) {
         // @ts-ignore
@@ -10490,7 +10479,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         if (this.checkPriority("onDragStart")) {
             const value_casted = value as (((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)
-            this.getPeer()?.onDragStartAttribute(value_casted)
+            hookRegisterOnDragStartImpl(this.getPeer(), value_casted)
             return this
         }
         return this
@@ -11169,9 +11158,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if ((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) {
+            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
                 const value_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (BackgroundBlurStyleOptions)
+                const options_casted = options as (BackgroundBlurStyleOptions | undefined)
                 this.getPeer()?.backgroundBlurStyle0Attribute(value_casted, options_casted)
                 return this
             }
@@ -11191,9 +11180,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if ((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) {
+            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
                 const value_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (ForegroundBlurStyleOptions)
+                const options_casted = options as (ForegroundBlurStyleOptions | undefined)
                 this.getPeer()?.foregroundBlurStyle0Attribute(value_casted, options_casted)
                 return this
             }
@@ -11331,7 +11320,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const sysOptions_type = runtimeType(sysOptions)
             if ((RuntimeType.NUMBER == radius_type) || (RuntimeType.UNDEFINED == radius_type)) {
                 const value_casted = radius as (number | undefined)
-                const options_casted = options as (BlurOptions)
+                const options_casted = options as (BlurOptions| undefined)
                 this.getPeer()?.backdropBlur0Attribute(value_casted, options_casted)
                 return this
             }

@@ -75,7 +75,7 @@ import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation,
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
 import { Resource } from "global/resource"
 import { AnimatedDrawableDescriptor, AnimatedDrawableDescriptorInternal, DrawableDescriptor, DrawableDescriptorInternal, AnimationOptions, LayeredDrawableDescriptor, LayeredDrawableDescriptorInternal, PixelMapDrawableDescriptor, PixelMapDrawableDescriptorInternal } from "./../arkui-drawabledescriptor"
-import { PixelMap, PixelMapInternal } from "./../arkui-pixelmap"
+import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
 import { BlendMode, DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, DrawingLattice, DrawingLatticeInternal, RectType } from "./../arkui-drawing"
@@ -12151,7 +12151,7 @@ export class Serializer extends SerializerBase {
         const value_force  = value.force
         valueSerializer.writeNumber(value_force)
         const value_timestamp  = value.timestamp
-        valueSerializer.writeInt64(value_timestamp)
+        valueSerializer.writeNumber(value_timestamp)
     }
     writeHoverEvent(value: HoverEvent): void {
         let valueSerializer : Serializer = this

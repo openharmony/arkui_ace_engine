@@ -2134,9 +2134,9 @@ BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
         " handles invalid structure"
     );
     // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
-    dst.leftColor = OptConvert<Color>(src.start);
+    dst.startColor = OptConvert<Color>(src.start);
     dst.topColor = OptConvert<Color>(src.top);
-    dst.rightColor = OptConvert<Color>(src.end);
+    dst.endColor = OptConvert<Color>(src.end);
     dst.bottomColor = OptConvert<Color>(src.bottom);
     dst.multiValued = true;
     return dst;
@@ -2262,11 +2262,11 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
     Validator::ValidateNonNegative(widthProperty.topDimen);
-    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.start);
+    widthProperty.startDimen = Converter::OptConvert<Dimension>(src.start);
     Validator::ValidateNonNegative(widthProperty.leftDimen);
     widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
     Validator::ValidateNonNegative(widthProperty.bottomDimen);
-    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
+    widthProperty.endDimen = Converter::OptConvert<Dimension>(src.end);
     Validator::ValidateNonNegative(widthProperty.rightDimen);
     widthProperty.multiValued = true;
     return widthProperty;
