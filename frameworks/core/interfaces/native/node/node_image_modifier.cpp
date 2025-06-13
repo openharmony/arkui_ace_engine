@@ -660,7 +660,7 @@ void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, con
 {
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_VOID(nodeModifiers);
-    nodeModifiers->getCommonModifier()->setBorderRadius(node, values, units, length);
+    nodeModifiers->getCommonModifier()->setBorderRadius(node, values, units, length, nullptr);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {

@@ -170,6 +170,8 @@ public:
         std::optional<CalcDimension>& optionalDimension, RefPtr<ResourceObject>& resObj);
     static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
+    static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
+        std::optional<CalcDimension>& optionalDimension, RefPtr<ResourceObject>& resObj);
     static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
         std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
     static void ParseJsAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::optional<float>& angle);
