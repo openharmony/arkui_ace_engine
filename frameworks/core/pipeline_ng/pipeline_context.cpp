@@ -2907,6 +2907,7 @@ void PipelineContext::OnTouchEvent(
     }
     if (scalePoint.type == TouchType::DOWN) {
         SetUiDvsyncSwitch(false);
+        CompensateTouchMoveEventBeforeDown();
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
@@ -3066,6 +3067,23 @@ void PipelineContext::OnTouchEvent(
     if (postEventManager_) {
         postEventManager_->SetPassThroughResult(eventManager_->GetPassThroughResult());
     }
+}
+
+void PipelineContext::CompensateTouchMoveEventBeforeDown()
+{
+    if (touchEvents_.empty()) {
+        return;
+    }
+    std::unordered_map<int32_t, TouchEvent> historyPointsById;
+    for (auto iter = touchEvents_.rbegin(); iter != touchEvents_.rend(); ++iter) {
+        auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
+        historyPointsById.emplace(scalePoint.id, scalePoint);
+        historyPointsById[scalePoint.id].history.insert(historyPointsById[scalePoint.id].history.begin(), scalePoint);
+    }
+    for (const auto& item : historyPointsById) {
+        eventManager_->DispatchTouchEvent(item.second);
+    }
+    touchEvents_.clear();
 }
 
 bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event)

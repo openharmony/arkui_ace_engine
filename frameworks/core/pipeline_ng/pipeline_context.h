@@ -1323,6 +1323,7 @@ private:
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
+    void CompensateTouchMoveEventBeforeDown();
 
     void DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
