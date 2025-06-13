@@ -2269,6 +2269,13 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
         }
+        if (self->IsObservedByDrawChildren()) {
+            auto pipeline = self->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto frameNode = AceType::DynamicCast<FrameNode>(self->GetObserverParentForDrawChildren());
+            CHECK_NULL_VOID(frameNode);
+            pipeline->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(frameNode));
+        }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
         return UITask(std::move(task), MAIN_TASK);
