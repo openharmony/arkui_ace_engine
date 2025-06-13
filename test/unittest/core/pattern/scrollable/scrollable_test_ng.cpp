@@ -1538,6 +1538,47 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone001, TestSize.Level1)
     EXPECT_FALSE(panRecognizer->IsPreventDefault());
 }
 
+/**
+ * @tc.name: ScrollTo001
+ * @tc.desc: Test ScrollTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollTo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer and set EdgeEffect to Spring.
+     * @tc.expected: isOverScroll_ is true.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    scrollPn->SetCanStayOverScroll(true);
+    scrollPn->ScrollTo(1.0f);
+    EXPECT_TRUE(scrollPn->GetIsOverScroll());
+}
+
+/**
+ * @tc.name: HandleOverScroll001
+ * @tc.desc: Test HandleOverScroll001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleOverScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer and set EdgeEffect to Spring.
+     * @tc.expected: isOverScroll_ is true.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    scrollPn->SetIsOverScroll(true);
+    auto scrollableEvent = scrollPn->GetScrollableEvent();
+    auto scrollable = scrollableEvent->GetScrollable();
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::AXIS;
+    info.sourceTool_ = SourceTool::TOUCHPAD;
+    scrollable->HandleDragEnd(info);
+    EXPECT_FALSE(scrollPn->GetIsOverScroll());
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 /**
  * @tc.name: ListenDigitalCrownEvent001
