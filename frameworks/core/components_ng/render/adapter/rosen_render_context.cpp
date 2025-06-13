@@ -1235,6 +1235,40 @@ void RosenRenderContext::UpdateBackgroundEffect(
     }
 }
 
+void RosenRenderContext::UpdateForeBlurStyleForColorMode(
+    const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(this), fgBlurStyle, sysOptions](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto render = weak.Upgrade();
+        CHECK_NULL_VOID(render);
+        CHECK_NULL_VOID(render->rsNode_);
+        const auto& groupProperty = render->GetOrCreateForeground();
+        if (groupProperty->CheckBlurStyleOption(fgBlurStyle) && groupProperty->CheckSysOptionsForBlurSame(sysOptions)) {
+            // Same with previous value.
+            // If colorMode is following system and has valid blurStyle, still needs updating
+            if (fgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
+                return;
+            }
+            if (fgBlurStyle->blurOption.grayscale.size() > 1) {
+                Rosen::Vector2f grayScale(fgBlurStyle->blurOption.grayscale[0], fgBlurStyle->blurOption.grayscale[1]);
+                render->rsNode_->SetGreyCoef(grayScale);
+            }
+        } else {
+            groupProperty->propBlurStyleOption = fgBlurStyle;
+            groupProperty->propSysOptionsForBlur = sysOptions;
+        }
+        render->SetFrontBlurFilter();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("foregroundBlurStyle.blurStyle", resObj, std::move(updateFunc));
+}
+
 void RosenRenderContext::UpdateFrontBlurStyle(
     const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions)
 {
@@ -1253,6 +1287,9 @@ void RosenRenderContext::UpdateFrontBlurStyle(
     } else {
         groupProperty->propBlurStyleOption = fgBlurStyle;
         groupProperty->propSysOptionsForBlur = sysOptions;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        UpdateForeBlurStyleForColorMode(fgBlurStyle, sysOptions);
     }
     SetFrontBlurFilter();
 }

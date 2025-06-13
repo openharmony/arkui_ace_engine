@@ -989,11 +989,6 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
-    void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) override
-    {
-        ViewAbstract::CreateWithMaskResourceObj(progress);
-    }
-
     void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
         ViewAbstract::SetBackdropBlur(radius, blurOption, sysOptions);
@@ -1662,6 +1657,10 @@ public:
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) override;
     virtual void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override;
+    void RemoveResObj(const std::string& key) override
+    {
+        ViewAbstract::RemoveResObj(key);
+    }
     void SetForegroundColor(const Color& color) override
     {
         ViewAbstract::SetForegroundColor(color);

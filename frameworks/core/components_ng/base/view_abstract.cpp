@@ -74,6 +74,18 @@ std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec
 
 } // namespace
 
+void ViewAbstract::RemoveResObj(const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+}
+
 void ViewAbstract::SetWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -873,9 +885,7 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, co
         auto&& updateFunc = [bgBlurStyle, sysOptions, weak = AceType::WeakClaim(frameNode)](
                                 const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             BlurStyleOption& bgBlurStyleValue = const_cast<BlurStyleOption&>(bgBlurStyle);
             bgBlurStyleValue.ReloadResources();
             auto pipeline = frameNode->GetContext();
@@ -935,12 +945,10 @@ void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption, const S
         auto&& updateFunc = [effectOption, sysOptions, weak = AceType::WeakClaim(frameNode)](
                                 const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             EffectOption& effectOptionValue = const_cast<EffectOption&>(effectOption);
             effectOptionValue.ReloadResources();
-            SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOptionValue, sysOptions);
+            SetBackgroundEffect(AceType::RawPtr(frameNode), effectOptionValue, sysOptions);
         };
         pattern->AddResObj("backgroundEffect", resObj, std::move(updateFunc));
     }
@@ -984,9 +992,7 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
         auto&& updateFunc = [option, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             PixStretchEffectOption& value = const_cast<PixStretchEffectOption&>(option);
             value.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, value, frameNode);
@@ -1711,9 +1717,7 @@ void ViewAbstract::SetOuterBorderRadius(const BorderRadiusProperty& value)
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
         auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             BorderRadiusProperty& outerBorderRadius = const_cast<BorderRadiusProperty &>(value);
             outerBorderRadius.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, outerBorderRadius, frameNode);
@@ -1760,9 +1764,7 @@ void ViewAbstract::SetOuterBorderColor(const BorderColorProperty& value)
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
         auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             BorderColorProperty& outerBorderColor = const_cast<BorderColorProperty &>(value);
             outerBorderColor.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderColor, outerBorderColor, frameNode);
@@ -1815,9 +1817,7 @@ void ViewAbstract::SetOuterBorderWidth(const BorderWidthProperty& value)
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
         auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             BorderWidthProperty& outerBorderWidth = const_cast<BorderWidthProperty &>(value);
             outerBorderWidth.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, outerBorderWidth, frameNode);
@@ -4319,9 +4319,7 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
         auto&& updateFunc = [shadow, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             Shadow& shadowValue = const_cast<Shadow&>(shadow);
             shadowValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
@@ -4668,9 +4666,7 @@ void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
         auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
             basicShapeValue->ReloadResources();
             CHECK_NULL_VOID(frameNode);
@@ -4763,9 +4759,7 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
         auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
             basicShapeValue->ReloadResources();
             auto target = frameNode->GetRenderContext();
@@ -4793,6 +4787,28 @@ void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [progress, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<ProgressMaskProperty>& progressValue = const_cast<RefPtr<ProgressMaskProperty>&>(progress);
+            progressValue->ReloadResources();
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->HasClipMask()) {
+                target->ResetClipMask();
+                target->OnClipMaskUpdate(nullptr);
+            }
+            target->UpdateProgressMask(progressValue);
+            target->OnProgressMaskUpdate(progressValue);
+        };
+        pattern->AddResObj("ProgressMask", resObj, std::move(updateFunc));
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -4932,9 +4948,7 @@ void ViewAbstract::CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>&
     CHECK_NULL_VOID(pattern);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
-        if (!frameNode) {
-            return;
-        }
+        CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         std::string viewAbstractColorBlend = pattern->GetResCacheMapByKey("viewAbstract.colorBlend");
@@ -5217,42 +5231,6 @@ void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMa
         }
         target->UpdateProgressMask(progress);
     }
-}
-
-void ViewAbstract::CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    auto&& updateFunc = [progress, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-        auto frameNode = weak.Upgrade();
-        if (!frameNode) {
-            return;
-        }
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        std::string colorString = pattern->GetResCacheMapByKey("progressMask.color");
-        Color maskColor;
-        if (colorString.empty()) {
-            ResourceParseUtils::ParseResColor(progress->GetResObj(), maskColor);
-            pattern->AddResCache("progressMask.color", maskColor.ColorToString());
-        } else {
-            maskColor = Color::ColorFromString(colorString);
-        }
-        progress->SetColor(maskColor);
-        auto target = frameNode->GetRenderContext();
-        if (target) {
-            if (target->HasClipMask()) {
-                target->ResetClipMask();
-                target->OnClipMaskUpdate(nullptr);
-            }
-            target->UpdateProgressMask(progress);
-        }
-    };
-    updateFunc(resObj);
-    pattern->AddResObj("progressMask.color", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetUseEffect(bool useEffect, EffectType effectType)
@@ -5591,9 +5569,7 @@ void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& re
     CHECK_NULL_VOID(pattern);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
-        if (!frameNode) {
-            return;
-        }
+        CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         std::string viewAbstractOpacity = pattern->GetResCacheMapByKey("viewAbstract.opacity");
