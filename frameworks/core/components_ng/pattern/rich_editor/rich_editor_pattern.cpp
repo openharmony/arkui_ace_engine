@@ -3262,7 +3262,11 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     CHECK_NULL_VOID(!IsClickEventOnlyForMenuToggle(info));
     CHECK_NULL_VOID(!HandleUrlSpanClickEvent(info));
 
-    Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
+    bool isMouseClick = info.GetSourceDevice() == SourceType::MOUSE;
+    auto localOffset = info.GetLocalLocation();
+    IF_TRUE(isMouseClick, AdjustMouseLocalOffset(localOffset));
+ 
+    Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     IF_TRUE(!isMousePressed_, HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY())));
 
     if (dataDetectorAdapter_->hasClickedAISpan_ || dataDetectorAdapter_->pressedByLeftMouse_) {
@@ -3272,7 +3276,6 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 
     HandleUserClickEvent(info);
     CHECK_NULL_VOID(!info.IsPreventDefault());
-    bool isMouseClick = info.GetSourceDevice() == SourceType::MOUSE;
     bool isMouseClickWithShift = shiftFlag_ && isMouseClick && !IsPreviewTextInputting();
     if (textSelector_.IsValid() && !isMouseSelect_ && !isMouseClickWithShift) {
         CloseSelectOverlay();
@@ -3298,7 +3301,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         }
     }
     UseHostToUpdateTextFieldManager();
-    CalcCaretInfoByClick(info.GetLocalLocation());
+    CalcCaretInfoByClick(localOffset);
     CHECK_NULL_VOID(!isMouseClick);
     if (IsShowSingleHandleByClick(info, lastCaretPosition, lastCaretRect, isCaretTwinkling)) {
         CreateAndShowSingleHandle();
@@ -7935,6 +7938,7 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
     if (!selectOverlay_->HasRenderTransform()) {
         localOffset = Offset(globalOffset.GetX() - paintOffset.GetX(), globalOffset.GetY() - paintOffset.GetY());
     }
+    AdjustMouseLocalOffset(localOffset);
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     if (dataDetectorAdapter_->pressedByLeftMouse_) {
         dataDetectorAdapter_->pressedByLeftMouse_ = false;
@@ -7950,6 +7954,12 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::AdjustMouseLocalOffset(Offset& offset)
+{
+    CHECK_NULL_VOID(GreatNotEqual(offset.GetY(), richTextRect_.Bottom()));
+    offset.SetX(richTextRect_.Right());
 }
 
 void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
@@ -7998,8 +8008,9 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
         return;
     }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    auto localOffset = info.GetLocalLocation();
+    AdjustMouseLocalOffset(localOffset);
+    Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
     int32_t position = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
     if (shiftFlag_) {
         HandleShiftSelect(position);
@@ -8019,7 +8030,7 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     }
     UseHostToUpdateTextFieldManager();
     MoveCaretAndStartFocus(textOffset);
-    CalcCaretInfoByClick(info.GetLocalLocation());
+    CalcCaretInfoByClick(localOffset);
 }
 
 void RichEditorPattern::HandleShiftSelect(int32_t position)
