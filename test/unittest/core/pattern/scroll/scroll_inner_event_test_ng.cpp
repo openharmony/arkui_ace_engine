@@ -369,6 +369,7 @@ HWTEST_F(ScrollInnerEventTestNg, TouchEvent001, TestSize.Level1)
     EXPECT_TRUE(scrollable_->isTouching_);
     TouchOnScrollBar(TouchType::DOWN, SourceType::TOUCH, IN_ACTIVE_BAR_OFFSET);
     EXPECT_TRUE(scrollBar_->IsPressed());
+    EXPECT_NE(scrollBar_->fingerId_, -1);
     EXPECT_EQ(scrollBar_->GetOpacityAnimationType(), OpacityAnimationType::APPEAR);
     EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_ACTIVE_WIDTH);
     EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::GROW);
@@ -401,6 +402,7 @@ HWTEST_F(ScrollInnerEventTestNg, TouchEvent001, TestSize.Level1)
     EXPECT_FALSE(scrollable_->isTouching_);
     TouchOnScrollBar(TouchType::UP, SourceType::TOUCH, IN_ACTIVE_BAR_OFFSET);
     EXPECT_FALSE(scrollBar_->IsPressed());
+    EXPECT_EQ(scrollBar_->fingerId_, -1);
     EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_INACTIVE_WIDTH);
     mockTaskExecutor->RunDelayTask();
