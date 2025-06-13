@@ -17,13 +17,13 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("ressched_report_test") {
   module_out_path = frameworks_test_output_path
   sources = [
-    "$ace_root/test/mock/core/pipline/mock_pipline_context.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/base/mock_ressched_report.cpp",
-    "$ace_root/test/mock/core/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "ressched_report_test.cpp",
   ]
 
-  external_deps = [ "gooletest:gmock_main" ]
+  external_deps = [ "googletest:gmock_main" ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

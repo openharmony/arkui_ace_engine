@@ -14,11 +14,10 @@
  */
 
 #include "gtest/gtest.h"
-#include "vector"
 #include "base/ressched/ressched_report.h"
 #include "core/common/ace_application_info.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipline_context.h"
+#include "core/event/touchEvent.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,19 +41,19 @@ public:
 
 /**
  * @tc.name: ResSchedReportTest001
- * @tc.desc: CurrentId
+ * @tc.desc: test touch up
  * @tc.type: FUNC
  */
 HWTEST_F(ResSchedReportTest, ResSchedReportTest001, TestSize.Level1)
 {
-    TouchEvent touch_event;
-    touch_event.type = TouchType::UP;
-    touch_event.localX = 100.0f;
-    touch_event.localY = 200.0f;
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::UP;
+    touchEvent.localX = 100.0f;
+    touchEvent.localY = 200.0f;
     ReportConfig config;
     config.isReportTid = true;
     config.tid = 98765;
-    ResSchedReport::GetInstance().OnTouchEvent(touch_event, config);
-    EXPECT_NE(touch_event.localX, touch_event.localY);
+    ResSchedReport::GetInstance().OnTouchEvent(touchEvent, config);
+    EXPECT_NE(touchEvent.localX, touchEvent.localY);
 }
 } // namespace OHOS::Ace
