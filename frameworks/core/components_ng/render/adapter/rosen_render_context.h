@@ -546,6 +546,7 @@ protected:
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
     void OnTransformRotateUpdate(const Vector5F& value) override;
+    void OnTransformRotateAngleUpdate(const Vector4F& value) override;
 
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
     void OnOffsetEdgesUpdate(const EdgesParam& value) override;
