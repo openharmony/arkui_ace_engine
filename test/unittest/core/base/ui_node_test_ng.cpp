@@ -3649,4 +3649,28 @@ HWTEST_F(UINodeTestNg, FreeUINodeTestNg009, TestSize.Level1)
     EXPECT_EQ(frameNode->isFreeNode_, true);
     EXPECT_EQ(frameNode->isFreeState_, true);
 }
+
+/**
+ * @tc.name: AddChildOPTTest001
+ * @tc.desc: Test AddChild optimize
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddChildOPTTest001, TestSize.Level1)
+{
+    ONE->Clean();
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildBefore(testNode, testNode2);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildAfter(testNode2, testNode);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
+}
 } // namespace OHOS::Ace::NG
