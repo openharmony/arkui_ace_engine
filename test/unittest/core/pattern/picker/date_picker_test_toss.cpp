@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_default.h"
@@ -385,4 +386,41 @@ HWTEST_F(DatePickerTestToss, TestFlushCurrentOptionsNormalCase, TestSize.Level1)
     EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
 }
 
+/**
+ * @tc.name: DatePickerPatternDirty000
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, DatePickerPatternDirty000, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create picker framenode and pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    auto pickerProperty = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    DirtySwapConfig dirtySwapConfig;
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    /**
+     * @tc.step: step2. call pattern's OnDirtyLayoutWrapperSwap method.
+     * @tc.expected: the result of OnDirtyLayoutWrapperSwap is true.
+     */
+    dirtySwapConfig.skipLayout = false;
+    dirtySwapConfig.skipMeasure = false;
+    EXPECT_TRUE(pickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    /**
+     * @tc.step: step3. call pattern's OnDirtyLayoutWrapperSwap method.
+     * @tc.expected: the result of OnDirtyLayoutWrapperSwap is false.
+     */
+    dirtySwapConfig.skipLayout = true;
+    dirtySwapConfig.skipMeasure = true;
+    EXPECT_FALSE(pickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+}
 } // namespace OHOS::Ace::NG
