@@ -1397,6 +1397,11 @@ HWTEST_F(EventRecorderTest, AddApiTest001, TestSize.Level1)
     pageNode->AddChild(pageNode2, 1, false);
     builder.SetHost(pageNode);
     EXPECT_EQ(builder.params_->empty(), false);
+
+    auto pageNode3 = CreatePageNode("pages/Index3");
+    pageNode3->UpdateInspectorId("abc");
+    builder.SetHost(pageNode3);
+    EXPECT_EQ(builder.params_->empty(), false);
 }
 
 /**
