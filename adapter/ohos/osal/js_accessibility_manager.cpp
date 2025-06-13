@@ -3030,10 +3030,7 @@ void JsAccessibilityManager::UpdateVirtualNodeFocus()
         return;
     }
     RefPtr<NG::RenderContext> renderContext;
-    auto geometryNode = frameNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    bool frameSizeChange = geometryNode->GetFrameSize() != oldGeometrySize_;
-    if (frameNode->GetAccessibilityId() == currentFocusNodeId_ && frameSizeChange) {
+    if (frameNode->GetAccessibilityId() == currentFocusNodeId_) {
         auto parentUinode = frameNode->GetVirtualNodeParent().Upgrade();
         CHECK_NULL_VOID(parentUinode);
         auto parentFrame = AceType::DynamicCast<NG::FrameNode>(parentUinode);
