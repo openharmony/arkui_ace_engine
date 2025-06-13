@@ -20,6 +20,9 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_container.h"
@@ -1136,6 +1139,49 @@ HWTEST_F(BarStyleTestNg, toolBarStyleTest003, TestSize.Level1)
      * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
      */
     ASSERT_NE(safeAreaPadding, nullptr);
+}
+
+/**
+ * @tc.name: SetToolbarOptions001
+ * @tc.desc: Test SetToolbarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, SetToolbarOptions001, TestSize.Level1)
+{
+    NavigationToolbarOptions options;
+    options.bgOptions.color = std::make_optional(Color(0xff00ff00));
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::REGULAR;
+    options.bgOptions.blurStyleOption = blurStyleOption;
+    options.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
+    EffectOption effectOption;
+    effectOption.adaptiveColor = AdaptiveColor::DEFAULT;
+    options.bgOptions.effectOption = effectOption;
+    std::vector<BarItem> toolbarItems = { BarItem() };
+    g_isConfigChangePerform = true;
+    auto navigationNode = CreateNavigationWithToolBar(
+        AceType::MakeRefPtr<MockNavigationStack>(), std::move(options), std::move(toolbarItems));
+    ASSERT_NE(navigationNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarPattern, nullptr);
+    navBarPattern->OnColorModeChange(1);
+    EXPECT_NE(navBarNode->GetToolBarNode(), nullptr);
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    auto toolBarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolBarPattern, nullptr);
+    EXPECT_TRUE(toolBarPattern->options_.bgOptions.color.has_value());
+    EXPECT_EQ(toolBarPattern->options_.bgOptions.color.value(), Color(0xff00ff00));
+
+    EXPECT_TRUE(toolBarPattern->options_.bgOptions.blurStyleOption.has_value());
+    EXPECT_EQ(toolBarPattern->options_.bgOptions.blurStyleOption->blurStyle, BlurStyle::REGULAR);
+
+    EXPECT_TRUE(toolBarPattern->options_.brOptions.barStyle.has_value());
+    EXPECT_EQ(toolBarPattern->options_.brOptions.barStyle.value(), BarStyle::STANDARD);
+    EXPECT_TRUE(options.bgOptions.effectOption.has_value());
+    EXPECT_EQ(options.bgOptions.effectOption->adaptiveColor, AdaptiveColor::DEFAULT);
+    g_isConfigChangePerform = false;
 }
 
 /**
