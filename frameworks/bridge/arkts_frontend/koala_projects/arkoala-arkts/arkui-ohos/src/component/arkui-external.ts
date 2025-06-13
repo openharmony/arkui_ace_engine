@@ -960,9 +960,23 @@ export interface WebHeader {
     headerKey: string;
     headerValue: string;
 }
+export interface SnapshotRegion {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+}
+export interface LocalizedSnapshotRegion {
+    start: number;
+    end: number;
+    top: number;
+    bottom: number;
+}
+export type SnapshotRegionType = SnapshotRegion | LocalizedSnapshotRegion;
 export interface SnapshotOptions {
     scale?: number;
     waitUntilRenderFinished?: boolean;
+    region?: SnapshotRegionType;
 }
 export type AsyncCallback_image_PixelMap_Void = (result: PixelMap) => void;
 export enum PerfMonitorActionType {

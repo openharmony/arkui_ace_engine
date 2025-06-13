@@ -22,8 +22,9 @@ import { MeasureOptions } from "@ohos/measure"
 import { SizeOptions } from "arkui/component/units"
 import { AnimateParam } from "arkui/component"
 import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
-import { Context, PointerStyle } from "#external"
+import { Context, PointerStyle, PixelMap } from "#external"
 import { componentUtils } from "@ohos/arkui/componentUtils"
+import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
 import { KeyEvent } from "arkui/component/common"
@@ -37,6 +38,7 @@ import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import promptAction from '@ohos/promptAction';
+import { AsyncCallback, CustomBuilder } from 'arkui/component'
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -120,6 +122,39 @@ export class FocusController {
     }
     public setKeyProcessingMode(mode: KeyProcessingMode): void {
         throw Error("setKeyProcessingMode not implemented in FocusController!")
+    }
+}
+
+export class ComponentSnapshot {
+    //@ts-ignore
+    public get(id: string, callback: AsyncCallback<PixelMap>,
+               options?: componentSnapshot.SnapshotOptions): void {
+        throw Error("get with callback not implemented in ComponentSnapshot!")
+    }
+    //@ts-ignore
+    public get(id: string, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("get with promise not implemented in ComponentSnapshot!")
+    }
+    //@ts-ignore
+    public createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<PixelMap>,
+                             delay?: number, checkImageStatus?: boolean,
+                             options?: componentSnapshot.SnapshotOptions): void {
+        throw Error("createFromBuilder with callback not implemented in ComponentSnapshot!")
+    }
+    //@ts-ignore
+    public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
+                             options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("createFromBuilder with promise not implemented in ComponentSnapshot!")
+    }
+    public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap {
+        throw Error("getSync not implemented in ComponentSnapshot!")
+    }
+    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("getWithUniqueId not implemented in ComponentSnapshot!")
+    }
+
+    public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
+        throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
 }
 
@@ -207,6 +242,11 @@ export class UIContext {
     public getCursorController(): CursorController {
         throw Error("getCursorController not implemented in UIContext!")
     }
+    
+    public getComponentSnapshot(): ComponentSnapshot {
+        throw Error("getComponentSnapshot not implemented in UIContext!")
+    }
+
     public getRouter(): Router {
         throw Error("getRouter not implemented in UIContext!")
     }
