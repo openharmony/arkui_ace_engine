@@ -143,7 +143,7 @@ void PanRecognizer::OnAccepted()
 
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
-        "Pan accepted, tag = %{public}s, averageDistance is x %{public}f, y %{public}f",
+        "PAN RACC, T: %{public}s, DIS x %{public}f, y %{public}f",
         node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;

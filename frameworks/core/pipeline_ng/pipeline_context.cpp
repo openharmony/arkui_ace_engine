@@ -2880,14 +2880,14 @@ void PipelineContext::OnTouchEvent(
         eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddTouchPoint(scalePoint);
 #ifdef IS_RELEASE_VERSION
             TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
-                "InputTracking id:%{public}d, fingerId:%{public}d, type=%{public}d, inject=%{public}d, "
-                "isPrivacyMode=%{public}d",
+                "ITK Id:%{public}d, fId:%{public}d, T:%{public}d, I=%{public}d, "
+                "M=%{public}d",
                 scalePoint.touchEventId, scalePoint.id, (int)scalePoint.type, scalePoint.isInjected,
                 scalePoint.isPrivacyMode);
 #else
             TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
-                "InputTracking id:%{public}d, fingerId:%{public}d, x=%{public}.3f, y=%{public}.3f type=%{public}d, "
-                "inject=%{public}d",
+                "ITK Id:%{public}d, fId:%{public}d, x=%{public}.3f, y=%{public}.3f T=%{public}d, "
+                "I=%{public}d",
                 scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type,
                 scalePoint.isInjected);
 #endif
