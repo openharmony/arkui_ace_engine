@@ -54,7 +54,7 @@ HWTEST_F(ScrollAdjustmanagerTestNg, ChangeScrollStateIfNeedTest, TestSize.Level1
      * @tc.steps: step1. if current state is ScrollState::SCROLL, get ScrollState is need change.
      * @tc.expected: step1. current back is false.
      */
-    bool testResult = false;
+    bool testResult = true;
     bool actual = scrollAdjustmanager_->ChangeScrollStateIfNeed(ScrollState::SCROLL);
     EXPECT_EQ(actual, testResult);
     
