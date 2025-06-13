@@ -2237,7 +2237,6 @@ void TextFieldPattern::InitDragEvent()
         ClearDragDropEvent();
         InitDragDropEventWithOutDragStart();
     }
-    AddDragFrameNodeToManager(host);
 }
 
 std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
@@ -11108,24 +11107,6 @@ void TextFieldPattern::NotifyKeyboardClosed()
     if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
         FocusHub::LostFocusToViewRoot();
     }
-}
-
-void TextFieldPattern::AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
-{
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(context);
-    auto dragDropManager = context->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
-}
-
-void TextFieldPattern::RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
-{
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(context);
-    auto dragDropManager = context->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->RemoveDragFrameNode(frameNode->GetId());
 }
 
 bool TextFieldPattern::BetweenSelectedPosition(const Offset& globalOffset)
