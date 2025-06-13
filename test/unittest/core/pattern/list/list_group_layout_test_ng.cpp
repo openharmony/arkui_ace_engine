@@ -1686,4 +1686,41 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureBackward004, TestSize.Level1)
     EXPECT_EQ(listItemGroupLayoutAlgorithm->itemPosition_[4].startPos, 2.0f);
     EXPECT_FALSE(listItemGroupLayoutAlgorithm->targetIndex_.has_value());
 }
+
+/**
+ * @tc.name: CheckRecycle001
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm CheckRecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    layoutWrapperNode->hostNode_ = frameNode;
+    layoutWrapperNode->hostNode_.Upgrade()->tag_ = V2::LIST_ITEM_GROUP_COMPONENT_TAG;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapperNode->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    listItemGroupLayoutAlgorithm->itemPosition_[0] = { 0, 0.0f, 100.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[1] = { 1, 100.0f, 200.0f, true };
+    listItemGroupLayoutAlgorithm->CheckRecycle(layoutWrapperNode, 200.0f, 300.0f, 0.0f, true);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->recycledItemPosition_.size(), 1);
+}
 } // namespace OHOS::Ace::NG
