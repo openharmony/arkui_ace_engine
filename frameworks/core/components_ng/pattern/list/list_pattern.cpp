@@ -2273,8 +2273,10 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
             calculate.SetPosMap(posMap_, true);
             calculate.GetEstimateHeightAndOffset(GetHost());
             currentOffset_ = calculate.GetEstimateOffset();
+            listTotalHeight_ = calculate.GetEstimateHeight();
             relativeOffset = 0;
             needReEstimateOffset_ = false;
+            heightEstimated_ = true;
         }
         CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
     }
@@ -2405,6 +2407,7 @@ void ListPattern::UpdateScrollBarOffset()
 {
     CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
+        heightEstimated_ = false;
         return;
     }
     auto host = GetHost();
@@ -2414,13 +2417,15 @@ void ListPattern::UpdateScrollBarOffset()
     Size size(frameSize.Width(), frameSize.Height());
     if (itemPosition_.empty()) {
         UpdateScrollBarRegion(0.f, 0.f, size, Offset(0.0f, 0.0f));
+        heightEstimated_ = false;
         return;
     }
     float currentOffset = 0.0f;
     float estimatedHeight = 0.0f;
-    if (childrenSize_) {
+    if (childrenSize_ || heightEstimated_) {
         currentOffset = currentOffset_;
         estimatedHeight = listTotalHeight_;
+        heightEstimated_ = false;
     } else {
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis(), itemStartIndex_);
         calculate.SetPosMap(posMap_);

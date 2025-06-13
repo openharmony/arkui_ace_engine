@@ -678,6 +678,7 @@ private:
 
     bool prevMeasureBreak_ = false;
     int32_t draggingIndex_ = -1;
+    bool heightEstimated_ = false;
 };
 } // namespace OHOS::Ace::NG
 
