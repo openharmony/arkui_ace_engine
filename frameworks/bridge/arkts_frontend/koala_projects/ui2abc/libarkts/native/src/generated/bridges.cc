@@ -4244,25 +4244,6 @@ KUInt impl_ScriptFunctionFormalParamsLengthConst(KNativePointer context, KNative
 }
 KOALA_INTEROP_2(ScriptFunctionFormalParamsLengthConst, KUInt, KNativePointer, KNativePointer);
 
-void impl_ScriptFunctionSetIsolatedDeclgenReturnType(KNativePointer context, KNativePointer receiver, KStringPtr& type)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _type = getStringCopy(type);
-    GetImpl()->ScriptFunctionSetIsolatedDeclgenReturnType(_context, _receiver, _type);
-    return ;
-}
-KOALA_INTEROP_V3(ScriptFunctionSetIsolatedDeclgenReturnType, KNativePointer, KNativePointer, KStringPtr);
-
-KNativePointer impl_ScriptFunctionGetIsolatedDeclgenReturnTypeConst(KNativePointer context, KNativePointer receiver)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    auto result = GetImpl()->ScriptFunctionGetIsolatedDeclgenReturnTypeConst(_context, _receiver);
-    return StageArena::strdup(result);
-}
-KOALA_INTEROP_2(ScriptFunctionGetIsolatedDeclgenReturnTypeConst, KNativePointer, KNativePointer, KNativePointer);
-
 void impl_ScriptFunctionEmplaceReturnStatements(KNativePointer context, KNativePointer receiver, KNativePointer returnStatements)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -6706,15 +6687,6 @@ KNativePointer impl_AstNodeDumpDeclConst(KNativePointer context, KNativePointer 
     return StageArena::strdup(result);
 }
 KOALA_INTEROP_2(AstNodeDumpDeclConst, KNativePointer, KNativePointer, KNativePointer);
-
-KNativePointer impl_AstNodeIsolatedDumpDeclConst(KNativePointer context, KNativePointer receiver)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    auto result = GetImpl()->AstNodeIsolatedDumpDeclConst(_context, _receiver);
-    return StageArena::strdup(result);
-}
-KOALA_INTEROP_2(AstNodeIsolatedDumpDeclConst, KNativePointer, KNativePointer, KNativePointer);
 
 void impl_AstNodeDumpConst(KNativePointer context, KNativePointer receiver, KNativePointer dumper)
 {
@@ -12008,16 +11980,15 @@ KNativePointer impl_CreateSrcDumper(KNativePointer context, KNativePointer node)
 }
 KOALA_INTEROP_2(CreateSrcDumper, KNativePointer, KNativePointer, KNativePointer);
 
-KNativePointer impl_CreateSrcDumper1(KNativePointer context, KNativePointer node, KBoolean isDeclgen, KBoolean isIsolatedDeclgen)
+KNativePointer impl_CreateSrcDumper1(KNativePointer context, KNativePointer node, KBoolean isDeclgen)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
     const auto _node = reinterpret_cast<es2panda_AstNode*>(node);
     const auto _isDeclgen = static_cast<KBoolean>(isDeclgen);
-    const auto _isIsolatedDeclgen = static_cast<KBoolean>(isIsolatedDeclgen);
-    auto result = GetImpl()->CreateSrcDumper1(_context, _node, _isDeclgen, _isIsolatedDeclgen);
+    auto result = GetImpl()->CreateSrcDumper1(_context, _node, _isDeclgen);
     return result;
 }
-KOALA_INTEROP_4(CreateSrcDumper1, KNativePointer, KNativePointer, KNativePointer, KBoolean, KBoolean);
+KOALA_INTEROP_3(CreateSrcDumper1, KNativePointer, KNativePointer, KNativePointer, KBoolean);
 
 void impl_SrcDumperAdd(KNativePointer context, KNativePointer receiver, KStringPtr& str)
 {
@@ -12114,15 +12085,6 @@ KBoolean impl_SrcDumperIsDeclgenConst(KNativePointer context, KNativePointer rec
     return result;
 }
 KOALA_INTEROP_2(SrcDumperIsDeclgenConst, KBoolean, KNativePointer, KNativePointer);
-
-KBoolean impl_SrcDumperIsIsolatedDeclgenConst(KNativePointer context, KNativePointer receiver)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_SrcDumper*>(receiver);
-    auto result = GetImpl()->SrcDumperIsIsolatedDeclgenConst(_context, _receiver);
-    return result;
-}
-KOALA_INTEROP_2(SrcDumperIsIsolatedDeclgenConst, KBoolean, KNativePointer, KNativePointer);
 
 void impl_SrcDumperDumpNode(KNativePointer context, KNativePointer receiver, KStringPtr& key)
 {
