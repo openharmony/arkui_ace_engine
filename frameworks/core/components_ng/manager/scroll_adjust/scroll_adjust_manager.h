@@ -20,7 +20,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
-class ScrollAdjustmanager {
+class ScrollAdjustmanager : public virtual AceType {
+    DECLARE_ACE_TYPE(ScrollAdjustmanager, AceType);
 public:
     static ScrollAdjustmanager& GetInstance();
     ScrollAdjustmanager() = default;
