@@ -1457,7 +1457,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
 }
 
 /**
- * @tc.name: Test DragDropFuncWrapperTestNgCoverage040
+ * @tc.name: Test DragDropFuncWrapperTestNgCoverage042
  * @tc.desc: Test EnvelopedDataLoadParams func
  * @tc.type: FUNC
  * @tc.author:

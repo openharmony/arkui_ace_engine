@@ -257,11 +257,8 @@ void UnifiedDataImpl::SetUnifiedData(std::shared_ptr<UDMF::UnifiedData> unifiedD
     unifiedData_ = unifiedData;
 }
 
-std::shared_ptr<UDMF::DataLoadParams> DataLoadParamsImpl::GetDataLoadParams()
+std::shared_ptr<UDMF::DataLoadParams> DataLoadParamsImpl::GetDataLoadParams() const
 {
-    if (dataLoadParams_ == nullptr) {
-        dataLoadParams_ = std::make_shared<UDMF::DataLoadParams>();
-    }
     return dataLoadParams_;
 }
 

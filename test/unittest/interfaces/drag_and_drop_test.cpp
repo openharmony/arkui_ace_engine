@@ -1303,7 +1303,9 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0046, TestSize.Level1)
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
     auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
+    ASSERT_NE(rootFrameNode, nullptr);
     auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
+    ASSERT_NE(frameNode, nullptr);
     auto context = NG::MockPipelineContext::GetCurrent();
     frameNode->context_ = AceType::RawPtr(context);
     auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
@@ -1368,6 +1370,6 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0047, TestSize.Level1)
     auto ret3 = OH_ArkUI_DragEvent_SetDataLoadParams(drag_Event, dataLoadParams);
     OH_UdmfDataLoadInfo_Destroy(info);
     OH_UdmfDataLoadParams_Destroy(dataLoadParams);
-    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
 }
 } // namespace OHOS::Ace
