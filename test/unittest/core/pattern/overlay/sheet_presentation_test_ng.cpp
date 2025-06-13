@@ -197,6 +197,32 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleScrollWithSheet002
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::HandleScrollWithSheet function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet002, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_SIDE);
+    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
+    sheetPattern->sheetDetentHeight_.emplace_back(1800.0f);
+    sheetPattern->height_ = 2000.0f;
+    sheetPattern->sheetMaxHeight_ = 1800.0f;
+    float scrollOffset = 0.0f;
+    sheetPattern->sheetObject_->HandleScrollWithSheet(scrollOffset);
+    EXPECT_FALSE(LessNotEqual(scrollOffset, 0.0f));
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: OnDirtyLayoutWrapperSwap001
  * @tc.desc: Increase the coverage of SheetPresentationPattern::OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
