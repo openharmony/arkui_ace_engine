@@ -19256,6 +19256,9 @@ export class TypeChecker {
     static isBindableString(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<String>")
     }
+    static isBindableResource(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Resource>")
+    }
     static isBindableResourceStr(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<ResourceStr>")
     }

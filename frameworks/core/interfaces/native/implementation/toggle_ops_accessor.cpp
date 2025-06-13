@@ -29,7 +29,7 @@ Ark_NativePointer RegisterIsOnCallbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    ToggleModelNG::SetSwitchIsOn(frameNode, Converter::Convert<bool>(isOn));
+    ToggleModelNG::SetToggleState(frameNode, Converter::Convert<bool>(isOn));
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool isOn) {
         PipelineContext::SetCallBackNode(weakNode);

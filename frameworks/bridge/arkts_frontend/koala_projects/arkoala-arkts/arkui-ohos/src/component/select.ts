@@ -1232,8 +1232,8 @@ export type Callback_Number_String_Void = (index: number, value: string) => void
 export type Callback_Opt_Union_Number_Resource_Void = (selected: number | Resource | undefined) => void;
 export type Callback_Opt_ResourceStr_Void = (value: ResourceStr | undefined) => void;
 export interface SelectAttribute extends CommonMethod {
-    selected(value: number | Resource | Bindable<number | Resource> | undefined): this
-    value(value: ResourceStr | Bindable<ResourceStr> | undefined): this
+    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this
+    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this
     font(value: Font | undefined): this
     fontColor(value: ResourceColor | undefined): this
     selectedOptionBgColor(value: ResourceColor | undefined): this
@@ -1291,10 +1291,10 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     dividerStyle_value?: DividerStyleOptions | undefined
     avoidance_value?: AvoidanceMode | undefined
     menuOutline_value?: MenuOutlineOptions | undefined
-    public selected(value: number | Resource | Bindable<number | Resource> | undefined): this {
+    public selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
         return this
     }
-    public value(value: ResourceStr | Bindable<ResourceStr> | undefined): this {
+    public value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
         return this
     }
     public font(value: Font | undefined): this {
@@ -1394,7 +1394,7 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         }
         return this
     }
-    public selected(value: number | Resource | Bindable<number | Resource> | undefined): this {
+    public selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
         if (this.checkPriority("selected") && (typeof value === "number" || TypeChecker.isResource(value, false, false, false, false, false) || typeof value === "undefined")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
@@ -1412,8 +1412,12 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         SelectOpsHandWritten.hookSelectAttributeSelectedImpl(this.getPeer().peer.ptr, (value as Bindable<number | Resource>));
         return this
     }
-    public value(value: ResourceStr | Bindable<ResourceStr> | undefined): this {
-        if (this.checkPriority("value") && (TypeChecker.isBindableResourceStr(value) || typeof value === "undefined")) {
+    public value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
+        if (TypeChecker.isBindableString(value) || TypeChecker.isBindableResource(value)) {
+            SelectOpsHandWritten.hookSelectAttributeValueImpl(this.getPeer().peer.ptr, (value as Bindable<ResourceStr>));
+            return this
+        }
+        if (this.checkPriority("value")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (ResourceStr | undefined)
@@ -1427,7 +1431,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
             }
             throw new Error("Can not select appropriate overload")
         }
-        SelectOpsHandWritten.hookSelectAttributeValueImpl(this.getPeer().peer.ptr, (value as Bindable<ResourceStr>));
         return this
     }
     public font(value: Font | undefined): this {
