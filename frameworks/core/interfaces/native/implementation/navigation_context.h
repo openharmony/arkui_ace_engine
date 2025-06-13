@@ -65,7 +65,7 @@ public:
     std::string name_;
     ParamType param_;
     OnPopCallback onPop_;
-    int index_;
+    int index_ = -1;
     bool needUpdate_;
     bool needBuildNewInstance_;
     std::optional<std::string> navDestinationId_;
@@ -114,7 +114,7 @@ public:
     void PushPathByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
     std::pair<LaunchMode, bool> ParseNavigationOptions(const std::optional<NavigationOptions>& param);
-    bool PushWithLaunchModeAndAnimated(PathInfo info, LaunchMode launchMode, bool animated);
+    bool PushWithLaunchModeAndAnimated(const PathInfo& info, LaunchMode launchMode, bool animated);
     void PushPath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     PushDestinationResultType PushDestinationByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);

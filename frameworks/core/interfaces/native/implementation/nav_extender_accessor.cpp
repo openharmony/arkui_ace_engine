@@ -222,7 +222,7 @@ Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
                      const Ark_String* name,
                      Ark_Boolean animated)
 {
-    auto invalidVal = Converter::ArkValue<Ark_Number>(-1);
+    static Ark_Number invalidVal = Converter::ArkValue<Ark_Number>(-1);
     CHECK_NULL_RETURN(pathStack, invalidVal);
     auto navStack = pathStack->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
