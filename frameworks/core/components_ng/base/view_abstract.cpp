@@ -588,15 +588,6 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, 
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
 }
 
-void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color)
-{
-    if (color) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *color, frameNode);
-    } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
-    }
-}
-
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -4704,19 +4695,6 @@ void ViewAbstract::SetClipEdge(FrameNode* frameNode, bool isClip)
             target->OnClipShapeUpdate(nullptr);
         }
         target->UpdateClipEdge(isClip);
-    }
-}
-
-void ViewAbstract::SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    if (target) {
-        if (target->GetClipShape().has_value()) {
-            target->ResetClipShape();
-            target->OnClipShapeUpdate(nullptr);
-        }
-        target->UpdateClipEdge(isClip.value_or(false));
     }
 }
 

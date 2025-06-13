@@ -235,7 +235,7 @@ public:
     static void SetCancelButtonSymbol(FrameNode* frameNode, bool isShowSymbol);
     static void SetCancelSymbolIcon(FrameNode* frameNode,
         const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
-    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
     static void ResetBackgroundColor(FrameNode* frameNode);
     static std::u16string GetPlaceholderText(FrameNode* frameNode);

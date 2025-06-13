@@ -509,7 +509,6 @@ public:
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape> &basicShape);
     static void SetClipEdge(bool isClip);
-    static void SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip);
     static void SetMask(const RefPtr<BasicShape> &basicShape);
     // overlay
     static void SetOverlay(const NG::OverlayOptions &overlay);
@@ -624,7 +623,6 @@ public:
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
-    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
     static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);

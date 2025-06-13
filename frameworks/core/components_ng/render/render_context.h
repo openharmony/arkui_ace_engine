@@ -933,6 +933,7 @@ protected:
 
 private:
     friend class ViewAbstract;
+    friend class ViewAbstractModelStatic;
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
     RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;

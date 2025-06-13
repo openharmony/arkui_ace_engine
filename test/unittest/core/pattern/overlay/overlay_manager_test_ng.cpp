@@ -1626,9 +1626,12 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll002, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     auto targetNode = CreateTargetNode();
+    CHECK_NULL_VOID(targetNode);
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    CHECK_NULL_VOID(stageNode);
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_VOID(rootNode);
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
@@ -1639,6 +1642,7 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll002, TestSize.Level1)
     CreateSheetBuilder();
     SheetStyle sheetStyle;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CHECK_NULL_VOID(overlayManager);
     overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());

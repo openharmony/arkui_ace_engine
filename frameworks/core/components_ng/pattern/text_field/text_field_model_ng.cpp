@@ -808,15 +808,11 @@ void TextFieldModelNG::ResetBackgroundColor()
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(TextFieldPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
 }
 
-void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBackgroundColor(frameNode, color);
-    if (color) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, *color, frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
 }
 
 void TextFieldModelNG::ResetBackgroundColor(FrameNode* frameNode)
