@@ -846,7 +846,7 @@ struct CJUIColumnModifier {
     void (*resetColumnAlignItems)(ArkUINodeHandle node);
     ArkUI_Int32 (*getColumnJustifyContent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getColumnAlignItems)(ArkUINodeHandle node);
-    void (*setColumnSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setColumnSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* spaceRawPtr);
     void (*resetColumnSpace)(ArkUINodeHandle node);
 };
 
@@ -857,7 +857,7 @@ struct CJUIRowModifier {
     void (*resetRowAlignItems)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRowJustifyContent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRowAlignItems)(ArkUINodeHandle node);
-    void (*setRowSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setRowSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* spaceRawPtr);
     void (*resetRowSpace)(ArkUINodeHandle node);
 };
 
@@ -866,7 +866,7 @@ struct CJUIDividerModifier {
     void (*resetDividerStrokeWidth)(ArkUINodeHandle node);
     void (*setDividerLineCap)(ArkUINodeHandle node, ArkUI_Int32 lineCap);
     void (*resetDividerLineCap)(ArkUINodeHandle node);
-    void (*setDividerColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setDividerColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
     void (*resetDividerColor)(ArkUINodeHandle node);
     void (*setDividerVertical)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetDividerVertical)(ArkUINodeHandle node);
@@ -2121,7 +2121,7 @@ struct CJUIWebModifier {
 };
 
 struct CJUIBlankModifier {
-    void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 value, void* blankRawPtr);
     void (*resetColor)(ArkUINodeHandle node);
     void (*setBlankHeight)(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
     void (*resetBlankHeight)(ArkUINodeHandle node);
@@ -3200,7 +3200,8 @@ struct CJUIPatternLockModifier {
 
 struct CJUIColumnSplitModifier {
     void (*setColumnSplitDivider)(
-        ArkUINodeHandle node, ArkUI_Float32 stVal, ArkUI_Int32 stUnit, ArkUI_Float32 endVal, ArkUI_Int32 endUnit);
+        ArkUINodeHandle node, ArkUI_Float32 stVal, ArkUI_Int32 stUnit, ArkUI_Float32 endVal, ArkUI_Int32 endUnit,
+        void* startMarginRawPtr, void* endMarginRawPtr);
     void (*resetColumnSplitDivider)(ArkUINodeHandle node);
     void (*setColumnSplitResizable)(ArkUINodeHandle node, ArkUI_Bool resizable);
     void (*resetColumnSplitResizable)(ArkUINodeHandle node);
@@ -3574,7 +3575,7 @@ struct CJUIGraphicsAPI {
 };
 
 struct CJUIRelativeContainerModifier {
-    void (*setGuideLine)(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32 size);
+    void (*setGuideLine)(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32 size, void* rawPtr);
     void (*setBarrier)(ArkUINodeHandle node, ArkUIBarrierStyle* values, ArkUI_Int32 size);
     void (*getGuideLine)(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32* size);
     void (*getBarrier)(ArkUINodeHandle node, ArkUIBarrierStyle* values, ArkUI_Int32* size);

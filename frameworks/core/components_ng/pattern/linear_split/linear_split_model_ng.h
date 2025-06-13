@@ -29,6 +29,7 @@ public:
     void ResetResObj(const std::string& key) override;
     static void SetResizable(FrameNode* frameNode, NG::SplitType splitType, bool resizable);
     static void SetDivider(FrameNode* frameNode, NG::SplitType splitType, const NG::ColumnSplitDivider& divider);
+    static void ResetResObj(FrameNode* frameNode, const std::string& key);
 };
 
 } // namespace OHOS::Ace::NG

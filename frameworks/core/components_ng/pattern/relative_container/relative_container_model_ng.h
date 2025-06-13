@@ -35,6 +35,7 @@ public:
 
     static void ResetBarrier(FrameNode* frameNode);
     static void ResetGuideline(FrameNode* frameNode);
+    static void ResetResObj(FrameNode* frameNode, const std::string& key);
 
 };
 } // namespace OHOS::Ace::NG

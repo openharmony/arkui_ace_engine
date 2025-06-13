@@ -115,13 +115,53 @@ void DividerModelNG::LineCap(FrameNode* frameNode, const std::optional<enum Line
     }
 }
 
-void DividerModelNG::SetDividerColor(FrameNode* frameNode, std::optional<Color> colorOpt)
+void DividerModelNG::SetDividerColor(FrameNode* frameNode, std::optional<Color> colorOpt, bool isSetByUser)
 {
     if (colorOpt) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, colorOpt.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, frameNode);
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, isSetByUser, frameNode);
+    }
+}
+
+void DividerModelNG::SetDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, bool isSetByUser)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto dividerPattern = frameNode->GetPattern<DividerPattern>();
+    CHECK_NULL_VOID(dividerPattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto dividerPattern = frameNode->GetPattern<DividerPattern>();
+        CHECK_NULL_VOID(dividerPattern);
+        std::string dividerColor = dividerPattern->GetResCacheMapByKey("divider.color");
+        Color result;
+        if (dividerColor.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            dividerPattern->AddResCache("divider.color", result.ColorToString());
+        } else {
+            result = Color::ColorFromString(dividerColor);
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, result, frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    };
+    updateFunc(resObj);
+    dividerPattern->AddResObj("divider.color", resObj, std::move(updateFunc));
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, isSetByUser, frameNode);
+}
+
+void DividerModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto dividerPattern = frameNode->GetPattern<DividerPattern>();
+    CHECK_NULL_VOID(dividerPattern);
+    dividerPattern->RemoveResObj(key);
 }
 
 void DividerModelNG::SetVertical(FrameNode* frameNode, const bool& value)

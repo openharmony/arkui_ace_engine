@@ -130,6 +130,30 @@ void BlankModelNG::SetColor(FrameNode* frameNode, const Color& color)
     ACE_UPDATE_NODE_PAINT_PROPERTY(BlankPaintProperty, Color, color, frameNode);
 }
 
+void BlankModelNG::SetColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto blockPattern = frameNode->GetPattern<BlankPattern>();
+    CHECK_NULL_VOID(blockPattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto blankPattern = frameNode->GetPattern<BlankPattern>();
+        CHECK_NULL_VOID(blankPattern);
+        std::string blankColor = blankPattern->GetResCacheMapByKey("blank.color");
+        Color result;
+        if (blankColor.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            blankPattern->AddResCache("blank.color", result.ColorToString());
+        } else {
+            result = Color::ColorFromString(blankColor);
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(BlankPaintProperty, Color, result, frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    };
+    updateFunc(resObj);
+    blockPattern->AddResObj("blank.color", resObj, std::move(updateFunc));
+}
 void BlankModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
 {
     CHECK_NULL_VOID(frameNode);
@@ -151,5 +175,16 @@ void BlankModelNG::SetBlankMin(FrameNode* frameNode, const Dimension& blankMin)
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexBasis, result, frameNode);
     }
+}
+
+void BlankModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto blankPattern = frameNode->GetPattern<BlankPattern>();
+    CHECK_NULL_VOID(blankPattern);
+    blankPattern->RemoveResObj(key);
 }
 } // namespace OHOS::Ace::NG

@@ -34,8 +34,10 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void StrokeWidth(FrameNode* frameNode, std::optional<Dimension> valueOpt);
     static void LineCap(FrameNode* frameNode, std::optional<enum LineCap> valueOpt);
-    static void SetDividerColor(FrameNode* frameNode, std::optional<Color> colorOpt);
+    static void SetDividerColor(FrameNode* frameNode, std::optional<Color> colorOpt, bool isSetByUser);
+    static void SetDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, bool isSetByUser);
     static void SetVertical(FrameNode* frameNode, const bool& value);
+    static void ResetResObj(FrameNode* frameNode, const std::string& key);
 };
 } // namespace OHOS::Ace::NG
 
