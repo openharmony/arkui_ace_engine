@@ -1312,6 +1312,11 @@ void JSViewPopups::ParseMenuParam(
             menuParam.anchorPosition.SetY(dy.ConvertToPx());
         }
         menuParam.isAnchorPosition = true;
+        if (LessNotEqual(menuParam.anchorPosition.GetX(), 0.0f) &&
+            LessNotEqual(menuParam.anchorPosition.GetY(), 0.0f)) {
+            menuParam.isAnchorPosition = false;
+            menuParam.placement = Placement::BOTTOM_LEFT;
+        }
     }
 }
 

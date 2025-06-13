@@ -1507,4 +1507,21 @@ HWTEST_F(MenuViewTestNg, Create002, TestSize.Level1)
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
+
+/**
+ * @tc.name: UpdateMenuProperties002
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuProperties002, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.anchorPosition = OffsetF(10.0f, 10.0f);
+    ASSERT_NE(wrapperNode_, nullptr);
+    ASSERT_NE(menuFrameNode_, nullptr);
+    MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);
+    auto menuProperty = menuFrameNode_->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    EXPECT_EQ(menuProperty->HasAnchorPosition(), true);
+}
 } // namespace OHOS::Ace::NG

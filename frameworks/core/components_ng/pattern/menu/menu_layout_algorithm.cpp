@@ -1918,6 +1918,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(menuWrapper);
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(wrapperPattern);
+        dumpInfo_.anchorPosition = menuProp->GetAnchorPosition().value_or(OffsetF());
         wrapperPattern->SetDumpInfo(dumpInfo_);
         UpdateMenuFrameSizeWithArrow(geometryNode, didNeedArrow_);
     }
