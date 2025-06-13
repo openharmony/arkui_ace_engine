@@ -209,7 +209,7 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet002, TestSize.Level1)
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    sheetPattern->UpdateSheetObject(SheetType::SHEET_SIDE);
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->sheetObject_, nullptr);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
     sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;

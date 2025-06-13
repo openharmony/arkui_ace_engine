@@ -1576,7 +1576,7 @@ HWTEST_F(SheetPresentationTestThreeNg, StartSheetTransitionAnimation001, TestSiz
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    sheetPattern->UpdateSheetObject(SheetType::SHEET_SIDE);
+    sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->sheetObject_, nullptr);
     AnimationOption option;
     float offset = 0.0f;
