@@ -93,22 +93,30 @@ struct ScaleOptions {
                centerX.ToString() + "," + centerY.ToString() + "]";
     }
 };
-struct RotateOptions {
-    float xDirection = 0.0f;
-    float yDirection = 0.0f;
-    float zDirection = 0.0f;
-    // angle in degree unit
-    float angle = 0.0f;
+struct BaseRotateOptions {
     CalcDimension centerX;
     CalcDimension centerY;
     CalcDimension centerZ;
     // camera distance value
     float perspective = 0.0f;
+    BaseRotateOptions(const CalcDimension& centerX, const CalcDimension& centerY,
+        const CalcDimension& centerZ, float perspective)
+        : centerX(centerX), centerY(centerY), centerZ(centerZ), perspective(perspective) {}
+    BaseRotateOptions() = default;
+};
+struct RotateOptions : BaseRotateOptions {
+    float xDirection = 0.0f;
+    float yDirection = 0.0f;
+    float zDirection = 0.0f;
+    // angle in degree unit
+    float angle = 0.0f;
 
     RotateOptions(float xDirection, float yDirection, float zDirection, float angle, const CalcDimension& centerX,
         const CalcDimension& centerY, const CalcDimension& centerZ = CalcDimension(0.0f, DimensionUnit::VP),
-        const float perspective = 0.0f) : xDirection(xDirection), yDirection(yDirection), zDirection(zDirection),
-        angle(angle), centerX(centerX), centerY(centerY), centerZ(centerZ), perspective(perspective) {}
+        float perspective = 0.0f)
+        : BaseRotateOptions(centerX, centerY, centerZ, perspective), xDirection(xDirection), yDirection(yDirection),
+          zDirection(zDirection), angle(angle)
+    {}
     RotateOptions() = default;
     bool operator==(const RotateOptions& other) const
     {
@@ -125,6 +133,17 @@ struct RotateOptions {
                std::to_string(perspective) + "]";
     }
 };
+struct RotateAngleOptions : BaseRotateOptions {
+    float angleX = 0.0f;
+    float angleY = 0.0f;
+    float angleZ = 0.0f;
+    RotateAngleOptions(float angleX, float angleY, float angleZ, const CalcDimension& centerX,
+        const CalcDimension& centerY, const CalcDimension& centerZ = CalcDimension(0.0f, DimensionUnit::VP),
+        float perspective = 0.0f)
+        : BaseRotateOptions(centerX, centerY, centerZ, perspective), angleX(angleX), angleY(angleY), angleZ(angleZ)
+    {}
+};
+
 struct TransitionOptions {
     TransitionType Type = TransitionType::ALL;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Opacity, float);

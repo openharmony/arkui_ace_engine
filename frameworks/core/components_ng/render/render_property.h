@@ -219,6 +219,7 @@ struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, TranslateOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector5F);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotateAngle, Vector4F);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };

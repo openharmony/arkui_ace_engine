@@ -1996,6 +1996,18 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector5F& rotate)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnTransformRotateAngleUpdate(const Vector4F& rotate)
+{
+    CHECK_NULL_VOID(rsNode_);
+    
+    SetAnimatableProperty<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, -rotate.x);
+    SetAnimatableProperty<Rosen::RSRotationYModifier, float>(rotationYUserModifier_, -rotate.y);
+    SetAnimatableProperty<Rosen::RSRotationModifier, float>(rotationZUserModifier_, rotate.z);
+    SetAnimatableProperty<Rosen::RSCameraDistanceModifier, float>(cameraDistanceUserModifier_, rotate.w);
+    NotifyHostTransformUpdated();
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
 {
     RectF rect = GetPaintRectWithoutTransform();
