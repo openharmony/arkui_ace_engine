@@ -1961,6 +1961,36 @@ const __attributeMap__ = new Map([
         }
         node._componentAttribute = new ArkXComponentComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
+    }],
+    ['Progress', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['LoadingProgress', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkLoadingProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Image', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkImageComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
     }]
 ]);
 const __eventMap__ = new Map(
