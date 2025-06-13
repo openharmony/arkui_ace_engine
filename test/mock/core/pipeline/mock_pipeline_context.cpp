@@ -1112,6 +1112,11 @@ bool PipelineBase::IsDestroyed()
     return false;
 }
 
+bool PipelineBase::CheckIfGetTheme()
+{
+    return false;
+}
+
 void PipelineBase::SetDestroyed() {}
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
