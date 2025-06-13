@@ -1631,4 +1631,26 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgeColor, TestSize.Level1)
     auto badgeColor = layoutProperty_->GetBadgeBorderColorValue();
     EXPECT_EQ(badgeColor.ColorToString(), "#FF000000");
 }
+
+/**
+ * @tc.name: BadgeDumpInfo001
+ * @tc.desc: Test dump info of Badge.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, BadgeDumpInfo001, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    CalcDimension width(BADGE_FONT_SIZE);
+    pattern_->UpdateBorderWidth(width, true);
+    pattern_->DumpInfo();
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width);
+    
+    CalcDimension width2(BADGE_FONT_SIZE);
+    pattern_->UpdateBorderWidth(width2, false);
+    pattern_->DumpInfo();
+    EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width); // should not update
+}
 } // namespace OHOS::Ace::NG
