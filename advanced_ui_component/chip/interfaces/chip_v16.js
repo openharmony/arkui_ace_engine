@@ -1542,7 +1542,7 @@ export class ChipComponent extends ViewPU {
       this.label.localizedLabelMargin.end.value >= 0
     ) {
       localizedLabelMargin.end = this.label.localizedLabelMargin.end;
-    } else if (this.hasSuffix()) {
+    } else if (this.hasSuffix() || this.isNeedShowCloseIconMargin()) {
       localizedLabelMargin.end = defaultLocalizedMargin.end;
     }
     if (typeof this.label?.localizedLabelMargin === 'object') {
@@ -1792,6 +1792,9 @@ export class ChipComponent extends ViewPU {
       y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
      };
     }
+  }
+  isNeedShowCloseIconMargin() {
+    return this.isClosable() && this.isSuffixIconFocusStyleCustomized;
   }
   rerender() {
     this.updateDirtyElements();
