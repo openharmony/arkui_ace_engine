@@ -1246,6 +1246,56 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       }
       node._componentAttribute = new ArkToggleComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
+    }],
+    ['Column', (node: FrameNode): ArkColumnComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkColumnComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Row', (node: FrameNode): ArkRowComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkRowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Stack', (node: FrameNode): ArkStackComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkStackComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Flex', (node: FrameNode): ArkFlexComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkFlexComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['RelativeContainer', (node: FrameNode): ArkRelativeContainerComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkRelativeContainerComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
     }]
   ]
 )
