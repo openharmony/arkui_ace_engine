@@ -146,6 +146,8 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("textModifier", &JSSelect::SetTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("optionTextModifier", &JSSelect::SetOptionTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionTextModifier", &JSSelect::SetSelectedOptionTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("showInSubWindow", &JSSelect::SetShowInSubWindow);
+    JSClass<JSSelect>::StaticMethod("showDefaultSelectedIcon", &JSSelect::SetShowDefaultSelectedIcon);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -1056,5 +1058,29 @@ void JSSelect::SetSelectedOptionTextModifier(const JSCallbackInfo& info)
     }
     JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
     SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
+}
+
+void JSSelect::SetShowInSubWindow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        SelectModel::GetInstance()->ResetShowInSubWindow();
+        return;
+    }
+    SelectModel::GetInstance()->SetShowInSubWindow(info[0]->ToBoolean());
+}
+
+void JSSelect::SetShowDefaultSelectedIcon(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        SelectModel::GetInstance()->ResetShowDefaultSelectedIcon();
+        return;
+    }
+    SelectModel::GetInstance()->SetShowDefaultSelectedIcon(info[0]->ToBoolean());
 }
 } // namespace OHOS::Ace::Framework
