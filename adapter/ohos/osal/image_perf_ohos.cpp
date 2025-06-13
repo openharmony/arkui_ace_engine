@@ -19,6 +19,7 @@
 
 #include "base/image/image_perf.h"
 #include "base/log/log_wrapper.h"
+#include "perf_monitor_adapter.h"
 
 namespace OHOS::Ace {
 ImagePerf* ImagePerf::GetPerfMonitor()
@@ -29,12 +30,14 @@ ImagePerf* ImagePerf::GetPerfMonitor()
 
 void ImagePerfOhos::StartRecordImageLoadStat(int64_t id)
 {
+    HiviewDFX::PerfMonitorAdapter::GetInstance().StartRecordImageLoadStat(id);
     LOGD("ImagePerfOhos::StartRecordImageLoadStat id: %{public}" PRId64 "", id);
 }
 
 void ImagePerfOhos::EndRecordImageLoadStat(
     int64_t id, const std::string& imageType, std::pair<int, int> size, int state)
 {
+    HiviewDFX::PerfMonitorAdapter::GetInstance().EndRecordImageLoadStat(id, size, imageType, state);
     LOGD("ImagePerfOhos::EndRecordImageLoadStat id: %{public}" PRId64
          ", imageType: %{public}s, width: %{public}d, height: %{public}d, state: %{public}d",
         id, imageType.c_str(), size.first, size.second, state);

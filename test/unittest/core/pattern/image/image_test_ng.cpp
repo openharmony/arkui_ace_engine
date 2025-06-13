@@ -2341,4 +2341,20 @@ HWTEST_F(ImageTestNg, TestReportPerfData001, TestSize.Level1)
     EXPECT_CALL(*mockImagePerf, EndRecordImageLoadStat(_, _, _, _)).Times(AtLeast(1));
     imagePattern->ReportPerfData(frameNode, 1);
 }
+
+/**
+ * @tc.name: TestReportPerfData002
+ * @tc.desc: Test ReportPerfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestReportPerfData002, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto mockImagePerf = reinterpret_cast<MockImagePerf*>(MockImagePerf::GetPerfMonitor());
+    EXPECT_CALL(*mockImagePerf, StartRecordImageLoadStat(_)).Times(AtLeast(1));
+    imagePattern->LoadImage(ImageSourceInfo(""), false);
+}
 } // namespace OHOS::Ace::NG
