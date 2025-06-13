@@ -183,6 +183,17 @@ void UIObserverHandler::NotifyPanGestureStateChange(const GestureEvent& gestureE
     panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
 }
 
+void UIObserverHandler::NotifyGestureStateChange(NG::GestureListenerType gestureListenerType,
+    const GestureEvent& gestureEventInfo, const RefPtr<NGGestureRecognizer>& current,
+    const RefPtr<FrameNode>& frameNode, NG::GestureActionPhase phase)
+{
+    CHECK_NULL_VOID(current);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(gestureHandleFunc_);
+
+    gestureHandleFunc_(gestureListenerType, gestureEventInfo, current, frameNode, phase);
+}
+
 void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
 {
     CHECK_NULL_VOID(tabContentStateHandleFunc_);
@@ -407,6 +418,11 @@ void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 void UIObserverHandler::SetPanGestureHandleFunc(PanGestureHandleFunc func)
 {
     panGestureHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleGestureHandleFunc(GestureHandleFunc func)
+{
+    gestureHandleFunc_ = func;
 }
 
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)

@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
+#include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace::NG {
 
@@ -77,7 +78,9 @@ public:
         bubbleMethod->SetArrowHeight(arrowHeight_);
         bubbleMethod->SetBorder(border_);
         bubbleMethod->SetArrowBuildPlacement(arrowBuildPlacement_);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, bubbleMethod);
+        auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
         auto theme = pipeline->GetTheme<PopupTheme>();
         CHECK_NULL_RETURN(theme, bubbleMethod);
@@ -258,6 +261,46 @@ public:
         return avoidKeyboard_;
     }
 
+    void SetHasPlacement(bool hasPlacement)
+    {
+        hasPlacement_ = hasPlacement;
+    }
+
+    bool HasPlacement() const
+    {
+        return hasPlacement_;
+    }
+
+    void SetHasWidth(bool hasWidth)
+    {
+        hasWidth_ = hasWidth;
+    }
+
+    bool HasWidth() const
+    {
+        return hasWidth_;
+    }
+
+    void SetAvoidTarget(AvoidanceMode avoidTarget)
+    {
+        avoidTarget_ = avoidTarget;
+    }
+    
+    AvoidanceMode GetAvoidTarget() const
+    {
+        return avoidTarget_;
+    }
+
+    void SetTextPadding(PaddingProperty textPadding)
+    {
+        popupTextPadding_ = textPadding;
+    }
+    
+    PaddingProperty GetTextPadding() const
+    {
+        return popupTextPadding_;
+    }
+
     bool GetHasTransition() const
     {
         return hasTransition_;
@@ -421,6 +464,10 @@ private:
     bool isSetMessageColor_ = false;
     Border border_;
     bool avoidKeyboard_ = false;
+    bool hasPlacement_ = false;
+    bool hasWidth_ = false;
+    AvoidanceMode avoidTarget_ = AvoidanceMode::COVER_TARGET;
+    PaddingProperty popupTextPadding_;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 

@@ -138,10 +138,12 @@ bool AceContainer::IsSceneBoardWindow()
 {
     return false;
 }
+
 bool AceContainer::IsUIExtensionWindow()
 {
-    return false;
+    return IsUIExtensionSubWindow();
 }
+
 bool AceContainer::IsSceneBoardEnabled()
 {
     return true;

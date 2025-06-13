@@ -1425,14 +1425,16 @@ HWTEST_F(XComponentTestNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Level1)
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
     pattern->surfaceId_ = SURFACE_ID;
+    pattern->initialSurfaceId_ = SURFACE_ID;
+    pattern->SetScreenId(0U);
+    EXPECT_EQ(pattern->surfaceId_, "");
+    /**
+     * @tc.steps: step2. set and get renderFit mode with valid surfaceId and valid renderFit number
+     * @tc.expected: the return value equals 0 and get expected renderFit number
+     */
     int32_t code;
     pattern->handlingSurfaceRenderContext_ = AceType::MakeRefPtr<XComponentMockRenderContext>();
-    /**
-     * @tc.steps: step2. Set and get eenderFit by surfaceId with valid surfaceId and valid renderfit number
-     * @tc.expected: the return value equals 0 and the set renderfit function is called
-     */
-    XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
-        SURFACE_ID, pattern->handlingSurfaceRenderContext_);
+    pattern->RegisterSurfaceRenderContext();
     for (int i = 0; i < NUM_SIXTEEN; ++i) {
         for (int j = 0; j < NUM_TWO; ++j) {
             code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(SURFACE_ID, g_renderFitCases[i],
@@ -1445,10 +1447,12 @@ HWTEST_F(XComponentTestNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Level1)
             EXPECT_EQ(renderFitNumber, static_cast<int32_t>(g_renderFitCases[i]));
         }
     }
+    pattern->UnregisterSurfaceRenderContext();
     /**
-     * @tc.steps: step3. call SetAndGetRenderFitBySurfaceId with invalid surfaceId and valid renderfit number
+     * @tc.steps: step3. set and get renderFit mode with invalid surfaceId and valid renderFit number
      * @tc.expected: the return value equals 1
      */
+    pattern->RegisterSurfaceRenderContext();
     for (int i = 0; i < NUM_SIXTEEN; ++i) {
         for (int j = 0; j < NUM_TWO; ++j) {
             code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(INVALID_SURFACE_ID, g_renderFitCases[i],
@@ -1461,5 +1465,12 @@ HWTEST_F(XComponentTestNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Level1)
             EXPECT_EQ(code, 1);
         }
     }
+    /**
+     * @tc.steps: step4. call SetRenderFitBySurfaceId after the renderContext has been destroyed.
+     * @tc.expected: the return value equals 1
+     */
+    pattern->handlingSurfaceRenderContext_.Reset();
+    code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(SURFACE_ID, RenderFit::CENTER, true);
+    EXPECT_EQ(code, 1);
 }
 } // namespace OHOS::Ace::NG

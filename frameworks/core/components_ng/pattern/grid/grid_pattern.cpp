@@ -468,7 +468,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         auto userOffset = FireOnWillScroll(-offset);
         info_.currentOffset_ -= userOffset;
-
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (GreatNotEqual(info_.currentOffset_, GetMainContentSize() - itemsHeight)) {
@@ -485,7 +484,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         auto userOffset = FireOnWillScroll(-offset);
         info_.currentOffset_ -= userOffset;
-
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(info_.currentOffset_, 0.0)) {
@@ -555,6 +553,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
+    if (gridLayoutAlgorithm->MeasureInNextFrame()) {
+        ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
+        MarkDirtyNodeSelf();
+    }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
     return paintProperty->GetFadingEdge().value_or(false) || paintProperty->HasContentClip();

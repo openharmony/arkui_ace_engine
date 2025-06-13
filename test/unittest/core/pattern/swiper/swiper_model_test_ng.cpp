@@ -1736,7 +1736,6 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg036, TestSize.Level1)
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
     indicatorController_->SetSwiperNode(frameNode_);
-    FlushUITasks(indicatorNode_);
     EXPECT_NE(indicatorPattern->RealTotalCount(), 2);
 }
 

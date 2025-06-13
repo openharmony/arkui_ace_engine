@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,6 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
 
     JSClass<JSCheckboxGroup>::StaticMethod("create", &JSCheckboxGroup::Create);
     JSClass<JSCheckboxGroup>::StaticMethod("selectAll", &JSCheckboxGroup::SetSelectAll);
-    JSClass<JSCheckboxGroup>::StaticMethod("onChange", &JSCheckboxGroup::SetOnChange);
     JSClass<JSCheckboxGroup>::StaticMethod("selectedColor", &JSCheckboxGroup::SelectedColor);
     JSClass<JSCheckboxGroup>::StaticMethod("unselectedColor", &JSCheckboxGroup::UnSelectedColor);
     JSClass<JSCheckboxGroup>::StaticMethod("mark", &JSCheckboxGroup::Mark);
@@ -110,20 +109,22 @@ void ParseSelectAllObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = info.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                           const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+    auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
         if (eventInfo) {
             PipelineContext::SetCallBackNode(node);
             if (eventInfo->GetStatus() == 0) {
-                auto newJSVal = JSRef<JSVal>::Make(ToJSValue(true));
-                func->ExecuteJS(1, &newJSVal);
+                panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, true) };
+                func->Call(vm, func.ToLocal(), params, 1);
             } else {
-                auto newJSVal = JSRef<JSVal>::Make(ToJSValue(false));
-                func->ExecuteJS(1, &newJSVal);
+                panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, false) };
+                func->Call(vm, func.ToLocal(), params, 1);
             }
         }
     };
@@ -157,23 +158,6 @@ void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
     }
 }
 
-void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
-{
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CheckboxGroupResult, 1>>(
-        JSRef<JSFunc>::Cast(args[0]), CheckboxGroupResultEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                        const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        PipelineContext::SetCallBackNode(node);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
-        func->Execute(*eventInfo);
-    };
-    CheckBoxGroupModel::GetInstance()->SetOnChange(onChange);
-}
 
 void JSCheckboxGroup::JsResponseRegion(const JSCallbackInfo& info)
 {

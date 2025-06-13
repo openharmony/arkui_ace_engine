@@ -766,7 +766,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest007, TestSize.Level1)
     ASSERT_NE(childNode, nullptr);
     /**
      * @tc.steps: step3. callback AxisTest.
-     * @tc.expected: expect CheckChildHitTestReslut is true.
+     * @tc.expected: expect CheckChildHitTestResult is true.
      */
     childNode->isActive_ = true;
     auto childEventHub_ = AceType::MakeRefPtr<EventHub>();
@@ -844,5 +844,29 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback04, TestSize.Level
      */
     frameNode->TriggerOnSizeChangeCallback();
     EXPECT_EQ(frameNode->lastFrameNodeRect_, nullptr);
+}
+
+
+/**
+ * @tc.name: FrameNodeNotifyColorModeChange01
+ * @tc.desc: Test the function NotifyColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeNotifyColorModeChange01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto childNode = FrameNode::CreateFrameNode("child", 2, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    frameNode->AddChild(childNode);
+    frameNode->SetRerenderable(true);
+    childNode->SetMeasureAnyway(true);
+    /**
+     * @tc.steps: step2. call the function NotifyColorModeChange.
+     * @tc.expected: expect childNode Rerenderable is true.
+     */
+    childNode->NotifyColorModeChange(1);
+    EXPECT_TRUE(childNode->GetRerenderable());
 }
 } // namespace OHOS::Ace::NG

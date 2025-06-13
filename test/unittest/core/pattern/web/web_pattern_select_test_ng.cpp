@@ -1562,35 +1562,15 @@ HWTEST_F(WebPatternSelectTestNg, CreateSnapshotImageFrameNode_001, TestSize.Leve
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     MockPipelineContext::SetUp();
-    std::string snapshotPath = "";
+    std::string snapshotPath = "/data/storage/el2/base/cache/web/123456.png";
     webPattern->CreateSnapshotImageFrameNode(snapshotPath);
-    MockPipelineContext::TearDown();
-#endif
-}
-
-/**
- * @tc.name: RemoveSnapshotFrameNode_001
- * @tc.desc: RemoveSnapshotFrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternSelectTestNg, RemoveSnapshotFrameNode_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
+    snapshotPath = "/data/storage/el2/base/cache/web/web_frame_123456";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    snapshotPath = "/data/storage/el2/base/cache/web/web_frame_123456.png";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    webPattern->RemoveSnapshotFrameNode();
+    webPattern->RemoveSnapshotFrameNode();
     ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    MockPipelineContext::SetUp();
-    std::string snapshotPath = "";
-    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
-    webPattern->RemoveSnapshotFrameNode();
-    webPattern->RemoveSnapshotFrameNode();
     MockPipelineContext::TearDown();
 #endif
 }

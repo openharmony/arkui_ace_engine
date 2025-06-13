@@ -204,6 +204,12 @@ HWTEST_F(EventRecorderTest, EventRecorderTest001, TestSize.Level1)
     exposureCfg = { "", 0.0, 0 };
     Recorder::NodeDataCache::Get().GetExposureCfg("pages/ScrollPage", "scroll_item_2", exposureCfg);
     EXPECT_EQ(exposureCfg.id, "");
+    auto eventParams = std::make_shared<std::unordered_map<std::string, std::string>>();
+    eventParams->emplace("id", "abc");
+    observer->NotifyUIEvent(1, eventParams);
+    EXPECT_EQ(observer->GetEventType(), 1);
+    observer->NotifyUIEvent(2, *eventParams);
+    EXPECT_EQ(observer->GetEventType(), 2);
 }
 
 /**
@@ -1390,6 +1396,11 @@ HWTEST_F(EventRecorderTest, AddApiTest001, TestSize.Level1)
     auto pageNode2 = CreatePageNode("pages/Index2");
     pageNode->AddChild(pageNode2, 1, false);
     builder.SetHost(pageNode);
+    EXPECT_EQ(builder.params_->empty(), false);
+
+    auto pageNode3 = CreatePageNode("pages/Index3");
+    pageNode3->UpdateInspectorId("abc");
+    builder.SetHost(pageNode3);
     EXPECT_EQ(builder.params_->empty(), false);
 }
 

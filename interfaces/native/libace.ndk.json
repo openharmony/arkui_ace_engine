@@ -1536,6 +1536,14 @@
         "name": "OH_ArkUI_NodeUtils_GetAttachedNodeHandleById"
     },
     {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_NodeUtils_GetNodeUniqueId"
+    },
+    {
         "first_introduced": "15",
         "name": "OH_ArkUI_NodeUtils_GetWindowInfo"
     },
@@ -2696,6 +2704,14 @@
         "name": "OH_ArkUI_DragEvent_StartDataLoading"
     },
     {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_DragEvent_SetDataLoadParams"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_DragAction_SetDataLoadParams"
+    },
+    {
         "first_introduced": "15",
         "name": "OH_ArkUI_CancelDataLoading"
     },
@@ -3369,6 +3385,14 @@
     },
     {
         "first_introduced": "20",
+        "name": "OH_ArkUI_DragEvent_GetDragSource"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_DragEvent_IsRemote"
+    },
+    {
+        "first_introduced": "20",
         "name": "OH_NativeXComponent_GetExtraMouseEventInfo"
     },
     {
@@ -3386,6 +3410,10 @@
     {
         "first_introduced": "20",
         "name": "OH_NativeXComponent_GetKeyEventCapsLockState"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_UIInputEvent_GetLatestStatus"
     },
     {
         "first_introduced": "20",

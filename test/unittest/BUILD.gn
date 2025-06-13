@@ -219,8 +219,9 @@ ohos_source_set("ace_components_base") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
-    "$ace_root/adapter/preview/entrance/ui_session/ui_session_json_util.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_session_json_util.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/token_colors.cpp",
+    "$ace_root/frameworks/core/common/card_scope.cpp",
     "$ace_root/frameworks/core/common/multi_thread_build_manager.cpp",
     "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
     "$ace_root/frameworks/core/common/resource/resource_wrapper.cpp",
@@ -259,8 +260,9 @@ ohos_source_set("ace_components_base") {
   }
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  external_deps = [ "cJSON:cjson" ]
   if (current_os == "ohos") {
-    external_deps = [ "c_utils:utils" ]
+    external_deps += [ "c_utils:utils" ]
   }
   if (defined(ffrt_support) && ffrt_support) {
     defines = [ "FFRT_SUPPORT" ]
@@ -711,6 +713,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_perf.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
@@ -1183,6 +1186,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/preview_menu_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.cpp",

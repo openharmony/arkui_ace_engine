@@ -90,12 +90,16 @@ public:
         return distanceMap_;
     }
 
-    void HandlePanGestureAccept(
-        const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback);
+    void HandlePanGestureAccept(const GestureEvent& info, PanGestureState panGestureState, GestureCallbackType type);
     
     void SetPanEndCallback(const GestureEventFunc& panEndCallback)
     {
         panEndOnDisableState_ = std::make_unique<GestureEventFunc>(panEndCallback);
+    }
+
+    const RefPtr<PanGestureOption>& GetPanGestureOption() const
+    {
+        return panGestureOption_;
     }
 
 private:
@@ -145,6 +149,7 @@ private:
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
+    void HandleCallbackReports(const GestureEvent& info, GestureCallbackType type, PanGestureState panGestureState);
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
     void ChangeFingers(int32_t fingers);

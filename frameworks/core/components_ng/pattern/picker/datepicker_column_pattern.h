@@ -101,6 +101,8 @@ public:
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void InitHapticController(const RefPtr<FrameNode>& host) override;
 
+    std::string GetCurrentOption() const override;
+
 private:
     void OnModifyDone() override;
     void SetDividerHeight(uint32_t showOptionCount);

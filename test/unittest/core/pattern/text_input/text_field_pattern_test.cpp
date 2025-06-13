@@ -2440,6 +2440,54 @@ HWTEST_F(TextFieldPatternTest, TextPattern106, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPattern106
+ * @tc.desc: Test TextPattern HandleSelectionParagraghEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern107, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectController_->caretInfo_.index = 1;
+    pattern->contentController_->SetTextValue(u"\n01234\n");
+    pattern->HandleSelectionParagraghEnd();
+}
+
+/**
+ * @tc.name: OnDragNodeDetachFromMainTree001
+ * @tc.desc: Test OnDragNodeDetachFromMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, OnDragNodeDetachFromMainTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    textFieldNode->SetParent(frameNode_);
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. prepare dragStatus_ and call OnDragNodeDetachFromMainTree
+     * @tc.expected: examine the OnDragNodeDetachFromMainTree function and no crash
+     */
+    pattern->dragStatus_ = DragStatus::ON_DROP;
+    pattern->OnDragNodeDetachFromMainTree();
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    EXPECT_TRUE(pattern->selectOverlay_->isShowMenu_);
+}
+
+/**
  * @tc.name: IsShowSearch001
  * @tc.desc: test testInput text IsShowSearch
  * @tc.type: FUNC
@@ -2951,5 +2999,21 @@ HWTEST_F(TextFieldPatternTest, HandleOnPageUpAndPageDownTest, TestSize.Level1)
     pattern_->HandleOnPageUp();
     int32_t upCaret = pattern_->selectController_->GetCaretIndex();
     EXPECT_EQ(downCaret, upCaret);
+}
+
+/**
+ * @tc.name: AdjustAutoScrollOffset
+ * @tc.desc: test AdjustAutoScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, AdjustAutoScrollOffset, TestSize.Level1)
+{
+    CreateTextField("Hello World\n Hello World\n Hello World\n Hello World\n Hello World\n");
+    pattern_->contentRect_ = RectF(0, 0, 100, 100);
+    auto offset = pattern_->AdjustAutoScrollOffset(Offset(50.0f, -10.0f));
+    EXPECT_EQ(offset, Offset(50.0f, 1.0f));
+
+    offset = pattern_->AdjustAutoScrollOffset(Offset(50.0f, 110.0f));
+    EXPECT_EQ(offset, Offset(50.0f, 99.0f));
 }
 } // namespace OHOS::Ace::NG

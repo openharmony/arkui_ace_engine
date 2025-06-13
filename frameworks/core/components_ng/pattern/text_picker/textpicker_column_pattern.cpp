@@ -341,6 +341,11 @@ int32_t TextPickerColumnPattern::GetMiddleButtonIndex()
     return GetShowOptionCount() / 2;
 }
 
+void TextPickerColumnPattern::StopHaptic()
+{
+    stopHaptic_ = true;
+}
+
 RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
 {
     auto toss = GetToss();
@@ -351,6 +356,11 @@ RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
         auto isToss = pattern->GetTossStatus();
         if (info.GetTouches().empty()) {
             return;
+        }
+        if (info.GetSourceTool() == SourceTool::MOUSE) {
+            pattern->stopHaptic_ = true;
+        } else {
+            pattern->stopHaptic_ = false;
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (isToss) {
@@ -1844,7 +1854,7 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     offsetCurSet_ = 0.0;
 
     if (hapticController_ && isShow_) {
-        if (isEnableHaptic_ && !isHapticPlayOnce_) {
+        if (isEnableHaptic_ && !isHapticPlayOnce_ && !stopHaptic_) {
             hapticController_->HandleDelta(dragDelta);
         }
     }
@@ -1944,7 +1954,7 @@ bool TextPickerColumnPattern::InnerHandleScroll(
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    if (hapticController_ && isEnableHaptic_) {
+    if (hapticController_ && isEnableHaptic_ && !stopHaptic_) {
         hapticController_->PlayOnce();
     }
     FlushCurrentOptions(isDown, isUpdatePropertiesOnly, isUpdateAnimationProperties);
@@ -1952,7 +1962,14 @@ bool TextPickerColumnPattern::InnerHandleScroll(
     HandleEventCallback(true);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(blendNode, false);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    accessibilityProperty->SetUserTextValue(GetOption(GetCurrentIndex()));
+    accessibilityProperty->SetAccessibilityText(GetOption(GetCurrentIndex()));
+    blendNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
     return true;
 }
 
@@ -1997,8 +2014,29 @@ void TextPickerColumnPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetAccessibilityCustomRole("TextPicker");
+    accessibilityProperty->SetUserTextValue(GetOption(GetCurrentIndex()));
+    accessibilityProperty->SetAccessibilityText(GetOption(GetCurrentIndex()));
+
+    accessibilityProperty->SetSpecificSupportActionCallback(
+        [weakPtr = WeakClaim(this), accessibilityPtr = WeakClaim(RawPtr(accessibilityProperty))]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        const auto& accessibilityProperty = accessibilityPtr.Upgrade();
+        CHECK_NULL_VOID(accessibilityProperty);
+        if (pattern->CanMove(true)) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+        if (pattern->CanMove(false)) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+    });
+
     accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);

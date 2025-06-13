@@ -534,6 +534,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("clearMatches", &JSWebController::ClearMatches);
     JSClass<JSWebController>::CustomMethod("searchNext", &JSWebController::SearchNext);
     JSClass<JSWebController>::CustomMethod("getUrl", &JSWebController::GetUrl);
+    JSClass<JSWebController>::CustomMethod("getProgress", &JSWebController::GetProgress);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);
@@ -888,6 +889,14 @@ void JSWebController::ZoomOut(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     if (webController_) {
         bool result = webController_->ZoomOut();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::GetProgress(const JSCallbackInfo& args)
+{
+    if (webController_) {
+        int result = webController_->GetProgress();
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
 }

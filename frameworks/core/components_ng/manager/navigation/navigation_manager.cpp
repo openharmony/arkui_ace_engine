@@ -79,6 +79,14 @@ void NavigationManager::OnDumpInfo()
             CHECK_NULL_VOID(navDestination);
             DumpLog::GetInstance().Print(space + navDestination->ToDumpString());
             depth++;
+            auto parent = curNode->GetParent();
+            if (!stack.empty() && parent && parent->GetTag() == V2::PRIMARY_CONTENT_NODE_ETS_TAG &&
+                stack.top().first->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+                DumpLog::GetInstance().Print("----------------------------------------------------------");
+            }
+        } else if (curNode->GetTag() == V2::NAVBAR_ETS_TAG) {
+            DumpLog::GetInstance().Print(space + "| [/]{ NavBar }");
+            DumpLog::GetInstance().Print("----------------------------------------------------------");
         }
         const auto& children = curNode->GetChildren();
         for (auto it = children.rbegin(); it != children.rend(); it++) {
@@ -628,5 +636,79 @@ bool NavigationManager::FireNavigationIntentActively(int32_t pageId, bool needTr
         "error, specified navigation(id: %{public}s) doesn't exist in current page(id: %{public}d)",
         navigationIntentInfo_.value().navigationInspectorId.c_str(), pageId);
     return false;
+}
+
+std::string NavigationManager::GetTopNavDestinationInfo(int32_t pageId, bool onlyFullScreen, bool needParam)
+{
+    if (navigationMap_.find(pageId) == navigationMap_.end()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "no navigation in current page(id: %{public}d)", pageId);
+        return "{}";
+    }
+    auto navigationInfos = navigationMap_[pageId];
+    for (int32_t index = static_cast<int32_t>(navigationInfos.size()) -1; index >= 0; index--) {
+        auto navigationInfo = navigationInfos[index];
+        auto navigationNode = navigationInfo.navigationNode.Upgrade();
+        if (!navigationNode) {
+            continue;
+        }
+        auto pattern = navigationNode->GetPattern<NavigationPattern>();
+        if (!pattern) {
+            continue;
+        }
+        if (onlyFullScreen && !pattern->IsFullPageNavigation()) {
+            continue;
+        }
+        return pattern->GetTopNavdestinationJson(needParam)->ToString();
+    }
+    TAG_LOGW(AceLogTag::ACE_NAVIGATION, "no valid navigation in current page(id: %{public}d)", pageId);
+    return "{}";
+}
+
+void NavigationManager::RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart)
+{
+    auto navDestinationJson = JsonUtil::ParseJsonString(navDestinationInfo);
+    if (!navDestinationJson || !navDestinationJson->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "restore navdestination info is an invalid json object!");
+        return;
+    }
+    auto name = navDestinationJson->GetString("name");
+    auto param = navDestinationJson->GetString("param");
+    auto mode = navDestinationJson->GetInt("mode");
+    if (isColdStart) {
+        // for cold start case
+        auto navigationId = navDestinationJson->GetString("navigationId", "");
+        if (navigationId.empty()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "will restore %{public}s without navigationId, "
+                "it may lead to error in multi-navigation case!", name.c_str());
+        }
+        navigationRecoveryInfo_[navigationId] = { NavdestinationRecoveryInfo(name, param, mode) };
+        return;
+    }
+    // for hot start case
+    if (navigationMap_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "restore navdestination failed cause  is an invagitlid json object!");
+        return;
+    }
+    auto navigationNode = GetNavigationByInspectorId(navDestinationJson->GetString("navigationId", ""));
+    CHECK_NULL_VOID(navigationNode);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto navigationStack = pattern->GetNavigationStack();
+    CHECK_NULL_VOID(navigationStack);
+    navigationStack->CallPushDestinationInner(NavdestinationRecoveryInfo(name, param, mode));
+}
+
+RefPtr<FrameNode> NavigationManager::GetNavigationByInspectorId(const std::string& id) const
+{
+    for (auto iter : navigationMap_) {
+        auto allNavigations = iter.second;
+        for (int32_t index = static_cast<int32_t>(allNavigations.size()) - 1; index >= 0; index--) {
+            auto navigationInfo = allNavigations[index];
+            if (navigationInfo.navigationId == id && navigationInfo.navigationNode.Upgrade()) {
+                return navigationInfo.navigationNode.Upgrade();
+            }
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

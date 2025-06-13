@@ -68,6 +68,7 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad001, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     CreateListItems(10);
+    model.SetSyncLoad(false);
     MockPipelineContext::GetCurrent()->SetResponseTime(2);
     CreateDone();
     EXPECT_EQ(pattern_->itemPosition_.size(), 2);
@@ -96,6 +97,7 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad002, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     CreateListItems(10);
+    model.SetSyncLoad(false);
     MockPipelineContext::GetCurrent()->SetResponseTime(2);
     pattern_->jumpIndex_ = 0;
     pattern_->scrollAlign_ = ScrollAlign::END;
@@ -126,10 +128,31 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad003, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     CreateListItems(6);
+    model.SetSyncLoad(false);
     layoutProperty_->ClearUserDefinedIdealSize(false, true);
     MockPipelineContext::GetCurrent()->SetResponseTime(2);
     CreateDone();
     EXPECT_EQ(pattern_->itemPosition_.size(), 6);
+    EXPECT_FALSE(pattern_->prevMeasureBreak_);
+}
+
+/**
+ * @tc.name: SyncLoad004
+ * @tc.desc: Test List with out sync load
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSyncLoadTestNg, SyncLoad004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     * @tc.expected: List not sync load
+     */
+    ListModelNG model = CreateList();
+    model.SetSyncLoad(true);
+    CreateListItems(10);
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    CreateDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
     EXPECT_FALSE(pattern_->prevMeasureBreak_);
 }
 }

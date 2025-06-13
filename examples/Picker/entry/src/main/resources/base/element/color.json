@@ -3,6 +3,14 @@
     {
       "name": "start_window_background",
       "value": "#FFFFFF"
+    },
+    {
+      "name": "picker_text_style_color",
+      "value": "#FFBCE78B"
+    },
+    {
+      "name": "text_picker_divider_color",
+      "value": "#FFBCE78B"
     }
   ]
 }

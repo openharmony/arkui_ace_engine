@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
@@ -524,6 +525,10 @@ template("ace_core_source_set") {
       defines += [ "ENABLE_OPENCL" ]
     }
 
+    if (use_new_skia) {
+      defines += [ "USE_NEW_SKIA" ]
+    }
+
     if (current_os == "mingw" || current_os == "mac") {
       sources -= [ "common/watch_dog.cpp" ]
       sources += [ "common/watch_dog_mingw.cpp" ]
@@ -688,6 +693,7 @@ template("ace_core_source_set") {
 
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
+    deps += [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
 
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
@@ -1155,6 +1161,10 @@ template("ace_core_ng_source_set") {
         config.enable_image_compression) {
       external_deps += [ "opencl-headers:libcl" ]
       defines += [ "ENABLE_OPENCL" ]
+    }
+
+    if (use_new_skia) {
+      defines += [ "USE_NEW_SKIA" ]
     }
 
     if (defined(config.use_platform_font) && config.use_platform_font) {

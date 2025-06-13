@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
 namespace OHOS::Ace::NG {
+
 SizeF WaterFlowPattern::GetContentSize() const
 {
     auto host = GetHost();
@@ -353,6 +354,17 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     isInitialized_ = true;
+
+    if (layoutInfo_->measureInNextFrame_) {
+        GetContext()->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
+            ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
+            auto waterFlow = weak.Upgrade();
+            if (waterFlow) {
+                waterFlow->MarkDirtyNodeSelf();
+                waterFlow->layoutInfo_->measureInNextFrame_ = false;
+            }
+        });
+    }
 
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();

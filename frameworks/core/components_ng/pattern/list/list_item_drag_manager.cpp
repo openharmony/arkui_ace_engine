@@ -242,14 +242,28 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
     float scale = 1 - sharped * 0.05f;
     SetNearbyNodeScale(node, scale);
     res.scale = scale;
-
-    float dis = std::abs((nearRect.GetOffset().GetMainOffset(axis) + nearRect.GetSize().MainSize(axis) -
-        rect.GetOffset().GetMainOffset(axis) - rect.GetSize().MainSize(axis)) / 2);
-
-    if (GreatNotEqual(axisDelta, dis) || LessNotEqual(axisDelta, -dis)) {
-        res.needMove = true;
-    }
+    res.needMove = IsNeedMove(nearRect, rect, axis, axisDelta);
+    
     return res;
+}
+
+bool ListItemDragManager::IsNeedMove(const RectF& nearRect, const RectF& rect, Axis axis, float axisDelta)
+{
+    bool needMove = false;
+    if (Positive(axisDelta)) {
+        float th = (nearRect.GetOffset().GetMainOffset(axis) + nearRect.GetSize().MainSize(axis) -
+            rect.GetOffset().GetMainOffset(axis) - rect.GetSize().MainSize(axis)) / 2;
+        if (GreatNotEqual(axisDelta, th)) {
+            needMove = true;
+        }
+    }
+    if (Negative(axisDelta)) {
+        float th = (nearRect.GetOffset().GetMainOffset(axis) - rect.GetOffset().GetMainOffset(axis)) / 2;
+        if (LessNotEqual(axisDelta, th)) {
+            needMove = true;
+        }
+    }
+    return needMove;
 }
 
 void ListItemDragManager::ScaleDiagonalItem(int32_t index, const RectF& rect, const OffsetF& delta)
@@ -386,11 +400,12 @@ bool ListItemDragManager::IsInHotZone(int32_t index, const RectF& frameRect) con
         HOT_ZONE_HEIGHT_VP_DIM.ConvertToPx() : HOT_ZONE_WIDTH_VP_DIM.ConvertToPx();
     float startOffset = frameRect.GetOffset().GetMainOffset(axis_);
     float endOffset = startOffset + frameRect.GetSize().MainSize(axis_);
-    if (isRtl_ && axis_ == Axis::HORIZONTAL) {
-        std::swap(startOffset, endOffset);
-    }
     bool reachStart = (index == 0 && startOffset > hotZone);
     bool reachEnd = (index == totalCount_ - 1) && endOffset < (listSize.MainSize(axis_) - hotZone);
+    if (isRtl_ && axis_ == Axis::HORIZONTAL) {
+        reachStart = index == 0 && endOffset < (listSize.MainSize(axis_) - hotZone);
+        reachEnd = (index == totalCount_ - 1) && startOffset > hotZone;
+    }
     return (!reachStart && !reachEnd);
 }
 
@@ -501,18 +516,12 @@ void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
             pipeline->FlushUITasks();
         }
     }
-    isSwapAnimationStopped_ = false;
+    auto pattern = list->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDraggingIndex(to);
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 400, 38); /* 400:stiffness, 38:damping */
     option.SetCurve(curve);
-    option.SetOnFinishEvent([weak = WeakClaim(this)]() {
-        auto manager = weak.Upgrade();
-        CHECK_NULL_VOID(manager);
-        manager->isSwapAnimationStopped_ = true;
-        if (manager->dragState_ == ListItemDragState::IDLE) {
-            manager->SetIsNeedDividerAnimation(true);
-        }
-    });
     option.SetDuration(30); /* 30:duration */
     AnimationUtils::Animate(option, [weak = forEachNode_, from, to]() {
             auto forEach = weak.Upgrade();
@@ -527,7 +536,7 @@ void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
     );
 }
 
-void ListItemDragManager::HandleDragEndAnimation()
+void ListItemDragManager::HandleZIndexAndPosition()
 {
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 400, 38); /* 400:stiffness, 38:damping */
@@ -547,9 +556,23 @@ void ListItemDragManager::HandleDragEndAnimation()
         },
         option.GetOnFinishEvent()
     );
+}
 
+void ListItemDragManager::HandleBackShadow()
+{
+    AnimationOption option;
+    isDragAnimationStopped_ = false;
     option.SetCurve(Curves::FRICTION);
     option.SetDuration(300); /* animate duration:300ms */
+    // choose the animation with max duration to re-open divider animation.
+    option.SetOnFinishEvent([weak = WeakClaim(this)]() {
+        auto manager = weak.Upgrade();
+        CHECK_NULL_VOID(manager);
+        manager->isDragAnimationStopped_ = true;
+        if (manager->dragState_ == ListItemDragState::IDLE) {
+            manager->SetIsNeedDividerAnimation(true);
+        }
+    });
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
@@ -561,7 +584,11 @@ void ListItemDragManager::HandleDragEndAnimation()
         },
         option.GetOnFinishEvent()
     );
+}
 
+void ListItemDragManager::HandleTransformScale()
+{
+    AnimationOption option;
     /* 14:init velocity, 170:stiffness, 17:damping */
     option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(14, 1, 170, 17));
     option.SetDuration(30);  /* 30:duration */
@@ -579,12 +606,23 @@ void ListItemDragManager::HandleDragEndAnimation()
     );
 }
 
+void ListItemDragManager::HandleDragEndAnimation()
+{
+    // start animation to reset z-index and position.
+    HandleZIndexAndPosition();
+    // start animation to reset backshadow.
+    HandleBackShadow();
+    // start animation to reset transformscale.
+    HandleTransformScale();
+}
+
 void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
 {
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetDraggingIndex(-1);
     pattern->SetHotZoneScrollCallback(nullptr);
     if (scrolling_) {
         pattern->HandleLeaveHotzoneEvent();
@@ -597,22 +635,23 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     forEach->FireOnMove(fromIndex_, to);
     forEach->FireOnDrop(to);
     dragState_ = ListItemDragState::IDLE;
-    if (isSwapAnimationStopped_) {
+    if (isDragAnimationStopped_) {
         SetIsNeedDividerAnimation(true);
     }
 }
 
 void ListItemDragManager::HandleOnItemDragCancel()
 {
-    HandleDragEndAnimation();
-    dragState_ = ListItemDragState::IDLE;
-    if (isSwapAnimationStopped_) {
-        SetIsNeedDividerAnimation(true);
-    }
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetDraggingIndex(-1);
+    HandleDragEndAnimation();
+    dragState_ = ListItemDragState::IDLE;
+    if (isDragAnimationStopped_) {
+        SetIsNeedDividerAnimation(true);
+    }
     pattern->HandleLeaveHotzoneEvent();
     pattern->SetHotZoneScrollCallback(nullptr);
 }

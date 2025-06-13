@@ -1124,9 +1124,19 @@ void JSText::SetEnableAutoSpacing(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
+void JSText::SetTextVerticalAlign(const JSCallbackInfo& info)
+{
+    TextVerticalAlign verticalAlign = TextVerticalAlign::BASELINE;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        verticalAlign = static_cast<TextVerticalAlign>(info[0]->ToNumber<int32_t>());
+    }
+    TextModel::GetInstance()->SetTextVerticalAlign(verticalAlign);
+}
+
 void JSText::SetShaderStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
+        TextModel::GetInstance()->ResetGradientShaderStyle();
         return;
     }
     NG::Gradient gradient;
@@ -1137,15 +1147,14 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
 {
     CalcDimension value;
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> center = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CENTER));
-    JSRef<JSVal> radius = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
-    JSRef<JSVal> colors = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS));
-    if (center->IsArray() && radius->IsNumber()) {
+    if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NewJsRadialGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
-    } else if (colors->IsArray()) {
+    } else if (shaderStyleObj->HasProperty("colors")) {
         NewJsLinearGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else {
+        TextModel::GetInstance()->ResetGradientShaderStyle();
     }
 }
 
@@ -1220,6 +1229,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("enableHapticFeedback", &JSText::SetEnableHapticFeedback);
     JSClass<JSText>::StaticMethod("optimizeTrailingSpace", &JSText::SetOptimizeTrailingSpace);
     JSClass<JSText>::StaticMethod("enableAutoSpacing", &JSText::SetEnableAutoSpacing);
+    JSClass<JSText>::StaticMethod("textVerticalAlign", &JSText::SetTextVerticalAlign);
     JSClass<JSText>::StaticMethod("shaderStyle", &JSText::SetShaderStyle);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -1450,7 +1460,9 @@ void JSText::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
-    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
+    TextModel::GetInstance()->SetSelectionMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 } // namespace OHOS::Ace::Framework

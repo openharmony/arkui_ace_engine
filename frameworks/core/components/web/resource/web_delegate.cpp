@@ -283,10 +283,10 @@ void AllSslErrorResultOhos::HandleConfirm()
     }
 }
 
-void AllSslErrorResultOhos::HandleCancel()
+void AllSslErrorResultOhos::HandleCancel(bool abortLoading)
 {
     if (result_) {
-        result_->HandleCancel();
+        result_->HandleCancelV2(abortLoading);
     }
 }
 
@@ -613,6 +613,27 @@ void ContextMenuResultOhos::SelectAll() const
 {
     if (callback_) {
         callback_->Continue(CI_SELECT_ALL, EF_NONE);
+    }
+}
+
+void ContextMenuResultOhos::Undo() const
+{
+    if (callback_) {
+        callback_->Continue(CI_UNDO, EF_NONE);
+    }
+}
+
+void ContextMenuResultOhos::Redo() const
+{
+    if (callback_) {
+        callback_->Continue(CI_REDO, EF_NONE);
+    }
+}
+
+void ContextMenuResultOhos::PasteAndMatchStyle() const
+{
+    if (callback_) {
+        callback_->Continue(CI_PASTE_AND_MATCH_STYLE, EF_NONE);
     }
 }
 
@@ -1706,6 +1727,11 @@ void WebDelegate::GetHitTestValue(HitTestResult& result)
     }
 }
 
+int WebDelegate::GetProgress()
+{
+    return nweb_ ? nweb_->PageLoadProgress() : 0;
+}
+
 int WebDelegate::GetPageHeight()
 {
     if (nweb_) {
@@ -1940,8 +1966,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
 
     state_ = State::CREATING;
     // obtain hap data path
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     if (container == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "get container failed.");
         return false;
     }
     const std::string& bundlePath = container->GetBundlePath();
@@ -1949,6 +1976,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     std::string baseDir = "base";
     std::size_t baseIndex = filesDataPath.find(baseDir);
     if (baseIndex == std::string::npos) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "get filesDataPath failed.");
         return false;
     }
     std::string dataPath = filesDataPath.substr(0, baseIndex + baseDir.length());
@@ -2043,6 +2071,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onScrollV2_ = useNewPipe ? eventHub->GetOnScrollEvent()
                                  : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                      webCom->GetScrollId(), oldContext);
+        onActivateContentV2_ = useNewPipe ? eventHub->GetOnActivateContentEvent()
+                                     : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                         webCom->GetActivateContentEventId(), oldContext);
         onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                          webCom->GetWindowExitEventId(), oldContext);
@@ -2196,6 +2227,7 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     if (!PrepareInitOHOSWeb(context)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "PrepareInitOHOSWeb failed.");
         return;
     }
     if (!isCreateWebView_) {
@@ -2507,6 +2539,10 @@ void WebDelegate::SetWebCallBack()
                 delegate->GetHitTestValue(result);
             }
         });
+        webController->SetGetProgressImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            return delegate ? delegate->GetProgress() : 0;
+        });
         webController->SetGetPageHeightImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (delegate) {
@@ -2747,7 +2783,12 @@ void WebDelegate::InitWebViewWithWindow()
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
 
-            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
+            auto upgradeContext = delegate->context_.Upgrade();
+            CHECK_NULL_VOID(upgradeContext);
+            auto pipelineContext = DynamicCast<NG::PipelineContext>(upgradeContext);
+            CHECK_NULL_VOID(pipelineContext);
+            auto instanceId = pipelineContext->GetInstanceId();
+            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(instanceId);
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
 
@@ -3226,6 +3267,11 @@ void WebDelegate::InitWebViewWithSurface()
                 delegate->JavaScriptOnHeadReadyByOrder();
 #endif
             }
+            auto upgradeContext = delegate->context_.Upgrade();
+            CHECK_NULL_VOID(upgradeContext);
+            auto pipelineContext = DynamicCast<NG::PipelineContext>(upgradeContext);
+            CHECK_NULL_VOID(pipelineContext);
+            auto instanceId = pipelineContext->GetInstanceId();
             CHECK_NULL_VOID(delegate->nweb_);
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             CHECK_NULL_VOID(delegate->cookieManager_);
@@ -3237,7 +3283,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
 #ifdef OHOS_STANDARD_SYSTEM
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
-            delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
+            delegate->nweb_->RegisterScreenLockFunction(instanceId, screenLockCallback);
             auto autoFillCallback = std::make_shared<NWebAutoFillCallbackImpl>(weak);
             delegate->nweb_->SetAutofillCallback(autoFillCallback);
 #endif
@@ -3251,8 +3297,6 @@ void WebDelegate::InitWebViewWithSurface()
             releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
             releaseSurfaceListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutReleaseSurfaceCallback(releaseSurfaceListenerImpl);
-            auto upgradeContext = context.Upgrade();
-            CHECK_NULL_VOID(upgradeContext);
             auto window_id = upgradeContext->GetWindowId();
             auto foucus_window_id = upgradeContext->GetFocusWindowId();
             delegate->nweb_->SetWindowId(window_id);
@@ -3265,7 +3309,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetFitContentMode(layoutMode);
             delegate->RegisterConfigObserver();
-            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
+            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(instanceId);
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
             auto pattern = delegate->webPattern_.Upgrade();
@@ -3730,6 +3774,22 @@ void WebDelegate::UpdateAudioExclusive(const bool& audioExclusive)
             delegate->nweb_->SetAudioExclusive(audioExclusive);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateAudioExclusive");
+}
+
+void WebDelegate::UpdateAudioSessionType(const WebAudioSessionType& audioSessionType)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), audioSessionType]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAudioSessionType(static_cast<int32_t>(audioSessionType));
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateAudioSessionType");
 }
 
 void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled)
@@ -4262,6 +4322,25 @@ void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetIntrinsicSizeEnable");
 }
 
+void WebDelegate::UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isCssDisplayChangeEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetCssDisplayChangeEnabled(isCssDisplayChangeEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetCssDisplayChangeEnabled");
+}
+
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag)
 {
     auto context = context_.Upgrade();
@@ -4316,7 +4395,7 @@ void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline == nullptr) {
         return;
     }
@@ -6108,6 +6187,21 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
         TaskExecutor::TaskType::JS, "ArkUIWebWindowNewEvent");
 }
 
+void WebDelegate::OnActivateContent()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onActivateContentV2 = delegate->onActivateContentV2_;
+            if (onActivateContentV2) {
+                onActivateContentV2(std::make_shared<WebActivateContentEvent>());
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebActivateContent");
+}
+
 void WebDelegate::OnWindowExit()
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -6257,7 +6351,7 @@ void WebDelegate::OnAudioStateChanged(bool audible)
 
 void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchHandleHotZone> hotZone)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
@@ -6584,12 +6678,40 @@ bool WebDelegate::GetPendingSizeStatus()
     return false;
 }
 
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter)
+void WebDelegate::HandleAccessibilityHoverEvent(
+    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time)
 {
     ACE_DCHECK(nweb_ != nullptr);
-    if (nweb_) {
-        nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
+    CHECK_NULL_VOID(nweb_);
+    int32_t x = point.GetX();
+    int32_t y = point.GetY();
+    std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
+    for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
+        CHECK_NULL_CONTINUE(dataInfo);
+        auto embedInfo = dataInfo->GetNativeEmbedInfo();
+        CHECK_NULL_CONTINUE(embedInfo);
+        int embedX = embedInfo->GetX();
+        int embedY = embedInfo->GetY();
+        int embedWidth = embedInfo->GetWidth();
+        int embedHeight = embedInfo->GetHeight();
+        if (x >= embedX && y >= embedY && x <= embedX + embedWidth && y <= embedY + embedHeight) {
+            NG::PointF mutablePoint = point;
+            mutablePoint.SetX(x - embedX);
+            mutablePoint.SetY(y - embedY);
+            NG::HandleHoverEventParam param = { mutablePoint, source, eventType, time };
+            auto context = context_.Upgrade();
+            CHECK_NULL_VOID(context);
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+            CHECK_NULL_VOID(pipeline);
+            auto accessibilityManagerNG = pipeline->GetAccessibilityManagerNG();
+            CHECK_NULL_VOID(accessibilityManagerNG);
+            accessibilityManagerNG->HandleAccessibilityHoverEventBySurfaceId(dataInfo->GetSurfaceId(), param);
+            return;
+        }
     }
+    bool isHoverEnter = (eventType != NG::AccessibilityHoverEventType::EXIT);
+    nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
 }
 
 void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
@@ -6781,7 +6903,7 @@ Offset WebDelegate::GetWebRenderGlobalPos()
 
 Size WebDelegate::GetEnhanceSurfaceSize(const Size& drawSize)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, Size());
     double dipScale = pipeline->GetDipScale();
     if (NearZero(dipScale)) {
@@ -7125,6 +7247,7 @@ void WebDelegate::OnNativeEmbedAllDestory()
     if (!isEmbedModeEnabled_) {
         return;
     }
+    std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
     auto iter = embedDataInfo_.begin();
     for (; iter != embedDataInfo_.end(); iter++) {
         EmbedInfo info;
@@ -7151,6 +7274,47 @@ void WebDelegate::OnNativeEmbedAllDestory()
     embedDataInfo_.clear();
 }
 
+std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
+{
+    std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
+    for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
+        CHECK_NULL_CONTINUE(dataInfo);
+        auto embedInfo = dataInfo->GetNativeEmbedInfo();
+        if (embedInfo && embedInfo->GetId() == htmlElementId) {
+            std::string surfaceId = dataInfo->GetSurfaceId();
+            return surfaceId;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "GetSurfaceIdByHtmlElementId surfaceId is empty");
+    return "";
+}
+
+std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceId)
+{
+    std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
+    for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
+        CHECK_NULL_CONTINUE(dataInfo);
+        std::string surfaceIdInData = dataInfo->GetSurfaceId();
+        if (surfaceIdInData == surfaceId) {
+            auto embedInfo = dataInfo->GetNativeEmbedInfo();
+            CHECK_NULL_RETURN(embedInfo, "");
+            return embedInfo->GetId();
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "GetHtmlElementIdBySurfaceId html element id is empty");
+    return "";
+}
+
+int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
+{
+    CHECK_NULL_RETURN(nweb_, -1);
+    std::string htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
+    int64_t webAccessibilityId = nweb_->GetWebAccessibilityIdByHtmlElementId(htmlElementId);
+    return webAccessibilityId;
+}
+
 void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo)
 {
     if (!isEmbedModeEnabled_) {
@@ -7165,18 +7329,25 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         embedId = dataInfo->GetEmbedId();
         surfaceId = dataInfo->GetSurfaceId();
         status = static_cast<OHOS::Ace::NativeEmbedStatus>(dataInfo->GetStatus());
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto accessibilityManager = context->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
 
         auto embedInfo = dataInfo->GetNativeEmbedInfo();
         if (embedInfo) {
-            info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
-                embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
-                embedInfo->GetHeight(), embedInfo->GetX(), embedInfo->GetY(),
-                embedInfo->GetParams()};
+            info = { embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(), embedInfo->GetUrl(),
+                embedInfo->GetTag(), embedInfo->GetWidth(), embedInfo->GetHeight(), embedInfo->GetX(),
+                embedInfo->GetY(), embedInfo->GetParams() };
         }
 
         if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE) {
+            accessibilityManager->SetWebPatternBySurfaceId(surfaceId, webPattern_);
+            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
             embedDataInfo_.insert_or_assign(embedId, dataInfo);
         } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
+            accessibilityManager->RemoveWebPatternBySurfaceId(surfaceId);
+            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
             auto iter = embedDataInfo_.find(embedId);
             if (iter != embedDataInfo_.end()) {
                 embedDataInfo_.erase(iter);
@@ -7256,7 +7427,7 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
 
 void WebDelegate::SetToken()
 {
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
     CHECK_NULL_VOID(container);
     int32_t instanceId = container->GetInstanceId();
     auto window = Platform::AceContainer::GetUIWindow(instanceId);
@@ -7741,6 +7912,7 @@ std::string WebDelegate::GetSelectInfo() const
 
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {
+    std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
     auto iter = embedDataInfo_.find(embedId);
     if (iter != embedDataInfo_.end()) {
         std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;
@@ -8197,6 +8369,13 @@ void WebDelegate::RestoreRenderFit()
     webPattern->RestoreRenderFit();
 }
 
+bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
+}
+
 bool WebDelegate::IsNWebEx()
 {
     if (!nweb_) {
@@ -8254,5 +8433,27 @@ void WebDelegate::SendPipEvent(int delegate_id, int child_id, int frame_routing_
             delegate->nweb_->SendPipEvent(delegate_id, child_id, frame_routing_id, event);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSendPipEvent");
+}
+
+void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), condition]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::UpdateBypassVsyncCondition condition:%{public}d", condition);
+                    setting->SetBypassVsyncCondition(static_cast<int32_t>(condition));
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebBypassVsyncCondition");
 }
 } // namespace OHOS::Ace

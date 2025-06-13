@@ -355,7 +355,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             if (gestureHub->GetTextDraggable()) {
                 auto pattern = frameNode->GetPattern<TextBase>();
                 CHECK_NULL_VOID(pattern);
-                if (!pattern->IsSelected()) {
+                if (!pattern->IsSelected() && !pattern->CanAIEntityDrag()) {
                     dragDropManager->ResetDragging();
                     gestureHub->SetIsTextDraggable(false);
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Text is not selected, stop dragging.");
@@ -1534,6 +1534,14 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     if (renderContext) {
         textPixelMap_ = renderContext->GetThumbnailPixelMap();
     }
+    // ai长按预览菜单hovescale依赖dragNode节点截图
+    if (textBase->CanAIEntityDrag()) {
+        auto hub = dragNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto dragGestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(dragGestureHub);
+        dragGestureHub->SetPixelMap(textPixelMap_);
+    }
     modifier->StartFloatingAnimate();
     pattern->OnDragNodeFloating();
     pattern->CloseHandleAndSelect();
@@ -1563,13 +1571,15 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto removeColumnNode = [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern),
             weakEvent = gestureEventHub_, weakModifier = WeakPtr<TextDragOverlayModifier>(modifier)] {
         ContainerScope scope(id);
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
         if (!startDrag) {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pattern);
             auto modifier = weakModifier.Upgrade();
             CHECK_NULL_VOID(modifier);
             pattern->ShowHandles(modifier->IsHandlesShow());
         }
+        // 长按ai菜单预览回落时，执行弹出ai菜单操作
+        pattern->ShowAIEntityMenuForCancel();
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetOverlayManager();
@@ -1593,7 +1603,11 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetOverlayManager();
     auto dragNode = manager->GetPixelMapNode();
-    CHECK_NULL_VOID(dragNode);
+    if (!dragNode) {
+        // 长按ai菜单预览回落时，执行弹出ai菜单操作
+        pattern->ShowAIEntityMenuForCancel();
+        return;
+    }
     auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
     auto frameWidth = dragFrame.Width();
     auto frameHeight = dragFrame.Height();

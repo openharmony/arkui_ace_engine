@@ -21,6 +21,7 @@
 #define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/accessibility/accessibility_constants.h"
 #include "frameworks/core/accessibility/accessibility_manager_ng.h"
@@ -83,6 +84,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest001, TestSize.L
     AccessibilityManagerNG accessibilityManagerNg{};
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNode, nullptr);
+    auto& hoverState = accessibilityManagerNg.hoverStateManager_.GetHoverState(frameNode->GetAccessibilityId());
 
     MouseEvent mouseEvent;
     mouseEvent.button = MouseButton::LEFT_BUTTON;
@@ -101,23 +103,21 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest001, TestSize.L
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
     mouseEvent.action = MouseAction::PULL_UP;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
-    EXPECT_EQ(mouseEvent.action, MouseAction::PULL_UP);
-    accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
-    accessibilityManagerNg.hoverState_.idle = false;
+    hoverState.idle = false;
     mouseEvent.sourceType = SourceType::MOUSE;
     mouseEvent.action = MouseAction::MOVE;
     
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
-    accessibilityManagerNg.hoverState_.idle = true;
+    hoverState.idle = true;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
     TimeStamp time;
-    accessibilityManagerNg.hoverState_.time = time;
+    hoverState.time = time;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
 
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
     accessibilityManagerNg.HandleAccessibilityHoverEvent(nullptr, mouseEvent);
-    EXPECT_EQ(accessibilityManagerNg.hoverState_.source, SourceType::MOUSE);
+    EXPECT_EQ(hoverState.source, SourceType::MOUSE);
 }
 
 /**
@@ -130,6 +130,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest002, TestSize.L
     AccessibilityManagerNG accessibilityManagerNg{};
     auto frameNode = FrameNode::CreateFrameNode("main", NUMTWO, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNode, nullptr);
+    auto& hoverState = accessibilityManagerNg.hoverStateManager_.GetHoverState(frameNode->GetAccessibilityId());
 
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
 
@@ -146,7 +147,6 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest002, TestSize.L
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
     touchEvent.type = TouchType::HOVER_EXIT;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
-    EXPECT_EQ(touchEvent.type, TouchType::HOVER_EXIT);
     touchEvent.type = TouchType::UNKNOWN;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
     touchEvent.sourceType = SourceType::TOUCH;
@@ -154,12 +154,12 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest002, TestSize.L
     touchEvent.pointers.push_back(pointOne);
     touchEvent.pointers.push_back(pointTwo);
     touchEvent.type = TouchType::HOVER_ENTER;
-    accessibilityManagerNg.hoverState_.source = SourceType::TOUCH;
+    hoverState.source = SourceType::TOUCH;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
     touchEvent.SetPointers(POINTERS);
     touchEvent.pointers.push_back(pointOne);
     touchEvent.pointers.push_back(pointTwo);
-    accessibilityManagerNg.hoverState_.source = SourceType::NONE;
+    hoverState.source = SourceType::NONE;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
 
     touchEvent.sourceType = SourceType::NONE;
@@ -168,13 +168,12 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest002, TestSize.L
     touchEvent.type = TouchType::UNKNOWN;
     touchEvent.x = 100;
     touchEvent.y = 100;
-    accessibilityManagerNg.hoverState_.idle = false;
+    hoverState.idle = false;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
-    accessibilityManagerNg.hoverState_.idle = true;
+    hoverState.idle = true;
     touchEvent.sourceType = SourceType::TOUCH;
-    accessibilityManagerNg.hoverState_.source = SourceType::TOUCH;
+    hoverState.source = SourceType::TOUCH;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
-    EXPECT_EQ(touchEvent.type, TouchType::UNKNOWN);
     
     touchEvent.sourceType = SourceType::NONE;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
@@ -194,40 +193,41 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest003, TestSize.L
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
 
     ASSERT_NE(frameNode, nullptr);
+    auto& hoverState = accessibilityManagerNg.hoverStateManager_.GetHoverState(frameNode->GetAccessibilityId());
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y, SOURCETYPE, EVENTTYPE, TIMEMS);
 
-    accessibilityManagerNg.hoverState_.idle = false;
+    hoverState.idle = false;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y,
         SOURCETYPETWO, EVENTTYPE, TIMEMS);
-    EXPECT_EQ(accessibilityManagerNg.hoverState_.idle, false);
+    EXPECT_EQ(hoverState.idle, false);
     WeakPtr<FrameNode> nodesHovering1;
     WeakPtr<FrameNode> nodesHovering2;
-    accessibilityManagerNg.hoverState_.nodesHovering.push_back(nodesHovering1);
-    accessibilityManagerNg.hoverState_.nodesHovering.push_back(nodesHovering2);
-    accessibilityManagerNg.hoverState_.nodesHovering.push_back(frameNode);
+    hoverState.nodesHovering.push_back(nodesHovering1);
+    hoverState.nodesHovering.push_back(nodesHovering2);
+    hoverState.nodesHovering.push_back(frameNode);
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y,
         SOURCETYPETWO, EVENTTYPE, TIMEMS);
-    EXPECT_NE(accessibilityManagerNg.hoverState_.nodesHovering.size(), 0);
+    EXPECT_NE(hoverState.nodesHovering.size(), 0);
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y, -1, EVENTTYPE, TIMEMS);
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y, 99, EVENTTYPE, TIMEMS);
-    EXPECT_EQ(accessibilityManagerNg.hoverState_.idle, false);
+    EXPECT_EQ(hoverState.idle, false);
 
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
-    accessibilityManagerNg.hoverState_.idle = false;
+    hoverState.idle = false;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y,
         SOURCETYPETWO, EVENTTYPE, TIMEMS);
-    accessibilityManagerNg.hoverState_.idle = true;
-    accessibilityManagerNg.hoverState_.source = SourceType::NONE;
+    hoverState.idle = true;
+    hoverState.source = SourceType::NONE;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y,
         SOURCETYPETWO, EVENTTYPE, LARGETIMEMS);
-    accessibilityManagerNg.hoverState_.idle = true;
+    hoverState.idle = true;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y, 0, EVENTTYPE, TIMEMS);
 
     int32_t eventTypeEnter = static_cast<int32_t>(AccessibilityHoverEventType::ENTER);
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y, 0, eventTypeEnter, TIMEMS);
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y, SOURCETYPETWO, EVENTTYPE, TIMEMS);
     EXPECT_EQ(AceApplicationInfo::GetInstance().IsAccessibilityEnabled(), true);
-    accessibilityManagerNg.hoverState_.idle = true;
+    hoverState.idle = true;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(nullptr, POINT_X, POINT_Y, SOURCETYPETWO, EVENTTYPE, TIMEMS);
     EXPECT_EQ(AceApplicationInfo::GetInstance().IsAccessibilityEnabled(), true);
 }
@@ -274,7 +274,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     ASSERT_NE(endNode, nullptr);
     endNode->UpdateRecycleElmtId(NUMTWO);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(result, true);
 
     endNode->SetParent(frameNode);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);
@@ -297,19 +297,20 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest005, TestSize.L
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
+    auto& hoverState = accessibilityManagerNg.hoverStateManager_.GetHoverState(frameNode->GetAccessibilityId());
 
     // for lastNodesHovering
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
-    accessibilityManagerNg.hoverState_.idle = true;
+    hoverState.idle = true;
     WeakPtr<FrameNode> nodesHovering1;
     WeakPtr<FrameNode> nodesHovering2;
-    accessibilityManagerNg.hoverState_.nodesHovering.push_back(nodesHovering1);
-    accessibilityManagerNg.hoverState_.nodesHovering.push_back(nodesHovering2);
-    accessibilityManagerNg.hoverState_.nodesHovering.push_back(frameNode);
+    hoverState.nodesHovering.push_back(nodesHovering1);
+    hoverState.nodesHovering.push_back(nodesHovering2);
+    hoverState.nodesHovering.push_back(frameNode);
 
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y,
         SOURCETYPETWO, EVENTTYPE, TIMEMS);
-    EXPECT_EQ(accessibilityManagerNg.hoverState_.nodesHovering.size(), 0);
+    EXPECT_EQ(hoverState.nodesHovering.size(), 0);
 
     // for first judge
     TouchEvent touchEvent;
@@ -342,12 +343,13 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest006, TestSize.L
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
+    auto& hoverState = accessibilityManagerNg.hoverStateManager_.GetHoverState(frameNode->GetAccessibilityId());
 
     // pointers.size
     TouchEvent touchEvent;
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
 
-    accessibilityManagerNg.hoverState_.idle = true;
+    hoverState.idle = true;
     touchEvent.type = TouchType::HOVER_ENTER;
 
     touchEvent.pointers.clear();
@@ -368,13 +370,13 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest006, TestSize.L
 
     touchEvent.sourceType = SourceType::TOUCH;
 
-    accessibilityManagerNg.hoverState_.source = SourceType::TOUCH;
+    hoverState.source = SourceType::TOUCH;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
-    EXPECT_EQ(accessibilityManagerNg.hoverState_.idle, true);
+    EXPECT_EQ(hoverState.idle, true);
 
-    accessibilityManagerNg.hoverState_.source = SourceType::MOUSE;
+    hoverState.source = SourceType::MOUSE;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
-    EXPECT_EQ(accessibilityManagerNg.hoverState_.idle, false);
+    EXPECT_EQ(hoverState.idle, false);
 }
 
 /**
@@ -412,9 +414,10 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest008, TestSize.L
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
+    auto& hoverState = accessibilityManagerNg.hoverStateManager_.GetHoverState(frameNode->GetAccessibilityId());
 
-    accessibilityManagerNg.hoverState_.idle = false;
-    accessibilityManagerNg.hoverState_.nodesHovering.push_back(frameNode);
+    hoverState.idle = false;
+    hoverState.nodesHovering.push_back(frameNode);
 
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, POINT_X, POINT_Y,
@@ -444,7 +447,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest008, TestSize.L
     accessibilityManagerNg.HandleAccessibilityHoverEvent(nullptr, POINT_X, POINT_Y,
         SOURCETYPETWO, 99, TIMEMS_INTERVAL_HOVER);
 
-    EXPECT_NE(accessibilityManagerNg.hoverState_.nodesHovering.size(), 0);
+    EXPECT_NE(hoverState.nodesHovering.size(), 0);
 }
 
 /**
@@ -458,27 +461,29 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest009, TestSize.L
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
+    auto& hoverState = accessibilityManagerNg.hoverStateManager_.GetHoverState(frameNode->GetAccessibilityId());
 
     // hoverState source different and time is in MIN_SOURCE_CHANGE_GAP_MS
     TouchEvent touchEvent;
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
 
-    accessibilityManagerNg.hoverState_.idle = false;
+    hoverState.idle = false;
     touchEvent.type = TouchType::HOVER_ENTER;
 
     touchEvent.SetPointers(POINTERS);
 
     touchEvent.sourceType = SourceType::TOUCH;
-    accessibilityManagerNg.hoverState_.source = SourceType::MOUSE;
+    hoverState.source = SourceType::MOUSE;
     TimeStamp time((std::chrono::milliseconds(TIMEMS_DIFFERENT_HOVER_SOURCE)));
     touchEvent.time = time;
 
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
-    EXPECT_EQ(accessibilityManagerNg.hoverState_.idle, false);
+    EXPECT_EQ(hoverState.idle, false);
 
-    accessibilityManagerNg.hoverState_.eventType = AccessibilityHoverEventType::MOVE;
+    hoverState.eventType = AccessibilityHoverEventType::MOVE;
     auto ret = accessibilityManagerNg.IsEventTypeChangeDirectHandleHover(
-        AccessibilityHoverEventType::EXIT);
+        AccessibilityHoverEventType::EXIT,
+        AccessibilityHoverEventType::MOVE);
     EXPECT_TRUE(ret);
 }
 
@@ -771,6 +776,30 @@ HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter00
 }
 
 /**
+* @tc.name: AccessibilityHoverStateManager001
+* @tc.desc: Test GetHoverState and ResetHoverState func
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityHoverStateManager001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    AccessibilityHoverStateManager  manager;
+    auto& hoverState = manager.GetHoverState(frameNode->GetAccessibilityId());
+    EXPECT_EQ(manager.hoverStateMap_.size(), 1);
+
+    hoverState.idle = false;
+    auto& hoverStateNew = manager.GetHoverState(frameNode->GetAccessibilityId());
+    EXPECT_EQ(manager.hoverStateMap_.size(), 1);
+    EXPECT_FALSE(hoverStateNew.idle);
+
+    manager.ResetHoverState(hoverStateNew);
+    EXPECT_TRUE(hoverStateNew.idle);
+}
+
+/**
 * @tc.name: HandlePipelineAccessibilityHoverEnter001
 * @tc.desc: HandlePipelineAccessibilityHoverEnter
 * @tc.type: FUNC
@@ -797,5 +826,46 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandlePipelineAccessibilityHoverEnter001,
     // Case 4: Test with an invalid event type (default case)
     eventType = -1; // Invalid type
     manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
+}
+
+/**
+* @tc.name: HandleAccessibilityHoverEventBySurfaceId
+* @tc.desc: HandleAccessibilityHoverEventBySurfaceId001
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverEventBySurfaceId001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto pipe = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipe, nullptr);
+
+    auto exportNode = FrameNode::CreateFrameNode(
+        "exportNode",
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(exportNode, nullptr);
+    exportNode->context_ = AceType::RawPtr(pipe);
+
+    ElementRegister::GetInstance()->RegisterEmbedNode(1U, exportNode);
+
+    auto rootElement = pipe->GetRootElement();
+    ASSERT_NE(rootElement, nullptr);
+    rootElement->AddChild(exportNode);
+
+    AccessibilityManagerNG manager;
+    std::stringstream ss;
+    ss << 1U;
+    PointF point(POINT_X, POINT_Y);
+    TimeStamp time((std::chrono::milliseconds(TIMEMS_DIFFERENT_HOVER_SOURCE)));
+    HandleHoverEventParam param {
+        .point = point,
+        .time = time,
+        .sourceType = SourceType::MOUSE,
+        .eventType = AccessibilityHoverEventType::ENTER
+    };
+    auto ret = manager.HandleAccessibilityHoverEventBySurfaceId(ss.str(), param);
+    EXPECT_EQ(ret, HandleHoverRet::HOVER_FAIL);
+
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

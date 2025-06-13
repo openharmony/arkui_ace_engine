@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components/list/list_theme.h"
+
 
 namespace OHOS::Ace::NG {
 
@@ -154,29 +156,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
                                                  cacheParam.value().backwardCachedIndex;
         layoutAlgorithm->SetCacheParam(std::nullopt);
     }
-    if (lanes_ != layoutAlgorithm->GetLanes()) {
-        lanes_ = layoutAlgorithm->GetLanes();
-        ClearCachedItemPosition();
-    }
-    itemPosition_ = layoutAlgorithm->GetItemPosition();
-    cachedItemPosition_ = layoutAlgorithm->GetCachedItemPosition();
-    spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
-    axis_ = layoutAlgorithm->GetAxis();
-    layoutDirection_ = layoutAlgorithm->GetLayoutDirection();
-    mainSize_ = layoutAlgorithm->GetMainSize();
-    laneGutter_ = layoutAlgorithm->GetLaneGutter();
-    itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
-    itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
-    headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
-    footerMainSize_ = layoutAlgorithm->GetFooterMainSize();
-    layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
-    startHeaderPos_ = layoutAlgorithm->GetStartHeaderPos();
-    endFooterPos_ = layoutAlgorithm->GetEndFooterPos();
-    adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
-    adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
-    listContentSize_ = layoutAlgorithm->GetListContentSize();
-    prevMeasureBreak_ = layoutAlgorithm->MeasureInNextFrame();
-    layouted_ = true;
+    MappingPropertiesFromLayoutAlgorithm(layoutAlgorithm);
     CheckListDirectionInCardStyle();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -794,6 +774,36 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
     }
 }
 
+void ListItemGroupPattern::UpdateDefaultColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ListTheme>();
+    CHECK_NULL_VOID(theme);
+    auto listItemLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_VOID(listItemLayoutProperty);
+    if (!listItemLayoutProperty->HasDividerColorSetByUser() ||
+        (listItemLayoutProperty->HasDividerColorSetByUser() &&
+            !listItemLayoutProperty->GetDividerColorSetByUserValue())) {
+        V2::ItemDivider value;
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListItemGroupLayoutProperty, Divider, value, host, value);
+        value.color = theme->GetDividerColor();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, value, host);
+    }
+}
+
+void ListItemGroupPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    UpdateDefaultColor();
+    host->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
+}
+
 void ListItemGroupPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("itemStartIndex", itemStartIndex_);
@@ -879,11 +889,9 @@ void ListItemGroupPattern::AdjustMountTreeSequence(int32_t footerCount)
 {
     // Adjust the mount tree sequence to header, listitem, footer
     if (footerIndex_ >= 0 && footerIndex_ < itemStartIndex_) {
-        auto groupHost = GetHost();
-        CHECK_NULL_VOID(groupHost);
-        auto totalChildCount = groupHost->GetTotalChildCount();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto totalChildCount = host->GetTotalChildCount();
         auto childNode = host->GetChildAtIndex(itemStartIndex_);
         CHECK_NULL_VOID(childNode);
         auto endNode = host->GetChildAtIndex(footerIndex_);
@@ -1217,4 +1225,38 @@ bool ListItemGroupPattern::FindHeadOrTailChild(
     }
     return isFindTailOrHead;
 }
+bool ListItemGroupPattern::IsInViewport(int32_t index) const
+{
+    return index >= itemDisplayStartIndex_ && index <= itemDisplayEndIndex_;
+}
+
+void ListItemGroupPattern::MappingPropertiesFromLayoutAlgorithm(
+    const RefPtr<ListItemGroupLayoutAlgorithm>& layoutAlgorithm)
+{
+    CHECK_NULL_VOID(layoutAlgorithm);
+    if (lanes_ != layoutAlgorithm->GetLanes()) {
+        lanes_ = layoutAlgorithm->GetLanes();
+        ClearCachedItemPosition();
+    }
+    itemPosition_ = layoutAlgorithm->GetItemPosition();
+    cachedItemPosition_ = layoutAlgorithm->GetCachedItemPosition();
+    spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
+    axis_ = layoutAlgorithm->GetAxis();
+    layoutDirection_ = layoutAlgorithm->GetLayoutDirection();
+    mainSize_ = layoutAlgorithm->GetMainSize();
+    laneGutter_ = layoutAlgorithm->GetLaneGutter();
+    itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
+    itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
+    headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
+    footerMainSize_ = layoutAlgorithm->GetFooterMainSize();
+    layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
+    startHeaderPos_ = layoutAlgorithm->GetStartHeaderPos();
+    endFooterPos_ = layoutAlgorithm->GetEndFooterPos();
+    adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
+    adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
+    listContentSize_ = layoutAlgorithm->GetListContentSize();
+    prevMeasureBreak_ = layoutAlgorithm->MeasureInNextFrame();
+    layouted_ = true;
+}
+
 } // namespace OHOS::Ace::NG

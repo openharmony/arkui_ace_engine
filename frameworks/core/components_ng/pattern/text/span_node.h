@@ -302,6 +302,7 @@ public:
     int32_t selectedEnd = -1;
     bool needReLayoutParagraph = false;
     bool needReLayout = false;
+    bool hasAISpanResult = false;
     // used for Span uiNode
     bool needReCreateParagraph_ = true;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
@@ -314,6 +315,7 @@ public:
     bool CheckSpanNeedReCreate(int32_t index);
     void UpdateReLayoutTextStyle(
         TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol);
+    void UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const TextStyle& aiSpanStyle);
@@ -676,6 +678,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextVerticalAlign, TextVerticalAlign, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);

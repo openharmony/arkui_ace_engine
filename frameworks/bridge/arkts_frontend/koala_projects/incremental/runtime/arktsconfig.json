@@ -1,0 +1,17 @@
+{
+      "compilerOptions": {
+         "package": "@koalaui/runtime",
+          "outDir": "build/abc",
+          "baseUrl": "./src",
+          "paths": {
+              "@koalaui/common": ["../../common/src"],
+              "@koalaui/compat": ["../../compat/src/arkts"]
+          }
+      },
+      "include": ["./src/**/*.ts"],
+      "references": [
+        { "path": "../common" },
+        { "path": "../compat" }
+      ]
+
+}

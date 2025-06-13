@@ -301,7 +301,6 @@ public:
     RefPtr<LongPressRecognizer> GetLongPressRecognizer() const;
     void SetIsAllowMouse(bool isAllowMouse) const;
     const RefPtr<ClickEventActuator>& GetUserClickEventActuator();
-    int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const PreparedInfoForDrag& dragInfoData,
@@ -519,6 +518,7 @@ private:
     bool monopolizeEvents_ = false;
     float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
     bool isDragNewFwk_ = false;
+    bool isRestoreDrag_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/animation/mock_animation_manager.h"
 #include "water_flow_test_ng.h"
+// mock
+#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
@@ -161,6 +163,26 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SyncLoad001
+ * @tc.desc: test load items frame by frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, SyncLoad001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetSyncLoad(false);
+
+    CreateRandomWaterFlowItems(10);
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 1);
+}
+
+/**
  * @tc.name: UpdateCurrentOffset003
  * @tc.desc: Test the firstIndex and endIndex after UpdateCurrentOffset
  * @tc.type: FUNC
@@ -178,7 +200,7 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
     CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
     CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
-    pattern_->UpdateCurrentOffset(10000, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(500000, SCROLL_FROM_UPDATE);
     FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 0);
@@ -189,7 +211,7 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
      * @tc.expected: startIndex_ = TOTAL_LINE_NUMBER * 2 - 1, endIndex_ = TOTAL_LINE_NUMBER * 2 - 1.
      */
     pattern_->SetAnimateCanOverScroll(true);
-    pattern_->UpdateCurrentOffset(-99999, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-1000000, SCROLL_FROM_UPDATE);
     FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 19);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
@@ -366,18 +388,20 @@ HWTEST_F(WaterFlowTestNg, OverScroll001, TestSize.Level1)
     CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     auto info = pattern_->layoutInfo_;
-    for (int i = 0; i < 50; ++i) {
-        UpdateCurrentOffset(500.0f);
+    for (int i = 0; i < 100; ++i) {
+        UpdateCurrentOffset(20000.0f);
         EXPECT_EQ(info->startIndex_, 0);
         EXPECT_GT(info->Offset(), 0.0f);
     }
     EXPECT_GT(info->Offset(), 2500.0f);
-    UpdateCurrentOffset(-25500.0f);
+    for (int i = 0; i < 100; ++i) {
+        UpdateCurrentOffset(-20000.0f);
+    }
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 10);
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    for (int i = 0; i < 50; ++i) {
-        UpdateCurrentOffset(-200.0f);
+    for (int i = 0; i < 100; ++i) {
+        UpdateCurrentOffset(-250.0f);
         EXPECT_EQ(info->endIndex_, std::max(49, info->footerIndex_));
         EXPECT_EQ(info->BottomFinalPos(800.0f), -3050.0f);
     }
@@ -667,17 +691,17 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -31.505754);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -4.393693);
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -60.800022);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -8.668375);
 
     MockAnimationManager::GetInstance().TickByVelocity(-100.0f);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -160.80002);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -108.66837);
     // swipe in the opposite direction
     info.SetMainVelocity(1200.f);
     info.SetMainDelta(200.f);
@@ -685,16 +709,16 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -128.9174);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -107.31796);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.0f);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -96.869041);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -105.96754);
     MockAnimationManager::GetInstance().TickByVelocity(1000.0f);
     FlushUITasks();
-    EXPECT_TRUE(NearZero(GetChildY(frameNode_, 0)));
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 800);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 894.03247);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_TRUE(NearZero(GetChildY(frameNode_, 0)));

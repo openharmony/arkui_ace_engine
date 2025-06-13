@@ -137,8 +137,7 @@ void EventController::NotifyCacheEventsIfNeed(const UIEventClient& client) const
     BackgroundTaskExecutor::GetInstance().PostTask([events = cacheEvents_, client]() {
         for (const auto& event : events) {
             if (IsAllowNotify(client.config, event.category, event.eventType, event.eventParams)) {
-                std::unordered_map<std::string, std::string> params(*event.eventParams);
-                client.observer->NotifyUIEvent(event.eventType, params);
+                client.observer->NotifyUIEvent(event.eventType, event.eventParams);
             }
         }
     });
@@ -273,8 +272,7 @@ void EventController::NotifyEventSync(EventCategory category, int32_t eventType,
     std::shared_lock<std::shared_mutex> lock(cacheLock_);
     for (auto&& client : clientList_) {
         if (IsAllowNotify(client.config, category, eventType, eventParams)) {
-            std::unordered_map<std::string, std::string> params(*eventParams);
-            client.observer->NotifyUIEvent(eventType, params);
+            client.observer->NotifyUIEvent(eventType, eventParams);
         }
     }
 }

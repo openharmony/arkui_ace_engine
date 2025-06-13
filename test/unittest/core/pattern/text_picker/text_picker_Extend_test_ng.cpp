@@ -1197,15 +1197,16 @@ HWTEST_F(TextPickerExTestNg, PerformActionTest001, TestSize.Level1)
     columnPattern->SetAccessibilityAction();
 
     /**
-     * @tc.steps: step3. Get textPickerColumn accessibilityProperty to call callback function.
+     * @tc.steps: step3. Get blendNode accessibilityProperty to call callback function.
      * @tc.expected: Related function is called.
      */
-    auto accessibilityProperty = columnNode->GetAccessibilityProperty<AccessibilityProperty>();
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
 
     /**
-     * @tc.steps: step4. When textPickerColumn can not move, call the callback function in textPickerColumn
-     *                   accessibilityProperty.
+     * @tc.steps: step4. When textPickerColumn can not move, call the callback function in accessibilityProperty.
      * @tc.expected: Related function is called.
      */
     columnPattern->SetCurrentIndex(0);
@@ -1213,8 +1214,7 @@ HWTEST_F(TextPickerExTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
 
     /**
-     * @tc.steps: step5. When textPickerColumn can move, call the callback function in textPickerColumn
-     *                   accessibilityProperty.
+     * @tc.steps: step5. When textPickerColumn can move, call the callback function in accessibilityProperty.
      * @tc.expected: Related function is called.
      */
     for (int index = 0; index < INDEX_NUM; index++) {

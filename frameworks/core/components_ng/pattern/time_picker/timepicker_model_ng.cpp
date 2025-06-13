@@ -341,6 +341,10 @@ void TimePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(theme);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseDisappearTextStyleResObj(value);
+    }
     auto disappearStyle = theme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize,
@@ -367,6 +371,10 @@ void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(theme);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseNormalTextStyleResObj(value);
+    }
     auto normalStyle = theme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, ConvertFontScaleValue(value.fontSize.value()));
@@ -392,6 +400,10 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(theme);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseSelectedTextStyleResObj(value);
+    }
     auto selectedStyle = theme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize,
@@ -580,6 +592,9 @@ void TimePickerModelNG::SetDisappearTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseDisappearTextStyleResObj(value);
+    }
     auto disappearStyle = theme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -607,6 +622,9 @@ void TimePickerModelNG::SetNormalTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseNormalTextStyleResObj(value);
+    }
     auto normalStyle = theme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize,
@@ -628,6 +646,9 @@ void TimePickerModelNG::SetSelectedTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseSelectedTextStyleResObj(value);
+    }
     auto selectedStyle = theme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -918,10 +939,6 @@ void TimePickerModelNG::UpdateUserSetSelectColor()
 void TimePickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
     std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
-
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 

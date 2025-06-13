@@ -332,6 +332,7 @@ public:
     VisibleContentInfo GetStartListItemIndex();
     VisibleContentInfo GetEndListItemIndex();
     void ResetChildrenSize();
+    bool IsInViewport(int32_t index) const;
 
     void ClearItemPosition();
     void ClearCachedItemPosition();
@@ -361,6 +362,9 @@ public:
     {
         return footer_.Upgrade();
     }
+
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdateDefaultColor();
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -394,7 +398,8 @@ private:
     WeakPtr<FocusHub> FindNextValidFocus(int32_t moveStep, int32_t curIndexInGroup, int32_t curGroupIndexInList,
         int32_t nextIndexInGroup, const WeakPtr<FocusHub>& currentFocusNode);
     void AdjustMountTreeSequence(int32_t footerCount);
-    
+    void MappingPropertiesFromLayoutAlgorithm(const RefPtr<ListItemGroupLayoutAlgorithm>& layoutAlgorithm);
+
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;

@@ -25,155 +25,170 @@ extern "C" {
 
 ArkUI_KeyEventType OH_ArkUI_KeyEvent_GetType(const ArkUI_UIInputEvent *event)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
-        return static_cast<ArkUI_KeyEventType>(-1);
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeyEventType>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return static_cast<ArkUI_KeyEventType>(-1);
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeyEventType>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     auto result = static_cast<ArkUI_KeyEventType>(keyEvent->type);
-    return result;
+    RETURN_RET_WITH_STATUS_CHECK(result, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 int32_t OH_ArkUI_KeyEvent_GetKeyCode(const ArkUI_UIInputEvent *event)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
-        return -1;
+        RETURN_RET_WITH_STATUS_CHECK(-1, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return -1;
+        RETURN_RET_WITH_STATUS_CHECK(-1, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     auto result = static_cast<int32_t>(keyEvent->keyCode);
-    return result;
+    RETURN_RET_WITH_STATUS_CHECK(result, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 const char* OH_ArkUI_KeyEvent_GetKeyText(const ArkUI_UIInputEvent *event)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
-        return nullptr;
+        RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return nullptr;
+        RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    return keyEvent->keyText;
+    RETURN_RET_WITH_STATUS_CHECK(keyEvent->keyText, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 ArkUI_KeySourceType OH_ArkUI_KeyEvent_GetKeySource(const ArkUI_UIInputEvent *event)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
-        return static_cast<ArkUI_KeySourceType>(-1);
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeySourceType>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return static_cast<ArkUI_KeySourceType>(-1);
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeySourceType>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     auto result = static_cast<ArkUI_KeySourceType>(keyEvent->keySource);
-    return result;
+    RETURN_RET_WITH_STATUS_CHECK(result, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 void OH_ArkUI_KeyEvent_StopPropagation(const ArkUI_UIInputEvent *event, bool stopPropagation)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
-        return;
+        RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return;
+        RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     keyEvent->stopPropagation = stopPropagation;
+    RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 ArkUI_KeyIntension OH_ArkUI_KeyEvent_GetKeyIntensionCode(const ArkUI_UIInputEvent *event)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
-        return static_cast<ArkUI_KeyIntension>(-1);
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeyIntension>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return static_cast<ArkUI_KeyIntension>(-1);
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeyIntension>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     auto result = static_cast<ArkUI_KeyIntension>(keyEvent->intentionCode);
-    return result;
+    RETURN_RET_WITH_STATUS_CHECK(result, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 uint32_t OH_ArkUI_KeyEvent_GetUnicode(const ArkUI_UIInputEvent *event)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
-        return 0;
+        RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return 0;
+        RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     auto result = static_cast<uint32_t>(keyEvent->unicode);
-    return result;
+    RETURN_RET_WITH_STATUS_CHECK(result, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent *event, bool isConsumed)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_KEY_EVENT, event);
     if (!event) {
-        return;
+        RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return;
+        RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     keyEvent->isConsumed = isConsumed;
+    RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!node || !event) {
-        return;
+        RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return;
+        RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->dispatchKeyEvent(node->uiNodeHandle, keyEvent);
+    RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsNumLockOn(const ArkUI_UIInputEvent* event, bool* state)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event || !state) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     *state = keyEvent->isNumLockOn;
-    return ARKUI_ERROR_CODE_NO_ERROR;
+    RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsCapsLockOn(const ArkUI_UIInputEvent* event, bool* state)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event || !state) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     *state = keyEvent->isCapsLockOn;
-    return ARKUI_ERROR_CODE_NO_ERROR;
+    RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsScrollLockOn(const ArkUI_UIInputEvent* event, bool* state)
 {
+    CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event || !state) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     *state = keyEvent->isScrollLockOn;
-    return ARKUI_ERROR_CODE_NO_ERROR;
+    RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
 }
 #ifdef __cplusplus
 };

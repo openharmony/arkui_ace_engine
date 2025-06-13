@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/ohos_var.gni")
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
@@ -86,6 +87,9 @@ ohos_unittest("parse_test_ng") {
       "ACE_ENABLE_GPU",
       "NEW_SKIA",
     ]
+  }
+  if (use_new_skia) {
+    defines += [ "USE_NEW_SKIA" ]
   }
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -283,6 +287,10 @@ ohos_unittest("svg_context_test_ng") {
 
   defines = [ "USE_ROSEN_DRAWING" ]
 
+  if (use_new_skia) {
+    defines += [ "USE_NEW_SKIA" ]
+  }
+
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   external_deps = [
@@ -357,6 +365,10 @@ ohos_unittest("svg_node_test_ng") {
   ]
 
   defines = [ "USE_ROSEN_DRAWING" ]
+
+  if (use_new_skia) {
+    defines += [ "USE_NEW_SKIA" ]
+  }
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 

@@ -110,6 +110,7 @@ public:
     virtual void SetOnDrop(std::function<void(const RefPtr<DragEvent>&, const std::string&)>&& onDropId) = 0;
     virtual void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) = 0;
     virtual void SetWindowNewEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) = 0;
+    virtual void SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 
     virtual void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnable) = 0;
@@ -157,10 +158,12 @@ public:
     virtual void SetOnControllerAttached(std::function<void()>&& callback) {};
     virtual void NotifyPopupWindowResult(int32_t webId, bool result) {};
     virtual void SetAudioResumeInterval(int32_t resumeInterval) {};
+    virtual void SetAudioSessionType(WebAudioSessionType audioSessionType) {};
     virtual void SetAudioExclusive(bool audioExclusive) {};
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;
     virtual void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) = 0;
+    virtual void SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) = 0;
     virtual void RegisterNativeEmbedRule(const std::string&, const std::string&) = 0;
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
@@ -203,13 +206,16 @@ public:
     virtual void SetOverlayScrollbarEnabled(bool isEnabled) {};
     virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
     virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+                                    const NG::OnMenuItemClickCallback&& onMenuItemClick,
+                                    const NG::OnPrepareMenuCallback&& onPrepareMenuCallback = nullptr) {};
     virtual void SetEnabledHapticFeedback(bool isEnabled) {}
     virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
     virtual void SetWebMediaAVSessionEnabled(bool isEnabled) {};
     virtual void SetEnableDataDetector(bool isEnabled) {};
     virtual void SetDataDetectorConfig(const TextDetectConfig& config) {};
     virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
+    virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
+    virtual void SetDefaultBackgroundColor() {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

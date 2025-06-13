@@ -334,6 +334,13 @@ enum class TextAlign {
     END = 2,
 };
 
+enum class TextVerticalAlign {
+    BASELINE = 0,
+    BOTTOM = 1,
+    CENTER = 2,
+    TOP = 3,
+};
+
 namespace StringUtils {
 inline std::string ToString(const TextAlign& textAlign)
 {
@@ -346,6 +353,18 @@ inline std::string ToString(const TextAlign& textAlign)
         { TextAlign::RIGHT, "RIGHT" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), textAlign);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const TextVerticalAlign& textVerticalAlign)
+{
+    static const LinearEnumMapNode<TextVerticalAlign, std::string> table[] = {
+        { TextVerticalAlign::BASELINE, "BASELINE" },
+        { TextVerticalAlign::BOTTOM, "BOTTOM" },
+        { TextVerticalAlign::CENTER, "CENTER" },
+        { TextVerticalAlign::TOP, "TOP" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textVerticalAlign);
     return iter != -1 ? table[iter].value : "";
 }
 } // namespace StringUtils
@@ -544,6 +563,22 @@ enum class KeyboardAppearance {
     IMMERSIVE = 1,
     LIGHT_IMMERSIVE = 2,
     DARK_IMMERSIVE = 3
+};
+
+enum class TextChangeReason {
+    UNKNOWN = 0,
+    INPUT = 1,
+    PASTE = 2,
+    CUT = 3,
+    DRAG = 4,
+    AUTO_FILL = 5,
+    AI_WRITE = 6,
+    REDO = 7,
+    UNDO = 8,
+    CONTROLLER = 9,
+    ACCESSIBILITY = 10,
+    COLLABORATION = 11,
+    STYLUS = 12
 };
 
 namespace StringUtils {
@@ -869,6 +904,7 @@ enum class VerticalAlign {
     CENTER,
     BOTTOM,
     BASELINE,
+    FOLLOW_PARAGRAPH,
     NONE,
 };
 

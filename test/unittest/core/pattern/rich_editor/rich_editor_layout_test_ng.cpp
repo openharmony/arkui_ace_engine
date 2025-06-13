@@ -363,8 +363,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy001, TestSize.Le
     layoutProperty->calcLayoutConstraint_->minSize = CalcSize{ CalcLength(MIN_WIDTH), CalcLength(MIN_HEIGHT) };
     layoutProperty->calcLayoutConstraint_->maxSize = CalcSize{ CalcLength(MAX_WIDTH), CalcLength(MAX_HEIGHT) };
     layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
-    EXPECT_EQ(frameSize.Width(), static_cast<float>(MAX_WIDTH.ConvertToPx()));
-    EXPECT_EQ(frameSize.Height(), static_cast<float>(MAX_HEIGHT.ConvertToPx()));
+    EXPECT_EQ(frameSize, CONTAINER_SIZE);
 }
 
 /**
@@ -507,5 +506,40 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateMaxSizeByLayoutPolicy, TestSize.Level1)
     EXPECT_EQ(maxSize.Width(), std::numeric_limits<float>::max());
 }
 
+/**
+ * @tc.name: HandleAISpanTest001
+ * @tc.desc: test HandleAISpanTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, HandleAISpanTest001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    std::list<RefPtr<SpanItem>> spans;
+    auto spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem1->rangeStart = 0;
+    spanItem1->position = 5;
+
+    auto spanItem2 = AceType::MakeRefPtr<SpanItem>();
+    spanItem2->rangeStart = 5;
+    spanItem2->position = 10;
+
+    auto spanItem3 = AceType::MakeRefPtr<SpanItem>();
+    spanItem3->rangeStart = 10;
+    spanItem3->position = 15;
+
+    spans.push_back(spanItem1);
+    spans.push_back(spanItem2);
+    spans.push_back(spanItem3);
+
+    std::map<int32_t, AISpan> aiSpanMap = { { 8, { 8, 12 } } };
+    layoutAlgorithm->HandleAISpan(spans, aiSpanMap);
+    EXPECT_EQ(spanItem1->hasAISpanResult, false);
+    EXPECT_EQ(spanItem2->hasAISpanResult, true);
+    EXPECT_EQ(spanItem3->hasAISpanResult, true);
+}
 
 } // namespace OHOS::Ace::NG

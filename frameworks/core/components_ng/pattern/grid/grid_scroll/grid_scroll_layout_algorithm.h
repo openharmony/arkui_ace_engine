@@ -185,9 +185,9 @@ private:
 
     bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
 
-    bool IsIrregularLine(int32_t lineIndex) const override;
-
     void ResetOffsetWhenHeightChanged();
+
+    bool IsIrregularLine(int32_t lineIndex) const override;
 
     void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
 
@@ -227,6 +227,8 @@ private:
 
     virtual void PreloadItems(LayoutWrapper* layoutWrapper);
 
+    void ClearUnlayoutedItems(LayoutWrapper* layoutWrapper);
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -242,6 +244,7 @@ protected:
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     std::list<GridPreloadItem> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
+    std::set<int32_t> measuredItems_;
 
 private:
     /**

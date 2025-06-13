@@ -118,6 +118,25 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional
     return true;
 }
 
+bool SafeAreaManager::UpdateKeyboardWebSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
+{
+    uint32_t bottom;
+    auto container = Container::Current();
+    if (container && systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
+        bottom = systemSafeArea_.bottom_.start;
+        ACE_SCOPED_TRACE("calc keyboardWebRect use systemSafeArea_.bottom_");
+    } else {
+        bottom = rootHeight.has_value() ? rootHeight.value() : PipelineContext::GetCurrentRootHeight();
+    }
+    SafeAreaInsets::Inset inset = { .start = bottom - keyboardHeight, .end = bottom };
+    if (inset == keyboardWebInset_) {
+        return false;
+    }
+    keyboardWebInset_ = inset;
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateKeyboardWebSafeArea %s", inset.ToString().c_str());
+    return true;
+}
+
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
@@ -186,7 +205,7 @@ bool SafeAreaManager::SetIsFullScreen(bool value)
         return false;
     }
     isFullScreen_ = value;
-    TAG_LOGI(ACE_LAYOUT, "SetIsFullScreen %{public}d", isFullScreen_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetIsFullScreen %{public}d", isFullScreen_);
     return true;
 }
 
@@ -196,7 +215,7 @@ bool SafeAreaManager::SetIsNeedAvoidWindow(bool value)
         return false;
     }
     isNeedAvoidWindow_ = value;
-    TAG_LOGI(ACE_LAYOUT, "SetIsNeedAvoidWindow %{public}d", isNeedAvoidWindow_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetIsNeedAvoidWindow %{public}d", isNeedAvoidWindow_);
     return true;
 }
 
@@ -206,7 +225,7 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
         return false;
     }
     ignoreSafeArea_ = value;
-    TAG_LOGI(ACE_LAYOUT, "SetIgnoreSafeArea %{public}d", ignoreSafeArea_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetIgnoreSafeArea %{public}d", ignoreSafeArea_);
     return true;
 }
 
@@ -221,7 +240,7 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(KeyBoardAvoidMode value)
     keyboardAvoidMode_ = value;
     keyboardSafeAreaEnabled_ = keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE
         || keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET;
-    TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardAvoidMode_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetKeyBoardAvoidMode %{public}d", keyboardAvoidMode_);
     return true;
 }
 
@@ -236,7 +255,7 @@ bool SafeAreaManager::SetIsAtomicService(bool value)
         return false;
     }
     isAtomicService_ = value;
-    TAG_LOGI(ACE_LAYOUT, "SetIsAtomicService %{public}d", isAtomicService_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetIsAtomicService %{public}d", isAtomicService_);
     return true;
 }
 
@@ -338,7 +357,7 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess, LayoutS
             auto bottomLength = GetSafeArea().bottom_.Length();
             auto distance = bottomLength - GetKeyboardOffset(withoutProcess);
             if (GreatNotEqual(keyboardHeight, 0.0f) && distance <= keyboardHeight) {
-                combinedSafeArea = combinedSafeArea.Combine(navSafeArea_);
+                combinedSafeArea.bottom_ = GetSafeArea().bottom_;
             }
         }
     }

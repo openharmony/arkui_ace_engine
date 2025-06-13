@@ -19,6 +19,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
+#include "interfaces/napi/kits/observer/gesture/gesture_observer.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 
@@ -1615,6 +1616,7 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     };
     NAPI_CALL(
         env, napi_define_properties(env, exports, sizeof(uiObserverDesc) / sizeof(uiObserverDesc[0]), uiObserverDesc));
+    NAPI_CALL(env, GestureObserver::DefineGestureObserver(env, exports));
     return exports;
 }
 

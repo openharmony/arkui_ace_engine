@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "ui/base/utils/utils.h"
+
+#include "base/log/dump_log.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -24,7 +27,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -854,15 +856,14 @@ void ProgressPattern::ReportProgressEvent()
     auto progressPaintProperty = host->GetPaintProperty<NG::ProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     auto value = progressPaintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
-    if (!progressPaintProperty->GetMaxValue().has_value()){
+    if (!progressPaintProperty->GetMaxValue().has_value()) {
         return;
     }
     auto maxValue = progressPaintProperty->GetMaxValue().value();
-    if (value >= maxValue) {
+    if (LessOrEqual(maxValue, value) && LessNotEqual(reportLastValue_, maxValue)) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress");
-        TAG_LOGI(AceLogTag::ACE_PROGRESS, "nodeId:[%{public}d] Progress reportComponentChangeEvent onProgress",
-            GetHost()->GetId());
     }
+    reportLastValue_ = value;
 }
 
 void ProgressPattern::UpdateColor(const Color& color, bool isFirstLoad)

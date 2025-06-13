@@ -36,7 +36,7 @@ namespace OHOS::Ace::Framework {
 bool JSSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
     SaveButtonSaveDescription& text, SaveButtonIconStyle& icon, int32_t& bg)
 {
-    if (!info[0]->IsObject()) {
+    if ((info.Length() < 1) || (!info[0]->IsObject())) {
         return false;
     }
 
@@ -143,7 +143,7 @@ void JsSaveButtonClickFunction::Execute(GestureEvent& info)
 
 void JSSaveButton::JsOnClick(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
+    if ((info.Length() < 1) || (!info[0]->IsFunction())) {
         return;
     }
     auto jsOnClickFunc = AceType::MakeRefPtr<JsSaveButtonClickFunction>(JSRef<JSFunc>::Cast(info[0]));

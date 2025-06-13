@@ -550,7 +550,7 @@ public:
     AllSslErrorResult() = default;
     ~AllSslErrorResult() = default;
     virtual void HandleConfirm() = 0;
-    virtual void HandleCancel() = 0;
+    virtual void HandleCancel(bool abortLoading) = 0;
 };
 
 class ACE_EXPORT WebAllSslErrorEvent : public BaseEventInfo {
@@ -572,6 +572,23 @@ public:
                                                 referrer_(referrer),
                                                 isFatalError_(isFatalError),
                                                 isMainFrame_(isMainFrame) {}
+    WebAllSslErrorEvent(const RefPtr<AllSslErrorResult>& result,
+                        int32_t error,
+                        const std::string& url,
+                        const std::string& originalUrl,
+                        const std::string& referrer,
+                        bool isFatalError,
+                        bool isMainFrame,
+                        const std::vector<std::string>& certChainData
+    )
+        : BaseEventInfo("WebAllSslErrorEvent"), result_(result),
+                                                error_(error),
+                                                url_(url),
+                                                originalUrl_(originalUrl),
+                                                referrer_(referrer),
+                                                isFatalError_(isFatalError),
+                                                isMainFrame_(isMainFrame),
+                                                certChainData_(certChainData) {}
     ~WebAllSslErrorEvent() = default;
 
     const RefPtr<AllSslErrorResult>& GetResult() const
@@ -609,6 +626,11 @@ public:
         return isMainFrame_;
     }
 
+    const std::vector<std::string>& GetCertChainData() const
+    {
+        return certChainData_;
+    }
+
 private:
     RefPtr<AllSslErrorResult> result_;
     int32_t error_;
@@ -617,6 +639,7 @@ private:
     const std::string& referrer_;
     bool isFatalError_;
     bool isMainFrame_;
+    std::vector<std::string> certChainData_;
 };
 
 class ACE_EXPORT SslSelectCertResult : public AceType {
@@ -1407,6 +1430,9 @@ public:
     virtual void Paste() const = 0;
     virtual void Cut() const = 0;
     virtual void SelectAll() const = 0;
+    virtual void Undo() const = 0;
+    virtual void Redo() const = 0;
+    virtual void PasteAndMatchStyle() const = 0;
 };
 
 class ACE_EXPORT ContextMenuEvent : public BaseEventInfo {
@@ -1505,6 +1531,14 @@ class ACE_EXPORT WebWindowExitEvent : public BaseEventInfo {
 public:
     WebWindowExitEvent() : BaseEventInfo("WebWindowExitEvent") {}
     ~WebWindowExitEvent() = default;
+};
+
+class ACE_EXPORT WebActivateContentEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebActivateContentEvent, BaseEventInfo);
+
+public:
+    WebActivateContentEvent() : BaseEventInfo("WebActivateContentEvent") {}
+    ~WebActivateContentEvent() = default;
 };
 
 class ACE_EXPORT PageVisibleEvent : public BaseEventInfo {

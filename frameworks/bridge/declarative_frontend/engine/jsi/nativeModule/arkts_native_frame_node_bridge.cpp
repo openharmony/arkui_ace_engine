@@ -69,10 +69,10 @@ bool CheckAnimationPropertyLength(AnimationPropertyType type, size_t size, bool 
         return true;
     }
     const static std::unordered_map<AnimationPropertyType, std::pair<size_t, const char*>> requiredLength = {
-        { AnimationPropertyType::ROTATION, { 3, "rotation" } },
-        { AnimationPropertyType::TRANSLATION, { 2, "translation" } },
-        { AnimationPropertyType::SCALE, { 2, "scale" } },
-        { AnimationPropertyType::OPACITY, { 1, "opacity" } },
+        { AnimationPropertyType::ROTATION, { ROTATION_PARAM_SIZE, "rotation" } },
+        { AnimationPropertyType::TRANSLATION, { TRANSLATION_PARAM_SIZE, "translation" } },
+        { AnimationPropertyType::SCALE, { SCALE_PARAM_SIZE, "scale" } },
+        { AnimationPropertyType::OPACITY, { OPACITY_PARAM_SIZE, "opacity" } },
     };
     auto iter = requiredLength.find(type);
     if (iter == requiredLength.end()) {
@@ -2293,7 +2293,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetNodePropertyValue(ArkUIRuntimeCallInf
     panda::Local<panda::JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     if (nodeArg.IsNull()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::getNodePropertyValue, node is null");
-        return panda::BooleanRef::New(vm, false);
+        return panda::ArrayRef::New(vm, 0);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);

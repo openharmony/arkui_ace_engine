@@ -1640,21 +1640,105 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest002, TestSize.Level1)
 HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1.The FrameNode is null, related function is called.
+     * @tc.steps: step1.Test backgroundColor.
      */
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
-    std::string bundleName = "";
-    std::string moduleName = "";
-    ViewAbstract::SetBackgroundColorWithResourceObj(resourceObject);
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
+    ViewAbstract::SetBackgroundColorWithResourceObj(BLUE, resourceObject);
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::pipeline_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::SetUp();
+    ViewAbstract::SetBackgroundColorWithResourceObj(BLUE, nullptr);
+    EXPECT_TRUE(resMap.find("backgroundColor") == resMap.end());
     ViewAbstract::SetBackgroundColor(nullptr, BLUE, resourceObject);
-    ViewAbstract::SetBackgroundImageWithResourceObj(resourceObject, bundleName, moduleName);
-    ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo, resourceObject);
-    ViewAbstract::SetCustomBackgroundColorWithResourceObj(resourceObject);
-    ViewAbstract::SetCustomBackgroundColor(BLUE);
 
     /**
      * @tc.expected: Return expected results..
      */
     EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+}
+ 
+/**
+ * @tc.name: BackgroundResourceTest002
+ * @tc.desc: Test SetBackgroundImageWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test SetBackgroundImageWithResourceObj.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
+    ViewAbstract::SetBackgroundImageWithResourceObj(resourceObject, imageSourceInfo);
+    auto pipeline = frameNode->GetContext();
+    EXPECT_TRUE(pipeline);
+    pipeline->SetIsFormRender(true);
+    pattern->resourceMgr_->ReloadResources();
+    pipeline->SetIsFormRender(false);
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::pipeline_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    frameNode->renderContext_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::SetUp();
+    frameNode->renderContext_ = RenderContext::Create();
+    ViewAbstract::SetBackgroundImageWithResourceObj(nullptr, imageSourceInfo);
+    EXPECT_TRUE(resMap.find("backgroundImageSrc") == resMap.end());
+    ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo, resourceObject);
+
+    /**
+     * @tc.expected: Return expected results..
+     */
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+}
+
+/**
+ * @tc.name: BackgroundResourceTest003
+ * @tc.desc: Test SetBackgroundImageSizeUpdateFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test SetBackgroundImageSizeUpdateFunc.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    ASSERT_NE(instance, nullptr);
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, resourceObject, "");
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, resourceObject, "width");
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, resourceObject, "height");
+    pattern->resourceMgr_->ReloadResources();
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, nullptr, "width");
+    EXPECT_TRUE(resMap.find("backgroundImageSizeWidth") == resMap.end());
 }
 } // namespace OHOS::Ace::NG

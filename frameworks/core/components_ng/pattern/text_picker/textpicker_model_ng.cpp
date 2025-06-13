@@ -351,6 +351,10 @@ void TextPickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerT
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseDisappearTextStyleResObj(value);
+    }
+
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontSize,
@@ -377,6 +381,10 @@ void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerThem
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseNormalTextStyleResObj(value);
+    }
+
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize,
@@ -403,6 +411,10 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseSelectedTextStyleResObj(value);
+    }
+
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize,
@@ -427,6 +439,9 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
 void TextPickerModelNG::SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value)
 {
     CHECK_NULL_VOID(textTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseDefaultTextStyleResObj(value);
+    }
     auto textStyle = textTheme->GetTextStyle();
 
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -972,6 +987,10 @@ void TextPickerModelNG::SetNormalTextStyle(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseNormalTextStyleResObj(value);
+    }
+
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize,
@@ -995,6 +1014,10 @@ void TextPickerModelNG::SetSelectedTextStyle(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseSelectedTextStyleResObj(value);
+    }
+
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -1024,6 +1047,9 @@ void TextPickerModelNG::SetDisappearTextStyle(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseDisappearTextStyleResObj(value);
+    }
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -1268,6 +1294,10 @@ void TextPickerModelNG::SetDefaultTextStyle(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(textTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseDefaultTextStyleResObj(value);
+    }
+
     auto textStyle = textTheme->GetTextStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontSize,
@@ -1320,6 +1350,7 @@ void TextPickerModelNG::SetDivider(const ItemDivider& divider)
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
+    ParseDividerResObj(frameNode, divider);
     textPickerPattern->SetDivider(divider);
     textPickerPattern->SetCustomDividerFlag(true);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider);
@@ -1330,6 +1361,7 @@ void TextPickerModelNG::SetDivider(FrameNode* frameNode, const ItemDivider& divi
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
+    ParseDividerResObj(frameNode, divider);
     textPickerPattern->SetDivider(divider);
     textPickerPattern->SetCustomDividerFlag(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider, frameNode);
@@ -1543,6 +1575,17 @@ void TextPickerModelNG::ParseGradientHeight(const RefPtr<ResourceObject>& resObj
     CHECK_NULL_VOID(resObj);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ParseGradientHeight(frameNode, resObj);
+}
+
+void TextPickerModelNG::ParseGradientHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
 
@@ -1559,14 +1602,17 @@ void TextPickerModelNG::ParseGradientHeight(const RefPtr<ResourceObject>& resObj
     textPickerPattern->AddResObj("textPicker.gradientHeight", resObj, std::move(updateFunc));
 }
 
-void TextPickerModelNG::ParseDividerResObj()
+void TextPickerModelNG::ParseDividerResObj(FrameNode* frameNode, const NG::ItemDivider& divider)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
 
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [frameNode, divider](const RefPtr<ResourceObject>& resObj) {
         auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
         CHECK_NULL_VOID(textPickerPattern);
         auto context = frameNode->GetContext();
@@ -1574,8 +1620,7 @@ void TextPickerModelNG::ParseDividerResObj()
         auto pickerTheme = context->GetTheme<PickerTheme>();
         CHECK_NULL_VOID(pickerTheme);
 
-        ItemDivider curDivider = textPickerPattern->GetDivider();
-
+        NG::ItemDivider& curDivider = const_cast<NG::ItemDivider&>(divider);
         CalcDimension strokeWidth = pickerTheme->GetDividerThickness();
         curDivider.strokeWidth = strokeWidth;
         if (curDivider.strokeWidthResObj &&
@@ -1615,10 +1660,6 @@ void TextPickerModelNG::ParseDividerResObj()
 void TextPickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
     std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
-
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
@@ -1709,7 +1750,7 @@ void TextPickerModelNG::ParseDefaultTextStyleResObj(const PickerTextStyle& textS
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
-    auto&& updateFunc = [this, textStyleOpt, frameNode](const RefPtr<ResourceObject> resObj) {
+    auto&& updateFunc = [textStyleOpt, frameNode](const RefPtr<ResourceObject> resObj) {
         PickerTextStyle textStyle;
         auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
         CHECK_NULL_VOID(pickerPattern);
@@ -1908,6 +1949,18 @@ void TextPickerModelNG::ParseCascadeResourceObj(const std::vector<NG::TextCascad
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     textPickerPattern->AddResObj("TextPicker.CascadeRange", resObj, std::move(updateFunc));
+}
+
+void TextPickerModelNG::TextPickerRemoveResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->RemoveResObj(key);
 }
 
 } // namespace OHOS::Ace::NG

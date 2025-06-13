@@ -754,8 +754,9 @@ HWTEST_F(TextTestTwoNg, ShowSelectOverlay004, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
-    pattern->selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
-
+    OnPrepareMenuCallback onPrepareMenuCallback;
+    pattern->selectOverlay_->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
     /**
      * @tc.steps: step2. call ShowSelectOverlay function
      * @tc.expected: the property of selectInfo is assigned.

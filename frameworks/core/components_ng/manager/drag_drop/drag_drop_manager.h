@@ -33,6 +33,10 @@ namespace OHOS::Ace {
 class UnifiedData;
 class GridColumnInfo;
 }
+namespace OHOS::Rosen {
+class RSSyncTransactionController;
+class RSSyncTransactionHandler;
+} // namespace OHOS::Rosen
 namespace OHOS::Ace::NG {
 class DragDropSpringLoadingDetector;
 enum class DragDropMgrState : int32_t {
@@ -725,7 +729,7 @@ private:
     bool isTimeLimited(const DragPointerEvent& pointerEvent, const Point& point);
     bool ReachMoveLimit(const DragPointerEvent& pointerEvent, const Point& point);
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
-    bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
+    bool IsUIExtensionOrDynamicComponent(const RefPtr<NG::UINode>& node);
     void HandleUIExtensionDragEvent(
         const RefPtr<FrameNode>& frameNode, const DragPointerEvent& pointerEvent, DragEventType type);
     int32_t GetWindowId();
@@ -739,6 +743,9 @@ private:
         DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
     void NotifyDragSpringLoadingMove(const RefPtr<FrameNode>& dragFrameNode, const std::string& extraInfo);
     void NotifyDragSpringLoadingIntercept(std::string_view extraParams);
+    void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
+        std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
+        const RefPtr<NG::PipelineContext>& pipeline);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;

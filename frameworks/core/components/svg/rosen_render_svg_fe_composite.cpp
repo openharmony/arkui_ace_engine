@@ -17,23 +17,13 @@
 
 namespace OHOS::Ace {
 
-#ifndef USE_ROSEN_DRAWING
-void RosenRenderSvgFeComposite::OnAsImageFilter(const sk_sp<SkImageFilter>& backImageFilter,
-    const sk_sp<SkImageFilter>& foreImageFilter, sk_sp<SkImageFilter>& imageFilter) const
-#else
 void RosenRenderSvgFeComposite::OnAsImageFilter(const std::shared_ptr<RSImageFilter>& backImageFilter,
     const std::shared_ptr<RSImageFilter>& foreImageFilter, std::shared_ptr<RSImageFilter>& imageFilter) const
-#endif
 {
     if (operatorType_ == FeOperatorType::FE_ARITHMETIC) {
-#ifndef USE_ROSEN_DRAWING
-
-        imageFilter = SkImageFilters::Arithmetic(k1_, k2_, k3_, k4_, true, backImageFilter, foreImageFilter, nullptr);
-#else // USE_ROSEN_DRAWING
         std::vector<RSScalar> coefficients { k1_, k2_, k3_, k4_ };
         imageFilter =
             RSRecordingImageFilter::CreateArithmeticImageFilter(coefficients, true, backImageFilter, foreImageFilter);
-#endif
     }
 }
 

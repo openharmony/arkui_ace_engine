@@ -498,14 +498,24 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextOverflow, TextOverflow);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextAlign, TextAlign);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextVerticalAlign, ParagraphVerticalAlign);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, MaxLines, MaxLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, WordBreak, WordBreak);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, EllipsisMode, EllipsisMode);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
-    auto gradient = textStyle.GetGradient();
-    spanTextStyle.SetGradient(gradient);
+    UpdateReLayoutGradient(spanTextStyle, textStyle);
+}
+
+void SpanItem::UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle)
+{
+    if (textStyle.GetGradient().has_value()) {
+        auto gradient = textStyle.GetGradient();
+        spanTextStyle.SetGradient(gradient);
+    } else {
+        spanTextStyle.SetGradient(std::nullopt);
+    }
 }
 
 bool SpanItem::UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle)
@@ -824,6 +834,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
     COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
     COPY_TEXT_STYLE(textLineStyle, TextAlign, UpdateTextAlign);
+    COPY_TEXT_STYLE(textLineStyle, TextVerticalAlign, UpdateTextVerticalAlign);
     COPY_TEXT_STYLE(textLineStyle, MaxLength, UpdateMaxLength);
     COPY_TEXT_STYLE(textLineStyle, MaxLines, UpdateMaxLines);
     COPY_TEXT_STYLE(textLineStyle, HeightAdaptivePolicy, UpdateHeightAdaptivePolicy);
@@ -974,6 +985,8 @@ void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(textLineStyle, LineBreakStrategy, TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy,
         LineBreakStrategy);
     WRITE_TLV_INHERIT(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode, EllipsisMode);
+    WRITE_TLV_INHERIT(textLineStyle, TextVerticalAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN, TextVerticalAlign,
+        ParagraphVerticalAlign);
 }
 
 RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor)
@@ -1032,6 +1045,8 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineBreakStrategy,
                 TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateEllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextVerticalAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN,
+                TextVerticalAlign);
 
             case TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR: {
                 if (!sameSpan->backgroundStyle.has_value()) {
@@ -1059,6 +1074,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
                     pipelineContext->HyperlinkStartAbility(address);
                 };
                 sameSpan->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+                break;
             }
             default:
                 break;
@@ -1068,6 +1084,9 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
         sameSpan->textLineStyle->ResetParagraphSpacing();
         sameSpan->urlAddress = std::nullopt;
         sameSpan->urlOnRelease = nullptr;
+    }
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        sameSpan->textLineStyle->ResetTextVerticalAlign();
     }
     return sameSpan;
 }
@@ -1211,6 +1230,9 @@ bool ImageSpanItem::UpdatePlaceholderRun(PlaceholderStyle placeholderStyle)
                 break;
             case VerticalAlign::BASELINE:
                 run.alignment = PlaceholderAlignment::ABOVEBASELINE;
+                break;
+            case VerticalAlign::FOLLOW_PARAGRAPH:
+                run.alignment = PlaceholderAlignment::FOLLOW_PARAGRAPH;
                 break;
             default:
                 run.alignment = PlaceholderAlignment::BOTTOM;
@@ -1534,6 +1556,7 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TextOverflow", StringUtils::ToString(textStyle->GetTextOverflow()).c_str());
     json->Put("VerticalAlign", StringUtils::ToString(textStyle->GetTextVerticalAlign()).c_str());
     json->Put("TextAlign", StringUtils::ToString(textStyle->GetTextAlign()).c_str());
+    json->Put("TextVerticalAlign", StringUtils::ToString(textStyle->GetParagraphVerticalAlign()).c_str());
     json->Put("WordBreak", StringUtils::ToString(textStyle->GetWordBreak()).c_str());
     json->Put("TextCase", StringUtils::ToString(textStyle->GetTextCase()).c_str());
     json->Put("EllipsisMode", StringUtils::ToString(textStyle->GetEllipsisMode()).c_str());
@@ -1545,5 +1568,6 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("SymbolEffect",
             spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
     }
+    json->Put("LineThicknessScale", std::to_string(textStyle->GetLineThicknessScale()).c_str());
 }
 } // namespace OHOS::Ace::NG

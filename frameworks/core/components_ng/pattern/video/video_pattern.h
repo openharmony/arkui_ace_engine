@@ -46,6 +46,11 @@ public:
     explicit VideoPattern(const RefPtr<VideoControllerV2>& videoController);
     ~VideoPattern() override;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<VideoEventHub>();

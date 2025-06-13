@@ -32,7 +32,7 @@ namespace OHOS::Ace::Framework {
 bool JSPasteButton::ParseComponentStyle(const JSCallbackInfo& info,
     PasteButtonPasteDescription& text, PasteButtonIconStyle& icon, int32_t& bg)
 {
-    if (!info[0]->IsObject()) {
+    if ((info.Length() < 1) || (!info[0]->IsObject())) {
         return false;
     }
 
@@ -137,7 +137,7 @@ void JsPasteButtonClickFunction::Execute(GestureEvent& info)
 
 void JSPasteButton::JsOnClick(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
+    if ((info.Length() < 1) || (!info[0]->IsFunction())) {
         return;
     }
     auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());

@@ -38,6 +38,7 @@ constexpr int32_t HANDLE_ANIMATION_DURATION = 150;
 struct OnMenuItemCallback {
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
+    OnPrepareMenuCallback onPrepareMenuCallback;
     std::function<void(int32_t&, int32_t&)> textRangeCallback;
 };
 
@@ -227,6 +228,7 @@ struct SelectMenuInfo {
     bool showSearch = false;
     bool showCameraInput = false;
     bool showAIWrite = false;
+    bool hasOnPrepareMenuCallback = false;
     OHOS::Ace::TextDataDetectType aiMenuOptionType = TextDataDetectType::INVALID;
     std::optional<OffsetF> menuOffset;
     OptionMenuType menuType = OptionMenuType::TOUCH_MENU;
@@ -245,7 +247,7 @@ struct SelectMenuInfo {
                  (showCut == info.showCut) && (showTranslate == info.showTranslate) &&
                  (showSearch == info.showSearch) && (showShare == info.showShare) &&
                  (showCameraInput == info.showCameraInput) && (showAIWrite == info.showAIWrite) &&
-                 (aiMenuOptionType == info.aiMenuOptionType));
+                 (aiMenuOptionType == info.aiMenuOptionType) && !info.hasOnPrepareMenuCallback);
     }
 
     std::string ToString() const
@@ -263,6 +265,7 @@ struct SelectMenuInfo {
         JSON_STRING_PUT_BOOL(jsonValue, showShare);
         JSON_STRING_PUT_BOOL(jsonValue, showCameraInput);
         JSON_STRING_PUT_INT(jsonValue, aiMenuOptionType);
+        JSON_STRING_PUT_INT(jsonValue, hasOnPrepareMenuCallback);
         return jsonValue->ToString();
     }
 };

@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
+#include "ui/base/utils/utils.h"
 
-#include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,7 +42,8 @@ RefPtr<Modifier> CheckBoxPaintMethod::GetContentModifier(PaintWrapper* paintWrap
         auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
-        auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
+        CHECK_NULL_RETURN(host, nullptr);
+        auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
         CHECK_NULL_RETURN(checkBoxTheme, nullptr);
         auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_RETURN(paintProperty, nullptr);
@@ -95,7 +98,8 @@ void CheckBoxPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(checkboxModifier_);
     CHECK_NULL_VOID(paintWrapper);
     auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
-    checkboxModifier_->InitializeParam(host ? host->GetThemeScopeId() : 0);
+    CHECK_NULL_VOID(host);
+    checkboxModifier_->InitializeParam(host->GetThemeScopeId());
     auto size = paintWrapper->GetContentSize();
     float strokePaintSize = size.Width();
     auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
@@ -121,41 +125,42 @@ void CheckBoxPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         }
         checkboxModifier_->SetStrokeWidth(strokeWidth);
     }
-
     checkboxModifier_->SetSize(size);
     auto offset = paintWrapper->GetContentOffset();
     checkboxModifier_->SetOffset(offset);
     checkboxModifier_->SetEnabled(enabled_);
     checkboxModifier_->SetTouchHoverAnimationType(touchHoverType_);
     checkboxModifier_->UpdateAnimatableProperty(needAnimation_);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto checkBoxTheme = context->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
     if (paintProperty->HasCheckBoxUnSelectedColor()) {
-        auto pipeline = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
-        auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
         CHECK_NULL_VOID(checkBoxTheme);
         checkboxModifier_->SetHasUnselectedColor(
             paintProperty->GetCheckBoxUnSelectedColorValue() != checkBoxTheme->GetInactiveColor());
     } else {
         checkboxModifier_->SetHasUnselectedColor(false);
     }
-
     SetHoverEffectType(paintProperty);
-    SetModifierBoundsRect(size, offset);
+    SetModifierBoundsRect(checkBoxTheme, size, offset, paintWrapper);
 }
 
-void CheckBoxPaintMethod::SetModifierBoundsRect(const SizeF& size, const OffsetF& offset)
+void CheckBoxPaintMethod::SetModifierBoundsRect(
+    const RefPtr<CheckboxTheme>& theme, const SizeF& size, const OffsetF& offset, PaintWrapper* paintWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
-    auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-    auto verticalPadding = checkboxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    CHECK_NULL_VOID(theme);
+    auto horizontalPadding = theme->GetHotZoneHorizontalPadding().ConvertToPx();
+    auto verticalPadding = theme->GetHotZoneVerticalPadding().ConvertToPx();
     float boundsRectOriginX = offset.GetX() - horizontalPadding;
     float boundsRectOriginY = offset.GetY() - verticalPadding;
     float boundsRectWidth = size.Width() + 2 * horizontalPadding;
     float boundsRectHeight = size.Height() + 2 * verticalPadding;
     RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+    CHECK_NULL_VOID(checkboxModifier_);
+    auto origin = checkboxModifier_->GetBoundsRect();
+    CHECK_EQUAL_VOID(origin, boundsRect);
     checkboxModifier_->SetBoundsRect(boundsRect);
+    paintWrapper->FlushContentModifier();
 }
 
 void CheckBoxPaintMethod::SetHoverEffectType(const RefPtr<CheckBoxPaintProperty>& checkBoxPaintProperty)

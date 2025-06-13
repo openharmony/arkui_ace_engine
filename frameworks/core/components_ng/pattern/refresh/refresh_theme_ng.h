@@ -57,8 +57,7 @@ public:
             theme->progressColor_ = pattern->GetAttr<Color>("progress_color", Color::BLACK);
             theme->loadingDistance_ = pattern->GetAttr<Dimension>("default_loading_distance", 16.0_vp);
             theme->progressDiameter_ = pattern->GetAttr<Dimension>("default_progress_diameter", 32.0_vp);
-            theme->ratio_ = pattern->GetAttr<double>("refresh_over_edge_following_ratio", 1.848f);
-            theme->ratioGreatApi_ = pattern->GetAttr<double>("refresh_over_edge_following_ratio_api_twenty", 5.0f);
+            theme->ratio_ = pattern->GetAttr<double>("refresh_over_edge_following_ratio_api_twenty", 5.0f);
         }
     };
 
@@ -89,11 +88,6 @@ public:
         return ratio_;
     }
 
-    float GetGreatApiRatio() const
-    {
-        return ratioGreatApi_;
-    }
-
 protected:
     RefreshThemeNG() = default;
 
@@ -102,8 +96,7 @@ private:
     Dimension progressDiameter_;
     TextStyle textStyle_;
     Color progressColor_;
-    float ratio_ = 1.848f;
-    float ratioGreatApi_ = 5.0f;
+    float ratio_ = 5.0f;
 };
 
 } // namespace OHOS::Ace::NG

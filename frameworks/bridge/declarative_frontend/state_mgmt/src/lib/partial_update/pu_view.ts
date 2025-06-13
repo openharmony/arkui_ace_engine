@@ -258,6 +258,14 @@ abstract class ViewPU extends PUV2ViewBase
     ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
     PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
+    // if memory watch register the callback func, then report such information to memory watch
+    // when custom node destroyed
+    if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
+      ArkUIObjectFinalizationRegisterProxy.call({
+        hash: Utils.getArkTsUtil().getHash(this),
+        name: this.constructor.name,
+        msg: `${this.debugInfo__()} is in the process of destruction` });
+    }
   }
 
   public purgeDeleteElmtId(rmElmtId: number): boolean {
@@ -325,12 +333,10 @@ abstract class ViewPU extends PUV2ViewBase
         this.onInactiveInternal();
       }
     }
-    for (const child of this.childrenWeakrefMap_.values()) {
-      const childView: IView | undefined = child.deref();
-      if (childView) {
-        childView.setActiveInternal(active, isReuse);
-      }
-    }
+    // Propagate state to all child View
+    this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+    // Propagate state to all child BuilderNode
+    this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
     stateMgmtProfiler.end();
   }
 
@@ -630,11 +636,17 @@ abstract class ViewPU extends PUV2ViewBase
    * @returns initializing value of the @Consume backing store
    */
   protected initializeConsume<T>(providedPropName: string,
-    consumeVarName: string): ObservedPropertyAbstractPU<T> {
+    consumeVarName: string, defaultValue?: any): ObservedPropertyAbstractPU<T> {
     let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU(providedPropName);
-    if (providedVarStore === undefined) {
-      throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
+    // '3' means that developer has initialized the @Consume decorated variable
+    if (!providedVarStore) {
+      if (arguments.length === 3) {
+        providedVarStore = new ObservedPropertySimplePU(defaultValue, this, consumeVarName);
+        providedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
+      } else {
+        throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
           Fail to resolve @Consume(${providedPropName}).`);
+      }
     }
 
     const factory = <T>(source: ObservedPropertyAbstract<T>) => {

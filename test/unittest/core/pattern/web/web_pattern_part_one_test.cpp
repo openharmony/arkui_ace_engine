@@ -73,6 +73,9 @@ public:
     MOCK_METHOD(void, Paste, (), (const, override));
     MOCK_METHOD(void, Cut, (), (const, override));
     MOCK_METHOD(void, SelectAll, (), (const, override));
+    MOCK_METHOD(void, Undo, (), (const, override));
+    MOCK_METHOD(void, Redo, (), (const, override));
+    MOCK_METHOD(void, PasteAndMatchStyle, (), (const, override));
 };
 
 class WebPatternPartOneTest : public testing::Test {
@@ -471,7 +474,8 @@ HWTEST_F(WebPatternPartOneTest, OnDetachFromMainTree_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-
+    auto host = webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
     webPattern->OnDetachFromMainTree();
     ASSERT_NE(webPattern->delegate_, nullptr);
 #endif

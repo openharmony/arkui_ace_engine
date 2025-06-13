@@ -302,6 +302,8 @@ private:
     void RegisterOnHover();
     // add click event to show menu
     void RegisterOnClick();
+    void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
+    bool CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode);
 
     void RegisterOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);

@@ -31,7 +31,7 @@ constexpr int32_t INVALID_WINDOW_ID = -1;
 constexpr int32_t WORKER_ERROR = 10002;
 constexpr size_t WORKER_MAX_NUM = 1;
 constexpr int32_t WORKER_SIZE_ONE = 1;
-constexpr int32_t DC_MAX_NUM_IN_WORKER = 1;
+constexpr int32_t DC_MAX_NUM_IN_WORKER = 4;
 }
 
 void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
@@ -256,12 +256,31 @@ void DynamicComponentRendererImpl::BuildDynamicInitialConfig(
     auto context = container->GetPipelineContext();
     CHECK_NULL_VOID(context);
     if (container->IsSceneBoardWindow()) {
-        dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
-        dynamicInitialConfig.hostWindowInfo.realHostWindowId = static_cast<uint32_t>(GetWindowSceneId());
+        dynamicInitialConfig.hostWindowInfo.focusWindowId = static_cast<uint32_t>(GetWindowSceneId());
+        dynamicInitialConfig.hostWindowInfo.realHostWindowId = context->GetRealHostWindowId();
     } else {
         dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
         dynamicInitialConfig.hostWindowInfo.realHostWindowId = context->GetRealHostWindowId();
     }
+}
+
+void DynamicComponentRendererImpl::OnAccessibilityParentRectInfoUpdate()
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto instanceId = uiContent_->GetInstanceId();
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([instanceId] {
+        auto container = Container::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        CHECK_NULL_VOID(ngPipeline);
+        auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+        CHECK_NULL_VOID(uiExtensionManager);
+        uiExtensionManager->TransferAccessibilityRectInfo();
+        }, TaskExecutor::TaskType::UI, "OnAccessibilityParentRectInfoUpdate");
 }
 
 void DynamicComponentRendererImpl::InitUiContent(
@@ -298,6 +317,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     hostTaskExecutor->PostTask(
         [weak = WeakClaim(this)] () {
             auto render = weak.Upgrade();
+            CHECK_NULL_VOID(render);
             render->SetUIContentJsContext();
         }, TaskExecutor::TaskType::UI, "HostSetUIContentJsContext");
     rendererDumpInfo_.limitedWorkerInitTime = GetCurrentTimestamp();

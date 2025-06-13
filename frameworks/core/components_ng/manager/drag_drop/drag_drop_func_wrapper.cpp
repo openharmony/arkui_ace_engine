@@ -157,6 +157,7 @@ void EnvelopedDragData(
     std::map<std::string, int64_t> summary;
     std::map<std::string, int64_t> detailedSummary;
     int32_t dataSize = 1;
+    DragDropFuncWrapper::EnvelopedDataLoadParams(dragAction, udKey);
     if (dragAction->unifiedData) {
         int32_t ret = UdmfClient::GetInstance()->SetData(dragAction->unifiedData, udKey);
         if (ret != 0) {
@@ -187,6 +188,15 @@ void EnvelopedDragData(
         dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
         summary, false, detailedSummary };
+}
+
+void DragDropFuncWrapper::EnvelopedDataLoadParams(
+    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::string& udKey)
+{
+    CHECK_NULL_VOID(dragAction);
+    if (dragAction->dataLoadParams) {
+        UdmfClient::GetInstance()->SetDelayInfo(dragAction->dataLoadParams, udKey);
+    }
 }
 
 void DragDropFuncWrapper::HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -972,7 +982,7 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
 
     if (gestureHub->GetTextDraggable()) {
         auto pattern = frameNode->GetPattern<TextBase>();
-        if (pattern && !pattern->IsSelected()) {
+        if (pattern && !pattern->IsSelected() && !pattern->CanAIEntityDrag()) {
             TrySetDraggableStateAsync(frameNode, touchRestrict);
             TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, text is not selected.");
             return false;
@@ -988,7 +998,8 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
 }
 void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
 {
-    auto subWindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+    auto subWindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subWindow);
     auto overlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -1489,5 +1500,51 @@ void DragDropFuncWrapper::SetMenuSubWindowTouchable(bool touchable)
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subwindow);
     subwindow->SetWindowTouchable(touchable);
+}
+
+void DragDropFuncWrapper::HandleBackPressHideMenu()
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetIsDragNodeNeedClean(true);
+    auto container = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (container->IsUIExtensionWindow()) {
+        auto overlayManager = mainPipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->RemoveGatherNode();
+    }
+}
+
+void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, std::string& udKey,
+    std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary, int32_t& ret)
+{
+    CHECK_NULL_VOID(dragEvent);
+    auto unifiedData = dragEvent->GetData();
+    if (unifiedData) {
+        DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
+    }
+    auto dataLoadParams = dragEvent->GetDataLoadParams();
+    if (dataLoadParams) {
+        UdmfClient::GetInstance()->SetDelayInfo(dataLoadParams, udKey);
+    }
+    if (unifiedData) {
+        ACE_SCOPED_TRACE("drag: set drag data to udmf");
+        if (UdmfClient::GetInstance()->SetData(unifiedData, udKey) != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
+        }
+    }
+    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
+    if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetSummaryMap(summary);
 }
 } // namespace OHOS::Ace::NG

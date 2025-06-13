@@ -44,7 +44,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "core/components_ng/pattern/select_content_overlay/select_content_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/pipeline/base/constants.h"
 #include "ui/base/geometry/dimension.h"
@@ -1877,5 +1877,32 @@ HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams002, TestSize.Level1)
     auto menuWrapper =  selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapper, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
+}
+
+/**
+ * @tc.name: UpdateSingleHandleInfo
+ * @tc.desc: test DraggingSingleHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, DraggingSingleHandle, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    SelectOverlayInfo overlayInfo;
+    overlayInfo.isUseOverlayNG = true;
+    overlayInfo.isSingleHandle = true;
+    overlayInfo.isHandleLineShow = false;
+    std::shared_ptr<SelectOverlayInfo> shareInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
+    auto selectContentOverlayPattern = selectOverlayNode->GetPattern<SelectContentOverlayPattern>();
+    ASSERT_NE(selectContentOverlayPattern, nullptr);
+    selectContentOverlayPattern->firstHandleDrag_ = false;
+    selectContentOverlayPattern->secondHandleDrag_ = true;
+    selectContentOverlayPattern->RestartHiddenHandleTask(false);
+    EXPECT_FALSE(selectContentOverlayPattern->hiddenHandleTask_);
+    selectContentOverlayPattern->UpdateIsShowHandleLine(true);
+    EXPECT_FALSE(shareInfo->isHandleLineShow);
 }
 } // namespace OHOS::Ace::NG

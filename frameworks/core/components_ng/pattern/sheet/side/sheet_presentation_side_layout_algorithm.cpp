@@ -83,6 +83,7 @@ void SheetPresentationSideLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto padding = sheetPattern->GetSheetObject()->GetSheetSafeAreaPadding();
     auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.maxSize.SetWidth(sheetWidth_);
     auto childWidth = sheetWidth_ - padding.left.value_or(0.0f) - padding.right.value_or(0.0f);
     auto childHeight = sheetHeight_ - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f);
     childConstraint.parentIdealSize = OptionalSizeF(childWidth, childHeight);
@@ -129,6 +130,11 @@ void SheetPresentationSideLayoutAlgorithm::MeasureScrollNode(LayoutWrapper* layo
     CHECK_NULL_VOID(sheetPattern);
     auto scrollNode = sheetPattern->GetSheetScrollNode();
     CHECK_NULL_VOID(scrollNode);
+    auto index = host->GetChildIndexById(scrollNode->GetId());
+    auto scrollWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(scrollWrapper);
+    auto scrollGeometryNode = scrollWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(scrollGeometryNode);
     auto operatoration = sheetPattern->GetTitleBuilderNode();
     CHECK_NULL_VOID(operatoration);
     auto operatorGeometryNode = operatoration->GetGeometryNode();
@@ -141,7 +147,8 @@ void SheetPresentationSideLayoutAlgorithm::MeasureScrollNode(LayoutWrapper* layo
     childConstraint.maxSize.SetHeight(childHeight);
     childConstraint.parentIdealSize = OptionalSizeF(childWidth, childHeight);
     childConstraint.percentReference = SizeF(childWidth, childHeight);
-    scrollNode->Measure(childConstraint);
+    childConstraint.selfIdealSize = OptionalSizeF(childWidth, childHeight);
+    scrollWrapper->Measure(childConstraint);
 }
 
 void SheetPresentationSideLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

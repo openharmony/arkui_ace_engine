@@ -291,8 +291,8 @@ void GetScrollBarMargin(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     CHECK_NULL_VOID(frameNode);
     ScrollBarMargin scrollBarMargin;
     ScrollableModelNG::GetScrollBarMargin(frameNode, scrollBarMargin);
-    (*values)[0].i32 = scrollBarMargin.start_.ConvertToVp();
-    (*values)[1].i32 = scrollBarMargin.end_.ConvertToVp();
+    (*values)[0].f32 = scrollBarMargin.start_.ConvertToVp();
+    (*values)[1].f32 = scrollBarMargin.end_.ConvertToVp();
 }
 } // namespace
 

@@ -91,6 +91,8 @@ public:
     void RunIntentPage();
     void SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
         const std::function<void()>&& loadPageCallback);
+    std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam);
+
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data);
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
@@ -307,6 +309,10 @@ public:
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshotByUniqueId(int32_t uniqueId,
         const NG::SnapshotOptions& options) override;
         
+    void GetSnapshotWithRange(const NG::NodeIdentity startID, const NG::NodeIdentity endID, const bool isStartRect,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options) override;
+
     void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector, const NG::SnapshotParam& param) override;

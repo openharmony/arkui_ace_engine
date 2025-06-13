@@ -77,6 +77,7 @@ constexpr float SWIPER_CURVE_DAMPING = 34.0f;
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
+
 public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
     using PanEventFunction = std::function<void(const GestureEvent& info)>;
@@ -653,8 +654,8 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
-    bool IsAtStart() const;
-    bool IsAtEnd() const;
+    ACE_FORCE_EXPORT bool IsAtStart() const;
+    ACE_FORCE_EXPORT bool IsAtEnd() const;
 
     bool IsIndicatorInteractive() const
     {
@@ -1232,6 +1233,7 @@ private:
     void SetIndicatorIsInFast(std::optional<bool> isInFast);
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+    void SetLayoutDisplayCount(const RefPtr<FrameNode>& swiperNode);
 
     float AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) const;
     void UpdateIgnoreBlankOffsetWithIndex();

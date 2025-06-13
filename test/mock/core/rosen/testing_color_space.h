@@ -16,11 +16,39 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_COLOR_SPACE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_COLOR_SPACE_H
 
+#include <memory>
+
 namespace OHOS::Ace::Testing {
+enum class TestingCMSTransferFuncType {
+    SRGB,
+    DOT2,
+    LINEAR,
+    REC2020,
+};
+
+enum class TestingCMSMatrixType {
+    SRGB,
+    ADOBE_RGB,
+    DCIP3,
+    REC2020,
+    XYZ,
+};
+
 class TestingColorSpace {
 public:
     TestingColorSpace() = default;
     virtual ~TestingColorSpace() = default;
+
+    static std::shared_ptr<TestingColorSpace> CreateSRGB()
+    {
+        return std::make_shared<TestingColorSpace>();
+    }
+
+    static std::shared_ptr<TestingColorSpace> CreateRGB(
+        const TestingCMSTransferFuncType& func, const TestingCMSMatrixType& matrix)
+    {
+        return std::make_shared<TestingColorSpace>();
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_COLOR_SPACE_H

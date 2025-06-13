@@ -35,9 +35,9 @@ struct TextProperties {
     Dimension upFontSize;
     Dimension fontSize;
     Dimension downFontSize;
-    FontWeight upFontWeight;
-    FontWeight fontWeight;
-    FontWeight downFontWeight;
+    FontWeight upFontWeight = FontWeight::W100;
+    FontWeight fontWeight = FontWeight::W100;
+    FontWeight downFontWeight = FontWeight::W100;
     Color upColor;
     Color currentColor;
     Color downColor;
@@ -99,6 +99,7 @@ public:
     virtual const Color& GetButtonBgColor() const = 0;
     virtual const Color& GetButtonPressColor() const = 0;
     virtual bool CanMove(bool isDown) const = 0;
+    virtual std::string GetCurrentOption() const = 0;
 
     virtual uint32_t GetShowCount() const
     {

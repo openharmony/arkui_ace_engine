@@ -1,0 +1,10 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/lib",
+        "rootDir": ".",
+        "rootDirs": ["src", "test"],
+        "module": "CommonJS"
+    },
+    "include": ["src/**/*"],
+}

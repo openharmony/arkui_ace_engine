@@ -78,7 +78,7 @@ struct WindowConfig {
     }
 };
 
-enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ };
+enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, ARK_TS };
 struct PageTarget;
 
 class ACE_FORCE_EXPORT Frontend : public AceType {
@@ -155,6 +155,11 @@ public:
         const std::function<void()>&& loadPageCallback)
     {
         return UIContentErrorCode::NO_ERRORS;
+    }
+
+    virtual std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+    {
+        return "";
     }
 
     virtual void ReplacePage(const std::string& url, const std::string& params) = 0;

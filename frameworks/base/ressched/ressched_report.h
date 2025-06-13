@@ -41,6 +41,11 @@ struct ResEventInfo {
     SourceTool sourceTool = SourceTool::UNKNOWN;
 };
 
+struct ReportConfig {
+    bool isReportTid = false;
+    uint64_t tid = 0;
+};
+
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
     const std::unordered_map<std::string, std::string>& payload);
 
@@ -61,7 +66,7 @@ public:
         std::unordered_map<std::string, std::string>& reply);
     bool AppWhiteListCheck(const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
-    void OnTouchEvent(const TouchEvent& touchEvent);
+    void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config);
     void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);
@@ -71,19 +76,19 @@ public:
 private:
     ResSchedReport();
     ~ResSchedReport() {}
-    void HandleTouchDown(const TouchEvent& touchEvent);
-    void HandleTouchUp(const TouchEvent& touchEvent);
+    void HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchUp(const TouchEvent& touchEvent, const ReportConfig& config);
     bool IsRateLimit(int64_t maxCount, std::chrono::seconds durTime,
         int64_t& keyEventCount, std::chrono::steady_clock::time_point& startTime);
     bool IsPerSecRateLimit();
     bool IsPerMinRateLimit();
     void HandleKeyDown(const KeyEvent& event);
     void HandleKeyUp(const KeyEvent& event);
-    void HandleTouchMove(const TouchEvent& touchEvent);
-    void HandleTouchCancel(const TouchEvent& touchEvent);
-    void HandleTouchPullDown(const TouchEvent& touchEvent);
-    void HandleTouchPullUp(const TouchEvent& touchEvent);
-    void HandleTouchPullMove(const TouchEvent& touchEvent);
+    void HandleTouchMove(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchCancel(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchPullDown(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchPullUp(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchPullMove(const TouchEvent& touchEvent, const ReportConfig& config);
     double GetUpVelocity(const ResEventInfo& lastMoveInfo,
         const ResEventInfo& upEventInfo);
     void RecordTouchEvent(const TouchEvent& touchEvent, bool enforce = false);
@@ -103,9 +108,9 @@ private:
     ResEventInfo lastTouchEvent_;
     ResEventInfo curAxisEvent_;
     ResEventInfo lastAxisEvent_;
-    Offset averageDistance_;
-    bool isInSlide_ = false;
-    bool isInTouch_ = false;
+    static thread_local Offset averageDistance_;
+    static thread_local bool isInSlide_;
+    static thread_local bool isInTouch_;
     double dpi_ = PipelineBase::GetCurrentDensity();
     std::chrono::steady_clock::time_point startTimeMS = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point startTimeS = std::chrono::steady_clock::now();

@@ -401,7 +401,7 @@ void SpanString::ProcessMultiDecorationSpanForIntersection(
     int32_t intersectionEnd = std::min(end, lastSpanEnd);
 
     bool spanInRight = lastSpanStart <= start && lastSpanEnd <= end;
-    bool isInclude = lastSpanStart >= start && lastSpanEnd <= end;
+    bool isInclude = lastSpanStart <= start && lastSpanEnd >= end;
 
     int32_t newStart = 0;
     int32_t newEnd = 0;
@@ -481,7 +481,8 @@ bool SpanString::ProcessMultiDecorationSpan(const RefPtr<SpanBase>& span, int32_
     return true;
 }
 
-void SpanString::AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration, bool isFromHtml)
+void SpanString::AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration,
+    bool isFromHtml, bool removeOriginStyle)
 {
     if (!span || !CheckRange(span)) {
         return;
@@ -506,7 +507,9 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecorati
     if (processMultiDecoration && ProcessMultiDecorationSpan(span, start, end)) {
         return;
     }
-    RemoveSpan(start, end - start, span->GetSpanType());
+    if (removeOriginStyle) {
+        RemoveSpan(start, end - start, span->GetSpanType());
+    }
     auto spans = spansMap_[span->GetSpanType()];
     ApplyToSpans(span, { start, end }, SpanOperation::ADD);
     SplitInterval(spans, { start, end });
@@ -1263,6 +1266,7 @@ RefPtr<ParagraphStyleSpan> SpanString::ToParagraphStyleSpan(
     CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
     SpanParagraphStyle paragraphStyle;
     paragraphStyle.align = spanItem->textLineStyle->GetTextAlign();
+    paragraphStyle.textVerticalAlign = spanItem->textLineStyle->GetTextVerticalAlign();
     paragraphStyle.maxLines = spanItem->textLineStyle->GetMaxLines();
     paragraphStyle.textOverflow = spanItem->textLineStyle->GetTextOverflow();
     paragraphStyle.leadingMargin = spanItem->textLineStyle->GetLeadingMargin();

@@ -611,6 +611,7 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
+
     void CheckLocalized()
     {
         auto host = GetHost();

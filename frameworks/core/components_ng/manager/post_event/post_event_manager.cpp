@@ -62,8 +62,17 @@ bool PostEventManager::PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEve
     CHECK_NULL_RETURN(pipelineContext, false);
     touchEvent.passThrough = true;
     passThroughResult_ = false;
+    if (touchEvent.type != TouchType::MOVE) {
+        if (!CheckTouchEvent(uiNode, touchEvent)) {
+            return false;
+        }
+        postInputEventAction_.push_back({ uiNode, touchEvent });
+    }
     pipelineContext->OnTouchEvent(touchEvent, frameNode, false);
     touchEvent.passThrough = false;
+    if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
+        ClearPostInputActions(uiNode, touchEvent.id);
+    }
     return passThroughResult_;
 }
 
@@ -97,6 +106,55 @@ bool PostEventManager::PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent
     pipelineContext->OnAxisEvent(axisEvent, frameNode);
     axisEvent.passThrough = false;
     return passThroughResult_;
+}
+
+bool PostEventManager::CheckTouchEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    bool hasDown = false;
+    bool hasUpOrCancel = false;
+    for (const auto& item : postInputEventAction_) {
+        if (item.targetNode != targetNode || item.touchEvent.id != touchEvent.id) {
+            continue;
+        }
+        if (item.touchEvent.type == TouchType::DOWN) {
+            hasDown = true;
+        }
+        if (item.touchEvent.type == TouchType::UP || item.touchEvent.type == TouchType::CANCEL) {
+            hasUpOrCancel = true;
+        }
+    }
+    switch (touchEvent.type) {
+        case TouchType::DOWN:
+            if (hasDown && !hasUpOrCancel) {
+                TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+                    "CheckTouchEvent: DOWN event detected for id=%{public}d, dropping this event",
+                    touchEvent.id);
+                return false;
+            }
+            if (hasUpOrCancel) {
+                ClearPostInputActions(targetNode, touchEvent.id);
+            }
+            return true;
+        case TouchType::UP:
+        case TouchType::CANCEL:
+            return hasDown && !hasUpOrCancel;
+        default:
+            TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "CheckTouchEvent: unsupported touch type=%{public}d, id=%{public}d",
+                static_cast<int>(touchEvent.type), touchEvent.id);
+            return false;
+    }
+}
+
+void PostEventManager::ClearPostInputActions(const RefPtr<NG::UINode>& targetNode, int32_t id)
+{
+    for (auto item = postInputEventAction_.begin(); item != postInputEventAction_.end();) {
+        if (item->targetNode == targetNode && item->touchEvent.id == id) {
+            item = postInputEventAction_.erase(item);
+        } else {
+            ++item;
+        }
+    }
 }
 
 bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent)

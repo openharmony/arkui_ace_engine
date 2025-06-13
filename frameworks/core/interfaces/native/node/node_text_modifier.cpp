@@ -1149,6 +1149,7 @@ void SetTextDataDetectorConfigWithEvent(
     textDetectConfig.entityDecorationType = TextDecoration(arkUITextDetectConfig->entityDecorationType);
     textDetectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
     textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
+    textDetectConfig.enablePreviewMenu = arkUITextDetectConfig->entityEnablePreviewMenu;
     TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
@@ -1198,7 +1199,8 @@ void ResetTextOnTextSelectionChange(ArkUINodeHandle node)
     TextModelNG::SetOnTextSelectionChange(frameNode, nullptr);
 }
 
-void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+void SetTextSelectionMenuOptions(
+    ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1215,6 +1217,18 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
     } else {
         TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
+    if (onPrepareMenuCallback) {
+        NG::OnPrepareMenuCallback onPrepareMenu =
+            *(reinterpret_cast<NG::OnPrepareMenuCallback*>(onPrepareMenuCallback));
+        TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenu));
+    } else {
+        TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, nullptr);
+    }
+}
+
+void SetTextSelectionMenuOptionsForCJ(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+{
+    SetTextSelectionMenuOptions(node, onCreateMenuCallback, onMenuItemClickCallback, nullptr);
 }
 
 void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
@@ -1223,8 +1237,10 @@ void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
     TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
     TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+    TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
 }
 
 void SetTextHalfLeading(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1632,6 +1648,27 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
     }
     return index;
 }
+
+void SetTextVerticalAlign(ArkUINodeHandle node, ArkUI_Uint32 textVerticalAlign)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextVerticalAlign(frameNode, static_cast<TextVerticalAlign>(textVerticalAlign));
+}
+
+void ResetTextVerticalAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextVerticalAlign(frameNode, TextVerticalAlign::BASELINE);
+}
+
+ArkUI_Uint32 GetTextVerticalAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<uint32_t>(TextVerticalAlign::BASELINE));
+    return static_cast<ArkUI_Uint32>(TextModelNG::GetTextVerticalAlign(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1780,6 +1817,9 @@ const ArkUITextModifier* GetTextModifier()
         .setRadialGradient = SetTextRadialGradient,
         .getRadialGradient = GetTextRadialGradient,
         .resetTextGradient = ResetTextGradient,
+        .setTextVerticalAlign = SetTextVerticalAlign,
+        .resetTextVerticalAlign = ResetTextVerticalAlign,
+        .getTextVerticalAlign = GetTextVerticalAlign,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -1901,7 +1941,7 @@ const CJUITextModifier* GetCJUITextModifier()
         .resetTextMinFontScale = ResetTextMinFontScale,
         .setTextMaxFontScale = SetTextMaxFontScale,
         .resetTextMaxFontScale = ResetTextMaxFontScale,
-        .setTextSelectionMenuOptions = SetTextSelectionMenuOptions,
+        .setTextSelectionMenuOptions = SetTextSelectionMenuOptionsForCJ,
         .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
         .setTextHalfLeading = SetTextHalfLeading,
         .resetTextHalfLeading = ResetTextHalfLeading,

@@ -91,5 +91,62 @@ HWTEST_F(GridScrollLayoutTestNg, ShowCache001, TestSize.Level1)
         { 5, { { 0, 13 }, { 1, 14 }, { 2, 15 } } }, { 6, { { 0, 16 }, { 1, 17 }, { 2, 18 } } } };
     EXPECT_EQ(pattern_->info_.gridMatrix_, gridMatrix);
 }
+
+/**
+ * @tc.name: Remeasure001
+ * @tc.desc: Test triggering measure multiple times on the same Algo object
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, Remeasure001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(0, false);
+    CreateFixedItems(20);
+    CreateDone();
+
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo = AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_TRUE(algo);
+    algo->Measure(AceType::RawPtr(frameNode_));
+    std::set<int32_t> measuredItems = { 0, 1, 2, 3, 4, 5, 6, 7 };
+    EXPECT_EQ(measuredItems, algo->measuredItems_);
+    EXPECT_EQ(algo->info_.lastMainSize_, HEIGHT);
+
+    auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(frameNode_->GetLayoutProperty());
+    layoutProperty->layoutConstraint_->selfIdealSize.SetHeight(HEIGHT + 100);
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(algo->info_.lastMainSize_, HEIGHT + 100);
+    measuredItems.emplace(8);
+    measuredItems.emplace(9);
+    EXPECT_EQ(measuredItems, algo->measuredItems_);
+
+    algo->Layout(AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(algo->measuredItems_.empty());
+}
+
+/**
+ * @tc.name: GetTotalHeight002
+ * @tc.desc: Test GetTotalHeight when all items in viewport are irregular item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GetTotalHeight002, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 5, 8, 9, 10 };
+    GridModelNG model = CreateGrid();
+    model.SetLayoutOptions(option);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(0, false);
+    CreateFixedItems(9);
+    CreateFixedHeightItems(1, 350);
+    CreateFixedItems(1);
+    CreateDone();
+
+    ScrollToIndex(10, false, ScrollAlign::START);
+    EXPECT_TRUE(GreatNotEqual(pattern_->GetTotalHeight(), pattern_->info_.lastMainSize_));
+}
 } // namespace OHOS::Ace::NG
  

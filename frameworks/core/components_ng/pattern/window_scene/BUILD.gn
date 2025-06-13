@@ -51,27 +51,24 @@ build_component_ng("window_scene") {
   if (ace_engine_feature_asbng_path_enable) {
     sources += [ "scene/atomicservice_basic_engine_plugin.cpp" ]
   }
-
-  standard_input_deps = [
+  external_deps = [
     "hilog:libhilog",
     "hisysevent:libhisysevent",
-    "imf:inputmethod_client",
     "input:libmmi-client",
   ]
+  standard_input_deps = [ "imf:inputmethod_client" ]
 
   if (is_ohos_standard_system) {
     configs = [ ":window_scene_config" ]
 
     # The path of libwm should take priority over graphic_2d
-    external_deps = [ "window_manager:libwm" ]
+    external_deps += [ "window_manager:libwm" ]
     external_deps += [
       "ability_runtime:app_manager",
       "c_utils:utils",
       "ffrt:libffrt",
       "graphic_2d:librender_service_client",
-      "hilog:libhilog",
       "init:libbegetutil",
-      "input:libmmi-client",
       "ipc:ipc_single",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",

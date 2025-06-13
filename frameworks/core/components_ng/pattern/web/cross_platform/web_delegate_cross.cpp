@@ -1908,6 +1908,9 @@ void WebDelegateCross::UpdateAudioResumeInterval(const int32_t& resumeInterval)
 void WebDelegateCross::UpdateAudioExclusive(const bool& audioExclusive)
 {}
 
+void WebDelegateCross::UpdateAudioSessionType(const WebAudioSessionType& audioSessionType)
+{}
+
 void WebDelegateCross::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled)
 {}
 

@@ -512,8 +512,12 @@ void JSGrid::SetNestedScroll(const JSCallbackInfo& args)
 void JSGrid::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
-    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+    RefPtr<ResourceObject> resObj;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction, resObj)) {
         friction = -1.0;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        GridModel::GetInstance()->CreateWithResourceObjFriction(resObj);
     }
     GridModel::GetInstance()->SetFriction(friction);
 }

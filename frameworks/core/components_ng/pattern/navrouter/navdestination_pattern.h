@@ -124,6 +124,7 @@ public:
     {
         navDestinationContext_ = context;
         if (navDestinationContext_) {
+            navDestinationContext_->SetNavDestinationPattern(WeakClaim(this));
             navDestinationContext_->SetNavDestinationId(navDestinationId_);
         }
     }
@@ -155,11 +156,6 @@ public:
 
     bool GetBackButtonState();
 
-    RefPtr<UINode> GetNavigationNode()
-    {
-        return navigationNode_.Upgrade();
-    }
-
     NavDestinationState GetNavDestinationState() const
     {
         auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
@@ -175,11 +171,6 @@ public:
     uint64_t GetNavDestinationId() const
     {
         return navDestinationId_;
-    }
-
-    void SetNavigationNode(const RefPtr<UINode>& navigationNode)
-    {
-        navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
 
     void OnDetachFromMainTree() override
@@ -304,6 +295,16 @@ public:
         return isActive_;
     }
 
+    std::string GetSerializedParam() const
+    {
+        return serializedParam_;
+    }
+
+    void UpdateSerializedParam(const std::string& param)
+    {
+        serializedParam_ = param;
+    }
+
 private:
     struct HideBarOnSwipeContext {
         CancelableCallback<void()> showBarTask;
@@ -346,7 +347,6 @@ private:
     std::string inspectorId_;
     RefPtr<NavDestinationContext> navDestinationContext_;
     RefPtr<UINode> customNode_;
-    WeakPtr<UINode> navigationNode_;
     RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
     bool isActive_ = false;
@@ -363,6 +363,8 @@ private:
     bool isFirstTimeCheckOrientation_ = true;
     bool isFirstTimeCheckStatusBarConfig_ = true;
     bool isFirstTimeCheckNavigationIndicatorConfig_ = true;
+    RefPtr<TouchEventImpl> touchListener_ = nullptr;
+    std::string serializedParam_ = "";
 };
 } // namespace OHOS::Ace::NG
 

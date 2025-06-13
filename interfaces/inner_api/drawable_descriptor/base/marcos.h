@@ -27,4 +27,10 @@
         }                           \
     } while (0)
 
+#define CHECK_NULL_VOID(ptr) \
+    do {                     \
+        if (!(ptr)) {        \
+            return;          \
+        }                    \
+    } while (0)
 #endif // FOUNDATION_ACE_INTERFACE_INNERAPI_BASE_MARCOS_H

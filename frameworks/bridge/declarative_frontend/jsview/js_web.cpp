@@ -59,6 +59,7 @@ const int32_t PARAM_ONE = 1;
 const int32_t PARAM_TWO = 2;
 constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
 constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
+const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 
 void EraseSpace(std::string& data)
 {
@@ -434,8 +435,12 @@ public:
 
     void HandleCancel(const JSCallbackInfo& args)
     {
+        bool abortLoading = false;
+        if (args.Length() >= 1 && args[0]->IsBoolean()) {
+            abortLoading = args[0]->ToBoolean();
+        }
         if (result_) {
-            result_->HandleCancel();
+            result_->HandleCancel(abortLoading);
         }
     }
 
@@ -1770,6 +1775,9 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("paste", &JSContextMenuResult::Paste);
         JSClass<JSContextMenuResult>::CustomMethod("cut", &JSContextMenuResult::Cut);
         JSClass<JSContextMenuResult>::CustomMethod("selectAll", &JSContextMenuResult::SelectAll);
+        JSClass<JSContextMenuResult>::CustomMethod("undo", &JSContextMenuResult::Undo);
+        JSClass<JSContextMenuResult>::CustomMethod("redo", &JSContextMenuResult::Redo);
+        JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -1818,6 +1826,27 @@ public:
     {
         if (result_) {
             result_->SelectAll();
+        }
+    }
+
+    void Undo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Undo();
+        }
+    }
+
+    void Redo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Redo();
+        }
+    }
+
+    void PasteAndMatchStyle(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->PasteAndMatchStyle();
         }
     }
 
@@ -1969,6 +1998,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSWeb>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
+    JSClass<JSWeb>::StaticMethod("onActivateContent", &JSWeb::OnActivateContent);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
     JSClass<JSWeb>::StaticMethod("allowWindowOpenMethod", &JSWeb::AllowWindowOpenMethod);
@@ -2037,6 +2067,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
     JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
+    JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2074,6 +2105,17 @@ JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& event
     obj->SetPropertyObject("message", messageObj);
 
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateConsoleHandler(const LoadWebConsoleLogEvent& eventInfo)
+{
+    JSRef<JSObject> messageObj = JSClass<JSWebConsoleLog>::NewInstance();
+    auto jsWebConsoleLog = Referenced::Claim(messageObj->Unwrap<JSWebConsoleLog>());
+    if (!jsWebConsoleLog) {
+        return messageObj;
+    }
+    jsWebConsoleLog->SetMessage(eventInfo.GetMessage());
+    return messageObj;
 }
 
 JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
@@ -2183,6 +2225,17 @@ JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateLoadInterceptHandler(const LoadInterceptEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetLoadInterceptEvent(eventInfo);
+    return requestObj;
+}
+
 JSRef<JSVal> LoadWebGeolocationHideEventToJSValue(const LoadWebGeolocationHideEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetOrigin()));
@@ -2236,6 +2289,17 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("realm", eventInfo.GetRealm());
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateHttpAuthRequestHandler(const WebHttpAuthEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSWebHttpAuth>::NewInstance();
+    auto jsWebHttpAuth = Referenced::Claim(resultObj->Unwrap<JSWebHttpAuth>());
+    if (!jsWebHttpAuth) {
+        return resultObj;
+    }
+    jsWebHttpAuth->SetResult(eventInfo.GetResult());
+    return resultObj;
 }
 
 JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
@@ -2306,7 +2370,52 @@ JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
     obj->SetProperty("referrer", eventInfo.GetReferrer());
     obj->SetProperty("isFatalError", eventInfo.GetIsFatalError());
     obj->SetProperty("isMainFrame", eventInfo.GetIsMainFrame());
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine || !engine->GetNativeEngine()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    napi_env env = reinterpret_cast<napi_env>(engine->GetNativeEngine());
+    std::vector<std::string> certChainDerData = eventInfo.GetCertChainData();
+    JSRef<JSArray> certsArr = JSRef<JSArray>::New();
+    for (uint8_t i = 0; i < certChainDerData.size(); i++) {
+        if (i == UINT8_MAX) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
+            break;
+        }
+        void *data = nullptr;
+        napi_value buffer = nullptr;
+        napi_value item = nullptr;
+        napi_status status = napi_create_arraybuffer(env, certChainDerData[i].size(), &data, &buffer);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create array buffer failed, status = %{public}d.", status);
+            continue;
+        }
+        if (memcpy_s(data, certChainDerData[i].size(), certChainDerData[i].data(), certChainDerData[i].size()) != 0) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data failed, index = %{public}u.", i);
+            continue;
+        }
+        status = napi_create_typedarray(env, napi_uint8_array, certChainDerData[i].size(), buffer, 0, &item);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create typed array failed, status = %{public}d.", status);
+            continue;
+        }
+        JSRef<JSVal> cert = JsConverter::ConvertNapiValueToJsVal(item);
+        certsArr->SetValueAt(i, cert);
+    }
+    obj->SetPropertyObject("certChainData", certsArr);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateSslErrorEventHandler(const WebAllSslErrorEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSWebAllSslError>::NewInstance();
+    auto jsWebAllSslError = Referenced::Claim(resultObj->Unwrap<JSWebAllSslError>());
+    if (!jsWebAllSslError) {
+        return resultObj;
+    }
+    jsWebAllSslError->SetResult(eventInfo.GetResult());
+    return resultObj;
 }
 
 JSRef<JSVal> WebSslSelectCertEventToJSValue(const WebSslSelectCertEvent& eventInfo)
@@ -2357,6 +2466,17 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadOverrideEvent(eventInfo);
     return JSRef<JSVal>::Cast(requestObj);
+}
+
+JSRef<JSVal> JSWeb::CreateOverrideUrlLoadingHandler(const LoadOverrideEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetLoadOverrideEvent(eventInfo);
+    return requestObj;
 }
 
 JSRef<JSVal> AdsBlockedEventToJSValue(const AdsBlockedEvent& eventInfo)
@@ -3068,6 +3188,28 @@ JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateErrorReceiveRequestHandler(const ReceivedErrorEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetErrorEvent(eventInfo);
+    return requestObj;
+}
+
+JSRef<JSVal> JSWeb::CreateErrorReceiveErrorHandler(const ReceivedErrorEvent& eventInfo)
+{
+    JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
+    auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
+    if (!errorEvent) {
+        return errorObj;
+    }
+    errorEvent->SetEvent(eventInfo);
+    return errorObj;
+}
+
 JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -3084,6 +3226,28 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
     obj->SetPropertyObject("response", responseObj);
 
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateHttpErrorReceiveRequestHandler(const ReceivedHttpErrorEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetHttpErrorEvent(eventInfo);
+    return requestObj;
+}
+
+JSRef<JSVal> JSWeb::CreateHttpErrorReceiveResponseHandler(const ReceivedHttpErrorEvent& eventInfo)
+{
+    JSRef<JSObject> responseObj = JSClass<JSWebResourceResponse>::NewInstance();
+    auto responseEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
+    if (!responseEvent) {
+        return responseObj;
+    }
+    responseEvent->SetEvent(eventInfo);
+    return responseObj;
 }
 
 void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
@@ -3609,6 +3773,12 @@ void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
         enable = enableJsValue->ToBoolean();
         WebModel::GetInstance()->SetIntrinsicSizeEnabled(*enable);
     }
+
+    auto cssDisplayChangeObj = paramObject->GetProperty("supportCssDisplayChange");
+    if (cssDisplayChangeObj->IsBoolean()) {
+        bool cssDisplayChange = cssDisplayChangeObj->ToBoolean();
+        WebModel::GetInstance()->SetCssDisplayChangeEnabled(cssDisplayChange);
+    }
 }
 
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
@@ -4015,9 +4185,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
+        WebModel::GetInstance()->SetDefaultBackgroundColor();
+    } else {
+        WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
     }
-    WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 void JSWeb::InitialScale(float scale)
@@ -4290,6 +4461,36 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetWindowNewEvent(jsCallback);
 }
 
+JSRef<JSVal> ActivateContentEventToJSValue(const WebActivateContentEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnActivateContent(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebActivateContentEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ActivateContentEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebActivateContentEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetActivateContentEventId(jsCallback);
+}
+
 JSRef<JSVal> WindowExitEventToJSValue(const WebWindowExitEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -4478,6 +4679,17 @@ JSRef<JSVal> DataResubmittedEventToJSValue(const DataResubmittedEvent& eventInfo
     jsDataResubmitted->SetHandler(eventInfo.GetHandler());
     obj->SetPropertyObject("handler", resultObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateDataResubmittedHandler(const DataResubmittedEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSDataResubmitted>::NewInstance();
+    auto geolocationEvent = Referenced::Claim(resultObj->Unwrap<JSDataResubmitted>());
+    if (!geolocationEvent) {
+        return resultObj;
+    }
+    geolocationEvent->SetHandler(eventInfo.GetHandler());
+    return resultObj;
 }
 
 void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
@@ -4738,6 +4950,22 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
         bool audioExclusive = audioExclusiveObj->ToBoolean();
         WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
+    auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
+    auto audioSessionType = WebAudioSessionType::AUTO;
+    if (audioSessionTypeObj->IsNumber()) {
+        int32_t audioSessionTypeIntValue = audioSessionTypeObj->ToNumber<int32_t>();
+        switch (audioSessionTypeIntValue) {
+            case 0:
+                audioSessionType = WebAudioSessionType::AUTO;
+                break;
+            case WEB_AUDIO_SESSION_TYPE_AMBIENT:
+                audioSessionType = WebAudioSessionType::AMBIENT;
+                break;
+            default:
+                audioSessionType = WebAudioSessionType::AUTO;
+        }
+    }
+    WebModel::GetInstance()->SetAudioSessionType(audioSessionType);
 }
 
 JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)
@@ -5757,8 +5985,10 @@ void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
-    WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
+    WebModel::GetInstance()->SetEditMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)
@@ -5808,6 +6038,23 @@ void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
         return;
     }
     WebModel::GetInstance()->SetDataDetectorConfig(textDetectConfig);
+}
+
+void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
+{
+    auto condition = WebBypassVsyncCondition::NONE;
+    switch (webBypassVsyncCondition) {
+        case 0:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+        case 1:
+            condition = WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET;
+            break;
+        default:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+    }
+    WebModel::GetInstance()->SetBypassVsyncCondition(condition);
 }
 
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)

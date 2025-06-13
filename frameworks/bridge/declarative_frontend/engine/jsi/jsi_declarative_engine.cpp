@@ -858,6 +858,7 @@ void JsiDeclarativeEngineInstance::InitGroupJsBridge()
     }
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
     JsUINodeRegisterCleanUp(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
+    JsUpdateDirty2ForAnimateTo(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
 }
 
 void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef> value)
@@ -2242,7 +2243,7 @@ bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, co
 }
 
 void JsiDeclarativeEngine::SetHspBufferTrackerCallback(
-    std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>&& callback)
+    std::function<bool(const std::string&, bool, uint8_t**, size_t*, std::string&)>&& callback)
 {
     CHECK_NULL_VOID(engineInstance_);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());

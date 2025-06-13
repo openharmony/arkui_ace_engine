@@ -1,0 +1,62 @@
+
+@interface memo{}
+
+class Test {
+
+	@memo void_method(): void {
+	}
+
+	@memo a_method_with_implicit_return_type() {
+	}
+
+	@memo void_method_with_arg(arg: string) {
+	}
+
+	@memo void_method_with_return(arg: string) {
+	 	return
+	}
+
+	@memo string_method_with_return(arg: string): string {
+	 	return arg
+	}
+
+	@memo method_with_type_parameter<T>(arg: T): T {
+		return arg
+	}
+
+    @memo static static_method_with_type_parameter<T>(arg: T): void {
+		return
+	}
+
+	@memo internal_call() {
+		this.void_method()
+	}
+
+	@memo lambda_arg(@memo arg: () => void) {
+
+	}
+
+	@memo lambda_arg_with_arg(@memo arg: (value: string) => string) {
+
+	}
+}
+
+class Use {
+	test() {
+		const test = new Test()
+
+		test.void_method()
+		test.void_method_with_arg("an arg")
+		test.void_method_with_return("a value")
+		Test.static_method_with_type_parameter("I'm static")
+
+		test.string_method_with_return("a string")
+		test.method_with_type_parameter("I'm string")
+
+		test.lambda_arg(() => {})
+		test.lambda_arg_with_arg((value: string) => value)
+	}
+}
+
+
+

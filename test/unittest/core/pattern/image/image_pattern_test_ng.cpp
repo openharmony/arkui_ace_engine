@@ -499,6 +499,22 @@ HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TriggerFirstVisibleAreaChange002
+ * @tc.desc: call TriggerFirstVisibleAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange002, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->isImageAnimator_ = true;
+    imagePattern->TriggerFirstVisibleAreaChange();
+    EXPECT_TRUE(imagePattern->isFormAnimationStart_);
+}
+
+/**
  * @tc.name: OnAreaChangedInner001
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
@@ -1851,6 +1867,24 @@ HWTEST_F(ImagePatternTestNg, ConvertOrientationToString005, TestSize.Level1)
     auto res = imagePattern->GetOrientation();
     ImageRotateOrientation Msg = ImageRotateOrientation::DOWN_MIRRORED;
     EXPECT_EQ(res, Msg);
+}
+
+/**
+ * @tc.name: ConvertOrientationToString006
+ * @tc.desc: Test ConvertOrientationToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ConvertOrientationToString006, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetOrientation(ImageRotateOrientation::DOWN);
+    imagePattern->DumpInfo();
+    auto res = imagePattern->GetOrientation();
+    ImageRotateOrientation msg = ImageRotateOrientation::DOWN;
+    EXPECT_EQ(res, msg);
 }
 
 /**

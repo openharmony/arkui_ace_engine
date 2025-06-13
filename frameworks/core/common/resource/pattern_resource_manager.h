@@ -102,6 +102,7 @@ private:
         std::function<void(const RefPtr<ResourceObject>&)> updateFunc;
     };
     std::unordered_map<std::string, ResourceUpdater> resMap_;
+    std::vector<std::string> resKeyArray_;
     std::unordered_map<std::string, std::map<bool, std::string>> resCacheMap_;
 };
 }

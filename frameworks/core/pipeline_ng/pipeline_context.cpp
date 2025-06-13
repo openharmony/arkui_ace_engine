@@ -706,7 +706,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
-    if (!onShow_) {
+    // the application is in the background and the dark and light colors are switched.
+    if (!onShow_ && backgroundColorModeUpdated_) {
+        backgroundColorModeUpdated_ = false;
         FlushMessages([window = window_]() {
             if (window) {
                 window->NotifySnapshotUpdate();
@@ -1265,6 +1267,11 @@ void PipelineContext::FlushBuild()
     FlushBuildFinishCallbacks();
 }
 
+void PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
+{
+    vsyncListener_ = std::move(vsync);
+}
+
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
 {
     animationClosuresList_.emplace_back(std::move(animation));
@@ -1395,15 +1402,25 @@ void PipelineContext::SetupRootElement()
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() : stageNode->GetParent()));
 
-    OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
+    auto instanceId = container->GetInstanceId();
+    OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_)),
+                                              instanceId](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
-        overlay->HideAllMenus();
-        SubwindowManager::GetInstance()->HideMenuNG(false);
-        overlay->HideCustomPopups();
+        auto container = Container::GetContainer(instanceId);
+        // In sceneBoard window, popup and menu need be cleared without animation.
+        if (container && container->IsSceneBoardWindow()) {
+            overlay->HideAllMenusWithoutAnimation();
+            overlay->HideAllPopupsWithoutAnimation();
+            SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
+        } else {
+            overlay->HideAllMenus();
+            SubwindowManager::GetInstance()->HideMenuNG(false);
+            overlay->HideCustomPopups();
+        }
         SubwindowManager::GetInstance()->ClearToastInSubwindow();
         SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
         overlay->UpdateCustomKeyboardPosition();
@@ -2148,7 +2165,7 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
     auto frameNode = DynamicCast<FrameNode>(uiNode);
-    attachedNodeSet_.erase(RawPtr(uiNode));
+    attachedNodeSet_.erase(WeakPtr(uiNode));
     CHECK_NULL_VOID(frameNode);
 
     RemoveStoredNode(frameNode->GetRestoreId());
@@ -2846,7 +2863,17 @@ void PipelineContext::OnTouchEvent(
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     eventManager_->CheckDownEvent(scalePoint);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
+    ReportConfig config;
+#if !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM) && defined(OHOS_PLATFORM)
+    auto container = Container::GetContainer(instanceId_);
+    if (container) {
+        config.isReportTid = container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    }
+    if (config.isReportTid) {
+        config.tid = static_cast<uint64_t>(pthread_self());
+    }
+#endif
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
 
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
@@ -3528,6 +3555,12 @@ void PipelineContext::FlushTouchEvents()
         }
         eventManager_->SetIdToTouchPoint(std::move(idToTouchPoints));
     }
+}
+
+
+void PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated)
+{
+    backgroundColorModeUpdated_ = backgroundColorModeUpdated;
 }
 
 void PipelineContext::ConsumeTouchEvents(
@@ -4235,6 +4268,11 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId)
 {
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    if (frameNode) {
+        frameNode->ClearCachedIsFrameDisappear();
+    }
+
     onVisibleAreaChangeNodeIds_.erase(nodeId);
 }
 
@@ -4246,8 +4284,10 @@ void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp)
     }
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp);
+        frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp, false, isDisappearChangeNodeMinDepth_);
     }
+
+    isDisappearChangeNodeMinDepth_ = 0;
 }
 
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
@@ -4258,6 +4298,11 @@ void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
 {
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    if (frameNode) {
+        frameNode->ClearCachedGlobalOffset();
+    }
+
     onAreaChangeNodeIds_.erase(nodeId);
     isOnAreaChangeNodesCacheVaild_ = false;
 }
@@ -4275,8 +4320,10 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     }
     auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
+        frameNode->TriggerOnAreaChangeCallback(nanoTimestamp, areaChangeNodeMinDepth_);
     }
+
+    areaChangeNodeMinDepth_ = 0;
     UpdateFormLinkInfos();
 }
 
@@ -4525,10 +4572,13 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
-    std::unordered_set<UINode*> nodeSet;
+    std::set<WeakPtr<UINode>> nodeSet;
     std::swap(nodeSet, attachedNodeSet_);
-    for (auto& node : nodeSet) {
-        node->DetachFromMainTree();
+    for (const auto& node : nodeSet) {
+        auto illegalNode = node.Upgrade();
+        if (illegalNode) {
+            illegalNode->DetachFromMainTree();
+        }
     }
     rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
@@ -4561,9 +4611,6 @@ void PipelineContext::Destroy()
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
     dirtyRequestFocusNode_.Reset();
-    if (textFieldManager_ && textFieldManager_->GetImeShow()) {
-        InputMethodManager::GetInstance()->CloseKeyboardInPipelineDestroy();
-    }
     auto formEventMgr = this->GetFormEventManager();
     if (formEventMgr) {
         formEventMgr->ClearEtsCardTouchEventCallback();
@@ -5845,12 +5892,29 @@ void PipelineContext::NotifyColorModeChange(uint32_t colorMode)
     option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(
         option,
-        [weak = AceType::WeakClaim(AceType::RawPtr(rootNode_)), colorMode, rootColorMode = GetColorMode()]() {
+        [weakPipelineContext = WeakClaim(this), weak = WeakPtr<FrameNode>(rootNode_),
+            colorMode, rootColorMode = GetColorMode()]() {
+            auto pipeline = weakPipelineContext.Upgrade();
+            CHECK_NULL_VOID(pipeline);
             auto rootNode = weak.Upgrade();
             CHECK_NULL_VOID(rootNode);
+            pipeline->SetIsReloading(true);
             rootNode->SetDarkMode(rootColorMode == ColorMode::DARK);
             rootNode->NotifyColorModeChange(colorMode);
+            pipeline->SetIsReloading(false);
+            pipeline->FlushUITasks();
+        },
+        [weak = WeakClaim(this)]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->OnFlushReloadFinish();
         });
+    CHECK_NULL_VOID(stageManager_);
+    auto stage = stageManager_->GetStageNode();
+    CHECK_NULL_VOID(stage);
+    auto renderContext = stage->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateWindowBlur();
 }
 
 void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)
@@ -6024,12 +6088,12 @@ bool PipelineContext::FlushModifierAnimation(uint64_t nanoTimestamp)
 
 void PipelineContext::RegisterAttachedNode(UINode* uiNode)
 {
-    attachedNodeSet_.emplace(uiNode);
+    attachedNodeSet_.emplace(WeakClaim(uiNode));
 }
 
 void PipelineContext::RemoveAttachedNode(UINode* uiNode)
 {
-    attachedNodeSet_.erase(uiNode);
+    attachedNodeSet_.erase(WeakClaim(uiNode));
 }
 
 ScopedLayout::ScopedLayout(PipelineContext* pipeline)

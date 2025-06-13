@@ -248,6 +248,7 @@ public:
     {
         return propTransitionDisappearing_ != nullptr;
     }
+    void ClearModifiers();
     void OnNodeAppear(bool recursive) override;
     void OnNodeDisappear(bool recursive) override;
     void SetTransitionOutCallback(std::function<void()>&& callback) override;
@@ -384,7 +385,7 @@ public:
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
     void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) override {}
     void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) override;
-    void UpdateCustomBackground() override;
+    void OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges) override;
 
     void ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor);
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -463,6 +464,8 @@ public:
     void UpdateWindowBlur() override;
     void MarkUiFirstNode(bool isUiFirstNode) override;
 
+    void SetRSUIContext(PipelineContext* context) override;
+
     void SetDrawNode() override;
     bool AddNodeToRsTree() override;
     static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
@@ -513,6 +516,8 @@ public:
     void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) override;
     void CancelPropertyAnimation(AnimationPropertyType property) override;
     std::vector<float> GetRenderNodePropertyValue(AnimationPropertyType property) override;
+    void SyncRSPropertyToRenderContext(AnimationPropertyType property) override;
+    void RemoveFromTree() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -624,7 +629,7 @@ protected:
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
-    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext();
+    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(PipelineContext* pipeline);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);
@@ -675,6 +680,8 @@ protected:
     RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
     void ClickEffectPlayAnimation(const TouchType& touchType);
 
+    void SetSkipCheckInMultiInstance();
+
     // helper function to check if paint rect is valid
     bool RectIsNull();
 
@@ -701,6 +708,8 @@ protected:
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void BdImagePaintTask(RSCanvas& canvas);
+
+    void FlushImplicitTransaction();
 
     void RegisterDensityChangedCallback();
 
@@ -735,6 +744,7 @@ protected:
         const std::optional<ContextParam>& param, bool isTextureExportNode);
 #endif
     void DetachModifiers();
+    void MarkNeedDrawNode(bool condition);
 
     void OnEmitterPropertyUpdate();
 
@@ -847,6 +857,7 @@ protected:
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
     bool isDraggingFlag_ = false;
     bool reDraggingFlag_ = false;
+    PipelineContext* pipeline_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

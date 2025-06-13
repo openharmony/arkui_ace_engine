@@ -44,7 +44,10 @@ static void DragActionConvert(
         internalDragAction->previewOption.isShowBadge = dragAction->dragPreviewOption.isShowBadge;
     }
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataForNative(dragAction->unifiedData);
+    RefPtr<DataLoadParams> udDataLoadParams =
+        UdmfClient::GetInstance()->TransformDataLoadParamsForNative(dragAction->dataLoadParams);
     internalDragAction->unifiedData = udData;
+    internalDragAction->dataLoadParams = udDataLoadParams;
     internalDragAction->instanceId = dragAction->instanceId;
     internalDragAction->touchPointX = dragAction->touchPointX;
     internalDragAction->touchPointY = dragAction->touchPointY;
@@ -66,10 +69,6 @@ ArkUI_Int32 StartDrag(ArkUIDragAction* dragAction)
         ArkUIDragEvent dragEvent;
         dragEvent.dragResult = static_cast<int32_t>(dragNotifyMsg.result);
         dragEvent.dragBehavior = static_cast<int32_t>(dragNotifyMsg.dragBehavior);
-        DragBundleInfo dragBundleInfo;
-        InteractionInterface::GetInstance()->GetDragBundleInfo(dragBundleInfo);
-        dragEvent.bundleName = strdup(dragBundleInfo.bundleName.c_str());
-        dragEvent.isRemoteDev = &dragBundleInfo.isRemoteDev;
 
         auto action = manager->GetDragAction();
         if (action != nullptr) {

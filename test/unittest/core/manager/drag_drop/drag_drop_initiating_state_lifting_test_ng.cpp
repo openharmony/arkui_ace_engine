@@ -200,6 +200,7 @@ void DragDropInitiatingStateLiftingTestNG::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+    DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(false);
 }
 
 /**
@@ -418,7 +419,7 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
 }
 
 /**
- * @tc.name: DragDropInitiatingStateLiftingTestNG001
+ * @tc.name: DragDropInitiatingStateLiftingTestNG005
  * @tc.desc: Test CollectTouchTarget function when frameNode is image.
  * @tc.type: FUNC
  */
@@ -447,7 +448,6 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
     ASSERT_NE(state, nullptr);
     auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
     ASSERT_NE(liftingState, nullptr);
-    DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(true);
     gestureEventHub->SetIsTextDraggable(true);
 
     auto info = GestureEvent();

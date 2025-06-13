@@ -191,8 +191,8 @@ public:
     bool IsPointInRect(const OffsetF& point, const OffsetF& leftBottom, const OffsetF& rightBottom,
         const OffsetF& rightTop, const OffsetF& leftTop);
 
-    void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
 
     void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
     {
@@ -202,6 +202,11 @@ public:
     void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
     {
         onMenuItemClick_ = onMenuItemClick;
+    }
+
+    void OnPrepareMenuCallbackUpdate(const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+    {
+        onPrepareMenuCallback_ = onPrepareMenuCallback;
     }
 
     float GetHandleDiameter();
@@ -246,6 +251,7 @@ public:
     {
         selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback_;
         selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick_;
+        selectInfo.onCreateCallback.onPrepareMenuCallback = onPrepareMenuCallback_;
         auto textRange = [weak = GetHostTextBase()](int32_t& start, int32_t& end) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -381,6 +387,7 @@ protected:
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
+    OnPrepareMenuCallback onPrepareMenuCallback_;
     bool isHandleMoving_ = false;
     DragHandleIndex dragHandleIndex_ = DragHandleIndex::NONE;
     RectF ConvertWindowToScreenDomain(RectF rect);

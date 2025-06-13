@@ -48,17 +48,18 @@ void EventManager::UpdatePenHoverNode(const TouchEvent& event, const TouchTestRe
         }
     }
 
+    int32_t eventIdentity = event.GetEventIdentity();
     if (event.type == TouchType::PROXIMITY_IN) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "pen proximity in hover event.");
-        lastPenHoverResultsMap_[event.id].clear();
-        curPenHoverResultsMap_[event.id] = std::move(penHoverTestResult);
+        lastPenHoverResultsMap_[eventIdentity].clear();
+        curPenHoverResultsMap_[eventIdentity] = std::move(penHoverTestResult);
     } else if (event.type == TouchType::PROXIMITY_OUT) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "pen proximity out hover event.");
-        lastPenHoverResultsMap_[event.id] = std::move(curPenHoverResultsMap_[event.id]);
-        curPenHoverResultsMap_[event.id].clear();
+        lastPenHoverResultsMap_[eventIdentity] = std::move(curPenHoverResultsMap_[eventIdentity]);
+        curPenHoverResultsMap_[eventIdentity].clear();
     } else {
-        lastPenHoverResultsMap_[event.id] = std::move(curPenHoverResultsMap_[event.id]);
-        curPenHoverResultsMap_[event.id] = std::move(penHoverTestResult);
+        lastPenHoverResultsMap_[eventIdentity] = std::move(curPenHoverResultsMap_[eventIdentity]);
+        curPenHoverResultsMap_[eventIdentity] = std::move(penHoverTestResult);
     }
 }
 
@@ -77,12 +78,12 @@ void EventManager::UpdatePenHoverMoveNode(const TouchEvent& event, const TouchTe
 void EventManager::DispatchPenHoverEventNG(const TouchEvent& event)
 {
     HoverTestResult lastPenHoverResults;
-    if (auto it = lastPenHoverResultsMap_.find(event.id); it != lastPenHoverResultsMap_.end()) {
+    if (auto it = lastPenHoverResultsMap_.find(event.GetEventIdentity()); it != lastPenHoverResultsMap_.end()) {
         lastPenHoverResults = it->second;
     }
 
     HoverTestResult curPenHoverResults;
-    if (auto it = curPenHoverResultsMap_.find(event.id); it != curPenHoverResultsMap_.end()) {
+    if (auto it = curPenHoverResultsMap_.find(event.GetEventIdentity()); it != curPenHoverResultsMap_.end()) {
         curPenHoverResults = it->second;
     }
     auto lastHoverEndNode = lastPenHoverResults.begin();

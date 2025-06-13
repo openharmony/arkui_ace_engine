@@ -18,12 +18,24 @@
 
 #include <functional>
 #include <string>
+#include <unordered_map>
 
 #include "ui/animation/animation_constants.h"
 #include "ui/animation/curve.h"
 #include "ui/animation/frame_rate_range.h"
 
 namespace OHOS::Ace {
+
+inline const std::unordered_map<AnimationInterface, std::string> animationTypeToStrMap = {
+    { AnimationInterface::ANIMATION, "animation" },
+    { AnimationInterface::ANIMATE_TO, "animateTo" },
+    { AnimationInterface::ANIMATE_TO_IMMEDIATELY, "animateToImmediately" },
+    { AnimationInterface::KEYFRAME_ANIMATE_TO, "keyframeAnimateTo" },
+    { AnimationInterface::TRANSITION, "transition" },
+    { AnimationInterface::SHARED_TRANSITION, "sharedTransition" },
+    { AnimationInterface::PAGE_TRANSITION, "pageTransition" },
+    { AnimationInterface::UNKNOWN, "unknown" },
+};
 
 class AnimationOption final {
 public:
@@ -155,6 +167,22 @@ public:
         return rateRange_;
     }
 
+    void SetAnimationInterface(AnimationInterface animationInterface)
+    {
+        animationInterface_ = animationInterface;
+    }
+
+    AnimationInterface GetAnimationInterface() const
+    {
+        return animationInterface_;
+    }
+
+    const std::string GetAnimationInterfaceString() const
+    {
+        auto it = animationTypeToStrMap.find(animationInterface_);
+        return it != animationTypeToStrMap.end() ? it->second : "unknown";
+    }
+
     std::string ToString() const
     {
         std::string result = std::string("duration:").append(std::to_string(duration_))
@@ -180,6 +208,7 @@ private:
     int32_t iteration_ = 1;
     float tempo_ = 1.0f;
     FillMode fillMode_ = FillMode::FORWARDS;
+    AnimationInterface animationInterface_ = AnimationInterface::UNKNOWN;
     bool allowRunningAsynchronously_ = false;
     RefPtr<Curve> curve_;
     std::function<void()> onFinishEvent_;

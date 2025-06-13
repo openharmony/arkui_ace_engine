@@ -112,10 +112,8 @@ void RefreshModelNG::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_VOID(pattern);
-    if (!resObj) {
-        pattern->RemoveResObj("refresh.promptText");
-        return;
-    }
+    pattern->RemoveResObj("refresh.promptText");
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);

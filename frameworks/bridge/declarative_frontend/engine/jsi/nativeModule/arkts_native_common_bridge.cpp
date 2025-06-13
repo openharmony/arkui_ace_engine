@@ -100,17 +100,8 @@ constexpr double DEFAULT_MAX_ROTATION_ANGLE = 360.0;
 const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
-constexpr double WIDTH_BREAKPOINT_320VP = 320.0; // window width threshold
-constexpr double WIDTH_BREAKPOINT_600VP = 600.0;
-constexpr double WIDTH_BREAKPOINT_840VP = 840.0;
-constexpr double WIDTH_BREAKPOINT_1440VP = 1440.0;
-constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0.8
-constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
-
-enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL};
-enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
 enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
@@ -1430,7 +1421,7 @@ bool ParseCalcDimension(const EcmaVM* vm,
 
 void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
     std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue,
-    std::vector<RefPtr<ResourceObject>>& bgImageResizableResObjArray)
+    std::vector<RefPtr<ResourceObject>>& bgImageResizableResObjs)
 {
     auto end = offset + count;
     auto argsNumber = runtimeCallInfo->GetArgsNumber();
@@ -1449,7 +1440,7 @@ void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_
         } else {
             optCalcDimension = defaultDimension;
         }
-        bgImageResizableResObjArray.push_back(resObj);
+        bgImageResizableResObjs.push_back(resObj);
         results.push_back(optCalcDimension);
     }
 }
@@ -3336,16 +3327,12 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageResizable(ArkUIRuntimeCal
 
     std::vector<ArkUIStringAndFloat> options;
     std::vector<std::optional<CalcDimension>> sliceDimensions;
-    std::vector<void*> bgImageResizableArray;
-    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjArray;
-    ParseResizableCalcDimensions(runtimeCallInfo, NUM_1, NUM_4, sliceDimensions, CalcDimension(0.0), bgImageResizableResObjArray);
-    for (unsigned int index = 0; index < NUM_4; index++) {
-        auto bgImageResizableRawPtr = AceType::RawPtr(bgImageResizableResObjArray[index]);
-        bgImageResizableArray.push_back(bgImageResizableRawPtr);
-    }
+    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjs;
+    ParseResizableCalcDimensions(
+        runtimeCallInfo, NUM_1, NUM_4, sliceDimensions, CalcDimension(0.0), bgImageResizableResObjs);
     PushDimensionsToVector(options, sliceDimensions);
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageResizable(nativeNode, options.data(),
-        static_cast<ArkUI_Int32>(options.size()), bgImageResizableArray);
+        static_cast<ArkUI_Int32>(options.size()), static_cast<void*>(&bgImageResizableResObjs));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -7262,6 +7249,11 @@ Local<panda::ObjectRef> CommonBridge::SetUniqueAttributes(
 {
     double density = PipelineBase::GetCurrentDensity();
     switch (typeName) {
+        case OHOS::Ace::GestureTypeName::TAP_GESTURE: {
+            const char* keys[] = { "tapLocation" };
+            Local<JSValueRef> values[] = { CreateTapGestureLocationInfo(vm,info) };
+            return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        }
         case OHOS::Ace::GestureTypeName::LONG_PRESS_GESTURE: {
             auto* longPressGestureEvent = TypeInfoHelper::DynamicCast<LongPressGestureEvent>(info.get());
             if (longPressGestureEvent) {
@@ -7879,6 +7871,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, info.GetTargetDisplayId()));
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTargetDisplayId())));
     if (info.GetGestureTypeName() == GestureTypeName::TAP_GESTURE && !info.GetFingerList().empty()) {
         auto tapGuestureInfo = CreateTapGestureInfo(vm, info);
         obj->Set(
@@ -9018,23 +9012,10 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo
         if (value->IsNumber()) {
             returnValue = static_cast<GestureJudgeResult>(value->ToNumber(vm)->Value());
         }
-        if (gestureInfo->GetType() == GestureTypeName::TAP_GESTURE) {
-            auto tapGuestureEventObj = CreateTapGestureLocationEvent(vm, gestureInfo->GetType(), info);
-            panda::Local<panda::JSValueRef> params[1] = { tapGuestureEventObj };
-            function->Call(vm, function.ToLocal(), params, 1);
-        }
         return returnValue;
     };
     NG::ViewAbstract::SetOnGestureJudgeBegin(frameNode, std::move(onGestureJudgeBegin));
     return panda::JSValueRef::Undefined(vm);
-}
-
-Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationEvent(
-    EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info)
-{
-    auto obj = SetUniqueAttributes(vm, typeName, info);
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tapLocation"), CreateTapGestureLocationInfo(vm, info));
-    return obj;
 }
 
 Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationInfo(
@@ -9568,26 +9549,10 @@ ArkUINativeModuleValue CommonBridge::GetWindowWidthBreakpoint(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto window = container->GetWindow();
     CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
-    double density = PipelineBase::GetCurrentDensity();
-    double width = 0.0;
-    if (NearZero(density)) {
-        width = window->GetCurrentWindowRect().Width();
-    } else {
-        width = window->GetCurrentWindowRect().Width() / density;
-    }
 
-    WidthBreakpoint breakpoint;
-    if (width < WIDTH_BREAKPOINT_320VP) {
-        breakpoint = WidthBreakpoint::WIDTH_XS;
-    } else if (width < WIDTH_BREAKPOINT_600VP) {
-        breakpoint = WidthBreakpoint::WIDTH_SM;
-    } else if (width < WIDTH_BREAKPOINT_840VP) {
-        breakpoint = WidthBreakpoint::WIDTH_MD;
-    } else if (width < WIDTH_BREAKPOINT_1440VP) {
-        breakpoint = WidthBreakpoint::WIDTH_LG;
-    } else {
-        breakpoint = WidthBreakpoint::WIDTH_XL;
-    }
+    WidthLayoutBreakPoint layoutBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+    WidthBreakpoint breakpoint = window->GetWidthBreakpoint(layoutBreakpoints);
+
     return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));
 }
 
@@ -9599,22 +9564,10 @@ ArkUINativeModuleValue CommonBridge::GetWindowHeightBreakpoint(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto window = container->GetWindow();
     CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
-    auto width = window->GetCurrentWindowRect().Width();
-    auto height = window->GetCurrentWindowRect().Height();
-    auto aspectRatio = 0.0;
-    if (NearZero(width)) {
-        aspectRatio = 0.0;
-    } else {
-        aspectRatio = height / width;
-    }
-    HeightBreakpoint breakpoint;
-    if (aspectRatio < HEIGHT_ASPECTRATIO_THRESHOLD1) {
-        breakpoint = HeightBreakpoint::HEIGHT_SM;
-    } else if (aspectRatio < HEIGHT_ASPECTRATIO_THRESHOLD2) {
-        breakpoint = HeightBreakpoint::HEIGHT_MD;
-    } else {
-        breakpoint = HeightBreakpoint::HEIGHT_LG;
-    }
+
+    HeightLayoutBreakPoint layoutBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
+    HeightBreakpoint breakpoint = window->GetHeightBreakpoint(layoutBreakpoints);
+
     return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));
 }
 

@@ -277,8 +277,7 @@ void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
 
         if (dxResObj || dyResObj) {
             std::vector<RefPtr<ResourceObject>> resArray = { dxResObj, dyResObj };
-            CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset, resArray);
-            return;
+            CalendarPickerModel::GetInstance()->ParseEdgeAlignResObj(resArray);
         }
     } else {
         ParseJsDimensionVp(dxValue, dx);
@@ -301,10 +300,6 @@ void JSCalendarPicker::SetTextStyle(const JSCallbackInfo& info)
     textStyle.fontWeight = FontWeight::NORMAL;
     if (info[0]->IsObject()) {
         JSCalendarPicker::ParseTextStyle(info[0], textStyle);
-    }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        CalendarPickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);
     }
     CalendarPickerModel::GetInstance()->SetTextStyle(textStyle);
 }
@@ -359,9 +354,21 @@ void JSCalendarPicker::JsHeight(const JSCallbackInfo& info)
     CalcDimension value;
     if (ParseJsDimensionVpNG(jsValue, value) && value.IsValid()) {
         JSViewAbstract::JsHeight(info);
-    } else {
-        CalendarPickerModel::GetInstance()->ClearHeight();
+        return;
     }
+
+    LayoutCalPolicy policy = LayoutCalPolicy::NO_MATCH;
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+        CHECK_NULL_VOID(!object->IsEmpty());
+        JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+        CHECK_NULL_VOID(!layoutPolicy->IsEmpty());
+        if (layoutPolicy->IsString()) {
+            policy = ParseLayoutPolicy(layoutPolicy->ToString());
+        }
+    }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+    CalendarPickerModel::GetInstance()->ClearHeight();
 }
 
 void JSCalendarPicker::JsBorderColor(const JSCallbackInfo& info)

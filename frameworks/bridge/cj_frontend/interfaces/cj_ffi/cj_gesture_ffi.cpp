@@ -16,8 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_gesture_ffi.h"
 
 #include "cj_gesture_native.h"
-#include "cj_lambda.h"
 #include "cj_gesture_recognizer_ffi.h"
+#include "cj_lambda.h"
 
 #include "bridge/cj_frontend/cppview/gesture.h"
 #include "core/components/common/layout/constants.h"
@@ -158,6 +158,36 @@ bool CheckKeysPressed(const std::vector<KeyCode>& pressedKeyCodes, std::vector<s
     return true;
 }
 
+void ParseOnGestureJudgeFuncCJArea(
+    const EventTarget& eventTarget, CJArea& ffiArea, CJPosition& ffiPosition, CJPosition& ffiGlobalPosition)
+{
+    ffiArea.width = eventTarget.area.GetWidth().ConvertToVp();
+    ffiArea.height = eventTarget.area.GetHeight().ConvertToVp();
+    const auto& localOffset = eventTarget.area.GetOffset();
+    const auto& origin = eventTarget.origin;
+    ffiPosition.x = localOffset.GetX().ConvertToVp();
+    ffiPosition.y = localOffset.GetY().ConvertToVp();
+    ffiGlobalPosition.x = origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp();
+    ffiGlobalPosition.y = origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp();
+    ffiArea.globalPosition = &ffiGlobalPosition;
+    ffiArea.position = &ffiPosition;
+}
+
+void ParseOnGestureJudgeFuncCJBaseEvent(
+    const std::shared_ptr<BaseGestureEvent>& info, CJBaseEvent& ffiBaseEvent, CJEventTarget& ffiEventTarget)
+{
+    ffiBaseEvent.timestamp = info->GetTimeStamp().time_since_epoch().count();
+    ffiBaseEvent.source = static_cast<int32_t>(info->GetSourceDevice());
+    ffiBaseEvent.pressure = info->GetForce();
+    ffiBaseEvent.tiltX = info->GetTiltX().value();
+    ffiBaseEvent.tiltY = info->GetTiltY().value();
+    ffiBaseEvent.sourceTool = static_cast<int32_t>(info->GetSourceTool());
+    ffiBaseEvent.target = &ffiEventTarget;
+    ffiBaseEvent.deviceId = info->GetDeviceId();
+    ffiBaseEvent.axisHorizontal = nullptr;
+    ffiBaseEvent.axisVertical = nullptr;
+}
+
 void FormatGestureType(CJBaseGestureEvent& cjEvent, const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName type)
 {
     double density = PipelineBase::GetCurrentDensity();
@@ -217,18 +247,7 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunctionV2(void 
         CJPosition ffiGlobalPosition {};
 
         const auto& eventTarget = event.GetTarget();
-        ffiArea.width = eventTarget.area.GetWidth().ConvertToVp();
-        ffiArea.height = eventTarget.area.GetHeight().ConvertToVp();
-        const auto& localOffset = eventTarget.area.GetOffset();
-        const auto& origin = eventTarget.origin;
-        ffiPosition.x = localOffset.GetX().ConvertToVp();
-        ffiPosition.y = localOffset.GetY().ConvertToVp();
-        ffiGlobalPosition.x = origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp();
-        ffiGlobalPosition.y = origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp();
-
-        ffiArea.globalPosition = &ffiGlobalPosition;
-        ffiArea.position = &ffiPosition;
-
+        ParseOnGestureJudgeFuncCJArea(eventTarget, ffiArea, ffiPosition, ffiGlobalPosition);
         ffiEventTarget.area = &ffiArea;
 
         auto& fingerList = event.GetFingerList();
@@ -259,7 +278,9 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunctionV2(void 
         ffiGestureEvent.deviceId = event.GetDeviceId();
         ffiGestureEvent.baseEventInfoPtr = dynamic_cast<const BaseEventInfo*>(&event);
         ffiOnAction(ffiGestureEvent);
-        delete ffiGestureEvent.fingerList;
+        if (ffiGestureEvent.fingerList != nullptr) {
+            delete[] ffiGestureEvent.fingerList;
+        }
     };
     return result;
 }
@@ -303,7 +324,9 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*
         ffiGestureEvent.angle = event.GetAngle();
         ffiGestureEvent.speed = event.GetSpeed();
         ffiOnAction(ffiGestureEvent);
-        delete ffiGestureEvent.fingerList;
+        if (ffiGestureEvent.fingerList != nullptr) {
+            delete[] ffiGestureEvent.fingerList;
+        }
     };
     return result;
 }
@@ -357,14 +380,13 @@ OHOS::sptr<CJGestureRecognizer> CreateRecognizerObject(const RefPtr<NG::NGGestur
     auto panRecognizer = AceType::DynamicCast<NG::PanRecognizer>(target);
     if (panRecognizer) {
         auto currentRecognizer = FFIData::Create<CJPanRecognizer>();
-        currentRecognizer->update(panRecognizer);
+        currentRecognizer->Update(panRecognizer);
         return currentRecognizer;
     }
     auto currentRecognizer = FFIData::Create<CJGestureRecognizer>();
-    currentRecognizer->update(target);
+    currentRecognizer->Update(target);
     return currentRecognizer;
 }
-
 } // namespace
 
 extern "C" {
@@ -957,28 +979,10 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureJudgeBegin(int32_t (*callback)(C
         CJPosition ffiGlobalPosition {};
 
         const auto& eventTarget = info->GetTarget();
-        ffiArea.width = eventTarget.area.GetWidth().ConvertToVp();
-        ffiArea.height = eventTarget.area.GetHeight().ConvertToVp();
-        const auto& localOffset = eventTarget.area.GetOffset();
-        const auto& origin = eventTarget.origin;
-        ffiPosition.x = localOffset.GetX().ConvertToVp();
-        ffiPosition.y = localOffset.GetY().ConvertToVp();
-        ffiGlobalPosition.x = origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp();
-        ffiGlobalPosition.y = origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp();
-        ffiArea.globalPosition = &ffiGlobalPosition;
-        ffiArea.position = &ffiPosition;
+        ParseOnGestureJudgeFuncCJArea(eventTarget, ffiArea, ffiPosition, ffiGlobalPosition);
         ffiEventTarget.area = &ffiArea;
 
-        ffiBaseEvent.timestamp = info->GetTimeStamp().time_since_epoch().count();
-        ffiBaseEvent.source = static_cast<int32_t>(info->GetSourceDevice());
-        ffiBaseEvent.pressure = info->GetForce();
-        ffiBaseEvent.tiltX = info->GetTiltX().value();
-        ffiBaseEvent.tiltY = info->GetTiltY().value();
-        ffiBaseEvent.sourceTool = static_cast<int32_t>(info->GetSourceTool());
-        ffiBaseEvent.target = &ffiEventTarget;
-        ffiBaseEvent.deviceId = info->GetDeviceId();
-        ffiBaseEvent.axisHorizontal = nullptr;
-        ffiBaseEvent.axisVertical = nullptr;
+        ParseOnGestureJudgeFuncCJBaseEvent(info, ffiBaseEvent, ffiEventTarget);
         baseGestureEvent.baseEvent = &ffiBaseEvent;
 
         auto& fingerList = info->GetFingerList();
@@ -987,18 +991,20 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureJudgeBegin(int32_t (*callback)(C
         TransformNativeCJFingerInfo(baseGestureEvent.fingerList, fingerList);
         FormatGestureType(baseGestureEvent, info, gestureInfo->GetType());
         auto result = ffiCallback(cjGestureInfo, baseGestureEvent);
-        delete baseGestureEvent.fingerList;
+        delete[] baseGestureEvent.fingerList;
         return static_cast<GestureJudgeResult>(result);
     };
     ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(std::move(onGestureJudgeFunc));
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(int32_t (*callback)(CJBaseGestureEvent, int64_t, VectorInt64Handle), bool exposeInnerGesture)
+void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(
+    int32_t (*callback)(CJBaseGestureEvent, int64_t, VectorInt64Handle), bool exposeInnerGesture)
 {
     auto onGestureRecognizerJudgeFunc = [ffiCallback = CJLambda::Create(callback)](
-                                            const std::shared_ptr<BaseGestureEvent>& info,
-                                            const RefPtr<NG::NGGestureRecognizer>& current,
-                                            const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        const std::shared_ptr<BaseGestureEvent>& info,
+        const RefPtr<NG::NGGestureRecognizer>& current,
+        const std::list<RefPtr<NG::NGGestureRecognizer>>& others
+    )-> GestureJudgeResult {
         ACE_SCORING_EVENT("onGestureRecognizerJudgeBegin");
         CJBaseGestureEvent baseGestureEvent;
         CJBaseEvent ffiBaseEvent {};
@@ -1011,40 +1017,22 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(int32_t (*c
         CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
 
         const auto& eventTarget = info->GetTarget();
-        ffiArea.width = eventTarget.area.GetWidth().ConvertToVp();
-        ffiArea.height = eventTarget.area.GetHeight().ConvertToVp();
-        const auto& localOffset = eventTarget.area.GetOffset();
-        const auto& origin = eventTarget.origin;
-        ffiPosition.x = localOffset.GetX().ConvertToVp();
-        ffiPosition.y = localOffset.GetY().ConvertToVp();
-        ffiGlobalPosition.x = origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp();
-        ffiGlobalPosition.y = origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp();
-        ffiArea.globalPosition = &ffiGlobalPosition;
-        ffiArea.position = &ffiPosition;
+        ParseOnGestureJudgeFuncCJArea(eventTarget, ffiArea, ffiPosition, ffiGlobalPosition);
         ffiEventTarget.area = &ffiArea;
 
-        ffiBaseEvent.timestamp = info->GetTimeStamp().time_since_epoch().count();
-        ffiBaseEvent.source = static_cast<int32_t>(info->GetSourceDevice());
-        ffiBaseEvent.pressure = info->GetForce();
-        ffiBaseEvent.tiltX = info->GetTiltX().value();
-        ffiBaseEvent.tiltY = info->GetTiltY().value();
-        ffiBaseEvent.sourceTool = static_cast<int32_t>(info->GetSourceTool());
-        ffiBaseEvent.target = &ffiEventTarget;
-        ffiBaseEvent.deviceId = info->GetDeviceId();
-        ffiBaseEvent.axisHorizontal = nullptr;
-        ffiBaseEvent.axisVertical = nullptr;
+        ParseOnGestureJudgeFuncCJBaseEvent(info, ffiBaseEvent, ffiEventTarget);
         baseGestureEvent.baseEvent = &ffiBaseEvent;
 
         auto& fingerList = info->GetFingerList();
         baseGestureEvent.fingerListSize = static_cast<int32_t>(fingerList.size());
         baseGestureEvent.fingerList = new CJFingerInfo[fingerList.size()];
         TransformNativeCJFingerInfo(baseGestureEvent.fingerList, fingerList);
-        FormatGestureType(baseGestureEvent, info, gestureInfo->GetType());
+        FormatGestureType(baseGestureEvent, info, gestureInfo->GetRecognizerType());
 
         auto currentObj = CreateRecognizerObject(current);
         auto gestureRecognizerArray = std::vector<OHOS::sptr<Framework::CJGestureRecognizer>>(others.size());
         size_t i = 0;
-        for (const RefPtr<NG::NGGestureRecognizer>& temp: others) {
+        for (const RefPtr<NG::NGGestureRecognizer>& temp : others) {
             gestureRecognizerArray[i] = CreateRecognizerObject(temp);
             i++;
         }
@@ -1056,7 +1044,8 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(int32_t (*c
         delete baseGestureEvent.fingerList;
         return static_cast<GestureJudgeResult>(result);
     };
-    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(std::move(onGestureRecognizerJudgeFunc), exposeInnerGesture);
+    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(
+        std::move(onGestureRecognizerJudgeFunc), exposeInnerGesture);
 }
 
 void FfiOHOSAceFrameworkViewAbstractShouldBuiltInRecognizerParallelWith(int64_t (*callback)(int64_t, VectorInt64Handle))

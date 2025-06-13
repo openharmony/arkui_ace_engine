@@ -29,11 +29,11 @@
 namespace OHOS::Ace::NG {
 class NavigationStack;
 struct NavigationInfo {
-    int32_t nodeId;
+    int32_t nodeId = -1;
     std::string navigationId; // inspectorId
     WeakPtr<NavigationStack> pathStack;
     WeakPtr<FrameNode> navigationNode;
-    int32_t uniqueId;
+    int32_t uniqueId = -1;
     
     NavigationInfo() = default;
     NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack)
@@ -243,6 +243,8 @@ public:
     void RemoveForceSplitListener(int32_t nodeId);
     bool IsOuterMostNavigation(int32_t nodeId, int32_t depth);
 
+    std::string GetTopNavDestinationInfo(int32_t pageId, bool onlyFullScreen, bool needParam);
+    void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart);
 private:
     struct DumpMapKey {
         int32_t nodeId;
@@ -262,6 +264,7 @@ private:
         }
     };
 
+    RefPtr<FrameNode> GetNavigationByInspectorId(const std::string& id) const;
     bool IsOverlayValid(const RefPtr<UINode>& frameNode);
     bool IsCustomDialogValid(const RefPtr<UINode>& node);
     NavigationIntentInfo ParseNavigationIntentInfo(const std::string& intentInfoSerialized);

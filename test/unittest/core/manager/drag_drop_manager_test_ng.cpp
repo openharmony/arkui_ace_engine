@@ -2212,4 +2212,72 @@ HWTEST_F(DragDropManagerTestNg, SetEnableDisallowStatusShowing, TestSize.Level1)
     bool enableDropDisallowedBadgeFalse = DragDropGlobalController::GetInstance().GetEnableDropDisallowedBadge();
     EXPECT_FALSE(enableDropDisallowedBadgeFalse);
 }
+
+/**
+ * @tc.name: HandleOnDragEnd003
+ * @tc.desc: HandleOnDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, HandleOnDragEnd003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create a frameNode, then set preTargetFrameNode_.
+     * @tc.expected: The values of preTargetFrameNode_ and frameNode are equal
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    dragDropManager->preTargetFrameNode_ = frameNode;
+    ASSERT_EQ(dragDropManager->preTargetFrameNode_, frameNode);
+
+    dragDropManager->draggingPressedState_ = true;
+    EXPECT_TRUE(dragDropManager->draggingPressedState_);
+    DragNotifyMsgCore notifyMessage;
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    dragDropManager->ResetDragEndOption(notifyMessage, dragEvent, 0);
+    EXPECT_FALSE(dragDropManager->draggingPressedState_);
+}
+
+/**
+ * @tc.name: HandleOnDragEnd004
+ * @tc.desc: HandleOnDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, HandleOnDragEnd004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create a frameNode, then set preTargetFrameNode_.
+     * @tc.expected: The values of preTargetFrameNode_ and frameNode are equal
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    dragDropManager->preTargetFrameNode_ = frameNode;
+    ASSERT_EQ(dragDropManager->preTargetFrameNode_, frameNode);
+
+    DragNotifyMsgCore notifyMessage;
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    dragEvent->isRemoteDev_ = true;
+    EXPECT_TRUE(dragEvent->isRemoteDev_);
+    dragDropManager->ResetDragEndOption(notifyMessage, dragEvent, 0);
+    EXPECT_FALSE(dragEvent->isRemoteDev_);
+}
 } // namespace OHOS::Ace::NG

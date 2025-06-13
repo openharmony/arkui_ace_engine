@@ -101,6 +101,7 @@ public:
 
     void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) override;
     void SetWindowNewEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) override;
+    void SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnable) override;
     void SetAllowWindowOpenMethod(bool isAllowWindowOpenMethod) override;
@@ -110,6 +111,7 @@ public:
     void SetCopyOptionMode(CopyOptions mode) override;
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
     void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) override;
+    void SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) override;
     void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
@@ -122,6 +124,7 @@ public:
     void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) override;
     void SetOptimizeParserBudgetEnabled(bool enable) override;
+    void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WEB_MODEL_IMPL_H

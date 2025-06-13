@@ -141,6 +141,7 @@ template("ace_ohos_standard_source_set") {
       "relational_store:native_dataability",
       "relational_store:native_rdb",
       "resource_management:global_resmgr",
+      "runtime_core:ani",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
       "window_manager:libdm",

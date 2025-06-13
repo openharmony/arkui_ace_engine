@@ -106,11 +106,11 @@ void JSScrollableBase::SetScrollBarMargin(const JSCallbackInfo& info)
         return;
     }
     ScrollBarMargin scrollBarMargin;
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-    if (obj->IsUndefined()) {
+    if (!info[0]->IsObject()) {
         NG::ScrollableModelNG::SetScrollBarMargin(scrollBarMargin);
         return;
     }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     CalcDimension start;
     CalcDimension end;
     auto startObj = obj->GetProperty("start");

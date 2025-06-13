@@ -202,8 +202,7 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
         renderContext->GetPointTransform(tmp);
         item.SetWindowX(static_cast<int32_t>(std::round(tmp.GetX())));
         item.SetWindowY(static_cast<int32_t>(std::round(tmp.GetY())));
-        if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
-            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+        if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             // CaculatePoint for double XY Position.
             PointF tmpPos(item.GetWindowXPos() + rect.GetX(), item.GetWindowYPos() + rect.GetY());
             renderContext->GetPointTransform(tmpPos);

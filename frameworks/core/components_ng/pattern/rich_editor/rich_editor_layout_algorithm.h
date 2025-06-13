@@ -113,7 +113,8 @@ public:
     RichEditorLayoutAlgorithm() = delete;
     RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RichEditorParagraphManager* paragraphs,
         LRUMap<std::uintptr_t, RefPtr<Paragraph>>* paraMapPtr,
-        std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder);
+        std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder,
+        const std::map<int32_t, AISpan>& aiSpanMap);
     ~RichEditorLayoutAlgorithm() override = default;
 
     const OffsetF& GetParentGlobalOffset() const
@@ -181,6 +182,7 @@ private:
     std::uintptr_t Hash(const std::list<RefPtr<SpanItem>>& spanGroup);
     RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,
         const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap) override;
+    void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const std::map<int32_t, AISpan>& aiSpanMap);
     std::string SpansToString();
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const
@@ -196,6 +198,17 @@ private:
     LRUMap<std::uintptr_t, RefPtr<Paragraph>>* const paraMapPtr_;
     std::unique_ptr<StyleManager>& styleManager_;
     bool needShowPlaceholder_ = false;
+    int32_t cacheHitCount_ = 0;
+    const std::function<void(const RefPtr<SpanItem>& span)> CLEAR_AI_EFFECT = [](const RefPtr<SpanItem>& span) {
+        CHECK_NULL_VOID(span && span->hasAISpanResult);
+        span->hasAISpanResult = false;
+        span->needReLayout = true;
+    };
+    const std::function<void(const RefPtr<SpanItem>& span)> ADD_AI_EFFECT = [](const RefPtr<SpanItem>& span) {
+        CHECK_NULL_VOID(span && !span->hasAISpanResult);
+        span->hasAISpanResult = true;
+        span->needReLayout = true;
+    };
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

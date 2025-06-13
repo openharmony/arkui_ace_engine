@@ -1300,7 +1300,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     oldRealTotalCount_ = RealTotalCount();
     needFireCustomAnimationEvent_ = true;
     prevFrameAnimationRunning_ = false;
-
+    SetLayoutDisplayCount(GetHost());
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
         StartAutoPlay();
         windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
@@ -1972,9 +1972,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     if (hasTabsAncestor_ && NeedFastAnimation()) {
         FastAnimation(targetIndex);
     }
-
     targetIndex_ = targetIndex;
-
     UpdateTabBarAnimationDuration(index);
     if (GetDuration() == 0 || !isVisible_) {
         SwipeToWithoutAnimation(index);
@@ -4160,7 +4158,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
         const auto& turnPageRateCallback = swiper->swiperController_->GetTurnPageRateCallback();
         auto firstItem = swiper->GetFirstItemInfoInVisibleArea();
         auto translateLength = firstItem.second.endPos - firstItem.second.startPos;
-        if (turnPageRateCallback && !NearZero(translateLength)) {
+        if (turnPageRateCallback && !NearZero(translateLength) && swiper->propertyAnimationIsRunning_) {
             turnPageRateCallback(firstItem.first, (-firstItem.second.startPos - value) / translateLength);
         }
     });
@@ -5421,6 +5419,30 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 pattern->PostIdleTask(frameNode);
             }
         });
+}
+
+void SwiperPattern::SetLayoutDisplayCount(const RefPtr<FrameNode>& swiperNode)
+{
+    CHECK_NULL_VOID(swiperNode);
+    if (!IsAutoFill()) {
+        return;
+    }
+    if (HasLeftButtonNode()) {
+        auto leftArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(leftButtonId_.value())));
+        CHECK_NULL_VOID(leftArrowNode);
+        auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(leftArrowPattern);
+        leftArrowPattern->SetLayoutDisplayCount(GetDisplayCount());
+    }
+    if (HasRightButtonNode()) {
+        auto rightArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(rightButtonId_.value())));
+        CHECK_NULL_VOID(rightArrowNode);
+        auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(rightArrowPattern);
+        rightArrowPattern->SetLayoutDisplayCount(GetDisplayCount());
+    }
 }
 
 bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper() const

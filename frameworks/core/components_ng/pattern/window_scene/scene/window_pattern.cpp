@@ -490,6 +490,7 @@ void WindowPattern::CreateStartingWindow()
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
             startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
+        startingWindow_->GetPattern<ImagePattern>()->SetSyncLoad(syncStartingWindow_);
         return;
     }
     startingWindow_ = FrameNode::CreateFrameNode(
@@ -505,6 +506,7 @@ void WindowPattern::CreateStartingWindow()
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
+    startingWindow_->GetPattern<ImagePattern>()->SetSyncLoad(syncStartingWindow_);
     startingWindow_->MarkModifyDone();
 }
 
@@ -533,11 +535,13 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     }
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    int32_t imageFit = 0;
+    int32_t persistentImageFit = 0;
     auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-            session_->GetPersistentId(), imageFit);
+        session_->GetPersistentId(), persistentImageFit);
+    auto imageFit = static_cast<ImageFit>(persistentImageFit);
     if (isPersistentImageFit) {
-        imageLayoutProperty->UpdateImageFit(static_cast<ImageFit>(imageFit));
+        // ImageFit type COVER_TOP_LEFT is not support for api interface
+        imageLayoutProperty->UpdateImageFit(imageFit == ImageFit::COVER_TOP_LEFT ? ImageFit::MATRIX : imageFit);
     } else {
         imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
     }

@@ -68,6 +68,8 @@ public:
     int32_t GetAppDragSwitchState(bool& state) override;
 
     void SetDraggableStateAsync(bool state, int64_t downTime) override;
+
+    int32_t EnableInternalDropAnimation(const std::string& animationInfo) override;
 };
 
 } // namespace OHOS::Ace

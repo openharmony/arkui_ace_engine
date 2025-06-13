@@ -35,6 +35,7 @@ const curves = globalThis.requireNativeModule('ohos.curves');
 const KeyCode = globalThis.requireNapi('multimodalInput.keyCode').KeyCode;
 const util = globalThis.requireNapi('util');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const I18n = requireNapi('i18n');
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
@@ -227,6 +228,10 @@ const segmentButtonTheme = {
 function nearEqual(first, second) {
   return Math.abs(first - second) < 0.001;
 }
+function validateLengthMetrics(value, defaultValue) {
+  const actualValue = value ?? defaultValue;
+  return (actualValue.value < 0 || actualValue.unit === LengthUnit.PERCENT) ? defaultValue : actualValue;
+}
 export var BorderRadiusMode;
 (function (BorderRadiusMode) {
   /**
@@ -362,10 +367,14 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
     if (this.borderRadiusMode !== BorderRadiusMode.DEFAULT && this.borderRadiusMode !== BorderRadiusMode.CUSTOM) {
       this.borderRadiusMode = BorderRadiusMode.DEFAULT;
     }
-    this.backgroundBorderRadius =
-      options.backgroundBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE);
-    this.itemBorderRadius =
-      options.itemBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE);
+    this.backgroundBorderRadius = validateLengthMetrics(
+      options.backgroundBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE)
+    );
+    this.itemBorderRadius = validateLengthMetrics(
+      options.itemBorderRadius,
+      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE)
+    );
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons);
     if (this.type === 'capsule') {
       this.multiply = options.multiply ?? false;
@@ -1778,35 +1787,37 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     const buttonsLength = this.options.buttons
       ? Math.min(this.options.buttons.length, this.buttonItemsSize.length)
       : MIN_ITEM_COUNT;
-    const setAllCorners = (array, index, value) => {
+    const setAllCorners = (array, index, lengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(safeValue);
-      array[index].topEnd = LengthMetrics.vp(safeValue);
-      array[index].bottomStart = LengthMetrics.vp(safeValue);
-      array[index].bottomEnd = LengthMetrics.vp(safeValue);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      array[index].topStart = safeLengthMetrics;
+      array[index].topEnd = safeLengthMetrics;
+      array[index].bottomStart = safeLengthMetrics;
+      array[index].bottomEnd = safeLengthMetrics;
     };
-    const setLeftCorners = (array, index, value) => {
+    const setLeftCorners = (array, index, lengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(safeValue);
-      array[index].topEnd = LengthMetrics.vp(0);
-      array[index].bottomStart = LengthMetrics.vp(safeValue);
-      array[index].bottomEnd = LengthMetrics.vp(0);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      const zeroLengthMetrics = LengthMetrics.vp(0);
+      array[index].topStart = safeLengthMetrics;
+      array[index].topEnd = zeroLengthMetrics;
+      array[index].bottomStart = safeLengthMetrics;
+      array[index].bottomEnd = zeroLengthMetrics;
     };
-    const setRightCorners = (array, index, value) => {
+    const setRightCorners = (array, index, lengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
         return;
       }
-      const safeValue = Math.max(0, value);
-      array[index].topStart = LengthMetrics.vp(0);
-      array[index].topEnd = LengthMetrics.vp(safeValue);
-      array[index].bottomStart = LengthMetrics.vp(0);
-      array[index].bottomEnd = LengthMetrics.vp(safeValue);
+      const safeLengthMetrics = lengthMetrics.value < 0 ? LengthMetrics.vp(0) : lengthMetrics;
+      const zeroLengthMetrics = LengthMetrics.vp(0);
+      array[index].topStart = zeroLengthMetrics;
+      array[index].topEnd = safeLengthMetrics;
+      array[index].bottomStart = zeroLengthMetrics;
+      array[index].bottomEnd = safeLengthMetrics;
     };
     const setMiddleCorners = (array, index) => {
       if (!array || index < 0 || index >= array.length) {
@@ -1820,18 +1831,26 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     for (let index = 0; index < this.buttonBorderRadius.length; index++) {
       let halfButtonItemsSizeHeight = this.buttonItemsSize[index].height / 2;
       let radius = this.options.iconTextRadius ?? halfButtonItemsSizeHeight; // default radius
+      // Determine which border radius to use based on mode setting
       const isCustomMode =
         this.options.borderRadiusMode === BorderRadiusMode.CUSTOM && this.options.itemBorderRadius !== undefined;
-      const radiusValue = isCustomMode ? this.options.itemBorderRadius.value : radius;
+      let radiusLengthMetrics;
+      if (isCustomMode && this.options.itemBorderRadius) {
+        // Use custom border radius from options
+        radiusLengthMetrics = this.options.itemBorderRadius;
+      } else {
+        // Use default calculated radius value
+        radiusLengthMetrics = LengthMetrics.vp(radius);
+      }
       if (isSingleSelect) {
         // single-select
-        setAllCorners(borderRadiusArray, index, radiusValue);
+        setAllCorners(borderRadiusArray, index, radiusLengthMetrics);
       } else {
         // multi-select
         if (index === 0) {
-          setLeftCorners(borderRadiusArray, index, radiusValue);
+          setLeftCorners(borderRadiusArray, index, radiusLengthMetrics);
         } else if (index === buttonsLength - 1) {
-          setRightCorners(borderRadiusArray, index, radiusValue);
+          setRightCorners(borderRadiusArray, index, radiusLengthMetrics);
         } else {
           setMiddleCorners(borderRadiusArray, index);
         }
@@ -2663,15 +2682,24 @@ export class SegmentButton extends ViewPU {
         if (this.isCurrentPositionSelected) {
           return;
         }
+        // Only handle horizontal swipes (angle between -45 to 45 degrees or 135 to 225 degrees)
+        let isHorizontalSwipe = Math.abs(event.angle) <= 45 || Math.abs(event.angle) >= 135;
+        if (!isHorizontalSwipe) {
+          return;
+        }
+        let isSwipeRight = Math.abs(event.angle) <= 45; // swipe right
+        let isSwipeLeft = Math.abs(event.angle) >= 135; // swipe left
+        let isSwipeToNext = this.isShouldMirror() ? isSwipeLeft : isSwipeRight;
+        let isSwipeToPrevious = this.isShouldMirror() ? isSwipeRight : isSwipeLeft;
         if (
-          Math.abs(event.angle) < 90 &&
+          isSwipeToNext &&
           this.selectedIndexes[0] !== Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1
         ) {
           // Move to next
           this.doSelectedChangeAnimate = true;
           this.selectedIndexes[0] = this.selectedIndexes[0] + 1;
           this.doSelectedChangeAnimate = false;
-        } else if (Math.abs(event.angle) > 90 && this.selectedIndexes[0] !== 0) {
+        } else if (isSwipeToPrevious && this.selectedIndexes[0] !== 0) {
           // Move to previous
           this.doSelectedChangeAnimate = true;
           this.selectedIndexes[0] = this.selectedIndexes[0] - 1;
@@ -2696,10 +2724,12 @@ export class SegmentButton extends ViewPU {
         let selectedInfo = fingerInfo.localX;
         this.panGestureStartPoint = { x: fingerInfo.globalX, y: fingerInfo.globalY };
         this.isPanGestureMoved = false;
-        for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
+        let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+        for (let i = 0; i < buttonLength; i++) {
           selectedInfo = selectedInfo - this.buttonItemsSize[i].width;
           if (selectedInfo < 0) {
-            this.isCurrentPositionSelected = i === this.selectedIndexes[0] ? true : false;
+            let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+            this.isCurrentPositionSelected = realIndex === this.selectedIndexes[0] ? true : false;
             break;
           }
         }
@@ -2723,11 +2753,13 @@ export class SegmentButton extends ViewPU {
         if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX, fingerInfo.globalY)) {
           this.isPanGestureMoved = true;
         }
-        for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
+        let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+        for (let i = 0; i < buttonLength; i++) {
           selectedInfo = selectedInfo - this.buttonItemsSize[i].width;
           if (selectedInfo < 0) {
+            let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
             this.doSelectedChangeAnimate = true;
-            this.selectedIndexes[0] = i;
+            this.selectedIndexes[0] = realIndex;
             this.doSelectedChangeAnimate = false;
             break;
           }
@@ -2763,10 +2795,13 @@ export class SegmentButton extends ViewPU {
         if (this.isMouseWheelScroll(event)) {
           let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
           this.doSelectedChangeAnimate = true;
-          if (offset > 0 && this.selectedIndexes[0] > 0) {
+          // Reverse mouse wheel direction in mirrored layout
+          let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
+          let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
+          if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
             this.selectedIndexes[0] -= 1;
           } else if (
-            offset < 0 &&
+            shouldMoveNext &&
             this.selectedIndexes[0] < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1
           ) {
             this.selectedIndexes[0] += 1;
@@ -3133,13 +3168,39 @@ function resourceToNumber(context, resource, defaultValue) {
       return defaultValue;
   }
 }
+class LengthMetricsUtils {
+  constructor() {}
+  static getInstance() {
+    if (!LengthMetricsUtils.instance) {
+      LengthMetricsUtils.instance = new LengthMetricsUtils();
+    }
+    return LengthMetricsUtils.instance;
+  }
+  stringify(metrics) {
+    switch (metrics.unit) {
+      case LengthUnit.PX:
+        return `${metrics.value}px`;
+      case LengthUnit.VP:
+        return `${metrics.value}vp`;
+      case LengthUnit.FP:
+        return `${metrics.value}fp`;
+      case LengthUnit.PERCENT:
+        return `${metrics.value}%`;
+      case LengthUnit.LPX:
+        return `${metrics.value}lpx`;
+    }
+  }
+  isNaturalNumber(metrics) {
+    return metrics.value >= 0;
+  }
+}
 function getBackgroundBorderRadius(options, defaultRadius) {
   if (options.borderRadiusMode === BorderRadiusMode.CUSTOM) {
     // For capsule multi-select buttons, use itemBorderRadius
     if (options.type === 'capsule' && (options.multiply ?? false) && options.itemBorderRadius !== undefined) {
-      return options.itemBorderRadius.value;
+      return LengthMetricsUtils.getInstance().stringify(options.itemBorderRadius);
     } else if (options.backgroundBorderRadius !== undefined) {
-      return options.backgroundBorderRadius.value;
+      return LengthMetricsUtils.getInstance().stringify(options.backgroundBorderRadius);
     }
   }
   if (options.type === 'capsule' && (options.multiply ?? false)) {
@@ -3147,16 +3208,13 @@ function getBackgroundBorderRadius(options, defaultRadius) {
   }
   return options.iconTextBackgroundRadius ?? defaultRadius;
 }
-
 class FocusStyleButtonModifier {
   constructor(stateStyleAction) {
     this.stateStyleAction = stateStyleAction;
   }
-
   applyNormalAttribute(instance) {
     this.stateStyleAction && this.stateStyleAction(false);
   }
-
   applyFocusedAttribute(instance) {
     this.stateStyleAction && this.stateStyleAction(true);
   }

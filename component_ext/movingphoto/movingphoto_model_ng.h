@@ -31,6 +31,7 @@ public:
     void SetImageSrc(const std::string& src);
     void SetImageSrcByPixelMap(RefPtr<PixelMap>& pixMap);
     void SetMuted(bool muted);
+    void SetHdrBrightness(float hdrBrightness);
     void SetObjectFit(ImageFit objectFit);
     void SetOnComplete(MovingPhotoEventFunc&& onComplete);
     void SetOnStart(MovingPhotoEventFunc&& onStart);

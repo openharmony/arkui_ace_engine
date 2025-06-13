@@ -17,6 +17,7 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "core/animation/native_curve_helper.h"
 #include "core/components/remote_window/rosen_render_remote_window.h"
@@ -2172,6 +2173,17 @@ void RenderNode::MarkParentNeedRender() const
 std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        return Rosen::RSCanvasNode::Create();
+    }
+    auto pipelineContext = GetContext().Upgrade();
+    if (pipelineContext) {
+        auto rsUIDirector = pipelineContext->GetRSUIDirector();
+        if (rsUIDirector) {
+            auto rsContext = rsUIDirector->GetRSUIContext();
+            return Rosen::RSCanvasNode::Create(false, false, rsContext);
+        }
+    }
     return Rosen::RSCanvasNode::Create();
 #else
     return nullptr;

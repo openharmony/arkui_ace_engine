@@ -767,4 +767,118 @@ HWTEST_F(ScrollEffectTestNg, FadingEdge002, TestSize.Level1)
     EXPECT_TRUE(paintMethod->isFadingTop_);
     EXPECT_FALSE(paintMethod->isFadingBottom_);
 }
+
+/**
+ * @tc.name: CalculateOverScroll001
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback, leadingCallback, trailingCallback
+     * @tc.expected: The result return 0.0
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return 2.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return 1.0; };
+    scrollFadeEffect->trailingCallback_ = nullptr;
+    auto result = scrollFadeEffect->CalculateOverScroll(2.0, true);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: SetPaintDirection001
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set scrollFadeEffect fadePainter value
+     * @tc.expected: The fadePainter direction return up
+     */
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 1.0f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::UP);
+    scrollFadeEffect->SetPaintDirection(Axis::VERTICAL, 3.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::DOWN);
+}
+
+/**
+ * @tc.name: SetPaintDirection002
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set scrollFadeEffect fadePainter value
+     * @tc.expected: The fadePainter direction return up
+     */
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 2.3f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::RIGHT);
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, -5.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::LEFT);
+}
+
+/**
+ * @tc.name: SetPaintDirection003
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set scrollFadeEffect fadePainter value
+     * @tc.expected: The fadePainter direction return up
+     */
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 2.3f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::LEFT);
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, 4.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::RIGHT);
+}
+
+/**
+ * @tc.name: ChangeStateDefault
+ * @tc.desc: Test ScrollFadeController ChangeState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, ChangeStateDefault, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeController> controller = AceType::MakeRefPtr<ScrollFadeController>();
+
+    /**
+     * @tc.steps: step2. Set state value
+     * @tc.expected: The pullDistance value return 0
+     */
+    int32_t value = 6;
+    controller->state_ = static_cast<OverScrollState>(value);
+    controller->ChangeState();
+    EXPECT_EQ(controller->pullDistance_, 0.0);
+}
 } // namespace OHOS::Ace::NG

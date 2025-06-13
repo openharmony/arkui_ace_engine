@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("web_pattern_unit_test_ohos") {
@@ -20,6 +21,9 @@ ohos_unittest("web_pattern_unit_test_ohos") {
   defines = [ "OHOS_STANDARD_SYSTEM" ]
   defines += [ "ENABLE_DRAG_FRAMEWORK" ]
   defines += [ "WEB_SUPPORTED" ]
+  if (use_new_skia) {
+    defines += [ "USE_NEW_SKIA" ]
+  }
 
   include_dirs = [
     "$ace_root/interfaces/inner_api/ui_session",
@@ -375,6 +379,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/preview_menu_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.cpp",
@@ -635,6 +640,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/web/web_data_detector_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_model_ng.cpp",
+    #"$ace_root/frameworks/core/components_ng/pattern/web/web_model_static_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_select_overlay.cpp",
@@ -718,7 +724,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
-    "imf:inputmethod_client",
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_core",
@@ -726,9 +731,13 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
     "webview:libnweb",
-    "window_manager:libwm",
     "window_manager:libpip_ndk",
+    "window_manager:libwm",
   ]
+
+  if (defined(global_parts_info.inputmethod_imf)) {
+    external_deps += [ "imf:inputmethod_client" ]
+  }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 

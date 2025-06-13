@@ -1,0 +1,23 @@
+{
+      "compilerOptions": {
+          "package": "@arkoala/arkui",
+          "baseUrl": ".",
+          "outDir": "build",
+          "paths": {
+              "@koalaui/common": ["../../incremental/common/src"],
+              "@koalaui/runtime": ["../../incremental/runtime/src"],
+              "@koalaui/interop": ["../../interop/src"],
+              "@koalaui/arkui-common": ["../arkui-common/src"],
+              "@koalaui/arkoala": ["../framework/src"]
+          }
+      },
+      "include": ["./src/**/*.ts"],
+      "references": [
+        { "path": "../../incremental/common" },
+        { "path": "../../interop" },
+        { "path": "../../incremental/runtime" },
+        { "path": "../arkui-common" },
+        { "path": "../framework" }
+      ]
+
+}
