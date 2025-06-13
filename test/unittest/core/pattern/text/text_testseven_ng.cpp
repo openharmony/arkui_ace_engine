@@ -571,6 +571,38 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToJsonValue
+ * @tc.desc: Test TextLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, ToJsonValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. run ToJsonValue().
+     */
+    textLayoutProperty->UpdateLineSpacing(LINE_SPACING_VALUE);
+    textLayoutProperty->UpdateIsOnlyBetweenLines(true);
+    auto json = JsonUtil::Create(true);
+    textLayoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("lineSpacing"), "20.00px");
+    EXPECT_EQ(json->GetString("onlyBetweenLines"), "true");
+}
+
+/**
  * @tc.name: SpanBuildParagraph001
  * @tc.desc: test InheritParentTextStyle of multiple paragraph.
  * @tc.type: FUNC
