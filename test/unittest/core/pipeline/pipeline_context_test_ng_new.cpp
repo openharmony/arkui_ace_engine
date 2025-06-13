@@ -3638,6 +3638,79 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg252, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNg253
+ * @tc.desc: Test the function SetAreaChangeNodeMinDepth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg253, TestSize.Level1)
+{
+    /**
+     * @tc.expected: The initialize val is -1.
+     */
+    context_->areaChangeNodeMinDepth_ = -1;
+    ASSERT_NE(context_, nullptr);
+    EXPECT_EQ(context_->areaChangeNodeMinDepth_, -1);
+
+    /**
+     * @tc.steps2: Call the function SetAreaChangeNodeMinDepth and set val 10.
+     * @tc.expected: The areaChangeNodeMinDepth_ is equal to 10.
+     */
+    context_->SetAreaChangeNodeMinDepth(10);
+    EXPECT_EQ(context_->areaChangeNodeMinDepth_, 10);
+
+    /**
+     * @tc.steps3: Call the function SetAreaChangeNodeMinDepth and set val 5.
+     * @tc.expected: The areaChangeNodeMinDepth_ is equal to 5.
+     */
+    context_->SetAreaChangeNodeMinDepth(5);
+    EXPECT_EQ(context_->areaChangeNodeMinDepth_, 5);
+
+    /**
+     * @tc.steps4: Call the function SetAreaChangeNodeMinDepth and set val 10.
+     * @tc.expected: The areaChangeNodeMinDepth_ is equal to 5.
+     */
+    context_->SetAreaChangeNodeMinDepth(10);
+    EXPECT_EQ(context_->areaChangeNodeMinDepth_, 5);
+}
+
+
+/**
+ * @tc.name: PipelineContextTestNg254
+ * @tc.desc: Test the function SetIsDisappearChangeNodeMinDepth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg254, TestSize.Level1)
+{
+    /**
+     * @tc.expected: The initialize val is -1.
+     */
+    context_->isDisappearChangeNodeMinDepth_ = -1;
+    ASSERT_NE(context_, nullptr);
+    EXPECT_EQ(context_->isDisappearChangeNodeMinDepth_, -1);
+
+    /**
+     * @tc.steps2: Call the function SetIsDisappearChangeNodeMinDepth and set val 10.
+     * @tc.expected: The isDisappearChangeNodeMinDepth_ is equal to 10.
+     */
+    context_->SetIsDisappearChangeNodeMinDepth(10);
+    EXPECT_EQ(context_->isDisappearChangeNodeMinDepth_, 10);
+
+    /**
+     * @tc.steps3: Call the function SetIsDisappearChangeNodeMinDepth and set val 5.
+     * @tc.expected: The isDisappearChangeNodeMinDepth_ is equal to 5.
+     */
+    context_->SetIsDisappearChangeNodeMinDepth(5);
+    EXPECT_EQ(context_->isDisappearChangeNodeMinDepth_, 5);
+
+    /**
+     * @tc.steps4: Call the function SetIsDisappearChangeNodeMinDepth and set val 10.
+     * @tc.expected: The isDisappearChangeNodeMinDepth_ is equal to 5.
+     */
+    context_->SetIsDisappearChangeNodeMinDepth(10);
+    EXPECT_EQ(context_->isDisappearChangeNodeMinDepth_, 5);
+}
+
+/**
  * @tc.name: UITaskSchedulerTestNg015
  * @tc.desc: Test FlushRenderTask.
  * @tc.type: FUNC

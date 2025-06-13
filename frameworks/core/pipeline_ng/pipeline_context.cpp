@@ -4268,6 +4268,11 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId)
 {
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    if (frameNode) {
+        frameNode->ClearCachedIsFrameDisappear();
+    }
+
     onVisibleAreaChangeNodeIds_.erase(nodeId);
 }
 
@@ -4279,8 +4284,10 @@ void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp)
     }
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp);
+        frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp, false, isDisappearChangeNodeMinDepth_);
     }
+
+    isDisappearChangeNodeMinDepth_ = 0;
 }
 
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
@@ -4291,6 +4298,11 @@ void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
 {
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    if (frameNode) {
+        frameNode->ClearCachedGlobalOffset();
+    }
+
     onAreaChangeNodeIds_.erase(nodeId);
     isOnAreaChangeNodesCacheVaild_ = false;
 }
@@ -4308,8 +4320,10 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     }
     auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
+        frameNode->TriggerOnAreaChangeCallback(nanoTimestamp, areaChangeNodeMinDepth_);
     }
+
+    areaChangeNodeMinDepth_ = 0;
     UpdateFormLinkInfos();
 }
 

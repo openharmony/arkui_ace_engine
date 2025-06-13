@@ -1429,6 +1429,266 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodIsFrameDisappear04
+ * @tc.desc: Test the function IsFrameDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear04, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->SetDepth(1);
+    frameNode->SetDepth(2);
+    frameNode2->SetDepth(3);
+    parentNode->isActive_ = true;
+    frameNode->isActive_ = true;
+    frameNode2->onMainTree_ = true;
+    frameNode2->isActive_ = true;
+    auto context = frameNode2->GetContext();
+    context->onShow_ = true;
+    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+    frameNode2->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto parentLayoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    parentLayoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    auto layoutProperty2 = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty2->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function IsFrameDisappear and create TIMESTAMP_1 cache.
+     * @tc.expected: expect res is false
+     */
+    parentNode->SetLayoutProperty(parentLayoutProperty);
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode2->SetLayoutProperty(layoutProperty2);
+    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_1));
+
+    /**
+     * @tc.steps: step4. call the function IsFrameDisappear and use TIMESTAMP_1 cache.
+     * @tc.expected: expect res is false
+     */
+    parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
+    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 0));
+
+    /**
+     * @tc.steps: step5. call the function IsFrameDisappear and no use TIMESTAMP_1 cache.
+     * @tc.expected: expect res is true
+     */
+    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_3));
+}
+
+/**
+ * @tc.name: FrameNodIsFrameDisappear05
+ * @tc.desc: Test the function IsFrameDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear05, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->SetDepth(1);
+    frameNode->SetDepth(2);
+    frameNode2->SetDepth(3);
+    parentNode->isActive_ = true;
+    frameNode->isActive_ = true;
+    frameNode2->onMainTree_ = true;
+    frameNode2->isActive_ = true;
+    auto context = frameNode2->GetContext();
+    context->onShow_ = true;
+    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+    frameNode2->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto parentLayoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    parentLayoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    auto layoutProperty2 = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty2->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function IsFrameDisappear and create TIMESTAMP_1 cache.
+     * @tc.expected: expect res is false
+     */
+    parentNode->SetLayoutProperty(parentLayoutProperty);
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode2->SetLayoutProperty(layoutProperty2);
+    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_1));
+
+    /**
+     * @tc.steps: step4. call the function IsFrameDisappear and use TIMESTAMP_1 cache.
+     * @tc.expected: expect res is false
+     */
+    parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
+    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 2));
+
+    /**
+     * @tc.steps: step5. call the function IsFrameDisappear and no use TIMESTAMP_1 cache.
+     * @tc.expected: expect res is true
+     */
+    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_3, 1));
+}
+
+/**
+ * @tc.name: FrameNodeCalculateOffsetRelativeToWindow01
+ * @tc.desc: Test the function CalculateOffsetRelativeToWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCalculateOffsetRelativeToWindow01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->SetDepth(1);
+    frameNode->SetDepth(2);
+    frameNode2->SetDepth(3);
+    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+    frameNode2->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step2. set Offset.
+     */
+    parentNode->GetGeometryNode()->SetFrameOffset(OffsetF(1.1, 2.3));
+    frameNode->GetGeometryNode()->SetFrameOffset(OffsetF(3.2, 4.1));
+    frameNode2->GetGeometryNode()->SetFrameOffset(OffsetF(5.3, 6.3));
+
+    /**
+     * @tc.steps: step3. call the function CalculateOffsetRelativeToWindow and create TIMESTAMP_1 cache.
+     * @tc.expected: expect res is frameNode offset + parentNode offset
+     */
+    EXPECT_EQ(frameNode->CalculateOffsetRelativeToWindow(TIMESTAMP_1), OffsetF(4.3, 6.4));
+ 
+    /**
+     * @tc.steps: step4. call the function CalculateOffsetRelativeToWindow and create TIMESTAMP_1 cache.
+     * @tc.expected: expect res is frameNode2 offset + framenode cache offset
+     */
+
+    parentNode->GetGeometryNode()->SetFrameOffset(OffsetF(2.1, 3.3));
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_1), OffsetF(9.6, 12.7));
+
+
+    /**
+     * @tc.steps: step5. call the function CalculateOffsetRelativeToWindow TIMESTAMP_2.
+     * @tc.expected: expect res is frameNode2 offset + framenode offset + parentNode offset
+     */
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_2), OffsetF(10.6, 13.7));
+}
+
+/**
+ * @tc.name: FrameNodeCalculateOffsetRelativeToWindow02
+ * @tc.desc: Test the function CalculateOffsetRelativeToWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCalculateOffsetRelativeToWindow02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->SetDepth(1);
+    frameNode->SetDepth(2);
+    frameNode2->SetDepth(3);
+    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+    frameNode2->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step2. set Offset.
+     */
+    parentNode->GetGeometryNode()->SetFrameOffset(OffsetF(1.1, 2.3));
+    frameNode->GetGeometryNode()->SetFrameOffset(OffsetF(3.2, 4.1));
+    frameNode2->GetGeometryNode()->SetFrameOffset(OffsetF(5.3, 6.3));
+
+    /**
+     * @tc.steps: step3. call the function CalculateOffsetRelativeToWindow and create TIMESTAMP_1 cache.
+     * @tc.expected: expect res is frameNode2 offset + frameNode offset + parentNode offset
+     */
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_1), OffsetF(9.6, 12.7));
+
+    /**
+     * @tc.steps: step4. call the function CalculateOffsetRelativeToWindow and use TIMESTAMP_1 cache.
+     * @tc.expected: expect res is frameNode2 offset + framenode cache offset
+     */
+
+    parentNode->GetGeometryNode()->SetFrameOffset(OffsetF(2.1, 3.3));
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_2, false, 0), OffsetF(9.6, 12.7));
+
+
+    /**
+     * @tc.steps: step5. call the function CalculateOffsetRelativeToWindow TIMESTAMP_2.
+     * @tc.expected: expect res is frameNode2 offset + framenode offset + parentNode offset
+     */
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_3), OffsetF(10.6, 13.7));
+}
+
+/**
+ * @tc.name: FrameNodeCalculateOffsetRelativeToWindow03
+ * @tc.desc: Test the function CalculateOffsetRelativeToWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCalculateOffsetRelativeToWindow03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->SetDepth(1);
+    frameNode->SetDepth(2);
+    frameNode2->SetDepth(3);
+    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+    frameNode2->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step2. set Offset.
+     */
+    parentNode->GetGeometryNode()->SetFrameOffset(OffsetF(1.1, 2.3));
+    frameNode->GetGeometryNode()->SetFrameOffset(OffsetF(3.2, 4.1));
+    frameNode2->GetGeometryNode()->SetFrameOffset(OffsetF(5.3, 6.3));
+
+    /**
+     * @tc.steps: step3. call the function CalculateOffsetRelativeToWindow and create TIMESTAMP_1 cache.
+     * @tc.expected: expect res is frameNode offset + frameNode2 + parentNode offset
+     */
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_1), OffsetF(9.6, 12.7));
+
+    /**
+     * @tc.steps: step4. call the function CalculateOffsetRelativeToWindow and use TIMESTAMP_1 cache.
+     * @tc.expected: expect res is frameNode2 offset + framenode cache offset
+     */
+
+    parentNode->GetGeometryNode()->SetFrameOffset(OffsetF(2.1, 3.3));
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_2, false, 2), OffsetF(9.6, 12.7));
+
+
+    /**
+     * @tc.steps: step5. call the function CalculateOffsetRelativeToWindow TIMESTAMP_3.
+     * @tc.expected: expect res is frameNode2 offset + framenode offset + parentNode offset
+     */
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_3), OffsetF(10.6, 13.7));
+}
+
+/**
  * @tc.name: FrameNodeTriggerVisibleAreaChangeCallback01
  * @tc.desc: Test the function TriggerVisibleAreaChangeCallback
  * @tc.type: FUNC

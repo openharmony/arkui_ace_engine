@@ -1719,7 +1719,7 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
-void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
+void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
 {
     if (!IsActive()) {
         if (IsDebugInspectorId()) {
@@ -1749,7 +1749,7 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
         }
         bool logFlag = IsDebugInspectorId();
         auto currParentOffsetToWindow =
-            CalculateOffsetRelativeToWindow(nanoTimestamp, logFlag) - currFrameRect.GetOffset();
+            CalculateOffsetRelativeToWindow(nanoTimestamp, logFlag, areaChangeMinDepth) - currFrameRect.GetOffset();
         if (logFlag) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT,
                 "OnAreaChange Node(%{public}s/%{public}d) rect:%{public}s lastRect:%{public}s "
@@ -1880,7 +1880,7 @@ bool FrameNode::IsFrameDisappear() const
     return !curIsVisible || !curFrameIsActive;
 }
 
-bool FrameNode::IsFrameDisappear(uint64_t timestamp)
+bool FrameNode::IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth)
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
@@ -1901,36 +1901,47 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp)
         cachedIsFrameDisappear_ = { timestamp, true };
         return true;
     }
-    auto result = IsFrameAncestorDisappear(timestamp);
+    auto result = IsFrameAncestorDisappear(timestamp, isVisibleChangeMinDepth);
     if (result) {
         SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::ANCESTOR_INVISIBLE);
     }
     return result;
 }
 
-bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp)
+bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth)
 {
     bool curFrameIsActive = isActive_;
     bool curIsVisible = IsVisible();
     bool result = !curIsVisible || !curFrameIsActive;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(false);
-    if (!parentUi) {
+    if (!parentUi || result) {
         cachedIsFrameDisappear_ = { timestamp, result };
         return result;
     }
 
+    // MinDepth < 0, it do not work
+    // MinDepth >= 0, and this node have calculate once
+    // MinDepth = 0, no change from last frame, use cache directly
+    // MinDepth > 0, and parent->GetDepth < MinDepth, parent do not change, use cache directly
     auto parentIsFrameDisappear = parentUi->cachedIsFrameDisappear_;
-    if (parentIsFrameDisappear.first == timestamp) {
+    if ((parentIsFrameDisappear.first == timestamp) ||
+        ((isVisibleChangeMinDepth >= 0) && parentIsFrameDisappear.first && (isVisibleChangeMinDepth == 0 ||
+        ((isVisibleChangeMinDepth > 0) && (parentUi->GetDepth() < isVisibleChangeMinDepth))))) {
         result = result || parentIsFrameDisappear.second;
         cachedIsFrameDisappear_ = { timestamp, result };
         return result;
     }
-    result = result || (parentUi->IsFrameAncestorDisappear(timestamp));
+
+    // if this node have not calculate once, then it will calculate to root
+    isVisibleChangeMinDepth = parentIsFrameDisappear.first > 0 ? isVisibleChangeMinDepth : -1;
+    result = result || parentUi->IsFrameAncestorDisappear(timestamp, isVisibleChangeMinDepth);
+
     cachedIsFrameDisappear_ = { timestamp, result };
     return result;
 }
 
-void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear)
+void FrameNode::TriggerVisibleAreaChangeCallback(
+    uint64_t timestamp, bool forceDisappear, int32_t isVisibleChangeMinDepth)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -1945,7 +1956,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
     auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
-    if (forceDisappear || IsFrameDisappear(timestamp)) {
+    if (forceDisappear || IsFrameDisappear(timestamp, isVisibleChangeMinDepth)) {
         if (IsDebugInspectorId()) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT,
                 "OnVisibleAreaChange Node(%{public}s/%{public}d) lastRatio(User:%{public}s/Inner:%{public}s) "
@@ -2141,8 +2152,15 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
         pattern_->OnInActive();
         isActive_ = false;
         activeChanged = true;
+        ClearCachedGlobalOffset();
     }
     CHECK_NULL_VOID(activeChanged);
+
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetIsDisappearChangeNodeMinDepth(GetDepth());
+    pipeline->SetAreaChangeNodeMinDepth(GetDepth());
+
     auto parent = GetAncestorNodeOfFrame(false);
     if (parent) {
         parent->MarkNeedSyncRenderTree();
@@ -2184,6 +2202,11 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
     if (!isLayoutDirtyMarked_ && (layoutTaskType == LayoutType::NONE)) {
         return;
     }
+
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->SetAreaChangeNodeMinDepth(GetDepth());
+
     SetRootMeasureNode(true);
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
@@ -5537,7 +5560,7 @@ OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp
     return offset;
 }
 
-OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag)
+OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag, int32_t areaChangeMinDepth)
 {
     auto currOffset = geometryNode_->GetFrameOffset();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
@@ -5552,11 +5575,20 @@ OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool 
     auto parent = GetAncestorNodeOfFrame(true);
     if (parent) {
         auto parentTimestampOffset = parent->GetCachedGlobalOffset();
-        if (parentTimestampOffset.first == nanoTimestamp) {
+        // MinDepth < 0, it do not work
+        // MinDepth >= 0, and this node have calculate once
+        // MinDepth = 0, no change from last frame, use cache directly
+        // MinDepth > 0, and parent->GetDepth < MinDepth, parent do not change, use cache directly
+        if ((parentTimestampOffset.first == nanoTimestamp) ||
+            ((areaChangeMinDepth >= 0) && parentTimestampOffset.first && (areaChangeMinDepth == 0 ||
+            ((areaChangeMinDepth > 0) && (parent->GetDepth() < areaChangeMinDepth))))) {
             currOffset = currOffset + parentTimestampOffset.second;
             SetCachedGlobalOffset({ nanoTimestamp, currOffset });
         } else {
-            currOffset = currOffset + parent->CalculateOffsetRelativeToWindow(nanoTimestamp, logFlag);
+            // if this node have not calculate once, then it will calculate to root
+            areaChangeMinDepth = parentTimestampOffset.first > 0 ? areaChangeMinDepth : -1;
+            currOffset = currOffset + parent->CalculateOffsetRelativeToWindow(
+                nanoTimestamp, logFlag, areaChangeMinDepth);
             SetCachedGlobalOffset({ nanoTimestamp, currOffset });
         }
     } else {
