@@ -41,6 +41,7 @@ public:
     static std::string GetDeviceType();
 
     static std::string GetOrientation(const RefPtr<OHOS::Ace::Container>& container);
+    static std::string GetSystemOrientation();
 
     bool GetIsInit() const
     {
