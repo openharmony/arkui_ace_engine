@@ -941,4 +941,49 @@ HWTEST_F(MenuLayoutPropertyTestNg, ExpandSymbol001, TestSize.Level1)
     property.SetExpandSymbol([](WeakPtr<NG::FrameNode> weakPtr) {});
     EXPECT_NE(property.GetExpandSymbol(), nullptr);
 }
+
+/**
+ * @tc.name: ToJsonValue005
+ * @tc.desc: Verify MaskToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, ToJsonValue005, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    auto json = JsonUtil::Create(true);
+    property->MaskToJsonValue(json, filter);
+    auto maskJsonObject = json->GetObject("mask");
+    EXPECT_EQ(maskJsonObject->GetString("mask"), "false");
+
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetFilterColumnNode(columnNode);
+    json = JsonUtil::Create(true);
+    property->MaskToJsonValue(json, filter);
+    maskJsonObject = json->GetObject("mask");
+    EXPECT_EQ(maskJsonObject->GetString("mask"), "true");
+
+    auto renderContext = columnNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
+    renderContext->UpdateBackgroundColor(Color::RED);
+    renderContext->UpdateBackBlurStyle(styleOption);
+    json = JsonUtil::Create(true);
+    property->MaskToJsonValue(json, filter);
+    maskJsonObject = json->GetObject("mask");
+    auto backgroundBlurStyleJsonObject = maskJsonObject->GetObject("backgroundBlurStyle");
+    EXPECT_EQ(maskJsonObject->GetString("mask"), "true");
+    EXPECT_EQ(maskJsonObject->GetString("color"), Color::RED.ToString().c_str());
+    EXPECT_EQ(backgroundBlurStyleJsonObject->GetString("value"), "BlurStyle.BACKGROUND_THIN");
+}
 } // namespace OHOS::Ace::NG
