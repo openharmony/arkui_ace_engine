@@ -165,4 +165,8 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
       modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, margin);
       return this;
     }
+    onWillStopDragging(callback: (velocity: number) => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnWillStopDraggingModifier.identity, OnWillStopDraggingModifier, callback);
+      return this;
+    }
 }

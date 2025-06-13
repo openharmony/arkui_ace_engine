@@ -5612,6 +5612,10 @@ class UIScrollableCommonEvent extends UICommonEvent {
     this._onDidScrollEvent = callback;
     getUINativeModule().frameNode.setOnDidScroll(this._nodePtr, callback, this._instanceId);
   }
+  setOnWillStopDragging(callback) {
+    this._onWillStopDraggingEvent = callback;
+    getUINativeModule().frameNode.setOnWillStopDragging(this._nodePtr, callback, this._instanceId);
+  }
 }
 
 class UIListEvent extends UIScrollableCommonEvent {
@@ -6957,6 +6961,20 @@ class ScrollBarMarginModifier extends ModifierWithKey {
   }
 }
 ScrollBarMarginModifier.identity = Symbol('scrollBarMargin');
+
+class OnWillStopDraggingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnWillStopDragging(node);
+    } else {
+      getUINativeModule().scrollable.setOnWillStopDragging(node, this.value);
+    }
+  }
+}
+OnWillStopDraggingModifier.identity = Symbol('onWillStopDragging');
 
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {

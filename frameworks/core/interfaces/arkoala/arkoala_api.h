@@ -3641,6 +3641,8 @@ struct ArkUIScrollableModifier {
         ArkUI_Float32 marginEnd, ArkUI_Int32 marginEndLengthUnit);
     void (*resetScrollBarMargin)(ArkUINodeHandle node);
     void (*getScrollBarMargin)(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2]);
+    void (*setOnWillStopDragging)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWillStopDragging)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {
