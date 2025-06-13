@@ -1870,6 +1870,24 @@ HWTEST_F(ImagePatternTestNg, ConvertOrientationToString005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConvertOrientationToString006
+ * @tc.desc: Test ConvertOrientationToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ConvertOrientationToString006, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetOrientation(ImageRotateOrientation::DOWN);
+    imagePattern->DumpInfo();
+    auto res = imagePattern->GetOrientation();
+    ImageRotateOrientation msg = ImageRotateOrientation::DOWN;
+    EXPECT_EQ(res, msg);
+}
+
+/**
  * @tc.name: OnDirtyLayoutWrapperSwap002
  * @tc.desc: Test OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
