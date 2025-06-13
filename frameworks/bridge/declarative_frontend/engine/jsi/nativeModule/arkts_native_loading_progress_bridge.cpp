@@ -91,7 +91,7 @@ ArkUINativeModuleValue LoadingProgressBridge::SetForegroundColor(ArkUIRuntimeCal
     ForegroundColorStrategy strategy;
     if (ArkTSUtils::ParseJsColorStrategy(vm, colorArg, strategy)) {
         auto strategyInt = static_cast<uint32_t>(ForegroundColorStrategy::INVERT);
-        GetArkUINodeModifiers()->getCommonModifier()->setForegroundColor(nativeNode, false, strategyInt);
+        GetArkUINodeModifiers()->getCommonModifier()->setForegroundColor(nativeNode, false, strategyInt, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
     Color foregroundColor;

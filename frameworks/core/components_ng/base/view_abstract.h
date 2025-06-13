@@ -622,6 +622,7 @@ public:
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
     static void SetLightIntensity(FrameNode* frameNode, float value);
     static void SetLightColor(FrameNode* frameNode, const Color& value);
+    static void SetLightColor(FrameNode* frameNode, const Color& value, const RefPtr<ResourceObject>& resObj);
     static void SetLightIlluminated(FrameNode* frameNode, uint32_t value);
     static void SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBloom(FrameNode* frameNode, float value);
@@ -660,6 +661,11 @@ public:
     static void SetTransform3DMatrix(FrameNode* frameNode, const Matrix4& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOpacity(FrameNode* frameNode, double opacity);
+    static void SetOpacity(FrameNode* frameNode, double opacity, const RefPtr<ResourceObject>& resObj);
+    static void UpdateBackgroundBlurStyle(
+        FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions);
+    static void UpdateBackgroundEffect(
+        FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
     static void SetLayoutGravity(FrameNode* frameNode, Alignment alignment);
@@ -670,6 +676,7 @@ public:
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
     static void SetColorBlend(FrameNode* frameNode, const Color& colorBlend);
+    static void SetColorBlend(FrameNode* frameNode, const Color& colorBlend, const RefPtr<ResourceObject>& resObj);
     static void SetGrayScale(FrameNode* frameNode, const Dimension& grayScale);
     static void SetContrast(FrameNode* frameNode, const Dimension& contrast);
     static void SetBrightness(FrameNode* frameNode, const Dimension& brightness);
@@ -720,6 +727,7 @@ public:
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
+    static void SetForegroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);

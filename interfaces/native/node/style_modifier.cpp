@@ -1564,7 +1564,7 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     };
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setLinearGradient(
-        node->uiNodeHandle, values, NUM_4, colors, size * NUM_3);
+        node->uiNodeHandle, values, NUM_4, colors, size * NUM_3, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1649,7 +1649,7 @@ int32_t SetOpacity(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setOpacity(node->uiNodeHandle, item->value[0].f32);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setOpacity(node->uiNodeHandle, item->value[0].f32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2281,7 +2281,8 @@ int32_t SetShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     ArkUIInt32orFloat32 shadows[NUM_1] = { {.i32 = ArkUI_ShadowStyle::ARKUI_SHADOW_STYLE_OUTER_DEFAULT_XS} };
     shadows[NUM_0].i32 = item->value[0].i32;
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1,
+        nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2339,7 +2340,8 @@ int32_t SetCustomShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (length > NUM_6) {
         shadows[NUM_6].i32 = item->value[NUM_6].i32;
     }
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7,
+        nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2766,7 +2768,7 @@ int32_t SetSweepGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     values[NUM_12].i32 = item->size > NUM_5 ? item->value[NUM_5].i32 : static_cast<ArkUI_Int32>(true);
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setSweepGradient(
-        node->uiNodeHandle, values, NUM_13, colors, size * NUM_3, ColorSpace::SRGB);
+        node->uiNodeHandle, values, NUM_13, colors, size * NUM_3, ColorSpace::SRGB, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2868,7 +2870,7 @@ int32_t SetRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
     values[NUM_9].i32 = item->size > NUM_3 ? item->value[NUM_3].i32 : static_cast<ArkUI_Int32>(false);
     fullImpl->getNodeModifiers()->getCommonModifier()->setRadialGradient(
-        node->uiNodeHandle, values, NUM_10, colors, size * NUM_3);
+        node->uiNodeHandle, values, NUM_10, colors, size * NUM_3, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3362,13 +3364,13 @@ int32_t SetForegroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         if (std::strcmp(item->string, COLORING_STRATEGY) == 0) {
             isColor = false;
             fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
-                node->uiNodeHandle, isColor, static_cast<uint32_t>(ForegroundColorStrategy::INVERT));
+                node->uiNodeHandle, isColor, static_cast<uint32_t>(ForegroundColorStrategy::INVERT), nullptr);
             return ERROR_CODE_NO_ERROR;
         }
         if (std::strcmp(item->string, COLOR_MARKERS) == 0 && item->size > 0) {
             isColor = true;
             fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
-                node->uiNodeHandle, isColor, item->value[0].u32);
+                node->uiNodeHandle, isColor, item->value[0].u32, nullptr);
             return ERROR_CODE_NO_ERROR;
         }
     }
@@ -3380,11 +3382,11 @@ int32_t SetForegroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         item->value[0].i32 == ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_PRIMARY) {
         isColor = false;
         fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
-            node->uiNodeHandle, isColor, item->value[0].i32);
+            node->uiNodeHandle, isColor, item->value[0].i32, nullptr);
     } else {
         isColor = true;
         fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
-            node->uiNodeHandle, isColor, item->value[0].u32);
+            node->uiNodeHandle, isColor, item->value[0].u32, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -3798,7 +3800,7 @@ int32_t SetOutlineColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setOutlineColor(
-        node->uiNodeHandle, colors, ALLOW_SIZE_8);
+        node->uiNodeHandle, colors, ALLOW_SIZE_8, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3888,7 +3890,7 @@ int32_t SetColorBlend(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setColorBlend(
-        node->uiNodeHandle, item->value[NUM_0].u32);
+        node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -10662,7 +10664,8 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     bool isValidColor = false;
     Color inactiveColor = Color::TRANSPARENT;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
-        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue(), true);
+        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue(), true,
+        nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
