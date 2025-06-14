@@ -4,6 +4,6 @@ export * from './decoratorImpl/decoratorConsume';
 export * from './decoratorImpl/decoratorBase'
 export * from './storage/appStorage';
 export * from './storage/localStorage';
-export * from './base/types'
-export * from './decoratorImpl/decoratorWatch'
-export * from './decorator'
+export * from './base/types';
+export * from './decoratorImpl/decoratorWatch';
+export * from './decorator';

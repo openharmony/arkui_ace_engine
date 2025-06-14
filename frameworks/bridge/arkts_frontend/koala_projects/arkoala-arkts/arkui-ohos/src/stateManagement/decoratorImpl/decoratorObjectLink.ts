@@ -46,14 +46,14 @@ export class ObjectLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     // parentInitValue is the init value of parent @Component
     // constructor takes a copy of it
     constructor(owningView: ExtendableComponent, varName: string, parentInitValue: T, watchFunc?: WatchFuncType) {
-        super("@ObjectLink", owningView, varName, watchFunc);
+        super('@ObjectLink', owningView, varName, watchFunc);
         this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, parentInitValue);
         this.registerWatchForObservedObjectChanges(parentInitValue);
     }
 
     public getInfo(): string {
         return `@ObjectLink ${this.varName} (ObjectLinkDecoratedVariable)`;
-    }   
+    }
 
     public get(): T {
         // @State V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1

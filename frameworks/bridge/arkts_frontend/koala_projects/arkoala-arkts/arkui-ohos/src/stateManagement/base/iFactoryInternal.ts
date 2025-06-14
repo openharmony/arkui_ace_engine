@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { IBackingValue } from "./iBackingValue";
-import { IMutableStateMeta, IMutableKeyedStateMeta } from "../decorator";
-import { ISubscribedWatches } from "../decorator";
-import { FactoryInternalImpl } from "./factoryInternal";
+import { IBackingValue } from './iBackingValue';
+import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
+import { ISubscribedWatches } from '../decorator';
+import { FactoryInternalImpl } from './factoryInternal';
 /**
  * iFactoryInternal is the state mgmt factory for classes, which are not exposed 
  * by the SDK and not used by UIPlugin generated code. So 'internal' use classes.
