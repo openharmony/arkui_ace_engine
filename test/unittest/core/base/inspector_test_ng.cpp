@@ -57,6 +57,25 @@ const char INSPECTOR_ID[] = "$ID";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
 const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_CHILDREN[] = "$children";
+
+class InspectorTestNode : public UINode {
+    DECLARE_ACE_TYPE(InspectorTestNode, UINode);
+
+public:
+    static RefPtr<InspectorTestNode> CreateTestNode(int32_t nodeId)
+    {
+        auto node = MakeRefPtr<InspectorTestNode>(nodeId);
+        return node;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    explicit InspectorTestNode(int32_t nodeId) : UINode("InspectorTestNode", nodeId) {}
+    ~InspectorTestNode() override = default;
+};
 }; // namespace
 
 class MockStageManager : public StageManager {
@@ -903,6 +922,52 @@ HWTEST_F(InspectorTestNg, GetRecordAllPagesNodes_001, TestSize.Level1)
     auto node3 = treesInfos[63];
     EXPECT_TRUE(node3 != nullptr);
     EXPECT_EQ(node3->GetParentId(), 6);
+}
+
+HWTEST_F(InspectorTestNg, GetRecordAllPagesNodes_002, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    // STEP1:Create stageNode->pageA->frameNode
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("stageNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    stageNode->children_.clear();
+    const RefPtr<FrameNode> pageA = FrameNode::CreateFrameNode("pageA", 2,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageA);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode0", 5, AceType::MakeRefPtr<Pattern>(), true);
+    pageA->AddChild(frameNode);
+    // STEP2:parent is CustomNode,stageNode->pageA->frameNode->customNode->customNodeChild
+    auto customNode = CustomNode::CreateCustomNode(100, "custom");
+    auto customNodeChild = FrameNode::CreateFrameNode("customNodeChild", 103, AceType::MakeRefPtr<Pattern>(), true);
+    customNodeChild->isActive_ = true;
+    customNode->AddChild(customNodeChild);
+    frameNode->AddChild(customNode);
+    // STEP3:parent is SpanNode,stageNode->pageA->frameNode->spanNode->spanNodeChild
+    auto spanNode = SpanNode::GetOrCreateSpanNode(int32_t(101));
+    auto spanNodeChild = FrameNode::CreateFrameNode("spanNodeChild", 104, AceType::MakeRefPtr<Pattern>(), true);
+    spanNodeChild->isActive_ = true;
+    spanNode->AddChild(spanNodeChild);
+    frameNode->AddChild(spanNode);
+    // STEP4:parent is TestNode,stageNode->pageA->frameNode->testNode->testNodeChild
+    auto testNode = InspectorTestNode::CreateTestNode(102);
+    auto testNodeChild = FrameNode::CreateFrameNode("testNodeChild", 105, AceType::MakeRefPtr<Pattern>(), true);
+    testNodeChild->isActive_ = true;
+    testNode->AddChild(testNodeChild);
+    frameNode->AddChild(testNode);
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetRecordAllPagesNodes(treesInfos);
+    auto treeNode = treesInfos[102];
+    EXPECT_TRUE(treeNode == nullptr);
+    treeNode = treesInfos[103];
+    EXPECT_TRUE(treeNode != nullptr);
+    EXPECT_EQ(treeNode->GetParentId(), 100);
+    treeNode = treesInfos[104];
+    EXPECT_TRUE(treeNode != nullptr);
+    EXPECT_EQ(treeNode->GetParentId(), 101);
+    treeNode = treesInfos[105];
+    EXPECT_TRUE(treeNode != nullptr);
+    EXPECT_EQ(treeNode->GetParentId(), 5);
 }
 
 /**
