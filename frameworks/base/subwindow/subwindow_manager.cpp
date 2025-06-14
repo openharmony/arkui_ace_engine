@@ -1174,6 +1174,7 @@ void SubwindowManager::CloseDialog(int32_t parentInstanceId)
     }
     auto subContainerId = GetSubContainerId(parentInstanceId);
     if (subContainerId > -1) {
+        CHECK_NULL_VOID(subwindow);
         subwindow->CloseDialog(subContainerId);
     }
 }
