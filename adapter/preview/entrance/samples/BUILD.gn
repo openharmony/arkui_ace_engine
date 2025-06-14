@@ -273,7 +273,7 @@ ohos_copy("copy_preview_shared_library") {
 
   sources = [
     "//base/global/system_resources/fonts",
-    "//third_party/icu/ohos_icu4j/data/icudt72l.dat",
+    "//third_party/icu/ohos_icu4j/data/icudt74l.dat",
     "//third_party/skia/src/ports/skia_ohos/config/fontconfig.json",
     "//third_party/skia/src/ports/skia_ohos/config/fontconfig_ohos.json",
   ]
