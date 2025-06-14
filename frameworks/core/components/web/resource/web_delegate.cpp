@@ -108,6 +108,7 @@ constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
+constexpr uint32_t BLANKLESS_REMOVE_SNAPSHOT_DELAY_TIME = 2000;
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -5947,7 +5948,7 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
     return result;
 }
 
-void WebDelegate::RemoveSnapshotFrameNode()
+void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::RemoveSnapshotFrameNode");
     auto context = context_.Upgrade();
@@ -5961,7 +5962,7 @@ void WebDelegate::RemoveSnapshotFrameNode()
             CHECK_NULL_VOID(webPattern);
             webPattern->RemoveSnapshotFrameNode();
         },
-        TaskExecutor::TaskType::UI, 650, "ArkUIWebSnapshotRemove"); // 650为根据LCP和FCP时差估算的经验值
+        TaskExecutor::TaskType::UI, removeDelayTime, "ArkUIWebSnapshotRemove");
 }
 
 bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
@@ -5995,17 +5996,15 @@ bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRe
         [weak = WeakClaim(this), request]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            std::string key = OHOS::NWeb::NWebHelper::Instance().CheckBlankOptEnable(
+            std::string snapshotPath = OHOS::NWeb::NWebHelper::Instance().CheckBlankOptEnable(
                 request->Url(), delegate->nweb_->GetWebId());
-            if (!key.empty() && request->IsAboutMainFrame()) {
-                auto snapshotDataItem = NWebSnapshotDataBase::Instance().GetSnapshotDataItem(key);
+            if (!snapshotPath.empty() && request->IsAboutMainFrame()) {
                 TAG_LOGD(AceLogTag::ACE_WEB, "blankless OnHandleInterceptLoading, snapshot Path:%{public}s",
-                         snapshotDataItem.staticPath.c_str());
-                if (!snapshotDataItem.staticPath.empty()) {
-                    auto webPattern = delegate->webPattern_.Upgrade();
-                    CHECK_NULL_VOID(webPattern);
-                    webPattern->CreateSnapshotImageFrameNode(snapshotDataItem.staticPath);
-                }
+                         snapshotPath.c_str());
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+                delegate->RemoveSnapshotFrameNode(BLANKLESS_REMOVE_SNAPSHOT_DELAY_TIME);
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebloadSnapshot");
