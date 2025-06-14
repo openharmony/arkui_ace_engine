@@ -91,6 +91,28 @@ void JsFunctionBase::Execute(const std::vector<std::string>& keys, const std::st
     ExecuteJS(1, &paramObj);
 }
 
+void JsFunctionBase::ExecuteWithContext(
+    const std::vector<std::string>& keys, const std::string& param, const JSExecutionContext& context)
+{
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(param);
+    if (!argsPtr) {
+        return;
+    }
+    JSRef<JSObject> eventInfo = JSRef<JSObject>::New();
+    for (auto iter = keys.begin(); iter != keys.end(); iter++) {
+        const std::string key = *iter;
+        const auto value = argsPtr->GetValue(key);
+        if (!value) {
+            LOGD("key[%{public}s] not exist.", key.c_str());
+            continue;
+        }
+        ExecuteInternal(value, key, eventInfo);
+    }
+
+    JSRef<JSVal> paramObj = JSRef<JSVal>::Cast(eventInfo);
+    ExecuteJSWithContext(1, &paramObj, context);
+}
+
 void JsFunctionBase::ExecuteInternal(const std::unique_ptr<JsonValue>& value, const std::string& key,
     const JSRef<JSObject>& eventInfo)
 {
@@ -150,6 +172,7 @@ JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAni
     return result;
 }
 
+#ifdef USE_ARK_ENGINE
 JSRef<JSVal> JsWeakFunction::ExecuteJSWithContext(
     int argc, JSRef<JSVal> argv[], const JSExecutionContext& context, bool isAnimation)
 {
@@ -185,6 +208,7 @@ JSRef<JSVal> JsFunction::ExecuteJSWithContext(
     JSRef<JSVal> result = jsFunction_->Call(jsObject, argc, argv, isAnimation);
     return result;
 }
+#endif
 
 JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAnimation)
 {

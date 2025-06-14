@@ -54,7 +54,7 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
     }
-    float widthTotal = 0.0f;
+    float totalWidth = 0.0f;
     float height = 0.0f;
     for (int32_t i = 0; i < CHILDREN_SIZE; i++) {
         auto textWrapper = contentWrapper->GetOrCreateChildByIndex(i);
@@ -63,27 +63,29 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
         textWrapper->Measure(std::nullopt);
         auto textGeometryNode = textWrapper->GetGeometryNode();
         CHECK_NULL_VOID(textGeometryNode);
-        widthTotal += textGeometryNode->GetFrameSize().Width();
+        totalWidth += textGeometryNode->GetFrameSize().Width();
         height = std::max(height, textGeometryNode->GetFrameSize().Height());
     }
-    widthTotal += currentPadding.left.value_or(CalcLength(defaultLeftMargin)).GetDimension().ConvertToPx();
-    widthTotal += currentPadding.right.value_or(CalcLength(defaultLeftMargin)).GetDimension().ConvertToPx();
+    totalWidth += currentPadding.left.value_or(CalcLength(defaultLeftMargin)).GetDimension().ConvertToPx();
+    totalWidth += currentPadding.right.value_or(CalcLength(defaultLeftMargin)).GetDimension().ConvertToPx();
     height += currentPadding.top.value_or(CalcLength(defaultTopMargin)).GetDimension().ConvertToPx();
     height += currentPadding.bottom.value_or(CalcLength(defaultTopMargin)).GetDimension().ConvertToPx();
 
     auto linearLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(contentLayoutProperty);
     CHECK_NULL_VOID(linearLayoutProperty);
 
-    auto Idealwidth = constraint->selfIdealSize.Width().value_or(0);
-    if (widthTotal < Idealwidth - theme->GetEntryButtonWidth().ConvertToPx()) {
-        widthTotal = Idealwidth - theme->GetEntryButtonWidth().ConvertToPx();
+    SizeF policySize = {constraint->selfIdealSize.Width().value_or(0), constraint->selfIdealSize.Height().value_or(0)};
+    UpdateFrameSizeWithLayoutPolicy(layoutWrapper, policySize);
+
+    if (LessNotEqual(totalWidth, policySize.Width() - theme->GetEntryButtonWidth().ConvertToPx())) {
+        totalWidth = policySize.Width() - theme->GetEntryButtonWidth().ConvertToPx();
         linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
     } else {
         linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     }
-    height = std::max(height, constraint->selfIdealSize.Height().value_or(0));
+    height = std::max(height, policySize.Height());
 
-    contentMeasure_ = SizeF(widthTotal, height);
+    contentMeasure_ = SizeF(totalWidth, height);
     contentGeometryNode->SetFrameSize(contentMeasure_);
 }
 
@@ -144,4 +146,30 @@ void CalendarPickerLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
         childGeometryNode->SetFrameSize(childMeasure);
     }
 }
+
+void CalendarPickerLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, SizeF& frameSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<CalendarPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint.has_value());
+
+    LayoutCalPolicy widthLayoutPolicy =
+        layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    LayoutCalPolicy heightLayoutPolicy =
+        layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        auto width = layoutConstraint->parentIdealSize.Width().value_or(0);
+        frameSize.SetWidth(width);
+    }
+
+    if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        auto height = layoutConstraint->parentIdealSize.Height().value_or(0);
+        frameSize.SetHeight(height);
+    }
+}
+
 } // namespace OHOS::Ace::NG

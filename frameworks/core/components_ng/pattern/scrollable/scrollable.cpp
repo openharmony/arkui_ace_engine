@@ -800,6 +800,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
             HandleDragUpdate(info);
         }
     }
+    if (onWillStopDraggingCallback_) {
+        onWillStopDraggingCallback_(info.GetMainVelocity());
+    }
     ReportToDragFRCScene(info.GetMainVelocity(), NG::SceneStatus::END);
     bool isScrollFromTouchPad = info.GetSourceTool() == SourceTool::TOUCHPAD;
     isDragUpdateStop_ = false;

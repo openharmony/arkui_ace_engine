@@ -72,11 +72,6 @@ public:
         const RefPtr<UINode>& customNode, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
     RefPtr<DragDropProxy> CreateTextDragDropProxy();
 
-    void AddDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
-    {
-        dragFrameNodes_.try_emplace(id, dragFrameNode);
-    }
-
     void RemoveDragFrameNode(int32_t id);
 
     void AddGridDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
@@ -747,7 +742,6 @@ private:
         std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
         const RefPtr<NG::PipelineContext>& pipeline);
 
-    std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> textFieldDragFrameNodes_;

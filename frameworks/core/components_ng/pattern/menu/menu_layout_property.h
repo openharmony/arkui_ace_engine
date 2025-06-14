@@ -151,6 +151,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void BindToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void DividerToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void MaskToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutProperty);
 
 private:

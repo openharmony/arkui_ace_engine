@@ -157,6 +157,10 @@ public:
     {
         return -1;
     }
+    virtual int32_t SetPlayRangeUsWithMode(int64_t /*startTime*/, int64_t /*endTime*/, SeekMode /*mode */)
+    {
+        return -1;
+    }
 
 protected:
 

@@ -61,6 +61,7 @@ void MovingPhotoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = DynamicCast<MovingPhotoPattern>(host->GetPattern());
     CHECK_NULL_VOID(pattern);
+    pattern->SetXmagePosition();
     if (pattern->GetXmageModeStatus() && pattern->GetXmageModeValue() == ROUND_XMAGE_MODE_VALUE) {
         MeasureInRoundXmageMode(layoutWrapper);
         return;
@@ -119,7 +120,6 @@ void MovingPhotoLayoutAlgorithm::MeasureInRoundXmageMode(LayoutWrapper* layoutWr
         } else if (child->GetHostTag() == V2::COLUMN_ETS_TAG) {
             auto layoutConstraintForColumn = layoutConstraint;
             auto columnSize = contentSize;
-            pattern->SetXmagePosition();
             SizeF xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(contentSize);
             SizeF imageSize = layoutProperty->GetImageSize().value();
             columnSize.SetHeight(imageSize.Height() * xmageOffsetRatio.Height() + 1);

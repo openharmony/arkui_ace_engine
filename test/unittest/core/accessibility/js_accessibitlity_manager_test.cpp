@@ -1214,24 +1214,18 @@ public:
  */
 HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible02, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create parent frameNode and set up its rect.
-     */
+    //@tc.steps: step1. create parent frameNode and set up its rect.
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     CHECK_NULL_VOID(frameNode);
     EXPECT_NE(frameNode->pattern_, nullptr);
     frameNode->isActive_ = true;
     auto pipeline = frameNode->GetContext();
-
     auto parentRender = AceType::MakeRefPtr<MockRenderContextTest>();
     CHECK_NULL_VOID(parentRender);
     auto parentRec = std::make_shared<RectF>(10.0, 10.0, 10.0, 5.0);
     parentRender->retf = parentRec;
     frameNode->renderContext_ = parentRender;
-
-    /**
-     * @tc.steps: step2. create child frameNode and set up its rect.
-     */
+    //@tc.steps: step2. create child frameNode and set up its rect.
     auto childNode = FrameNode::CreateFrameNode(
     "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     childNode->isActive_ = true;
@@ -1240,17 +1234,21 @@ HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible02, TestSize.L
     auto childRec = std::make_shared<RectF>(10.0, 10.0, 10.0, 10.0);
     childRender->retf = childRec;
     childNode->renderContext_ = childRender;
-
-    /**
-     * @tc.steps: step3. add parent and child node to the pipeline context.
-     */
+    auto accessibilityProperty = childNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityNextFocusInspectorKey("test_inspector_id");
+    //@tc.steps: step3. create next child frameNode and set up its rect.
+    auto nextChildNode = FrameNode::CreateFrameNode(
+    "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    nextChildNode->isActive_ = true;
+    nextChildNode->UpdateInspectorId("test_inspector_id");
+    auto nextChildAccessibilityId = nextChildNode->GetAccessibilityId();
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(1, nextChildAccessibilityId);
+    //@tc.steps: step4. add parent and child node to the pipeline context.
     auto context = NG::PipelineContext::GetCurrentContext();
     context->GetRootElement()->AddChild(frameNode);
     frameNode->AddChild(childNode);
-
-    /**
-     * @tc.steps: step4. verify the child node's accessibilityVisible is true.
-     */
+    frameNode->AddChild(nextChildNode);
+    //@tc.steps: step5. verify the child node's accessibilityVisible is true.
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     CHECK_NULL_VOID(jsAccessibilityManager);
     jsAccessibilityManager->SetPipelineContext(context);
@@ -1258,11 +1256,13 @@ HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible02, TestSize.L
     RefPtr<NG::PipelineContext> ngPipeline;
     ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     std::list<AccessibilityElementInfo> extensionElementInfos;
+    jsAccessibilityManager->treeId_ = 1;
     jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(
         childNode->GetAccessibilityId(), 1, extensionElementInfos, ngPipeline, 1);
     for (auto& extensionElementInfo : extensionElementInfos) {
         if (childNode->GetAccessibilityId() == extensionElementInfo.GetAccessibilityId()) {
             EXPECT_TRUE(extensionElementInfo.GetAccessibilityVisible());
+            EXPECT_EQ(extensionElementInfo.GetAccessibilityNextFocusId(), nextChildAccessibilityId);
         }
     }
 }
@@ -2136,34 +2136,159 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest001, TestSize.L
     /**
      * @tc.steps: step1. construct jsAccessibilityManager, test node
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<Pattern>(), false);
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    ASSERT_NE(context, nullptr);
     auto root = context->GetRootElement();
-    CHECK_NULL_VOID(root);
+    ASSERT_NE(root, nullptr);
 
     jsAccessibilityManager->SetPipelineContext(context);
     auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
-    CHECK_NULL_VOID(container);
+    ASSERT_NE(container, nullptr);
 
     AccessibilityEvent accessibilityEvent {
         .nodeId = root->GetAccessibilityId(),
         .type = AccessibilityEventType::PAGE_CHANGE
     };
 
-    auto IsUIExtensionWindowBackup = container->IsUIExtensionWindow();
+    // mock conntainer will return isUIexentionwindow by SetUIExtensionSubWindow
     container->SetUIExtensionSubWindow(true);
     jsAccessibilityManager->AddToPageEventController(root);
     /**
      * @tc.steps: step2. save pages when in UIExtensionWindow
      */
+    AccessibilityWorkMode accessibilityWorkMode { .isTouchExplorationEnabled = true };
+    EXPECT_CALL(*jsAccessibilityManager,
+        GenerateAccessibilityWorkMode()).WillOnce(::testing::Return(accessibilityWorkMode));
     auto result = jsAccessibilityManager->IsSendAccessibilityEvent(accessibilityEvent);
     EXPECT_EQ(result, false);
 
-    container->SetUIExtensionSubWindow(IsUIExtensionWindowBackup);
+    container->SetUIExtensionSubWindow(false);
+}
+
+/**
+* @tc.name: IsSendAccessibilityEventTest002
+* @tc.desc: IsSendAccessibilityEvent in UIExtensionWindow
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+
+    jsAccessibilityManager->SetPipelineContext(context);
+    auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+
+    AccessibilityEvent accessibilityEvent {
+        .nodeId = root->GetAccessibilityId(),
+        .type = AccessibilityEventType::PAGE_CHANGE
+    };
+
+    // mock conntainer will return isUIexentionwindow by SetUIExtensionSubWindow
+    container->SetUIExtensionSubWindow(true);
+    jsAccessibilityManager->AddToPageEventController(root);
+    /**
+     * @tc.steps: step2. save pages when in UIExtensionWindow
+     */
+    AccessibilityWorkMode accessibilityWorkMode { .isTouchExplorationEnabled = false };
+    EXPECT_CALL(*jsAccessibilityManager,
+        GenerateAccessibilityWorkMode()).WillOnce(::testing::Return(accessibilityWorkMode));
+    auto result = jsAccessibilityManager->IsSendAccessibilityEvent(accessibilityEvent);
+    EXPECT_EQ(result, true);
+
+    container->SetUIExtensionSubWindow(false);
+}
+
+/**
+* @tc.name: IsSendAccessibilityEventTest003
+* @tc.desc: IsSendAccessibilityEvent
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+
+    jsAccessibilityManager->SetPipelineContext(context);
+    auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+
+    AccessibilityEvent accessibilityEvent {
+        .nodeId = root->GetAccessibilityId(),
+        .type = AccessibilityEventType::PAGE_CHANGE
+    };
+
+    jsAccessibilityManager->AddToPageEventController(root);
+    /**
+     * @tc.steps: step2. save pages when in UIExtensionWindow
+     */
+    AccessibilityWorkMode accessibilityWorkMode { .isTouchExplorationEnabled = true };
+    EXPECT_CALL(*jsAccessibilityManager,
+        GenerateAccessibilityWorkMode()).WillOnce(::testing::Return(accessibilityWorkMode));
+    auto result = jsAccessibilityManager->IsSendAccessibilityEvent(accessibilityEvent);
+    EXPECT_EQ(result, false);
+}
+
+/**
+* @tc.name: IsSendAccessibilityEventForHostTest001
+* @tc.desc: IsSendAccessibilityEventForHost
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventForHostTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto accessibilityProperty = root->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilitySamePage("FULL_SILENT");
+
+    jsAccessibilityManager->SetPipelineContext(context);
+    auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+    jsAccessibilityManager->AddDefaultFocusNode(root);
+    jsAccessibilityManager->AddFrameNodeToUecStatusVec(root);
+
+    AccessibilityEvent accessibilityEvent {
+        .nodeId = root->GetAccessibilityId(),
+        .type = AccessibilityEventType::PAGE_CHANGE
+    };
+    /**
+     * @tc.steps: step2. save events when UIExtension not ready
+     */
+    auto result =
+        jsAccessibilityManager->IsSendAccessibilityEventForHost(accessibilityEvent, "test", root->GetPageId());
+    EXPECT_EQ(result, false);
 }
 
 /**
@@ -2266,6 +2391,55 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager042, TestSize.Level1)
     EXPECT_EQ(parentRectInfo.rotateTransform.centerY, 20);
     EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterX, 30);
     EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterY, 40);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager043
+ * @tc.desc: test UpdateVirtualNodeFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isAccessibilityVirtualNode_ = true;
+    frameNode->accessibilityId_ = 1;
+    jsAccessibilityManager->lastFrameNode_ = frameNode;
+    jsAccessibilityManager->currentFocusNodeId_ = frameNode->accessibilityId_;
+
+    /**
+     * @tc.steps: step2. construct parentNode
+     */
+    auto rootNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->accessibilityId_ = 0;
+    rootNode->children_.push_back(frameNode);
+    frameNode->SetAccessibilityVirtualNodeParent(rootNode);
+    EXPECT_EQ(rootNode->children_.size(), 1);
+
+    /**
+     * @tc.steps: step3. construct size
+     */
+    NG::SizeF size;
+    size.width_ = 123.0f;
+    size.height_ = 456.0f;
+    jsAccessibilityManager->oldGeometrySize_ = size;
+    frameNode->geometryNode_->SetFrameSize(size);
+
+    /**
+     * @tc.steps: step4. test UpdateVirtualNodeFocus
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityFocusState(false);
+    jsAccessibilityManager->UpdateVirtualNodeFocus();
+    EXPECT_EQ(accessibilityProperty->isAccessibilityFocused_, true);
 }
 
 #ifdef WEB_SUPPORTED
@@ -2394,4 +2568,41 @@ HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoBySurfaceId001, TestSize.L
     rootElement->RemoveChild(embedNode);
     MockPipelineContext::TearDown();
 }
+
+/**
+ * @tc.name: IsTagInEmbedComponent001
+ * @tc.desc: Test IsTagInEmbedComponent with exist componentType
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsTagInEmbedComponent001, TestSize.Level1)
+{
+    std::string tag = "embeddedObject";
+    bool result = OHOS::Ace::Framework::JsAccessibilityManager::IsTagInEmbedComponent(tag);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsTagInEmbedComponent002
+ * @tc.desc: Test IsTagInEmbedComponent with no exist componentType
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsTagInEmbedComponent002, TestSize.Level1)
+{
+    std::string tag = "noExist_embeddedObject";
+    bool result = OHOS::Ace::Framework::JsAccessibilityManager::IsTagInEmbedComponent(tag);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsTagInEmbedComponent003
+ * @tc.desc: Test IsTagInEmbedComponent with null string
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsTagInEmbedComponent003, TestSize.Level1)
+{
+    std::string tag = "";
+    bool result = OHOS::Ace::Framework::JsAccessibilityManager::IsTagInEmbedComponent(tag);
+    EXPECT_FALSE(result);
+}
+
 } // namespace OHOS::Ace::NG

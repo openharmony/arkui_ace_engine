@@ -53,6 +53,7 @@ RefPtr<ThemeConstants> ResourceParseUtils::GetThemeConstants(const RefPtr<Resour
         moduleName = resObj->GetModuleName();
     }
 
+#if !defined(ACE_UNITTEST)
     auto cardId = CardScope::CurrentId();
     if (cardId != INVALID_CARD_ID) {
         auto container = Container::Current();
@@ -63,6 +64,7 @@ RefPtr<ThemeConstants> ResourceParseUtils::GetThemeConstants(const RefPtr<Resour
         CHECK_NULL_RETURN(cardThemeManager, nullptr);
         return cardThemeManager->GetThemeConstants(bundleName, moduleName);
     }
+#endif
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {

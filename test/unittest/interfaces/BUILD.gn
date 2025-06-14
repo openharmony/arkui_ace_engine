@@ -70,8 +70,8 @@ ohos_unittest("form_render_test") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
-    "form_render_test.cpp",
-    "form_renderer_dispatcher_proxy_test.cpp",
+    "form_render/form_render_test.cpp",
+    "form_render/form_renderer_dispatcher_proxy_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -148,7 +148,7 @@ ohos_unittest("form_render_group_test") {
     "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
-    "form_render_group_test.cpp",
+    "form_render/form_render_group_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -205,7 +205,7 @@ ohos_unittest("form_render_delegate_proxy_test") {
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
-    "form_render_delegate_proxy_test.cpp",
+    "form_render/form_render_delegate_proxy_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -243,7 +243,7 @@ ohos_unittest("form_render_delegate_stub_test") {
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
-    "form_render_delegate_stub_test.cpp",
+    "form_render/form_render_delegate_stub_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -298,7 +298,7 @@ ohos_unittest("form_render_dispatcher_stub_test") {
     "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
-    "form_render_dispatcher_stub_test.cpp",
+    "form_render/form_render_dispatcher_stub_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -337,7 +337,7 @@ ohos_unittest("form_render_delegate_impl_test") {
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
-    "form_render_delegate_impl_test.cpp",
+    "form_render/form_render_delegate_impl_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -368,7 +368,7 @@ ohos_unittest("form_render_dispatcher_impl_test") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_impl.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
-    "form_render_dispatcher_impl_test.cpp",
+    "form_render/form_render_dispatcher_impl_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -834,6 +834,7 @@ ohos_unittest("drag_and_drop_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "udmf:udmf_client",
+    "udmf:libudmf",
   ]
 }
 

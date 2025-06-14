@@ -624,4 +624,86 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage014, TestSize
     EXPECT_TRUE(dragPreviewInfo.customNode);
     EXPECT_EQ(dragPreviewInfo.customNode, buildFunc());
 }
+
+/**
+ * @tc.name: GestureEventHubTestCoverage015
+ * @tc.desc: test OnDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto childNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(childNode, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto patternNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    frameNode->AddChild(childNode);
+    DragDropInfo dragDropInfo;
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. InitDragDropEvent.
+     */
+    gestureEventHub->InitDragDropEvent();
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
+    GestureEvent gestureEvent;
+    char voidPtr[0];
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    dragDropInfo.pixelMap = pixelMap;
+    frameNode->SetDragPreview(dragDropInfo);
+    gestureEventHub->dragEventActuator_->preScaledPixelMap_ = pixelMap;
+    gestureEventHub->dragPreviewPixelMap_ = pixelMap;
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto dragDropProxy = AceType::MakeRefPtr<DragDropProxy>(101);
+    gestureEventHub->dragDropProxy_ = dragDropProxy;
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    textPattern->dragRecordSize_ = 1;
+    frameNode->pattern_ = textPattern;
+    frameNode->GetOrCreateFocusHub();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(mainPipeline, nullptr);
+    auto overlayManager = mainPipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->pixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
+    gestureEventHub->OnDragStart(gestureEvent, pipeline, frameNode, dragDropInfo, event);
+    gestureEventHub->dragEventActuator_->itemParentNode_ = patternNode;
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    patternNode->pattern_ = mockPn;
+    gestureEventHub->dragEventActuator_->isSelectedItemNode_ = true;
+    auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
+    dragDropInfo.pixelMap = pixmap;
+    EXPECT_CALL(*pixmap, GetWidth()).WillRepeatedly(Return(200));
+    gestureEvent.inputEventType_ = InputEventType::MOUSE_BUTTON;
+
+    /**
+     * @tc.steps: step3. set gestureEvent info, set MouseTransformEnable true.
+     */
+    gestureEvent.SetSourceTool(SourceTool::MOUSE);
+    gestureEvent.SetSourceDevice(SourceType::TOUCH);
+    AceApplicationInfo::GetInstance().SetMouseTransformEnable(true);
+
+    /**
+     * @tc.steps: step4. call OnDragStart function.
+     *            case: GetSourceDevice is TOUCH, GetSourceTool is MOUSE, and MouseTransformEnable is true.
+     * @tc.expected: branch is covered.
+     */
+    auto mock = AceType::DynamicCast<MockInteractionInterface>(InteractionInterface::GetInstance());
+    ASSERT_NE(mock, nullptr);
+    if (mock->gDragOutCallback) {
+        mock->gDragOutCallback();
+    }
+    gestureEventHub->OnDragStart(gestureEvent, pipeline, frameNode, dragDropInfo, event);
+    EXPECT_EQ(gestureEvent.inputEventType_, InputEventType::MOUSE_BUTTON);
+    EXPECT_EQ(gestureEvent.GetSourceDevice(), SourceType::TOUCH);
+    EXPECT_EQ(gestureEvent.GetSourceTool(), SourceTool::MOUSE);
+}
 } // namespace OHOS::Ace::NG

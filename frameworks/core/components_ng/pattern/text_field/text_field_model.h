@@ -341,7 +341,8 @@ public:
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
     virtual void ResetBackgroundColor() = 0;
     virtual void SetHeight(const Dimension& value) = 0;
-    virtual void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
+    virtual void SetPadding(
+        const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp, bool hasRegist = false) = 0;
     virtual void SetMargin() {};
     virtual void SetBackBorder() {};
     virtual void SetEllipsisMode(EllipsisMode modal) {};
@@ -359,6 +360,13 @@ public:
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
+    virtual void SetTypingUnderlineColor(const Color& normalColor) {};
+    virtual void SetErrorUnderlineColor(const Color& normalColor) {};
+    virtual void SetDisableUnderlineColor(const Color& normalColor) {};
+    virtual void ResetNormalUnderlineColor() {};
+    virtual void ResetTypingUnderlineColor() {};
+    virtual void ResetErrorUnderlineColor() {};
+    virtual void ResetDisableUnderlineColor() {};
     virtual void SetUserUnderlineColor(UserUnderlineColor userColor) {};
     virtual void SetShowCounter(bool value) {};
     virtual void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) = 0;

@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/property/transition_property.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_container.h"
@@ -1268,6 +1269,40 @@ HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest007, Tes
 }
 
 /**
+ * @tc.name: CalcTranslateForTransitionPushEndTest008
+ * @tc.desc: The CalcTranslateForTransitionPushEnd Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest008, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto isRTL = node->GetLanguageDirection();
+    auto translate = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(translate.GetX(), (-frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL));
+    EXPECT_EQ(translate.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushEndTest009
+ * @tc.desc: The CalcTranslateForTransitionPushEnd Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest009, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto isRTL = node->GetLanguageDirection();
+    SystemProperties::softPagetransition_ = true;
+    auto translate = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(translate.GetX(), (-frameSize.Width() * HALF * HALF * isRTL));
+    EXPECT_EQ(translate.GetY(), 0.0f);
+    SystemProperties::softPagetransition_ = false;
+}
+
+/**
  * @tc.name: CalcTranslateForTransitionPopStartTest001
  * @tc.desc: Branch: if (!transitionIn) { => true
  * @tc.type: FUNC
@@ -1475,6 +1510,40 @@ HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest007, Te
     EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * CONTENT_OFFSET_PERCENT, 0.0f));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopStartTest008
+ * @tc.desc: The CalcTranslateForTransitionPopStart Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest008, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto isRTL = node->GetLanguageDirection();
+    auto translate = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(translate.GetX(), (-frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL));
+    EXPECT_EQ(translate.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopStartTest009
+ * @tc.desc: The CalcTranslateForTransitionPopStart Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest009, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto isRTL = node->GetLanguageDirection();
+    SystemProperties::softPagetransition_ = true;
+    auto translate = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(translate.GetX(), (-frameSize.Width() * HALF * HALF * isRTL));
+    EXPECT_EQ(translate.GetY(), 0.0f);
+    SystemProperties::softPagetransition_ = false;
 }
 
 /**

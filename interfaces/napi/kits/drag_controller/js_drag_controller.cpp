@@ -24,6 +24,7 @@
 #include "napi/native_common.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_value.h"
+#include "core/common/udmf/data_load_params.h"
 
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 #include "jsnapi.h"
@@ -97,6 +98,7 @@ struct DragControllerAsyncCtx {
     napi_value customBuilder;
     std::vector<napi_ref> customBuilderList;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData;
+    RefPtr<OHOS::Ace::DataLoadParams> dataLoadParams;
     std::string extraParams;
     int32_t instanceId = -1;
     int32_t errCode = -1;
@@ -941,7 +943,9 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     CHECK_NULL_RETURN(pipeline, false);
     auto dragNodePipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_RETURN(dragNodePipeline, false);
-    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
+    auto scaleData =
+        NG::DragControllerFuncWrapper::GetScaleInfo(asyncCtx->instanceId, pixelMap->GetWidth(), pixelMap->GetHeight());
+    CHECK_NULL_RETURN(scaleData, false);
     auto scale = asyncCtx->windowScale;
     CHECK_NULL_RETURN(pixelMap, false);
     RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
@@ -953,10 +957,10 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     data = { false, asyncCtx->badgeNumber, 1.0f, false,
         NG::OffsetF(), NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(asyncCtx->instanceId), refPixelMap };
     NG::DragControllerFuncWrapper::ResetContextMenuDragPosition(asyncCtx->instanceId);
-    if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
+    if (scaleData->isNeedScale && asyncCtx->dragPreviewOption.isScaleEnabled) {
         auto overlayManager = dragNodePipeline->GetOverlayManager();
         auto imageNode = overlayManager->GetPixelMapContentNode();
-        scale = minScaleWidth / pixelMap->GetWidth() * asyncCtx->windowScale;
+        scale = scaleData->scale * asyncCtx->windowScale;
         data.previewScale = scale;
         NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
         CHECK_NULL_RETURN(imageNode, false);
@@ -1154,6 +1158,9 @@ void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSi
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
+    if (asyncCtx->dataLoadParams) {
+        UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
+    }
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
         dataSize = badgeNumber.value();
@@ -1263,6 +1270,21 @@ bool ParseTouchPoint(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_valu
         return false;
     }
     return true;
+}
+
+bool ParseDataLoadParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_valuetype& valueType)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    napi_value dataLoadParamsNApi = nullptr;
+    napi_get_named_property(asyncCtx->env, asyncCtx->argv[1], "dataLoadParams", &dataLoadParamsNApi);
+    napi_typeof(asyncCtx->env, dataLoadParamsNApi, &valueType);
+    if (valueType == napi_object) {
+        auto dataLoadParams = UdmfClient::GetInstance()->TransformDataLoadParams(asyncCtx->env, dataLoadParamsNApi);
+        CHECK_NULL_RETURN(dataLoadParams, false);
+        asyncCtx->dataLoadParams = dataLoadParams;
+        return true;
+    }
+    return false;
 }
 
 bool ParseDragItemInfoParam(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::string& errMsg)
@@ -1746,6 +1768,8 @@ bool ParseDragInfoParam(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::s
 
     GetCurrentDipScale(asyncCtx);
     asyncCtx->hasTouchPoint = ParseTouchPoint(asyncCtx, valueType);
+
+    ParseDataLoadParams(asyncCtx, valueType);
     return true;
 }
 

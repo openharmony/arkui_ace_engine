@@ -3560,7 +3560,7 @@ std::unique_ptr<JsonValue> NavigationPattern::GetTopNavdestinationJson(bool need
     topNavdestinationJson->Put("navigationId", hostNode->GetCurId().c_str());
     std::string param = "";
     if (needParam) {
-        param = navigationStack_->GetSerializedParamSafely(topNavDestinationNode->GetIndex());
+        param = navdestinationPattern->GetSerializedParam();
         topNavdestinationJson->Put("param", param.c_str());
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get top navDestinationInfo success, name: %{public}s, mode: %{public}d, "

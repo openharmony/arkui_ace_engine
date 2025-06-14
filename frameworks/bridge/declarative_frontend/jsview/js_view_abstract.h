@@ -63,6 +63,8 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
+static std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> DEFAULT_RESOURCE_PAIR_ARRAY;
+
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 struct LocalizedCalcDimension {
@@ -468,6 +470,7 @@ public:
     static void JsLayoutWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
+    static void JsLayoutGravity(const JSCallbackInfo& info);
     static void JsPosition(const JSCallbackInfo& info);
     static void JsMarkAnchor(const JSCallbackInfo& info);
     static void JsOffset(const JSCallbackInfo& info);
@@ -476,6 +479,7 @@ public:
     static void JsOverlay(const JSCallbackInfo& info);
     static Alignment ParseAlignment(int32_t align);
     static LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
+    static Alignment ParseLocalizedAlignment(std::string localizedAlignment);
     static void JsAlignRules(const JSCallbackInfo& info);
     static void JsChainMode(const JSCallbackInfo& info);
 
@@ -676,8 +680,13 @@ public:
     static void GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
     static void GetBorderRadiusResObj(const char* key, JSRef<JSObject>& object, CalcDimension& radius,
         RefPtr<ResourceObject>& resObj);
+    static void RegisterTextBackgroundStyleResource(TextBackgroundStyle& textBackgroundStyle,
+        RefPtr<ResourceObject>& resObjTopLeft, RefPtr<ResourceObject>& resObjTopRight,
+        RefPtr<ResourceObject>& resObjBottomLeft, RefPtr<ResourceObject>& resObjBottomRight);
     static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
         CalcDimension& bottomLeft, CalcDimension& bottomRight);
+    static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+        CalcDimension& bottomLeft, CalcDimension& bottomRight, TextBackgroundStyle& textBackgroundStyle);
     static void JsPointLight(const JSCallbackInfo& info);
 
     template<typename T>
@@ -780,7 +789,9 @@ public:
         const JSRef<JSVal>& jsValue, uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
     static void ParseJsSymbolCustomFamilyNames(std::vector<std::string>& customFamilyNames,
         const JSRef<JSVal>& jsValue);
-    static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result);
+    static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result,
+        bool enableResourceUpdate = false,
+        std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr = DEFAULT_RESOURCE_PAIR_ARRAY);
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
@@ -836,9 +847,9 @@ public:
     static void ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj);
 
 private:
-    static bool ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+    static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
-    static bool ParseJsIntegerArrayInternal(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
+    static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::string& result,

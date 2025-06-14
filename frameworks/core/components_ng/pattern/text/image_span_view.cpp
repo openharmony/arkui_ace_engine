@@ -87,6 +87,25 @@ void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
         style.backgroundColor.has_value() || style.backgroundRadius.has_value());
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
     SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode), true);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto key = "textbackgroundStyle";
+    auto&& updateFunc = [style, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        TextBackgroundStyle& styleValue = const_cast<TextBackgroundStyle&>(style);
+        styleValue.ReloadResources();
+        styleValue.groupId = frameNode->GetId();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, styleValue, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
+            styleValue.backgroundColor.has_value() || styleValue.backgroundRadius.has_value(), frameNode);
+        SpanNode::RequestTextFlushDirty(frameNode, true);
+    };
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style)
@@ -97,6 +116,25 @@ void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyl
         style.backgroundColor.has_value() || style.backgroundRadius.has_value(), frameNode);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
     SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode), true);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto key = "textbackgroundStyle";
+    auto&& updateFunc = [style, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        TextBackgroundStyle& styleValue = const_cast<TextBackgroundStyle&>(style);
+        styleValue.ReloadResources();
+        styleValue.groupId = frameNode->GetId();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, styleValue, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
+            styleValue.backgroundColor.has_value() || styleValue.backgroundRadius.has_value(), frameNode);
+        SpanNode::RequestTextFlushDirty(frameNode, true);
+    };
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void ImageSpanView::Create()

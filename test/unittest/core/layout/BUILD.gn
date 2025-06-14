@@ -58,7 +58,9 @@ group("core_layout_unittest") {
     ":layout_wrapper_build_test_ng",
     ":layout_wrapper_node_test_ng",
     ":layout_wrapper_test_ng",
+    ":layout_algorithm_test_ng",
     "box:box_layout_algorithm_test_ng",
     "safe_area:safeArea_test_expandSafeArea_ng",
+    "safe_area:ignore_layout_safe_area_test_ng",
   ]
 }

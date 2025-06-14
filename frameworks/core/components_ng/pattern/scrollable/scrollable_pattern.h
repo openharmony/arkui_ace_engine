@@ -1059,6 +1059,7 @@ private:
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
     void SetGetSnapTypeCallback(const RefPtr<Scrollable>& scrollable);
+    void SetOnWillStopDraggingCallback(const RefPtr<Scrollable>& scrollable);
     RefPtr<Scrollable> CreateScrollable();
 
     // Scrollable::UpdateScrollPosition

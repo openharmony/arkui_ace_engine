@@ -378,3 +378,17 @@ HWTEST_F(NativeNodeNapiTest, OH_ArkUI_PostUITaskAndWaitAPITest001, TestSize.Leve
     EXPECT_NE(ret, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
+/**
+ * @tc.name: GreatOrEqualTargetAPIVersion001
+ * @tc.desc: Test GreatOrEqualTargetAPIVersion function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, GreatOrEqualTargetAPIVersion001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto ret = OHOS::Ace::AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(
+        OHOS::Ace::PlatformVersion::VERSION_TWELVE);
+    auto ret1 = OHOS::Ace::NodeModel::GreatOrEqualTargetAPIVersion(OHOS::Ace::PlatformVersion::VERSION_TWELVE);
+    EXPECT_EQ(ret, ret1);
+}
+

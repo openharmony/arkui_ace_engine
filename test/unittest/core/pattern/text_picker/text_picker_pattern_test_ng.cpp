@@ -2242,4 +2242,22 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest019, TestSize.Level1)
     sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(1);
     EXPECT_FLOAT_EQ(sum, 0);
 }
+
+/**
+ * @tc.name: TextPickerPatternTest020
+ * @tc.desc: Test CalculateColumnSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest020, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+
+    int32_t index = 0;
+    float childCount = 1.0f;
+    SizeF pickerContentSize = SizeF(0.0f, 200.0f);
+    auto columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
+    EXPECT_FLOAT_EQ(columnSize, 0.0f);
+}
 } // namespace OHOS::Ace::NG

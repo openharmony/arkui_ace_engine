@@ -571,6 +571,19 @@ class AlignModifier extends ModifierWithKey {
   }
 }
 AlignModifier.identity = Symbol('align');
+class LayoutGravityModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().common.resetLayoutGravity(node);
+      } else {
+        getUINativeModule().common.setLayoutGravity(node, this.value);
+      }
+    }
+  }
+  LayoutGravityModifier.identity = Symbol('layoutGravity');
 class BackdropBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3751,7 +3764,7 @@ class ArkComponent {
   }
   applyStateUpdatePtr(instance) {
     if (this.nativePtr !== instance.nativePtr) {
-      ArkLogConsole.info("modifier pointer changed");
+      ArkLogConsole.debug("modifier pointer changed");
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
       if (instance._weakPtr) {
@@ -4673,11 +4686,18 @@ class ArkComponent {
     return this;
   }
   align(value) {
-    if (isNumber(value)) {
+    if (!isNumber(value) && !isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
+    } else {
       modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
     }
-    else {
-      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
+    return this;
+  }
+  layoutGravity(value) {
+    if (!isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, value);
     }
     return this;
   }
@@ -5612,6 +5632,10 @@ class UIScrollableCommonEvent extends UICommonEvent {
     this._onDidScrollEvent = callback;
     getUINativeModule().frameNode.setOnDidScroll(this._nodePtr, callback, this._instanceId);
   }
+  setOnWillStopDragging(callback) {
+    this._onWillStopDraggingEvent = callback;
+    getUINativeModule().frameNode.setOnWillStopDragging(this._nodePtr, callback, this._instanceId);
+  }
 }
 
 class UIListEvent extends UIScrollableCommonEvent {
@@ -5652,7 +5676,7 @@ class UIWaterFlowEvent extends UIScrollableCommonEvent {
 
 function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
   if (modifier === undefined || modifier === null) {
-    ArkLogConsole.info("custom modifier is undefined");
+    ArkLogConsole.debug("custom modifier is undefined");
     return;
   }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -5663,7 +5687,7 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
   if (modifier.isAttributeUpdater === true) {
     let modifierJS = globalThis.requireNapi('arkui.modifier');
     if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
-      ArkLogConsole.info("AttributeUpdater is created for the first time");
+      ArkLogConsole.debug("AttributeUpdater is created for the first time");
       modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
       modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
       modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
@@ -5687,7 +5711,7 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
 
 function attributeModifierFuncWithoutStateStyles(modifier, componentBuilder, modifierBuilder) {
   if (modifier === undefined || modifier === null) {
-    ArkLogConsole.info("custom modifier is undefined");
+    ArkLogConsole.debug("custom modifier is undefined");
     return;
   }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -6957,6 +6981,20 @@ class ScrollBarMarginModifier extends ModifierWithKey {
   }
 }
 ScrollBarMarginModifier.identity = Symbol('scrollBarMargin');
+
+class OnWillStopDraggingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnWillStopDragging(node);
+    } else {
+      getUINativeModule().scrollable.setOnWillStopDragging(node, this.value);
+    }
+  }
+}
+OnWillStopDraggingModifier.identity = Symbol('onWillStopDragging');
 
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {

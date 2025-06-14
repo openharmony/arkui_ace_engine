@@ -206,7 +206,8 @@ public:
     virtual void SetOverlayScrollbarEnabled(bool isEnabled) {};
     virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
     virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+                                    const NG::OnMenuItemClickCallback&& onMenuItemClick,
+                                    const NG::OnPrepareMenuCallback&& onPrepareMenuCallback = nullptr) {};
     virtual void SetEnabledHapticFeedback(bool isEnabled) {}
     virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
     virtual void SetWebMediaAVSessionEnabled(bool isEnabled) {};

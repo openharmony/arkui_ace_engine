@@ -624,7 +624,7 @@ NG::Gradient ToGradient(const Gradient& gradient)
     if (gradient.GetType() == GradientType::LINEAR) {
         auto angle = gradient.GetLinearGradient().angle;
         if (angle.has_value()) {
-            retGradient.GetLinearGradient()->angle = CalcDimension(angle.value().Value());
+            retGradient.GetLinearGradient()->angle = CalcDimension(angle.value());
         }
         auto linearX = gradient.GetLinearGradient().linearX;
         if (linearX.has_value()) {
@@ -638,19 +638,19 @@ NG::Gradient ToGradient(const Gradient& gradient)
     if (gradient.GetType() == GradientType::RADIAL) {
         auto radialCenterX = gradient.GetRadialGradient().radialCenterX;
         if (radialCenterX.has_value()) {
-            retGradient.GetRadialGradient()->radialCenterX = CalcDimension(radialCenterX.value().Value());
+            retGradient.GetRadialGradient()->radialCenterX = CalcDimension(radialCenterX.value());
         }
         auto radialCenterY = gradient.GetRadialGradient().radialCenterY;
         if (radialCenterY.has_value()) {
-            retGradient.GetRadialGradient()->radialCenterY = CalcDimension(radialCenterY.value().Value());
+            retGradient.GetRadialGradient()->radialCenterY = CalcDimension(radialCenterY.value());
         }
         auto radialVerticalSize = gradient.GetRadialGradient().radialVerticalSize;
         if (radialVerticalSize.has_value()) {
-            retGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radialVerticalSize.value().Value());
+            retGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radialVerticalSize.value());
         }
         auto radialHorizontalSize = gradient.GetRadialGradient().radialHorizontalSize;
         if (radialVerticalSize.has_value()) {
-            retGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radialHorizontalSize.value().Value());
+            retGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radialHorizontalSize.value());
         }
     }
     retGradient.SetRepeat(gradient.GetRepeat());

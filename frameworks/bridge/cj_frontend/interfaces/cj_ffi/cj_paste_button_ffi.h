@@ -22,7 +22,6 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkPasteButtonCreate();
-CJ_EXPORT void FfiOHOSAceFrameworkPasteButtonOnClick(void (*callback)(CJClickInfo event, int32_t result));
 CJ_EXPORT void FfiOHOSAceFrameworkPasteButtonCreateWithButtonOptions(int32_t icon, int32_t text, int32_t buttonType);
 }
 #endif // OHOS_ACE_FRAMEWORK_CJ_PASTE_BUTTON_FFI_H

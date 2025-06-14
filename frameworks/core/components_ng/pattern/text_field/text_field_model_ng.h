@@ -92,6 +92,13 @@ public:
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetNormalUnderlineColor(const Color& normalColor) override;
+    void SetTypingUnderlineColor(const Color& normalColor) override;
+    void SetErrorUnderlineColor(const Color& normalColor) override;
+    void SetDisableUnderlineColor(const Color& normalColor) override;
+    void ResetNormalUnderlineColor() override;
+    void ResetTypingUnderlineColor() override;
+    void ResetErrorUnderlineColor() override;
+    void ResetDisableUnderlineColor() override;
     void SetUserUnderlineColor(UserUnderlineColor userColor) override;
     void SetShowCounter(bool value) override;
     void SetCounterType(int32_t value) override;
@@ -100,7 +107,7 @@ public:
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void ResetBackgroundColor() override;
     void SetHeight(const Dimension& value) override;
-    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
+    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp, bool hasRegist = false) override;
     void SetMargin() override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override;

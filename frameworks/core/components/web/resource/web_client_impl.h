@@ -309,6 +309,9 @@ public:
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id, int width, int height) override;
 
+    bool OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result, OHOS::NWeb::SslError error,
+        const std::string& url, const std::string& originalUrl, const std::string& referrer, bool isFatalError,
+        bool isMainFrame, const std::vector<std::string>& certChainData) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

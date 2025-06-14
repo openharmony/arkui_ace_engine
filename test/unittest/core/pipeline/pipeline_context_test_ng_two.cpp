@@ -2356,5 +2356,95 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg301, TestSize.Level1)
     EXPECT_FALSE(context_->backgroundColorModeUpdated_);
 }
 
+/**
+ * @tc.name: PipelineContextTestNg303
+ * @tc.desc: Test the function OnMouseMoveEventForAxisEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg303, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: initialize pipeline, touch event.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    TouchEvent touchEventOne;
+    touchEventOne.id = 0;
+    touchEventOne.type = TouchType::MOVE;
+    TouchEvent touchEventTwo;
+    touchEventTwo.id = 1;
+    touchEventTwo.type = TouchType::MOVE;
+
+    /**
+     * @tc.steps2: Call the function CompensateTouchMoveEventBeforeDown.
+     * @tc.expected: Test if this function is available and the events is consumed.
+     */
+    context_->CompensateTouchMoveEventBeforeDown();
+    context_->touchEvents_.push_back(touchEventOne);
+    context_->touchEvents_.push_back(touchEventTwo);
+    context_->CompensateTouchMoveEventBeforeDown();
+    EXPECT_TRUE(context_->touchEvents_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg400
+ * @tc.desc: Test the function RegisterAttachedNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg400, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
+    context_->RegisterAttachedNode(AceType::RawPtr(node));
+    auto& attachedNodeSet = context_->attachedNodeSet_;
+    bool found = false;
+    for (const auto& uiNode : attachedNodeSet) {
+        auto illegalNode = uiNode.Upgrade();
+        if (illegalNode && illegalNode == node) {
+            found = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(found);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg401
+ * @tc.desc: Test the function RemoveAttachedNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg401, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
+    context_->RegisterAttachedNode(AceType::RawPtr(node));
+
+    auto& attachedNodeSet = context_->attachedNodeSet_;
+    auto AttachedNum = attachedNodeSet.size();
+    context_->RemoveAttachedNode(AceType::RawPtr(node));
+    EXPECT_EQ(AttachedNum, attachedNodeSet.size() + 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg402
+ * @tc.desc: Test the function detaching node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg402, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
+    node->AttachContext(AceType::RawPtr(context_), false);
+    EXPECT_TRUE(context_->attachedNodeSet_.count(AceType::WeakClaim(AceType::RawPtr(node))));
+    node->DetachContext(false);
+    EXPECT_FALSE(context_->attachedNodeSet_.count(AceType::WeakClaim(AceType::RawPtr(node))));
+}
 } // namespace NG
 } // namespace OHOS::Ace

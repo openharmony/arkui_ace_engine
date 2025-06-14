@@ -1128,9 +1128,9 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnAnimationStart(ArkUIRuntimeCallI
         panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
         panda::Local<panda::NumberRef> targetIndexParam = panda::NumberRef::New(vm, targetIndex);
         const char* keys[] = {"currentOffset", "targetOffset", "velocity"};
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value()),
-            panda::NumberRef::New(vm, extraInfo.targetOffset.value()),
-            panda::NumberRef::New(vm, extraInfo.velocity.value()) };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value_or(0.0f)),
+            panda::NumberRef::New(vm, extraInfo.targetOffset.value_or(0.0f)),
+            panda::NumberRef::New(vm, extraInfo.velocity.value_or(0.0f)) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[3] = { indexParam, targetIndexParam, eventObject }; // 3: Array length
         func->Call(vm, func.ToLocal(), params, 3); // 3: Array length

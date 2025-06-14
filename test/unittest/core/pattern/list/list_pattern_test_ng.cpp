@@ -1239,4 +1239,19 @@ HWTEST_F(ListPatternTestNg, HandleLastLineIndex002, TestSize.Level1)
     auto result = listPaintMethod->HandleLastLineIndex(2, 3, dividerInfo);
     EXPECT_EQ(result.offset.GetY(), 12.5f);
 }
+
+/**
+ * @tc.name: UpdateScrollBarOffset001
+ * @tc.desc: Test ListPattern UpdateScrollBarOffset with heightEstimated_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, UpdateScrollBarOffset001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listPattern->heightEstimated_ = true;
+    listPattern->UpdateScrollBarOffset();
+    EXPECT_FALSE(listPattern->heightEstimated_);
+}
 } // namespace OHOS::Ace::NG

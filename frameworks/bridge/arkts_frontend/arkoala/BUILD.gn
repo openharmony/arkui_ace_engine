@@ -46,8 +46,8 @@ action("run_arkoala_build") {
     rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
   ]
 
-  external_deps = ets2abc_build_deps
-  external_deps += static_linker_build_deps
+  # external_deps = ets2abc_build_deps
+  # external_deps += static_linker_build_deps
 }
 
 ohos_prebuilt_etc("arkoala_prebuild") {

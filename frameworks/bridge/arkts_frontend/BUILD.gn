@@ -19,13 +19,13 @@ ohos_source_set("arkts_frontend") {
   configs = [ "$ace_root:ace_config" ]
   deps = [
     ":ArkoalaNative_ark",
-    # "arkoala:arkoala_prebuild",
+    "arkoala:arkoala_prebuild",
   ]
 
   if (build_ohos_sdk) {
     deps -= [
       ":ArkoalaNative_ark",
-      # "arkoala:arkoala_prebuild",
+      "arkoala:arkoala_prebuild",
     ]
   }
 

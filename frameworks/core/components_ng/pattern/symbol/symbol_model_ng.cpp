@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 void SymbolModelNG::Create(const std::uint32_t& unicode)
@@ -107,6 +108,39 @@ void SymbolModelNG::SetMinFontScale(const float value)
 void SymbolModelNG::SetMaxFontScale(const float value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value);
+}
+
+void SymbolModelNG::RegisterSymbolFontColorResource(const std::string& key,
+    std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    for (auto i = 0; i < static_cast<int32_t>(resObjArr.size()); ++i) {
+        auto resObjIndex = resObjArr[i].first;
+        auto resObj = resObjArr[i].second;
+        auto storeKey = key + "_" + std::to_string(resObjIndex);
+        pattern->EmplaceSymbolColorIndex(resObjIndex);
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), storeKey, resObjIndex]
+            (const RefPtr<ResourceObject>& resObj) {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            Color fontColor;
+            ResourceParseUtils::ParseResColor(resObj, fontColor);
+            auto colorVec = layoutProperty->GetSymbolColorList();
+            if (colorVec.has_value() && GreatNotEqual(colorVec.value().size(), resObjIndex)) {
+                auto colorVecArr = colorVec.value();
+                colorVecArr[resObjIndex] = fontColor;
+                layoutProperty->UpdateSymbolColorList(colorVecArr);
+            }
+        };
+
+        pattern->AddResObj(storeKey, resObj, std::move(updateFunc));
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor);
 }
 
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)

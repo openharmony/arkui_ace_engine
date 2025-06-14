@@ -1286,4 +1286,39 @@ HWTEST_F(LayoutPropertyTestNgTwo, TestIsExpandConstraintNeeded, TestSize.Level1)
     layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
     EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), true);
 }
+
+/**
+ * @tc.name: UpdateLocalizedAlignment001
+ * @tc.desc: Test cast to UpdateLocalizedAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateLocalizedAlignment001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    EXPECT_FALSE(layoutProperty->positionProperty_);
+    layoutProperty->UpdateLocalizedAlignment("top_start");
+    auto align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align, "top_start");
+
+    layoutProperty->UpdateLocalizedAlignment("bottom_end");
+    auto align1 = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align1, "bottom_end");
+}
+
+/**
+ * @tc.name: UpdateIsMirrorable001
+ * @tc.desc: Test cast to UpdateIsMirrorable
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateIsMirrorable001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->UpdateIsMirrorable(true);
+    auto isMirrorable = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable, true);
+
+    layoutProperty->UpdateIsMirrorable(false);
+    auto isMirrorable1 = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable1, false);
+}
 }

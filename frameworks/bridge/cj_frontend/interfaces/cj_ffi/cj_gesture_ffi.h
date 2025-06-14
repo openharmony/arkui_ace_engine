@@ -100,7 +100,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOnGestureJudgeBegin(
     int32_t (*callback)(CJGestureInfo, CJBaseGestureEvent));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(
     int32_t (*callback)(CJBaseGestureEvent, int64_t, VectorInt64Handle), bool exposeInnerGesture);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractShouldBuiltInRecognizerParallelWith(int64_t (*callback)(int64_t, VectorInt64Handle));
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractShouldBuiltInRecognizerParallelWith(
+    int64_t (*callback)(int64_t, VectorInt64Handle));
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_GESTURE_FFI_H

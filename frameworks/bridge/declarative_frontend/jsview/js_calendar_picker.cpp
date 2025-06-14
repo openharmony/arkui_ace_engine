@@ -354,9 +354,21 @@ void JSCalendarPicker::JsHeight(const JSCallbackInfo& info)
     CalcDimension value;
     if (ParseJsDimensionVpNG(jsValue, value) && value.IsValid()) {
         JSViewAbstract::JsHeight(info);
-    } else {
-        CalendarPickerModel::GetInstance()->ClearHeight();
+        return;
     }
+
+    LayoutCalPolicy policy = LayoutCalPolicy::NO_MATCH;
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+        CHECK_NULL_VOID(!object->IsEmpty());
+        JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+        CHECK_NULL_VOID(!layoutPolicy->IsEmpty());
+        if (layoutPolicy->IsString()) {
+            policy = ParseLayoutPolicy(layoutPolicy->ToString());
+        }
+    }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+    CalendarPickerModel::GetInstance()->ClearHeight();
 }
 
 void JSCalendarPicker::JsBorderColor(const JSCallbackInfo& info)

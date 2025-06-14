@@ -419,6 +419,11 @@ public:
         pattern_ = pattern;
     }
 
+    WeakPtr<Pattern> GetTextPattern()
+    {
+        return pattern_;
+    }
+
     bool UpdateSpanTextColor(Color color);
 
     bool GetSymbolEffectSwitch() const
@@ -537,8 +542,59 @@ public:
         return hasTextBackgroundStyle_;
     }
 
+    RefPtr<PatternResourceManager> GetResourceManager()
+    {
+        return resourceMgr_;
+    }
+
+    template<typename T>
+    T ParseResToObject(const RefPtr<ResourceObject>& resObj);
+
+    virtual void UnregisterResource(const std::string& key)
+    {
+        RemoveResObj(key);
+    }
+
+    void AddResObj(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc)
+    {
+        if (resourceMgr_ == nullptr) {
+            resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+        }
+        resourceMgr_->AddResource(key, resObj, std::move(updateFunc));
+    }
+
+    void AddResCache(const std::string& key, const std::string& value)
+    {
+        if (resourceMgr_ == nullptr) {
+            resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+        }
+        resourceMgr_->AddResCache(key, value);
+    }
+
+    std::string GetResCacheMapByKey(const std::string& key)
+    {
+        if (resourceMgr_ == nullptr) {
+            return "";
+        }
+        return resourceMgr_->GetResCacheMapByKey(key);
+    }
+
+    void RemoveResObj(const std::string& key)
+    {
+        if (resourceMgr_) {
+            resourceMgr_->RemoveResource(key);
+            if (resourceMgr_->Empty()) {
+                resourceMgr_ = nullptr;
+            }
+        }
+    }
+
 private:
     std::optional<TextBackgroundStyle> textBackgroundStyle_;
+    RefPtr<PatternResourceManager> resourceMgr_;
     int32_t groupId_ = 0;
     bool hasTextBackgroundStyle_ = false;
 };
@@ -587,6 +643,26 @@ public:
     {
         return spanItem_;
     }
+
+    void NotifyColorModeChange(uint32_t colorMode) override
+    {
+        UINode::NotifyColorModeChange(colorMode);
+        auto resourceMgr = GetResourceManager();
+        if (resourceMgr) {
+            resourceMgr->ReloadResources();
+        }
+    }
+
+    void UnregisterResource(const std::string& key) override;
+    void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
+        const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr);
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
+    template<typename T>
+    void UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj);
+    template<typename T>
+    void UpdateProperty(std::string key, T value);
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value);
 
     void UpdateContent(const uint32_t& unicode)
     {
@@ -759,6 +835,7 @@ protected:
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
+    std::vector<int32_t> symbolFontColorResObjIndexArr;
 
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);
 };
@@ -1073,6 +1150,23 @@ public:
     {
         SpanNode::RequestTextFlushDirty(Claim(this));
     }
+
+    void NotifyColorModeChange(uint32_t colorMode) override
+    {
+        UINode::NotifyColorModeChange(colorMode);
+        auto resourceMgr = GetResourceManager();
+        if (resourceMgr) {
+            resourceMgr->ReloadResources();
+        }
+    }
+
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
+    template<typename T>
+    void UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj);
+    template<typename T>
+    void UpdateProperty(std::string key, T value);
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ContainerSpanNode);

@@ -28,10 +28,21 @@ std::optional<SizeF> XComponentLayoutAlgorithm::MeasureContent(
     if (xcomponentType == XComponentType::COMPONENT) {
         return LayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
     }
+    SizeF layoutSize = contentConstraint.maxSize;
     if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
+        layoutSize = contentConstraint.selfIdealSize.ConvertToSizeT();
     }
-    return contentConstraint.maxSize;
+    // if width or height is matchParent
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
+            layoutSize.SetWidth(contentConstraint.parentIdealSize.Width().value());
+        }
+        if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
+            layoutSize.SetHeight(contentConstraint.parentIdealSize.Height().value());
+        }
+    }
+    return layoutSize;
 }
 
 void XComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
