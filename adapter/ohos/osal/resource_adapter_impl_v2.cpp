@@ -19,6 +19,7 @@
 #include <queue>
 #include <unordered_set>
 
+#include "ability_context.h"
 #include "drawable_descriptor.h"
 #include "resource_adapter_impl_v2.h"
 
@@ -86,6 +87,26 @@ DimensionUnit ParseDimensionUnit(const std::string& unit)
         return DimensionUnit::VP;
     }
 };
+
+RefPtr<ResourceAdapter> CreateAdapterWithAppContext(
+    const std::string& bundleName, const std::string& moduleName)
+{
+    auto appContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    if (!bundleName.empty() && !bundleName.empty()) {
+        auto moduleContext = (appContext ? appContext->CreateModuleContext(bundleName, moduleName) : nullptr);
+        if (moduleContext) {
+            resourceManager = moduleContext->GetResourceManager();
+        }
+    }
+    if (appContext && !resourceManager) {
+        resourceManager = appContext->GetResourceManager();
+    }
+    if (!resourceManager) {
+        return nullptr;
+    }
+    return AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
+}
 } // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
@@ -94,9 +115,12 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
 }
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName)
+    const std::string& bundleName, const std::string& moduleName, bool fromTheme)
 {
     auto container = Container::CurrentSafely();
+    if (!container && fromTheme) {
+        return CreateAdapterWithAppContext(bundleName, moduleName);
+    }
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, nullptr);

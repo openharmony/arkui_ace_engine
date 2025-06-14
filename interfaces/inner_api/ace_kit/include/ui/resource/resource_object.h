@@ -60,6 +60,11 @@ public:
         return instanceId_;
     }
 
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
     std::vector<ResourceObjectParams> GetParams() const
     {
         return params_;

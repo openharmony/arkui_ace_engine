@@ -54,9 +54,10 @@ public:
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
         RefPtr<ResourceObject>& resourceObject);
-    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-        RefPtr<ResourceObject>& resourceObject);
+        bool fromTheme = false);
+    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+        RefPtr<ResourceObject>& resourceObject, bool fromTheme = false);
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value,
@@ -65,9 +66,10 @@ public:
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
         RefPtr<ResourceObject>& resourceObject);
     static void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj);
-    static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-        RefPtr<ResourceObject>& resourceObject);
+        bool fromTheme = false);
+    static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
+        RefPtr<ResourceObject>& resourceObject, bool fromTheme = false);
     static bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result);
     static bool ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);

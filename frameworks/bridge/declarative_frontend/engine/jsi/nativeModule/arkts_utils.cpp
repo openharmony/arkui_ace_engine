@@ -126,14 +126,14 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
     return true;
 }
 
-bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
+bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, bool fromTheme)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsColorAlpha(vm, value, result, resourceObject);
+    return ParseJsColorAlpha(vm, value, result, resourceObject, fromTheme);
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-    RefPtr<ResourceObject>& resourceObject)
+    RefPtr<ResourceObject>& resourceObject, bool fromTheme)
 {
     if (value->IsNumber()) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
@@ -146,7 +146,7 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
         if (ParseColorMetricsToColor(vm, value, result)) {
             return true;
         }
-        return ParseJsColorFromResource(vm, value, result, resourceObject);
+        return ParseJsColorFromResource(vm, value, result, resourceObject, fromTheme);
     }
     return false;
 }
@@ -275,12 +275,12 @@ RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(const EcmaVM* vm, const Loca
 }
 
 RefPtr<ResourceWrapper> CreateResourceWrapper(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
-    RefPtr<ResourceObject>& resourceObject)
+    RefPtr<ResourceObject>& resourceObject, bool fromTheme = false)
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject, fromTheme);
         if (!resourceAdapter) {
             return nullptr;
         }
@@ -499,14 +499,15 @@ void ArkTSUtils::CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef
     }
 }
 
-bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result)
+bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
+    bool fromTheme)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsColorFromResource(vm, jsObj, result, resourceObject);
+    return ParseJsColorFromResource(vm, jsObj, result, resourceObject, fromTheme);
 }
 
 bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-    RefPtr<ResourceObject>& resourceObject)
+    RefPtr<ResourceObject>& resourceObject, bool fromTheme)
 {
     auto obj = jsObj ->ToObject(vm);
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
@@ -516,7 +517,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
 
     CompleteResourceObject(vm, obj);
     resourceObject = GetResourceObject(vm, jsObj);
-    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject, fromTheme);
     if (!resourceWrapper) {
         return false;
     }
