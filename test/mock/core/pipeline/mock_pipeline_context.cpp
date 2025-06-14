@@ -1292,14 +1292,6 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
-bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
-{
-    if (fontManager_) {
-        return fontManager_->GetSystemFont(fontName, fontInfo);
-    }
-    return false;
-}
-
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
     return false;

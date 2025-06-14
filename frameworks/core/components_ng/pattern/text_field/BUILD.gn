@@ -26,6 +26,7 @@ build_component_ng("text_field_pattern_ng") {
     "text_field_layout_algorithm.cpp",
     "text_field_manager.cpp",
     "text_field_model_ng.cpp",
+    "text_field_model_static.cpp",
     "text_field_overlay_modifier.cpp",
     "text_field_paint_method.cpp",
     "text_field_paint_property.cpp",

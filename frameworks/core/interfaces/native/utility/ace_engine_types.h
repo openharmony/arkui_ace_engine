@@ -127,6 +127,12 @@ enum class ThreatType {
     WARNING = 3,
 };
 
+enum class RenderingStrategy {
+    SINGLE = 0,
+    MULTIPLE_COLOR,
+    MULTIPLE_OPACITY
+};
+
 struct Header {
     std::string headerKey;
     std::string headerValue;
