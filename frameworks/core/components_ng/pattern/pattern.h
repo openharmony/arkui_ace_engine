@@ -640,6 +640,7 @@ public:
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
         layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
+        layoutProperty->CheckBackgroundLayoutSafeAreaEdges(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}

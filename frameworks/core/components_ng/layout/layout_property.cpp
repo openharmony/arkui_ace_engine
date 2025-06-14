@@ -157,6 +157,7 @@ void LayoutProperty::Reset()
     propVisibility_.reset();
     propIsBindOverlay_.reset();
     backgroundIgnoresLayoutSafeAreaEdges_.reset();
+    localizedBackgroundIgnoresLayoutSafeAreaEdges_.reset();
     CleanDirty();
 }
 
@@ -398,6 +399,8 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     overlayOffsetX_ = layoutProperty->overlayOffsetX_;
     overlayOffsetY_ = layoutProperty->overlayOffsetY_;
     backgroundIgnoresLayoutSafeAreaEdges_ = layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_;
+    localizedBackgroundIgnoresLayoutSafeAreaEdges_ =
+        layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
@@ -1194,7 +1197,7 @@ void LayoutProperty::UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value)
         return;
     }
     backgroundIgnoresLayoutSafeAreaEdges_ = value;
-    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
 }
 
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
@@ -2063,6 +2066,48 @@ void LayoutProperty::CheckIgnoreLayoutSafeArea(const TextDirection& direction)
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
         ignoreLayoutSafeAreaOpts_->edges = edges;
     }
+}
+
+void LayoutProperty::CheckBackgroundLayoutSafeAreaEdges(const TextDirection& direction)
+{
+    if (!backgroundIgnoresLayoutSafeAreaEdges_.has_value()) {
+        return;
+    }
+
+    auto rawEdges = backgroundIgnoresLayoutSafeAreaEdges_.value();
+    LayoutSafeAreaEdge edges = LAYOUT_SAFE_AREA_EDGE_NONE;
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_TOP) {
+        edges |= LAYOUT_SAFE_AREA_EDGE_TOP;
+    }
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_BOTTOM) {
+        edges |= LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+    }
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_START) {
+        if (direction == TextDirection::RTL) {
+            edges |= LAYOUT_SAFE_AREA_EDGE_END;
+        } else {
+            edges |= LAYOUT_SAFE_AREA_EDGE_START;
+        }
+    }
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_END) {
+        if (direction == TextDirection::RTL) {
+            edges |= LAYOUT_SAFE_AREA_EDGE_START;
+        } else {
+            edges |= LAYOUT_SAFE_AREA_EDGE_END;
+        }
+    }
+
+    if (edges != localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(LAYOUT_SAFE_AREA_EDGE_NONE)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
+        localizedBackgroundIgnoresLayoutSafeAreaEdges_ = edges;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateBackgroundIgnoresLayoutSafeAreaEdges(
+        localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(LAYOUT_SAFE_AREA_EDGE_NONE));
 }
 
 void LayoutProperty::LocalizedPaddingOrMarginChange(

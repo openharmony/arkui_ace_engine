@@ -1219,6 +1219,48 @@ HWTEST_F(LayoutPropertyTestNgTwo, UpdateLayoutConstraint002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckBackgroundLayoutSafeAreaEdges001
+ * @tc.desc: Test CheckBackgroundLayoutSafeAreaEdges
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckBackgroundLayoutSafeAreaEdges001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    layoutProperty->SetHost(frameNodeHost);
+    auto renderContext = frameNodeHost->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP;
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
+    EXPECT_EQ(
+        layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::RTL);
+    EXPECT_EQ(
+        layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(renderContext->GetBackgroundIgnoresLayoutSafeAreaEdgesValue(LAYOUT_SAFE_AREA_EDGE_NONE),
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
+
+    layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
+    EXPECT_EQ(layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::RTL);
+    EXPECT_EQ(layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(renderContext->GetBackgroundIgnoresLayoutSafeAreaEdgesValue(LAYOUT_SAFE_AREA_EDGE_NONE),
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+}
+
+/**
  * @tc.name: CheckIgnoreLayoutSafeArea
  * @tc.desc: Test CheckIgnoreLayoutSafeArea
  * @tc.type: FUNC
