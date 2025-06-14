@@ -919,7 +919,6 @@ void CanvasPattern::CreateAnalyzerOverlay()
     auto pixelMap = context->GetThumbnailPixelMap();
     CHECK_NULL_VOID(pixelMap);
     if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
     }
 }
