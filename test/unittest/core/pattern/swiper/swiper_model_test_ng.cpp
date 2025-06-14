@@ -1125,7 +1125,8 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg022, TestSize.Level1)
      * @tc.expected: change page to 0.
      */
     layoutProperty_->ResetIndex();
-    ShowNextPage();
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(currentIndex, 0);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 0);
 }
@@ -1317,7 +1318,8 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg026, TestSize.Level1)
      */
     auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
     swiperLayoutProperty->UpdateIndex(1);
-    ShowNextPage();
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(currentIndex, 1);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 1);
 }
@@ -1430,7 +1432,8 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg028, TestSize.Level1)
     auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
     ASSERT_NE(swiperLayoutProperty, nullptr);
     swiperLayoutProperty->UpdateIndex(2);
-    ShowNextPage();
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(currentIndex, 2);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 2);
     /**
