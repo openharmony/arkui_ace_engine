@@ -542,6 +542,70 @@ HWTEST_F(JsAccessibilityManagerTest, GetPipelineByWindowId002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AccessibilityDfxTest003
+ * @tc.desc: inject SecurityClickAction normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, AccessibilityHidumperTest001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->SetWindowId(1);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto rootId = root->GetAccessibilityId();
+    std::string idStr = std::to_string(rootId);
+    auto accessibilityProperty = root->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    // not SecurityClickAction
+    std::vector<std::string> params = {"-inspector", "--inject-action", idStr, "--SecurityClickAction"};
+    // suppose to parse inject-action normal
+    jsAccessibilityManager->DumpInjectActionTest(params);
+    ASSERT_NE(accessibilityProperty->GetSecurityClickActionFunc(), nullptr);
+
+    // reset
+    accessibilityProperty->SetSecurityClickAction(nullptr);
+}
+
+/**
+ * @tc.name: AccessibilityDfxTest003
+ * @tc.desc: inject SecurityClickAction abnormal
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, AccessibilityHidumperTest002, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->SetWindowId(1);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto rootId = root->GetAccessibilityId();
+    std::string idStr = std::to_string(rootId);
+    auto accessibilityProperty = root->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    std::vector<std::string> params = {"-inspector", "--inject-action", idStr, "--NotSecurityClickAction"};
+    // suppose to parse inject-action normal
+    jsAccessibilityManager->DumpInjectActionTest(params);
+    ASSERT_EQ(accessibilityProperty->GetSecurityClickActionFunc(), nullptr);
+
+    // NotifyChildAction
+    params = {"-inspector", "--inject-action", idStr, "--NotifyChildAction", "5"};
+    jsAccessibilityManager->DumpInjectActionTest(params);
+    ASSERT_EQ(accessibilityProperty->GetSecurityClickActionFunc(), nullptr);
+    ASSERT_NE(accessibilityProperty->GetNotifyChildActionFunc(), nullptr);
+    // reset
+    accessibilityProperty->SetSecurityClickAction(nullptr);
+    accessibilityProperty->SetNotifyChildAction(nullptr);
+}
+/**
  * @tc.name: JsAccessibilityManager011
  * @tc.desc: CheckDumpInfoParams,OnDumpInfoNG,CheckDumpHandleEventParams,DumpProperty
  * @tc.type: FUNC
@@ -600,32 +664,32 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager012, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
     int64_t elementId = 0;
-
+    std::map<std::string, std::string> actionArguments;
     /**
      * @tc.steps: step2. test ConvertActionTypeToBoolen
      */
     auto ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_FOCUS,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(ret, false);
 
     ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(ret, false);
 
     ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(ret, false);
 
     ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_LONG_CLICK,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(ret, false);
 
     ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(ret, true);
 
     ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(ret, false);
 }
 
@@ -1562,11 +1626,12 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     ASSERT_NE(gesture, nullptr);
     std::string nodeName = "Click";
     frameNode->SetNodeName(nodeName);
+    std::map<std::string, std::string> actionArguments;
     /**
     * @tc.steps: step2. test do without any willClick or didClick, expect return nodeName Click
     */
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(frameNode->GetNodeName(), nodeName);
     /**
     * @tc.steps: step3. test do with willClick or didClick, expect return nodeName WillClick_Click_DidClick
@@ -1593,7 +1658,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     ASSERT_NE(didClickHandleFunc, nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(frameNode->GetNodeName(), "WillClick_Click_DidClick");
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
@@ -1620,6 +1685,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     ASSERT_NE(gesture, nullptr);
     std::string nodeName = "Click";
     frameNode->SetNodeName(nodeName);
+    std::map<std::string, std::string> actionArguments;
     /**
     * @tc.steps: step2. test only with willClick, expect return nodeName WillClick_Click
     */
@@ -1640,7 +1706,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     ASSERT_NE(didClickHandleFunc, nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(frameNode->GetNodeName(), "WillClick_Click");
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
@@ -1667,7 +1733,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     ASSERT_NE(gesture, nullptr);
     std::string nodeName = "Click";
     frameNode->SetNodeName(nodeName);
-
+    std::map<std::string, std::string> actionArguments;
     /**
     * @tc.steps: step3. test do with didClick, expect return nodeName Click_DidClick
     */
@@ -1688,7 +1754,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     ASSERT_NE(didClickHandleFunc, nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(frameNode->GetNodeName(), "Click_DidClick");
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
@@ -1711,9 +1777,9 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Leve
     ASSERT_NE(jsAccessibilityManager, nullptr);
     jsAccessibilityManager->currentFocusNodeId_ = 2LL;
     jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3LL;
-
+    std::map<std::string, std::string> actionArguments;
     bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
-        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context);
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context, actionArguments);
     EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1LL);
     EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3LL);
     EXPECT_TRUE(ret);
@@ -1736,9 +1802,9 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Leve
     ASSERT_NE(jsAccessibilityManager, nullptr);
     jsAccessibilityManager->currentFocusNodeId_ = 4LL;
     jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 5LL;
-
+    std::map<std::string, std::string> actionArguments;
     bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
-        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context);
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context, actionArguments);
     EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 4LL);
     EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 5LL);
     EXPECT_FALSE(ret);
@@ -1765,7 +1831,7 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen006, TestSize.Leve
     ASSERT_NE(gesture, nullptr);
     std::string nodeName = "Click";
     frameNode->SetNodeName(nodeName);
-
+    std::map<std::string, std::string> actionArguments;
     /**
     * @tc.steps: step2. test with nothing, expect return nodeName Click
     */
@@ -1781,12 +1847,125 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen006, TestSize.Leve
     ASSERT_NE(didClickHandleFunc, nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
-        frameNode, elementId, context);
+        frameNode, elementId, context, actionArguments);
     EXPECT_EQ(frameNode->GetNodeName(), "Click");
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
 }
 
+/**
+ * @tc.name: HandleClickBySecComp001
+ * @tc.desc: HandleClickBySecComp
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, HandleClickBySecComp001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    int64_t elementId = 0;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    std::map<std::string, std::string> actionArguments;
+
+    /**
+     * @tc.steps: step2. test only with willClick, expect return nodeName WillClick_Click
+     */
+    bool processFlag1 = false;
+    bool processFlag2 = false;
+    SecCompEnhanceEvent testEvent;
+    std::string hmacTest = "test";
+    uint64_t timeTest = 123456;
+    actionArguments[ACTION_ARGU_CLICK_ENHANCE_DATA] = hmacTest;
+    actionArguments[ACTION_ARGU_CLICK_TIMESTAMP] = std::to_string(timeTest);
+
+    accessibilityProperty->SetAccessibilityActionIntercept (
+        [&] (AccessibilityInterfaceAction accessibilityInterfaceAction) {
+            processFlag2 = true;
+            return AccessibilityActionInterceptResult::ACTION_INTERCEPT;
+        }
+    );
+
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
+        frameNode, elementId, context, actionArguments);
+    EXPECT_EQ(processFlag1, false);
+    EXPECT_EQ(processFlag2, true);
+
+    processFlag2 = false;
+    accessibilityProperty->SetSecurityClickAction (
+        [&] (const SecCompEnhanceEvent& event) {
+            processFlag1 = true;
+            testEvent = event;
+        }
+    );
+
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
+        frameNode, elementId, context, actionArguments);
+    EXPECT_EQ(processFlag1, true);
+    EXPECT_EQ(processFlag2, false);
+}
+
+/**
+ * @tc.name: HandleClickBySecComp002
+ * @tc.desc: HandleClickBySecComp
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, HandleClickBySecComp002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    int64_t elementId = 0;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    std::map<std::string, std::string> actionArguments;
+
+    /**
+     * @tc.steps: step2. test only with willClick, expect return nodeName WillClick_Click
+     */
+    bool processFlag1 = false;
+    bool processFlag2 = false;
+    SecCompEnhanceEvent testEvent;
+    std::string hmacTest = "test";
+    uint64_t timeTest = 123456;
+    actionArguments[ACTION_ARGU_CLICK_ENHANCE_DATA] = hmacTest;
+    actionArguments[ACTION_ARGU_CLICK_TIMESTAMP] = std::to_string(timeTest);
+
+    accessibilityProperty->SetAccessibilityActionIntercept (
+        [&] (AccessibilityInterfaceAction accessibilityInterfaceAction) {
+            processFlag2 = true;
+            return AccessibilityActionInterceptResult::ACTION_INTERCEPT;
+        }
+    );
+
+    accessibilityProperty->SetSecurityClickAction (
+        [&] (const SecCompEnhanceEvent& event) {
+            processFlag1 = true;
+            testEvent = event;
+        }
+    );
+
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
+        frameNode, elementId, context, actionArguments);
+    EXPECT_EQ(processFlag1, true);
+    EXPECT_EQ(processFlag2, false);
+
+    std::vector<uint8_t> dataBuffer;
+    dataBuffer.assign(hmacTest.begin(), hmacTest.end());
+    std::chrono::microseconds microseconds(timeTest);
+    auto testTime = TimeStamp { microseconds };
+
+    EXPECT_EQ(testEvent.dataBuffer, dataBuffer);
+    EXPECT_EQ(testEvent.time, testTime);
+}
 /**
 * @tc.name: JsAccessibilityManager031
 * @tc.desc: IsUpdateWindowSceneInfo

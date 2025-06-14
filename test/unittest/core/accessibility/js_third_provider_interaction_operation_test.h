@@ -70,6 +70,7 @@ class ProviderMockResult {
             errorCode_ = 0;
             injectResult_ = 0;
             injectActionResult_ = 0;
+            resultActionArguments_.clear();
         }
 
     public:
@@ -161,6 +162,7 @@ public:
         const int64_t elementId, int32_t action, const int32_t requestId,
         const std::map<std::string, std::string>& actionArguments) override
     {
+        providerMockResult_.resultActionArguments_ = actionArguments;
         return providerMockResult_.injectActionResult_;
     }
     int32_t ClearFocusedAccessibilityNode() override

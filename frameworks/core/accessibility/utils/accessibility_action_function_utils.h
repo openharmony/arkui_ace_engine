@@ -51,6 +51,17 @@ public:
         return true;
     }
 
+    static bool CheckCurrentHasFunc(ActionSecurityClickAction& ptr, const RefPtr<FrameNode>& node)
+    {
+        ptr = nullptr;
+        CHECK_NULL_RETURN(node, false);
+        auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, false);
+        ptr = accessibilityProperty->GetSecurityClickActionFunc();
+        CHECK_NULL_RETURN(ptr, false);
+        return true;
+    }
+
     template <typename T>
     static bool CheckAncestorHasFunc(T& ptr, const RefPtr<FrameNode>& node, RefPtr<FrameNode>& parentNode)
     {
@@ -106,6 +117,18 @@ public:
         } else {
             return AccessibilityActionInterceptResult::ACTION_CONTINUE;
         }
+    }
+
+    static bool HandleClickBySecComponent(const RefPtr<FrameNode>& node, const SecCompEnhanceEvent& secEvent)
+    {
+        CHECK_NULL_RETURN(node, false);
+        ActionSecurityClickAction func = nullptr;
+        if (!CheckCurrentHasFunc(func, node)) {
+            return false;
+        }
+        CHECK_NULL_RETURN(func, false);
+        func(secEvent);
+        return true;
     }
 };
 } // namespace OHOS::Ace::NG
