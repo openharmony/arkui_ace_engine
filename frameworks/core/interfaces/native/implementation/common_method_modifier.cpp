@@ -1692,7 +1692,7 @@ void DrawModifierImpl(Ark_NativePointer node,
         peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
     }
     peer->frameNode = AceType::WeakClaim(frameNode);
-    // ViewAbstract::SetDrawModifier(frameNode, peer->drawModifier);
+    ViewAbstractModelStatic::SetDrawModifier(frameNode, peer->drawModifier);
 }
 void ResponseRegionImpl(Ark_NativePointer node,
                         const Opt_Union_Array_Rectangle_Rectangle* value)
