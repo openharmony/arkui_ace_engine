@@ -861,6 +861,7 @@ private:
     static WidthLayoutBreakPoint widthLayoutBreakpoints_;
     static HeightLayoutBreakPoint heightLayoutBreakpoints_;
     static bool syncLoadEnabled_;
+    static bool whiteBlockEnabled_;
 };
 
 } // namespace OHOS::Ace

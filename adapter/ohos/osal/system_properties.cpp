@@ -693,6 +693,7 @@ int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_I
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
+bool SystemProperties::whiteBlockEnabled_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -857,6 +858,7 @@ void SystemProperties::InitDeviceInfo(
     formSharedImageCacheThreshold_ =
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
     syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
+    whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -1322,7 +1324,7 @@ int32_t SystemProperties::getFormSharedImageCacheThreshold()
 
 bool SystemProperties::IsWhiteBlockEnabled()
 {
-    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
+    return whiteBlockEnabled_;
 }
 
 bool SystemProperties::IsWhiteBlockIdleChange()
