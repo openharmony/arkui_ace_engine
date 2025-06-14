@@ -110,9 +110,6 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
     auto type = Converter::OptConvert<XComponentType>(options->type);
     XComponentModelNG::SetXComponentType(frameNode, type.value_or(XComponentType::UNKNOWN));
 
-//     LOGE("XComponentInterfaceModifier::SetXComponentOptions2Impl - Ark_ImageAIOptions is not supported");
-//     XComponentModelNG::SetImageAIOptions(frameNode, nullptr);
-
     auto peerPtr = options->controller;
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peerPtr);
     XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
@@ -124,11 +121,13 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
 void SetXComponentOptions3Impl(Ark_NativePointer node,
                                const Ark_NativeXComponentParameters* params)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(params);
-    // //auto convValue = Converter::OptConvert<type_name>(*params);
-    // //XComponentModelNG::SetSetXComponentOptions3(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(params);
+    auto type = Converter::OptConvert<XComponentType>(params->type);
+#ifdef XCOMPONENT_SUPPORTED
+    XComponentModelNG::SetXComponentType(frameNode, type.value_or(XComponentType::UNKNOWN));
+#endif // XCOMPONENT_SUPPORTED
 }
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
