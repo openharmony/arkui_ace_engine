@@ -37,6 +37,7 @@ import {
 import { Config } from "../peers/Config"
 import { Context } from "../peers/Context"
 import { NodeCache } from "../node-cache"
+import { Profiler } from "../static/profiler"
 
 export function createETSModuleFromContext(): ETSModule {
     let program = global.es2panda._ContextProgram(global.context)
@@ -91,14 +92,14 @@ export function checkErrors() {
     }
 }
 
-export function proceedToState(state: Es2pandaContextState): void {
+export function proceedToState(state: Es2pandaContextState, profiler?: Profiler): void {
     if (state <= global.es2panda._ContextState(global.context)) {
         return
     }
     const before = Date.now()
     global.es2panda._ProceedToState(global.context, state)
     const after = Date.now()
-    global.profiler.proceededToState(after-before)
+    profiler?.proceededToState(after-before)
     NodeCache.clear()
     checkErrors()
 }

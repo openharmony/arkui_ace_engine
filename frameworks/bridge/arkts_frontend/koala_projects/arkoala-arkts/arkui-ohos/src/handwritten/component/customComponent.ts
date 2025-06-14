@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+import { __context, StateManager } from '@koalaui/runtime';
 import { ArkStructBase } from '../ArkStructBase';
 import { ArkCommonMethodComponent } from './common';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { ExtendableComponent } from './extendableComponent';
+import { ContextRecord } from 'arkui/handwritten/UIContextImpl';
 
 
 class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
@@ -95,6 +97,7 @@ class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
 }
 
 export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T_Options> extends ExtendableComponent {
+    private uiContext: UIContext | undefined = undefined
     constructor() {
         super();
     }
@@ -108,7 +111,11 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         /** @memo */
         content?: () => void
     ): void {
-        CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(factory()), content, initializers, reuseKey);
+        const context: StateManager = __context() as StateManager;
+        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+        let instance: S = factory();
+        instance.uiContext = data?.uiContext;
+        CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(instance), content, initializers, reuseKey);
     }
 
     __initializeStruct(
@@ -129,7 +136,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
     onPageShow(): void {}
     onPageHide(): void {}
     onBackPress(): boolean { return false; }
-    getUIContext(): UIContext { return new UIContext(100000); }
+    getUIContext(): UIContext { return this.uiContext!; }
 
     aboutToReuse(param: Record<string, Object>): void {}
     aboutToRecycle(): void {}

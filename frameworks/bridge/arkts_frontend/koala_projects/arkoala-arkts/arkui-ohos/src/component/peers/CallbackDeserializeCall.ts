@@ -24,7 +24,7 @@ import { CallbackTransformer } from "./CallbackTransformer"
 import { AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallback, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, Callback_AxisEvent_Void, AxisEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, Callback_ClickEvent_Void, ClickEvent, Callback_CrownEvent_Void, CrownEvent, CustomBuilder, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, ItemDragInfo, Callback_KeyEvent_Boolean, KeyEvent, Callback_KeyEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_MouseEvent_Void, MouseEvent, Callback_PreDragStatus_Void, PreDragStatus, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, SheetType, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, TouchEvent, Callback_TouchEvent_Void, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ScrollResult, OnWillScrollCallback } from "./../common"
 import { AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, TextRange, DeleteValue, EditableTextChangeValue, InsertValue, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnDidChangeCallback } from "./../textCommon"
 import { AsyncCallback_image_PixelMap_Void, ReceiveCallback } from "./../arkui-external"
-import { PixelMap } from "./../arkui-pixelmap"
+import { PixelMap } from "#external"
 import { ButtonTriggerClickCallback } from "./../button"
 import { Callback_Any_Void, Callback_FormCallbackInfo_Void, FormCallbackInfo, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg } from "./../formComponent"
 import { Area, ResourceStr, SizeOptions, VoidCallback } from "./../units"
@@ -36,6 +36,7 @@ import { Callback_CalendarRequestedData_Void, CalendarRequestedData, Callback_Ca
 import { ComputedBarAttribute, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Void, Literal_Number_offsetRemain, Callback_Number_Number_ComputedBarAttribute, Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number } from "./../grid"
 import { Callback_CopyEvent_Void, CopyEvent, Callback_CutEvent_Void, CutEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, PasteEvent, Callback_TextRange_Void, MenuCallback, MenuOnAppearCallback, PasteEventCallback, SubmitCallback } from "./../richEditor"
 import { Callback_Date_Void } from "./../calendarPicker"
+import { ShowCallback } from "./../bindSheetOpts"
 import { Callback_DatePickerResult_Void, DatePickerResult } from "./../datePicker"
 import { Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, Callback_InsertValue_Boolean, Callback_InsertValue_Void, SearchSubmitCallback } from "./../search"
 import { Callback_DismissDialogAction_Void, DismissDialogAction } from "./../actionSheet"
@@ -60,7 +61,7 @@ import { Callback_Opt_Boolean_Void, OnCheckboxChangeCallback } from "./../checkb
 import { Resource } from "global/resource"
 import { StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../styledString"
 import { TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../tabs"
-import { Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Callback_CreateItem } from "./../arkui-custom"
+import { Callback_onDragStart, Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Callback_CreateItem } from "./../arkui-custom"
 import { Callback_RefreshStatus_Void, RefreshStatus } from "./../refresh"
 import { Callback_String_Number_Void, Callback_TextPickerResult_Void, TextPickerResult, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback, Type_TextPickerAttribute_onChange_callback } from "./../textPicker"
 import { Callback_String_Void } from "./../gridRow"
@@ -90,6 +91,8 @@ import { PageTransitionCallback, RouteType } from "./../pageTransition"
 import { PasteButtonCallback, PasteButtonOnClickResult } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData } from "./../pluginComponent"
 import { SaveButtonCallback, SaveButtonOnClickResult } from "./../saveButton"
+import { SearchValueCallback } from "./../searchops"
+import { TextFieldValueCallback } from "./../textfieldops"
 import { SelectedCallback } from "./../griditemops"
 import { TypeChecker } from "#components"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
@@ -821,6 +824,14 @@ export function deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeseria
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((parameter: OnDownloadStartEvent) => void))
     let parameter : OnDownloadStartEvent = thisDeserializer.readOnDownloadStartEvent()
     _call(parameter)
+}
+export function deserializeAndCallCallback_onDragStart(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_onDragStart)
+    let node : KPointer = thisDeserializer.readPointer()
+    let dragEvent : DragEvent = (thisDeserializer.readDragEvent() as DragEvent)
+    let extraParam : string = (thisDeserializer.readString() as string)
+    _call(node, dragEvent, extraParam)
 }
 export function deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2225,9 +2236,22 @@ export function deserializeAndCallSearchSubmitCallback(thisDeserializer: Deseria
     let event : SubmitEvent | undefined = event_buf
     _call(searchContent, event)
 }
+export function deserializeAndCallSearchValueCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as SearchValueCallback)
+    let value : string = (thisDeserializer.readString() as string)
+    _call(value)
+}
 export function deserializeAndCallSelectedCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as SelectedCallback)
+    let selected : boolean = thisDeserializer.readBoolean()
+    _call(selected)
+}
+
+export function deserializeAndCallShowCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ShowCallback)
     let selected : boolean = thisDeserializer.readBoolean()
     _call(selected)
 }
@@ -2303,6 +2327,23 @@ export function deserializeAndCallTextAreaSubmitCallback(thisDeserializer: Deser
     }
     let event : SubmitEvent | undefined = event_buf
     _call(enterKeyType, event)
+}
+export function deserializeAndCallTextFieldValueCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as TextFieldValueCallback)
+    const value_buf_selector : int32 = thisDeserializer.readInt8()
+    let value_buf : string | Resource | undefined
+    if (value_buf_selector == 0) {
+        value_buf = (thisDeserializer.readString() as string)
+    }
+    else if (value_buf_selector == 1) {
+        value_buf = thisDeserializer.readResource()
+    }
+    else {
+        throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
+    }
+    let value : ResourceStr = (value_buf as string | Resource)
+    _call(value)
 }
 export function deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2618,6 +2659,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 332449533/*CallbackKind.Kind_Callback_OnContextMenuShowEvent_Boolean*/: return deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisDeserializer);
         case 118631204/*CallbackKind.Kind_Callback_OnDataResubmittedEvent_Void*/: return deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisDeserializer);
         case 1834611702/*CallbackKind.Kind_Callback_OnDownloadStartEvent_Void*/: return deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeserializer);
+        case 921313525/*CallbackKind.Kind_Callback_onDragStart*/: return deserializeAndCallCallback_onDragStart(thisDeserializer);
         case -1792851375/*CallbackKind.Kind_Callback_OnErrorReceiveEvent_Void*/: return deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisDeserializer);
         case -243916553/*CallbackKind.Kind_Callback_OnFaviconReceivedEvent_Void*/: return deserializeAndCallCallback_OnFaviconReceivedEvent_Void(thisDeserializer);
         case -1852060212/*CallbackKind.Kind_Callback_OnFirstContentfulPaintEvent_Void*/: return deserializeAndCallCallback_OnFirstContentfulPaintEvent_Void(thisDeserializer);
@@ -2786,8 +2828,10 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -1265626662/*CallbackKind.Kind_ScrollOnScrollCallback*/: return deserializeAndCallScrollOnScrollCallback(thisDeserializer);
         case -721521596/*CallbackKind.Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallScrollOnWillScrollCallback(thisDeserializer);
         case 1717691617/*CallbackKind.Kind_SearchSubmitCallback*/: return deserializeAndCallSearchSubmitCallback(thisDeserializer);
+        case 2049289694/*CallbackKind.Kind_SearchValueCallback*/: return deserializeAndCallSearchValueCallback(thisDeserializer);
         case -1480175598/*CallbackKind.Kind_SelectedCallback*/: return deserializeAndCallSelectedCallback(thisDeserializer);
         case -250780276/*CallbackKind.Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer);
+        case 63936248/*CallbackKind.Kind_ShowCallback*/: return deserializeAndCallShowCallback(thisDeserializer);
         case -1716637992/*CallbackKind.Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisDeserializer);
         case 711649376/*CallbackKind.Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisDeserializer);
         case 1095217433/*CallbackKind.Kind_StyledStringMarshallCallback*/: return deserializeAndCallStyledStringMarshallCallback(thisDeserializer);
@@ -2795,6 +2839,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -712186065/*CallbackKind.Kind_SubmitCallback*/: return deserializeAndCallSubmitCallback(thisDeserializer);
         case 221706282/*CallbackKind.Kind_TabsCustomContentTransitionCallback*/: return deserializeAndCallTabsCustomContentTransitionCallback(thisDeserializer);
         case -401980571/*CallbackKind.Kind_TextAreaSubmitCallback*/: return deserializeAndCallTextAreaSubmitCallback(thisDeserializer);
+        case 18061455/*CallbackKind.Kind_TextFieldValueCallback*/: return deserializeAndCallTextFieldValueCallback(thisDeserializer);
         case -202014218/*CallbackKind.Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeserializer);
         case -1928298699/*CallbackKind.Kind_TextPickerScrollStopCallback*/: return deserializeAndCallTextPickerScrollStopCallback(thisDeserializer);
         case 2057659801/*CallbackKind.Kind_TextTimerAttribute_onTimer_event_type*/: return deserializeAndCallTextTimerAttribute_onTimer_event_type(thisDeserializer);

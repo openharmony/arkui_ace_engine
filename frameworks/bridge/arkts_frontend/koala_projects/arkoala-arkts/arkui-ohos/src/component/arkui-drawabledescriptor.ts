@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { PixelMap, PixelMapInternal } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -52,9 +52,7 @@ export class DrawableDescriptor implements MaterializedBase {
         return this.getPixelMap_serialize()
     }
     private getPixelMap_serialize(): PixelMap {
-        const retval  = ArkUIGeneratedNativeModule._DrawableDescriptor_getPixelMap(this.peer!.ptr)
-        const obj : PixelMap = PixelMapInternal.fromPtr(retval)
-        return obj
+        throw new Error("Not implemented")
     }
 }
 export interface AnimationOptions {

@@ -19,6 +19,8 @@
 #include <functional>
 #include <string>
 #include <cstdint>
+#include "core/common/ace_engine.h"
+#include "core/components_ng/render/snapshot_param.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,11 +52,17 @@ struct ArkUIAniWebModifier {
         std::function<void(int32_t)>&& onNWebId,
         std::function<void(const std::string&)>&& onHapPath);
 };
+struct ArkUIAniDragModifier {
+    void (*setDragDropInfoPixelMap)(ani_ref event, ani_ref pixelMap);
+    void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
+    void (*setDragDropInfoExtraInfo)(ani_ref event, std::string& extraInfo);
+};
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);
+    ArkUI_Int32 (*getCurrentInstanceId)();
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
@@ -67,14 +75,23 @@ struct ArkUIAniContentSlotModifier {
     ArkUIContentSlot (*construct)(ArkUI_Int32 id);
     void (*setContentSlotOptions)(ArkUIContentSlot node, ArkUINodeContent value);
 };
+struct ArkUIAniComponentSnapshotModifier {
+    int32_t (*getCurrentIdSafely)();
+    OHOS::Ace::RefPtr<OHOS::Ace::Container> (*getContainer)(int32_t instanceId);
+    void (*createFromBuilder)(ArkUINodeHandle node,
+    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    OHOS::Ace::NG::SnapshotParam param);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
     const ArkUIAniWebModifier* (*getWebAniModifier)();
+    const ArkUIAniDragModifier* (*getDragAniModifier) ();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
+    const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

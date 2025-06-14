@@ -296,6 +296,7 @@ function fixNamespace(code: string) {
     code = code.replaceAll(/public static (restoreDefault)/g, "export function $1")
     code = code.replaceAll(/public static (requestFocus\(value)/g, "export function $1")
     code = code.replaceAll(/public static (createUIObserver\(id)/g, "export function $1")
+    code = code.replaceAll(/public static (matchMediaSync\(condition)/g, "export function $1")
     code = code.replaceAll(/public static (createComponentObserver\(id)/g, "export function $1")
     code = code.replaceAll(/public static (registerPage\(page)/g, "export function $1")
     code = code.replaceAll(/public static (error\(prefix)/g, "export function $1")
@@ -317,6 +318,11 @@ function fixNamespace(code: string) {
     code = code.replaceAll(/public static (getRectangleById\(rectId)/g, "export function $1")
     code = code.replaceAll(/public static (getUIFontConfig\()/g, "export function $1")
     code = code.replaceAll(/public static (showToast\(value: ShowToastOptions)/g, "export function $1")
+    code = code.replaceAll(/public static (get\(callbackId)/g, "export function $1")
+    code = code.replaceAll(/static (get\(promiseId)/g, "export function $1")
+    code = code.replaceAll(/public static (getSync\(value)/g, "export function $1")
+    code = code.replaceAll(/public static (getWithUniqueId\(uniqueIdValue)/g, "export function $1")
+    code = code.replaceAll(/public static (getSyncWithUniqueId\(uniqueIdValue)/g, "export function $1")
     return code
 }
 

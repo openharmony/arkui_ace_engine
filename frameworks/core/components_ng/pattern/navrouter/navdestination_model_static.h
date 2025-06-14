@@ -62,6 +62,8 @@ public:
     static void SetCustomTitle(FrameNode* frameNode, const RefPtr<UINode>& customNode);
     static void SetCustomToolBar(FrameNode* frameNode, const RefPtr<UINode>& customNode);
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid = true);
+    static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
+    static void SetEnableStatusBar(FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar);
 };
 } // namespace OHOS::Ace::NG
 

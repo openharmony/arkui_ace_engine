@@ -144,7 +144,6 @@ export function visitEachChild(
     node: AstNode,
     visitor: Visitor
 ): AstNode {
-    global.profiler.nodeVisited()
     if (isETSModule(node)) {
         return updateETSModuleByStatements(
             node,

@@ -1363,6 +1363,8 @@ typedef struct Callback_SpringBackAction_Void Callback_SpringBackAction_Void;
 typedef struct Opt_Callback_SpringBackAction_Void Opt_Callback_SpringBackAction_Void;
 typedef struct Callback_StateStylesChange Callback_StateStylesChange;
 typedef struct Opt_Callback_StateStylesChange Opt_Callback_StateStylesChange;
+typedef struct Callback_onDragStart Callback_onDragStart;
+typedef struct Opt_Callback_onDragStart Opt_Callback_onDragStart;
 typedef struct Callback_String_Number_Void Callback_String_Number_Void;
 typedef struct Opt_Callback_String_Number_Void Opt_Callback_String_Number_Void;
 typedef struct Callback_String_Opt_Object_Void Callback_String_Opt_Object_Void;
@@ -1603,10 +1605,14 @@ typedef struct OnWillScrollCallback OnWillScrollCallback;
 typedef struct Opt_OnWillScrollCallback Opt_OnWillScrollCallback;
 typedef struct SearchSubmitCallback SearchSubmitCallback;
 typedef struct Opt_SearchSubmitCallback Opt_SearchSubmitCallback;
+typedef struct SearchValueCallback SearchValueCallback;
+typedef struct Opt_SearchValueCallback Opt_SearchValueCallback;
 typedef struct SelectedCallback SelectedCallback;
 typedef struct Opt_SelectedCallback Opt_SelectedCallback;
 typedef struct ShouldBuiltInRecognizerParallelWithCallback ShouldBuiltInRecognizerParallelWithCallback;
 typedef struct Opt_ShouldBuiltInRecognizerParallelWithCallback Opt_ShouldBuiltInRecognizerParallelWithCallback;
+typedef struct ShowCallback ShowCallback;
+typedef struct Opt_ShowCallback Opt_ShowCallback;
 typedef struct SizeChangeCallback SizeChangeCallback;
 typedef struct Opt_SizeChangeCallback Opt_SizeChangeCallback;
 typedef struct SliderTriggerChangeCallback SliderTriggerChangeCallback;
@@ -7449,6 +7455,15 @@ typedef struct Opt_ScreenCaptureHandler {
     Ark_Tag tag;
     Ark_ScreenCaptureHandler value;
 } Opt_ScreenCaptureHandler;
+typedef struct ShowCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Boolean value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Boolean value);
+} ShowCallback;
+typedef struct Opt_ShowCallback {
+    Ark_Tag tag;
+    ShowCallback value;
+} Opt_ShowCallback;
 typedef struct Opt_ScrollableTargetInfo {
     Ark_Tag tag;
     Ark_ScrollableTargetInfo value;
@@ -10397,6 +10412,16 @@ typedef struct Opt_Callback_StateStylesChange {
     Ark_Tag tag;
     Callback_StateStylesChange value;
 } Opt_Callback_StateStylesChange;
+typedef struct Callback_onDragStart {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer node, const Ark_DragEvent dragEvent, const Ark_String extraParam);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer node, const Ark_DragEvent dragEvent, const Ark_String extraParam);
+} Callback_onDragStart;
+typedef struct Opt_Callback_onDragStart {
+    Ark_Tag tag;
+    Callback_onDragStart value;
+} Opt_Callback_onDragStart;
 typedef struct Callback_String_Number_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_String value, const Ark_Number index);
@@ -11475,6 +11500,15 @@ typedef struct Opt_SearchSubmitCallback {
     Ark_Tag tag;
     SearchSubmitCallback value;
 } Opt_SearchSubmitCallback;
+typedef struct SearchValueCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String value);
+} SearchValueCallback;
+typedef struct Opt_SearchValueCallback {
+    Ark_Tag tag;
+    SearchValueCallback value;
+} Opt_SearchValueCallback;
 typedef struct SelectedCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Boolean selected);
@@ -11556,6 +11590,15 @@ typedef struct Opt_TextAreaSubmitCallback {
     Ark_Tag tag;
     TextAreaSubmitCallback value;
 } Opt_TextAreaSubmitCallback;
+typedef struct TextFieldValueCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_ResourceStr value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ResourceStr value);
+} TextFieldValueCallback;
+typedef struct Opt_TextFieldValueCallback {
+    Ark_Tag tag;
+    TextFieldValueCallback value;
+} Opt_TextFieldValueCallback;
 typedef struct TextPickerEnterSelectedAreaCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index);
@@ -23370,6 +23413,19 @@ typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
                                const Ark_TranslateOptions* options);
 } GENERATED_ArkUIAnimationExtenderAccessor;
 
+typedef struct GENERATED_ArkUIBindSheetOpsAccessor {
+    Ark_NativePointer (*registerBindSheetShowCallback)(Ark_NativePointer node,
+                                              Ark_Boolean value,
+                                              const ShowCallback* callback,
+                                              const Opt_CustomNodeBuilder* builder,
+                                              const Opt_SheetOptions* options);
+    Ark_NativePointer (*registerContentCoverShowCallback)(Ark_NativePointer node,
+                                        Ark_Boolean value,
+                                        const ShowCallback* callback,
+                                        const Opt_CustomNodeBuilder* builder,
+                                        const Opt_ContentCoverOptions* options);
+} GENERATED_ArkUIBindSheetOpsAccessor;
+
 typedef struct GENERATED_ArkUIBaseContextAccessor {
     void (*destroyPeer)(Ark_BaseContext peer);
     Ark_BaseContext (*ctor)();
@@ -23694,6 +23750,11 @@ typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
     void (*onStateStyleChange)(Ark_NativePointer node,
                                const Callback_StateStylesChange* stateStyleChange);
 } GENERATED_ArkUIStateStylesOpsAccessor;
+
+typedef struct GENERATED_ArkUIDragDropOpsAccessor {
+    void (*registerOnDragStart)(Ark_NativePointer node,
+                                const Callback_onDragStart* onDragStart);
+} GENERATED_ArkUIDragDropOpsAccessor;
 
 typedef struct GENERATED_ArkUIUIContextAtomicServiceBarAccessor {
     Ark_Frame (*getBarRect)();
@@ -24389,12 +24450,24 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
                             Ark_Boolean animated);
 } GENERATED_ArkUINavExtenderAccessor;
 
+typedef struct GENERATED_ArkUISearchOpsAccessor {
+    Ark_NativePointer (*registerSearchValueCallback)(Ark_NativePointer node,
+                                                     const Ark_String* value,
+                                                     const SearchValueCallback* callback);
+} GENERATED_ArkUISearchOpsAccessor;
+
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
     void (*emitClickEvent)(Ark_NativePointer node,
                            Ark_ClickEvent event);
     void (*emitTextInputEvent)(Ark_NativePointer node,
                                const Ark_String* text);
 } GENERATED_ArkUIEventEmulatorAccessor;
+
+typedef struct GENERATED_ArkUITextFieldOpsAccessor {
+    Ark_NativePointer (*registerTextFieldValueCallback)(Ark_NativePointer node,
+                                                        const Ark_ResourceStr* value,
+                                                        const TextFieldValueCallback* callback);
+} GENERATED_ArkUITextFieldOpsAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {
     void (*show)(const Ark_ActionSheetOptions* value);
@@ -27065,6 +27138,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
 
 typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIAnimationExtenderAccessor* (*getAnimationExtenderAccessor)();
+    const GENERATED_ArkUIBindSheetOpsAccessor* (*getBindSheetOpsAccessor)();
     const GENERATED_ArkUIBaseContextAccessor* (*getBaseContextAccessor)();
     const GENERATED_ArkUIContextAccessor* (*getContextAccessor)();
     const GENERATED_ArkUIUnifiedDataAccessor* (*getUnifiedDataAccessor)();
@@ -27078,6 +27152,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIRestrictedWorkerAccessor* (*getRestrictedWorkerAccessor)();
     const GENERATED_ArkUIUIContextAccessor* (*getUIContextAccessor)();
     const GENERATED_ArkUIStateStylesOpsAccessor* (*getStateStylesOpsAccessor)();
+    const GENERATED_ArkUIDragDropOpsAccessor* (*getDragDropOpsAccessor)();
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* (*getUIContextAtomicServiceBarAccessor)();
     const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* (*getUIContextDispatchKeyEventAccessor)();
     const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();
@@ -27118,7 +27193,9 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
     const GENERATED_ArkUINavExtenderAccessor* (*getNavExtenderAccessor)();
+    const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();
+    const GENERATED_ArkUITextFieldOpsAccessor* (*getTextFieldOpsAccessor)();
     const GENERATED_ArkUIActionSheetAccessor* (*getActionSheetAccessor)();
     const GENERATED_ArkUIAlertDialogAccessor* (*getAlertDialogAccessor)();
     const GENERATED_ArkUISpringPropAccessor* (*getSpringPropAccessor)();

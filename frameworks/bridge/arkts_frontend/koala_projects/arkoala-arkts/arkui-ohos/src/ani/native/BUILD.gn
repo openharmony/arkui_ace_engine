@@ -28,9 +28,12 @@ ohos_shared_library("arkoala_native_ani") {
     "custom_node/",
     "web/",
     "content_slot/",
+    "drag_and_drop/",
+    "componentSnapshot/",
   ]
 
   sources = [
+    "ani_utils.cpp",
     "common/common_module.cpp",
     "load.cpp",
     "module.cpp",
@@ -38,11 +41,16 @@ ohos_shared_library("arkoala_native_ani") {
     "web/web_module_methods.cpp",
     "utils/convert_utils.cpp",
     "content_slot/content_slot_module.cpp",
+    "drag_and_drop/native_drag_drop_global.cpp",
+    "componentSnapshot/componentSnapshot_module.cpp",
   ]
 
   external_deps = [
     "hilog:libhilog",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
+    "image_framework:image",
+    "image_framework:image_taihe"
   ]
 
   configs = [ "$ace_root:ace_config" ]

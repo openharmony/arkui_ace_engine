@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, InputCounterOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { ArkCommonMethodPeer, Bindable, CommonMethod, TextDecorationOptions, InputCounterOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { ResourceColor, Font, Length, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage } from "./units"
 import { EnterKeyType, SubmitEvent, ContentType } from "./textInput"
 import { TextAlign, FontStyle, FontWeight, TextOverflow, CopyOptions, TextContentStyle, BarState, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, Color } from "./enums"
@@ -37,8 +37,9 @@ import { Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_Delet
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-
 import { Deserializer } from "./peers/Deserializer"
+import { TextFieldOpsHandWritten } from "./../handwritten"
+
 export class ArkTextAreaPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -1032,7 +1033,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
 }
 export interface TextAreaOptions {
     placeholder?: ResourceStr;
-    text?: ResourceStr;
+    text?: ResourceStr | Bindable<ResourceStr>;
     controller?: TextAreaController;
 }
 export type TextAreaInterface = (value?: TextAreaOptions) => TextAreaAttribute;
@@ -1357,12 +1358,25 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     getPeer(): ArkTextAreaPeer {
         return (this.peer as ArkTextAreaPeer)
     }
+    TextAreaOptionsValueIsBindable(value?: TextAreaOptions) : boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(value)) {
+            const value_text  = value!.text;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(value_text))) {
+                const value_text_value  = value_text!;
+                return TypeChecker.isBindableResourceStr(value_text_value);
+            }
+        }
+        return false;
+    }
     public setTextAreaOptions(value?: TextAreaOptions): this {
         if (this.checkPriority("setTextAreaOptions")) {
             const value_casted = value as (TextAreaOptions | undefined)
             this.getPeer()?.setTextAreaOptionsAttribute(value_casted)
-            return this
         }
+        if (this.TextAreaOptionsValueIsBindable(value)) {
+            TextFieldOpsHandWritten.hookTextFieldInputValueImpl(this.getPeer().peer.ptr,
+                (value!.text as Bindable<ResourceStr>));
+         }
         return this
     }
     public placeholderColor(value: ResourceColor | undefined): this {

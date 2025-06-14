@@ -31,6 +31,10 @@ import { Deserializer } from "./component/peers/Deserializer"
 import { StateUpdateLoop } from "./stateManagement"
 import { Routed } from "./handwritten/Router"
 import { updateLazyItems } from "./handwritten/LazyForEachImpl"
+import { UIContext } from "@ohos/arkui/UIContext"
+import { createStateManager } from "@koalaui/runtime"
+import { UIContextImpl, ContextRecord } from "arkui/handwritten/UIContextImpl"
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -197,6 +201,11 @@ export class Application {
         let root: PeerNode | undefined = undefined
         try {
             this.manager = GlobalStateManager.instance
+            let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            uiContext.stateMgr = this.manager
+            let uiData = new ContextRecord();
+            uiData.uiContext = uiContext;
+            this.manager!.contextData = uiData;
             this.timer = getAnimationTimer() ?? createAnimationTimer(this.manager!)
             /** @memo */
             let builder: UserViewBuilder
@@ -307,7 +316,7 @@ export class Application {
         } else {
             try {
                 this.timer!.value = Date.now() as int64
-                this.loopIteration(arg0, arg1)
+                this.loopIteration2(arg0, arg1) // loop iteration without callbacks execution
                 if (this.enableDumpTree) dumpTree(this.rootState!.value)
             } catch (error) {
                 if (error instanceof Error) {
@@ -341,6 +350,19 @@ export class Application {
         this.checkEvents(arg0)
         this.updateState()
         this.render()
+    }
+
+    // loop iteration without callbacks execution, callbacks execution will be done at the tail of vsync
+    loopIteration2(arg0: int32, arg1: int32) {
+        if (this.withLog) InteropNativeModule._NativeLog("ARKTS: loopIteration2")
+        this.updateState()
+        this.render()
+    }
+
+    // called at the tail of vsync
+    checkCallbacks(): void {
+        if (this.withLog) InteropNativeModule._NativeLog("ARKTS: checkCallbacks")
+        checkEvents()
     }
 
     // TODO: make [emitEvent] suitable to get string argument

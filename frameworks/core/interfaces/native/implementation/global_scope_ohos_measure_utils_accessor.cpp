@@ -178,12 +178,21 @@ Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
                             ? DimensionUnit::FP
                             : DimensionUnit::VP;
     context.fontSize = ConvertToDimension(options->fontSize, fontSizeUnit);
+    context.constraintWidth = ConvertToDimension(options->constraintWidth);
     context.letterSpacing = ConvertToDimension(options->letterSpacing);
     context.fontStyle =
         Converter::OptConvert<OHOS::Ace::FontStyle>(options->fontStyle).value_or(OHOS::Ace::FontStyle::NORMAL);
     context.textContent = Converter::OptConvert<std::string>(options->textContent).value_or("");
     context.fontWeight = ConvertToFontWeight(options->fontWeight);
     context.fontFamily = Converter::OptConvert<std::string>(options->fontFamily).value_or("");
+    context.textAlign = Converter::OptConvert<TextAlign>(options->textAlign).value_or(TextAlign::START);
+    context.textOverlayFlow = Converter::OptConvert<TextOverflow>(options->overflow).value_or(TextOverflow::CLIP);
+    context.maxlines = Converter::OptConvert<int32_t>(options->maxLines).value_or(0);
+    context.lineHeight = ConvertToDimension(options->lineHeight);
+    context.baselineOffset = ConvertToDimension(options->baselineOffset);
+    context.textCase = Converter::OptConvert<TextCase>(options->textCase).value_or(TextCase::NORMAL);
+    context.textIndent = ConvertToDimension(options->textIndent);
+    context.wordBreak = Converter::OptConvert<WordBreak>(options->wordBreak).value_or(WordBreak::BREAK_WORD);
     auto textWidth = MeasureUtil::MeasureText(context);
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(textWidth));
 }

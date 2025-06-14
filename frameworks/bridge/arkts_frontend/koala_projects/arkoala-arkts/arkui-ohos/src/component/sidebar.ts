@@ -30,7 +30,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 
 export interface DividerStyle {
     strokeWidth: Length;
@@ -210,7 +210,10 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            const newDivider = { strokeWidth: 0.0 } as DividerStyle
+            thisSerializer.writeDividerStyleSidebar(newDivider)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeDividerStyleSidebar(value_value)
         }

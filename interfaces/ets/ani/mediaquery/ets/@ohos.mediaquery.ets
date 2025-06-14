@@ -21,6 +21,14 @@ export default namespace mediaquery {
         readonly matches: boolean;
         readonly media: string;
     }
+    class Result implements MediaQueryResult {
+        readonly matches: boolean;
+        readonly media: string;
+        constructor(matches: boolean, media: string) {
+           this.matches = matches;
+           this.media = media;
+        }
+    }
     export interface MediaQueryListener {
         on(type: string, callback: Callback<MediaQueryResult>): void;
         off(type: string, callback?: Callback<MediaQueryResult>): void

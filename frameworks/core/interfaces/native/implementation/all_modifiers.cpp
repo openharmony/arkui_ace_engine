@@ -205,6 +205,7 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier();
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier();
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
+const GENERATED_ArkUIBindSheetOpsAccessor* GetBindSheetOpsAccessor();
 const GENERATED_ArkUIBaseContextAccessor* GetBaseContextAccessor();
 const GENERATED_ArkUIContextAccessor* GetContextAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
@@ -218,6 +219,7 @@ const GENERATED_ArkUIWorkerEventListenerAccessor* GetWorkerEventListenerAccessor
 const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor();
 const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor();
 const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor();
+const GENERATED_ArkUIDragDropOpsAccessor* GetDragDropOpsAccessor();
 const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor();
 const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* GetUIContextDispatchKeyEventAccessor();
 const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor();
@@ -258,7 +260,9 @@ const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor();
 const GENERATED_ArkUIFilterAccessor* GetFilterAccessor();
 const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor();
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
+const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
+const GENERATED_ArkUITextFieldOpsAccessor* GetTextFieldOpsAccessor();
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
 const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor();
@@ -541,6 +545,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
 {
     static const GENERATED_ArkUIAccessors accessorsImpl = {
         GetAnimationExtenderAccessor,
+        GetBindSheetOpsAccessor,
         GetBaseContextAccessor,
         GetContextAccessor,
         GetUnifiedDataAccessor,
@@ -554,6 +559,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetRestrictedWorkerAccessor,
         GetUIContextAccessor,
         GetStateStylesOpsAccessor,
+        GetDragDropOpsAccessor,
         GetUIContextAtomicServiceBarAccessor,
         GetUIContextDispatchKeyEventAccessor,
         GetDrawableDescriptorAccessor,
@@ -594,7 +600,9 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetFilterAccessor,
         GetVisualEffectAccessor,
         GetNavExtenderAccessor,
+        GetSearchOpsAccessor,
         GetEventEmulatorAccessor,
+        GetTextFieldOpsAccessor,
         GetActionSheetAccessor,
         GetAlertDialogAccessor,
         GetSpringPropAccessor,

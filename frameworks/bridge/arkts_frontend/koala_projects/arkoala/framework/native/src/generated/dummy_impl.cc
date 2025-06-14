@@ -25120,6 +25120,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {42};
     }
     } // UIContextAccessor
+    namespace DragDropOpsAccessor {
+    void RegisterOnDragStartImpl(Ark_NativePointer node,
+                                    const Callback_onDragStart* onDragStart)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("registerOnDragStart(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, onDragStart);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DragDropOpsAccessor
     namespace StateStylesOpsAccessor {
     void OnStateStyleChangeImpl(Ark_NativePointer node,
                                 const Callback_StateStylesChange* stateStyleChange)
@@ -28700,6 +28714,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // NavExtenderAccessor
+    namespace SearchOpsAccessor {
+    Ark_NativePointer RegisterSearchValueCallbackImpl(Ark_NativePointer node,
+                                                      const Ark_String* value,
+                                                      const SearchValueCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerSearchValueCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // SearchOpsAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
                                 const Ark_String* text)
@@ -28714,6 +28747,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // EventEmulatorAccessor
+    namespace TextFieldOpsAccessor {
+    Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
+                                                         const Ark_ResourceStr* value,
+                                                         const TextFieldValueCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerTextFieldValueCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // TextFieldOpsAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* value)
     {
@@ -43265,6 +43317,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &StateStylesOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUIDragDropOpsAccessor* GetDragDropOpsAccessor()
+    {
+        static const GENERATED_ArkUIDragDropOpsAccessor DragDropOpsAccessorImpl {
+            DragDropOpsAccessor::RegisterOnDragStartImpl,
+        };
+        return &DragDropOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor()
     {
         static const GENERATED_ArkUIUIContextAtomicServiceBarAccessor UIContextAtomicServiceBarAccessorImpl {
@@ -43945,6 +44005,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &NavExtenderAccessorImpl;
     }
 
+    const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor()
+    {
+        static const GENERATED_ArkUISearchOpsAccessor SearchOpsAccessorImpl {
+            SearchOpsAccessor::RegisterSearchValueCallbackImpl,
+        };
+        return &SearchOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()
     {
         static const GENERATED_ArkUIEventEmulatorAccessor EventEmulatorAccessorImpl {
@@ -43952,6 +44020,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventEmulatorAccessor::EmitTextInputEventImpl,
         };
         return &EventEmulatorAccessorImpl;
+    }
+
+    const GENERATED_ArkUITextFieldOpsAccessor* GetTextFieldOpsAccessor()
+    {
+        static const GENERATED_ArkUITextFieldOpsAccessor TextFieldOpsAccessorImpl {
+            TextFieldOpsAccessor::RegisterTextFieldValueCallbackImpl,
+        };
+        return &TextFieldOpsAccessorImpl;
     }
 
     const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
@@ -46808,6 +46884,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetRestrictedWorkerAccessor,
             GetUIContextAccessor,
             GetStateStylesOpsAccessor,
+            GetDragDropOpsAccessor,
             GetUIContextAtomicServiceBarAccessor,
             GetUIContextDispatchKeyEventAccessor,
             GetDrawableDescriptorAccessor,
@@ -46847,7 +46924,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetFilterAccessor,
             GetVisualEffectAccessor,
             GetNavExtenderAccessor,
+            GetSearchOpsAccessor,
             GetEventEmulatorAccessor,
+            GetTextFieldOpsAccessor,
             GetActionSheetAccessor,
             GetAlertDialogAccessor,
             GetSpringPropAccessor,
