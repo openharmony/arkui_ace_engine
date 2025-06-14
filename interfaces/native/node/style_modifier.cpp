@@ -223,6 +223,7 @@ constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
 constexpr int32_t OUTLINE_TOP_WIDTH_INDEX = 1;
 constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
 constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
+constexpr int32_t DEFAULT_INLINE_MAX_LINE = 3;
 constexpr uint32_t DEFAULT_ANIMATION_MODE = 0;
 constexpr uint32_t CONVERT_CONTENT_TYPE = 5;
 constexpr uint32_t DEFAULT_PICKER_STYLE_COLOR = 0xFF182431;
@@ -5363,7 +5364,10 @@ int32_t SetTextAreaMaxLines(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(node->uiNodeHandle, item->value[0].i32);
+    int32_t maxLines = item->value[0].i32;
+    maxLines = maxLines > 0 ? maxLines : DEFAULT_INLINE_MAX_LINE;
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(
+        node->uiNodeHandle, maxLines, NUM_0);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5380,6 +5384,27 @@ void ResetTextAreaMaxLines(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaMaxLines(node->uiNodeHandle);
+}
+
+int32_t SetTextAreaMaxLinesWithScroll(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaTextOverflow(node->uiNodeHandle, NUM_1);
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(
+        node->uiNodeHandle, (int)item->value[0].f32, NUM_1);
+
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextAreaMaxLinesWithScroll(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaTextOverflow(node->uiNodeHandle, NUM_1);
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(node->uiNodeHandle, NUM_3, NUM_1);
 }
 
 int32_t SetTextAreaLineSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -11204,8 +11229,13 @@ int32_t SetMaxLines(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
                 node->uiNodeHandle, item->value[0].i32);
             break;
         case ARKUI_NODE_TEXT_AREA:
-            fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(
-                node->uiNodeHandle, item->value[0].i32);
+            if (item->size == 2) {
+                fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(
+                    node->uiNodeHandle, item->value[0].i32, item->value[1].i32);
+            } else {
+                fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(
+                    node->uiNodeHandle, item->value[0].i32, 0);
+            }
             break;
         default:
             break;
@@ -15902,7 +15932,7 @@ int32_t SetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
         SetTextInputTextSelection, SetTextInputEnableAutoFill, SetTextInputContentType,
         SetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, SetLetterSpacing, SetEnablePreviewText,
         SetTextInputHalfLeading, SetTextInputKeyboardAppearance, SetTextAreaMaxLines, SetTextAreaLineSpacing,
-        nullptr, nullptr, SetTextAreaLineHeight };
+        nullptr, SetTextAreaMaxLinesWithScroll, SetTextAreaLineHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -15919,7 +15949,7 @@ const ArkUI_AttributeItem* GetTextAreaAttribute(ArkUI_NodeHandle node, int32_t s
         GetTextInputContentLineCount, GetTextInputTextSelection, GetTextInputEnableAutoFill, GetTextInputContentType,
         GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText,
         nullptr, GetTextInputKeyboardAppearance, GetTextAreaMaxLines, GetTextAreaLineSpacing,
-        nullptr, nullptr, GetTextAreaLineHeight };
+        nullptr, GetTextAreaMaxLines, GetTextAreaLineHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -15939,7 +15969,7 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputTextSelection, ResetTextInputEnableAutoFill, ResetTextInputContentType,
         ResetTextInputShowKeyBoardOnFocus, ResetTextInputNumberOfLines, ResetLetterSpacing, ResetEnablePreviewText,
         ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance, ResetTextAreaMaxLines, ResetTextAreaLineSpacing,
-        nullptr, nullptr, ResetTextAreaLineHeight };
+        nullptr, ResetTextAreaMaxLinesWithScroll, ResetTextAreaLineHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
