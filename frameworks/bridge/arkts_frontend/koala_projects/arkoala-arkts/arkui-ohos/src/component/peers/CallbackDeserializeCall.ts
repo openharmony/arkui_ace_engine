@@ -21,7 +21,7 @@ import { Deserializer } from "./Deserializer"
 import { int32, float32, int64 } from "@koalaui/common"
 import { ResourceHolder, KInt, KStringPtr, wrapSystemCallback, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer } from "@koalaui/interop"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallback, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, Callback_AxisEvent_Void, AxisEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, Callback_ClickEvent_Void, ClickEvent, Callback_CrownEvent_Void, CrownEvent, CustomBuilder, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, ItemDragInfo, Callback_KeyEvent_Boolean, KeyEvent, Callback_KeyEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_MouseEvent_Void, MouseEvent, Callback_PreDragStatus_Void, PreDragStatus, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, SheetType, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, TouchEvent, Callback_TouchEvent_Void, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ScrollResult, OnWillScrollCallback } from "./../common"
+import { AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallback, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, Callback_AxisEvent_Void, AxisEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, Callback_ClickEvent_Void, ClickEvent, Callback_CrownEvent_Void, CrownEvent, CustomBuilder, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, ItemDragInfo, Callback_KeyEvent_Boolean, KeyEvent, Callback_KeyEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_MouseEvent_Void, MouseEvent, Callback_PreDragStatus_Void, PreDragStatus, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, SheetType, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, TouchEvent, Callback_TouchEvent_Void, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ScrollResult, OnWillScrollCallback, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback } from "./../common"
 import { AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, TextRange, DeleteValue, EditableTextChangeValue, InsertValue, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnDidChangeCallback } from "./../textCommon"
 import { AsyncCallback_image_PixelMap_Void, ReceiveCallback } from "./../arkui-external"
 import { PixelMap } from "#external"
@@ -101,7 +101,6 @@ import { SelectAllCallback } from "./../checkboxgroupops"
 import { SelectCallback } from "./../checkboxops"
 import { SelectSelectedCallback, SelectValueCallback } from "./../selectops"
 import { ValueCallback } from "./../sliderops"
-import { SelectedCallback } from "./../griditemops"
 import { ShowSideBarCallback, SideBarWidthCallback } from "./../sidebarcontainerops"
 import { NavBarWidthCallback } from "./../navigationops"
 import { StepperIndexCallback } from "./../stepperops"
@@ -1670,6 +1669,18 @@ export function deserializeAndCallImageErrorCallback(thisDeserializer: Deseriali
     let error : ImageError = thisDeserializer.readImageError()
     _call(error)
 }
+export function deserializeAndCallIndexCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as IndexCallback)
+    let value : number = (thisDeserializer.readNumber() as number)
+    _call(value)
+}
+export function deserializeAndCallIndexerSelectedCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as IndexerSelectedCallback)
+    let index : number = (thisDeserializer.readNumber() as number)
+    _call(index)
+}
 export function deserializeAndCallInterceptionModeCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as InterceptionModeCallback)
@@ -2186,6 +2197,12 @@ export function deserializeAndCallReceiveCallback(thisDeserializer: Deserializer
     }
     let data : Map<string, Object> = data_buf
     _call(data)
+}
+export function deserializeAndCallRefreshingCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as RefreshingCallback)
+    let refreshing : boolean = thisDeserializer.readBoolean()
+    _call(refreshing)
 }
 export function deserializeAndCallRestrictedWorker_onerror_Callback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2868,6 +2885,8 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 68560477/*CallbackKind.Kind_HoverCallback*/: return deserializeAndCallHoverCallback(thisDeserializer);
         case -1180567691/*CallbackKind.Kind_ImageCompleteCallback*/: return deserializeAndCallImageCompleteCallback(thisDeserializer);
         case 1906248580/*CallbackKind.Kind_ImageErrorCallback*/: return deserializeAndCallImageErrorCallback(thisDeserializer);
+        case 372156059/*CallbackKind.Kind_IndexerSelectedCallback*/: return deserializeAndCallIndexerSelectedCallback(thisDeserializer);
+        case -1271670107/*CallbackKind.Kind_IndexCallback*/: return deserializeAndCallIndexCallback(thisDeserializer);
         case 1502213270/*CallbackKind.Kind_InterceptionModeCallback*/: return deserializeAndCallInterceptionModeCallback(thisDeserializer);
         case 1852781814/*CallbackKind.Kind_InterceptionShowCallback*/: return deserializeAndCallInterceptionShowCallback(thisDeserializer);
         case -464108861/*CallbackKind.Kind_ListAttribute_onItemDragStart_event_type*/: return deserializeAndCallListAttribute_onItemDragStart_event_type(thisDeserializer);
@@ -2932,6 +2951,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -1992671958/*CallbackKind.Kind_PluginErrorCallback*/: return deserializeAndCallPluginErrorCallback(thisDeserializer);
         case -1444325632/*CallbackKind.Kind_PopupStateChangeCallback*/: return deserializeAndCallPopupStateChangeCallback(thisDeserializer);
         case 2053798608/*CallbackKind.Kind_ReceiveCallback*/: return deserializeAndCallReceiveCallback(thisDeserializer);
+        case -1858515962/*CallbackKind.Kind_RefreshingCallback*/: return deserializeAndCallRefreshingCallback(thisDeserializer);
         case -1213708823/*CallbackKind.Kind_RestrictedWorker_onerror_Callback*/: return deserializeAndCallRestrictedWorker_onerror_Callback(thisDeserializer);
         case -2095497263/*CallbackKind.Kind_RestrictedWorker_onexit_Callback*/: return deserializeAndCallRestrictedWorker_onexit_Callback(thisDeserializer);
         case 1614214490/*CallbackKind.Kind_RestrictedWorker_onmessage_Callback*/: return deserializeAndCallRestrictedWorker_onmessage_Callback(thisDeserializer);

@@ -9227,6 +9227,10 @@ export interface VisibleAreaEventOptions {
     expectedUpdateInterval?: number;
 }
 export type VisibleAreaChangeCallback = (isExpanding: boolean, currentRatio: number) => void;
+export type SelectedCallback = (selected: boolean) => void;
+export type IndexCallback = (value: number) => void;
+export type IndexerSelectedCallback = (index: number) => void;
+export type RefreshingCallback = (refreshing: boolean) => void;
 export class UIGestureEvent {
     private peer?: PeerNode
     setPeer(peer?: PeerNode) {

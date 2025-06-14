@@ -204,6 +204,10 @@ const GENERATED_ArkUIRemoteWindowModifier* GetRemoteWindowModifier();
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier();
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier();
+const GENERATED_ArkUIAlphabetIndexerOpsAccessor* GetAlphabetIndexerOpsAccessor();
+const GENERATED_ArkUIListItemOpsAccessor* GetListItemOpsAccessor();
+const GENERATED_ArkUIRefreshOpsAccessor* GetRefreshOpsAccessor();
+const GENERATED_ArkUISwiperOpsAccessor* GetSwiperOpsAccessor();
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIBindSheetOpsAccessor* GetBindSheetOpsAccessor();
 const GENERATED_ArkUIBaseContextAccessor* GetBaseContextAccessor();
@@ -556,6 +560,10 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
 {
     static const GENERATED_ArkUIAccessors accessorsImpl = {
+        GetAlphabetIndexerOpsAccessor,
+        GetListItemOpsAccessor,
+        GetRefreshOpsAccessor,
+        GetSwiperOpsAccessor,
         GetAnimationExtenderAccessor,
         GetBindSheetOpsAccessor,
         GetBaseContextAccessor,

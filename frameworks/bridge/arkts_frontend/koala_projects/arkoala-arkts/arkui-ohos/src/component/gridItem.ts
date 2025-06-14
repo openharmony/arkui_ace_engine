@@ -273,7 +273,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public selected(value: boolean | Bindable<boolean> | undefined): this {
-        if (typeof value === "boolean" || typeof value === "undefined") {
+        if (typeof value === 'boolean' || typeof value === 'undefined') {
             if (this.checkPriority("selected")) {
                 const value_casted = value as (boolean | undefined)
                 this.getPeer()?.selectedAttribute(value_casted)

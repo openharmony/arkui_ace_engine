@@ -4373,6 +4373,42 @@ void deserializeAndCallSyncImageErrorCallback(Ark_VMContext vmContext, KSerializ
     Ark_ImageError error = thisDeserializer.readImageError();
     _callSync(vmContext, _resourceId, error);
 }
+void deserializeAndCallIndexCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Number value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncIndexCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointer());
+    Ark_Number value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    _callSync(vmContext, _resourceId, value);
+}
+void deserializeAndCallIndexerSelectedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Number index = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    _call(_resourceId, index);
+}
+void deserializeAndCallSyncIndexerSelectedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointer());
+    Ark_Number index = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    _callSync(vmContext, _resourceId, index);
+}
 void deserializeAndCallInterceptionModeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -5821,6 +5857,24 @@ void deserializeAndCallSyncReceiveCallback(Ark_VMContext vmContext, KSerializerB
     }
     Map_String_Object data = data_buf;
     _callSync(vmContext, _resourceId, data);
+}
+void deserializeAndCallRefreshingCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean refreshing)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Boolean refreshing = thisDeserializer.readBoolean();
+    _call(_resourceId, refreshing);
+}
+void deserializeAndCallSyncRefreshingCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean refreshing)>(thisDeserializer.readPointer());
+    Ark_Boolean refreshing = thisDeserializer.readBoolean();
+    _callSync(vmContext, _resourceId, refreshing);
 }
 void deserializeAndCallRestrictedWorker_onerror_Callback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -7338,6 +7392,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case 68560477/*Kind_HoverCallback*/: return deserializeAndCallHoverCallback(thisArray, thisLength);
         case -1180567691/*Kind_ImageCompleteCallback*/: return deserializeAndCallImageCompleteCallback(thisArray, thisLength);
         case 1906248580/*Kind_ImageErrorCallback*/: return deserializeAndCallImageErrorCallback(thisArray, thisLength);
+        case -1271670107/*Kind_IndexCallback*/: return deserializeAndCallIndexCallback(thisArray, thisLength);
+        case 372156059/*Kind_IndexerSelectedCallback*/: return deserializeAndCallIndexerSelectedCallback(thisArray, thisLength);
         case 1502213270/*Kind_InterceptionModeCallback*/: return deserializeAndCallInterceptionModeCallback(thisArray, thisLength);
         case 1852781814/*Kind_InterceptionShowCallback*/: return deserializeAndCallInterceptionShowCallback(thisArray, thisLength);
         case -464108861/*Kind_ListAttribute_onItemDragStart_event_type*/: return deserializeAndCallListAttribute_onItemDragStart_event_type(thisArray, thisLength);
@@ -7402,6 +7458,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case -1992671958/*Kind_PluginErrorCallback*/: return deserializeAndCallPluginErrorCallback(thisArray, thisLength);
         case -1444325632/*Kind_PopupStateChangeCallback*/: return deserializeAndCallPopupStateChangeCallback(thisArray, thisLength);
         case 2053798608/*Kind_ReceiveCallback*/: return deserializeAndCallReceiveCallback(thisArray, thisLength);
+        case -1858515962/*Kind_RefreshingCallback*/: return deserializeAndCallRefreshingCallback(thisArray, thisLength);
         case -1213708823/*Kind_RestrictedWorker_onerror_Callback*/: return deserializeAndCallRestrictedWorker_onerror_Callback(thisArray, thisLength);
         case -2095497263/*Kind_RestrictedWorker_onexit_Callback*/: return deserializeAndCallRestrictedWorker_onexit_Callback(thisArray, thisLength);
         case 1614214490/*Kind_RestrictedWorker_onmessage_Callback*/: return deserializeAndCallRestrictedWorker_onmessage_Callback(thisArray, thisLength);
@@ -7649,6 +7706,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case 68560477/*Kind_HoverCallback*/: return deserializeAndCallSyncHoverCallback(vmContext, thisArray, thisLength);
         case -1180567691/*Kind_ImageCompleteCallback*/: return deserializeAndCallSyncImageCompleteCallback(vmContext, thisArray, thisLength);
         case 1906248580/*Kind_ImageErrorCallback*/: return deserializeAndCallSyncImageErrorCallback(vmContext, thisArray, thisLength);
+        case -1271670107/*Kind_IndexCallback*/: return deserializeAndCallSyncIndexCallback(vmContext, thisArray, thisLength);
+        case 372156059/*Kind_IndexerSelectedCallback*/: return deserializeAndCallSyncIndexerSelectedCallback(vmContext, thisArray, thisLength);
         case 1502213270/*Kind_InterceptionModeCallback*/: return deserializeAndCallSyncInterceptionModeCallback(vmContext, thisArray, thisLength);
         case 1852781814/*Kind_InterceptionShowCallback*/: return deserializeAndCallSyncInterceptionShowCallback(vmContext, thisArray, thisLength);
         case -464108861/*Kind_ListAttribute_onItemDragStart_event_type*/: return deserializeAndCallSyncListAttribute_onItemDragStart_event_type(vmContext, thisArray, thisLength);
@@ -7713,6 +7772,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -1992671958/*Kind_PluginErrorCallback*/: return deserializeAndCallSyncPluginErrorCallback(vmContext, thisArray, thisLength);
         case -1444325632/*Kind_PopupStateChangeCallback*/: return deserializeAndCallSyncPopupStateChangeCallback(vmContext, thisArray, thisLength);
         case 2053798608/*Kind_ReceiveCallback*/: return deserializeAndCallSyncReceiveCallback(vmContext, thisArray, thisLength);
+        case -1858515962/*Kind_RefreshingCallback*/: return deserializeAndCallSyncRefreshingCallback(vmContext, thisArray, thisLength);
         case -1213708823/*Kind_RestrictedWorker_onerror_Callback*/: return deserializeAndCallSyncRestrictedWorker_onerror_Callback(vmContext, thisArray, thisLength);
         case -2095497263/*Kind_RestrictedWorker_onexit_Callback*/: return deserializeAndCallSyncRestrictedWorker_onexit_Callback(vmContext, thisArray, thisLength);
         case 1614214490/*Kind_RestrictedWorker_onmessage_Callback*/: return deserializeAndCallSyncRestrictedWorker_onmessage_Callback(vmContext, thisArray, thisLength);

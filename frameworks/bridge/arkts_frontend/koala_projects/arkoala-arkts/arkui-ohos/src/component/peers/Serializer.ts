@@ -1195,8 +1195,23 @@ export class Serializer extends SerializerBase {
             const value_arrayValue_element : string = value_arrayValue[i]
             valueSerializer.writeString(value_arrayValue_element)
         }
-        const value_selected  = value.selected
-        valueSerializer.writeNumber(value_selected)
+        const value_value  = value.selected
+        let value_value_type : int32 = RuntimeType.UNDEFINED
+        value_value_type = runtimeType(value_value)
+        valueSerializer.writeInt8(value_value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_value_type)) {
+            const value_value_value  = value_value!
+            let value_value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_value_type = runtimeType(value_value_value)
+            if (RuntimeType.NUMBER == value_value_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_value_value_0  = value_value_value as number
+                valueSerializer.writeNumber(value_value_value_0)
+            }
+            else if (TypeChecker.isBindableNumber(value_value_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
+        }
     }
     writeAnimationOptions(value: AnimationOptions): void {
         let valueSerializer : Serializer = this
@@ -14751,7 +14766,22 @@ export class Serializer extends SerializerBase {
     writeRefreshOptions(value: RefreshOptions): void {
         let valueSerializer : Serializer = this
         const value_refreshing  = value.refreshing
-        valueSerializer.writeBoolean(value_refreshing)
+        let value_refreshing_type : int32 = RuntimeType.UNDEFINED
+        value_refreshing_type = runtimeType(value_refreshing)
+        valueSerializer.writeInt8(value_refreshing_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_refreshing_type)) {
+            const value_refreshing_value  = value_refreshing!
+            let value_refreshing_value_type : int32 = RuntimeType.UNDEFINED
+            value_refreshing_value_type = runtimeType(value_refreshing_value)
+            if (RuntimeType.BOOLEAN == value_refreshing_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_refreshing_value_0  = value_refreshing_value as boolean
+                valueSerializer.writeBoolean(value_refreshing_value_0)
+            }
+            else if (TypeChecker.isBindableBoolean(value_refreshing_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
+        }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
         value_offset_type = runtimeType(value_offset)
@@ -16176,7 +16206,16 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_index_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_index_type)) {
             const value_index_value  = value_index!
-            valueSerializer.writeNumber(value_index_value)
+            let value_index_value_type : int32 = RuntimeType.UNDEFINED
+            value_index_value_type = runtimeType(value_index_value)
+            if (RuntimeType.NUMBER == value_index_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_index_value_0  = value_index_value as number
+                valueSerializer.writeNumber(value_index_value_0)
+            }
+            else if (TypeChecker.isBindableNumber(value_index_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
         }
         const value_controller  = value.controller
         let value_controller_type : int32 = RuntimeType.UNDEFINED

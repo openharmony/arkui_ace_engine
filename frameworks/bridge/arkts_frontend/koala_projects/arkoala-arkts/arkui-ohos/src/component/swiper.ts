@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { IndicatorComponentController } from "./indicatorcomponent"
 import { EdgeEffect, Curve, PageFlipMode } from "./enums"
 import { Callback_Number_Void, Callback_Opt_Number_Void } from "./alphabetIndexer"
@@ -35,6 +35,7 @@ import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 import { LengthMetrics } from "../Graphics"
+import { SwiperOpsHandWritten } from "./../handwritten"
 export class SwiperControllerInternal {
     public static fromPtr(ptr: KPointer): SwiperController {
         const obj : SwiperController = new SwiperController()
@@ -884,7 +885,7 @@ export type OnSwiperAnimationStartCallback = (index: number, targetIndex: number
 export type OnSwiperAnimationEndCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export type OnSwiperGestureSwipeCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export interface SwiperAttribute extends CommonMethod {
-    index(value: number | undefined): this
+    index(value: number | Bindable<number> | undefined): this
     autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this
     interval(value: number | undefined): this
     indicator(value: DotIndicator | DigitIndicator | boolean | undefined | IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this
@@ -943,7 +944,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     indicatorInteractive_value?: boolean | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillScroll_value?: ContentWillScrollCallback | undefined
-    public index(value: number | undefined): this {
+    public index(value: number | Bindable<number> | undefined): this {
         return this
     }
     public autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this {
@@ -1061,12 +1062,16 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
-    public index(value: number | undefined): this {
-        if (this.checkPriority("index")) {
-            const value_casted = value as (number | undefined)
-            this.getPeer()?.indexAttribute(value_casted)
-            return this
+    public index(value: number | Bindable<number> | undefined): this {
+        if (typeof value === 'number' || typeof value === 'undefined') {
+            if (this.checkPriority("index")) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.indexAttribute(value_casted)
+                return this
+            }
         }
+        SwiperOpsHandWritten.hookSwiperAttributeIndexImpl(this.getPeer().peer.ptr,
+            (value as Bindable<number>));
         return this
     }
     public autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this {

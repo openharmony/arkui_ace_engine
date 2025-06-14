@@ -1445,6 +1445,10 @@ typedef struct ImageCompleteCallback ImageCompleteCallback;
 typedef struct Opt_ImageCompleteCallback Opt_ImageCompleteCallback;
 typedef struct ImageErrorCallback ImageErrorCallback;
 typedef struct Opt_ImageErrorCallback Opt_ImageErrorCallback;
+typedef struct IndexerSelectedCallback IndexerSelectedCallback;
+typedef struct Opt_IndexerSelectedCallback Opt_IndexerSelectedCallback;
+typedef struct IndexCallback IndexCallback;
+typedef struct Opt_IndexCallback Opt_IndexCallback;
 typedef struct InterceptionModeCallback InterceptionModeCallback;
 typedef struct Opt_InterceptionModeCallback Opt_InterceptionModeCallback;
 typedef struct InterceptionShowCallback InterceptionShowCallback;
@@ -1589,6 +1593,8 @@ typedef struct Profiler_Callback_String_Void Profiler_Callback_String_Void;
 typedef struct Opt_Profiler_Callback_String_Void Opt_Profiler_Callback_String_Void;
 typedef struct ReceiveCallback ReceiveCallback;
 typedef struct Opt_ReceiveCallback Opt_ReceiveCallback;
+typedef struct RefreshingCallback RefreshingCallback;
+typedef struct Opt_RefreshingCallback Opt_RefreshingCallback;
 typedef struct RestrictedWorker_onerror_Callback RestrictedWorker_onerror_Callback;
 typedef struct Opt_RestrictedWorker_onerror_Callback Opt_RestrictedWorker_onerror_Callback;
 typedef struct RestrictedWorker_onexit_Callback RestrictedWorker_onexit_Callback;
@@ -10801,6 +10807,24 @@ typedef struct Opt_ImageErrorCallback {
     Ark_Tag tag;
     ImageErrorCallback value;
 } Opt_ImageErrorCallback;
+typedef struct IndexerSelectedCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number index);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number index);
+} IndexerSelectedCallback;
+typedef struct Opt_IndexerSelectedCallback {
+    Ark_Tag tag;
+    IndexerSelectedCallback value;
+} Opt_IndexerSelectedCallback;
+typedef struct IndexCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number value);
+} IndexCallback;
+typedef struct Opt_IndexCallback {
+    Ark_Tag tag;
+    IndexCallback value;
+} Opt_IndexCallback;
 typedef struct InterceptionModeCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, Ark_NavigationMode mode);
@@ -11456,6 +11480,15 @@ typedef struct Opt_ReceiveCallback {
     Ark_Tag tag;
     ReceiveCallback value;
 } Opt_ReceiveCallback;
+typedef struct RefreshingCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Boolean refreshing);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Boolean refreshing);
+} RefreshingCallback;
+typedef struct Opt_RefreshingCallback {
+    Ark_Tag tag;
+    RefreshingCallback value;
+} Opt_RefreshingCallback;
 typedef struct RestrictedWorker_onerror_Callback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_ErrorEvent ev);
@@ -23544,6 +23577,27 @@ typedef struct GENERATED_ArkUILinearIndicatorModifier {
 
 // Accessors
 
+typedef struct GENERATED_ArkUIAlphabetIndexerOpsAccessor {
+    Ark_NativePointer (*registerIndexerSelectedCallback)(Ark_NativePointer node,
+                                                         const Ark_Number* index,
+                                                         const IndexerSelectedCallback* callback);
+} GENERATED_ArkUIAlphabetIndexerOpsAccessor;
+typedef struct GENERATED_ArkUIListItemOpsAccessor {
+    Ark_NativePointer (*registerSelectedCallback)(Ark_NativePointer node,
+                                                  Ark_Boolean value,
+                                                  const SelectedCallback* callback);
+} GENERATED_ArkUIListItemOpsAccessor;
+typedef struct GENERATED_ArkUIRefreshOpsAccessor {
+    Ark_NativePointer (*registerRefreshingCallback)(Ark_NativePointer node,
+                                                    Ark_Boolean value,
+                                                    const RefreshingCallback* callback);
+} GENERATED_ArkUIRefreshOpsAccessor;
+typedef struct GENERATED_ArkUISwiperOpsAccessor {
+    Ark_NativePointer (*registerIndexCallback)(Ark_NativePointer node,
+                                               const Ark_Number* value,
+                                               const IndexCallback* callback);
+} GENERATED_ArkUISwiperOpsAccessor;
+
 typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
     void (*SetClipRect)(Ark_NativePointer node,
                         Ark_Float32 x,
@@ -24478,6 +24532,9 @@ typedef struct GENERATED_ArkUITabsOpsAccessor {
     Ark_NativePointer (*registerBarBackgroundBlurStyle)(Ark_NativePointer node,
                                                         const Opt_BlurStyle* style,
                                                         const Opt_BackgroundBlurStyleOptions* options);
+    Ark_NativePointer (*registerIndexCallback)(Ark_NativePointer node,
+                                               const Ark_Number* value,
+                                               const IndexCallback* callback);
 } GENERATED_ArkUITabsOpsAccessor;
 
 typedef struct GENERATED_ArkUIUIContextImpAccessor {
@@ -27364,6 +27421,10 @@ typedef struct GENERATED_ArkUINodeModifiers {
 } GENERATED_ArkUINodeModifiers;
 
 typedef struct GENERATED_ArkUIAccessors {
+    const GENERATED_ArkUIAlphabetIndexerOpsAccessor* (*getAlphabetIndexerOpsAccessor)();
+    const GENERATED_ArkUIListItemOpsAccessor* (*getListItemOpsAccessor)();
+    const GENERATED_ArkUIRefreshOpsAccessor* (*getRefreshOpsAccessor)();
+    const GENERATED_ArkUISwiperOpsAccessor* (*getSwiperOpsAccessor)();
     const GENERATED_ArkUIAnimationExtenderAccessor* (*getAnimationExtenderAccessor)();
     const GENERATED_ArkUIBindSheetOpsAccessor* (*getBindSheetOpsAccessor)();
     const GENERATED_ArkUIBaseContextAccessor* (*getBaseContextAccessor)();
