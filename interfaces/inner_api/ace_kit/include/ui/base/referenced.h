@@ -457,6 +457,17 @@ public:
         return refCounter_ < other.refCounter_;
     }
 
+    // Hash function for WeakPtr to be used in unordered containers like std::unordered_map or std::unordered_set.
+    struct Hash {
+        std::size_t operator()(const WeakPtr& k) const
+        {
+            using std::hash;
+            using std::size_t;
+
+            return hash<void*>()(k.refCounter_);
+        }
+    };
+
 private:
     // Construct instance by raw pointer.
     explicit WeakPtr(T* rawPtr) : WeakPtr(rawPtr, rawPtr != nullptr ? rawPtr->refCounter_ : nullptr) {}
