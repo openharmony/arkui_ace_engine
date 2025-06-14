@@ -347,6 +347,28 @@ HWTEST_F(GridScrollLayoutTestNg, GetTotalHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTotalHeightWithOptions
+ * @tc.desc: Test total height of grid with different irregular heights.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GetTotalHeightWithOptions, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0, 2, 4 };
+    model.SetLayoutOptions(option);
+    CreateFixedHeightItems(1, 100);
+    CreateFixedHeightItems(1, 50);
+    CreateFixedHeightItems(1, 80);
+    CreateFixedHeightItems(1, 50);
+    CreateFixedHeightItems(1, 30);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetTotalHeight(), 310);
+}
+
+/**
  * @tc.name: GetAverageHeight001
  * @tc.desc: Test GetAverageHeight Function.
  * @tc.type: FUNC
