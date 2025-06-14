@@ -26,6 +26,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -2426,5 +2427,22 @@ void SearchModelNG::SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAp
     auto pattern = frameNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardAppearanceConfig(config);
+}
+
+void SearchModelNG::SetUserMargin()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetUserMargin(frameNode);
+}
+
+void SearchModelNG::SetUserMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& marginProp = layoutProperty->GetMarginProperty();
+    layoutProperty->ResetUserMargin();
+    CHECK_NULL_VOID(marginProp);
+    layoutProperty->UpdateUserMargin(*marginProp);
 }
 } // namespace OHOS::Ace::NG
