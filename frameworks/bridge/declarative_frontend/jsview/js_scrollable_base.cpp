@@ -74,7 +74,6 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
     JSClass<JSScrollableBase>::StaticMethod("scrollBarMargin", &JSScrollableBase::SetScrollBarMargin);
     JSClass<JSScrollableBase>::StaticMethod("backToTop", &JSScrollableBase::JSBackToTop);
-    JSClass<JSScrollableBase>::StaticMethod("onWillStopDragging", &JSScrollableBase::JSOnWillStopDragging);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -143,24 +142,6 @@ void JSScrollableBase::JSBackToTop(const JSCallbackInfo& info)
         NG::ScrollableModelNG::SetBackToTop(info[0]->ToBoolean());
     } else {
         NG::ScrollableModelNG::ResetBackToTop();
-    }
-}
-
-void JSScrollableBase::JSOnWillStopDragging(const JSCallbackInfo& args)
-{
-    if (args.Length() <= 0) {
-        return;
-    }
-    if (args[0]->IsFunction()) {
-        auto onWillStopDragging = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const CalcDimension& velocity) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(velocity.ConvertToVp());
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
-        NG::ScrollableModelNG::SetOnWillStopDragging(std::move(onWillStopDragging));
-    } else {
-        NG::ScrollableModelNG::SetOnWillStopDragging(nullptr);
     }
 }
 } // namespace OHOS::Ace::Framework

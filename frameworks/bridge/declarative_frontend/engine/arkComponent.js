@@ -5632,10 +5632,6 @@ class UIScrollableCommonEvent extends UICommonEvent {
     this._onDidScrollEvent = callback;
     getUINativeModule().frameNode.setOnDidScroll(this._nodePtr, callback, this._instanceId);
   }
-  setOnWillStopDragging(callback) {
-    this._onWillStopDraggingEvent = callback;
-    getUINativeModule().frameNode.setOnWillStopDragging(this._nodePtr, callback, this._instanceId);
-  }
 }
 
 class UIListEvent extends UIScrollableCommonEvent {
@@ -7040,6 +7036,10 @@ class ArkScrollable extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, value);
     return this;
   }
+  onWillStopDragging(value) {
+    modifierWithKey(this._modifiersWithKeys, OnWillStopDraggingModifier.identity, OnWillStopDraggingModifier, value);
+    return this;
+  }
 }
 
 /// <reference path='./import.ts' />
@@ -7816,6 +7816,10 @@ if (globalThis.Grid !== undefined) {
   globalThis.Grid.onDidScroll = function (value) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().grid.setOnDidScroll(nodePtr, value);
+  };
+  globalThis.Grid.onWillStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
   };
 }
 
@@ -21312,6 +21316,10 @@ if (globalThis.Scroll !== undefined) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().scrollable.setOnReachEnd(nodePtr, value);
   };
+  globalThis.Scroll.onWillStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+  };
 }
 
 /// <reference path='./import.ts' />
@@ -34184,6 +34192,10 @@ if (globalThis.List !== undefined) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().list.setOnDidScroll(nodePtr, value);
   };
+  globalThis.List.onWillStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+  };
 }
 
 /// <reference path='./import.ts' />
@@ -37188,6 +37200,10 @@ if (globalThis.WaterFlow !== undefined) {
   globalThis.WaterFlow.onDidScroll = function (value) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().waterFlow.setOnDidScroll(nodePtr, value);
+  };
+  globalThis.WaterFlow.onWillStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
   };
 }
 
