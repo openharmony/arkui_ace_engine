@@ -52,6 +52,7 @@ public:
 private:
     void InitPanAction();
     void InitLongPressAction();
+    const GestureEventFunc GetSequenceOnActionCancel();
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
