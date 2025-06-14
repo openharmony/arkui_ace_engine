@@ -1239,6 +1239,74 @@ void ViewAbstractModelStatic::SetFocusScopePriority(
     focusHub->SetFocusScopePriority(focusScopeId, proirity);
 }
 
+void ViewAbstractModelStatic::SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale)
+{
+    if (grayScale.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontGrayScale, grayScale.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontGrayScale, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend)
+{
+    if (colorBlend.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontColorBlend, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching)
+{
+    if (useShadowBatching.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseShadowBatching, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect)
+{
+    if (useEffect.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, useEffect.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetFreeze(FrameNode* frameNode, std::optional<bool> freeze)
+{
+    if (freeze.has_value()) {
+        ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze.value());
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_RENDER_CONTEXT(target, Freeze);
+    }
+}
+
+void ViewAbstractModelStatic::SetClickEffectLevel(FrameNode* frameNode,
+    const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue)
+{
+    if (level.has_value() || scaleValue.has_value()) {
+        ClickEffectInfo clickEffectInfo;
+        if (level.has_value()) {
+            clickEffectInfo.level = level.value();
+        }
+        if (scaleValue.has_value()) {
+            clickEffectInfo.scaleNumber = scaleValue.value();
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, ClickEffectLevel, frameNode);
+    }
+}
+
 void ViewAbstractModelStatic::SetBlendApplyType(
     FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
 {

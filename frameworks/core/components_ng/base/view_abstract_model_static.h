@@ -225,6 +225,13 @@ public:
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
     static void SetFocusScopePriority(
         FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority);
+    static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
+    static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
+    static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);
+    static void SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect);
+    static void SetFreeze(FrameNode* frameNode, std::optional<bool> freeze);
+    static void SetClickEffectLevel(FrameNode* frameNode,
+        const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue);
     static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
