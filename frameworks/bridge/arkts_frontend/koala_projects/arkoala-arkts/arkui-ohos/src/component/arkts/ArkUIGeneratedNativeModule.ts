@@ -4574,6 +4574,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _VisualEffect_backgroundColorBlender(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
+    native static _NavigationOps_registerNavBarWidthCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _NavExtender_setUpdateStackCallback(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavExtender_syncStack(peer: KPointer): void
@@ -4625,6 +4627,12 @@ export class ArkUIGeneratedNativeModule {
     native static _NavExtender_popToIndex(pathStack: KPointer, index: int32, animated: KInt): void
     @ani.unsafe.Quick
     native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): number
+    @ani.unsafe.Direct
+    native static _SideBarContainerOps_registerShowSideBarCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _SideBarContainerOps_registerSideBarWidthCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _StepperOps_registerStepperIndexCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void
     @ani.unsafe.Quick

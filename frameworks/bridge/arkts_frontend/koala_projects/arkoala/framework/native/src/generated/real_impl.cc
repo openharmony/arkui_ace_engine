@@ -14180,6 +14180,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // VisualEffectAccessor
+    namespace NavigationOpsAccessor {
+    Ark_NativePointer RegisterNavBarWidthCallbackImpl(Ark_NativePointer node,
+                                                      const Ark_Length* value,
+                                                      const NavBarWidthCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterNavBarWidthCallback(frameNode, convValue);
+        return {};
+    }
+    } // NavigationOpsAccessor
     namespace NavExtenderAccessor {
     void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                     const NavExtender_OnUpdateStack* callback)
@@ -14357,6 +14370,43 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // SearchOpsAccessor
+    namespace SideBarContainerOpsAccessor {
+    Ark_NativePointer RegisterShowSideBarCallbackImpl(Ark_NativePointer node,
+                                                      Ark_Boolean value,
+                                                      const ShowSideBarCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterShowSideBarCallback(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer RegisterSideBarWidthCallbackImpl(Ark_NativePointer node,
+                                                       const Ark_Number* value,
+                                                       const SideBarWidthCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSideBarWidthCallback(frameNode, convValue);
+        return {};
+    }
+    } // SideBarContainerOpsAccessor
+    namespace StepperOpsAccessor {
+    Ark_NativePointer RegisterStepperIndexCallbackImpl(Ark_NativePointer node,
+                                                       const Ark_Number* value,
+                                                       const StepperIndexCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterStepperIndexCallback(frameNode, convValue);
+        return {};
+    }
+    } // StepperOpsAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
                                 const Ark_String* text)
@@ -21698,6 +21748,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct VisualEffectPeer {
         virtual ~VisualEffectPeer() = default;
     };
+    const GENERATED_ArkUINavigationOpsAccessor* GetNavigationOpsAccessor()
+    {
+        static const GENERATED_ArkUINavigationOpsAccessor NavigationOpsAccessorImpl {
+            NavigationOpsAccessor::RegisterNavBarWidthCallbackImpl,
+        };
+        return &NavigationOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
     {
         static const GENERATED_ArkUINavExtenderAccessor NavExtenderAccessorImpl {
@@ -21734,6 +21792,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchOpsAccessor::RegisterSearchValueCallbackImpl,
         };
         return &SearchOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUISideBarContainerOpsAccessor* GetSideBarContainerOpsAccessor()
+    {
+        static const GENERATED_ArkUISideBarContainerOpsAccessor SideBarContainerOpsAccessorImpl {
+            SideBarContainerOpsAccessor::RegisterShowSideBarCallbackImpl,
+            SideBarContainerOpsAccessor::RegisterSideBarWidthCallbackImpl,
+        };
+        return &SideBarContainerOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIStepperOpsAccessor* GetStepperOpsAccessor()
+    {
+        static const GENERATED_ArkUIStepperOpsAccessor StepperOpsAccessorImpl {
+            StepperOpsAccessor::RegisterStepperIndexCallbackImpl,
+        };
+        return &StepperOpsAccessorImpl;
     }
 
     const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()
@@ -24647,8 +24722,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGridItemOpsAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
+            GetNavigationOpsAccessor,
             GetNavExtenderAccessor,
             GetSearchOpsAccessor,
+            GetSideBarContainerOpsAccessor,
+            GetStepperOpsAccessor,
             GetEventEmulatorAccessor,
             GetTextFieldOpsAccessor,
             GetActionSheetAccessor,

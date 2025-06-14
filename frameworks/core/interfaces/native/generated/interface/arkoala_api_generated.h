@@ -1469,6 +1469,8 @@ typedef struct MenuCallback MenuCallback;
 typedef struct Opt_MenuCallback Opt_MenuCallback;
 typedef struct MenuOnAppearCallback MenuOnAppearCallback;
 typedef struct Opt_MenuOnAppearCallback Opt_MenuOnAppearCallback;
+typedef struct NavBarWidthCallback NavBarWidthCallback;
+typedef struct Opt_NavBarWidthCallback Opt_NavBarWidthCallback;
 typedef struct NavDestinationTransitionDelegate NavDestinationTransitionDelegate;
 typedef struct Opt_NavDestinationTransitionDelegate Opt_NavDestinationTransitionDelegate;
 typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
@@ -1613,10 +1615,16 @@ typedef struct ShouldBuiltInRecognizerParallelWithCallback ShouldBuiltInRecogniz
 typedef struct Opt_ShouldBuiltInRecognizerParallelWithCallback Opt_ShouldBuiltInRecognizerParallelWithCallback;
 typedef struct ShowCallback ShowCallback;
 typedef struct Opt_ShowCallback Opt_ShowCallback;
+typedef struct ShowSideBarCallback ShowSideBarCallback;
+typedef struct Opt_ShowSideBarCallback Opt_ShowSideBarCallback;
+typedef struct SideBarWidthCallback SideBarWidthCallback;
+typedef struct Opt_SideBarWidthCallback Opt_SideBarWidthCallback;
 typedef struct SizeChangeCallback SizeChangeCallback;
 typedef struct Opt_SizeChangeCallback Opt_SizeChangeCallback;
 typedef struct SliderTriggerChangeCallback SliderTriggerChangeCallback;
 typedef struct Opt_SliderTriggerChangeCallback Opt_SliderTriggerChangeCallback;
+typedef struct StepperIndexCallback StepperIndexCallback;
+typedef struct Opt_StepperIndexCallback Opt_StepperIndexCallback;
 typedef struct StyledStringMarshallCallback StyledStringMarshallCallback;
 typedef struct Opt_StyledStringMarshallCallback Opt_StyledStringMarshallCallback;
 typedef struct StyledStringUnmarshallCallback StyledStringUnmarshallCallback;
@@ -10883,6 +10891,15 @@ typedef struct Opt_MenuOnAppearCallback {
     Ark_Tag tag;
     MenuOnAppearCallback value;
 } Opt_MenuOnAppearCallback;
+typedef struct NavBarWidthCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Length navBarWidth);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Length navBarWidth);
+} NavBarWidthCallback;
+typedef struct Opt_NavBarWidthCallback {
+    Ark_Tag tag;
+    NavBarWidthCallback value;
+} Opt_NavBarWidthCallback;
 typedef struct NavDestinationTransitionDelegate {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, Ark_NavigationOperation operation, const Ark_Boolean isEnter, const Callback_Opt_Array_NavDestinationTransition_Void continuation);
@@ -11529,6 +11546,24 @@ typedef struct Opt_ShowCallback {
     Ark_Tag tag;
     ShowCallback value;
 } Opt_ShowCallback;
+typedef struct ShowSideBarCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Boolean showSideBar);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Boolean showSideBar);
+} ShowSideBarCallback;
+typedef struct Opt_ShowSideBarCallback {
+    Ark_Tag tag;
+    ShowSideBarCallback value;
+} Opt_ShowSideBarCallback;
+typedef struct SideBarWidthCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number sideBarWidth);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number sideBarWidth);
+} SideBarWidthCallback;
+typedef struct Opt_SideBarWidthCallback {
+    Ark_Tag tag;
+    SideBarWidthCallback value;
+} Opt_SideBarWidthCallback;
 typedef struct SizeChangeCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_SizeOptions oldValue, const Ark_SizeOptions newValue);
@@ -11547,6 +11582,15 @@ typedef struct Opt_SliderTriggerChangeCallback {
     Ark_Tag tag;
     SliderTriggerChangeCallback value;
 } Opt_SliderTriggerChangeCallback;
+typedef struct StepperIndexCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number stepperIndex);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number stepperIndex);
+} StepperIndexCallback;
+typedef struct Opt_StepperIndexCallback {
+    Ark_Tag tag;
+    StepperIndexCallback value;
+} Opt_StepperIndexCallback;
 typedef struct StyledStringMarshallCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_UserDataSpan marshallableVal, const Callback_Buffer_Void continuation);
@@ -24380,6 +24424,12 @@ typedef struct GENERATED_ArkUIVisualEffectAccessor {
                                                const Ark_BrightnessBlender* blender);
 } GENERATED_ArkUIVisualEffectAccessor;
 
+typedef struct GENERATED_ArkUINavigationOpsAccessor {
+    Ark_NativePointer (*registerNavBarWidthCallback)(Ark_NativePointer node,
+                                                     const Ark_Length* value,
+                                                     const NavBarWidthCallback* callback);
+} GENERATED_ArkUINavigationOpsAccessor;
+
 typedef struct GENERATED_ArkUINavExtenderAccessor {
     void (*setUpdateStackCallback)(Ark_NavPathStack peer,
                                    const NavExtender_OnUpdateStack* callback);
@@ -24444,6 +24494,21 @@ typedef struct GENERATED_ArkUISearchOpsAccessor {
                                                      const Ark_String* value,
                                                      const SearchValueCallback* callback);
 } GENERATED_ArkUISearchOpsAccessor;
+
+typedef struct GENERATED_ArkUISideBarContainerOpsAccessor {
+    Ark_NativePointer (*registerShowSideBarCallback)(Ark_NativePointer node,
+                                                     Ark_Boolean value,
+                                                     const ShowSideBarCallback* callback);
+    Ark_NativePointer (*registerSideBarWidthCallback)(Ark_NativePointer node,
+                                                      const Ark_Number* value,
+                                                      const SideBarWidthCallback* callback);
+} GENERATED_ArkUISideBarContainerOpsAccessor;
+
+typedef struct GENERATED_ArkUIStepperOpsAccessor {
+    Ark_NativePointer (*registerStepperIndexCallback)(Ark_NativePointer node,
+                                                      const Ark_Number* value,
+                                                      const StepperIndexCallback* callback);
+} GENERATED_ArkUIStepperOpsAccessor;
 
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
     void (*emitClickEvent)(Ark_NativePointer node,
@@ -27195,8 +27260,11 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
+    const GENERATED_ArkUINavigationOpsAccessor* (*getNavigationOpsAccessor)();
     const GENERATED_ArkUINavExtenderAccessor* (*getNavExtenderAccessor)();
     const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
+    const GENERATED_ArkUISideBarContainerOpsAccessor* (*getSideBarContainerOpsAccessor)();
+    const GENERATED_ArkUIStepperOpsAccessor* (*getStepperOpsAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();
     const GENERATED_ArkUITextFieldOpsAccessor* (*getTextFieldOpsAccessor)();
     const GENERATED_ArkUIActionSheetAccessor* (*getActionSheetAccessor)();

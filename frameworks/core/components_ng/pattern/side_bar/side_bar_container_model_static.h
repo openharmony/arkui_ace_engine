@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SIDE_BAR_CONTAINER_MODEL_STATIC_H
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_event_hub.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SideBarContainerModelStatic {
@@ -48,6 +49,7 @@ public:
     static void SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const bool)>&& onChangeEvent);
+    static void SetOnSideBarWidthChangeEvent(FrameNode* frameNode, OnSideBarWidthChangeEvent&& event);
     static void ResetControlButtonLeft(FrameNode* frameNode);
     static void ResetControlButtonIconInfo(FrameNode* frameNode);
 private:

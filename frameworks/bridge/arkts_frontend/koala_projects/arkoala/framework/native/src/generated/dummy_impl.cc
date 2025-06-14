@@ -28409,6 +28409,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return (Ark_VisualEffect) 300;
     }
     } // VisualEffectAccessor
+    namespace NavigationOpsAccessor {
+    Ark_NativePointer RegisterNavBarWidthCallbackImpl(Ark_NativePointer node,
+                                                      const Ark_Length* value,
+                                                      const NavBarWidthCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerNavBarWidthCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // NavigationOpsAccessor
     namespace NavExtenderAccessor {
     void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                     const NavExtender_OnUpdateStack* callback)
@@ -28733,6 +28752,61 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // SearchOpsAccessor
+    namespace SideBarContainerOpsAccessor {
+    Ark_NativePointer RegisterShowSideBarCallbackImpl(Ark_NativePointer node,
+                                                      Ark_Boolean value,
+                                                      const ShowSideBarCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerShowSideBarCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer RegisterSideBarWidthCallbackImpl(Ark_NativePointer node,
+                                                       const Ark_Number* value,
+                                                       const SideBarWidthCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerSideBarWidthCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // SideBarContainerOpsAccessor
+    namespace StepperOpsAccessor {
+    Ark_NativePointer RegisterStepperIndexCallbackImpl(Ark_NativePointer node,
+                                                       const Ark_Number* value,
+                                                       const StepperIndexCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerStepperIndexCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // StepperOpsAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
                                 const Ark_String* text)

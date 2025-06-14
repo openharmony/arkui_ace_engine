@@ -27,7 +27,7 @@ import { AsyncCallback_image_PixelMap_Void, ReceiveCallback } from "./../arkui-e
 import { PixelMap } from "#external"
 import { ButtonTriggerClickCallback } from "./../button"
 import { Callback_Any_Void, Callback_FormCallbackInfo_Void, FormCallbackInfo, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg } from "./../formComponent"
-import { Area, ResourceStr, SizeOptions, VoidCallback } from "./../units"
+import { Area, Length, ResourceStr, SizeOptions, VoidCallback } from "./../units"
 import { Callback_Array_Number_Void } from "./../patternLock"
 import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_Buffer_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_NavDestinationTransition_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_StyledStringMarshallingValue_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void } from "./../generatorSynthetic"
 import { Callback_Boolean, Callback_NavDestinationActiveReason_Void, NavDestinationActiveReason, Callback_NavDestinationContext_Void, NavDestinationContext, Callback_Object_Void, NavDestinationTransition, NavDestinationTransitionDelegate } from "./../navDestination"
@@ -94,6 +94,9 @@ import { SaveButtonCallback, SaveButtonOnClickResult } from "./../saveButton"
 import { SearchValueCallback } from "./../searchops"
 import { TextFieldValueCallback } from "./../textfieldops"
 import { SelectedCallback } from "./../griditemops"
+import { ShowSideBarCallback, SideBarWidthCallback } from "./../sidebarcontainerops"
+import { NavBarWidthCallback } from "./../navigationops"
+import { StepperIndexCallback } from "./../stepperops"
 import { TypeChecker } from "#components"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 import { Size, DrawContext } from "../../Graphics"
@@ -1733,6 +1736,12 @@ export function deserializeAndCallMenuOnAppearCallback(thisDeserializer: Deseria
     let end : number = (thisDeserializer.readNumber() as number)
     _call(start, end)
 }
+export function deserializeAndCallNavBarWidthCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as NavBarWidthCallback)
+    let navBarWidth : Length = (thisDeserializer.readLength() as Length)
+    _call(navBarWidth)
+}
 export function deserializeAndCallNavDestinationTransitionDelegate(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as NavDestinationTransitionDelegate)
@@ -2269,6 +2278,18 @@ export function deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(th
     const _callResult  = _call(current, others)
     _continuation(_callResult)
 }
+export function deserializeAndCallShowSideBarCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ShowSideBarCallback)
+    let showSideBar : boolean = thisDeserializer.readBoolean()
+    _call(showSideBar)
+}
+export function deserializeAndCallSideBarWidthCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as SideBarWidthCallback)
+    let sideBarWidth : number = (thisDeserializer.readNumber() as number)
+    _call(sideBarWidth)
+}
 export function deserializeAndCallSizeChangeCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as SizeChangeCallback)
@@ -2282,6 +2303,12 @@ export function deserializeAndCallSliderTriggerChangeCallback(thisDeserializer: 
     let value : number = (thisDeserializer.readNumber() as number)
     let mode : SliderChangeMode = TypeChecker.SliderChangeMode_FromNumeric(thisDeserializer.readInt32())
     _call(value, mode)
+}
+export function deserializeAndCallStepperIndexCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as StepperIndexCallback)
+    let stepperIndex : number = (thisDeserializer.readNumber() as number)
+    _call(stepperIndex)
 }
 export function deserializeAndCallStyledStringMarshallCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2763,6 +2790,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -957598032/*CallbackKind.Kind_LocationButtonCallback*/: return deserializeAndCallLocationButtonCallback(thisDeserializer);
         case 810927048/*CallbackKind.Kind_MenuCallback*/: return deserializeAndCallMenuCallback(thisDeserializer);
         case -614475458/*CallbackKind.Kind_MenuOnAppearCallback*/: return deserializeAndCallMenuOnAppearCallback(thisDeserializer);
+        case -324352939/*CallbackKind.Kind_NavBarWidthCallback*/: return deserializeAndCallNavBarWidthCallback(thisDeserializer);
         case -1066063065/*CallbackKind.Kind_NavDestinationTransitionDelegate*/: return deserializeAndCallNavDestinationTransitionDelegate(thisDeserializer);
         case -588228933/*CallbackKind.Kind_NavExtender_OnUpdateStack*/: return deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer);
         case -1817630617/*CallbackKind.Kind_NodeContainer_AboutToResizeCallback*/: return deserializeAndCallNodeContainer_AboutToResizeCallback(thisDeserializer);
@@ -2832,8 +2860,11 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -1480175598/*CallbackKind.Kind_SelectedCallback*/: return deserializeAndCallSelectedCallback(thisDeserializer);
         case -250780276/*CallbackKind.Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer);
         case 63936248/*CallbackKind.Kind_ShowCallback*/: return deserializeAndCallShowCallback(thisDeserializer);
+        case 2113738450/*CallbackKind.Kind_ShowSideBarCallback*/: return deserializeAndCallShowSideBarCallback(thisDeserializer);
+        case 1771687607/*CallbackKind.Kind_SideBarWidthCallback*/: return deserializeAndCallSideBarWidthCallback(thisDeserializer);
         case -1716637992/*CallbackKind.Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisDeserializer);
         case 711649376/*CallbackKind.Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisDeserializer);
+        case 2068688176/*CallbackKind.Kind_StepperIndexCallback*/: return deserializeAndCallStepperIndexCallback(thisDeserializer);
         case 1095217433/*CallbackKind.Kind_StyledStringMarshallCallback*/: return deserializeAndCallStyledStringMarshallCallback(thisDeserializer);
         case 1359717794/*CallbackKind.Kind_StyledStringUnmarshallCallback*/: return deserializeAndCallStyledStringUnmarshallCallback(thisDeserializer);
         case -712186065/*CallbackKind.Kind_SubmitCallback*/: return deserializeAndCallSubmitCallback(thisDeserializer);

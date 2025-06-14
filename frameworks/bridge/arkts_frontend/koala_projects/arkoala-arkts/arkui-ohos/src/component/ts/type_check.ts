@@ -138,7 +138,7 @@ import { GaugeOptions, GaugeIndicatorOptions, GaugeShadowOptions, Tuple_Union_Re
 import { GridColColumnOption, GridColOptions } from "./../gridCol"
 import { ImageLoadResult } from "./../imageSpan"
 import { LineOptions, ShapePoint } from "./../line"
-import { StepperOptionalIndex } from "./../stepper"
+import { StepperOptions } from "./../stepper"
 import { MarqueeOptions } from "./../marquee"
 import { PathOptions } from "./../path"
 import { PluginComponentTemplate, PluginErrorData, PluginComponentOptions } from "./../pluginComponent"
