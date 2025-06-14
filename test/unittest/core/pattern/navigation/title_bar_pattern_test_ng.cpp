@@ -1687,4 +1687,152 @@ HWTEST_F(TitleBarPatternTestNg, GetFontSize003, TestSize.Level1)
     EXPECT_EQ(fontSize.Value(), 16.0f);
     TitleBarPatternTestNg::TearDownTestSuite();
 }
+
+/**
+ * @tc.name: titleBarLayoutAlgoritm::LayoutTitle, test navBar title offset
+ * @tc.desc: branch. if(GetTitleModeValue() != FREE) true
+ *           branch. if (isCustom) true
+ *           check navBar title Full mode title's offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestNg, TitleBarLayoutTitle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TitleBar adn title node
+     */
+    MockPipelineContext::SetUp();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    titleBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FULL;
+    titleBarPattern->titleMode_ = NavigationTitleMode::FULL;
+
+    auto mainTitleNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->SetTitle(mainTitleNode);
+    titleBarNode->AddChild(mainTitleNode);
+    auto titleProp = mainTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    
+    auto geo = titleBarNode->GetGeometryNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(titleBarNode, geo, titleBarLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto childWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(mainTitleNode, mainTitleNode->GetGeometryNode(), titleProp);
+    ASSERT_NE(childWrapper, nullptr);
+    layoutWrapper->AppendChild(childWrapper);
+    
+    auto layoutAlgorithm = AceType::DynamicCast<TitleBarLayoutAlgorithm>(titleBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    
+    auto navBar = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBar, nullptr);
+    navBar->propPrevTitleIsCustom_ = true;
+    titleBarNode->parent_ = navBar;
+    
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    layoutAlgorithm->menuOccupiedHeight_ = 100.0f;
+    layoutAlgorithm->LayoutTitle(AceType::RawPtr(layoutWrapper), titleBarNode, titleBarLayoutProperty, 100);
+    
+    /**
+     * @tc.steps: step2. check geometryNode frameOffset is correct?
+     */
+    auto titleGeo = mainTitleNode->GetGeometryNode();
+    EXPECT_EQ(layoutAlgorithm->menuOccupiedHeight_, 100.0f);
+    EXPECT_EQ(titleGeo->GetMarginFrameOffset().GetY(), layoutAlgorithm->menuOccupiedHeight_);
+    
+    /**
+     * @tc.steps: step3. test Free mode, title offse.
+     */
+    titleBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    titleBarPattern->titleMode_ = NavigationTitleMode::FREE;
+    layoutAlgorithm->LayoutTitle(AceType::RawPtr(layoutWrapper), titleBarNode, titleBarLayoutProperty, 100);
+    EXPECT_EQ(layoutAlgorithm->menuOccupiedHeight_, 100.0f);
+    EXPECT_EQ(titleGeo->GetMarginFrameOffset().GetY(), layoutAlgorithm->menuOccupiedHeight_);
+    
+    /**
+     * @tc.steps: step4. test apiVersion 9, and FULL mode. offsetY is not menuOccupieHeight_
+     */
+    titleBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FULL;
+    titleBarPattern->titleMode_ = NavigationTitleMode::FULL;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_NINE);
+    layoutAlgorithm->doubleLineTitleBarHeight_ = 360;
+    layoutAlgorithm->LayoutTitle(AceType::RawPtr(layoutWrapper), titleBarNode, titleBarLayoutProperty, 100);
+    EXPECT_NE(titleGeo->GetMarginFrameOffset().GetY(), layoutAlgorithm->menuOccupiedHeight_);
+}
+
+/**
+ * @tc.name: titleBarLayoutAlgoritm::LayoutTitle, test navdestination title offset
+ * @tc.desc: branch. if(!NearZero(sub)) true
+ *           branch. if (isCustom) true
+ *           check navBar title Full mode title's offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestNg, TitleBarLayoutTitle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TitleBar adn title node
+     */
+    MockPipelineContext::SetUp();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    titleBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FULL;
+    titleBarPattern->titleMode_ = NavigationTitleMode::FULL;
+
+    auto mainTitleNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->SetTitle(mainTitleNode);
+    titleBarNode->AddChild(mainTitleNode);
+    auto titleProp = mainTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    auto navDes = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDes, nullptr);
+    titleBarNode->parent_ = navDes;
+    
+    auto geo = titleBarNode->GetGeometryNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(titleBarNode, geo, titleBarLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto childWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(mainTitleNode, mainTitleNode->GetGeometryNode(), titleProp);
+    ASSERT_NE(childWrapper, nullptr);
+    layoutWrapper->AppendChild(childWrapper);
+    
+    auto layoutAlgorithm = AceType::DynamicCast<TitleBarLayoutAlgorithm>(titleBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    
+    auto navBar = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBar, nullptr);
+    navBar->propPrevTitleIsCustom_ = false;
+    
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto titleGeo = mainTitleNode->GetGeometryNode();
+    
+    SizeF mSize = SizeF(500, 100);
+    titleGeo->SetFrameSize(mSize);
+    layoutAlgorithm->menuOccupiedHeight_ = 100.0f;
+    layoutAlgorithm->singleLineTitleHeight_ = 200.0f;
+    layoutAlgorithm->LayoutTitle(AceType::RawPtr(layoutWrapper), titleBarNode, titleBarLayoutProperty, 0);
+    
+    /**
+     * @tc.steps: step2. check geometryNode frameOffset is Center  (200 - 100) / 2;
+     */
+    EXPECT_EQ(titleGeo->GetMarginFrameOffset().GetY(), 50);
+}
 } // namespace OHOS::Ace::NG
