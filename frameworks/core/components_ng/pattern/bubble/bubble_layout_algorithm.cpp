@@ -283,6 +283,30 @@ BubbleLayoutAlgorithm::BubbleLayoutAlgorithm(int32_t id, const std::string& tag,
         Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 }
 
+void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bool showInSubWindow)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto bubbleNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(bubbleNode);
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.empty()) {
+        return;
+    }
+    auto child = children.front();
+    CHECK_NULL_VOID(child);
+    auto childProp = child->GetLayoutProperty();
+    CHECK_NULL_VOID(childProp);
+    auto maxSize = GetPopupMaxWidthAndHeight(showInSubWindow, bubbleNode);
+    float popupMaxWidth = maxSize.Width();
+    float popupMaxHeight = maxSize.Height();
+    if (useCustom_) {
+        childProp->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
+    } else if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
+        childProp->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    }
+}
+
 void BubbleLayoutAlgorithm::FitAvailableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow)
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
@@ -341,6 +365,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
     useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
     isTips_ = bubbleLayoutProperty->GetIsTips().value_or(false);
+    UpdateBubbleMaxSize(layoutWrapper, showInSubWindow);
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);

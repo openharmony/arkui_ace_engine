@@ -234,6 +234,7 @@ private:
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void UpdateClipOffset(const RefPtr<FrameNode>& frameNode);
+    void UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
     std::string ClipBubbleWithPath();
     float GetArrowOffset(const Placement& placement);
