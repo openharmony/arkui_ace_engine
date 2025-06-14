@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -24,51 +24,50 @@ namespace MenuItemGroupModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = MenuItemGroupView::CreateFrameNode(id);
+    auto frameNode = MenuItemGroupViewStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
-    return nullptr;
 }
 } // MenuItemGroupModifier
 namespace MenuItemGroupInterfaceModifier {
 void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_MenuItemGroupOptions* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto arkOptions = Converter::OptConvert<Ark_MenuItemGroupOptions>(*value);
-    // CHECK_NULL_VOID(arkOptions);
-    // Converter::VisitUnion(arkOptions.value().header,
-    //     [frameNode, node](const Ark_ResourceStr& value) {
-    //         auto valueString = Converter::OptConvert<std::string>(value);
-    //         MenuItemGroupView::SetHeader(frameNode, valueString);
-    //     },
-    //     [frameNode, node](const CustomNodeBuilder& value) {
-    //         CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-    //             auto builder = [uiNode]() -> RefPtr<UINode> {
-    //                 return uiNode;
-    //             };
-    //             MenuItemGroupView::SetHeader(frameNode, std::move(builder));
-    //             }, node);
-    //     },
-    //     []() {}
-    // );
-    // Converter::VisitUnion(arkOptions.value().footer,
-    //     [frameNode, node](const Ark_ResourceStr& value) {
-    //         auto valueString = Converter::OptConvert<std::string>(value);
-    //         MenuItemGroupView::SetFooter(frameNode, valueString);
-    //     },
-    //     [frameNode, node](const CustomNodeBuilder& value) {
-    //         CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-    //             auto builder = [uiNode]() -> RefPtr<UINode> {
-    //                 return uiNode;
-    //             };
-    //             MenuItemGroupView::SetFooter(frameNode, std::move(builder));
-    //             }, node);
-    //     },
-    //     []() {}
-    // );
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto arkOptions = Converter::OptConvert<Ark_MenuItemGroupOptions>(*value);
+    CHECK_NULL_VOID(arkOptions);
+    Converter::VisitUnion(arkOptions.value().header,
+        [frameNode, node](const Ark_ResourceStr& value) {
+            auto valueString = Converter::OptConvert<std::string>(value);
+            MenuItemGroupViewStatic::SetHeader(frameNode, valueString);
+        },
+        [frameNode, node](const CustomNodeBuilder& value) {
+            CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                auto builder = [uiNode]() -> RefPtr<UINode> {
+                    return uiNode;
+                };
+                MenuItemGroupViewStatic::SetHeader(frameNode, std::move(builder));
+                }, node);
+        },
+        []() {}
+    );
+    Converter::VisitUnion(arkOptions.value().footer,
+        [frameNode, node](const Ark_ResourceStr& value) {
+            auto valueString = Converter::OptConvert<std::string>(value);
+            MenuItemGroupViewStatic::SetFooter(frameNode, valueString);
+        },
+        [frameNode, node](const CustomNodeBuilder& value) {
+            CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                auto builder = [uiNode]() -> RefPtr<UINode> {
+                    return uiNode;
+                };
+                MenuItemGroupViewStatic::SetFooter(frameNode, std::move(builder));
+                }, node);
+        },
+        []() {}
+    );
 }
 } // MenuItemGroupInterfaceModifier
 const GENERATED_ArkUIMenuItemGroupModifier* GetMenuItemGroupModifier()

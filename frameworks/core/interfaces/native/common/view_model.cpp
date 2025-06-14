@@ -36,9 +36,9 @@
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_static.h"
+#include "core/components_ng/pattern/menu/menu_model_static.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view_static.h"
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/model/model_view_ng.h"
 #endif //MODEL_COMPONENT_SUPPORTED
@@ -789,29 +789,26 @@ void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
 
 void* createMenuNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = MenuModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = MenuModelStatic::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createMenuItemNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = MenuItemModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = MenuItemGroupView::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = MenuItemGroupViewStatic::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createNavDestinationNode(ArkUI_Int32 nodeId)
