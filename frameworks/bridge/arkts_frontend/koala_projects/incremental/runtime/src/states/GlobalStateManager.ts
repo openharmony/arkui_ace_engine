@@ -75,12 +75,6 @@ export class GlobalStateManager {
     public static getCurrentScopeId(): int32 | undefined {
         return (GlobalStateManager.instance as StateManagerImpl).current ? (GlobalStateManager.instance as StateManagerImpl).current!.id : undefined;
     }
-
-    // used by BuilderNode
-    static CreateLocalManager(): StateManager | undefined {
-        // @ts-ignore
-        return createStateManager()
-    }
 }
 
 /**

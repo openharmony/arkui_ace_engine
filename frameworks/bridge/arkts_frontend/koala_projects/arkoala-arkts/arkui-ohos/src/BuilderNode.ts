@@ -18,13 +18,15 @@ import { Size } from "./Graphics"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr } from "@koalaui/interop"
 import { finalizerRegister, Thunk } from "@koalaui/common"
-import { ComputableState, GlobalStateManager, MutableState, rememberMutableState, StateManager,__context, __id  } from "@koalaui/runtime"
+import { ComputableState, MutableState, rememberMutableState, StateManager, createStateManager, GlobalStateManager } from "@koalaui/runtime"
 import { WrappedBuilder } from "./component/builder"
 import { BuilderRootFrameNode, FrameNode, FrameNodeUtils } from "./FrameNode"
 import { PeerNode } from "./PeerNode"
 import { ArkComponentRootPeer, List } from "./component"
 import { createUiDetachedBuilderRoot } from "./ArkUIEntry"
 import { BuilderNodeOps, BuilderNodeOptions } from "./component/arkui-custom"
+import { ArkBuilderProxyNodePeer } from "./handwritten/BuilderProxyNode"
+import { setNeedCreate } from "./ArkComponentRoot"
 
 export enum NodeRenderType {
     RENDER_TYPE_DISPLAY = 0,
@@ -151,7 +153,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             }
             this.setOptions(buildOptions);
         }
-        this.__manager = GlobalStateManager.CreateLocalManager()!;
+        this.__manager = createStateManager()!;
         this.__frameNode = null;
     }
     public postTouchEvent(touchEvent: TouchEvent): boolean {
@@ -161,19 +163,23 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     public buildFunc() {
         this.__rootStage = createUiDetachedBuilderRoot(() => {
             if (this.__root == null) {
-                this.__root = ArkComponentRootPeer.create(undefined);
+                this.__root = ArkBuilderProxyNodePeer.create(undefined);
             }
             return this.__root!;
         }, () => {
             if (this.__builder0) {
+                const result = setNeedCreate(true);
                 this.__builder0?.builder();
+                setNeedCreate(result);
                 return;
             }
             if (this.__params === undefined && this.__arg !== undefined) {
                 this.__params = rememberMutableState<T>(this.__arg!);
             }
             if (this.__params?.value) {
+                const result = setNeedCreate(true);
                 this.__builder?.builder(this.__params!.value);
+                setNeedCreate(result);
             }
         }, this.__manager!)
         this.__rootStage?.value;
@@ -185,7 +191,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             }
             const frameNodeOfBuilderNode: KPointer = this.setRootFrameNodeInBuilderNode(this.__root!.getPeerPtr()!)
             this.__frameNode = FrameNodeUtils.createBuilderRootFrameNode<T>(this.__uiContext!, frameNodeOfBuilderNode);
-            this.__frameNode?.setJsBuilderNode(new WeakRef<JSBuilderNode<T>>(this));
+            this.__frameNode?.setJsBuilderNode(this);
             this.setUpdateConfigurationCallback(this.updateConfiguration);
         }
     }
@@ -215,10 +221,13 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             InteropNativeModule._NativeLog("the params is not Initialized!!!");
             return;
         }
+        const old = GlobalStateManager.GetLocalManager();
+        GlobalStateManager.SetLocalManager(this.__manager);
         this.__params!.value = arg!;
         this.__manager!.syncChanges();
         this.__manager!.updateSnapshot();
         this.__rootStage?.value;
+        GlobalStateManager.SetLocalManager(old);
     }
 
     public getFrameNode(): FrameNode | null {
@@ -247,13 +256,18 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public disposeNode(): void {
-        super.disposeNode();
+        this.disposeAll();
         this.__frameNode = null;
     }
 
-    public dispose(): void {
+    private disposeAll(): void {
         super.disposeNode();
-        this.__frameNode?.disposeNode()
+        this.__rootStage?.dispose();
+    }
+
+    public dispose(): void {
+        this.disposeAll();
+        this.__frameNode?.disposeNode();
         this.__frameNode = null;
     }
 }

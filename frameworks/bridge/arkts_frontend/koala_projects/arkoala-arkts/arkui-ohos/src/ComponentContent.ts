@@ -56,6 +56,7 @@ export class ComponentContent<T = undefined> implements Content {
         this.builderNode_.recycle();
     }
     dispose(): void {
+        this.detachFromParent();
         this.builderNode_?.dispose();
     }
     updateConfiguration(): void {

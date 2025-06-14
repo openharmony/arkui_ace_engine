@@ -14,6 +14,7 @@
  */
 
 #include <cstdint>
+
 #include "arkoala_api_generated.h"
 #include "builder_node_ops_peer.h"
 #include "frame_node_peer_impl.h"
@@ -96,6 +97,7 @@ void DisposeNodeImpl(Ark_BuilderNodeOps peer)
 void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer, const Callback_Void* configurationUpdateFunc)
 {
     CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->viewNode_);
     CHECK_NULL_VOID(configurationUpdateFunc);
     auto updateNodeConfig = [updateTsConfig = CallbackHelper(*configurationUpdateFunc)]() mutable {
         updateTsConfig.InvokeSync();
@@ -133,7 +135,8 @@ void SetOptionsImpl(Ark_BuilderNodeOps peer, const Ark_BuilderNodeOptions* optio
     }
 }
 
-Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer, Ark_TouchEvent event){
+Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer, Ark_TouchEvent event)
+{
     return Converter::ArkValue<Ark_Boolean>(false);
 }
 

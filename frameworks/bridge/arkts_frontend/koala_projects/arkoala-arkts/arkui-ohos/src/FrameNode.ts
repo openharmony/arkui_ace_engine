@@ -744,14 +744,14 @@ export class ProxyFrameNode extends ImmutableFrameNode {
     }
 }
 export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
-    private __BuilderNodeOpt: WeakRef<JSBuilderNode<T>> | undefined = undefined;
+    private __BuilderNodeOpt: JSBuilderNode<T> | undefined = undefined;
     constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: KPointer) {
         super(uiContext, type, ptr);
     }
     getType(): string {
         return 'BuilderRootFrameNode';
     }
-    setJsBuilderNode(weak ?: WeakRef<JSBuilderNode<T>>){
+    setJsBuilderNode(weak?: JSBuilderNode<T>) {
         this.__BuilderNodeOpt = weak;
     }
     public disposeNode(): void {
@@ -761,7 +761,7 @@ export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
     }
     public dispose(): void {
         super.dispose();
-        this.__BuilderNodeOpt?.deref()?.disposeNode();
+        this.__BuilderNodeOpt?.disposeNode();
         this.__BuilderNodeOpt = undefined;
         this._nodeId = -1;
     }
