@@ -43,7 +43,7 @@ template("framework_bridge") {
       "plugin_frontend:plugin_frontend_$platform",
     ]
 
-    if (build_ohos_sdk) {
+    if (build_ohos_sdk || is_arkui_x) {
       deps -= [ "arkts_frontend:arkts_frontend" ]
     }
 
@@ -79,7 +79,9 @@ template("framework_bridge_ng") {
       "common/accessibility:bridge_accessibility_$platform",
       "declarative_frontend:declarative_frontend_$platform",
     ]
-
+    if (is_arkui_x) {
+      deps -= [ "arkts_frontend:arkts_frontend" ]
+    }
     if (defined(config.js_pa_support) && config.js_pa_support) {
       deps += [ "$ace_root/${config.pa_engine_path}:pa_backend_$platform" ]
     }

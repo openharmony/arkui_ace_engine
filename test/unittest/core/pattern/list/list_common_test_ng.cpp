@@ -538,6 +538,49 @@ RefPtr<ListItemDragManager> ListCommonTestNg::GetRepeatItemDragManager(int32_t i
 }
 
 /**
+* @tc.name: OnMoveDragManager001
+* @tc.desc: Test ListItemDragManager IsNeedMove
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, OnMoveDragManager001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List
+     */
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    CreateForEachList(3, 1, onMoveEvent);
+    CreateDone();
+    auto manager = GetForEachItemDragManager(0);
+
+    /**
+     * @tc.steps: step2. Test IsNeedMove
+     */
+    RectF nearRect = RectF(0.f, 0.f, 100.f, 400.f);
+    RectF rect = RectF(0.f, 400.f, 100.f, 100.f);
+    Axis axis = Axis::VERTICAL;
+
+    float axisDelta = -100.f;
+    bool needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, false);
+
+    axisDelta = -300.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, true);
+
+    nearRect = RectF(0.f, 100.f, 100.f, 400.f);
+    rect = RectF(0.f, 0.f, 100.f, 100.f);
+    axis = Axis::VERTICAL;
+
+    axisDelta = 100.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, false);
+
+    axisDelta = 300.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, true);
+}
+
+/**
  * @tc.name: FocusStep001
  * @tc.desc: Test GetNextFocusNode func
  * @tc.type: FUNC
@@ -3437,11 +3480,10 @@ HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex001, TestSize.Level1)
     RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
     focusNode->currentFocus_ = true;
     frameNode->focusHub_ = focusNode;
-    list.needTriggerFocus_ = true;
     list.focusIndex_ = 2;
     list.startIndex_ = 0;
     list.endIndex_ = 10;
-    auto result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_UP);
+    auto result = list.ScrollToLastFocusIndex(KeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN));
     EXPECT_FALSE(result);
 }
 
@@ -3470,133 +3512,13 @@ HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex002, TestSize.Level1)
     auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
     frameNode->layoutProperty_ = listLayoutProperty;
     frameNode->focusHub_ = focusNode;
-    list.needTriggerFocus_ = true;
     list.focusIndex_ = 2;
     list.startIndex_ = 5;
 
     list.endIndex_ = 10;
-    auto result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_DOWN);
-    EXPECT_TRUE(result);
+    auto result = list.ScrollToLastFocusIndex(KeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN));
+    EXPECT_FALSE(result);
     EXPECT_EQ(list.scrollSource_, 7);
-}
-
-/**
- * @tc.name: ScrollToLastFocusIndex003
- * @tc.desc: Test ListFocus ScrollToLastFocusIndex
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex003, TestSize.Level1)
-{
-    ListPattern list;
-    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemPattern> listItemPattern =
-        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
-    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
-    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
-    RefPtr<FocusManager> focusManager = AceType::MakeRefPtr<FocusManager>(pipe);
-    focusManager->isFocusActive_ = true;
-    pipe->focusManager_ = focusManager;
-    frameNode->context_ = AceType::RawPtr(pipe);
-    WeakPtr<FrameNode> node = frameNode;
-    listItemPattern->frameNode_ = frameNode;
-    list.frameNode_ = frameNode;
-    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
-    focusNode->currentFocus_ = true;
-    auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
-    frameNode->layoutProperty_ = listLayoutProperty;
-    frameNode->focusHub_ = focusNode;
-    list.needTriggerFocus_ = true;
-    list.focusIndex_ = 2;
-    list.startIndex_ = 5;
-    list.endIndex_ = 10;
-
-    auto result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_UP);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(list.scrollSource_, 7);
-
-    list.focusIndex_ = 11;
-    result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_DOWN);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(list.scrollSource_, 7);
-}
-
-
-/**
- * @tc.name: ProcessFocusEvent001
- * @tc.desc: Test list ProcessFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, ProcessFocusEvent001, TestSize.Level1)
-{
-    ListPattern list;
-    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemPattern> listItemPattern =
-        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
-    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
-    WeakPtr<FrameNode> node = frameNode;
-    listItemPattern->frameNode_ = frameNode;
-    list.frameNode_ = frameNode;
-    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
-    focusNode->currentFocus_ = true;
-    frameNode->focusHub_ = focusNode;
-    KeyEvent event;
-    
-    list.needTriggerFocus_ = true;
-    list.triggerFocus_ = true;
-    list.ProcessFocusEvent(event, true);
-    EXPECT_FALSE(list.triggerFocus_);
-}
-
-/**
- * @tc.name: ProcessFocusEvent002
- * @tc.desc: Test list ProcessFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, ProcessFocusEvent002, TestSize.Level1)
-{
-    ListPattern list;
-    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemPattern> listItemPattern =
-        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
-    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
-    WeakPtr<FrameNode> node = frameNode;
-    listItemPattern->frameNode_ = frameNode;
-    list.frameNode_ = frameNode;
-    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
-    focusNode->currentFocus_ = true;
-    frameNode->focusHub_ = focusNode;
-    KeyEvent event;
-    
-    list.needTriggerFocus_ = true;
-    list.focusIndex_ = std::nullopt;
-    list.ProcessFocusEvent(event, true);
-    EXPECT_FALSE(list.needTriggerFocus_);
-}
-
-/**
- * @tc.name: ProcessFocusEvent003
- * @tc.desc: Test list ProcessFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, ProcessFocusEvent003, TestSize.Level1)
-{
-    ListPattern list;
-    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemPattern> listItemPattern =
-        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
-    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
-    WeakPtr<FrameNode> node = frameNode;
-    listItemPattern->frameNode_ = frameNode;
-    list.frameNode_ = frameNode;
-    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
-    focusNode->currentFocus_ = true;
-    frameNode->focusHub_ = focusNode;
-    KeyEvent event;
-
-    list.needTriggerFocus_ = true;
-    list.focusIndex_ = 2;
-    list.ProcessFocusEvent(event, true);
-    EXPECT_TRUE(list.triggerFocus_);
 }
 
 /**
@@ -3616,6 +3538,7 @@ HWTEST_F(ListCommonTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
      */
     int32_t focusNodeIndex = 6;
     pattern_->focusIndex_ = 2;
+    pattern_->startIndex_ = 4;
     pattern_->ScrollToFocusNodeIndex(focusNodeIndex);
     FlushUITasks();
     RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, focusNodeIndex);

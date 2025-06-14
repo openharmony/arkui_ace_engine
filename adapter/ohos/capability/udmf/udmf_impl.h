@@ -31,7 +31,9 @@ class UdmfClientImpl : public UdmfClient {
 public:
     RefPtr<UnifiedData> CreateUnifiedData() override;
     RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) override;
+    RefPtr<DataLoadParams> TransformDataLoadParams(napi_env env, napi_value napiValue) override;
     RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) override;
+    RefPtr<DataLoadParams> TransformDataLoadParamsForNative(void* rawData) override;
     void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) override;
     napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) override;
     napi_value TransformSummary(std::map<std::string, int64_t>& summary) override;
@@ -64,6 +66,7 @@ public:
         const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) override;
     std::vector<uint8_t> GetSpanStringRecord(const RefPtr<UnifiedData>& unifiedData) override;
     int32_t StartAsyncDataRetrieval(napi_env env, napi_value napiValue, const std::string& key) override;
+    int32_t SetDelayInfo(RefPtr<DataLoadParams> dataLoadParams, std::string& key) override;
     int32_t Cancel(const std::string& key) override;
 
     void SetTagProperty(const RefPtr<UnifiedData>& unifiedData, const std::string& tag) override;
@@ -89,6 +92,20 @@ public:
 
 private:
     std::shared_ptr<UDMF::UnifiedData> unifiedData_;
+};
+
+class DataLoadParamsImpl : public DataLoadParams {
+    DECLARE_ACE_TYPE(DataLoadParamsImpl, DataLoadParams);
+
+public:
+    DataLoadParamsImpl() = default;
+    ~DataLoadParamsImpl() = default;
+
+    std::shared_ptr<UDMF::DataLoadParams> GetDataLoadParams();
+    void SetDataLoadParams(const std::shared_ptr<UDMF::DataLoadParams>& dataLoadParams);
+
+private:
+    std::shared_ptr<UDMF::DataLoadParams> dataLoadParams_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_UDMF_IMPL_H

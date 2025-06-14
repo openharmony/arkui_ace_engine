@@ -767,6 +767,20 @@ void ScrollablePattern::SetGetSnapTypeCallback(const RefPtr<Scrollable>& scrolla
     });
 }
 
+void ScrollablePattern::SetOnWillStopDraggingCallback(const RefPtr<Scrollable>& scrollable)
+{
+    CHECK_NULL_VOID(scrollable);
+    scrollable->SetOnWillStopDraggingCallback([weak = WeakClaim(this)](float velocity) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto eventHub = pattern->GetOrCreateEventHub<ScrollableEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        OnWillStopDraggingEvent callback = eventHub->GetOnWillStopDragging();
+        CHECK_NULL_VOID(callback);
+        callback(Dimension(velocity));
+    });
+}
+
 RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
 {
     auto host = GetHost();
@@ -793,6 +807,7 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
     SetGetSnapTypeCallback(scrollable);
+    SetOnWillStopDraggingCallback(scrollable);
     if (!NearZero(velocityScale_)) {
         scrollable->SetUnstaticVelocityScale(velocityScale_);
     }
@@ -4312,10 +4327,6 @@ void ScrollablePattern::StopScrollableAndAnimate()
 void ScrollablePattern::GetRepeatCountInfo(
     RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount)
 {
-    if (auto* adapter = GetScrollWindowAdapter(); adapter) {
-        totalChildCount = adapter->GetTotalCount();
-        return;
-    }
     CHECK_NULL_VOID(node);
     auto& children = node->GetChildren();
     for (const auto& child : children) {

@@ -53,6 +53,7 @@ const std::string DEFAULT_EXIF_VALUE = "default_exif_value";
 constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 constexpr int32_t AVERAGE_VALUE = 2;
+constexpr int32_t US_CONVERT = 1000;
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
     : instanceId_(Container::CurrentId()), controller_(controller)
@@ -263,7 +264,7 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
         currentPlayStatus_ == PlaybackStatus::PAUSED)) {
         int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
-        SetAutoPlayPeriod(PERIOD_START, duration);
+        SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
     Start();
 }
@@ -1108,6 +1109,7 @@ void MovingPhotoPattern::GetXmageHeight()
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV, host);
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto XmageHeight.%{public}f", imageL - bottomV);
     } else {
+        isXmageMode_ = false;
         imageSize = SizeF(imageW, imageL);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize, host);
@@ -1118,6 +1120,8 @@ void MovingPhotoPattern::GetXmageHeight()
 void MovingPhotoPattern::SetXmagePosition()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto SetXmagePosition");
+    isXmageMode_ = false;
+    xmageModeValue_ = 0;
     int32_t fd = GetImageFd();
     CHECK_NULL_VOID(fd >= 0);
     auto imageSrc = ImageSource::Create(fd);
@@ -1427,7 +1431,7 @@ void MovingPhotoPattern::StartPlayback()
         mediaPlayer_->GetDuration(duration);
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "StartPlayback duration:%{public}d.",
             duration);
-        SetAutoPlayPeriod(PERIOD_START, duration);
+        SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
     Start();
 }
@@ -1640,7 +1644,7 @@ void MovingPhotoPattern::StopAnimation()
 void MovingPhotoPattern::StopAnimationCallback()
 {
     if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO && autoPlayPeriodStartTime_ >= 0) {
-        Seek(static_cast<int32_t>(autoPlayPeriodStartTime_));
+        Seek(static_cast<int32_t>(autoPlayPeriodStartTime_ / US_CONVERT));
     } else {
         Seek(0);
     }
@@ -1707,7 +1711,7 @@ void MovingPhotoPattern::StartRepeatPlay()
     if (!isFirstRepeatPlay_ && isSetAutoPlayPeriod_) {
         int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
-        SetAutoPlayPeriod(PERIOD_START, duration);
+        SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
     Start();
 }
@@ -1753,7 +1757,7 @@ void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
     }
-    mediaPlayer_->SetPlayRangeWithMode(startTime, endTime, SeekMode::SEEK_CLOSEST);
+    mediaPlayer_->SetPlayRangeUsWithMode(startTime, endTime, SeekMode::SEEK_CLOSEST);
 }
 
 void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
@@ -1779,7 +1783,7 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
         currentPlayStatus_ == PlaybackStatus::PAUSED)) {
         int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
-        SetAutoPlayPeriod(PERIOD_START, duration);
+        SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
     Start();
 }
@@ -2309,6 +2313,23 @@ bool MovingPhotoPattern::IsRefreshMovingPhotoReturn(bool status)
         }
     }
     return false;
+}
+
+void MovingPhotoPattern::SetHdrBrightness(float hdrBrightness)
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "SetHdrBrightness:%{public}f.", hdrBrightness);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto movingPhotoNode = AceType::DynamicCast<MovingPhotoNode>(host);
+    CHECK_NULL_VOID(movingPhotoNode);
+    auto imageNode = AceType::DynamicCast<FrameNode>(movingPhotoNode->GetImage());
+    CHECK_NULL_VOID(imageNode);
+    auto imageRenderContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageRenderContext);
+    imageRenderContext->SetImageHDRBrightness(hdrBrightness);
+    imageRenderContext->SetImageHDRPresent(true);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, hdrBrightness, imageNode);
+    hdrBrightness_ = hdrBrightness;
 }
 
 MovingPhotoPattern::~MovingPhotoPattern()

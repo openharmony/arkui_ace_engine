@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_TEST_CORE_PATTERN_MOCK_UI_SESSION_MANAGE_H
-#define FOUNDATION_ACE_TEST_CORE_PATTERN_MOCK_UI_SESSION_MANAGE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_UNIFIED_DATA_LOAD_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_UNIFIED_DATA_LOAD_H
 
-#include "gmock/gmock.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "base/memory/ace_type.h"
+
 namespace OHOS::Ace {
-class MockUiSessionManage : public UiSessionManager {
+class DataLoadParams : public AceType {
+    DECLARE_ACE_TYPE(DataLoadParams, AceType);
+
 public:
-    MOCK_METHOD(void, ReportComponentChangeEvent, (const std::string&, const std::string&), (override));
+    DataLoadParams() = default;
+    ~DataLoadParams() = default;
 };
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_TEST_CORE_PATTERN_MOCK_UI_SESSION_MANAGE_H
+#endif

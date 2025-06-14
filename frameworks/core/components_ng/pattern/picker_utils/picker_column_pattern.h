@@ -99,6 +99,7 @@ public:
     virtual const Color& GetButtonBgColor() const = 0;
     virtual const Color& GetButtonPressColor() const = 0;
     virtual bool CanMove(bool isDown) const = 0;
+    virtual std::string GetCurrentOption() const = 0;
 
     virtual uint32_t GetShowCount() const
     {

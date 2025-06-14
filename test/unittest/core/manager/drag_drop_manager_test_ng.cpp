@@ -721,14 +721,11 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
     auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeGeoNull =
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
-    EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
     auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
     EXPECT_FALSE(targetFrameNode);
 
@@ -944,14 +941,11 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest022, TestSize.Level1)
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
     auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeGeoNull =
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
-    EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
     auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
     EXPECT_FALSE(targetFrameNode);
 }

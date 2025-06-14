@@ -408,17 +408,18 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateKeyboardSafeArea12
- * @tc.desc: Test UpdateKeyboardSafeArea.
+ * @tc.name: MenuAvoidKeyboard
+ * @tc.desc: Test MenuAvoidKeyboard.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternTest, UpdateKeyboardSafeArea012, TestSize.Level1)
+HWTEST_F(WebPatternTest, MenuAvoidKeyboard, TestSize.Level1)
 {
     MockPipelineContext::SetUp();
-    bool result = g_webPattern->UpdateKeyboardSafeArea(true, 0.0);
+    bool result = g_webPattern->MenuAvoidKeyboard(true, 0.0);
     EXPECT_TRUE(result);
-    result = g_webPattern->UpdateKeyboardSafeArea(false, 0.0);
+    result = g_webPattern->MenuAvoidKeyboard(false, 0.0);
     EXPECT_TRUE(result);
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -437,4 +438,35 @@ HWTEST_F(WebPatternTest, SetLinkPreviewSelectionMenu001, TestSize.Level1)
     g_webPattern->SetPreviewSelectionMenu(param);
 #endif
 }
+
+/**
+ * @tc.name: ProcessVirtualKeyBoardShowAvoidMenu
+ * @tc.desc: Test ProcessVirtualKeyBoardShowAvoidMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardShowAvoidMenu, TestSize.Level1)
+{
+    bool result;
+    result = g_webPattern->ProcessVirtualKeyBoardShowAvoidMenu(0, 1280, 0.0, false);
+    EXPECT_TRUE(result);
+    result = g_webPattern->ProcessVirtualKeyBoardShowAvoidMenu(0, 1280, 0.0, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ProcessVirtualKeyBoardHideAvoidMenu
+ * @tc.desc: Test ProcessVirtualKeyBoardHideAvoidMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardHideAvoidMenu, TestSize.Level1)
+{
+    bool result;
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    result = g_webPattern->ProcessVirtualKeyBoardHideAvoidMenu(0, 1280, false);
+    EXPECT_TRUE(result);
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    result = g_webPattern->ProcessVirtualKeyBoardHideAvoidMenu(0, 1280, true);
+    EXPECT_FALSE(result);
+}
+
 } // namespace OHOS::Ace::NG

@@ -45,6 +45,9 @@ namespace OHOS::Ace {
 namespace {
 constexpr size_t SNAP_PARTITION_SIZE = 100;
 constexpr int64_t FIND_RSNODE_ERROR = -1;
+constexpr int32_t UI_TREE = 0;
+constexpr int32_t THREE_DIMENSIONS_TREE = 1;
+constexpr int32_t QUERY_ABILITY = 2;
 #ifndef USE_NEW_SKIA
 constexpr int32_t PNG_ENCODE_QUALITY = 100;
 #endif
@@ -124,6 +127,7 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
 }
 } // namespace
 
+static std::vector<std::string> inspectorAbilities = {"3DLayers"};
 constexpr static char RECNODE_SELFID[] = "selfId";
 constexpr static char RECNODE_NODEID[] = "nodeID";
 constexpr static char RECNODE_PARENTID[] = "parentID";
@@ -330,6 +334,21 @@ void LayoutInspector::CreateLayoutInfoByWinId(uint32_t windId)
     return CreateContainerLayoutInfo(container);
 }
 
+void LayoutInspector::SendInspctorAbilities()
+{
+    auto jsonRoot = JsonUtil::Create(true);
+    jsonRoot->Put("type", "inspectorAbilities");
+    auto contentArray = JsonUtil::CreateArray(true);
+    for (size_t i = 0; i < inspectorAbilities.size(); ++i) {
+        contentArray->Put(std::to_string(i).c_str(), inspectorAbilities[i].c_str());
+    }
+    jsonRoot->PutRef("content", std::move(contentArray));
+    auto sendInspctorAbilitiesTask = [abilitiesJsonStr = jsonRoot->ToString()]() {
+        WebSocketManager::SendMessage(abilitiesJsonStr);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendInspctorAbilitiesTask));
+}
+
 void LayoutInspector::Create3DLayoutInfoByWinId(uint32_t windId)
 {
     auto container = Container::GetByWindowId(windId);
@@ -450,7 +469,7 @@ void LayoutInspector::Get3DSnapshotJson(const RefPtr<NG::FrameNode>& node)
         SendEmpty3DSnapJson();
         return;
     }
-    int totalParts = (filterSnapInfos.size() + SNAP_PARTITION_SIZE - 1) / SNAP_PARTITION_SIZE;
+    size_t totalParts = (filterSnapInfos.size() + SNAP_PARTITION_SIZE - 1) / SNAP_PARTITION_SIZE;
     int partNum = 1;
     for (size_t i = 0; i < filterSnapInfos.size(); i += SNAP_PARTITION_SIZE) {
         auto message = JsonUtil::Create(true);
@@ -553,7 +572,7 @@ void LayoutInspector::RegisterConnectCallback()
     }
 }
 
-void LayoutInspector::ProcessMessages(const std::string& message)
+std::pair<uint32_t, int32_t> LayoutInspector::ProcessMessages(const std::string& message)
 {
     if (message.find(START_PERFORMANCE_CHECK_MESSAGE, 0) != std::string::npos) {
         TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "performance check start");
@@ -564,17 +583,26 @@ void LayoutInspector::ProcessMessages(const std::string& message)
     }
     auto windowResult = NG::Inspector::ParseWindowIdFromMsg(message);
     uint32_t windowId = windowResult.first;
-    if (windowId == OHOS::Ace::NG::INVALID_WINDOW_ID) {
+    if (windowId == OHOS::Ace::NG::INVALID_WINDOW_ID && windowResult.second != QUERY_ABILITY) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
-        return;
+        return windowResult;
     }
 
-    int32_t methodIndex = windowResult.second;
-    if (methodIndex == 1) {
-        Create3DLayoutInfoByWinId(windowId);
-    } else {
-        CreateLayoutInfoByWinId(windowId);
+    switch (windowResult.second) {
+        case UI_TREE:
+            CreateLayoutInfoByWinId(windowId);
+            break;
+        case THREE_DIMENSIONS_TREE:
+            Create3DLayoutInfoByWinId(windowId);
+            break;
+        case QUERY_ABILITY:
+            SendInspctorAbilities();
+            break;
+        default:
+            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "unsupport message: %{public}s", message.c_str());
+            break;
     }
+    return windowResult;
 }
 
 void LayoutInspector::HandleStopRecord()

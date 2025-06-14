@@ -74,6 +74,7 @@ constexpr double SHOW_START = 0.0;
 constexpr double SHOW_FULL = 1.0;
 constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 constexpr uint32_t PLACEHOLDER_TIMEOUT = 6000;
+constexpr char OCCLUSION_SCENE[] = "_occlusion";
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -483,6 +484,17 @@ void UIExtensionPattern::ReDispatchWantParams()
     sessionWrapper_->ReDispatchWantParams();
 }
 
+void UIExtensionPattern::HandleOcclusionScene(const RefPtr<FrameNode>& node, bool flag)
+{
+    CHECK_NULL_VOID(node);
+    if (node->GetInspectorId().value_or("").find(OCCLUSION_SCENE) == std::string::npos) {
+        return;
+    }
+    ACE_SCOPED_TRACE("occlusion contentNode id: %d, name: %s setSuccess",
+        node->GetId(), node->GetInspectorId().value_or("").c_str());
+    node->AddToOcclusionMap(flag);
+}
+
 void UIExtensionPattern::OnConnect()
 {
     CHECK_RUN_ON(UI);
@@ -545,6 +557,7 @@ void UIExtensionPattern::OnConnect()
     ReDispatchDisplayArea();
     InitBusinessDataHandleCallback();
     NotifyHostWindowMode();
+    HandleOcclusionScene(host, true);
 }
 
 void UIExtensionPattern::InitBusinessDataHandleCallback()

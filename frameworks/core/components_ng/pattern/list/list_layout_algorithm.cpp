@@ -1141,7 +1141,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     auto currentIndex = startIndex - 1;
     auto chainOffset = 0.0f;
     do {
-        if (!itemPosition_.empty() && syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if (!itemPosition_.empty() && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             return;
         }
@@ -1175,8 +1175,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     }
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
-    if (LessNotEqual(currentEndPos, endMainPos - contentEndOffset_) && !itemPosition_.empty() &&
-        itemPosition_.rbegin()->first == totalItemCount_ - 1) {
+    if (LessNotEqual(currentEndPos, endMainPos - contentEndOffset_) && !itemPosition_.empty()) {
         endMainPos_ = currentEndPos + contentEndOffset_;
         startMainPos_ = endMainPos_ - contentMainSize_;
         ReMeasureListItemGroup(layoutWrapper, true);
@@ -1231,7 +1230,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     auto currentIndex = endIndex + 1;
     auto chainOffset = 0.0f;
     do {
-        if (!itemPosition_.empty() && syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if (!itemPosition_.empty() && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             return;
         }
@@ -1254,8 +1253,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     currentStartPos += chainOffset;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     UpdateSnapCenterContentOffset(layoutWrapper);
-    if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_) && !itemPosition_.empty() &&
-        itemPosition_.begin()->first == 0) {
+    if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_) && !itemPosition_.empty()) {
         auto itemTotalSize = GetEndPosition() - currentStartPos + contentEndOffset_ + contentStartOffset_;
         bool overBottom = (GetEndIndex() == totalItemCount_ - 1) && (LessNotEqual(itemTotalSize, contentMainSize_));
         if (overBottom && !mainSizeIsDefined_ && GreatNotEqual(contentMainSize_, itemTotalSize)) {
@@ -1619,13 +1617,13 @@ int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrappe
 
 bool ListLayoutAlgorithm::IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const
 {
-    bool syncLoad = property->GetSyncLoad().value_or(SystemProperties::IsSyncLoadEnabled());
-    return (syncLoad && NearZero(currentDelta_) && !targetIndex_.has_value() && mainSizeIsDefined_);
+    bool syncLoad = property->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled());
+    return !(!syncLoad && NearZero(currentDelta_) && !targetIndex_.has_value() && mainSizeIsDefined_);
 }
 
 void ListLayoutAlgorithm::CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& wrapper)
 {
-    if (!syncLoad_) {
+    if (syncLoad_) {
         return;
     }
     CHECK_NULL_VOID(wrapper);

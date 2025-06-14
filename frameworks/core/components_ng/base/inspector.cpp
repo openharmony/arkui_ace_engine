@@ -43,7 +43,7 @@ const char INSPECTOR_COMPONENT_TYPE[] = "type";
 const char INSPECTOR_STATE_VAR[] = "state";
 #endif
 
-const std::vector SUPPORT_METHOD = {"ArkUI.tree", "ArkUI.tree.3D"};
+const std::vector SUPPORT_METHOD = {"ArkUI.tree", "ArkUI.tree.3D", "ArkUI.queryAbilities"};
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;

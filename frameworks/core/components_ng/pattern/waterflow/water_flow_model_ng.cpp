@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -397,6 +397,24 @@ float WaterFlowModelNG::GetScrollBarWidth(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, 0.0f);
     auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarWidth();
     return value.ConvertToVp();
+}
+
+void WaterFlowModelNG::SetSyncLoad(bool syncLoad)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad);
+}
+
+void WaterFlowModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad, frameNode);
+}
+
+bool WaterFlowModelNG::GetSyncLoad(FrameNode* frameNode)
+{
+    bool result = false;
+    CHECK_NULL_RETURN(frameNode, result);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, SyncLoad, result, frameNode, false);
+    return result;
 }
 
 RefPtr<WaterFlowSections> WaterFlowModelNG::GetOrCreateWaterFlowSections()

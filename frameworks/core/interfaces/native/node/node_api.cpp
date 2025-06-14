@@ -1930,6 +1930,12 @@ int32_t PostUITaskAndWait(ArkUI_Int32 contextId, void* taskData, void(*task)(voi
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 GreatOrEqualTargetAPIVersion(ArkUI_Int32 version)
+{
+    auto platformVersion = static_cast<PlatformVersion>(version);
+    return AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(platformVersion);
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -1960,6 +1966,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         .getContextByNode = GetContextByNode,
         .postFrameCallback = PostFrameCallback,
         .postIdleCallback = PostIdleCallback,
+        .greatOrEqualTargetAPIVersion = GreatOrEqualTargetAPIVersion,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;

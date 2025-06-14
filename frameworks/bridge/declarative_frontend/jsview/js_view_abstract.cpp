@@ -2599,16 +2599,39 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
-    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::STRING };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsAlign", jsVal, checkList) &&
         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         ViewAbstractModel::GetInstance()->SetAlign(Alignment::CENTER);
         return;
     }
-    auto value = jsVal->ToNumber<int32_t>();
-    Alignment alignment = ParseAlignment(value);
-    ViewAbstractModel::GetInstance()->SetAlign(alignment);
+    if (jsVal->IsNumber()) {
+        auto value = jsVal->ToNumber<int32_t>();
+        Alignment alignment = ParseAlignment(value);
+        ViewAbstractModel::GetInstance()->SetAlign(alignment);
+        ViewAbstractModel::GetInstance()->SetIsMirrorable(false);
+    } else {
+        std::string localizedAlignment = jsVal->ToString();
+        ViewAbstractModel::GetInstance()->SetAlign(localizedAlignment);
+        ViewAbstractModel::GetInstance()->SetIsMirrorable(true);
+    }
+}
+
+void JSViewAbstract::JsLayoutGravity(const JSCallbackInfo& info)
+{
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
+    auto jsVal = info[0];
+    if (!CheckJSCallbackInfo("JsLayoutGravity", jsVal, checkList)) {
+        ViewAbstractModel::GetInstance()->SetLayoutGravity(Alignment::CENTER);
+        return;
+    }
+
+    if (jsVal->IsString()) {
+        std::string value = jsVal->ToString();
+        Alignment layoutGravityAlignment = NG::BoxLayoutAlgorithm::MapLocalizedToAlignment(value);
+        ViewAbstractModel::GetInstance()->SetLayoutGravity(layoutGravityAlignment);
+    }
 }
 
 void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
@@ -7085,13 +7108,12 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
     return ParseJsIntegerArray(jsValue, result, resObj, resObjArray);
 }
 
-bool JSViewAbstract::ParseJsIntegerArrayInternal(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
+bool JSViewAbstract::ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,
     std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
-    for (size_t i = 0; i < array->Length(); i++) {
+    for (size_t i = 0; i < jsArray->Length(); i++) {
         RefPtr<ResourceObject> resObj;
-        JSRef<JSVal> value = array->GetValueAt(i);
+        JSRef<JSVal> value = jsArray->GetValueAt(i);
         if (value->IsNumber()) {
             result.emplace_back(value->ToNumber<uint32_t>());
         } else if (value->IsObject()) {
@@ -7118,7 +7140,8 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
     if (jsValue->IsArray()) {
-        return ParseJsIntegerArrayInternal(jsValue, result, resObjArray);
+        JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
+        return ParseJsIntegerArrayInternal(jsArray, result, resObjArray);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
@@ -7167,13 +7190,12 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
     return ParseJsStrArray(jsValue, result, resObj, resObjArray);
 }
 
-bool JSViewAbstract::ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+bool JSViewAbstract::ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
     std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
-    for (size_t i = 0; i < array->Length(); i++) {
+    for (size_t i = 0; i < jsArray->Length(); i++) {
         RefPtr<ResourceObject> resObj;
-        JSRef<JSVal> value = array->GetValueAt(i);
+        JSRef<JSVal> value = jsArray->GetValueAt(i);
         if (value->IsString()) {
             result.emplace_back(value->ToString());
         } else if (value->IsObject()) {
@@ -7200,7 +7222,8 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         return false;
     }
     if (jsValue->IsArray()) {
-        return ParseJsStrArrayInternal(jsValue, result, resObjArray);
+        JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
+        return ParseJsStrArrayInternal(jsArray, result, resObjArray);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
@@ -9081,6 +9104,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("transition", &JSViewAbstract::JsTransition);
 
     JSClass<JSViewAbstract>::StaticMethod("align", &JSViewAbstract::JsAlign);
+    JSClass<JSViewAbstract>::StaticMethod("layoutGravity", &JSViewAbstract::JsLayoutGravity);
     JSClass<JSViewAbstract>::StaticMethod("position", &JSViewAbstract::JsPosition);
     JSClass<JSViewAbstract>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSViewAbstract>::StaticMethod("offset", &JSViewAbstract::JsOffset);
@@ -9291,6 +9315,7 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
             const auto& extensionHandler = frameNode->GetExtensionHandler();
             if (extensionHandler) {
                 extensionHandler->InvalidateRender();
+                extensionHandler->ForegroundRender();
             } else {
                 frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
             }
@@ -9303,6 +9328,7 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
         const auto& extensionHandler = frameNode->GetExtensionHandler();
         if (extensionHandler) {
             extensionHandler->InvalidateRender();
+            extensionHandler->ForegroundRender();
         } else {
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
         }
@@ -9343,6 +9369,7 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
     drawModifier->drawBehindFunc = getDrawModifierFunc("drawBehind");
     drawModifier->drawContentFunc = getDrawModifierFunc("drawContent");
     drawModifier->drawFrontFunc = getDrawModifierFunc("drawFront");
+    drawModifier->drawForegroundFunc = getDrawModifierFunc("drawForeground");
 
     ViewAbstractModel::GetInstance()->SetDrawModifier(drawModifier);
     AddInvalidateFunc(jsDrawModifier, frameNode);

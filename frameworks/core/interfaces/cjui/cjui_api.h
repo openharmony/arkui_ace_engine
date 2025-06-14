@@ -61,6 +61,8 @@ struct CJUICommonModifier {
     void (*resetOpacity)(ArkUINodeHandle node);
     void (*setAlign)(ArkUINodeHandle node, ArkUI_Int32 align);
     void (*resetAlign)(ArkUINodeHandle node);
+    void (*setLayoutGravity)(ArkUINodeHandle node, ArkUI_CharPtr align);
+    void (*resetLayoutGravity)(ArkUINodeHandle node);
     void (*setBackdropBlur)(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
         ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation);
     void (*resetBackdropBlur)(ArkUINodeHandle node);
@@ -2081,6 +2083,22 @@ struct CJUIWebModifier {
     void (*resetWebNestedScrollExt)(ArkUINodeHandle node);
     void (*setOnInterceptKeyEventCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnInterceptKeyEventCallBack)(ArkUINodeHandle node);
+    void (*setOnErrorReceive)(ArkUINodeHandle node, void* callback);
+    void (*resetOnErrorReceive)(ArkUINodeHandle node);
+    void (*setOnLoadIntercept)(ArkUINodeHandle node, void* callback);
+    void (*resetOnLoadIntercept)(ArkUINodeHandle node);
+    void (*setOnHttpErrorReceive)(ArkUINodeHandle node, void* callback);
+    void (*resetOnHttpErrorReceive)(ArkUINodeHandle node);
+    void (*setOnOverrideUrlLoading)(ArkUINodeHandle node, void* callback);
+    void (*resetOnOverrideUrlLoading)(ArkUINodeHandle node);
+    void (*setOnHttpAuthRequest)(ArkUINodeHandle node, void* callback);
+    void (*resetOnHttpAuthRequest)(ArkUINodeHandle node);
+    void (*setOnConsole)(ArkUINodeHandle node, void* callback);
+    void (*resetOnConsole)(ArkUINodeHandle node);
+    void (*setOnSslErrorEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetOnSslErrorEvent)(ArkUINodeHandle node);
+    void (*setOnDataResubmitted)(ArkUINodeHandle node, void* callback);
+    void (*resetOnDataResubmitted)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {

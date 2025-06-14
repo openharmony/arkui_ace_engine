@@ -1047,6 +1047,16 @@ void WebPattern::OnDetachFromMainTree()
     isAttachedToMainTree_ = false;
     // report component is in background.
     delegate_->OnRenderToBackground();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto frontend = pipelineContext->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->ReleasePageEvent(host, true, true);
 }
 
 void WebPattern::OnAttachToFrameNode()
@@ -3404,10 +3414,6 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t nodeId = host->GetId();
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    if (dragDropManager) {
-        dragDropManager->AddDragFrameNode(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
-    }
 
     pipelineContext->AddWindowStateChangedCallback(nodeId);
     pipelineContext->AddWindowSizeChangeCallback(nodeId);
@@ -3441,11 +3447,6 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
 
     if (observer_) {
         observer_->OnDetachContext();
-    }
-
-    auto dragDropManager = context->GetDragDropManager();
-    if (dragDropManager) {
-        dragDropManager->RemoveDragFrameNode(nodeId);
     }
 
     if (tooltipId_ != -1) {
@@ -4028,15 +4029,33 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         height, keyboard, keyboardSafeAreaEnabled);
     if (!isFocus_ || !isVisible_) {
         UpdateOnFocusTextField(false);
-        ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
+        ProcessVirtualKeyBoardHideAvoidMenu(width, height, keyboardSafeAreaEnabled);
         return false;
     }
     UpdateOnFocusTextField(!NearZero(keyboard));
     if (NearZero(keyboard)) {
-        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled) && UpdateKeyboardSafeArea(true);
+        return ProcessVirtualKeyBoardHideAvoidMenu(width, height, keyboardSafeAreaEnabled);
     }
-    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled) &&
-           UpdateKeyboardSafeArea(false, keyboard);
+    return ProcessVirtualKeyBoardShowAvoidMenu(width, height, keyboard, keyboardSafeAreaEnabled);
+}
+
+bool WebPattern::ProcessVirtualKeyBoardShowAvoidMenu(
+    int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
+{
+    if (ProcessVirtualKeyBoardShow(width, height, keyboard, safeAreaEnabled)) {
+        MenuAvoidKeyboard(false, keyboard);
+        return true;
+    }
+    return false;
+}
+
+bool WebPattern::ProcessVirtualKeyBoardHideAvoidMenu(int32_t width, int32_t height, bool safeAreaEnabled)
+{
+    if (ProcessVirtualKeyBoardHide(width, height, safeAreaEnabled)) {
+        MenuAvoidKeyboard(true);
+        return true;
+    }
+    return false;
 }
 
 void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate)
@@ -4377,9 +4396,8 @@ void  WebPattern::OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMen
     }
 }
 
-void WebPattern::UpdateEditMenuOptions(
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     onCreateMenuCallback_ = std::move(onCreateMenuCallback);
     onMenuItemClick_ = [weak = AceType::WeakClaim(this), action = std::move(onMenuItemClick)] (
@@ -4395,6 +4413,9 @@ void WebPattern::UpdateEditMenuOptions(
         }
         return result;
     };
+    if (onPrepareMenuCallback) {
+        onPrepareMenuCallback_ = std::move(onPrepareMenuCallback);
+    }
 }
 
 void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
@@ -5102,7 +5123,7 @@ void WebPattern::CloseCustomKeyboard()
     keyboardOverlay_->CloseKeyboard(frameNode->GetId());
     isUsingCustomKeyboardAvoid_ = false;
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard end");
-    UpdateKeyboardSafeArea(true);
+    MenuAvoidKeyboard(true);
 }
 
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
@@ -7053,7 +7074,7 @@ void WebPattern::RemoveDataListNode()
 
 void WebPattern::CloseKeyboard()
 {
-    UpdateKeyboardSafeArea(true);
+    MenuAvoidKeyboard(true);
     InputMethodManager::GetInstance()->CloseKeyboard();
 }
 
@@ -7351,10 +7372,23 @@ void WebPattern::DestroyAnalyzerOverlay()
     awaitingOnTextSelected_ = false;
 }
 
-void WebPattern::OnAccessibilityHoverEvent(const PointF& point, bool isHoverEnter)
+void WebPattern::OnAccessibilityHoverEvent(
+    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time)
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->HandleAccessibilityHoverEvent(point.GetX(), point.GetY(), isHoverEnter);
+    delegate_->HandleAccessibilityHoverEvent(point, source, eventType, time);
+}
+
+std::string WebPattern::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
+{
+    CHECK_NULL_RETURN(delegate_, "");
+    return delegate_->GetSurfaceIdByHtmlElementId(htmlElementId);
+}
+
+int64_t WebPattern::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
+{
+    CHECK_NULL_RETURN(delegate_, -1);
+    return delegate_->GetWebAccessibilityIdBySurfaceId(surfaceId);
 }
 
 void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)
@@ -7874,7 +7908,7 @@ void WebPattern::CloseDataDetectorMenu()
     CHECK_NULL_VOID(webDataDetectorAdapter_);
     webDataDetectorAdapter_->CloseAIMenu();
 }
-bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
+bool WebPattern::MenuAvoidKeyboard(bool hideOrClose, double height)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -7882,12 +7916,12 @@ bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
-    auto keyboardInset = safeAreaManager->GetKeyboardInset();
+    auto keyboardInset = safeAreaManager->GetKeyboardWebInset();
     if (hideOrClose) {
         auto newBottom = std::optional<uint32_t>(keyboardInset.end);
-        safeAreaManager->UpdateKeyboardSafeArea(0, newBottom);
+        safeAreaManager->UpdateKeyboardWebSafeArea(0, newBottom);
     } else {
-        safeAreaManager->UpdateKeyboardSafeArea(height);
+        safeAreaManager->UpdateKeyboardWebSafeArea(height);
     }
     return true;
 }

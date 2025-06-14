@@ -102,8 +102,10 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorToJsonValue001, TestSize.Level1)
     filter.filterExt.clear();
     EXPECT_FALSE(filter.IsFastFilter());
     richEditorPattern->SetRequestKeyboardOnFocus(true);
+    richEditorPattern->SetSupportStyledUndo(true);
     richEditorPattern->ToJsonValue(jsonObject, filter);
     EXPECT_EQ(jsonObject->GetString("enableKeyboardOnFocus"), "true");
+    EXPECT_EQ(jsonObject->GetInt("undoStyle"), 1);
 
     filter.filterFixed = 10;
     EXPECT_TRUE(filter.IsFastFilter());

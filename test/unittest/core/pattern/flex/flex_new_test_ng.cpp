@@ -999,4 +999,330 @@ HWTEST_F(FlexNewTestNG, FlexInfinityPercentHeight001, TestSize.Level1)
     EXPECT_EQ(flexRowSensitive.first, true);
     EXPECT_EQ(flexRowSensitive.second, false);
 }
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        flexInner = CreateFlexRow([this](FlexModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Flex()
+            .width(LayoutPolicy.MATCH_PARENT)
+            .height(LayoutPolicy.MATCH_PARENT)
+        }
+        .width("500px")
+        .height("300px")
+    */
+
+    // Expect flex's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest002
+ * @tc.desc: test the measure result when setting matchParent and parent has padding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ViewAbstract::SetPadding(CalcLength(20));
+        flexInner = CreateFlexRow([this](FlexModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Flex()
+            .width(LayoutPolicy.MATCH_PARENT)
+            .height(LayoutPolicy.MATCH_PARENT)
+        }
+        .width("500px")
+        .height("300px")
+        .padding("20px")
+    */
+
+    // Expect flex's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 460, height is 260 and offset is [20.0, 20.0].
+    auto geometryNode1 = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(460.0f, 260.0f));
+    EXPECT_EQ(offset1, OffsetF(20.0f, 20.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest003
+ * @tc.desc: test the measure result when setting wrapContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest003, TestSize.Level1)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+        flexInner = CreateFlexRow([this](FlexModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500));
+            ViewAbstract::SetHeight(CalcLength(300));
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Flex()
+            .width("500px")
+            .height("300px")
+        }
+        .width(LayoutPolicy.WRAP_CONTENT)
+        .height(LayoutPolicy.WRAP_CONTENT)
+    */
+
+    // Expect flex's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest004
+ * @tc.desc: test the measure result when setting wrapContent and parent has constraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest004, TestSize.Level1)
+{
+    RefPtr<FrameNode> flexInner;
+    RefPtr<FrameNode> flexOutter;
+    RefPtr<FrameNode> flex;
+    flexOutter = CreateFlexRow([this, &flex, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(200.0f));
+        ViewAbstract::SetHeight(CalcLength(200.0f));
+        flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+            ViewAbstract::SetMaxWidth(CalcLength(150.0f));
+            ViewAbstract::SetMaxHeight(CalcLength(300.0f));
+            flexInner = CreateFlexRow([this](FlexModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(300.0f));
+                ViewAbstract::SetHeight(CalcLength(400.0f));
+                ViewAbstract::SetFlexShrink(0.0f);
+            });
+        });
+    });
+    ASSERT_NE(flexOutter, nullptr);
+    ASSERT_EQ(flexOutter->GetChildren().size(), 1);
+    CreateLayoutTask(flexOutter);
+
+    /* corresponding ets code:
+        Flex() {
+            Flex() {
+                Flex().width("300px").height("400px")
+            }
+            .width(LayoutPolicy.wrapContent)
+            .height(LayoutPolicy.wrapContent)
+            .constraintSize({ maxWidth: "150px", maxHeight: "300px" })
+        }.width("200px").height("200px")
+    */
+
+    // Expect flexOutter's width is 200, height is 200 and offset is [0.0, 0.0].
+    auto geometryNodeOutter = flexOutter->GetGeometryNode();
+    ASSERT_NE(geometryNodeOutter, nullptr);
+    auto sizeOutter = geometryNodeOutter->GetFrameSize();
+    auto offsetOutter = geometryNodeOutter->GetFrameOffset();
+    EXPECT_EQ(sizeOutter, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offsetOutter, OffsetF(0.0f, 0.0f));
+
+    // Expect flex's width is 150, height is 200 and offset is [25.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(150.0f, 200.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 300, height is 400 and offset is [-75.0, -100.0].
+    auto geometryNodeInner = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNodeInner, nullptr);
+    auto sizeInner = geometryNodeInner->GetFrameSize();
+    auto offsetInner = geometryNodeInner->GetFrameOffset();
+    EXPECT_EQ(sizeInner, SizeF(300.0f, 400.0f));
+    EXPECT_EQ(offsetInner, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest005
+ * @tc.desc: test the measure result when setting fixAtIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest005, TestSize.Level1)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+        flexInner = CreateFlexRow([this](FlexModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500.0f));
+            ViewAbstract::SetHeight(CalcLength(300.0f));
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Flex()
+            .width("500px")
+            .height("300px")
+        }
+        .width(LayoutPolicy.fixAtIdealSize)
+        .height(LayoutPolicy.fixAtIdealSize)
+    */
+
+    // Expect flex's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest006
+ * @tc.desc: test the measure result when setting fixAtIdealSize and parent has constraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest006, TestSize.Level1)
+{
+    RefPtr<FrameNode> flexInner;
+    RefPtr<FrameNode> flexOutter;
+    RefPtr<FrameNode> flex;
+    flexOutter = CreateFlexRow([this, &flex, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(200.0f));
+        ViewAbstract::SetHeight(CalcLength(200.0f));
+        flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+            ViewAbstract::SetMaxWidth(CalcLength(150.0f));
+            ViewAbstract::SetMaxHeight(CalcLength(300.0f));
+            flexInner = CreateFlexRow([this](FlexModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(300.0f));
+                ViewAbstract::SetHeight(CalcLength(400.0f));
+                ViewAbstract::SetFlexShrink(0.0f);
+            });
+        });
+    });
+    ASSERT_NE(flexOutter, nullptr);
+    ASSERT_EQ(flexOutter->GetChildren().size(), 1);
+    CreateLayoutTask(flexOutter);
+
+    /* corresponding ets code:
+        Flex() {
+            Flex() {
+                Flex().width("300px").height("400px")
+            }
+            .width(LayoutPolicy.fixAtIdealSize)
+            .height(LayoutPolicy.fixAtIdealSize)
+            .constraintSize({ maxWidth: "150px", maxHeight: "300px" })
+        }.width("200px").height("200px")
+    */
+
+    // Expect flexOutter's width is 200, height is 200 and offset is [0.0, 0.0].
+    auto geometryNodeOutter = flexOutter->GetGeometryNode();
+    ASSERT_NE(geometryNodeOutter, nullptr);
+    auto sizeOutter = geometryNodeOutter->GetFrameSize();
+    auto offsetOutter = geometryNodeOutter->GetFrameOffset();
+    EXPECT_EQ(sizeOutter, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offsetOutter, OffsetF(0.0f, 0.0f));
+
+    // Expect flex's width is 150, height is 300 and offset is [25.0, -50.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(150.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 300, height is 400 and offset is [-75.0, -50.0].
+    auto geometryNodeInner = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNodeInner, nullptr);
+    auto sizeInner = geometryNodeInner->GetFrameSize();
+    auto offsetInner = geometryNodeInner->GetFrameOffset();
+    EXPECT_EQ(sizeInner, SizeF(300.0f, 400.0f));
+    EXPECT_EQ(offsetInner, OffsetF(0.0f, 0.0f));
+}
 } // namespace OHOS::Ace::NG

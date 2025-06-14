@@ -185,9 +185,9 @@ private:
 
     bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
 
-    bool IsIrregularLine(int32_t lineIndex) const override;
-
     void ResetOffsetWhenHeightChanged();
+
+    bool IsIrregularLine(int32_t lineIndex) const override;
 
     void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
 

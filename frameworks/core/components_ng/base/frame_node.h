@@ -73,7 +73,6 @@ class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
 class DragDropRelatedConfigurations;
-class ScrollWindowAdapter;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -253,7 +252,7 @@ public:
 
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
 
-    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp);
+    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth = -1);
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
@@ -291,7 +290,8 @@ public:
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
-    void TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear = false);
+    void TriggerVisibleAreaChangeCallback(
+        uint64_t timestamp, bool forceDisappear = false, int32_t isVisibleChangeMinDepth = -1);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
@@ -446,7 +446,7 @@ public:
     HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
         TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
 
-    void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
+    ACE_NON_VIRTUAL void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
         const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
         TouchRestrict& touchRestrict);
 
@@ -548,7 +548,7 @@ public:
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
     // do not consider the transform of its ansestors
-    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false) const;
+    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false, bool checkScreen = false) const;
 
     // returns a node's offset relative to root.
     // and accumulate every ancestor node's graphic properties such as rotate and transform
@@ -853,7 +853,10 @@ public:
     // Called to perform layout children.
     void Layout() override;
 
-    int32_t GetTotalChildCount() const override;
+    int32_t GetTotalChildCount() const override
+    {
+        return UINode::TotalChildCount();
+    }
 
     int32_t GetTotalChildCountWithoutExpanded() const
     {
@@ -1291,7 +1294,8 @@ public:
 
     void OnThemeScopeUpdate(int32_t themeScopeId) override;
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
+    OffsetF CalculateOffsetRelativeToWindow(
+        uint64_t nanoTimestamp, bool logFlag = false, int32_t areaChangeMinDepth = -1);
 
     bool IsDebugInspectorId();
 
@@ -1331,10 +1335,26 @@ public:
         return topWindowBoundary_;
     }
 
+    void ClearCachedGlobalOffset()
+    {
+        cachedGlobalOffset_ = { 0, OffsetF() };
+    }
+
+    void ClearCachedIsFrameDisappear()
+    {
+        cachedIsFrameDisappear_ = { 0, false };
+    }
+
     void SetTopWindowBoundary(bool topWindowBoundary)
     {
         topWindowBoundary_ = topWindowBoundary;
     }
+
+    bool CheckTopScreen() const
+    {
+        return GetTag() == V2::SCREEN_ETS_TAG;
+    }
+
     bool CheckVisibleOrActive() override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)
@@ -1394,9 +1414,6 @@ public:
     void AddToOcclusionMap(bool enable);
     void MarkModifyDoneUnsafely();
     void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
-
-    ScrollWindowAdapter* GetScrollWindowAdapter() const;
-    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
 
 protected:
     void DumpInfo() override;
@@ -1487,8 +1504,8 @@ private:
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
-    bool IsFrameDisappear(uint64_t timestamp);
-    bool IsFrameAncestorDisappear(uint64_t timestamp);
+    bool IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
+    bool IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
     void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);

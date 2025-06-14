@@ -1432,4 +1432,31 @@ HWTEST_F(ScrollPatternTestNg, GetPagingDelta008, TestSize.Level1)
     auto result = scrollPattern->GetPagingDelta(-1.0f, 1300.0f, -4.0f);
     EXPECT_EQ(result, 0.0f);
 }
+
+/**
+ * @tc.name: DoJump001
+ * @tc.desc: Test DoJump
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, DoJump001, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
+    scrollPattern->currentOffset_ = 0.0f;
+    scrollPattern->scrollableDistance_ = 1.0f;
+    scrollPattern->canStayOverScroll_ = false;
+    scrollPattern->DoJump(0.0f, SCROLL_FROM_JUMP);
+    EXPECT_FALSE(scrollPattern->GetCanStayOverScroll());
+    scrollPattern->canStayOverScroll_ = true;
+    scrollPattern->DoJump(0.0f, SCROLL_FROM_JUMP);
+    EXPECT_TRUE(scrollPattern->GetCanStayOverScroll());
+    scrollPattern->DoJump(10.0f, SCROLL_FROM_JUMP);
+
+    scrollPattern->currentOffset_ = 1.0f;
+    scrollPattern->axis_ = Axis::VERTICAL;
+    scrollPattern->DoJump(1000.0f, SCROLL_FROM_JUMP);
+    EXPECT_TRUE(scrollPattern->IsOutOfBoundary());
+}
 } // namespace OHOS::Ace::NG

@@ -2165,7 +2165,7 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
     auto frameNode = DynamicCast<FrameNode>(uiNode);
-    attachedNodeSet_.erase(RawPtr(uiNode));
+    attachedNodeSet_.erase(WeakPtr(uiNode));
     CHECK_NULL_VOID(frameNode);
 
     RemoveStoredNode(frameNode->GetRestoreId());
@@ -2880,14 +2880,14 @@ void PipelineContext::OnTouchEvent(
         eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddTouchPoint(scalePoint);
 #ifdef IS_RELEASE_VERSION
             TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
-                "InputTracking id:%{public}d, fingerId:%{public}d, type=%{public}d, inject=%{public}d, "
-                "isPrivacyMode=%{public}d",
+                "ITK Id:%{public}d, fId:%{public}d, T:%{public}d, I=%{public}d, "
+                "M=%{public}d",
                 scalePoint.touchEventId, scalePoint.id, (int)scalePoint.type, scalePoint.isInjected,
                 scalePoint.isPrivacyMode);
 #else
             TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
-                "InputTracking id:%{public}d, fingerId:%{public}d, x=%{public}.3f, y=%{public}.3f type=%{public}d, "
-                "inject=%{public}d",
+                "ITK Id:%{public}d, fId:%{public}d, x=%{public}.3f, y=%{public}.3f T=%{public}d, "
+                "I=%{public}d",
                 scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type,
                 scalePoint.isInjected);
 #endif
@@ -2907,6 +2907,7 @@ void PipelineContext::OnTouchEvent(
     }
     if (scalePoint.type == TouchType::DOWN) {
         SetUiDvsyncSwitch(false);
+        CompensateTouchMoveEventBeforeDown();
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
@@ -3066,6 +3067,23 @@ void PipelineContext::OnTouchEvent(
     if (postEventManager_) {
         postEventManager_->SetPassThroughResult(eventManager_->GetPassThroughResult());
     }
+}
+
+void PipelineContext::CompensateTouchMoveEventBeforeDown()
+{
+    if (touchEvents_.empty()) {
+        return;
+    }
+    std::unordered_map<int32_t, TouchEvent> historyPointsById;
+    for (auto iter = touchEvents_.rbegin(); iter != touchEvents_.rend(); ++iter) {
+        auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
+        historyPointsById.emplace(scalePoint.id, scalePoint);
+        historyPointsById[scalePoint.id].history.insert(historyPointsById[scalePoint.id].history.begin(), scalePoint);
+    }
+    for (const auto& item : historyPointsById) {
+        eventManager_->DispatchTouchEvent(item.second);
+    }
+    touchEvents_.clear();
 }
 
 bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event)
@@ -4268,6 +4286,11 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId)
 {
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    if (frameNode) {
+        frameNode->ClearCachedIsFrameDisappear();
+    }
+
     onVisibleAreaChangeNodeIds_.erase(nodeId);
 }
 
@@ -4279,8 +4302,10 @@ void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp)
     }
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp);
+        frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp, false, isDisappearChangeNodeMinDepth_);
     }
+
+    isDisappearChangeNodeMinDepth_ = 0;
 }
 
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
@@ -4291,6 +4316,11 @@ void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
 {
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    if (frameNode) {
+        frameNode->ClearCachedGlobalOffset();
+    }
+
     onAreaChangeNodeIds_.erase(nodeId);
     isOnAreaChangeNodesCacheVaild_ = false;
 }
@@ -4308,8 +4338,10 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     }
     auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
+        frameNode->TriggerOnAreaChangeCallback(nanoTimestamp, areaChangeNodeMinDepth_);
     }
+
+    areaChangeNodeMinDepth_ = 0;
     UpdateFormLinkInfos();
 }
 
@@ -4558,10 +4590,13 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
-    std::unordered_set<UINode*> nodeSet;
+    std::set<WeakPtr<UINode>> nodeSet;
     std::swap(nodeSet, attachedNodeSet_);
-    for (auto& node : nodeSet) {
-        node->DetachFromMainTree();
+    for (const auto& node : nodeSet) {
+        auto illegalNode = node.Upgrade();
+        if (illegalNode) {
+            illegalNode->DetachFromMainTree();
+        }
     }
     rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
@@ -6071,12 +6106,12 @@ bool PipelineContext::FlushModifierAnimation(uint64_t nanoTimestamp)
 
 void PipelineContext::RegisterAttachedNode(UINode* uiNode)
 {
-    attachedNodeSet_.emplace(uiNode);
+    attachedNodeSet_.emplace(WeakClaim(uiNode));
 }
 
 void PipelineContext::RemoveAttachedNode(UINode* uiNode)
 {
-    attachedNodeSet_.erase(uiNode);
+    attachedNodeSet_.erase(WeakClaim(uiNode));
 }
 
 ScopedLayout::ScopedLayout(PipelineContext* pipeline)

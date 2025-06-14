@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -856,6 +856,22 @@ void GridModelNG::CreateWithResourceObjFriction(FrameNode* frameNode, const RefP
         }
     };
     pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
+}
+void GridModelNG::SetSyncLoad(bool syncLoad)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad);
+}
 
+void GridModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad, frameNode);
+}
+
+bool GridModelNG::GetSyncLoad(FrameNode* frameNode)
+{
+    bool result = false;
+    CHECK_NULL_RETURN(frameNode, result);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, SyncLoad, result, frameNode, false);
+    return result;
 }
 } // namespace OHOS::Ace::NG

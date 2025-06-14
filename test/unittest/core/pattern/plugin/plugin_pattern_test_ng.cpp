@@ -615,7 +615,7 @@ HWTEST_F(PluginPatternTestNg, GetDrawDelegate, TestSize.Level1)
     drawRSFrame->DrawRSFrame(rsNode, Rect(100.0, 100.0, 100.0, 100.0));
 }
 
-/**s
+/**
  * @tc.name: PluginLayoutPropertyTestNg
  * @tc.desc: Test funcions in PluginLayoutProperty.
  * @tc.type: FUNC

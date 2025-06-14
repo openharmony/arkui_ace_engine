@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/common/frontend.h"
+#include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/form/resource/form_request_data.h"
 
@@ -41,12 +42,15 @@ class ACE_FORCE_EXPORT UdmfClient : public AceType {
 public:
     static UdmfClient* GetInstance();
     virtual RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) = 0;
+    virtual RefPtr<DataLoadParams> TransformDataLoadParams(napi_env env, napi_value napiValue) = 0;
     virtual RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) = 0;
+    virtual RefPtr<DataLoadParams> TransformDataLoadParamsForNative(void* rawData) = 0;
     virtual void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) = 0;
     virtual napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
     virtual napi_value TransformSummary(std::map<std::string, int64_t>& summary) = 0;
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;
     virtual int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) = 0;
+    virtual int32_t SetDelayInfo(RefPtr<DataLoadParams> dataLoadParams, std::string& key) = 0;
     virtual int32_t GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key) = 0;
     virtual int32_t GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap,
         std::map<std::string, int64_t>& detailedSummaryMap) = 0;

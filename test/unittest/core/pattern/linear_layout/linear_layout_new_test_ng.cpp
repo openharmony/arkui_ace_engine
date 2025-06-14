@@ -18,6 +18,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "test/mock/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -211,6 +212,280 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest002, TestSize.Level1)
     auto offset3 = geometryNode3->GetFrameOffset();
     EXPECT_EQ(size3, SizeF(500.0f, 300.0f));
     EXPECT_EQ(offset3, OffsetF(0.0f, 300.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest003
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest003, TestSize.Level1)
+{
+    RefPtr<FrameNode> columnInner;
+    auto column = CreateColumn([this, &columnInner](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        columnInner = CreateColumn([this](ColumnModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        });
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    /* corresponding ets code:
+        Column() {
+          Column()
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
+        }
+        .width("500px")
+        .height("300px")
+    */
+
+    // Expect column's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = column->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect columnInner's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = columnInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest004
+ * @tc.desc: test the measure result when setting wrapContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest004, TestSize.Level1)
+{
+    RefPtr<FrameNode> columnInner;
+    auto column = CreateColumn([this, &columnInner](ColumnModelNG model) {
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+        columnInner = CreateColumn([this](ColumnModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500));
+            ViewAbstract::SetHeight(CalcLength(300));
+        });
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    /* corresponding ets code:
+        Column() {
+          Column()
+            .width("500px")
+            .height("300px")
+        }
+        .width(LayoutPolicy.wrapContent)
+        .height(LayoutPolicy.wrapContent)
+    */
+
+    // Expect column's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = column->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect columnInner's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = columnInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest005
+ * @tc.desc: test the measure result when setting wrapContent and parent has constraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest005, TestSize.Level1)
+{
+    RefPtr<FrameNode> columnInner;
+    RefPtr<FrameNode> columnOutter;
+    RefPtr<FrameNode> column;
+    columnOutter = CreateColumn([this, &column, &columnInner](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(200.0f));
+        ViewAbstract::SetHeight(CalcLength(200.0f));
+        column = CreateColumn([this, &columnInner](ColumnModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+            ViewAbstract::SetMaxWidth(CalcLength(150.0f));
+            ViewAbstract::SetMaxHeight(CalcLength(300.0f));
+            columnInner = CreateColumn([this](ColumnModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(300.0f));
+                ViewAbstract::SetHeight(CalcLength(400.0f));
+            });
+        });
+    });
+    ASSERT_NE(columnOutter, nullptr);
+    ASSERT_EQ(columnOutter->GetChildren().size(), 1);
+    CreateLayoutTask(columnOutter);
+
+    /* corresponding ets code:
+        Column() {
+            Column() {
+                Column().width("300px").height("400px")
+            }
+            .width(LayoutPolicy.wrapContent)
+            .height(LayoutPolicy.wrapContent)
+            .constraintSize({ maxWidth: "150px", maxHeight: "300px" })
+        }.width("200px").height("200px")
+    */
+
+    // Expect columnOutter's width is 200, height is 200 and offset is [0.0, 0.0].
+    auto geometryNodeOutter = columnOutter->GetGeometryNode();
+    ASSERT_NE(geometryNodeOutter, nullptr);
+    auto sizeOutter = geometryNodeOutter->GetFrameSize();
+    auto offsetOutter = geometryNodeOutter->GetFrameOffset();
+    EXPECT_EQ(sizeOutter, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offsetOutter, OffsetF(0.0f, 0.0f));
+
+    // Expect column's width is 150, height is 200 and offset is [25.0, 0.0].
+    auto geometryNode = column->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(150.0f, 200.0f));
+    EXPECT_EQ(offset, OffsetF(25.0f, 0.0f));
+
+    // Expect columnInner's width is 300, height is 400 and offset is [-75.0, -100.0].
+    auto geometryNodeInner = columnInner->GetGeometryNode();
+    ASSERT_NE(geometryNodeInner, nullptr);
+    auto sizeInner = geometryNodeInner->GetFrameSize();
+    auto offsetInner = geometryNodeInner->GetFrameOffset();
+    EXPECT_EQ(sizeInner, SizeF(300.0f, 400.0f));
+    EXPECT_EQ(offsetInner, OffsetF(-75.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest006
+ * @tc.desc: test the measure result when setting fixAtIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest006, TestSize.Level1)
+{
+    RefPtr<FrameNode> columnInner;
+    auto column = CreateColumn([this, &columnInner](ColumnModelNG model) {
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+        columnInner = CreateColumn([this](ColumnModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500.0f));
+            ViewAbstract::SetHeight(CalcLength(300.0f));
+        });
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    /* corresponding ets code:
+        Column() {
+          Column()
+            .width("500px")
+            .height("300px")
+        }
+        .width(LayoutPolicy.fixAtIdealSize)
+        .height(LayoutPolicy.fixAtIdealSize)
+    */
+
+    // Expect column's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = column->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect columnInner's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = columnInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest007
+ * @tc.desc: test the measure result when setting fixAtIdealSize and parent has constraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest007, TestSize.Level1)
+{
+    RefPtr<FrameNode> columnInner;
+    RefPtr<FrameNode> columnOutter;
+    RefPtr<FrameNode> column;
+    columnOutter = CreateColumn([this, &column, &columnInner](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(200.0f));
+        ViewAbstract::SetHeight(CalcLength(200.0f));
+        column = CreateColumn([this, &columnInner](ColumnModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+            ViewAbstract::SetMaxWidth(CalcLength(150.0f));
+            ViewAbstract::SetMaxHeight(CalcLength(300.0f));
+            columnInner = CreateColumn([this](ColumnModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(300.0f));
+                ViewAbstract::SetHeight(CalcLength(400.0f));
+            });
+        });
+    });
+    ASSERT_NE(columnOutter, nullptr);
+    ASSERT_EQ(columnOutter->GetChildren().size(), 1);
+    CreateLayoutTask(columnOutter);
+
+    /* corresponding ets code:
+        Column() {
+            Column() {
+                Column().width("300px").height("400px")
+            }
+            .width(LayoutPolicy.fixAtIdealSize)
+            .height(LayoutPolicy.fixAtIdealSize)
+            .constraintSize({ maxWidth: "150px", maxHeight: "300px" })
+        }.width("200px").height("200px")
+    */
+
+    // Expect columnOutter's width is 200, height is 200 and offset is [0.0, 0.0].
+    auto geometryNodeOutter = columnOutter->GetGeometryNode();
+    ASSERT_NE(geometryNodeOutter, nullptr);
+    auto sizeOutter = geometryNodeOutter->GetFrameSize();
+    auto offsetOutter = geometryNodeOutter->GetFrameOffset();
+    EXPECT_EQ(sizeOutter, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offsetOutter, OffsetF(0.0f, 0.0f));
+
+    // Expect column's width is 150, height is 300 and offset is [25.0, -50.0].
+    auto geometryNode = column->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(150.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(25.0f, 0.0f));
+
+    // Expect columnInner's width is 300, height is 400 and offset is [-75.0, -50.0].
+    auto geometryNodeInner = columnInner->GetGeometryNode();
+    ASSERT_NE(geometryNodeInner, nullptr);
+    auto sizeInner = geometryNodeInner->GetFrameSize();
+    auto offsetInner = geometryNodeInner->GetFrameOffset();
+    EXPECT_EQ(sizeInner, SizeF(300.0f, 400.0f));
+    EXPECT_EQ(offsetInner, OffsetF(-75.0f, 0.0f));
 }
 
 /**

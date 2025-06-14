@@ -48,7 +48,7 @@ public:
 void DragControllerFuncWrapperTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
-    MockContainer::SetUp();
+    MockContainer::SetUp(NG::PipelineContext::GetCurrentContext());
     MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
 }
 
@@ -625,7 +625,28 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0014, Tes
     NG::DragControllerFuncWrapper::GetDragPreviewInfo(overlayManager, containerId);
     auto imageNode = overlayManager->GetDragPixelMapContentNode();
     EXPECT_NE(imageNode, nullptr);
-    EXPECT_EQ(dragDropManager->GetDragPreviewInfo().imageNode, nullptr);
+    EXPECT_NE(dragDropManager->GetDragPreviewInfo().imageNode, nullptr);
+}
+
+/**
+ * @tc.name: DragDropControllerFuncWrapperTest0015
+ * @tc.desc: Test GetScaleInfo.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetScaleInfo function.
+     * @tc.expected: step1. isNeedScale is true and sacle is not 1.0f.
+     */
+    int32_t containerId = 100;
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
+    auto scaleData = NG::DragControllerFuncWrapper::GetScaleInfo(containerId, WIDTH, HEIGHT);
+    EXPECT_NE(scaleData, nullptr);
+    EXPECT_NE(scaleData->isNeedScale, false);
+    EXPECT_NE(scaleData->scale, 1.0f);
 }
 
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace::NG {
 // BoxLayout is the class for box type measure, layout.
@@ -49,6 +50,8 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& frameSize);
+    
+    static Alignment MapLocalizedToAlignment(std::string localizedAlignment);
 
 protected:
     std::list<RefPtr<LayoutWrapper>> layoutPolicyChildren_;

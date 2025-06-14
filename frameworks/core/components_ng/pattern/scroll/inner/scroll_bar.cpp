@@ -26,6 +26,7 @@ constexpr double BAR_ADAPT_EPSLION = 1.0;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
 constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 30;
+constexpr int32_t OGN_FIGNERID = -1;
 #ifdef ARKUI_WEARABLE
 constexpr char SCROLL_BAR_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
 #endif
@@ -420,6 +421,9 @@ void ScrollBar::SetGestureEvent()
                     inRegion = scrollBar->InBarHoverRegion(point);
                     scrollBar->MarkNeedRender();
                 }
+                if (inRegion) {
+                    scrollBar->fingerId_ = touch.GetFingerId();
+                }
                 if (!scrollBar->IsPressed()) {
                     scrollBar->SetPressed(inRegion);
                 }
@@ -429,12 +433,13 @@ void ScrollBar::SetGestureEvent()
             }
             if ((info.GetTouches().front().GetTouchType() == TouchType::UP ||
                     info.GetTouches().front().GetTouchType() == TouchType::CANCEL) &&
-                    (info.GetTouches().size() <= 1)) {
+                    (scrollBar->fingerId_ == info.GetTouches().front().GetFingerId())) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
                     scrollBar->ScheduleDisappearDelayTask();
                 }
                 scrollBar->SetPressed(false);
+                scrollBar->fingerId_ = OGN_FIGNERID;
                 scrollBar->MarkNeedRender();
             }
         });

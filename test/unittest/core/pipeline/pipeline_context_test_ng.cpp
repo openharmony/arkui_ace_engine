@@ -751,7 +751,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     auto frameNodeId_017 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_017, nullptr);
     ASSERT_NE(frameNode, nullptr);
-    manager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps2: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and
@@ -1004,7 +1003,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     auto frameNodeId_022 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_022, nullptr);
     ASSERT_NE(frameNode, nullptr);
-    eventManager->AddDragFrameNode(frameNode->GetId(), frameNode);
     KeyEvent event;
 
     /**

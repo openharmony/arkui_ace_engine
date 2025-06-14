@@ -28,9 +28,15 @@ using namespace std;
 
 class MediaQueryTest : public TestNG {};
 
-HWTEST_F(MediaQueryTest, GetOrientation, TestSize.Level1)
+/**
+ * @tc.name: GetOrientationTest1
+ * @tc.desc: Test GetOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MediaQueryTest, GetOrientationTest1, TestSize.Level1)
 {
     auto container = MockContainer::Current();
+    ASSERT_TRUE(container);
     container->SetCurrentDisplayOrientation(DisplayOrientation::PORTRAIT);
     EXPECT_EQ(Framework::MediaQueryInfo::GetOrientation(container), "portrait");
 
@@ -42,7 +48,19 @@ HWTEST_F(MediaQueryTest, GetOrientation, TestSize.Level1)
 
     container->SetCurrentDisplayOrientation(DisplayOrientation::LANDSCAPE_INVERTED);
     EXPECT_EQ(Framework::MediaQueryInfo::GetOrientation(container), "landscape");
-
-    EXPECT_EQ(Framework::MediaQueryInfo::GetOrientation(nullptr), "");
 }
-} // namespace OHOS::Ace::NG
+
+/**
+ * @tc.name: GetOrientationTest2
+ * @tc.desc: Test GetOrientation, container == nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MediaQueryTest, GetOrientationTest2, TestSize.Level1)
+{
+    SystemProperties::SetDeviceOrientation(0);
+    EXPECT_EQ(Framework::MediaQueryInfo::GetOrientation(nullptr), "portrait");
+
+    SystemProperties::SetDeviceOrientation(1);
+    EXPECT_EQ(Framework::MediaQueryInfo::GetOrientation(nullptr), "landscape");
+}
+} // namespace OHOS::Ace::NG

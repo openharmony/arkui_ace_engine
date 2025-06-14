@@ -914,10 +914,6 @@ public:
         return dragContents_;
     }
 
-    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode);
-
-    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode);
-
     bool IsDragging() const
     {
         return dragStatus_ == DragStatus::DRAGGING;

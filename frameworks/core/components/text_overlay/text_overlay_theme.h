@@ -312,6 +312,11 @@ public:
         return Dimension(16.0_vp).ConvertToPx();
     }
 
+    float GetDefaultMenuPositionY()
+    {
+        return Dimension(16.0_vp).ConvertToPx();
+    }
+
     Dimension GetHandleLineWidth() const
     {
         return 2.0_vp;

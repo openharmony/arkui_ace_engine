@@ -46,9 +46,22 @@ std::string MediaQueryInfo::GetDeviceType()
     }
 }
 
+std::string MediaQueryInfo::GetSystemOrientation()
+{
+    switch (SystemProperties::GetDeviceOrientation()) {
+        case DeviceOrientation::PORTRAIT:
+            return "portrait";
+        case DeviceOrientation::LANDSCAPE:
+            return "landscape";
+        default:
+            break;
+    }
+    return "";
+}
+
 std::string MediaQueryInfo::GetOrientation(const RefPtr<OHOS::Ace::Container>& container)
 {
-    CHECK_NULL_RETURN(container, "");
+    CHECK_NULL_RETURN(container, GetSystemOrientation());
     switch (container->GetCurrentDisplayOrientation()) {
         case DisplayOrientation::PORTRAIT:
         case DisplayOrientation::PORTRAIT_INVERTED:

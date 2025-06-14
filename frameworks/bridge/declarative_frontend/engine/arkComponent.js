@@ -571,6 +571,19 @@ class AlignModifier extends ModifierWithKey {
   }
 }
 AlignModifier.identity = Symbol('align');
+class LayoutGravityModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().common.resetLayoutGravity(node);
+      } else {
+        getUINativeModule().common.setLayoutGravity(node, this.value);
+      }
+    }
+  }
+  LayoutGravityModifier.identity = Symbol('layoutGravity');
 class BackdropBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3751,7 +3764,7 @@ class ArkComponent {
   }
   applyStateUpdatePtr(instance) {
     if (this.nativePtr !== instance.nativePtr) {
-      ArkLogConsole.info("modifier pointer changed");
+      ArkLogConsole.debug("modifier pointer changed");
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
       if (instance._weakPtr) {
@@ -4673,11 +4686,18 @@ class ArkComponent {
     return this;
   }
   align(value) {
-    if (isNumber(value)) {
+    if (!isNumber(value) && !isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
+    } else {
       modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
     }
-    else {
-      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
+    return this;
+  }
+  layoutGravity(value) {
+    if (!isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, value);
     }
     return this;
   }
@@ -5612,6 +5632,10 @@ class UIScrollableCommonEvent extends UICommonEvent {
     this._onDidScrollEvent = callback;
     getUINativeModule().frameNode.setOnDidScroll(this._nodePtr, callback, this._instanceId);
   }
+  setOnWillStopDragging(callback) {
+    this._onWillStopDraggingEvent = callback;
+    getUINativeModule().frameNode.setOnWillStopDragging(this._nodePtr, callback, this._instanceId);
+  }
 }
 
 class UIListEvent extends UIScrollableCommonEvent {
@@ -5652,7 +5676,7 @@ class UIWaterFlowEvent extends UIScrollableCommonEvent {
 
 function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
   if (modifier === undefined || modifier === null) {
-    ArkLogConsole.info("custom modifier is undefined");
+    ArkLogConsole.debug("custom modifier is undefined");
     return;
   }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -5663,7 +5687,7 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
   if (modifier.isAttributeUpdater === true) {
     let modifierJS = globalThis.requireNapi('arkui.modifier');
     if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
-      ArkLogConsole.info("AttributeUpdater is created for the first time");
+      ArkLogConsole.debug("AttributeUpdater is created for the first time");
       modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
       modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
       modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
@@ -5687,7 +5711,7 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
 
 function attributeModifierFuncWithoutStateStyles(modifier, componentBuilder, modifierBuilder) {
   if (modifier === undefined || modifier === null) {
-    ArkLogConsole.info("custom modifier is undefined");
+    ArkLogConsole.debug("custom modifier is undefined");
     return;
   }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -6957,6 +6981,20 @@ class ScrollBarMarginModifier extends ModifierWithKey {
   }
 }
 ScrollBarMarginModifier.identity = Symbol('scrollBarMargin');
+
+class OnWillStopDraggingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnWillStopDragging(node);
+    } else {
+      getUINativeModule().scrollable.setOnWillStopDragging(node, this.value);
+    }
+  }
+}
+OnWillStopDraggingModifier.identity = Symbol('onWillStopDragging');
 
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -19327,6 +19365,19 @@ class ArkNestedScrollOptionsExt {
       );
   }
 }
+class ArkWebScriptItem {
+  constructor() {
+    this.scripts = undefined;
+    this.scriptRules = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.scripts === another.scripts &&
+      this.scriptRules === another.scriptRules
+    );
+  }
+}
 class ArkConstraintSizeOptions {
   constructor() {
     this.minWidth = undefined;
@@ -30472,13 +30523,16 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onConsole(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnConsoleModifier.identity, WebOnConsoleModifier, callback);
+    return this;
   }
   onErrorReceive(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnErrorReceiveModifier.identity, WebOnErrorReceiveModifier, callback);
+    return this;
   }
   onHttpErrorReceive(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnHttpErrorReceiveModifier.identity, WebOnHttpErrorReceiveModifier, callback);
+    return this;
   }
   onDownloadStart(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnDownloadStartModifier.identity, WebOnDownloadStartModifier, callback);
@@ -30522,7 +30576,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onHttpAuthRequest(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnHttpAuthRequestModifier.identity, WebOnHttpAuthRequestModifier, callback);
+    return this;
   }
   onInterceptRequest(callback) {
     throw new Error('Method not implemented.');
@@ -30555,7 +30610,8 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onSslErrorEvent(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnSslErrorEventModifier.identity, WebOnSslErrorEventModifier, callback);
+    return this;
   }
   onClientAuthenticationRequest(callback) {
     throw new Error('Method not implemented.');
@@ -30640,7 +30696,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onDataResubmitted(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnDataResubmittedModifier.identity, WebOnDataResubmittedModifier, callback);
+    return this;
   }
   pinchSmooth(isEnabled) {
     modifierWithKey(this._modifiersWithKeys, WebPinchSmoothModifier.identity, WebPinchSmoothModifier, isEnabled);
@@ -30671,7 +30728,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onLoadIntercept(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnLoadInterceptModifier.identity, WebOnLoadInterceptModifier, callback);
+    return this;
   }
   onControllerAttached(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnControllerAttachedModifier.identity, WebOnControllerAttachedModifier, callback);
@@ -30683,15 +30741,15 @@ class ArkWebComponent extends ArkComponent {
   }
   javaScriptOnDocumentStart(scripts) {
     let scriptInfo = new ArkWebScriptItem();
-    scriptInfo.scripts = scripts.map(item => { return item.id; });
-    scriptInfo.scriptRules = scripts.map(item => { return item.referencedId; });
+    scriptInfo.scripts = scripts.map(item => { return item.script; });
+    scriptInfo.scriptRules = scripts.map(item => { return item.scriptRules; });
     modifierWithKey(this._modifiersWithKeys, WebJavaScriptOnDocumentStartModifier.identity, WebJavaScriptOnDocumentStartModifier, scriptInfo);
     return this;
   }
   javaScriptOnDocumentEnd(scripts) {
     let scriptInfo = new ArkWebScriptItem();
-    scriptInfo.scripts = scripts.map(item => { return item.id; });
-    scriptInfo.scriptRules = scripts.map(item => { return item.referencedId; });
+    scriptInfo.scripts = scripts.map(item => { return item.script; });
+    scriptInfo.scriptRules = scripts.map(item => { return item.scriptRules; });
     modifierWithKey(this._modifiersWithKeys, WebJavaScriptOnDocumentEndModifier.identity, WebJavaScriptOnDocumentEndModifier, scriptInfo);
     return this;
   }
@@ -30746,7 +30804,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onOverrideUrlLoading(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnOverrideUrlLoadingModifier.identity, WebOnOverrideUrlLoadingModifier, callback);
+    return this;
   }
   enableNativeMediaPlayer(config) {
     throw new Error('Method not implemented.');
@@ -32004,6 +32063,125 @@ class WebOnInterceptKeyEventModifier extends ModifierWithKey {
 }
 WebOnInterceptKeyEventModifier.identity = Symbol('webOnInterceptKeyEventModifier');
 
+class WebOnErrorReceiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnErrorReceive(node);
+    }
+    else {
+      getUINativeModule().web.setOnErrorReceive(node, this.value);
+    }
+  }
+}
+WebOnErrorReceiveModifier.identity = Symbol('webOnErrorReceiveModifier');
+
+class WebOnLoadInterceptModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnLoadIntercept(node);
+    }
+    else {
+      getUINativeModule().web.setOnLoadIntercept(node, this.value);
+    }
+  }
+}
+WebOnLoadInterceptModifier.identity = Symbol('webOnLoadInterceptModifier');
+
+class WebOnHttpErrorReceiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnHttpErrorReceive(node);
+    }
+    else {
+      getUINativeModule().web.setOnHttpErrorReceive(node, this.value);
+    }
+  }
+}
+WebOnHttpErrorReceiveModifier.identity = Symbol('webOnHttpErrorReceiveModifier');
+
+class WebOnOverrideUrlLoadingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnOverrideUrlLoading(node);
+    }
+    else {
+      getUINativeModule().web.setOnOverrideUrlLoading(node, this.value);
+    }
+  }
+}
+WebOnOverrideUrlLoadingModifier.identity = Symbol('webOnOverrideUrlLoadingModifier');
+
+class WebOnHttpAuthRequestModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnHttpAuthRequest(node);
+    }
+    else {
+      getUINativeModule().web.setOnHttpAuthRequest(node, this.value);
+    }
+  }
+}
+WebOnHttpAuthRequestModifier.identity = Symbol('webOnHttpAuthRequestModifier');
+
+class WebOnConsoleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnConsole(node);
+    }
+    else {
+      getUINativeModule().web.setOnConsole(node, this.value);
+    }
+  }
+}
+WebOnConsoleModifier.identity = Symbol('webOnConsoleModifier');
+
+class WebOnSslErrorEventModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnSslErrorEvent(node);
+    }
+    else {
+      getUINativeModule().web.setOnSslErrorEvent(node, this.value);
+    }
+  }
+}
+WebOnSslErrorEventModifier.identity = Symbol('webOnSslErrorEventModifier');
+
+class WebOnDataResubmittedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnDataResubmitted(node);
+    }
+    else {
+      getUINativeModule().web.setOnDataResubmitted(node, this.value);
+    }
+  }
+}
+WebOnDataResubmittedModifier.identity = Symbol('webOnDataResubmittedModifier');
 // @ts-ignore
 if (globalThis.Web !== undefined) {
   globalThis.Web.attributeModifier = function (modifier) {

@@ -706,4 +706,30 @@ void TimePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.angularVelocity, SceneStatus::RUNNING);
 }
 #endif
+
+std::string TimePickerColumnPattern::GetCurrentOption() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, "");
+    auto blendNode = DynamicCast<FrameNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(blendNode, "");
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_RETURN(stackNode, "");
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_RETURN(parentNode, "");
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, "");
+    auto pattern = frameNode->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_RETURN(pattern, "");
+    auto index = pattern->GetCurrentIndex();
+    auto options = pattern->GetOptions();
+    auto it = options.find(frameNode);
+    if (it != options.end()) {
+        if (it->second < index) {
+            return "";
+        }
+        return timePickerRowPattern->GetOptionsValue(frameNode, index);
+    }
+    return "";
+}
 } // namespace OHOS::Ace::NG

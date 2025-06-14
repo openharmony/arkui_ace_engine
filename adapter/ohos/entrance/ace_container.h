@@ -928,6 +928,8 @@ private:
     static bool SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, SystemBarType type,
         std::optional<bool> enable, std::optional<bool> animation);
 
+    void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
+
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;

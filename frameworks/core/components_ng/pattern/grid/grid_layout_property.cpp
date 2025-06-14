@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,6 +77,7 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("irregularIndexes", irregularIndexesArray, filter);
     json->PutExtAttr("alignItems", GetAlignItems().value_or(GridItemAlignment::DEFAULT) ==
         GridItemAlignment::DEFAULT ? "GridItemAlignment.Default" : "GridItemAlignment.Stretch", filter);
+    json->PutExtAttr("syncLoad", propSyncLoad_.value_or(false), filter);
 }
 
 std::string GridLayoutProperty::GetGridDirectionStr() const
@@ -133,11 +134,6 @@ void GridLayoutProperty::UpdateIrregularFlag(const GridLayoutOptions& layoutOpti
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetFrontendType() == FrontendType::ARK_TS) {
-        return; // always use new layout in ArkTS
-    }
     pattern->SetIrregular(false);
     CHECK_NULL_VOID(layoutOptions.getSizeByIndex);
 

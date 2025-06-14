@@ -64,7 +64,7 @@ class ModifierUtils {
   static mergeMapsEmplace(stageMap, newMap, componentOverrideMap) {
     newMap.forEach((value, key) => {
       if (!key) {
-        ArkLogConsole.info('key of modifier map is undefined, ModifierWithKey is ' +
+        ArkLogConsole.debug('key of modifier map is undefined, ModifierWithKey is ' +
           (value ? value.constructor.name.toString() : 'undefined'));
       } else {
         if (componentOverrideMap.has(key.toString())) {
@@ -109,7 +109,7 @@ class ModifierUtils {
           attributeModifierWithKey.value === null)
       );
     } else {
-      ArkLogConsole.info('pointer is invalid when putDirtyModifier in ' + (arkModifier ?
+      ArkLogConsole.debug('pointer is invalid when putDirtyModifier in ' + (arkModifier ?
         arkModifier.constructor.name.toString() : 'undefined') + ' of ' + (attributeModifierWithKey ?
         attributeModifierWithKey.constructor.name.toString() : 'undefined'));
     }
@@ -225,7 +225,7 @@ class AttributeUpdater {
   onComponentChanged(instance) {}
   updateConstructorParams(...args) {
     if (!this.attribute) {
-      ArkLogConsole.info('AttributeUpdater has not been initialized before updateConstructorParams.');
+      ArkLogConsole.debug('AttributeUpdater has not been initialized before updateConstructorParams.');
       return;
     }
     this.attribute.initialize(args);

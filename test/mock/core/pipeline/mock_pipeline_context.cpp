@@ -530,7 +530,10 @@ void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color) {}
 
 bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
 {
-    return false;
+    if (!isFormRender_) {
+        return false;
+    }
+    return true;
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
@@ -1105,6 +1108,11 @@ bool PipelineBase::CloseImplicitAnimation()
 }
 
 bool PipelineBase::IsDestroyed()
+{
+    return false;
+}
+
+bool PipelineBase::CheckIfGetTheme()
 {
     return false;
 }

@@ -1915,6 +1915,7 @@ HWTEST_F(GridScrollerEventTestNg, SpringAnimationTest001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0.f);
     EXPECT_EQ(reachEndTimes, 2);
@@ -1977,4 +1978,81 @@ HWTEST_F(GridScrollerEventTestNg, SpringAnimationTest002, TestSize.Level1)
     EXPECT_EQ(reachEndTimes, 2);
 }
 
+/**
+ * @tc.name: HandleOnWillStopDragging001
+ * @tc.desc: Test HandleOnWillStopDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerEventTestNg, HandleOnWillStopDragging001, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateFixedItems(20);
+    CreateDone();
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
+}
+
+/**
+ * @tc.name: HandleOnWillStopDragging002
+ * @tc.desc: Test HandleOnWillStopDragging002
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerEventTestNg, HandleOnWillStopDragging002, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateFixedItems(20);
+    CreateDone();
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
+}
 } // namespace OHOS::Ace::NG

@@ -434,6 +434,8 @@ enum class SymbolStyleAttribute {
     COLOR_LIST = 4,
     // RenderStrategy
     RENDER_MODE = 5,
+    GRADIENT_COLOR = 6,
+    SYMBOL_SHADOW = 7,
     MAX_SYMBOL_STYLE,
 };
 

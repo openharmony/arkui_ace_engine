@@ -1916,6 +1916,7 @@ struct ArkUIDragAction {
     void* userData;
     DragStatusCallback listener;
     void* unifiedData;
+    void* dataLoadParams;
     bool hasTouchPoint = false;
     void** pixelmapNativeList;
 };
@@ -2116,7 +2117,10 @@ struct ArkUICommonModifier {
     void (*setOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetOpacity)(ArkUINodeHandle node);
     void (*setAlign)(ArkUINodeHandle node, ArkUI_Int32 align);
+    void (*setLocalizedAlign)(ArkUINodeHandle node, ArkUI_CharPtr align);
     void (*resetAlign)(ArkUINodeHandle node);
+    void (*setLayoutGravity)(ArkUINodeHandle node, ArkUI_CharPtr align);
+    void (*resetLayoutGravity)(ArkUINodeHandle node);
     void (*setBackdropBlur)(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
         ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation);
     void (*resetBackdropBlur)(ArkUINodeHandle node);
@@ -3640,6 +3644,8 @@ struct ArkUIScrollableModifier {
         ArkUI_Float32 marginEnd, ArkUI_Int32 marginEndLengthUnit);
     void (*resetScrollBarMargin)(ArkUINodeHandle node);
     void (*getScrollBarMargin)(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2]);
+    void (*setOnWillStopDragging)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWillStopDragging)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {
@@ -4789,6 +4795,22 @@ struct ArkUIWebModifier {
     void (*resetWebNestedScrollExt)(ArkUINodeHandle node);
     void (*setOnInterceptKeyEventCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnInterceptKeyEventCallBack)(ArkUINodeHandle node);
+    void (*setOnErrorReceive)(ArkUINodeHandle node, void* callback);
+    void (*resetOnErrorReceive)(ArkUINodeHandle node);
+    void (*setOnLoadIntercept)(ArkUINodeHandle node, void* callback);
+    void (*resetOnLoadIntercept)(ArkUINodeHandle node);
+    void (*setOnHttpErrorReceive)(ArkUINodeHandle node, void* callback);
+    void (*resetOnHttpErrorReceive)(ArkUINodeHandle node);
+    void (*setOnOverrideUrlLoading)(ArkUINodeHandle node, void* callback);
+    void (*resetOnOverrideUrlLoading)(ArkUINodeHandle node);
+    void (*setOnHttpAuthRequest)(ArkUINodeHandle node, void* callback);
+    void (*resetOnHttpAuthRequest)(ArkUINodeHandle node);
+    void (*setOnConsole)(ArkUINodeHandle node, void* callback);
+    void (*resetOnConsole)(ArkUINodeHandle node);
+    void (*setOnSslErrorEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetOnSslErrorEvent)(ArkUINodeHandle node);
+    void (*setOnDataResubmitted)(ArkUINodeHandle node, void* callback);
+    void (*resetOnDataResubmitted)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {
@@ -6825,6 +6847,8 @@ struct ArkUIBasicAPI {
 
     ArkUI_Int32 (*postIdleCallback)(ArkUI_Int32 instanceId, void* userData,
     void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData));
+
+    ArkUI_Int32 (*greatOrEqualTargetAPIVersion)(ArkUI_Int32 version);
 };
 
 struct ArkUIMultiThreadManagerAPI {

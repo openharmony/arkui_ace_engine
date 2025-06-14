@@ -24,8 +24,8 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/property/templates_parser.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
@@ -37,6 +37,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     GetExpandArea(props_, info_);
 
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
+    syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren;
     Init(size);
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
         info_->isDataValid_ = false;
@@ -46,21 +47,27 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
         FillBack(mainLen_, change, itemCnt_ - 1);
     }
 
-    if (info_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
-        MeasureOnJump(info_->jumpIndex_, info_->align_);
-    } else if (info_->targetIndex_) {
-        MeasureBeforeAnimation(*info_->targetIndex_);
-    } else if (canSkip_ && info_->TryConvertLargeDeltaToJump(mainLen_, itemCnt_)) {
-        info_->jumpForRecompose_ = info_->jumpIndex_;
-        MeasureOnJump(info_->jumpIndex_, ScrollAlign::START);
-    } else {
-        MeasureOnOffset(info_->delta_);
+    if (!info_->measureInNextFrame_) {
+        if (info_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
+            MeasureOnJump(info_->jumpIndex_, info_->align_);
+        } else if (info_->targetIndex_) {
+            MeasureBeforeAnimation(*info_->targetIndex_);
+        } else if (canSkip_ && info_->TryConvertLargeDeltaToJump(mainLen_, itemCnt_)) {
+            MeasureOnJump(info_->jumpIndex_, ScrollAlign::START);
+        } else {
+            MeasureOnOffset(info_->delta_);
+        }
     }
     if (matchChildren) {
         PostMeasureSelf(size.CrossSize(axis_));
     }
 
     info_->Sync(itemCnt_, mainLen_, mainGaps_);
+
+    if (info_->measureInNextFrame_) {
+        return;
+    }
+
     if (props_->GetShowCachedItemsValue(false)) {
         SyncPreloadItems(wrapper_, info_, props_->GetCachedCountValue(info_->defCachedCount_));
     } else {
@@ -392,7 +399,7 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
     }
     EndPosQ q;
     PrepareEndPosQueue(q, info_->lanes_[section], mainGaps_[section], viewportBound);
-
+    auto notScrolling = NearZero(info_->delta_);
     while (!q.empty() && idx <= maxChildIdx) {
         if (OverDue(cacheDeadline_)) {
             return true;
@@ -407,6 +414,10 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
         float endPos = FillBackHelper(mainLen, idx++, laneIdx);
         if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, laneIdx });
+        }
+        if (!syncLoad_ && notScrolling && wrapper_->ReachResponseDeadline()) {
+            info_->measureInNextFrame_ = true;
+            return true;
         }
     }
     return q.empty();
