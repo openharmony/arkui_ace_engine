@@ -19,19 +19,26 @@
 #include <functional>
 #include <memory>
 
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
+#if defined(MODIFIER_NG)
+#include "render_service_client/core/modifier_ng/custom/rs_transition_style_modifier.h"
+#endif
 
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
-class TransitionModifier : public Rosen::RSTransitionModifier {
+#if defined(MODIFIER_NG)
+using RSTransitionStyleModifier = Rosen::ModifierNG::RSTransitionStyleModifier;
+#else
+using RSTransitionStyleModifier = Rosen::RSTransitionModifier;
+#endif
+class TransitionModifier : public RSTransitionStyleModifier {
 public:
     TransitionModifier() = default;
     ~TransitionModifier() override = default;
 
-    void Draw(Rosen::RSDrawingContext& context) const override
+    void Draw(RSDrawingContext& context) const override
     {
         if (isBuilderBackground_) {
             DrawWithPixelMap(context);
@@ -85,11 +92,13 @@ public:
         initialBackgroundRegion_ = region;
     }
 
+#ifndef MODIFIER_NG
     void Active() override {};
     void Identity() override {};
+#endif
 
 private:
-    void DrawWithPixelMap(Rosen::RSDrawingContext& context) const
+    void DrawWithPixelMap(RSDrawingContext& context) const
     {
         CHECK_NULL_VOID(pixelMap_);
         RSRect backgroundRegion = GetBackgroundRegion();
@@ -130,7 +139,7 @@ private:
         recordingCanvas.DetachBrush();
     }
 
-    void DrawWithBackgroundColor(Rosen::RSDrawingContext& context) const
+    void DrawWithBackgroundColor(RSDrawingContext& context) const
     {
         RSRect backgroundRegion = GetBackgroundRegion();
         std::shared_ptr<Rosen::RectF> drawRect = std::make_shared<Rosen::RectF>(backgroundRegion.GetLeft(),

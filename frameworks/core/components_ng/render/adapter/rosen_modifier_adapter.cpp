@@ -253,9 +253,9 @@ void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity
     const auto& timingProtocol = OptionToTimingProtocol(option);
     auto targetValue = std::make_shared<RSAnimatableProperty<float>>(value);
     auto initialVelocity = std::make_shared<RSAnimatableProperty<float>>(velocity);
-    auto modify = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
-    if (modify) {
-        auto property = std::static_pointer_cast<RSAnimatableProperty<float>>(modify->GetProperty());
+    auto modifier = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
+    if (modifier) {
+        auto property = std::static_pointer_cast<RSAnimatableProperty<float>>(modifier->GetProperty());
         if (property) {
             property->AnimateWithInitialVelocity(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()),
                 targetValue, initialVelocity, finishCallback, nullptr);
@@ -266,9 +266,9 @@ void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity
 template<>
 void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetThresholdType(ThresholdType type)
 {
-    auto modify = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
-    CHECK_NULL_VOID(modify);
-    auto property = std::static_pointer_cast<RSPropertyBase>(modify->GetProperty());
+    auto modifier = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
+    CHECK_NULL_VOID(modifier);
+    auto property = std::static_pointer_cast<RSPropertyBase>(modifier->GetProperty());
     CHECK_NULL_VOID(property);
     property->SetThresholdType(static_cast<Rosen::ThresholdType>(type));
 }
@@ -276,9 +276,9 @@ void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetThresholdType(Th
 template<>
 void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetPropertyUnit(PropertyUnit unit)
 {
-    auto modify = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
-    CHECK_NULL_VOID(modify);
-    auto property = std::static_pointer_cast<RSAnimatableProperty<float>>(modify->GetProperty());
+    auto modifier = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
+    CHECK_NULL_VOID(modifier);
+    auto property = std::static_pointer_cast<RSAnimatableProperty<float>>(modifier->GetProperty());
     CHECK_NULL_VOID(property);
     property->SetPropertyUnit(static_cast<Rosen::RSPropertyUnit>(unit));
 }
