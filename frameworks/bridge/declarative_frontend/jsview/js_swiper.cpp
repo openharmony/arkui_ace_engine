@@ -939,17 +939,21 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
     }
 }
 
-void JSSwiper::ResetSwiperNode()
+void JSSwiper::ResetSwiperNode(const JSCallbackInfo& info)
 {
-    auto* jsIndicatorController = SwiperModel::GetInstance()->GetIndicatorController();
-    if (jsIndicatorController) {
+    JSIndicatorController* jsIndicatorController = SwiperModel::GetInstance()->GetIndicatorController();
+    JSIndicatorController* controller = nullptr;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        controller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSIndicatorController>();
+    }
+    if (jsIndicatorController && jsIndicatorController != controller) {
         jsIndicatorController->ResetSwiperNode();
     }
 }
 
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
-    ResetSwiperNode();
+    ResetSwiperNode(info);
     if (info.Length() < 1) {
         return;
     }
