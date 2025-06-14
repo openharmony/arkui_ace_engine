@@ -2943,36 +2943,32 @@ void MotionBlur1Impl(Ark_NativePointer node,
 void Brightness0Impl(Ark_NativePointer node,
                      const Opt_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode*>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    // Validator::ValidateNonNegative(convValue);
-    // ViewAbstract::SetBrightness(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstractModelStatic::SetBrightness(frameNode, convValue);
 }
 void Brightness1Impl(Ark_NativePointer node,
                      const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetBrightness1(frameNode, convValue);
 }
 void Contrast0Impl(Ark_NativePointer node,
                    const Opt_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode*>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    // Validator::ValidateNonNegative(convValue);
-    // ViewAbstract::SetContrast(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstractModelStatic::SetContrast(frameNode, convValue);
 }
 void Contrast1Impl(Ark_NativePointer node,
                    const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetContrast1(frameNode, convValue);
 }
 void Grayscale0Impl(Ark_NativePointer node,
                     const Opt_Number* value)
@@ -4152,15 +4148,13 @@ void SphericalEffect0Impl(Ark_NativePointer node,
     const float minValue = 0.0;
     const float maxValue = 1.0;
     Validator::ValidateByRange(convValue, minValue, maxValue);
-    // ViewAbstract::SetSphericalEffect(frameNode, convValue);
+    ViewAbstractModelStatic::SetSphericalEffect(frameNode, convValue);
 }
 void SphericalEffect1Impl(Ark_NativePointer node,
                           const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetSphericalEffect1(frameNode, convValue);
 }
 void LightUpEffect0Impl(Ark_NativePointer node,
                         const Opt_Number* value)
@@ -4171,15 +4165,13 @@ void LightUpEffect0Impl(Ark_NativePointer node,
     const float minValue = 0.0;
     const float maxValue = 1.0;
     Validator::ValidateByRange(convValue, minValue, maxValue);
-    // ViewAbstract::SetLightUpEffect(frameNode, convValue);
+    ViewAbstractModelStatic::SetLightUpEffect(frameNode, convValue);
 }
 void LightUpEffect1Impl(Ark_NativePointer node,
                         const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetLightUpEffect1(frameNode, convValue);
 }
 void PixelStretchEffect0Impl(Ark_NativePointer node,
                              const Opt_PixelStretchEffectOptions* value)
@@ -4187,15 +4179,13 @@ void PixelStretchEffect0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<PixStretchEffectOption>(value);
-    // ViewAbstract::SetPixelStretchEffect(frameNode, convValue);
+    ViewAbstractModelStatic::SetPixelStretchEffect(frameNode, convValue);
 }
 void PixelStretchEffect1Impl(Ark_NativePointer node,
                              const Opt_PixelStretchEffectOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetPixelStretchEffect1(frameNode, convValue);
 }
 void AccessibilityGroup0Impl(Ark_NativePointer node,
                              const Opt_Boolean* value)

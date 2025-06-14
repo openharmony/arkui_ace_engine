@@ -232,6 +232,12 @@ public:
     static void SetFreeze(FrameNode* frameNode, std::optional<bool> freeze);
     static void SetClickEffectLevel(FrameNode* frameNode,
         const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue);
+    static void SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness);
+    static void SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast);
+    static void SetSphericalEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetPixelStretchEffect(FrameNode* frameNode,
+        const std::optional<PixStretchEffectOption>& option);
     static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
