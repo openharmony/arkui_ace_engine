@@ -5441,9 +5441,66 @@ void JSViewAbstract::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObj
 bool JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
     CalcDimension& bottomLeft, CalcDimension& bottomRight)
 {
-    if (object->IsUndefined()) {
-        return false;
+    TextBackgroundStyle textBackgroundStyle;
+    return ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight, textBackgroundStyle);
+}
+
+void JSViewAbstract::RegisterTextBackgroundStyleResource(TextBackgroundStyle& textBackgroundStyle,
+    RefPtr<ResourceObject>& resObjTopLeft, RefPtr<ResourceObject>& resObjTopRight,
+    RefPtr<ResourceObject>& resObjBottomLeft, RefPtr<ResourceObject>& resObjBottomRight)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
     }
+    if (resObjTopLeft) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObjTopLeft,
+            TextBackgroundStyle& textBackgroundStyle) {
+            CalcDimension radius;
+            ResourceParseUtils::ParseResDimensionVp(resObjTopLeft, radius);
+            textBackgroundStyle.backgroundRadius->radiusTopLeft = radius;
+            textBackgroundStyle.backgroundRadius->multiValued = true;
+        };
+        textBackgroundStyle.AddResource("textBackgroundStyle.radiusTopLeft", resObjTopLeft,
+            std::move(updateFunc));
+    }
+    if (resObjTopRight) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObjTopRight,
+            TextBackgroundStyle& textBackgroundStyle) {
+            CalcDimension radius;
+            ResourceParseUtils::ParseResDimensionVp(resObjTopRight, radius);
+            textBackgroundStyle.backgroundRadius->radiusTopRight = radius;
+            textBackgroundStyle.backgroundRadius->multiValued = true;
+        };
+        textBackgroundStyle.AddResource("textBackgroundStyle.radiusTopRight", resObjTopRight,
+            std::move(updateFunc));
+    }
+    if (resObjBottomLeft) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObjBottomLeft,
+            TextBackgroundStyle& textBackgroundStyle) {
+            CalcDimension radius;
+            ResourceParseUtils::ParseResDimensionVp(resObjBottomLeft, radius);
+            textBackgroundStyle.backgroundRadius->radiusBottomLeft = radius;
+            textBackgroundStyle.backgroundRadius->multiValued = true;
+        };
+        textBackgroundStyle.AddResource("textBackgroundStyle.radiusBottomLeft", resObjBottomLeft,
+            std::move(updateFunc));
+    }
+    if (resObjBottomRight) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObjBottomRight,
+            TextBackgroundStyle& textBackgroundStyle) {
+            CalcDimension radius;
+            ResourceParseUtils::ParseResDimensionVp(resObjBottomRight, radius);
+            textBackgroundStyle.backgroundRadius->radiusBottomRight = radius;
+            textBackgroundStyle.backgroundRadius->multiValued = true;
+        };
+        textBackgroundStyle.AddResource("textBackgroundStyle.radiusBottomRight", resObjBottomRight,
+            std::move(updateFunc));
+    }
+}
+
+bool JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+    CalcDimension& bottomLeft, CalcDimension& bottomRight, TextBackgroundStyle& textBackgroundStyle)
+{
     if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
         object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
         CalcDimension topStart;
@@ -5460,12 +5517,17 @@ bool JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimensi
         bottomRight = bottomEnd;
         return true;
     }
-    if (!SystemProperties::ConfigChangePerform()) {
-        GetBorderRadius("topLeft", object, topLeft);
-        GetBorderRadius("topRight", object, topRight);
-        GetBorderRadius("bottomLeft", object, bottomLeft);
-        GetBorderRadius("bottomRight", object, bottomRight);
-    }
+    RefPtr<ResourceObject> resObjTopLeft;
+    RefPtr<ResourceObject> resObjTopRight;
+    RefPtr<ResourceObject> resObjBottomLeft;
+    RefPtr<ResourceObject> resObjBottomRight;
+    GetBorderRadiusResObj("topLeft", object, topLeft, resObjTopLeft);
+    GetBorderRadiusResObj("topRight", object, topRight, resObjTopRight);
+    GetBorderRadiusResObj("bottomLeft", object, bottomLeft, resObjBottomLeft);
+    GetBorderRadiusResObj("bottomRight", object, bottomRight, resObjBottomRight);
+    
+    RegisterTextBackgroundStyleResource(textBackgroundStyle, resObjTopLeft, resObjTopRight, resObjBottomLeft,
+        resObjBottomRight);
     return false;
 }
 
@@ -6693,36 +6755,38 @@ bool JSViewAbstract::ParseJsSymbolId(
     return true;
 }
 
-bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result)
+bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result,
+    bool enableResourceUpdate, std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
 {
     if (!jsValue->IsArray()) {
         return false;
     }
-    if (jsValue->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> value = array->GetValueAt(i);
-            if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
-                return false;
-            }
-            if (value->IsNumber()) {
-                result.emplace_back(Color(ColorAlphaAdapt(value->ToNumber<uint32_t>())));
-                continue;
-            } else if (value->IsString()) {
-                Color color;
-                Color::ParseColorString(value->ToString(), color);
-                result.emplace_back(color);
-                continue;
-            } else {
-                Color color;
-                RefPtr<ResourceObject> resObj;
-                ParseJsColorFromResource(value, color, resObj);
-                result.emplace_back(color);
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
+            return false;
+        }
+        if (value->IsNumber()) {
+            result.emplace_back(Color(ColorAlphaAdapt(value->ToNumber<uint32_t>())));
+            continue;
+        } else if (value->IsString()) {
+            Color color;
+            Color::ParseColorString(value->ToString(), color);
+            result.emplace_back(color);
+            continue;
+        } else {
+            Color color;
+            RefPtr<ResourceObject> resObj;
+            ParseJsColorFromResource(value, color, resObj);
+            result.emplace_back(color);
+            if (enableResourceUpdate && resObj) {
+                std::pair<int32_t, RefPtr<ResourceObject>> pair(i, resObj);
+                resObjArr.push_back(pair);
             }
         }
-        return true;
     }
-    return false;
+    return true;
 }
 
 bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
@@ -10025,8 +10089,10 @@ bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, TextDet
 
 bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectConfig& textDetectConfig)
 {
+    RefPtr<ResourceObject> resObj;
     JSRef<JSVal> entityColorValue = obj->GetProperty("color");
-    ParseJsColor(entityColorValue, textDetectConfig.entityColor);
+    ParseJsColor(entityColorValue, textDetectConfig.entityColor, resObj);
+    TextDetectConfig::RegisterColorResource(textDetectConfig, resObj);
 
     JSRef<JSVal> decorationValue = obj->GetProperty("decoration");
     if (decorationValue->IsUndefined() || !decorationValue->IsObject()) {
@@ -10043,15 +10109,16 @@ bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectCo
     } else {
         textDetectConfig.entityDecorationType = TextDecoration::UNDERLINE;
     }
-    if (!ParseJsColor(colorValue, textDetectConfig.entityDecorationColor)) {
+    RefPtr<ResourceObject> decoColorResObj;
+    if (!ParseJsColor(colorValue, textDetectConfig.entityDecorationColor, decoColorResObj)) {
         textDetectConfig.entityDecorationColor = textDetectConfig.entityColor;
     }
+    TextDetectConfig::RegisterDecoColorResource(textDetectConfig, decoColorResObj);
     if (styleValue->IsNumber()) {
-         textDetectConfig.entityDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        textDetectConfig.entityDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
     } else {
         textDetectConfig.entityDecorationStyle = TextDecorationStyle::SOLID;
     }
-
     return true;
 }
 

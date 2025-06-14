@@ -476,7 +476,7 @@ void TextFieldModelImpl::SetHeight(const Dimension& value)
     textInputComponent->SetHeight(value);
 }
 
-void TextFieldModelImpl::SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
+void TextFieldModelImpl::SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp, bool hasRegist)
 {
     if (tmp) {
         return;

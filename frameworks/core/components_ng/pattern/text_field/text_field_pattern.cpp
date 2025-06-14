@@ -11336,4 +11336,544 @@ void TextFieldPattern::FireOnWillAttachIME()
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnWillAttachIME(GetIMEClientInfo());
 }
+
+void TextFieldPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkModifyDone();
+}
+
+#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                   \
+    {                                                                              \
+        #KEY_TYPE, [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) { \
+            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {  \
+                prop->UPDATE_METHOD(castedVal->value);                             \
+            }                                                                      \
+        }                                                                          \
+    }
+
+void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    using Handler = std::function<void(TextFieldLayoutProperty*, RefPtr<PropertyValueBase>)>;
+    static const std::unordered_map<std::string, Handler> handlers = {
+        DEFINE_PROP_HANDLER(fontSize, CalcDimension, UpdateFontSize),
+        DEFINE_PROP_HANDLER(decorationColor, Color, UpdateTextDecorationColor),
+        DEFINE_PROP_HANDLER(minFontSize, CalcDimension, UpdateAdaptMinFontSize),
+        DEFINE_PROP_HANDLER(maxFontSize, CalcDimension, UpdateAdaptMaxFontSize),
+        DEFINE_PROP_HANDLER(lineHeight, Dimension, UpdateLineHeight),
+        DEFINE_PROP_HANDLER(cancelButtonIconSrc, std::string, UpdateIconSrc),
+        
+        {"placeholder", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::u16string>>(value)) {
+                    prop->UpdatePlaceholder(intVal->value);
+                }
+            }
+        },
+
+        {"text", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::u16string>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    auto oldValue = pattern->GetTextUtf16Value();
+                    if (intVal->value != oldValue) {
+                        pattern->InitEditingValueText(intVal->value);
+                        pattern->SetTextChangedAtCreation(true);
+                    }
+                }
+            }
+        },
+
+        {"cancelButtonIconSize", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<CalcDimension>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    prop->UpdateIconSize(intVal->value);
+                    pattern->ProcessResponseArea();
+                }
+            }
+        },
+
+        {"cancelButtonIconColor", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    prop->UpdateIconColor(intVal->value);
+                    pattern->ProcessResponseArea();
+                }
+            }
+        },
+
+        {"placeholderColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    prop->UpdatePlaceholderTextColor(intVal->value);
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, true, frameNode);
+                }
+            }
+        },
+
+        {"placeholderFontSize", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<CalcDimension>>(value)) {
+                    prop->UpdatePlaceholderFontSize(intVal->value);
+                    prop->UpdatePreferredPlaceholderLineHeightNeedToUpdate(true);
+                }
+            }
+        },
+
+        {"placeholderFontFamily", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::vector<std::string>>>(value)) {
+                    prop->UpdatePlaceholderFontFamily(intVal->value);
+                    prop->UpdatePreferredPlaceholderLineHeightNeedToUpdate(true);
+                }
+            }
+        },
+        
+        {"backgroundColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, intVal->value, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, intVal->value, frameNode);
+                }
+            }
+        },
+
+        {"foregroundColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    prop->UpdateTextColor(intVal->value);
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto renderContext = frameNode->GetRenderContext();
+                    CHECK_NULL_VOID(renderContext);
+                    if (renderContext->GetForegroundColorStrategy().has_value()) {
+                        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+                        renderContext->ResetForegroundColorStrategy();
+                    }
+                    renderContext->UpdateForegroundColor(intVal->value);
+                    renderContext->UpdateForegroundColorFlag(true);
+                }
+            }
+        },
+
+        {"caretColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, intVal->value, frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CaretColorFlagByUser, true, frameNode);
+                }
+            }
+        },
+
+        {"selectedBackgroundColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    if (intVal->value.GetAlpha() == 255) {
+                        intVal->value = intVal->value.ChangeOpacity(0.2);
+                    }
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, intVal->value, frameNode);
+                }
+            }
+        },
+
+        {"caretWidth", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    auto frameNode = pattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, intVal->value, frameNode);
+                    pattern->CalculateDefaultCursor();
+                }
+            }
+        },
+
+        {"letterSpacing", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    prop->UpdateLetterSpacing(intVal->value);
+                }
+            }
+        },
+
+        {"width", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    if (LessNotEqual(intVal->value.Value(), 0.0)) {
+                        return;
+                    }
+                    CalcLength width(intVal->value);
+                    std::optional<CalcLength> height = std::nullopt;
+                    auto&& layoutConstraint = prop->GetCalcLayoutConstraint();
+                    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+                        height = layoutConstraint->selfIdealSize->Height();
+                    }
+                    prop->UpdateUserDefinedIdealSize(CalcSize(width, height));
+                }
+            }
+        },
+
+        {"paddingTop", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+                    CHECK_NULL_VOID(paintProperty);
+                    PaddingProperty padding;
+                    padding = paintProperty->GetPaddingByUserValue(padding);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    padding.top = CalcLength(intVal->value);
+                    paintProperty->UpdatePaddingByUser(padding);
+                }
+            }
+        },
+
+        {"paddingBottom", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+                    CHECK_NULL_VOID(paintProperty);
+                    PaddingProperty padding;
+                    padding = paintProperty->GetPaddingByUserValue(padding);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    padding.bottom = CalcLength(intVal->value);
+                    paintProperty->UpdatePaddingByUser(padding);
+                }
+            }
+        },
+
+        {"paddingLeft", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+                    CHECK_NULL_VOID(paintProperty);
+                    PaddingProperty padding;
+                    padding = paintProperty->GetPaddingByUserValue(padding);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    padding.left = CalcLength(intVal->value);
+                    paintProperty->UpdatePaddingByUser(padding);
+                }
+            }
+        },
+
+        {"paddingRight", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+                    CHECK_NULL_VOID(paintProperty);
+                    PaddingProperty padding;
+                    padding = paintProperty->GetPaddingByUserValue(padding);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    padding.right = CalcLength(intVal->value);
+                    paintProperty->UpdatePaddingByUser(padding);
+                }
+            }
+        },
+
+        {"marginTop", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+                    CHECK_NULL_VOID(paintProperty);
+                    PaddingProperty margin;
+                    margin = paintProperty->GetMarginByUserValue(margin);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    margin.top = CalcLength(intVal->value);
+                    paintProperty->UpdatePaddingByUser(margin);
+                }
+            }
+        },
+
+        {"marginBottom", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+                    CHECK_NULL_VOID(paintProperty);
+                    PaddingProperty margin;
+                    margin = paintProperty->GetMarginByUserValue(margin);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    margin.bottom = CalcLength(intVal->value);
+                    paintProperty->UpdatePaddingByUser(margin);
+                }
+            }
+        },
+
+        {"marginLeft", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+                    CHECK_NULL_VOID(paintProperty);
+                    PaddingProperty margin;
+                    margin = paintProperty->GetMarginByUserValue(margin);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    margin.left = CalcLength(intVal->value);
+                    paintProperty->UpdatePaddingByUser(margin);
+                }
+            }
+        },
+
+        {"marginRight", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+                    CHECK_NULL_VOID(paintProperty);
+                    PaddingProperty margin;
+                    margin = paintProperty->GetMarginByUserValue(margin);
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    margin.right = CalcLength(intVal->value);
+                    paintProperty->UpdatePaddingByUser(margin);
+                }
+            }
+        },
+
+        {"fontWeight", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                    FontWeight fontWeight = ConvertStrToFontWeight(intVal->value);
+                    prop->UpdateFontWeight(fontWeight);
+                    prop->UpdatePreferredTextLineHeightNeedToUpdate(true);
+                }
+            }
+        },
+
+        {"fontColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    prop->UpdateTextColor(intVal->value);
+                    auto frameNode = wp.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, intVal->value, frameNode);
+                    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, TextColorFlagByUser, intVal->value, frameNode);
+                }
+            }
+        },
+
+        {"fontFamily", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::vector<std::string>>>(value)) {
+                    prop->UpdateFontFamily(intVal->value);
+                    prop->UpdatePreferredTextLineHeightNeedToUpdate(true);
+                }
+            }
+        },
+
+        {"errorString", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::u16string>>(value)) {
+                    prop->UpdateErrorText(intVal->value);
+                    prop->UpdateShowErrorText(true);
+                }
+            }
+        },
+
+        {"onIconSrc", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    auto frameNode = pattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    pattern->SetIsPasswordSymbol(false);
+                    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
+                        ImageSourceInfo(intVal->value, "", ""), frameNode);
+                }
+            }
+        },
+
+        {"offIconSrc", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    auto frameNode = pattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    pattern->SetIsPasswordSymbol(false);
+                    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo,
+                        ImageSourceInfo(intVal->value, "", ""), frameNode);
+                }
+            }
+        },
+
+        {"inputFilter", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                    prop->UpdateInputFilter(intVal->value);
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->FilterInitializeText();
+                }
+            }
+        },
+
+        {"underlineColorTyping", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->SetTypingUnderlineColor(intVal->value);
+                }
+            }
+        },
+
+        {"underlineColorNormal", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->SetNormalUnderlineColor(intVal->value);
+                }
+            }
+        },
+
+        {"underlineColorError", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->SetErrorUnderlineColor(intVal->value);
+                }
+            }
+        },
+
+        {"underlineColorDisable", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+            if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->SetDisableUnderlineColor(intVal->value);
+                }
+            }
+        },
+
+        {"textIndent", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                    intVal->value.SetUnit(DimensionUnit::VP);
+                    prop->UpdateTextIndent(intVal->value);
+                }
+            }
+        },
+
+        {"cancelButtonIconColorDefault", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                auto pattern = wp.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                Color iconColor;
+                auto context = host->GetContext();
+                CHECK_NULL_VOID(context);
+                auto colorMode = context->GetColorMode();
+                if (colorMode == ColorMode::DARK) {
+                    auto theme = pattern->GetTheme();
+                    iconColor = theme->GetCancelButtonIconColor();
+                }
+                prop->UpdateIconColor(iconColor);
+            }
+        },
+
+        {"minFontScale", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<float>>(value)) {
+                    float minFontScale = intVal->value;
+                    minFontScale = LessOrEqual(minFontScale, 0.0f) ? 0.0f : minFontScale;
+                    minFontScale = GreatOrEqual(minFontScale, 1.0f) ? 1.0f : minFontScale;
+                    prop->UpdateMinFontScale(minFontScale);
+                }
+            }
+        },
+
+        {"maxFontScale", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<float>>(value)) {
+                    float maxFontScale = intVal->value;
+                    maxFontScale = LessOrEqual(maxFontScale, 1.0f) ? 1.0f : maxFontScale;
+                    prop->UpdateMaxFontScale(maxFontScale);
+                }
+            }
+        },
+    };
+
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        it->second(layoutProperty, value);
+    }
+
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TextFieldPattern::SetBackBorderRadius()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto radius = renderContext->GetBorderRadius().value();
+
+    radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
+        (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
+    radius.radiusTopRight = radius.radiusTopRight.has_value() ? radius.radiusTopRight :
+        (isRTL ? radius.radiusTopStart : radius.radiusTopEnd);
+    radius.radiusBottomLeft = radius.radiusBottomLeft.has_value() ? radius.radiusBottomLeft :
+        (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
+    radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
+        (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
+
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, radius, frameNode);
+}
+
+void TextFieldPattern::UpdateBorderResource()
+{
+    auto frameNode = GetHost();
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        SetBackBorderRadius();
+    }
+    if (renderContext->HasBorderColor()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderColorFlagByUser, renderContext->GetBorderColor().value(), frameNode);
+    }
+    if (renderContext->HasBorderWidth()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderWidthFlagByUser, renderContext->GetBorderWidth().value(), frameNode);
+    }
+    if (renderContext->HasBorderStyle()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value(), frameNode);
+    }
+}
+
+void TextFieldPattern::UpdateMarginResource()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& margin = layoutProperty->GetMarginProperty();
+    CHECK_NULL_VOID(margin);
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+
+    MarginProperty userMargin;
+    userMargin.top = margin->top;
+    userMargin.bottom = margin->bottom;
+    userMargin.left = margin->left.has_value() ? margin->left :
+        (isRTL ? margin->end : margin->start);
+    userMargin.right = margin->right.has_value() ? margin->right :
+        (isRTL ? margin->start : margin->end);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin);
+}
 } // namespace OHOS::Ace::NG

@@ -45,6 +45,12 @@ public:
     static void SetAccessibilityDescription(const JSCallbackInfo& info);
     static void SetAccessibilityLevel(const JSCallbackInfo& info);
     static void SetOnHover(const JSCallbackInfo& info);
+
+    static void RegisterSpanFontInfo(const JSCallbackInfo& info, Font& font);
+    static void RegisterDecorationColorResource(JSRef<JSVal>& colorValue);
+    template<typename T>
+    static void RegisterSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
+    static void UnregisterSpanResource(const std::string& key);
 };
 
 } // namespace OHOS::Ace::Framework

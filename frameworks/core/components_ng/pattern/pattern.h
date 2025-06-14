@@ -64,7 +64,7 @@ public:
 private:
     std::function<void()> callback_;
 };
-
+ 
 // Pattern is the base class for different measure, layout and paint behavior.
 class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -726,7 +726,7 @@ public:
         return false;
     }
 
-    void UnRegisterResource(const std::string& key);
+    virtual void UnRegisterResource(const std::string& key);
 
     template<typename T>
     void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
@@ -749,6 +749,10 @@ public:
     {
         return false;
     }
+
+    virtual void UpdateBorderResource() {};
+    virtual void UpdateMarginResource() {};
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

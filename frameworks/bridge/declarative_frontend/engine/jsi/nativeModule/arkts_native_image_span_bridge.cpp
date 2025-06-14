@@ -34,30 +34,6 @@ const std::vector<float> DEFAULT_COLOR_FILTER_MATRIX = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
 };
-
-void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
-    std::vector<ArkUI_Int32>& units, int32_t argsIndex)
-{
-    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
-    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
-    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
-    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
-
-    std::optional<CalcDimension> topLeftOptional;
-    std::optional<CalcDimension> topRightOptional;
-    std::optional<CalcDimension> bottomLeftOptional;
-    std::optional<CalcDimension> bottomRightOptional;
-
-    ArkTSUtils::ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
-    ArkTSUtils::ParseOuterBorder(vm, topRightArgs, topRightOptional);
-    ArkTSUtils::ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
-    ArkTSUtils::ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
-
-    ArkTSUtils::PushOuterBorderDimensionVector(topLeftOptional, values, units);
-    ArkTSUtils::PushOuterBorderDimensionVector(topRightOptional, values, units);
-    ArkTSUtils::PushOuterBorderDimensionVector(bottomLeftOptional, values, units);
-    ArkTSUtils::PushOuterBorderDimensionVector(bottomRightOptional, values, units);
-}
 } // namespace
 
 ArkUINativeModuleValue ImageSpanBridge::SetVerticalAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -134,10 +110,13 @@ ArkUINativeModuleValue ImageSpanBridge::SetTextBackgroundStyle(ArkUIRuntimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    std::shared_ptr<TextBackgroundStyle> style = std::make_shared<TextBackgroundStyle>();
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         color = Color::TRANSPARENT;
     }
-    ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2); // Border Radius args start index
+    ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2, style);
+    ArkTSUtils::SetTextBackgroundStyle(style, color, colorResObj, radiusArray.data(), valueUnits.data());
     GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanTextBackgroundStyle(
         nativeNode, color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()));
     return panda::JSValueRef::Undefined(vm);

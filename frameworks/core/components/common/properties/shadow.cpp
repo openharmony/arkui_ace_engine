@@ -18,6 +18,7 @@
 #include "core/animation/evaluator.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace {
 
@@ -29,6 +30,50 @@ Shadow Shadow::Blend(const Shadow& to, const Shadow& from, float progress)
     LinearEvaluator<Color> evaluator;
     auto color = evaluator.Evaluate(from.color_, to.color_, progress);
     return Shadow(blurRadius, spreadRadius, offset, color);
+}
+
+void Shadow::RegisterShadowResourceObj(Shadow& shadow,
+    RefPtr<ResourceObject>& radiusObj, RefPtr<ResourceObject>& colorObj,
+    RefPtr<ResourceObject>& offsetXObj, RefPtr<ResourceObject>& offsetYObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    if (radiusObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
+            double radius = 0.0;
+            ResourceParseUtils::ParseResDouble(resObj, radius);
+            if (LessNotEqual(radius, 0.0)) {
+                radius = 0.0;
+            }
+            shadow.SetBlurRadius(radius);
+        };
+        shadow.AddResource("shadow.radius", radiusObj, std::move(updateFunc));
+    }
+    if (colorObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, Shadow& shadow) {
+            Color colorValue;
+            ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+            shadow.SetColor(colorValue);
+        };
+        shadow.AddResource("shadow.colorValue", colorObj, std::move(updateFunc));
+    }
+    if (offsetXObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
+            CalcDimension offsetX;
+            if (ResourceParseUtils::ParseResResource(resObj, offsetX)) {
+                shadow.SetOffsetX(offsetX.Value());
+            }
+        };
+        shadow.AddResource("shadow.offsetX", offsetXObj, std::move(updateFunc));
+    }
+    if (offsetYObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
+            CalcDimension offsetY;
+            if (ResourceParseUtils::ParseResResource(resObj, offsetY)) {
+                shadow.SetOffsetY(offsetY.Value());
+            }
+        };
+        shadow.AddResource("shadow.offsetY", offsetYObj, std::move(updateFunc));
+    }
 }
 
 Shadow Shadow::CreateShadow(ShadowStyle style)

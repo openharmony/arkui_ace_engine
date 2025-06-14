@@ -50,6 +50,12 @@ namespace OHOS::Ace::NG {
 
 void SpanModelNG::Create(const std::u16string& content)
 {
+    RefPtr<ResourceObject> resObj;
+    Create(content, resObj);
+}
+
+void SpanModelNG::Create(const std::u16string& content, RefPtr<ResourceObject>& resObj)
+{
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
@@ -57,6 +63,14 @@ void SpanModelNG::Create(const std::u16string& content)
     auto contentModified = content;
     UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(contentModified.data()), contentModified.length(), 0);
     ACE_UPDATE_SPAN_PROPERTY(Content, contentModified);
+    if (resObj) {
+        auto&& updateFunc = [weakptr = WeakPtr<NG::SpanNode>(spanNode)](const RefPtr<ResourceObject>& resObj) {
+            auto spanNode = weakptr.Upgrade();
+            CHECK_NULL_VOID(spanNode);
+            spanNode->UpdateSpanResource<std::u16string>("value", resObj);
+        };
+        spanNode->AddResObj("value", resObj, std::move(updateFunc));
+    }
 }
 
 RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::u16string& content)
@@ -178,15 +192,58 @@ void SpanModelNG::SetTextCase(Ace::TextCase value)
 
 void SpanModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    auto index = 0;
+    for (auto& shadow : value) {
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto key = "shadow_" + std::to_string(index);
+        auto&& updateFunc = [shadow, weak = WeakPtr<SpanNode>(spanNode), index](const RefPtr<ResourceObject>& resObj) {
+            auto spanNode = weak.Upgrade();
+            CHECK_NULL_VOID(spanNode);
+            Shadow& shadowValue = const_cast<Shadow&>(shadow);
+            shadowValue.ReloadResources();
+            auto origArr = spanNode->GetTextShadow();
+            if (origArr.has_value() && GreatNotEqual(origArr.value().size(), index)) {
+                auto origArrVal = origArr.value();
+                origArrVal[index] = shadowValue;
+                spanNode->UpdateTextShadow(origArrVal);
+            }
+        };
+        spanNode->AddResObj(key, resObj, std::move(updateFunc));
+        index ++;
+    }
     ACE_UPDATE_SPAN_PROPERTY(TextShadow, value);
 }
 
 void SpanModelNG::SetTextShadow(UINode* uiNode, const std::optional<std::vector<Shadow>>& value)
 {
-    if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(TextShadow, value.value(), uiNode);
-    } else {
+    if (!value) {
         ACE_RESET_NODE_SPAN_PROPERTY(TextShadow, uiNode);
+        return;
+    }
+    ACE_UPDATE_NODE_SPAN_PROPERTY(TextShadow, value.value(), uiNode);
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto index = 0;
+    for (auto& shadow : value.value()) {
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto key = "shadow_" + std::to_string(index);
+        auto&& updateFunc = [shadow, weak = AceType::WeakClaim(spanNode), index]
+            (const RefPtr<ResourceObject>& resObj) {
+            auto spanNode = weak.Upgrade();
+            CHECK_NULL_VOID(spanNode);
+            Shadow& shadowValue = const_cast<Shadow&>(shadow);
+            shadowValue.ReloadResources();
+            auto origArr = spanNode->GetTextShadow();
+            if (origArr.has_value() && GreatNotEqual(origArr.value().size(), index)) {
+                auto origArrVal = origArr.value();
+                origArrVal[index] = shadowValue;
+                spanNode->UpdateTextShadow(origArrVal);
+            }
+        };
+        spanNode->AddResObj(key, resObj, std::move(updateFunc));
+        index ++;
     }
 }
 
@@ -537,6 +594,17 @@ void SpanModelNG::SetTextBackgroundStyle(const TextBackgroundStyle& style)
     auto baseSpan = AceType::DynamicCast<BaseSpan>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     CHECK_NULL_VOID(baseSpan);
     baseSpan->SetTextBackgroundStyle(style);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto key = "textbackgroundStyle";
+    auto&& updateFunc = [style, weak = WeakPtr<BaseSpan>(baseSpan)](const RefPtr<ResourceObject>& resObj) {
+        auto baseSpan = weak.Upgrade();
+        CHECK_NULL_VOID(baseSpan);
+        TextBackgroundStyle& styleValue = const_cast<TextBackgroundStyle&>(style);
+        styleValue.ReloadResources();
+        baseSpan->SetTextBackgroundStyle(styleValue);
+    };
+    baseSpan->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void SpanModelNG::SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundStyle& style)
@@ -544,6 +612,17 @@ void SpanModelNG::SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundSty
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_VOID(spanNode);
     spanNode->SetTextBackgroundStyle(style);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto key = "textbackgroundStyle";
+    auto&& updateFunc = [style, weak = AceType::WeakClaim(spanNode)](const RefPtr<ResourceObject>& resObj) {
+        auto spanNode = weak.Upgrade();
+        CHECK_NULL_VOID(spanNode);
+        TextBackgroundStyle& styleValue = const_cast<TextBackgroundStyle&>(style);
+        styleValue.ReloadResources();
+        spanNode->SetTextBackgroundStyle(styleValue);
+    };
+    spanNode->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void SpanModelNG::SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBackgroundStyle& style)
@@ -551,6 +630,17 @@ void SpanModelNG::SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBac
     auto spanNode = AceType::DynamicCast<BaseSpan>(uiNode);
     CHECK_NULL_VOID(spanNode);
     spanNode->SetTextBackgroundStyle(style);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto key = "textbackgroundStyle";
+    auto&& updateFunc = [style, weak = AceType::WeakClaim(spanNode)](const RefPtr<ResourceObject>& resObj) {
+        auto spanNode = weak.Upgrade();
+        CHECK_NULL_VOID(spanNode);
+        TextBackgroundStyle& styleValue = const_cast<TextBackgroundStyle&>(style);
+        styleValue.ReloadResources();
+        spanNode->SetTextBackgroundStyle(styleValue);
+    };
+    spanNode->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 std::u16string SpanModelNG::GetContent(UINode* uiNode)

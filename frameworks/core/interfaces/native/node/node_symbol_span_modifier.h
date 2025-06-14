@@ -21,6 +21,9 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISymbolSpanModifier* GetSymbolSpanModifier();
 const CJUISymbolSpanModifier* GetCJUISymbolSpanModifier();
+
+template<typename T>
+void ProcessResourceObj(UINode* uiNode, std::string key, T value, void* objRawPtr);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SYMBOL_SPAN_MODIFIER_H
