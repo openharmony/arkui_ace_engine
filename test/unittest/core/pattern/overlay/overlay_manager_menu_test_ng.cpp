@@ -71,6 +71,8 @@ const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+constexpr int32_t EXPECT_CALL_TWICE_TIMES = 2;
+constexpr int32_t EXPECT_CALL_THREE_TIMES = 3;
 } // namespace
 
 class OverlayManagerMenuTestNg : public testing::Test {
@@ -885,5 +887,47 @@ HWTEST_F(OverlayManagerMenuTestNg, RemoveMenuFilter001, TestSize.Level1)
     EXPECT_FALSE(rootNode->GetChildren().empty());
     overlayManager->RemoveMenuFilter(menuWrapper, false);
     EXPECT_TRUE(rootNode->GetChildren().empty());
+}
+
+/**
+ * @tc.name: RemoveMenuWrapperFromRoot001
+ * @tc.desc: Test OverlayManager::RemoveMenuWrapperFromRoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, RemoveMenuWrapperFromRoot001, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    auto column = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(column, nullptr);
+    column->MountToParent(rootNode);
+    menuWrapperPattern->SetFilterColumnNode(column);
+    auto callCount = 0;
+    auto aboutToDisapppearCallback = [&callCount]() {
+        callCount++;
+    };
+    auto disappearCallback = [&callCount]() {
+        callCount++;
+    };
+    menuWrapperPattern->RegisterMenuAboutToDisappearCallback(aboutToDisapppearCallback);
+    menuWrapperPattern->RegisterMenuDisappearCallback(disappearCallback);
+    menuWrapperPattern->menuStatus_ = MenuStatus::SHOW;
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->RemoveMenuWrapperFromRoot(rootNode, menuWrapper);
+    EXPECT_EQ(callCount, EXPECT_CALL_TWICE_TIMES);
+    menuWrapperPattern->menuStatus_ = MenuStatus::ON_HIDE_ANIMATION;
+    overlayManager->RemoveMenuWrapperFromRoot(rootNode, menuWrapper);
+    EXPECT_EQ(callCount, EXPECT_CALL_THREE_TIMES);
 }
 } // namespace OHOS::Ace::NG
