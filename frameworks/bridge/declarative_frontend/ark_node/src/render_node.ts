@@ -708,6 +708,7 @@ class RenderNode extends Disposable {
     this.childrenList.push(node);
     node.parentRenderNode = new WeakRef(this);
     getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
+    getUINativeModule().renderNode.addBuilderNode(this.nodePtr, node.nodePtr);
   }
   insertChildAfter(child: RenderNode, sibling: RenderNode | null) {
     if (child === undefined || child === null) {
@@ -729,6 +730,7 @@ class RenderNode extends Disposable {
       this.childrenList.splice(indexOfSibling + 1, 0, child);
       getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
     }
+    getUINativeModule().renderNode.addBuilderNode(this.nodePtr, child.nodePtr);
   }
   removeChild(node: RenderNode) {
     if (node === undefined || node === null) {
@@ -741,9 +743,11 @@ class RenderNode extends Disposable {
     const child = this.childrenList[index];
     child.parentRenderNode = null;
     this.childrenList.splice(index, 1);
+    getUINativeModule().renderNode.removeBuilderNode(this.nodePtr, node.nodePtr);
     getUINativeModule().renderNode.removeChild(this.nodePtr, node.nodePtr);
   }
   clearChildren() {
+    getUINativeModule().renderNode.clearBuilderNode(this.nodePtr);
     this.childrenList = new Array<RenderNode>();
     getUINativeModule().renderNode.clearChildren(this.nodePtr);
   }

@@ -94,4 +94,8 @@ class ComponentContent extends Content implements IDisposable {
   public updateConfiguration(): void {
     this.builderNode_.updateConfiguration();
   }
+
+  public inheritFreezeOptions(enable: boolean): void {
+    this.builderNode_.inheritFreezeOptions(enable);
+  }
 }

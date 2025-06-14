@@ -119,7 +119,11 @@ void SetCreateNewChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::
         panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
         auto result = function->Call(vm, thisRef.Lock().ToLocal(), params, 1);
         CHECK_NULL_RETURN(result->IsNativePointer(vm), nullptr);
-        return nodePtr(result->ToNativePointer(vm)->Value());
+        auto node = nodePtr(result->ToNativePointer(vm)->Value());
+        auto* currentNode = reinterpret_cast<UINode*>(node);
+        CHECK_NULL_RETURN(currentNode, node);
+        currentNode->SetNodeAdapter(true);
+        return node;
     };
     adapter->SetOnCreateNewChild(std::move(onCreateChild));
 }
@@ -141,6 +145,9 @@ void SetDisposeChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Lo
         CHECK_NULL_VOID(function->IsFunction(vm));
         panda::Local<panda::JSValueRef> params[2] = { panda::NumberRef::New(vm, id),
             FrameNodeBridge::MakeFrameNodeInfo(vm, node) };
+        auto* currentNode = reinterpret_cast<UINode*>(node);
+        CHECK_NULL_VOID(currentNode);
+        currentNode->SetNodeAdapter(true);
         function->Call(vm, thisRef.Lock().ToLocal(), params, 2);
     };
     adapter->SetOnDisposeChild(std::move(onDisposeChild));

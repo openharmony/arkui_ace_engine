@@ -649,6 +649,11 @@ public:
     void UpdateNodeStatus(NodeStatus nodeStatus);
     void SetIsRootBuilderNode(bool isRootBuilderNode);
     bool GetIsRootBuilderNode() const;
+    void SetNodeAdapter(bool enable)
+    {
+        isNodeAdapter_ = enable;
+    }
+    
 
     bool IsArkTsFrameNode() const
     {
@@ -1230,6 +1235,7 @@ private:
     int32_t instanceId_ = -1;
     int32_t apiVersion_ = 0;
     uint32_t nodeFlag_ { 0 };
+    bool isNodeAdapter_ = false;
 
     int32_t restoreId_ = -1;
 

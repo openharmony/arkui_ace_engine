@@ -75,6 +75,7 @@ public:
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     napi_value GetContextValue() override;
+    bool BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds) override;
     napi_value GetFrameNodeValueByNodeId(int32_t nodeId) override;
     
 #if defined(PREVIEW)

@@ -892,6 +892,14 @@ napi_value DeclarativeFrontend::GetContextValue()
     return nullptr;
 }
 
+bool DeclarativeFrontend::BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds)
+{
+    if (jsEngine_) {
+        return jsEngine_->BuilderNodeFunc(functionName, nodeIds);
+    }
+    return false;
+}
+
 napi_value DeclarativeFrontend::GetFrameNodeValueByNodeId(int32_t nodeId)
 {
     if (jsEngine_) {

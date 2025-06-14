@@ -77,6 +77,9 @@ class BuilderNode extends Disposable {
   public onRecycleWithBindObject(): void {
     this._JSBuilderNode.onRecycleWithBindObject();
   }
+  public inheritFreezeOptions(enable: boolean): void {
+    this._JSBuilderNode.inheritFreezeOptions(enable);
+  }
 }
 
 class JSBuilderNode extends BaseNode implements IDisposable {
@@ -88,6 +91,10 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   private _proxyObjectParam: Object;
   private bindedViewOfBuilderNode:ViewPU;
   private disposable_: Disposable;
+  private inheritFreeze: boolean;
+  private allowFreezeWhenInactive: boolean;
+  private parentallowFreeze: boolean;
+  private isFreeze: boolean;
 
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
@@ -95,6 +102,10 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.updateFuncByElmtId = new UpdateFuncsByElmtId();
     this._supportNestingBuilder = false;
     this.disposable_ = new Disposable();
+    this.inheritFreeze = false;
+    this.allowFreezeWhenInactive = false;
+    this.parentallowFreeze = false;
+    this.isFreeze = false;
   }
   public reuse(param: Object): void {
     this.updateStart();
@@ -135,6 +146,32 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     super.onRecycleWithBindObject();
     __JSScopeUtil__.restoreInstanceId();
+  }
+  public inheritFreezeOptions(enable: boolean): void {
+    this.inheritFreeze = enable;
+    if (enable) {
+      this.setAllowFreezeWhenInactive(this.getParentAllowFreeze());
+    } else {
+      this.setAllowFreezeWhenInactive(false);
+    }
+  }
+  public getInheritFreeze(): boolean {
+    return this.inheritFreeze;
+  }
+  public setAllowFreezeWhenInactive(enable: boolean): void {
+    this.allowFreezeWhenInactive = enable;
+  }
+  public getAllowFreezeWhenInactive(): boolean {
+    return this.allowFreezeWhenInactive;
+  }
+  public setParentAllowFreeze(enable: boolean): void {
+    this.parentallowFreeze = enable;
+  }
+  public getParentAllowFreeze(): boolean {
+    return this.parentallowFreeze;
+  }
+  public getIsFreeze(): boolean {
+    return this.isFreeze;
   }
   public getCardId(): number {
     return -1;
@@ -187,9 +224,16 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
     this.frameNode_.setRenderNode(this._nativeRef);
     this.frameNode_.setBaseNode(this);
+    this.frameNode_.setBuilderNode(this);
+    this.id_ = this.frameNode_.getUniqueId();
+    BuilderNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this));
     __JSScopeUtil__.restoreInstanceId();
   }
   public update(param: Object) {
+    if (this.isFreeze) {
+      this.params_ = param;
+      return;
+    }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.updateStart();
     this.purgeDeletedElmtIds();
@@ -225,6 +269,23 @@ class JSBuilderNode extends BaseNode implements IDisposable {
       updateFunc(elmtId, /* isFirstRender */ false);
       this.finishUpdateFunc();
     }
+  }
+
+  public setActiveInternal(active: boolean, isReuse: boolean = false): void {
+    stateMgmtProfiler.begin('BuilderNode.setActive');
+    if (!isReuse) {
+      if (active && this.isFreeze) {
+        this.isFreeze = false;
+        this.update(this.params_);
+      } else if (!active) {
+        this.isFreeze = this.allowFreezeWhenInactive;
+      }
+    }
+    if (this.inheritFreeze) {
+      this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+      this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
+    }
+    stateMgmtProfiler.end();
   }
 
   public purgeDeleteElmtId(rmElmtId: number): boolean {
