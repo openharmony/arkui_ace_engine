@@ -5637,7 +5637,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     }
     if (sheetStyle.enableFloatingDragBar.value_or(false)) {
         sheetStyle.enableFloatingDragBar =
-            (sheetStyle.showDragBar.value_or(true) && !SheetView::IsSingleDetents(sheetStyle)) ? true : false;
+            (sheetStyle.showDragBar.value_or(true) && !SheetView::IsSingleDetents(sheetStyle) &&
+                !sheetStyle.isTitleBuilder.value_or(false));
     }
     SheetKey sheetKey(targetId);
     auto iter = sheetMap_.find(sheetKey);

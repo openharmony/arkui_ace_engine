@@ -1752,11 +1752,23 @@ HWTEST_F(SheetOthersTestNg, OnBindSheet001, TestSize.Level1)
      */
     SheetStyle sheetStyle;
     sheetStyle.enableFloatingDragBar = true;
-    sheetStyle.showDragBar = false;
+    sheetStyle.detents = {SheetHeight({ 300.0_vp }), SheetHeight({ 700.0_vp })};
+    sheetStyle.showDragBar = true;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->overlayManager_ = overlayManager;
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_EQ(sheetStyle.enableFloatingDragBar, true);
+
+    sheetStyle.showDragBar = false;
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_EQ(sheetStyle.enableFloatingDragBar, false);
+
+    sheetStyle.showDragBar = true;
+    sheetStyle.isTitleBuilder = true;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_EQ(sheetStyle.enableFloatingDragBar, false);
