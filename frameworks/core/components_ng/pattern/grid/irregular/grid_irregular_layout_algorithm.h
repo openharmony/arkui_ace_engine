@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,6 +166,7 @@ private:
     float mainGap_ = 0.0f;         /**< The main-axis gap between GridItems. */
 
     float postJumpOffset_ = 0.0f; /**< The offset to be applied after performing a jump. */
+    float overscrollOffsetBeforeJump_ = 0.0f;
 
     bool enableSkip_ = true;
     bool canOverScrollStart_ = false;
