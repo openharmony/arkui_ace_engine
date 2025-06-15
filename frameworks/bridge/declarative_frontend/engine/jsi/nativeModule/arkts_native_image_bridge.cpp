@@ -749,7 +749,8 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     RefPtr<ResourceObject> colorResObj;
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
-        nodeModifiers->getImageModifier()->setFillColor(nativeNode, color.GetValue(), colorRawPtr);
+        nodeModifiers->getImageModifier()->setFillColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
     } else if (ArkTSUtils::ParseJsColorContent(vm, colorArg)) {
         nodeModifiers->getImageModifier()->resetImageFill(nativeNode);
     } else {
