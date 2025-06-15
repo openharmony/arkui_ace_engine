@@ -68,6 +68,22 @@ BorderRadiusProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
     return result.value();
 }
 
+static bool CheckKeyAndValueTypeEqual(int32_t styledKey, int32_t valueTypeId)
+{
+    static int32_t KeyAndValueTypeMap[] = {
+        ARK_STYLED_STRING_KEY_FONT, ARK_STYLED_STRING_KEY_DECORATION, ARK_STYLED_STRING_KEY_BASELINE_OFFSET,
+        ARK_STYLED_STRING_KEY_LETTER_SPACING, ARK_STYLED_STRING_KEY_TEXT_SHADOW, ARK_STYLED_STRING_KEY_GESTURE,
+        ARK_STYLED_STRING_KEY_IMAGE, ARK_STYLED_STRING_KEY_PARAGRAPH_STYLE, ARK_STYLED_STRING_KEY_LINE_HEIGHT,
+        ARK_STYLED_STRING_KEY_URL, ARK_STYLED_STRING_KEY_CUSTOM_SPAN, ARK_STYLED_STRING_KEY_USER_DATA,
+        ARK_STYLED_STRING_KEY_BACKGROUND_COLOR
+    };
+    if ((valueTypeId >= sizeof(KeyAndValueTypeMap) / sizeof(int32_t)) || (valueTypeId < 0) ||
+        KeyAndValueTypeMap[valueTypeId] != styledKey) {
+        return false;
+    }
+    return true;
+}
+
 template<>
 RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
 {
@@ -75,6 +91,10 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
     Converter::VisitUnion(src.styledValue,
         [&result, &src](const auto& peer) {
             CHECK_NULL_VOID(peer);
+            auto valueTypeId = Converter::Convert<int32_t>(src.styledValue.selector);
+            if (!CheckKeyAndValueTypeEqual(static_cast<int32_t>(src.styledKey), valueTypeId)) {
+                return;
+            }
             result = peer->span;
             CHECK_NULL_VOID(result);
             auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
