@@ -1604,6 +1604,239 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StringExpressionTest008
+ * @tc.desc: Test ReplaceSignNumber HandlesSinglePositiveInteger
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest008, TestSize.Level1)
+{
+    std::string input = "+123";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 + 123)");
+}
+
+/**
+ * @tc.name: StringExpressionTest009
+ * @tc.desc: Test ReplaceSignNumber HandlesSingleNegativeInteger
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest009, TestSize.Level1)
+{
+    std::string input = "-456";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 - 456)");
+}
+
+/**
+ * @tc.name: StringExpressionTest010
+ * @tc.desc: Test ReplaceSignNumber HandlesPositiveDecimal
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest010, TestSize.Level1)
+{
+    std::string input = "+7.89";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 + 7.89)");
+}
+
+/**
+ * @tc.name: StringExpressionTest011
+ * @tc.desc: Test ReplaceSignNumber HandlesNegativeDecimal
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest011, TestSize.Level1)
+{
+    std::string input = "-3.14";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 - 3.14)");
+}
+
+/**
+ * @tc.name: StringExpressionTest012
+ * @tc.desc: Test ReplaceSignNumber MultipleReplacementsWithText
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest012, TestSize.Level1)
+{
+    std::string input = "a+12-b-34.5";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "a (0 + 12)-b (0 - 34.5)");
+}
+
+/**
+ * @tc.name: StringExpressionTest013
+ * @tc.desc: Test ReplaceSignNumber NoSignNumberUnchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest013, TestSize.Level1)
+{
+    std::string input = "123abc";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "123abc");
+}
+
+/**
+ * @tc.name: StringExpressionTest014
+ * @tc.desc: Test ReplaceSignNumber MixedOperatorsAndNumbers
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest014, TestSize.Level1)
+{
+    std::string input = "x-5.6+y+7-z";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "x (0 - 5.6)+y (0 + 7)-z");
+}
+
+/**
+ * @tc.name: StringExpressionTest015
+ * @tc.desc: Test ReplaceSignNumber ConsecutiveSignNumbers
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest015, TestSize.Level1)
+{
+    std::string input = "-1+2-3.4";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 - 1) (0 + 2) (0 - 3.4)");
+}
+
+/**
+ * @tc.name: StringExpressionTest016
+ * @tc.desc: Test ReplaceSignNumber SignWithoutNumberIgnored
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest016, TestSize.Level1)
+{
+    std::string input = "+-*/";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "+-*/");
+}
+
+/**
+ * @tc.name: StringExpressionTest017
+ * @tc.desc: Test ReplaceSignNumber NumberAfterNonDigitSignIgnored
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest017, TestSize.Level1)
+{
+    std::string input = "a-b123+45";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "a-b123 (0 + 45)");
+}
+
+/**
+ * @tc.name: StringExpressionTest018
+ * @tc.desc: Test ReplaceSignNumber ReplacementAtStringEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest018, TestSize.Level1)
+{
+    std::string input = "xyz-78.9";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "xyz (0 - 78.9)");
+}
+
+/**
+ * @tc.name: StringExpressionTest019
+ * @tc.desc: Test ReplaceSignNumber MultipleSignsBeforeNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest019, TestSize.Level1)
+{
+    std::string input = "++123--45.6";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "+ (0 + 123)- (0 - 45.6)");
+}
+
+/**
+ * @tc.name: StringExpressionTest020
+ * @tc.desc: Test ConvertDal2Rpn: invalid formula with unbalanced parentheses
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest020, TestSize.Level1)
+{
+    std::string formula = "2+3*(4";
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret.size(), 0);
+}
+
+/**
+ * @tc.name: StringExpressionTest021
+ * @tc.desc: Test ConvertDal2Rpn: decimal numbers and negative values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest021, TestSize.Level1)
+{
+    std::string formula = "calc(-2.5 + 3.1)";
+    std::vector<std::string> expected = {"0", "2.5", "-", "3.1", "+"};
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret, expected);
+}
+
+/**
+ * @tc.name: StringExpressionTest022
+ * @tc.desc: Test ConvertDal2Rpn: consecutive operators validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest022, TestSize.Level1)
+{
+    std::string formula = "3 + + 4";
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret.size(), 0);
+}
+
+/**
+ * @tc.name: StringExpressionTest023
+ * @tc.desc: Test ConvertDal2Rpn: formula with illegal special characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest023, TestSize.Level1)
+{
+    std::string formula = "calc(1 + 2#3)";
+    std::vector<std::string> expected = { "1", "2#3", "+" };
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret, expected);
+}
+
+/**
+ * @tc.name: StringExpressionTest024
+ * @tc.desc: Test ConvertDal2Rpn: negative numbers and operator precedence
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest024, TestSize.Level1)
+{
+    std::string formula = "calc(-5 + 3 * -2)";
+    std::vector<std::string> expected = { "0", "5", "-", "3", "0", "2", "-", "*", "+" };
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret, expected);
+}
+
+/**
+ * @tc.name: StringExpressionTest025
+ * @tc.desc: Test ConvertDal2Rpn: valid formula
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest025, TestSize.Level1)
+{
+    std::string formula = "calc(+10px)";
+    std::vector<std::string> expected = { "0px", "10px", "+" };
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret, expected);
+}
+
+/**
+ * @tc.name: StringExpressionTest026
+ * @tc.desc: Test ConvertDal2Rpn: verify space removal and nested operations
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest026, TestSize.Level1)
+{
+    std::string formula = "calc( 2 * ( 3 % 2 + 4 ))";
+    std::vector<std::string> expected = {"2", "3%2", "4", "+", "*"};
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret, expected);
+}
+
+/**
  * @tc.name: DateUtilsTest001
  * @tc.desc: GetMilliSecondsByDateTime
  * @tc.type: FUNC
@@ -1947,7 +2180,8 @@ HWTEST_F(BaseUtilsTest, TimeUtilsTest012, TestSize.Level1)
 HWTEST_F(BaseUtilsTest, TimeUtilsTest013, TestSize.Level1)
 {
     TimeOfZone time;
-    EXPECT_FALSE(IsDayTime(time));
+    time.hour24_ = 6;
+    EXPECT_TRUE(IsDayTime(time));
 }
 
 /**
