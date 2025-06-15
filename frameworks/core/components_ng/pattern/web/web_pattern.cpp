@@ -679,10 +679,12 @@ void WebPattern::RemovePreviewMenuNode()
 
 bool WebPattern::IsPreviewMenuNotNeedShowPreview()
 {
-    bool isNotNeedShowPreview = (isNewDragStyle_ && IsPreviewImageNodeExist()) || imageOverlayIsSelected_;
+    bool isNotNeedShowPreview =
+        ((isNewDragStyle_ || isAILinkMenuShow_) && IsPreviewImageNodeExist()) || imageOverlayIsSelected_;
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "IsPreviewMenuNotNeedShowPreview:%{public}d, temporarily for AI entity popup: %{public}d",
-        isNotNeedShowPreview, imageOverlayIsSelected_);
+        "IsPreviewMenuNotNeedShowPreview:%{public}d, for AI link preview menu %{public}d, for AI entity popup: "
+        "%{public}d",
+        isNotNeedShowPreview, isAILinkMenuShow_, imageOverlayIsSelected_);
     return isNotNeedShowPreview;
 }
 
@@ -700,6 +702,7 @@ void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelecti
         webPattern->RemovePreviewMenuNode();
         CHECK_NULL_VOID(webPattern->contextMenuResult_);
         webPattern->contextMenuResult_->Cancel();
+        webPattern->SetAILinkMenuShow(false);
     };
     param->menuParam.onDisappear = std::move(onPreviewMenuDisappear);
     auto key = std::make_pair(param->type, param->responseType);
@@ -892,6 +895,11 @@ void WebPattern::UpdateImagePreviewParam()
     auto previewNode =
         FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, previewImageNodeId_.value());
     CHECK_NULL_VOID(previewNode);
+    if (curElementType_ == WebElementType::AILINK && GetDataDetectorEnable()) {
+        if (!webDataDetectorAdapter_->GetPreviewMenuBuilder(params->menuBuilder, params->previewBuilder)) {
+            return;
+        }
+    }
     ViewStackProcessor::GetInstance()->Push(previewNode);
     ViewAbstractModel::GetInstance()->BindContextMenu(
         curResponseType_, params->menuBuilder, params->menuParam, params->previewBuilder);
@@ -926,7 +934,8 @@ void WebPattern::ShowPreviewMenu(WebElementType type) {
         delegate_->OnContextMenuHide("");
         return;
     }
-
+    isAILinkMenuShow_ = (type == WebElementType::AILINK);
+    TAG_LOGI(AceLogTag::ACE_WEB, "ShowPreviewMenu for AI link: %{public}d", isAILinkMenuShow_);
     host->AddChild(previewNode);
     previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     previewNode->MarkModifyDone();
@@ -947,7 +956,13 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     CHECK_NULL_VOID(contextMenuResult_);
     bool isImage = false;
     bool isHyperLink = false;
+    bool isAILink = !contextMenuParam_->GetLinkUrl().empty() && contextMenuParam_->IsAILink() &&
+                GetDataDetectorEnable() && webDataDetectorAdapter_->GetDataDetectorEnablePrewiew();
+    auto copyOption =
+        delegate_ ? delegate_->GetCopyOptionMode() : OHOS::NWeb::NWebPreference::CopyOptionMode::LOCAL_DEVICE;
+    isAILink = isAILink && copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        CHECK_NULL_VOID(delegate_);
         int hitTestResult = delegate_->GetLastHitTestResult();
         TAG_LOGI(AceLogTag::ACE_WEB, "OnContextMenuShow hitTestResult:%{public}d, isAILink:%{public}d", hitTestResult,
             contextMenuParam_->IsAILink());
@@ -983,18 +998,25 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         ShowContextSelectOverlay(RectF(), RectF());
         return;
     }
-    CHECK_NULL_VOID(isNewDragStyle_ && result);
+    CHECK_NULL_VOID((isNewDragStyle_ || isAILink) && result);
     TAG_LOGD(AceLogTag::ACE_WEB, "OnContextMenuShow isImage:%{public}d, isHyperLink:%{public}d", isImage, isHyperLink);
     if (isImage) {
         ShowPreviewMenu(WebElementType::IMAGE);
     } else if (isHyperLink) {
         ShowPreviewMenu(WebElementType::LINK);
+    } else if (isAILink) {
+        CHECK_NULL_VOID(webDataDetectorAdapter_);
+        if (!webDataDetectorAdapter_->SetPreviewMenuLink(contextMenuParam_->GetLinkUrl())) {
+            return;
+        }
+        ShowPreviewMenu(WebElementType::AILINK);
     }
 }
 
 void WebPattern::OnContextMenuHide()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern OnContextMenuHide");
+    isAILinkMenuShow_ = false;
     if (webData_) {
         CloseContextSelectionMenu();
         return;
@@ -2205,7 +2227,7 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
     CHECK_NULL_RETURN(delegate_, false);
-    if (curContextMenuResult_ && (!isNewDragStyle_ || !previewImageNodeId_.has_value())) {
+    if (curContextMenuResult_ && (!(isNewDragStyle_ || isAILinkMenuShow_) || !previewImageNodeId_.has_value())) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "preview menu is not displayed, and the app is notified to close the long-press menu");
         delegate_->OnContextMenuHide("");

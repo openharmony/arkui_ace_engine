@@ -5854,15 +5854,24 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
 #ifdef NG_BUILD
         auto webPattern = delegate->webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
+        webPattern->SetAILinkMenuShow(false);
         if (delegate->richtextData_) {
             webPattern->OnContextMenuShow(info, true, true);
             result = true;
         }
         auto webEventHub = webPattern->GetWebEventHub();
         CHECK_NULL_VOID(webEventHub);
-        auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
-        CHECK_NULL_VOID(propOnContextMenuShowEvent);
-        result = propOnContextMenuShowEvent(info);
+        auto *eventInfo = TypeInfoHelper::DynamicCast<ContextMenuEvent>(info.get());
+        CHECK_NULL_VOID(eventInfo);
+        auto contextMenuParam = eventInfo->GetParam();
+        CHECK_NULL_VOID(contextMenuParam);
+        if (!contextMenuParam->IsAILink()) {
+            auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
+            CHECK_NULL_VOID(propOnContextMenuShowEvent);
+            result = propOnContextMenuShowEvent(info);
+        } else {
+            result = true;
+        }
         if (!delegate->richtextData_) {
             webPattern->OnContextMenuShow(info, false, result);
         }
@@ -5871,15 +5880,24 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
+            webPattern->SetAILinkMenuShow(false);
             if (delegate->richtextData_) {
                 webPattern->OnContextMenuShow(info, true, true);
                 result = true;
             }
             auto webEventHub = webPattern->GetWebEventHub();
             CHECK_NULL_VOID(webEventHub);
-            auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
-            CHECK_NULL_VOID(propOnContextMenuShowEvent);
-            result = propOnContextMenuShowEvent(info);
+            auto *eventInfo = TypeInfoHelper::DynamicCast<ContextMenuEvent>(info.get());
+            CHECK_NULL_VOID(eventInfo);
+            auto contextMenuParam = eventInfo->GetParam();
+            CHECK_NULL_VOID(contextMenuParam);
+            if (!contextMenuParam->IsAILink()) {
+                auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
+                CHECK_NULL_VOID(propOnContextMenuShowEvent);
+                result = propOnContextMenuShowEvent(info);
+            } else {
+                result = true;
+            }
             if (!delegate->richtextData_) {
                 webPattern->OnContextMenuShow(info, false, result);
             }

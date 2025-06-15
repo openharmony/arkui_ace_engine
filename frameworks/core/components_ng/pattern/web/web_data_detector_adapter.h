@@ -42,6 +42,7 @@ struct EntityMatch {
 
 struct WebDataDetectorConfig {
     bool enable;
+    bool enablePreview;
     std::string types;
     std::string color;
     std::string textDecorationStyle;
@@ -140,6 +141,12 @@ public:
     {
         return config_.enable;
     }
+
+    bool GetDataDetectorEnablePrewiew()
+    {
+        return config_.enablePreview;
+    }
+
     void SetDataDetectorEnable(bool enable);
     void SetDataDetectorConfig(const TextDetectConfig& config);
     void Init();
@@ -164,6 +171,8 @@ public:
     void GetAIMenu();
     bool IsAISupported();
     RectF CalcAIMenuRect(double left, double top, double right, double bottom);
+    bool GetAIMenuOptions(
+        const AIMenuInfo& info, std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
     bool ShowAIMenu(const AIMenuInfo& info);
     void OnClickAIMenuOption(const AIMenuInfo& info, const std::pair<std::string, FuncVariant>& menuOption);
     void OnClickMenuItem(const std::string& action, const AIMenuInfo& info);
@@ -173,6 +182,13 @@ public:
     static DataDetectorResult ParseAIResultJson(std::unique_ptr<JsonValue>& jsonValue);
     void OnDetectSelectedTextDone(const TextDataDetectResult& result);
     void UpdateAISelectMenu(const std::string& entityType, const std::string& content);
+
+    static std::string ReplaceARGBToRGBA(const std::string& text);
+    static std::string UrlDecode(const std::string& str);
+    bool SetPreviewMenuLink(const std::string& link);
+    bool GetPreviewMenuBuilder(std::function<void()>& menuBuilder, std::function<void()>& previewBuilder);
+    std::string GetLinkOuterHTML(const std::string& entityType, const std::string& content);
+    RefPtr<FrameNode> GetPreviewMenuNode(const AIMenuInfo& info);
 
     void CloseAIMenu();
     void CloseOtherMenu();
@@ -189,11 +205,15 @@ private:
     WeakPtr<Pattern> pattern_;
 
     // properties
-    WebDataDetectorConfig config_ { false, "", "", "" };
-    WebDataDetectorConfig newConfig_ { false, "", "", "" };
+    WebDataDetectorConfig config_ { false, false, "", "", "" };
+    WebDataDetectorConfig newConfig_ { false, false, "", "", "" };
     bool hasInit_ = false;
 
     bool initDataDetectorProxy_ = false;
+
+    // preview menu
+    TextDataDetectType previewMenuType_ = TextDataDetectType::INVALID;
+    std::string previewMenuContent_ = "";
 
     // cache
     RefPtr<WebDataDetectorCache<std::string, DataDetectorResult>> resultCache_ = nullptr;
