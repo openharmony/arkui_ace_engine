@@ -784,7 +784,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitCanExpandCurrentWindow(isShowInSubWindow);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
     CalcWrapperRectForHoverMode(menuPattern);
 
