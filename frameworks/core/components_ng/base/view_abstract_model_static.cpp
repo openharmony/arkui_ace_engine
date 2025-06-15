@@ -1279,6 +1279,12 @@ void ViewAbstractModelStatic::SetUseEffect(FrameNode* frameNode, std::optional<b
     }
 }
 
+void ViewAbstractModelStatic::SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDrawModifier(drawModifier);
+}
+
 void ViewAbstractModelStatic::SetFreeze(FrameNode* frameNode, std::optional<bool> freeze)
 {
     if (freeze.has_value()) {

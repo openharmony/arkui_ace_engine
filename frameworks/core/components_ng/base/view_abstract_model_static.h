@@ -229,6 +229,7 @@ public:
     static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
     static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);
     static void SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect);
+    static void SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier);
     static void SetFreeze(FrameNode* frameNode, std::optional<bool> freeze);
     static void SetClickEffectLevel(FrameNode* frameNode,
         const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue);
