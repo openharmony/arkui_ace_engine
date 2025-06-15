@@ -1145,6 +1145,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             if (GreatOrEqual(pos->second.endPos, startPos - referencePos)) {
                 break;
             }
+            recycledItemPosition_.insert(*pos);
             cachedItemPosition_.insert(*pos);
             pos = itemPosition_.erase(pos);
         }
@@ -1155,6 +1156,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
         if (LessOrEqual(pos->second.startPos, endPos - (referencePos - totalMainSize_))) {
             break;
         }
+        recycledItemPosition_.insert(*pos);
         cachedItemPosition_.insert(*pos);
         removeIndexes.emplace_back(pos->first);
     }
@@ -1652,7 +1654,7 @@ bool ListItemGroupLayoutAlgorithm::IsRoundingMode(LayoutWrapper* layoutWrapper)
 
 void ListItemGroupLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
-    for (auto& pos : cachedItemPosition_) {
+    for (auto& pos : recycledItemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
         if (wrapperFrameNode) {
