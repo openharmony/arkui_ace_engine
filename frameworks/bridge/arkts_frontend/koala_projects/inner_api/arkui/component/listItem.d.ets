@@ -43,7 +43,9 @@ export enum EditMode {
 }
 
 export declare class ArkListItemPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name?: string, flags?: int32);
+    constructor(peerPtr: KPointer, id: int32, name: string);
+    constructor(peerPtr: KPointer, id: int32);
+    protected constructor(peerPtr: KPointer, id: int32, name: string, flags: int32);
     public static create(component: ComponentBase | undefined, flags?: int32): ArkListItemPeer;
     public setListItemOptions0Attribute(value?: ListItemOptions): void;
     public setListItemOptions1Attribute(value?: string): void;

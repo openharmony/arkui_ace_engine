@@ -13,24 +13,34 @@
  * limitations under the License.
  */
 
+import {
+    __memo_context_type as __memo_context_type,
+    __memo_id_type as __memo_id_type,
+} from 'arkui.stateManagement.runtime';
 import { IncrementalNode } from '@koalaui.runtime.tree.IncrementalNode';
 import { uint32 } from '@koalaui.compat';
 
-/** @memo:intrinsic */
 export declare function NodeAttach<Node extends IncrementalNode>(
+    __memo_context: __memo_context_type,
+    __memo_id: __memo_id_type,
     create: () => Node,
-    /** @memo */
-    update: (node: Node) => void,
+    update: (__memo_context: __memo_context_type, __memo_id: __memo_id_type, node: Node) => void,
     reuseKey?: string
 ): void;
-
-export declare function contextNode<T extends IncrementalNode>(kind: uint32, name?: string): T;
-
+export declare function contextNode<T extends IncrementalNode>(
+    __memo_context: __memo_context_type,
+    __memo_id: __memo_id_type,
+    gensym___1?: uint32,
+    name?: string
+): T;
 export declare class DataNode<Data> extends IncrementalNode {
-    constructor(kind: uint32);
-
-    /** @memo:intrinsic */
-    public static attach<Data>(kind: uint32, data: Data, onDataChange?: () => void): void;
-
-    public static extract<Data>(kind: uint32, node: IncrementalNode): Data | undefined;
+    constructor();
+    static attach<Data>(
+        __memo_context: __memo_context_type,
+        __memo_id: __memo_id_type,
+        kind: uint32,
+        data: Data,
+        onDataChange?: () => void
+    ): void;
+    static extract<Data>(kind: uint32, node: IncrementalNode): Data | undefined;
 }
