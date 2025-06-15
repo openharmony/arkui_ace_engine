@@ -1706,6 +1706,7 @@ HWTEST_F(NavigationTestNg, NavigationSplitPlaceholderTest001, TestSize.Level1)
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     NavigationModelNG navigationModelNG;
     navigationModelNG.Create();
+    navigationModelNG.SetNavigationStack();
     navigationModelNG.SetSplitPlaceholder(columnNode);
     auto rawFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto frameNode = AceType::Claim(rawFrameNode);

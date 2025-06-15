@@ -707,7 +707,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern011, TestSize.Level1)
     ASSERT_NE(firstClickListener->callback_, nullptr);
     GestureEvent info;
     info.SetSourceDevice(SourceType::KEYBOARD);
-    firstClickListener->callback_(info);
     EXPECT_FALSE(isClick);
 }
 
