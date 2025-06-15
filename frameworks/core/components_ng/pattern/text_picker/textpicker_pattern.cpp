@@ -82,6 +82,10 @@ void TextPickerPattern::SetLayoutDirection(TextDirection textDirection)
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipLayout || config.skipMeasure) {
+        return false;
+    }
+
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
     if (GetIsShowInDialog()) {
