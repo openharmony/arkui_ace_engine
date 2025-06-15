@@ -29,6 +29,10 @@ public:
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
     void CreateGroupWithFooter(
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupOnlySmallItem(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupOnlyBigItem(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
 };
 
 void ListGroupAlgTestNg::CreateGroupWithHeader(
@@ -59,6 +63,77 @@ void ListGroupAlgTestNg::CreateGroupWithFooter(
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
+}
+
+void ListGroupAlgTestNg::CreateGroupOnlySmallItem(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
+        groupModel.SetSpace(Dimension(SPACE));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void ListGroupAlgTestNg::CreateGroupOnlyBigItem(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
+        // 5: Increase the average height of elements by enlarging the space.
+        groupModel.SetSpace(Dimension(SPACE * 5));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+/**
+ * @tc.name: BigJumpAccuracyTest001
+ * @tc.desc: jump with big offset and check position
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ListGroupAlgTestNg, BigJumpAccuracyTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create ListItemGroup with big/small average height
+    * @tc.expected: big/small ListItemGroup height is 760/700
+    */
+    auto model = CreateList();
+    model.SetInitialIndex(0);
+    CreateGroupOnlySmallItem(10, V2::ListItemGroupStyle::NONE, 7);
+    CreateGroupOnlyBigItem(10, V2::ListItemGroupStyle::NONE, 5);
+    CreateDone();
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+
+    /**
+    * @tc.steps: step2. Slide to bottom
+    * @tc.expected: pos is 760 * 10 + 700 * 10 - 400 = 14200
+    */
+    UpdateCurrentOffset(-14200.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->currentOffset_, 14200.f);
+
+    /**
+    * @tc.steps: step3. Simulate LazyForEach. reset ListItemGroup layoutInfo.
+    */
+    for (auto i = 0; i < 10; i++) {
+        auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(i));
+        auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+        groupPattern->ResetLayoutedInfo();
+        groupPattern->cachedItemPosition_.clear();
+        groupPattern->mainSize_ = 0.f;
+        groupNode->GetGeometryNode()->Reset();
+    }
+
+    /**
+    * @tc.steps: step4. backToTop. Simulate big offset callback.
+    * @tc.expected: after scroll, pos is 14200 - 10000 = 4200
+    */
+    UpdateCurrentOffset(10000.f, SCROLL_FROM_STATUSBAR);
+    EXPECT_EQ(pattern_->currentOffset_, 4200.f);
 }
 
 /**
