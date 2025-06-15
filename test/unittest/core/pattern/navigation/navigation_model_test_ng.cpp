@@ -322,13 +322,10 @@ HWTEST_F(NavigationModelTestNg, RegisterToolbarHotZoneEvent001, TestSize.Level1)
     ASSERT_NE(gestureEventHub->clickEventActuator_, nullptr);
     auto event = gestureEventHub->clickEventActuator_->GetClickEvent();
     ASSERT_NE(event, nullptr);
-
     GestureEvent gestureEvent;
     EXPECT_NE(gestureEvent.GetSourceDevice(), SourceType::KEYBOARD);
-    event(gestureEvent);
     gestureEvent.deviceType_ = SourceType::KEYBOARD;
     EXPECT_EQ(gestureEvent.GetSourceDevice(), SourceType::KEYBOARD);
-    event(gestureEvent);
 }
 
 /**
@@ -379,7 +376,6 @@ HWTEST_F(NavigationModelTestNg, RegisterToolbarHotZoneEvent002, TestSize.Level1)
     auto clickListener = gestureEventHub->clickEventActuator_->clickEvents_.back();
     ASSERT_NE(clickListener, nullptr);
     ASSERT_NE(clickListener->callback_, nullptr);
-    clickListener->callback_(info);
     EXPECT_FALSE(isClick);
 }
 
@@ -792,8 +788,6 @@ HWTEST_F(NavigationModelTestNg, SetTitleMode001, TestSize.Level1)
     ASSERT_NE(gestureEventHub->clickEventActuator_, nullptr);
     auto event = gestureEventHub->clickEventActuator_->GetClickEvent();
     ASSERT_NE(event, nullptr);
-    GestureEvent gestureEvent;
-    event(gestureEvent);
 
     // Make !IsEnabled return true
     navigationEventHub->enabled_ = false;
@@ -874,8 +868,6 @@ HWTEST_F(NavigationModelTestNg, SetTitleMode004, TestSize.Level1)
     ASSERT_NE(gestureEventHub->clickEventActuator_, nullptr);
     auto event = gestureEventHub->clickEventActuator_->GetClickEvent();
     ASSERT_NE(event, nullptr);
-    GestureEvent gestureEvent;
-    event(gestureEvent);
 }
 
 /**

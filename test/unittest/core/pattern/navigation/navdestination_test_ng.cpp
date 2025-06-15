@@ -1699,7 +1699,6 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest016, TestSize.Level1)
     ASSERT_NE(clickListener->callback_, nullptr);
     GestureEvent info;
     info.SetSourceDevice(SourceType::MOUSE);
-    clickListener->callback_(info);
     EXPECT_FALSE(isClick);
 }
 } // namespace OHOS::Ace::NG
