@@ -219,6 +219,16 @@ public:
         actualForegroundColor_ = value;
     }
 
+    size_t GetAnimationsCount() const override
+    {
+        return animationsCount_;
+    }
+
+    void SetAnimationsCount(size_t count)
+    {
+        animationsCount_ = count;
+    }
+
     const std::optional<SysOptions>& GetSysOptions() const
     {
         return sysOptions_;
@@ -238,6 +248,9 @@ public:
     RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
     TransitionFinishCallback transitionUserCallback_;
     std::optional<SysOptions> sysOptions_;
+
+private:
+    size_t animationsCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

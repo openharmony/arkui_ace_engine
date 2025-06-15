@@ -117,12 +117,12 @@ export interface Router {
 
     UpdateVisiblePagePeerNode(node: PeerNode, index?: number): void
 
-    getEntryRootValue(): Array<ComputableState<PeerNode>>
+    getEntryRootValue(): ComputableState<PeerNode>
 
-    runPage(options: router.RouterOptions, builder: UserViewBuilder): void
+    runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void
 }
 
-class ArkRouter implements Router {
+class RouterImpl implements Router {
     private readonly moduleName: string
     private peerNodeList = new Array<KPointer>
     public readonly visiblePages = arrayState<VisiblePage>()
@@ -226,10 +226,7 @@ class ArkRouter implements Router {
             let pageTransiTionFinishCallback = () => {
                 this.peerNodeList.splice(this.showingPageIndex - 1, 1)
                 this.visiblePages.splice(this.showingPageIndex - 1, 1)
-                let preNodeList = this.rootState.splice(this.showingPageIndex - 1, 1)
-                if (preNodeList.length > 0 &&  preNodeList[0]) {
-                    preNodeList[0].dispose();
-                }
+                this.rootState.splice(this.showingPageIndex - 1, 1)
                 this.showingPageIndex -= 1
             }
             let pageNode = RouterExtender.routerReplace(options, pageTransiTionFinishCallback)
@@ -252,6 +249,7 @@ class ArkRouter implements Router {
 
     back(options?: router.RouterOptions): void {
         if (this.peerNodeList.length <= 1) {
+            RouterExtender.routerBack(options)
             return;
         }
         this.showingPageIndex = this.showingPageIndex - 1
@@ -264,6 +262,7 @@ class ArkRouter implements Router {
     clear(): void {
         InteropNativeModule._NativeLog("AceRouter: router clear")
         if (this.peerNodeList.length <= 1) {
+            RouterExtender.routerClear();
             return;
         }
         this.peerNodeList.splice(0, this.showingPageIndex)
@@ -323,11 +322,11 @@ class ArkRouter implements Router {
         return retVal
     }
 
-    getEntryRootValue(): Array<ComputableState<PeerNode>> {
-        return this.rootState
+    getEntryRootValue(): ComputableState<PeerNode> {
+        return this.rootState.at(this.rootState.length - 1)!
     }
 
-    runPage(options: router.RouterOptions, builder: UserViewBuilder): void {
+    runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void {
         let manager = GlobalStateManager.instance
         let peerNode = PeerNode.generateRootPeer()
         let stateNode = manager.updatableNode<PeerNode>(peerNode, (context: StateContext) => {
@@ -353,7 +352,7 @@ export function Routed(
     rootPeer: PeerNode,
     initialUrl?: string,
 ): void {
-    let routerImp = new ArkRouter(moduleName)
-    // Install default global router.
+    let routerImp = new RouterImpl(moduleName)
+    // Init default global router.
     router.setRouter(routerImp)
 }

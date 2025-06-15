@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import { __context, StateManager } from "@koalaui/runtime";
-import { ArkStructBase } from "../ArkStructBase"
-import { ArkCommonMethodComponent } from "./common"
-import { UIContext } from "@ohos/arkui/UIContext"
-import { ExtendableComponent } from "./extendableComponent";
-import { ContextRecord } from "arkui/handwritten/UIContextImpl";
+import { __context, StateManager } from '@koalaui/runtime';
+import { ArkStructBase } from '../ArkStructBase';
+import { ArkCommonMethodComponent } from './common';
+import { UIContext } from '@ohos/arkui/UIContext';
+import { ExtendableComponent } from './extendableComponent';
+import { ContextRecord } from 'arkui/handwritten/UIContextImpl';
 
 
 class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends

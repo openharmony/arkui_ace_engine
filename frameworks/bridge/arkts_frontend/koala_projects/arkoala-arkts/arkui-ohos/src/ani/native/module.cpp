@@ -25,6 +25,7 @@
 #include "web_module_methods.h"
 #include "custom_node_module.h"
 #include "native_drag_drop_global.h"
+#include "componentSnapshot_module.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -154,6 +155,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_DragEvent_Set_CustomNode",
             "JJ:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetCustomNode)
+        },
+        ani_native_function {
+            "_ComponentSnapshot_createFromBuilderWithCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithCallback)
+        },
+        ani_native_function {
+            "_ComponentSnapshot_createFromBuilderWithPromise",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithPromise)
         },
     };
 

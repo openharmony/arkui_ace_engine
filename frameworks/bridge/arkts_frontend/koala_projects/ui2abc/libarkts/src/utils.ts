@@ -325,6 +325,11 @@ function fixNamespace(code: string) {
     code = code.replaceAll(/public static (replaceUrl\(options)/g, "export function $1")
     code = code.replaceAll(/public static (getStateRoot\(\))/g, "export function $1")
     code = code.replaceAll(/public static (runPage\(options)/g, "export function $1")
+    code = code.replaceAll(/public static (get\(callbackId)/g, "export function $1")
+    code = code.replaceAll(/static (get\(promiseId)/g, "export function $1")
+    code = code.replaceAll(/public static (getSync\(value)/g, "export function $1")
+    code = code.replaceAll(/public static (getWithUniqueId\(uniqueIdValue)/g, "export function $1")
+    code = code.replaceAll(/public static (getSyncWithUniqueId\(uniqueIdValue)/g, "export function $1")
     return code
 }
 

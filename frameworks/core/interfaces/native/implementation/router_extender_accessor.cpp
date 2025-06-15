@@ -14,14 +14,13 @@
  */
 #include "arkoala_api_generated.h"
 #include "base/memory/ace_type.h"
-#include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/common/container.h"
+#include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
-#include "frameworks/core/interfaces/native/utility/callback_helper.h"
 
 #include <cstring>
 
@@ -55,7 +54,7 @@ Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Callback_Void* fi
     auto delegate = container->GetFrontend();
     CHECK_NULL_RETURN(delegate, nullptr);
     std::function<void()> callback;
-    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED){
+    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         callback = [finish = CallbackHelper(finishCallback->value)]() {
             finish.Invoke();
         };

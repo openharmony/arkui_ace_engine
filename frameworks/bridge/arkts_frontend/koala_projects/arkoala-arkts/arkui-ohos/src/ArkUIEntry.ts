@@ -157,17 +157,17 @@ export class Application {
     private userView?: UserView
     private entryPoint?: EntryPoint
     private moduleName: string
-    private initUrl: string
-    private initParam: string
+    private startUrl: string
+    private startParam: string
 
     private withLog = false
     private useNativeLog = true
 
-    constructor(useNativeLog: boolean, moduleName: string, initUrl: string, initParam: string, userView?: UserView, entryPoint?: EntryPoint) {
+    constructor(useNativeLog: boolean, moduleName: string, startUrl: string, startParam: string, userView?: UserView, entryPoint?: EntryPoint) {
         this.useNativeLog = useNativeLog
         this.moduleName = moduleName
-        this.initUrl = initUrl
-        this.initParam = initParam
+        this.startUrl = startUrl
+        this.startParam = startParam
         this.userView = userView
         this.entryPoint = entryPoint
     }
@@ -179,6 +179,7 @@ export class Application {
         initUrl: string
     ): void {
         const peer = PeerNode.generateRootPeer()
+        // init router module
         Routed(builder, moduleName, peer, initUrl)
         let routerOption: router.RouterOptions = {url: initUrl}
         router.runPage(routerOption, builder)
@@ -187,10 +188,8 @@ export class Application {
     private computeRoot(): PeerNode {
         // let handle = ArkUINativeModule._SystemAPI_StartFrame()
         let result: PeerNode
-        let rootArray: Array<ComputableState<PeerNode>>
         try {
-            rootArray = router.getStateRoot()
-            result = rootArray[rootArray.length - 1].value
+            result = router.getStateRoot().value
         } finally {
             // ArkUINativeModule._SystemAPI_EndFrame(handle)
         }
@@ -217,7 +216,7 @@ export class Application {
             } else {
                 throw new Error("Invalid EntryPoint")
             }
-            Application.createMemoRootState(this.manager!, builder, this.moduleName, this.initUrl)
+            Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
             InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
             root = this.computeRoot()
             InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
@@ -252,21 +251,18 @@ export class Application {
 
     private updateState() {
         // NativeModule._NativeLog("ARKTS: updateState")
-        let rootArray = router.getStateRoot();
-        let rootState = rootArray[rootArray.length - 1]
+        let rootState = router.getStateRoot();
         this.updateStates(this.manager!, rootState)
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
             this.updateStates(this.manager!, rootState)
         }
         // Here we request to draw a frame and call custom components callbacks.
-        rootArray.forEach((element, index) => {
-            let root = element.value
-            if (root.peer.ptr) {
-                ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr)
-                callScheduledCallbacks()
-            }
-        });
+        let root = rootState.value;
+        if (root.peer.ptr) {
+            ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr);
+            callScheduledCallbacks();
+        }
     }
 
     updateStates(manager: StateManager, root: ComputableState<PeerNode>) {
@@ -324,10 +320,8 @@ export class Application {
                 this.timer!.value = Date.now() as int64
                 this.loopIteration2(arg0, arg1) // loop iteration without callbacks execution
                 if (this.enableDumpTree) {
-                    let rootArray = router.getStateRoot();
-                    if (rootArray.length > 0) {
-                        dumpTree(rootArray[0]!.value)
-                    }
+                    let rootState = router.getStateRoot();
+                    dumpTree(rootState.value)
                 }
             } catch (error) {
                 if (error instanceof Error) {
@@ -409,7 +403,7 @@ export class Application {
         return "0"
     }
 
-    static createApplication(appUrl: string, params: string, useNativeLog: boolean, moduleName: string, userView?: UserView, entryPoint?: EntryPoint): Application {
+    static createApplication(startUrl: string, startParams: string, useNativeLog: boolean, moduleName: string, userView?: UserView, entryPoint?: EntryPoint): Application {
         if (!userView && !entryPoint) {
             throw new Error(`Invalid EntryPoint`)
         }
@@ -418,7 +412,7 @@ export class Application {
         registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
         registerSyncCallbackProcessor()
-        return new Application(useNativeLog, moduleName, appUrl, params, userView, entryPoint)
+        return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
     }
 }
 

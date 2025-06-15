@@ -259,8 +259,19 @@ const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor();
 const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor();
 const GENERATED_ArkUIFilterAccessor* GetFilterAccessor();
 const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor();
+const GENERATED_ArkUINavigationOpsAccessor* GetNavigationOpsAccessor();
+const GENERATED_ArkUICheckboxGroupOpsAccessor* GetCheckboxGroupOpsAccessor();
+const GENERATED_ArkUICheckboxOpsAccessor* GetCheckboxOpsAccessor();
+const GENERATED_ArkUIMenuItemOpsAccessor* GetMenuItemOpsAccessor();
+const GENERATED_ArkUIRadioOpsAccessor* GetRadioOpsAccessor();
+const GENERATED_ArkUIRatingOpsAccessor* GetRatingOpsAccessor();
+const GENERATED_ArkUISelectOpsAccessor* GetSelectOpsAccessor();
+const GENERATED_ArkUISliderOpsAccessor* GetSliderOpsAccessor();
+const GENERATED_ArkUIToggleOpsAccessor* GetToggleOpsAccessor();
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
 const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor();
+const GENERATED_ArkUISideBarContainerOpsAccessor* GetSideBarContainerOpsAccessor();
+const GENERATED_ArkUIStepperOpsAccessor* GetStepperOpsAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
 const GENERATED_ArkUITextFieldOpsAccessor* GetTextFieldOpsAccessor();
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
@@ -600,8 +611,19 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetGridItemOpsAccessor,
         GetFilterAccessor,
         GetVisualEffectAccessor,
+        GetNavigationOpsAccessor,
+        GetCheckboxGroupOpsAccessor,
+        GetCheckboxOpsAccessor,
+        GetMenuItemOpsAccessor,
+        GetRadioOpsAccessor,
+        GetRatingOpsAccessor,
+        GetSelectOpsAccessor,
+        GetSliderOpsAccessor,
+        GetToggleOpsAccessor,
         GetNavExtenderAccessor,
         GetSearchOpsAccessor,
+        GetSideBarContainerOpsAccessor,
+        GetStepperOpsAccessor,
         GetEventEmulatorAccessor,
         GetTextFieldOpsAccessor,
         GetActionSheetAccessor,

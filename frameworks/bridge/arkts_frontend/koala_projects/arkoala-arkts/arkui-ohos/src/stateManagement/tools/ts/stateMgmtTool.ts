@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IObservedObject } from "../../decorator";
+import { IObservedObject } from '../../decorator';
 import {
     IStateDecoratedVariable,
     IPropDecoratedVariable,
@@ -22,8 +22,8 @@ import {
     IConsumeDecoratedVariable,
     IStorageLinkDecoratedVariable,
     IStoragePropDecoratedVariable
-} from "../../decorator";
-import { NullableObject } from "../../base/types";
+} from '../../decorator';
+import { NullableObject } from '../../base/types';
 export class StateMgmtTool {
     static isIObservedObject(value: Object): boolean {
         return true;

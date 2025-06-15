@@ -40,11 +40,8 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     // localInitValue is the rhs of @state variable : type = localInitialValue;
     // caller ensure it is IObseredObject, eg. by wrapping
     constructor(owningView: ExtendableComponent | null, varName: string, sourceGet: () => T, sourceSet: (newValue: T) => void, watchFunc?: WatchFuncType) {
-        super("@Link", owningView, varName, watchFunc);
+        super('@Link', owningView, varName, watchFunc);
         const initValue = sourceGet()
-        // if (this.validateValue(localInitValue) === false) {
-        //     throw new Error("@State Object-type Value must be ObservedObject")
-        // }
         this.sourceGet_ = sourceGet;
         this.sourceSet_ = sourceSet;
 
@@ -74,9 +71,6 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     public set(newValue: T): void {
         const value = this.sourceGet_();
         if (value !== newValue) {
-            // if (this.validateValue(newValue) === false) {
-            //     throw new Error("@Link Object-type Value must be ObservedObject")
-            // }
             if (this.sourceSet_ === undefined) {
                 throw new Error(`${this.getInfo()}: Can not set @Link value. @Link source is immutable error.`);
             }

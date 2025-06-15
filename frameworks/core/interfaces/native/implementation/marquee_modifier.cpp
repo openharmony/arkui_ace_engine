@@ -78,7 +78,15 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto marqueeOptions = Converter::Convert<MarqueeOptions>(*options);
     if (marqueeOptions.step) {
-        MarqueeModelNG::SetScrollAmount(frameNode, marqueeOptions.step);
+        auto getStep = marqueeOptions.step;
+        std::optional<double> stepOpt;
+        if (getStep.has_value()) {
+            auto step = getStep.value();
+            if (GreatNotEqual(step, 0.0)) {
+                stepOpt = Dimension(step, DimensionUnit::VP).ConvertToPx();
+            }
+        }
+        MarqueeModelNG::SetScrollAmount(frameNode, stepOpt);
     }
     if (marqueeOptions.loop) {
         MarqueeModelNG::SetLoop(frameNode, marqueeOptions.loop);

@@ -379,7 +379,8 @@ void* ArktsFrontend::PushExtender(const std::string& url, const std::string& par
     return pageNode.GetRawPtr();
 }
 
-void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& params, std::function<void()>&& finishCallback)
+void* ArktsFrontend::ReplaceExtender(
+    const std::string& url, const std::string& params, std::function<void()>&& finishCallback)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;

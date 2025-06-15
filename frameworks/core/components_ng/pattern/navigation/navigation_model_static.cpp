@@ -428,6 +428,14 @@ void NavigationModelStatic::SetSystemBarStyle(FrameNode* frameNode, const Color&
     pattern->SetSystemBarStyle(style);
 }
 
+void NavigationModelStatic::SetOnNavBarWidthChangeEvent(FrameNode* frameNode, OnNavBarWidthChangeEvent event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNavBarWidthChangeEvent(std::move(event));
+}
+
 void NavigationModelStatic::SetUsrNavigationMode(FrameNode* frameNode, const std::optional<NavigationMode>& mode)
 {
     if (mode) {

@@ -86,12 +86,12 @@ namespace router {
         globalRouterImp!.UpdateVisiblePagePeerNode(node, index);
     }
 
-    export function getStateRoot(): Array<ComputableState<PeerNode>> {
+    export function getStateRoot(): ComputableState<PeerNode> {
         return globalRouterImp!.getEntryRootValue();
     }
 
     export function runPage(options: RouterOptions, builder: UserViewBuilder): void {
-        globalRouterImp!.runPage(options, builder)
+        globalRouterImp!.runStartPage(options, builder)
     }
 }
 

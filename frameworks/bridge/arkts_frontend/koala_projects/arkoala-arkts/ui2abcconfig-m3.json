@@ -92,6 +92,9 @@
             "@ohos/arkui/focusController": [
                 "@ohos.arkui.focusController.ets"
             ],
+            "@ohos/arkui/componentSnapshot": [
+                "@ohos.arkui.componentSnapshot.ets"
+            ],
             "#stateMgmtTool": [
                 "./arkui/stateManagement/tools/arkts"
             ]

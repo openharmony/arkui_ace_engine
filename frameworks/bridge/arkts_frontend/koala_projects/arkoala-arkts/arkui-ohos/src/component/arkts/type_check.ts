@@ -140,7 +140,7 @@ import { GaugeOptions, GaugeIndicatorOptions, GaugeShadowOptions, Tuple_Union_Re
 import { GridColColumnOption, GridColOptions } from "./../gridCol"
 import { ImageLoadResult } from "./../imageSpan"
 import { LineOptions } from "./../line"
-import { StepperOptionalIndex } from "./../stepper"
+import { StepperOptions } from "./../stepper"
 import { MarqueeOptions } from "./../marquee"
 import { PathOptions } from "./../path"
 import { PluginComponentTemplate, PluginErrorData, PluginComponentOptions } from "./../pluginComponent"
@@ -1544,7 +1544,7 @@ export class TypeChecker {
         return value instanceof Literal_Number_fingers_speed_SwipeDirection_direction
     }
     static isLiteral_Number_index(value: Object | string | number | undefined, arg0: boolean): boolean {
-        return value instanceof StepperOptionalIndex
+        return value instanceof StepperOptions
     }
     static isLiteral_Number_offset_span(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Literal_Number_offset_span
@@ -3433,8 +3433,17 @@ export class TypeChecker {
     static isWebNavigationType(value: Object | string | number | undefined): boolean {
         return value instanceof WebNavigationType
     }
+    static isBindableBoolean(value: Object | string | number | undefined): boolean {
+        return value instanceof Bindable<boolean>
+    }
+    static isBindableNumber(value: Object | string | number | undefined): boolean {
+        return value instanceof Bindable<number>
+    }
     static isBindableString(value: Object | string | number | undefined): boolean {
         return value instanceof Bindable<string>
+    }
+    static isBindableResource(value: Object | string | number | undefined): boolean {
+        return value instanceof Bindable<Resource>
     }
     static isBindableResourceStr(value: Object | string | number | undefined): boolean {
         return value instanceof Bindable<ResourceStr>

@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from "../../component/extendableComponent";
-import { DecoratedV1VariableBase } from "./decoratorBase";
-import { IProvideDecoratedVariable } from "../decorator";
-import { WatchFuncType } from "../decorator";
-import { IConsumeDecoratedVariable } from "../decorator";
-import { ObserveSingleton } from "../base/observeSingleton";
-import { NullableObject } from "../base/types";
+import { ExtendableComponent } from '../../component/extendableComponent';
+import { DecoratedV1VariableBase } from './decoratorBase';
+import { IProvideDecoratedVariable } from '../decorator';
+import { WatchFuncType } from '../decorator';
+import { IConsumeDecoratedVariable } from '../decorator';
+import { ObserveSingleton } from '../base/observeSingleton';
+import { NullableObject } from '../base/types';
 export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     implements IConsumeDecoratedVariable<T> {
     provideAliasName: string;

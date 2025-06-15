@@ -13,4 +13,4 @@
  * limitations under the License.
  */
 
-export { __memo_id_type, __memo_context_type }  from '@koalaui/runtime'
+export { __memo_id_type, __memo_context_type }  from '@koalaui/runtime';

@@ -5385,7 +5385,16 @@ export class Serializer extends SerializerBase {
     writeRatingOptions(value: RatingOptions): void {
         let valueSerializer : Serializer = this
         const value_rating  = value.rating
-        valueSerializer.writeNumber(value_rating)
+        let value_rating_type : int32 = RuntimeType.UNDEFINED
+        value_rating_type = runtimeType(value_rating)
+        if (RuntimeType.NUMBER == value_rating_type) {
+            valueSerializer.writeInt8(0 as int32)
+            const value_rating_0  = value_rating as number
+            valueSerializer.writeNumber(value_rating_0)
+        }
+        else if (TypeChecker.isBindableNumber(value_rating)) {
+            valueSerializer.writeInt8(1 as int32)
+        }
         const value_indicator  = value.indicator
         let value_indicator_type : int32 = RuntimeType.UNDEFINED
         value_indicator_type = runtimeType(value_indicator)
@@ -6382,7 +6391,16 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_value_type)) {
             const value_value_value  = value_value!
-            valueSerializer.writeNumber(value_value_value)
+            let value_value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_value_type = runtimeType(value_value_value)
+            if (RuntimeType.NUMBER == value_value_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_value_value_0  = value_value_value as number
+                valueSerializer.writeNumber(value_value_value_0)
+            }
+            else if (TypeChecker.isBindableNumber(value_value_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
         }
         const value_min  = value.min
         let value_min_type : int32 = RuntimeType.UNDEFINED
@@ -7200,7 +7218,16 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_isOn_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_isOn_type)) {
             const value_isOn_value  = value_isOn!
-            valueSerializer.writeBoolean(value_isOn_value)
+            let value_isOn_value_type : int32 = RuntimeType.UNDEFINED
+            value_isOn_value_type = runtimeType(value_isOn_value)
+            if (RuntimeType.BOOLEAN == value_isOn_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_isOn_value_0  = value_isOn_value as boolean
+                valueSerializer.writeBoolean(value_isOn_value_0)
+            }
+            else if (TypeChecker.isBindableBoolean(value_isOn_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
         }
     }
     writeTouchObject(value: TouchObject): void {

@@ -19,6 +19,8 @@
 #include <functional>
 #include <string>
 #include <cstdint>
+#include "core/common/ace_engine.h"
+#include "core/components_ng/render/snapshot_param.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,6 +75,13 @@ struct ArkUIAniContentSlotModifier {
     ArkUIContentSlot (*construct)(ArkUI_Int32 id);
     void (*setContentSlotOptions)(ArkUIContentSlot node, ArkUINodeContent value);
 };
+struct ArkUIAniComponentSnapshotModifier {
+    int32_t (*getCurrentIdSafely)();
+    OHOS::Ace::RefPtr<OHOS::Ace::Container> (*getContainer)(int32_t instanceId);
+    void (*createFromBuilder)(ArkUINodeHandle node,
+    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    OHOS::Ace::NG::SnapshotParam param);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -82,6 +91,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
+    const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

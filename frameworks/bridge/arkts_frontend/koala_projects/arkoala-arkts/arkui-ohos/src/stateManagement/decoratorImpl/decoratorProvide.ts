@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from "../../component/extendableComponent";
-import { DecoratedV1VariableBase } from "./decoratorBase";
-import { WatchFuncType } from "../decorator";
-import { IProvideDecoratedVariable } from "../decorator";
-import { IBackingValue } from "../base/iBackingValue";
-import { FactoryInternal } from "../base/iFactoryInternal";
-import { ObserveSingleton } from "../base/observeSingleton";
-import { NullableObject } from "../base/types";
+import { ExtendableComponent } from '../../component/extendableComponent';
+import { DecoratedV1VariableBase } from './decoratorBase';
+import { WatchFuncType } from '../decorator';
+import { IProvideDecoratedVariable } from '../decorator';
+import { IBackingValue } from '../base/iBackingValue';
+import { FactoryInternal } from '../base/iFactoryInternal';
+import { ObserveSingleton } from '../base/observeSingleton';
+import { NullableObject } from '../base/types';
 
 export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     implements IProvideDecoratedVariable<T> {
     private readonly provideAlias_: string;
-    private readonly bakcing_: IBackingValue<T>
+    private readonly backing_: IBackingValue<T>
     private readonly allowOverride_: boolean;
     constructor(owningView: ExtendableComponent, varName: string, provideAliasName: string, initValue: T, allowOverride: boolean, watchFunc?: WatchFuncType) {
-        super("Provide", owningView, varName, watchFunc);
+        super('Provide', owningView, varName, watchFunc);
         this.provideAlias_ = provideAliasName;
         this.allowOverride_ = allowOverride ? allowOverride : false;
-        this.bakcing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
+        this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
         this.registerWatchForObservedObjectChanges(initValue);
         owningView.addProvidedVar(provideAliasName, this, allowOverride);
         if (varName !== provideAliasName) {
@@ -39,16 +39,16 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         }
     }
     public get(): T {
-        const value = this.bakcing_.get(this.shouldAddRef());
+        const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
         return value;
     }
     public set(newValue: T): void {
-        const value = this.bakcing_.get(false);
+        const value = this.backing_.get(false);
         if (value === newValue) {
             return;
         }
-        if (this.bakcing_.set(newValue)) {
+        if (this.backing_.set(newValue)) {
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
             this.execWatchFuncs();

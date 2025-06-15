@@ -52,6 +52,9 @@
             "@ohos/arkui/focusController": [
                 "../@ohos.arkui.focusController.ts"
             ],
+            "@ohos/arkui/componentSnapshot": [
+                "../@ohos.arkui.componentSnapshot.ts"
+            ],
             "@ohos/arkui/inspector": [
                 "../@ohos.arkui.inspector.ts"
             ],
@@ -118,7 +121,8 @@
         "build/unmemoized/@ohos.graphics.common2D.ts",
         "build/unmemoized/@ohos.graphics.drawing.ts",
         "build/unmemoized/@ohos.arkui.graphics.ts",
-        "build/unmemoized/@ohos.promptAction.ts"
+        "build/unmemoized/@ohos.promptAction.ts",
+        "build/unmemoized/@ohos.arkui.componentSnapshot.ts"
     ],
     "exclude": [
         "**/index.ts",

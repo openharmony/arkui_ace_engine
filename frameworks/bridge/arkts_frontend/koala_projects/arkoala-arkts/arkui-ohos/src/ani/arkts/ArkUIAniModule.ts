@@ -19,7 +19,7 @@ import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { DrawContext } from "arkui/Graphics"
-import { DrawModifier } from "arkui/component"
+import { DrawModifier, AsyncCallback } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 
 export class ArkUIAniModule {
@@ -63,4 +63,11 @@ export class ArkUIAniModule {
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
+    
+    // for componentSnapshot
+    native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
+        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean): void
+    
+    native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
+        delay?: number, checkImageStatus?: boolean): Promise<image.PixelMap>
 }

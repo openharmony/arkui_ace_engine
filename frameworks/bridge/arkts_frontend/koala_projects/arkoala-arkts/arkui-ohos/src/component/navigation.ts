@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback, Bindable } from "./common"
 import { Length, Dimension, ResourceStr, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
 import { PixelMap } from "#external"
 import { Resource } from "global/resource"
@@ -41,6 +41,7 @@ import { addPartialUpdate, createUiDetachedRoot } from "../ArkUIEntry"
 import { PathStackUtils } from "../handwritten/ArkNavPathStack"
 import { setNeedCreate } from "../ArkComponentRoot"
 import { ArkStackComponent, ArkStackPeer } from "./stack"
+import { NavigationOpsHandWritten } from "./../handwritten"
 
 export class NavPathInfoInternal {
     public static fromPtr(ptr: KPointer): NavPathInfo {
@@ -1389,7 +1390,7 @@ export type Callback_NavigationMode_Void = (mode: NavigationMode) => void;
 export type Callback_String_Opt_Object_Void = (name: string, param: Object | undefined) => void;
 export type Type_NavigationAttribute_customNavContentTransition_delegate = (from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation) => NavigationAnimatedTransition | undefined;
 export interface NavigationAttribute extends CommonMethod {
-    navBarWidth(value: Length | undefined): this
+    navBarWidth(value: Length | Bindable<Length> | undefined): this
     navBarPosition(value: NavBarPosition | undefined): this
     navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this
     minContentWidth(value: Dimension | undefined): this
@@ -1420,7 +1421,7 @@ export interface NavigationAttribute extends CommonMethod {
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
 }
 export class ArkNavigationStyle extends ArkCommonMethodStyle implements NavigationAttribute {
-    navBarWidth_value?: Length | undefined
+    navBarWidth_value?: Length | Bindable<Length> | undefined
     navBarPosition_value?: NavBarPosition | undefined
     navBarWidthRange_value?: [ Dimension, Dimension ] | undefined
     minContentWidth_value?: Dimension | undefined
@@ -1445,7 +1446,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     recoverable_value?: boolean | undefined
     enableDragBar_value?: boolean | undefined
     enableModeChangeAnimation_value?: boolean | undefined
-    public navBarWidth(value: Length | undefined): this {
+    public navBarWidth(value: Length | Bindable<Length> | undefined): this {
         return this
     }
     public navBarPosition(value: NavBarPosition | undefined): this {
@@ -1567,8 +1568,27 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public navBarWidth(value: Length | undefined): this {
+    public navBarWidth(value: Length | Bindable<Length> | undefined): this {
+        /**
+         * 1.check navBarWidth property name is correct
+         * 2.check if param is undefined
+         * 3.check if param is Length
+         */
         if (this.checkPriority("navBarWidth")) {
+            let value_type : int32 = RuntimeType.UNDEFINED
+            value_type = runtimeType(value);
+            if ((RuntimeType.UNDEFINED) != (value_type)) {
+                const value_value = value!
+                let value_value_type : int32 = RuntimeType.UNDEFINED
+                value_value_type = runtimeType(value_value)
+                if (RuntimeType.STRING != value_value_type && RuntimeType.NUMBER != value_value_type &&
+                    RuntimeType.UNDEFINED != value_value_type &&
+                    !TypeChecker.isResource(value_value, false, false, false, false, false)) {
+                    NavigationOpsHandWritten.hookNavigationAttributeNavBarWidthImpl(this.getPeer().peer.ptr,
+                        (value as Bindable<Length>));
+                    return this
+                }
+            }
             const value_casted = value as (Length | undefined)
             this.getPeer()?.navBarWidthAttribute(value_casted)
             return this

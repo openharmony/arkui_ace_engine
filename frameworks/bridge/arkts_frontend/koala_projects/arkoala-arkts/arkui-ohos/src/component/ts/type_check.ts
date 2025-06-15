@@ -138,7 +138,7 @@ import { GaugeOptions, GaugeIndicatorOptions, GaugeShadowOptions, Tuple_Union_Re
 import { GridColColumnOption, GridColOptions } from "./../gridCol"
 import { ImageLoadResult } from "./../imageSpan"
 import { LineOptions, ShapePoint } from "./../line"
-import { StepperOptionalIndex } from "./../stepper"
+import { StepperOptions } from "./../stepper"
 import { MarqueeOptions } from "./../marquee"
 import { PathOptions } from "./../path"
 import { PluginComponentTemplate, PluginErrorData, PluginComponentOptions } from "./../pluginComponent"
@@ -19247,8 +19247,17 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof WebNavigationType")
         }
     }
+    static isBindableBoolean(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<boolean>")
+    }
+    static isBindableNumber(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<number>")
+    }
     static isBindableString(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<String>")
+    }
+    static isBindableResource(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Resource>")
     }
     static isBindableResourceStr(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<ResourceStr>")
