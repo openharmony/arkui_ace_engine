@@ -656,7 +656,7 @@ int32_t NavDestinationGroupNode::DoSystemFadeTransition(bool isEnter)
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, INVALID_ANIMATION_ID);
     auto eventHub = GetEventHub<EventHub>();
-    if (!canReused_ && eventHub) {
+    if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
@@ -671,7 +671,7 @@ int32_t NavDestinationGroupNode::DoSystemFadeTransition(bool isEnter)
 int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation operation, bool isEnter)
 {
     auto eventHub = GetEventHub<EventHub>();
-    if (!canReused_ && eventHub) {
+    if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
@@ -721,7 +721,7 @@ int32_t NavDestinationGroupNode::DoSystemEnterExplodeTransition(NavigationOperat
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, INVALID_ANIMATION_ID);
     auto eventHub = GetEventHub<EventHub>();
-    if (!canReused_ && eventHub) {
+    if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
@@ -752,7 +752,7 @@ int32_t NavDestinationGroupNode::DoSystemExitExplodeTransition(NavigationOperati
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, INVALID_ANIMATION_ID);
     auto eventHub = GetEventHub<EventHub>();
-    if (!canReused_ && eventHub) {
+    if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
@@ -801,7 +801,7 @@ int32_t NavDestinationGroupNode::DoCustomTransition(NavigationOperation operatio
         return INVALID_ANIMATION_ID;
     }
     auto eventHub = GetEventHub<EventHub>();
-    if (!canReused_ && eventHub) {
+    if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }
     auto allTransitions = delegate(operation, isEnter);
@@ -906,7 +906,7 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
                 navDestination->ResetCustomTransitionAnimationProperties();
             }
             // only handle current node in latest finish callback.
-            if (!navDestination->GetCanReused()) {
+            if (!navDestination->GetInCurrentStack()) {
                 // can't be reused means it is not in navigation stack anymore, so remove it.
                 navDestination->CleanContent();
                 auto parent = navDestination->GetParent();
