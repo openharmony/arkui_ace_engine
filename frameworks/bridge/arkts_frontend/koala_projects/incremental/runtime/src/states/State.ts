@@ -222,6 +222,17 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
         reuseKey?: string
     ): ScopeImpl<Value>
     increment(count: uint32, skip: boolean): void
+    /**
+     * when reused, need to recompute scopes between Reusable scope and its direct child node
+     *                 Reusable Scope
+     *                     |
+     *                   Scope
+     *                     |
+     *                   Scope
+     *                 /      \
+     *              Scope     Node
+     */
+    invalidateOnReuse(): void
 }
 
 class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
@@ -872,6 +883,17 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         statesNamed.set(name, state)
     }
 
+    invalidateOnReuse(): void {
+        this.recomputeNeeded = true
+        for (let child = this.child; child; child = child?.next) {
+            if (child?.node)
+                return
+            if (child?.once)
+                continue
+            child?.invalidateOnReuse()
+        }
+    }
+
     getNamedState<T>(name: string): MutableState<T> | undefined {
         const state = this.statesNamed?.get(name)
         return state ? state as MutableState<T> : undefined
@@ -891,12 +913,12 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             }
         }
         if (once != true && this.once) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the remember scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
-        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey) : undefined
+        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey, id) : undefined
         const scope = reused ? reused as ScopeImpl<Value> : new ScopeImpl<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
         if (reused) {
-            scope.recomputeNeeded = true
             scope._id = id // children scope IDs are independent from Reusable parent
+            scope.invalidateOnReuse()
         } else if (create) {
             // create node within a scope
             scope._once = true
@@ -1050,9 +1072,9 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     }
 
     private recycleOrDispose(child: ManagedScope): void {
-        const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child) == true
+        const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child, child.id) == true
         if (recycled) {
-             // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
+            // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
             if (!child.node) throw Error("reusable scope doesn't have a node")
             child.node!.detach()
         } else {

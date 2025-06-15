@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Callback_RangeUpdate } from "./ArkArkuiCustomInterfaces"
+import { Callback_CreateItem, Callback_RangeUpdate } from "./ArkArkuiCustomInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
@@ -59,6 +59,14 @@ export class LazyForEachOps {
         LazyForEachOps.NotifyChange_serialize(node_casted, startIndex_casted, endIndex_casted, count_casted)
         return
     }
+    public static Sync(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+        const node_casted = node as (KPointer)
+        const totalCount_casted = totalCount as (int32)
+        const creator_casted = creator as (Callback_CreateItem)
+        const updater_casted = updater as (Callback_RangeUpdate)
+        LazyForEachOps.Sync_serialize(node_casted, totalCount_casted, creator_casted, updater_casted)
+        return
+    }
     private static NeedMoreElements_serialize(node: KPointer, mark: KPointer, direction: int32): KPointer {
         const retval  = ArkUIGeneratedNativeModule._LazyForEachOps_NeedMoreElements(node, mark, direction)
         return retval
@@ -77,5 +85,12 @@ export class LazyForEachOps {
     }
     private static NotifyChange_serialize(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
         ArkUIGeneratedNativeModule._LazyForEachOps_NotifyChange(node, startIndex, endIndex, count)
+    }
+    private static Sync_serialize(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(creator)
+        thisSerializer.holdAndWriteCallback(updater)
+        ArkUIGeneratedNativeModule._LazyForEachOps_Sync(node, totalCount, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }

@@ -65,4 +65,5 @@ export enum PointerStyle {
     LOADING = 42,
     RUNNING = 43
 }
-export type Callback_RangeUpdate = (index: int32, mark: KPointer, end: int32) => void;
+export type Callback_RangeUpdate = (start: int32, end: int32) => void;
+export type Callback_CreateItem = (index: int32) => KPointer;

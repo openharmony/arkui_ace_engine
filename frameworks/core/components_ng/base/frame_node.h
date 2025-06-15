@@ -46,6 +46,7 @@
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -855,6 +856,9 @@ public:
 
     int32_t GetTotalChildCount() const override
     {
+        if (arkoalaLazyAdapter_) {
+            return arkoalaLazyAdapter_->GetTotalCount();
+        }
         return UINode::TotalChildCount();
     }
 
@@ -1232,6 +1236,19 @@ public:
     }
 
     void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
+
+    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
+    void ArkoalaSynchronize(
+        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
+
+    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
+
+private:
+    /* temporary adapter to provide LazyForEach feature in Arkoala */
+    std::unique_ptr<LazyComposeAdapter> arkoalaLazyAdapter_;
+
+public:
+    /* ============================== Arkoala LazyForEach adapter section END ================================*/
 
     void ChildrenUpdatedFrom(int32_t index);
     int32_t GetChildrenUpdated() const
