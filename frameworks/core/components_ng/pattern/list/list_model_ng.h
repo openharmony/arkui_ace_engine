@@ -142,6 +142,8 @@ public:
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static void SetListStackFromEnd(FrameNode* frameNode, bool enabled);
     static bool GetListStackFromEnd(FrameNode* frameNode);
+    static void SetListSyncLoad(FrameNode* frameNode, bool enabled);
+    static bool GetListSyncLoad(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);

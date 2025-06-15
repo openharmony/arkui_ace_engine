@@ -925,6 +925,18 @@ bool ListModelNG::GetListStackFromEnd(FrameNode* frameNode)
     return value;
 }
 
+void ListModelNG::SetListSyncLoad(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SyncLoad, enabled, frameNode);
+}
+
+bool ListModelNG::GetListSyncLoad(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto value = frameNode->GetLayoutProperty<ListLayoutProperty>()->GetSyncLoad().value_or(true);
+    return value;
+}
+
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);

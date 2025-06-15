@@ -2775,6 +2775,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest027, TestSize.Level1)
     value[0].i32 = 0;
     nodeAPI->setAttribute(rootNode, NODE_LIST_SCROLL_TO_INDEX, &item);
     nodeAPI->setAttribute(rootNode, NODE_LIST_INITIAL_INDEX, &item);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_LIST_SYNC_LOAD, &item), ARKUI_ERROR_CODE_NO_ERROR);
     item.object = rootNode;
     nodeAPI->setAttribute(groupNode, NODE_LIST_ITEM_GROUP_SET_HEADER, &item);
     nodeAPI->setAttribute(groupNode, NODE_LIST_ITEM_GROUP_SET_FOOTER, &item);
@@ -2805,6 +2806,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest027, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_ENABLE_SCROLL_INTERACTION), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_NESTED_SCROLL), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_LIST_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_LIST_DIRECTION), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_LIST_STICKY), nullptr);
@@ -2821,6 +2823,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest027, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_ENABLE_SCROLL_INTERACTION), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_NESTED_SCROLL), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_LIST_SYNC_LOAD), nullptr);
 
     EXPECT_EQ(nodeAPI->resetAttribute(childNode, NODE_LIST_ITEM_SWIPE_ACTION), ARKUI_ERROR_CODE_NO_ERROR);
 

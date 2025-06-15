@@ -251,6 +251,20 @@ class ListMaintainVisibleContentPositionModifier extends ModifierWithKey<boolean
   }
 }
 
+class ListSyncLoadModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listSyncLoad');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetListSyncLoad(node);
+    } else {
+      getUINativeModule().list.setListSyncLoad(node, this.value);
+    }
+  }
+}
+
 class ListNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
   constructor(value: NestedScrollOptions) {
     super(value);
@@ -774,6 +788,10 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   maintainVisibleContentPosition(value: boolean | undefined): this {
     modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
       ListMaintainVisibleContentPositionModifier, value);
+    return this;
+  }
+  syncLoad(value: boolean | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, ListSyncLoadModifier.identity, ListSyncLoadModifier, value);
     return this;
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
