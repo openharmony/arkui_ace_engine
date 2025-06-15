@@ -262,6 +262,8 @@ public:
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
     void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
         std::function<void(int32_t)> &&callback);
+    void UpdateCustomDialogWithNode(
+        const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
     std::optional<double> GetTopOrder();
     std::optional<double> GetBottomOrder();
 
@@ -942,6 +944,8 @@ private:
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
     void OpenCustomDialogInner(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback,
         const RefPtr<FrameNode> dialog, bool showComponentContent);
+    RefPtr<FrameNode> UpdateCustomDialogInner(
+        const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(

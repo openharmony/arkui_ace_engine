@@ -3395,44 +3395,62 @@ void OverlayManager::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::fun
     callback(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
 }
 
-void OverlayManager::UpdateCustomDialog(
-    const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
+RefPtr<FrameNode> OverlayManager::UpdateCustomDialogInner(
+    const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
 {
     if (!callback) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of UpdateCustomDialog are incomplete because of no callback.");
-        return;
+        return nullptr;
     }
     auto contentNode = node.Upgrade();
     if (!contentNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of custom dialog is null");
         callback(ERROR_CODE_DIALOG_CONTENT_ERROR);
-        return;
+        return nullptr;
     }
     TAG_LOGD(AceLogTag::ACE_DIALOG, "UpdateCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
     auto dialogNode = GetDialogNodeWithExistContent(contentNode);
     if (!dialogNode) {
         dialogNode = SubwindowManager::GetInstance()->GetSubwindowDialogNodeWithExistContent(contentNode);
     }
-    if (dialogNode) {
-        auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
-        CHECK_NULL_VOID(dialogLayoutProp);
-        dialogLayoutProp->UpdateDialogAlignment(dialogProps.alignment);
-        dialogLayoutProp->UpdateDialogOffset(dialogProps.offset);
-        dialogLayoutProp->UpdateAutoCancel(dialogProps.autoCancel);
-        auto dialogContext = dialogNode->GetRenderContext();
-        CHECK_NULL_VOID(dialogContext);
-        auto pipelineContext = dialogNode->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-        CHECK_NULL_VOID(dialogTheme);
-        dialogContext->UpdateBackgroundColor(dialogProps.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
-        dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-        callback(ERROR_CODE_NO_ERROR);
-        return;
+    if (!dialogNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "UpdateCustomDialog failed because cannot find dialog.");
+        callback(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+        return nullptr;
     }
-    TAG_LOGE(AceLogTag::ACE_DIALOG, "UpdateCustomDialog failed because cannot find dialog.");
-    callback(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(dialogLayoutProp, nullptr);
+    dialogLayoutProp->UpdateDialogAlignment(dialogProps.alignment);
+    dialogLayoutProp->UpdateDialogOffset(dialogProps.offset);
+    dialogLayoutProp->UpdateAutoCancel(dialogProps.autoCancel);
+    auto dialogContext = dialogNode->GetRenderContext();
+    CHECK_NULL_RETURN(dialogContext, nullptr);
+    auto pipelineContext = dialogNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    dialogContext->UpdateBackgroundColor(dialogProps.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+    dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    return dialogNode;
+}
+
+void OverlayManager::UpdateCustomDialog(
+    const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
+{
+    auto dialogNode = UpdateCustomDialogInner(node, dialogProps, std::move(callback));
+    if (dialogNode) {
+        callback(ERROR_CODE_NO_ERROR);
+    }
+}
+
+void OverlayManager::UpdateCustomDialogWithNode(
+    const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+{
+    auto dialogNode = UpdateCustomDialogInner(node, dialogProps, std::move(callback));
+    if (dialogNode) {
+        callback(dialogNode->GetId());
+        dialogMap_[dialogNode->GetId()] = dialogNode;
+    }
 }
 
 std::optional<double> OverlayManager::GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder)

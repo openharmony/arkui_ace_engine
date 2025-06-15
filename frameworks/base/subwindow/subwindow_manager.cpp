@@ -785,6 +785,28 @@ void SubwindowManager::UpdateCustomDialogNG(
     }
 }
 
+void SubwindowManager::UpdateCustomDialogNGWithNode(
+    const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "update customDialogWithNode ng enter");
+    DialogProperties dialogProperties = {
+        .autoCancel = dialogAttr.autoCancel,
+        .maskColor = dialogAttr.maskColor,
+        .isSysBlurStyle = false
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    for (auto &overlay : GetAllSubOverlayManager()) {
+        if (overlay) {
+            overlay->UpdateCustomDialogWithNode(node, dialogProperties, std::move(callback));
+        }
+    }
+}
+
 std::optional<double> SubwindowManager::GetTopOrder()
 {
     auto containerId = Container::CurrentIdSafelyWithCheck();
