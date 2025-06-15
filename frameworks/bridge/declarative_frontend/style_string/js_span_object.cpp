@@ -218,11 +218,11 @@ void JSFontSpan::ParseJsFontStyle(const JSRef<JSObject>& obj, Font& font)
 
 void JSFontSpan::ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font)
 {
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
     if (obj->HasProperty("strokeWidth")) {
-        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
         auto strokeWidth = obj->GetProperty("strokeWidth");
         CalcDimension width = theme->GetTextStyle().GetStrokeWidth();
         if (!strokeWidth->IsNull() && strokeWidth->IsObject()) {
@@ -232,6 +232,8 @@ void JSFontSpan::ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font)
             }
         }
         font.strokeWidth = width;
+    } else {
+        font.strokeWidth = theme->GetTextStyle().GetStrokeWidth();
     }
 }
 
@@ -283,6 +285,8 @@ void JSFontSpan::ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font)
             }
         }
         font.superscript = superscriptStyle;
+    } else {
+        font.superscript = SuperscriptStyle::NORMAL;
     }
 }
 
