@@ -15,12 +15,6 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("view_stack_processor_test_ng") {
-  type = "new"
-  module_output = "basic"
-  sources = [ "view_stack_processor_test_ng.cpp" ]
-}
-
 ace_unittest("distributed_ui_test_ng") {
   type = "new"
   module_output = "basic"
@@ -146,7 +140,6 @@ group("core_base_unittest") {
     ":view_abstract_test_ng",
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
-    ":view_stack_processor_test_ng",
   ]
 
   if (ace_engine_feature_enable_split_mode &&
