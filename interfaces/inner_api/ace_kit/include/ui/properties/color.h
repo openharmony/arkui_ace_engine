@@ -158,6 +158,7 @@ public:
     Color operator/(double value) const;
 
     std::string ColorToString() const;
+    std::string ToSvgFillColorKey() const;
 
     static Color ColorFromString(const std::string& str);
     static bool MatchColorHexString(const std::string& colorStr);
