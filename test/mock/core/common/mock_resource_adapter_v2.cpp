@@ -23,7 +23,7 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
 }
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName)
+    const std::string& bundleName, const std::string& moduleName, bool fromTheme)
 {
     return AceType::MakeRefPtr<MockResourceAdapterV2>();
 }
