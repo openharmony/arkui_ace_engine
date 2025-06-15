@@ -155,18 +155,18 @@ void SetListOptionsImpl(Ark_NativePointer node,
     }
 
     auto initialIndex = optionsOpt.value().initialIndex;
-    ListModelNG::SetInitialIndex(frameNode, initialIndex);
+    // ListModelNG::SetInitialIndex(frameNode, initialIndex);
     auto space = optionsOpt.value().space;
-    ListModelNG::SetListSpace(frameNode, space);
+    // ListModelNG::SetListSpace(frameNode, space);
 
     RefPtr<ScrollControllerBase> positionController = ListModelNG::GetOrCreateController(frameNode);
-    RefPtr<ScrollProxy> scrollBarProxy = ListModelNG::GetOrCreateScrollBarProxy(frameNode);
-    auto abstPeerPtrOpt = optionsOpt.value().scroller;
-    CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = *abstPeerPtrOpt;
-    CHECK_NULL_VOID(peerImplPtr);
-    peerImplPtr->SetController(positionController);
-    peerImplPtr->SetScrollBarProxy(scrollBarProxy);
+    // RefPtr<ScrollProxy> scrollBarProxy = ListModelNG::GetOrCreateScrollBarProxy(frameNode);
+    // auto abstPeerPtrOpt = optionsOpt.value().scroller;
+    // CHECK_NULL_VOID(abstPeerPtrOpt);
+    // auto peerImplPtr = *abstPeerPtrOpt;
+    // CHECK_NULL_VOID(peerImplPtr);
+    // peerImplPtr->SetController(positionController);
+    // peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
 } // ListInterfaceModifier
 namespace ListAttributeModifier {
@@ -175,7 +175,7 @@ void AlignListItemImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetListItemAlign(frameNode, Converter::OptConvert<V2::ListItemAlign>(value));
+    // ListModelNG::SetListItemAlign(frameNode, Converter::OptConvert<V2::ListItemAlign>(value));
 }
 void ListDirectionImpl(Ark_NativePointer node,
                        Ark_Axis value)
@@ -183,7 +183,7 @@ void ListDirectionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<Axis> direction = Converter::OptConvert<Axis>(value);
-    ListModelNG::SetListDirection(frameNode, EnumToInt(direction));
+    // ListModelNG::SetListDirection(frameNode, EnumToInt(direction));
 }
 void ScrollBarImpl(Ark_NativePointer node,
                    Ark_BarState value)
@@ -191,7 +191,7 @@ void ScrollBarImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<DisplayMode> mode = Converter::OptConvert<DisplayMode>(value);
-    ListModelNG::SetListScrollBar(frameNode, EnumToInt(mode));
+    // ListModelNG::SetListScrollBar(frameNode, EnumToInt(mode));
 }
 void ContentStartOffsetImpl(Ark_NativePointer node,
                             const Ark_Number* value)
@@ -281,7 +281,7 @@ void ScrollSnapAlignImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetScrollSnapAlign(frameNode, Converter::OptConvert<Ace::ScrollSnapAlign>(value));
+    // ListModelNG::SetScrollSnapAlign(frameNode, Converter::OptConvert<Ace::ScrollSnapAlign>(value));
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)
