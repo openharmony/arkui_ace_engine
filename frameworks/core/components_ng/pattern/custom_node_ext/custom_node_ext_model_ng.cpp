@@ -36,6 +36,11 @@ RefPtr<FrameNode> CustomNodeExtModelNG::CreateFrameNode(const std::string& tag)
     return frameNode;
 }
 
+RefPtr<FrameNode> CustomNodeExtModelNG::CreateFrameNode(const std::string& tag, int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<CustomNodeExtPattern>());
+}
+
 void CustomNodeExtModelNG::SetMeasureCallback(
     FrameNode* frameNode, std::function<void(LayoutConstraintF constraints)>&& onMeasure)
 {
