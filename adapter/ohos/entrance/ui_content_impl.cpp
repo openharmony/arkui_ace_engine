@@ -1010,6 +1010,35 @@ private:
     OHOS::Rosen::Rect lastRect_;
 };
 
+class DisplayIdChangeListener : public OHOS::Rosen::IDisplayIdChangeListener {
+public:
+    explicit DisplayIdChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~DisplayIdChangeListener() = default;
+
+    void OnDisplayIdChanged(OHOS::Rosen::DisplayId displayId)
+    {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "DisplayId is changed, displayId id is %{public}d, instanceId: %{public}d",
+            static_cast<int32_t>(displayId), instanceId_);
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        bool isDisplayIdChanged = displayId != lastDisplayId_;
+        lastDisplayId_ = displayId;
+        taskExecutor->PostTask(
+            [instanceId = instanceId_, isDisplayIdChanged] {
+                CHECK_EQUAL_VOID(isDisplayIdChanged, false);
+                ContainerScope scope(instanceId);
+                ClearAllMenuPopup(instanceId);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIDisplayIdChange");
+    }
+
+private:
+    int32_t instanceId_ = -1;
+    OHOS::Rosen::DisplayId lastDisplayId_;
+};
+
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType)
     : runtime_(runtime), vmType_(vmType)
 {
@@ -2328,10 +2357,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
-    auto container = CreateContainer(info, frontendType, useNewPipe);
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
     }
+    auto container = CreateContainer(info, frontendType, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetUIContentType(uIContentType_);
     container->SetWindowName(window_->GetWindowName());
@@ -2472,6 +2501,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         windowRectChangeListener_ = new WindowRectChangeListener(instanceId_);
         window_->RegisterWindowRectChangeListener(windowRectChangeListener_);
     }
+    displayIdChangeListener_ = new DisplayIdChangeListener(instanceId_);
+    window_->RegisterDisplayIdChangeListener(displayIdChangeListener_);
 
     // create ace_view
     auto aceView =
@@ -2831,6 +2862,7 @@ void UIContentImpl::Destroy()
 
     if (window_) {
         window_->UnregisterWaterfallModeChangeListener(waterfallModeChangeListener_);
+        window_->UnregisterDisplayIdChangeListener(displayIdChangeListener_);
         if (windowRectChangeListener_) {
             if (window_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
                 window_->UnregisterHostWindowRectChangeListener(windowRectChangeListener_);

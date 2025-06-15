@@ -250,6 +250,8 @@ public:
     // unfold the LazyVGrid during the position calculation.
     bool duringPositionCalc_ = false;
 
+    bool measureInNextFrame_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutInfoBase);
 };
 

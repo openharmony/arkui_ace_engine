@@ -195,6 +195,16 @@ void SetIsAtomic(ArkUINodeHandle node, const ArkUI_Bool isAtomic)
     CustomNodeExtModelNG::SetIsAtomic(frameNode, static_cast<bool>(isAtomic));
 }
 
+void SetBeforeCreateLayoutWrapperCallback(ArkUINodeHandle node, void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto beforeCreateLayoutWrapperCallback = [node, beforeCreateLayoutWrapper]() {
+        beforeCreateLayoutWrapper(node);
+    };
+    CustomNodeExtModelNG::SetBeforeCreateLayoutWrapperCallback(frameNode, std::move(beforeCreateLayoutWrapperCallback));
+}
+
 namespace NodeModifier {
 const struct ArkUICustomNodeExtModifier* GetCustomNodeExtModifier()
 {
@@ -212,7 +222,8 @@ const struct ArkUICustomNodeExtModifier* GetCustomNodeExtModifier()
         .setOnConfigUpdate = SetOnConfigUpdateCallback,
         .setOnModifyDone = SetOnModifyDoneCallback,
         .setOnDirtyLayoutWrapperSwap = SetOnDirtyLayoutWrapperSwap,
-        .setIsAtomic = SetIsAtomic
+        .setIsAtomic = SetIsAtomic,
+        .setBeforeCreateLayoutWrapper = SetBeforeCreateLayoutWrapperCallback
     };
     CHECK_INITIALIZED_FIELDS_END(modifiers, 0, 0, 0); // don't move this line
     return &modifiers;

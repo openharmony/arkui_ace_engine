@@ -77,6 +77,7 @@ public:
     bool GetIsAccessibilityFocus();
     bool GetIsPluralLineSupported();
     bool GetIsAccessibilityGroup();
+    std::string GetHtmlElementId();
 
 private:
     std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> node_;

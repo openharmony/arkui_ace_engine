@@ -52,6 +52,9 @@ public:
     virtual void SetFontFamilies(std::vector<std::string>& familyNames) = 0;
     virtual void SetSymbolType(SymbolType value) = 0;
 
+    virtual void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
+        const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr) = 0;
+
 private:
     static std::unique_ptr<SymbolModel> instance_;
     static std::mutex mutex_;

@@ -365,6 +365,19 @@ let Alignment;
   Alignment[Alignment.BottomEnd = 8] = 'BottomEnd';
 })(Alignment || (Alignment = {}));
 
+let LocalizedAlignment;
+(function (LocalizedAlignment) {
+  LocalizedAlignment.TOP_START = 'top_start';
+  LocalizedAlignment.TOP = 'top';
+  LocalizedAlignment.TOP_END = 'top_end';
+  LocalizedAlignment.START = 'start';
+  LocalizedAlignment.CENTER = 'center';
+  LocalizedAlignment.END = 'end';
+  LocalizedAlignment.BOTTOM_START = 'bottom_start';
+  LocalizedAlignment.BOTTOM = 'bottom';
+  LocalizedAlignment.BOTTOM_END = 'bottom_end';
+})(LocalizedAlignment || (LocalizedAlignment = {}));
+
 let ChainStyle;
 (function (ChainStyle) {
   ChainStyle[ChainStyle.SPREAD = 0] = 'SPREAD';
@@ -1588,6 +1601,30 @@ class PulseSymbolEffect extends SymbolEffect {
   constructor() {
     super();
     this.type = 'PulseSymbolEffect';
+  }
+}
+
+class DisableSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = 'DisableSymbolEffect';
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class QuickReplaceSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = 'QuickReplaceSymbolEffect';
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
   }
 }
 

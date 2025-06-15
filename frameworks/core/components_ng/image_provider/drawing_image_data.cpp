@@ -140,6 +140,29 @@ ImageRotateOrientation GetImageRotateOrientation(SkEncodedOrigin origin)
     }
 }
 
+ImageRotateOrientation GetImageSourceRotateOrientation(std::string origin)
+{
+    if (origin == "Top-right") {
+        return ImageRotateOrientation::UP_MIRRORED;
+    } else if (origin == "Bottom-right") {
+        return ImageRotateOrientation::DOWN;
+    } else if (origin == "Bottom-left") {
+        return ImageRotateOrientation::DOWN_MIRRORED;
+    } else if (origin == "Left-top") {
+        return ImageRotateOrientation::LEFT_MIRRORED;
+    } else if (origin == "Right-top") {
+        return ImageRotateOrientation::RIGHT;
+    } else if (origin == "Right-bottom") {
+        return ImageRotateOrientation::RIGHT_MIRRORED;
+    } else if (origin == "Left-bottom") {
+        return ImageRotateOrientation::LEFT;
+    } else if (origin == "Top-left") {
+        return ImageRotateOrientation::UP;
+    } else {
+        return ImageRotateOrientation::UP;
+    }
+}
+
 ImageCodec DrawingImageData::Parse() const
 {
     auto rsData = GetRSData();
@@ -150,6 +173,18 @@ ImageCodec DrawingImageData::Parse() const
             ImageSource::GetASTCInfo(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize());
         imageSize.SetSizeT(SizeF(astcSize.first, astcSize.second));
         return { imageSize, ASTC_FRAME_COUNT, ImageRotateOrientation::UP };
+    }
+    uint32_t errorCode = 0;
+    auto imageSource =
+        ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize(), errorCode);
+    if (imageSource) {
+        auto encodedFormat = imageSource->GetEncodedFormat();
+        if (encodedFormat == "image/heic" || encodedFormat == "image/heif") {
+            auto orientation = GetImageSourceRotateOrientation(imageSource->GetProperty("Orientation"));
+            auto originImageSize = imageSource->GetImageSize();
+            imageSize.SetSizeT(SizeF(originImageSize.first, originImageSize.second));
+            return { imageSize, imageSource->GetFrameCount(), orientation };
+        }
     }
 
     RSDataWrapper* wrapper = new RSDataWrapper { rsData };

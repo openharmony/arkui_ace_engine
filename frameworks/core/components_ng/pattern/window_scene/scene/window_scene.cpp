@@ -48,6 +48,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
     initWindowMode_ = session_->GetWindowMode();
+    syncStartingWindow_ = Rosen::SceneSessionManager::GetInstance().IsSyncLoadStartingWindow();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -99,6 +100,7 @@ std::shared_ptr<Rosen::RSSurfaceNode> WindowScene::CreateLeashWindowNode()
     TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSSurfaceNode: %{public}s",
              WindowSceneHelper::RSNodeToStr(surfaceNode).c_str());
     CHECK_NULL_RETURN(surfaceNode, nullptr);
+    surfaceNode->SetSkipCheckInMultiInstance(true);
     surfaceNode->SetLeashPersistentId(static_cast<int64_t>(session_->GetPersistentId()));
     return surfaceNode;
 }

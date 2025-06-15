@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -99,6 +100,7 @@ public:
     virtual const Color& GetButtonBgColor() const = 0;
     virtual const Color& GetButtonPressColor() const = 0;
     virtual bool CanMove(bool isDown) const = 0;
+    virtual std::string GetCurrentOption() const = 0;
 
     virtual uint32_t GetShowCount() const
     {
@@ -295,6 +297,12 @@ public:
     virtual bool NotLoopOptions() const;
     virtual void TossStoped();
     virtual void ScrollOption(double delta, bool isJump = false);
+    virtual void UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerLayoutProperty>& pickerLayoutProperty);
+    virtual void UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerLayoutProperty>& pickerLayoutProperty);
+    virtual void UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerLayoutProperty>& pickerLayoutProperty);
     virtual void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, PickerScrollDirection dir) {}
     virtual void HandleDragMove(const GestureEvent& event);
     virtual void PlayRestAnimation();
@@ -361,6 +369,7 @@ protected:
     uint32_t currentIndex_ = 0;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
+    FontWeight SelectedWeight_ = FontWeight::MEDIUM;
 
 public:
     PickerColumnPatternCircleUtils<PickerColumnPattern>* circleUtils_ = nullptr;

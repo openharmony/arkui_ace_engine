@@ -2734,20 +2734,9 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-
-    std::vector<int32_t> idsNeedClean;
-    for (auto child: rootNode->GetChildren()) {
-        idsNeedClean.push_back(child->GetId());
-    }
-    auto pipeline = rootNode->GetContext();
+    auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([idsNeedClean, containerId = Container::CurrentId()] {
-        auto subwindowMgr = SubwindowManager::GetInstance();
-        for (auto child : idsNeedClean) {
-            subwindowMgr->DeleteHotAreas(containerId, child, SubwindowType::TYPE_MENU);
-        }
-    });
-    hasDragPixelMap_ ? RemoveMenuWrapperNode(rootNode) : rootNode->Clean();
+    RemoveMenuWrapperNode(rootNode, pipeline);
 
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -8530,16 +8519,48 @@ bool OverlayManager::IsRootExpansive() const
     return opts && opts->Expansive();
 }
 
-void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode)
+void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const RefPtr<PipelineContext>& pipeline)
 {
     CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_VOID(pipeline);
+    std::vector<int32_t> idsNeedClean;
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            rootNode->RemoveChild(node);
-            return;
+            idsNeedClean.push_back(child->GetId());
+            RemoveMenuWrapperFromRoot(rootNode, node);
         }
     }
+    CHECK_EQUAL_VOID(idsNeedClean.empty(), true);
+    pipeline->AddAfterLayoutTask([idsNeedClean, containerId = pipeline->GetInstanceId()] {
+        auto subwindowMgr = SubwindowManager::GetInstance();
+        for (auto child : idsNeedClean) {
+            subwindowMgr->DeleteHotAreas(containerId, child, SubwindowType::TYPE_MENU);
+        }
+    });
+}
+
+void OverlayManager::RemoveMenuWrapperFromRoot(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    
+    if (menuWrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+        // When the menu is forcibly removed during the disappearing process, the onDisappear life cycle needs to be
+        // called back to the user.
+        menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->CallMenuOnDidDisappearCallback();
+    } else if (menuWrapperPattern->IsShow()) {
+        // When the menu is forcibly removed during display, the life cycle of aboutToDisappear and
+        // onDisappear needs to be called back to the user.
+        menuWrapperPattern->CallMenuAboutToDisappearCallback();
+        menuWrapperPattern->CallMenuOnWillDisappearCallback();
+        menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->CallMenuOnDidDisappearCallback();
+    }
+    rootNode->RemoveChild(menuWrapperNode);
 }
 
 void OverlayManager::SetDragNodeNeedClean()

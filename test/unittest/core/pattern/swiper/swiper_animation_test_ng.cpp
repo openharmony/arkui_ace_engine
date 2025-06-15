@@ -1143,6 +1143,40 @@ HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShowPreviousAnimation005
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation005, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    layoutProperty_->UpdateLoop(false);
+    layoutProperty_->UpdateIndex(1);
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->swiperController_, nullptr);
+
+    TurnPageRateFunc callback = [](const int32_t i, float f) {};
+    pattern_->swiperController_->SetTurnPageRateCallback(callback);
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+
+    // check ShowPrevious function
+    controller_->ShowPrevious();
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
  * @tc.name: StopAnimate001
  * @tc.desc: Test change index with animate, and force stop when animate running
  * @tc.desc: Would change index decided by currentOffset

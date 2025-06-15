@@ -148,6 +148,7 @@ EventParamsBuilder& EventParamsBuilder::SetHost(const RefPtr<NG::FrameNode>& nod
         params_->emplace(Recorder::KEY_NODE_RECT, std::move(rect));
     }
     params_->emplace(KEY_ACE_ID, std::to_string(node->GetId()));
+    params_->emplace("accessilityId", std::to_string(node->GetAccessibilityId()));
     SetPageUrl(GetPageUrlByNode(node));
     FillExtraTextIfNeed(eventType_, *this, node);
     auto parent = node->GetParent();

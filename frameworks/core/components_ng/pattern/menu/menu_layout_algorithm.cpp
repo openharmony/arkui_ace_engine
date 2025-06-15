@@ -394,7 +394,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitializeParam(layoutWrapper, menuPattern);
     auto needModify = !menuPattern->IsSelectMenu() && !menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
     if (needModify) {
-        if (canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_) {
+        if (canExpandCurrentWindow_ && isExpandDisplay_) {
             position_ += displayWindowRect_.GetOffset();
             TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
                 position_.ToString().c_str());
@@ -875,7 +875,7 @@ void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern
 
     auto menuMinWidth = theme->GetMenuMinWidth().ConvertToPx();
     auto menuDefaultWidth = theme->GetMenuDefaultWidth().ConvertToPx();
-    auto menuMaxWidth = theme->GetMenuMaxWidthRatio() * SystemProperties::GetDeviceWidth();
+    auto menuMaxWidth = theme->GetMenuMaxWidthRatio() * pipeline->GetDisplayWindowRectInfo().Width();
     double minWidth = 0.0f;
     double maxWidth = 0.0f;
 
@@ -1599,8 +1599,12 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     offsetX = CheckHorizontalLayoutPreviewOffsetX(previewGeometryNode, menuGeometryNode, offsetX);
     auto x = std::clamp(offsetX, static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
-    auto y = std::clamp(offsetY, static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
-        static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height());
+    auto yMax = static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height();
+    if (placement_ == Placement::LEFT_BOTTOM || placement_ == Placement::RIGHT_BOTTOM) {
+        yMax += previewSize.Height();
+        offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / HALF, yMax);
+    }
+    auto y = std::clamp(offsetY, static_cast<float>(wrapperRect_.Top()) + param_.topSecurity, yMax);
     x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / HALF;
     y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / HALF;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));

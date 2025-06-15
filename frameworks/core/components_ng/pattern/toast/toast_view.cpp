@@ -23,11 +23,6 @@ namespace OHOS::Ace::NG {
 constexpr float MAX_TOAST_SCALE = 2.0f;
 RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
 {
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto toastTheme = context->GetTheme<ToastTheme>();
-    CHECK_NULL_RETURN(toastTheme, nullptr);
-
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
     // make toast node
@@ -38,6 +33,10 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
     CHECK_NULL_RETURN(toastProperty, nullptr);
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, nullptr);
+    auto context = toastNode->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto toastTheme = context->GetTheme<ToastTheme>();
+    CHECK_NULL_RETURN(toastTheme, nullptr);
     auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
     toastAccessibilityProperty->SetUserTextValue(toastInfo.message);
@@ -81,7 +80,7 @@ void ToastView::UpdateTextLayoutProperty(
 {
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = textNode->GetContext();
     CHECK_NULL_VOID(context);
     auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
@@ -118,7 +117,7 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
     CHECK_NULL_VOID(toastContext);
     auto pattern = toastNode->GetPattern<ToastPattern>();
     CHECK_NULL_VOID(pattern);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = toastNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
@@ -156,7 +155,7 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     CHECK_NULL_VOID(toastContext);
     auto pattern = toastNode->GetPattern<ToastPattern>();
     CHECK_NULL_VOID(pattern);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = toastNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);

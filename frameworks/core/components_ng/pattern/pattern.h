@@ -64,7 +64,7 @@ public:
 private:
     std::function<void()> callback_;
 };
-
+ 
 // Pattern is the base class for different measure, layout and paint behavior.
 class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -612,19 +612,6 @@ public:
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
 
-    virtual RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index)
-    {
-        return nullptr;
-    }
-
-    /**
-     * @brief To override FrameNode::GetTotalChildCount in Arkoala
-     */
-    virtual int32_t GetTotalChildCount() const
-    {
-        return -1;
-    }
-
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -648,6 +635,7 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        layoutProperty->CheckLocalizedAlignment(layoutDirection);
         // Reset for safeAreaExpand's Cache in GeometryNode
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
@@ -685,15 +673,6 @@ public:
 
     virtual void AddInnerOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
-
-    virtual ScrollWindowAdapter* GetScrollWindowAdapter()
-    {
-        return nullptr;
-    }
-    virtual ScrollWindowAdapter* GetOrCreateScrollWindowAdapter()
-    {
-        return nullptr;
-    }
 
     virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
 
@@ -747,7 +726,7 @@ public:
         return false;
     }
 
-    void UnRegisterResource(const std::string& key);
+    virtual void UnRegisterResource(const std::string& key);
 
     template<typename T>
     void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
@@ -770,6 +749,10 @@ public:
     {
         return false;
     }
+
+    virtual void UpdateBorderResource() {};
+    virtual void UpdateMarginResource() {};
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

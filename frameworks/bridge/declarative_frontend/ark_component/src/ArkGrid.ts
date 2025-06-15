@@ -819,3 +819,7 @@ globalThis.Grid.onDidScroll = function (value: (xOffset: number, yOffset: number
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().grid.setOnDidScroll(nodePtr, value);
 };
+globalThis.Grid.onWillStopDragging = function (value: (velocity: number) => void) {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+};

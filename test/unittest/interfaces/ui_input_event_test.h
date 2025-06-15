@@ -20,6 +20,7 @@
 #include "interfaces/native/node/event_converter.h"
 #include "native_node.h"
 #include "ui_input_event.h"
+#include "base/error/error_code.h"
 
 #include "frameworks/core/event/ace_events.h"
 #include "frameworks/core/event/axis_event.h"

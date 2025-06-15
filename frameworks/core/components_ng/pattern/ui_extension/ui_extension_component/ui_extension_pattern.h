@@ -375,6 +375,7 @@ private:
     bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
     AccessibilityParentRectInfo GetAccessibilityRectInfo() const;
     void ReDispatchWantParams();
+    void HandleOcclusionScene(const RefPtr<FrameNode>& node, bool flag);
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

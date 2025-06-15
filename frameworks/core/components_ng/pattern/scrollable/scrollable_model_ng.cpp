@@ -442,4 +442,21 @@ void ScrollableModelNG::GetScrollBarMargin(FrameNode* frameNode, ScrollBarMargin
     CHECK_NULL_VOID(paintProperty);
     scrollBarMargin = paintProperty->GetScrollBarMargin().value_or(ScrollBarMargin());
 }
+
+void ScrollableModelNG::SetOnWillStopDragging(OnWillStopDraggingEvent&& onWillStopDragging)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStopDragging(std::move(onWillStopDragging));
+}
+
+void ScrollableModelNG::SetOnWillStopDragging(FrameNode* frameNode, OnWillStopDraggingEvent&& onWillStopDragging)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStopDragging(std::move(onWillStopDragging));
+}
 } // namespace OHOS::Ace::NG

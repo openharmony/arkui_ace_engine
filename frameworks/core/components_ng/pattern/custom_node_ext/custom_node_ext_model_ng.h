@@ -36,10 +36,18 @@ public:
     static void SetOnConfigUpdateCallback(
         FrameNode* frameNode, std::function<void(ConfigurationType configType)>&& onConfigUpdate);
     static void SetOnModifyDoneCallback(FrameNode* frameNode, std::function<void()>&& onModifyDone);
+    static void SetOnWindowFocusedCallback(FrameNode* frameNode, std::function<void()>&& onWindowFocused);
+    static void SetOnWindowUnfocusedCallback(FrameNode* frameNode, std::function<void()>&& onWindowUnfocused);
+    static void SetOnAttachToMainTreeCallback(FrameNode* frameNode, std::function<void()>&& onAttachToMainTree);
+    static void SetOnDetachFromMainTreeCallback(FrameNode* frameNode, std::function<void()>&& onDetachFromMainTree);
+    static void SetOnAvoidInfoChangeCallback(FrameNode* frameNode, std::function<void()>&& onAvoidInfoChange);
+    static void SetIsNeedRegisterAvoidInfoChangeListener(FrameNode* frameNode, bool isRegister);
     static void SetOnDirtyLayoutWrapperSwap(
         FrameNode* frameNode, std::function<void(const DirtySwapConfig& config)>&& onDirtySwap);
 
     static void SetIsAtomic(FrameNode* frameNode, bool isAtomic);
+    static void SetBeforeCreateLayoutWrapperCallback(
+        FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
 };
 }
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_NODE_EXT_CUSTOM_NODE_EXT_MODEL_NG_H

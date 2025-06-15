@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -101,6 +102,8 @@ public:
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void InitHapticController(const RefPtr<FrameNode>& host) override;
 
+    std::string GetCurrentOption() const override;
+
 private:
     void OnModifyDone() override;
     void SetDividerHeight(uint32_t showOptionCount);
@@ -117,13 +120,13 @@ private:
         const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty);
     void UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
         const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<DataPickerRowLayoutProperty>& timePickerLayoutProperty);
+        const RefPtr<PickerLayoutProperty>& pickerLayoutProperty) override;
     void UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
         const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<DataPickerRowLayoutProperty>& timePickerLayoutProperty);
+        const RefPtr<PickerLayoutProperty>& pickerLayoutProperty) override;
     void UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
         const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<DataPickerRowLayoutProperty>& timePickerLayoutProperty);
+        const RefPtr<PickerLayoutProperty>& pickerLayoutProperty) override;
     void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index,
         uint32_t showCount, bool isDown, double scale) override;
     void InitTextFontFamily() override;

@@ -669,7 +669,7 @@ bool JSBaseNode::InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
         axisEvent.screenY = screenYJsVal->ToNumber<float>();
     }
 
-    AxisInfo* axisInfo = JSRef<JSObject>::Cast(obj)->Unwrap<AxisInfo>();
+    AxisInfo* axisInfo = obj->Unwrap<AxisInfo>();
     auto pinchAxisScale = obj->GetProperty("pinchAxisScale");
     if (pinchAxisScale->IsNumber()) {
         axisEvent.pinchAxisScale = pinchAxisScale->ToNumber<float>();

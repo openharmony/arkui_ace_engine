@@ -34,7 +34,20 @@ ohos_unittest("ui_input_event_test") {
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "oh_arkui_pointerevent_gethistoryx_test.cpp",
     "oh_arkui_uiinputevent_gettype_test.cpp",
+    "oh_arkui_focusaxisevent_getaxisvalue.cpp",
+    "oh_arkui_focusaxisevent_setstoppropagation.cpp",
+    "oh_arkui_uiinputevent_geteventtargetwidth.cpp",
+    "oh_arkui_uiinputevent_geteventtargetheight.cpp",
+    "oh_arkui_uiinputevent_geteventtargetpositionx.cpp",
+    "oh_arkui_uiinputevent_geteventtargetpositiony.cpp",
+    "oh_arkui_uiinputevent_geteventtargetglobalpositionx.cpp",
+    "oh_arkui_uiinputevent_geteventtargetglobalpositiony.cpp",
+    "oh_arkui_hoverevent_ishovered.cpp",
+    "oh_arkui_pointerevent_getpressedtimebyindex.cpp",
+    "oh_arkui_mouseevent_getrawdeltax.cpp",
+    "oh_arkui_mouseevent_getrawdeltay.cpp",
   ]
 
   configs = [

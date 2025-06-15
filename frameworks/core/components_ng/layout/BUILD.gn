@@ -22,10 +22,5 @@ build_component_ng("layout_ng") {
     "layout_wrapper.cpp",
     "layout_wrapper_builder.cpp",
     "layout_wrapper_node.cpp",
-    "section/item_measurer.cpp",
-    "section/section_data_types.cpp",
-    "section/sections_initializer.cpp",
-    "section/staggered_fill_algorithm.cpp",
-    "section/staggered_section_filler.cpp",
   ]
 }

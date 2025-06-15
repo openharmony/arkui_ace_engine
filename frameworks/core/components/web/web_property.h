@@ -90,6 +90,7 @@ enum class WebElementType : int32_t {
     IMAGE,
     LINK,
     MIXED,
+    AILINK,
     NONE,
 };
 

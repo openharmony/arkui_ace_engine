@@ -22,7 +22,10 @@
 namespace OHOS::Ace {
 napi_value JsCreate(napi_env env, napi_callback_info info);
 napi_value SetWaterMask(napi_env env, napi_value object);
+napi_value SetDynamicRangeMode(napi_env env, napi_value object);
+napi_value SetMovingPhotoFormat(napi_env env, napi_value object);
 napi_value JsMuted(napi_env env, napi_callback_info info);
+napi_value JsHdrBrightness(napi_env env, napi_callback_info info);
 napi_value JsObjectFit(napi_env env, napi_callback_info info);
 napi_value JsOnComplete(napi_env env, napi_callback_info info);
 napi_value JsOnStart(napi_env env, napi_callback_info info);

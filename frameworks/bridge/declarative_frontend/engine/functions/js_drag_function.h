@@ -89,6 +89,7 @@ public:
     }
     void StartDataLoading(const JSCallbackInfo& args);
     void EnableInternalDropAnimation(const JSCallbackInfo& args);
+    void SetDataLoadParams(const JSCallbackInfo& args);
 
 private:
     static void Constructor(const JSCallbackInfo& args);

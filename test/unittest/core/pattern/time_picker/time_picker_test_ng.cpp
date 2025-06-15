@@ -340,6 +340,24 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle004, Tes
 }
 
 /**
+ * @tc.name: TimePickerModelNGSetDisappearTextStyle005
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    PickerTextStyle data;
+    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_FALSE(pickerProperty->HasFontStyle());
+}
+
+/**
  * @tc.name: TimePickerModelNGSetNormalTextStyle001
  * @tc.desc: Test TimePickerModelNG SetNormalTextStyle.
  * @tc.type: FUNC
@@ -3034,23 +3052,23 @@ HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)
     minuteColumnPattern->SetAccessibilityAction();
 
     /**
-     * @tc.steps: step3. Get timePickerColumn accessibilityProperty to call callback function.
+     * @tc.steps: step3. Get blendNode accessibilityProperty to call callback function.
      * @tc.expected: Related function is called.
      */
-    auto accessibilityProperty = minuteColumn->GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>();
+    auto blendNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
 
     /**
-     * @tc.steps: step4. When timePickerColumn can move, call the callback function in timePickerColumn
-     *                   accessibilityProperty.
+     * @tc.steps: step4. When timePickerColumn can move, call the callback function in accessibilityProperty.
      * @tc.expected: Related function is called.
      */
     EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
 
     /**
-     * @tc.steps: step5. When timePickerColumn can not move, call the callback function in timePickerColumn
-     *                   accessibilityProperty.
+     * @tc.steps: step5. When timePickerColumn can not move, call the callback function in accessibilityProperty.
      * @tc.expected: Related function is called.
      */
     options = minuteColumnPattern->GetOptions();
@@ -7317,5 +7335,40 @@ HWTEST_F(TimePickerPatternTestNg, ParseDirectionKey001, TestSize.Level1)
     columnPattern_->stopHaptic_ = false;
     pickerPattern->ParseDirectionKey(host, columnPattern_, code, currentIndex, totalOptionCount, 0);
     EXPECT_FALSE(columnPattern_->stopHaptic_);
+}
+
+/**
+ * @tc.name: TimePickerGetCurrentOption001
+ * @tc.desc: Test TimePickerColumnPattern GetCurrentOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerGetCurrentOption001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumnNode = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumnNode, nullptr);
+    auto minuteColumnPattern = minuteColumnNode->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto options = minuteColumnPattern->GetOptions();
+    options[minuteColumnNode] = 0;
+    minuteColumnPattern->SetOptions(options);
+    EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "");
+
+    options[minuteColumnNode] = DEFAULT_VALUE.size();
+    minuteColumnPattern->SetOptions(options);
+    EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "03");
+
+    options.erase(minuteColumnNode);
+    minuteColumnPattern->SetOptions(options);
+    EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "");
 }
 } // namespace OHOS::Ace::NG

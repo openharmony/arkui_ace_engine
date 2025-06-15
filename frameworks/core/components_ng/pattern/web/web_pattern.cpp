@@ -679,10 +679,12 @@ void WebPattern::RemovePreviewMenuNode()
 
 bool WebPattern::IsPreviewMenuNotNeedShowPreview()
 {
-    bool isNotNeedShowPreview = (isNewDragStyle_ && IsPreviewImageNodeExist()) || imageOverlayIsSelected_;
+    bool isNotNeedShowPreview =
+        ((isNewDragStyle_ || isAILinkMenuShow_) && IsPreviewImageNodeExist()) || imageOverlayIsSelected_;
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "IsPreviewMenuNotNeedShowPreview:%{public}d, temporarily for AI entity popup: %{public}d",
-        isNotNeedShowPreview, imageOverlayIsSelected_);
+        "IsPreviewMenuNotNeedShowPreview:%{public}d, for AI link preview menu %{public}d, for AI entity popup: "
+        "%{public}d",
+        isNotNeedShowPreview, isAILinkMenuShow_, imageOverlayIsSelected_);
     return isNotNeedShowPreview;
 }
 
@@ -700,6 +702,7 @@ void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelecti
         webPattern->RemovePreviewMenuNode();
         CHECK_NULL_VOID(webPattern->contextMenuResult_);
         webPattern->contextMenuResult_->Cancel();
+        webPattern->SetAILinkMenuShow(false);
     };
     param->menuParam.onDisappear = std::move(onPreviewMenuDisappear);
     auto key = std::make_pair(param->type, param->responseType);
@@ -892,6 +895,11 @@ void WebPattern::UpdateImagePreviewParam()
     auto previewNode =
         FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, previewImageNodeId_.value());
     CHECK_NULL_VOID(previewNode);
+    if (curElementType_ == WebElementType::AILINK && GetDataDetectorEnable()) {
+        if (!webDataDetectorAdapter_->GetPreviewMenuBuilder(params->menuBuilder, params->previewBuilder)) {
+            return;
+        }
+    }
     ViewStackProcessor::GetInstance()->Push(previewNode);
     ViewAbstractModel::GetInstance()->BindContextMenu(
         curResponseType_, params->menuBuilder, params->menuParam, params->previewBuilder);
@@ -926,7 +934,8 @@ void WebPattern::ShowPreviewMenu(WebElementType type) {
         delegate_->OnContextMenuHide("");
         return;
     }
-
+    isAILinkMenuShow_ = (type == WebElementType::AILINK);
+    TAG_LOGI(AceLogTag::ACE_WEB, "ShowPreviewMenu for AI link: %{public}d", isAILinkMenuShow_);
     host->AddChild(previewNode);
     previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     previewNode->MarkModifyDone();
@@ -947,7 +956,13 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     CHECK_NULL_VOID(contextMenuResult_);
     bool isImage = false;
     bool isHyperLink = false;
+    bool isAILink = !contextMenuParam_->GetLinkUrl().empty() && contextMenuParam_->IsAILink() &&
+                GetDataDetectorEnable() && webDataDetectorAdapter_->GetDataDetectorEnablePrewiew();
+    auto copyOption =
+        delegate_ ? delegate_->GetCopyOptionMode() : OHOS::NWeb::NWebPreference::CopyOptionMode::LOCAL_DEVICE;
+    isAILink = isAILink && copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        CHECK_NULL_VOID(delegate_);
         int hitTestResult = delegate_->GetLastHitTestResult();
         TAG_LOGI(AceLogTag::ACE_WEB, "OnContextMenuShow hitTestResult:%{public}d, isAILink:%{public}d", hitTestResult,
             contextMenuParam_->IsAILink());
@@ -983,18 +998,25 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         ShowContextSelectOverlay(RectF(), RectF());
         return;
     }
-    CHECK_NULL_VOID(isNewDragStyle_ && result);
+    CHECK_NULL_VOID((isNewDragStyle_ || isAILink) && result);
     TAG_LOGD(AceLogTag::ACE_WEB, "OnContextMenuShow isImage:%{public}d, isHyperLink:%{public}d", isImage, isHyperLink);
     if (isImage) {
         ShowPreviewMenu(WebElementType::IMAGE);
     } else if (isHyperLink) {
         ShowPreviewMenu(WebElementType::LINK);
+    } else if (isAILink) {
+        CHECK_NULL_VOID(webDataDetectorAdapter_);
+        if (!webDataDetectorAdapter_->SetPreviewMenuLink(contextMenuParam_->GetLinkUrl())) {
+            return;
+        }
+        ShowPreviewMenu(WebElementType::AILINK);
     }
 }
 
 void WebPattern::OnContextMenuHide()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern OnContextMenuHide");
+    isAILinkMenuShow_ = false;
     if (webData_) {
         CloseContextSelectionMenu();
         return;
@@ -1047,6 +1069,16 @@ void WebPattern::OnDetachFromMainTree()
     isAttachedToMainTree_ = false;
     // report component is in background.
     delegate_->OnRenderToBackground();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto frontend = pipelineContext->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->ReleasePageEvent(host, true, true);
 }
 
 void WebPattern::OnAttachToFrameNode()
@@ -2195,7 +2227,7 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
     CHECK_NULL_RETURN(delegate_, false);
-    if (curContextMenuResult_ && (!isNewDragStyle_ || !previewImageNodeId_.has_value())) {
+    if (curContextMenuResult_ && (!(isNewDragStyle_ || isAILinkMenuShow_) || !previewImageNodeId_.has_value())) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "preview menu is not displayed, and the app is notified to close the long-press menu");
         delegate_->OnContextMenuHide("");
@@ -3323,6 +3355,13 @@ void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnCssDisplayChangeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateCssDisplayChangeEnabled(value);
+    }
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     if (delegate_) {
@@ -3397,10 +3436,6 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t nodeId = host->GetId();
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    if (dragDropManager) {
-        dragDropManager->AddDragFrameNode(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
-    }
 
     pipelineContext->AddWindowStateChangedCallback(nodeId);
     pipelineContext->AddWindowSizeChangeCallback(nodeId);
@@ -3434,11 +3469,6 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
 
     if (observer_) {
         observer_->OnDetachContext();
-    }
-
-    auto dragDropManager = context->GetDragDropManager();
-    if (dragDropManager) {
-        dragDropManager->RemoveDragFrameNode(nodeId);
     }
 
     if (tooltipId_ != -1) {
@@ -3685,6 +3715,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateIntrinsicSizeEnabled(GetIntrinsicSizeEnabledValue(false));
+        delegate_->UpdateCssDisplayChangeEnabled(GetCssDisplayChangeEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
 
@@ -4020,15 +4051,33 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         height, keyboard, keyboardSafeAreaEnabled);
     if (!isFocus_ || !isVisible_) {
         UpdateOnFocusTextField(false);
-        ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
+        ProcessVirtualKeyBoardHideAvoidMenu(width, height, keyboardSafeAreaEnabled);
         return false;
     }
     UpdateOnFocusTextField(!NearZero(keyboard));
     if (NearZero(keyboard)) {
-        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled) && UpdateKeyboardSafeArea(true);
+        return ProcessVirtualKeyBoardHideAvoidMenu(width, height, keyboardSafeAreaEnabled);
     }
-    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled) &&
-           UpdateKeyboardSafeArea(false, keyboard);
+    return ProcessVirtualKeyBoardShowAvoidMenu(width, height, keyboard, keyboardSafeAreaEnabled);
+}
+
+bool WebPattern::ProcessVirtualKeyBoardShowAvoidMenu(
+    int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
+{
+    if (ProcessVirtualKeyBoardShow(width, height, keyboard, safeAreaEnabled)) {
+        MenuAvoidKeyboard(false, keyboard);
+        return true;
+    }
+    return false;
+}
+
+bool WebPattern::ProcessVirtualKeyBoardHideAvoidMenu(int32_t width, int32_t height, bool safeAreaEnabled)
+{
+    if (ProcessVirtualKeyBoardHide(width, height, safeAreaEnabled)) {
+        MenuAvoidKeyboard(true);
+        return true;
+    }
+    return false;
 }
 
 void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate)
@@ -4369,9 +4418,8 @@ void  WebPattern::OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMen
     }
 }
 
-void WebPattern::UpdateEditMenuOptions(
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     onCreateMenuCallback_ = std::move(onCreateMenuCallback);
     onMenuItemClick_ = [weak = AceType::WeakClaim(this), action = std::move(onMenuItemClick)] (
@@ -4387,6 +4435,9 @@ void WebPattern::UpdateEditMenuOptions(
         }
         return result;
     };
+    if (onPrepareMenuCallback) {
+        onPrepareMenuCallback_ = std::move(onPrepareMenuCallback);
+    }
 }
 
 void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
@@ -5094,7 +5145,7 @@ void WebPattern::CloseCustomKeyboard()
     keyboardOverlay_->CloseKeyboard(frameNode->GetId());
     isUsingCustomKeyboardAvoid_ = false;
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard end");
-    UpdateKeyboardSafeArea(true);
+    MenuAvoidKeyboard(true);
 }
 
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
@@ -7045,7 +7096,7 @@ void WebPattern::RemoveDataListNode()
 
 void WebPattern::CloseKeyboard()
 {
-    UpdateKeyboardSafeArea(true);
+    MenuAvoidKeyboard(true);
     InputMethodManager::GetInstance()->CloseKeyboard();
 }
 
@@ -7343,10 +7394,23 @@ void WebPattern::DestroyAnalyzerOverlay()
     awaitingOnTextSelected_ = false;
 }
 
-void WebPattern::OnAccessibilityHoverEvent(const PointF& point, bool isHoverEnter)
+void WebPattern::OnAccessibilityHoverEvent(
+    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time)
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->HandleAccessibilityHoverEvent(point.GetX(), point.GetY(), isHoverEnter);
+    delegate_->HandleAccessibilityHoverEvent(point, source, eventType, time);
+}
+
+std::string WebPattern::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
+{
+    CHECK_NULL_RETURN(delegate_, "");
+    return delegate_->GetSurfaceIdByHtmlElementId(htmlElementId);
+}
+
+int64_t WebPattern::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
+{
+    CHECK_NULL_RETURN(delegate_, -1);
+    return delegate_->GetWebAccessibilityIdBySurfaceId(surfaceId);
 }
 
 void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)
@@ -7866,7 +7930,7 @@ void WebPattern::CloseDataDetectorMenu()
     CHECK_NULL_VOID(webDataDetectorAdapter_);
     webDataDetectorAdapter_->CloseAIMenu();
 }
-bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
+bool WebPattern::MenuAvoidKeyboard(bool hideOrClose, double height)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -7874,12 +7938,12 @@ bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
-    auto keyboardInset = safeAreaManager->GetKeyboardInset();
+    auto keyboardInset = safeAreaManager->GetKeyboardWebInset();
     if (hideOrClose) {
         auto newBottom = std::optional<uint32_t>(keyboardInset.end);
-        safeAreaManager->UpdateKeyboardSafeArea(0, newBottom);
+        safeAreaManager->UpdateKeyboardWebSafeArea(0, newBottom);
     } else {
-        safeAreaManager->UpdateKeyboardSafeArea(height);
+        safeAreaManager->UpdateKeyboardWebSafeArea(height);
     }
     return true;
 }

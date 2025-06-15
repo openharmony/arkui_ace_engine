@@ -698,10 +698,8 @@ void RichEditorPattern::OnModifyDone()
     selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
     if (host->IsDraggable()) {
         InitDragDropEvent();
-        AddDragFrameNodeToManager(host);
     } else {
         ClearDragDropEvent();
-        RemoveDragFrameNodeFromManager(host);
     }
     Register2DragDropManager();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2559,7 +2557,7 @@ void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode c
         spanStyle = spanTextStyle.value();
     }
     HandleSelectFontStyleWrapper(code, spanStyle);
-    updateSpanStyle.updateTextColor = spanStyle.GetTextColor();
+    IF_TRUE(!(*it)->useThemeFontColor, updateSpanStyle.updateTextColor = spanStyle.GetTextColor());
     updateSpanStyle.updateFontSize = spanStyle.GetFontSize();
     updateSpanStyle.updateItalicFontStyle = spanStyle.GetFontStyle();
     updateSpanStyle.updateFontWeight = spanStyle.GetFontWeight();
@@ -3262,7 +3260,11 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     CHECK_NULL_VOID(!IsClickEventOnlyForMenuToggle(info));
     CHECK_NULL_VOID(!HandleUrlSpanClickEvent(info));
 
-    Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
+    bool isMouseClick = info.GetSourceDevice() == SourceType::MOUSE;
+    auto localOffset = info.GetLocalLocation();
+    IF_TRUE(isMouseClick, AdjustMouseLocalOffset(localOffset));
+ 
+    Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     IF_TRUE(!isMousePressed_, HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY())));
 
     if (dataDetectorAdapter_->hasClickedAISpan_ || dataDetectorAdapter_->pressedByLeftMouse_) {
@@ -3272,7 +3274,6 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 
     HandleUserClickEvent(info);
     CHECK_NULL_VOID(!info.IsPreventDefault());
-    bool isMouseClick = info.GetSourceDevice() == SourceType::MOUSE;
     bool isMouseClickWithShift = shiftFlag_ && isMouseClick && !IsPreviewTextInputting();
     if (textSelector_.IsValid() && !isMouseSelect_ && !isMouseClickWithShift) {
         CloseSelectOverlay();
@@ -3298,7 +3299,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         }
     }
     UseHostToUpdateTextFieldManager();
-    CalcCaretInfoByClick(info.GetLocalLocation());
+    CalcCaretInfoByClick(localOffset);
     CHECK_NULL_VOID(!isMouseClick);
     if (IsShowSingleHandleByClick(info, lastCaretPosition, lastCaretRect, isCaretTwinkling)) {
         CreateAndShowSingleHandle();
@@ -5918,9 +5919,9 @@ void RichEditorPattern::ProcessInsertValueMore(const std::u16string& text, Opera
     InsertValueOperation(text, &record, operationType, shouldCommitInput);
     record.afterCaretPosition = caretPosition_;
     if (isDragSponsor_) {
-        record.deleteCaretPostion = dragRange_.first;
+        record.deleteCaretPosition = dragRange_.first;
     }
-    AddOperationRecord(record);
+    IF_TRUE(shouldCommitInput, AddInsertOperationRecord(record));
     AfterContentChange(changeValue);
 }
 
@@ -5951,10 +5952,7 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
         return;
     }
     OperationRecord record;
-    record.beforeCaretPosition = caretPosition_ + moveLength_;
-    if (textSelector_.IsValid()) {
-        record.beforeCaretPosition = textSelector_.GetTextStart();
-    }
+    record.beforeCaretPosition = textSelector_.IsValid() ? textSelector_.GetTextStart() : caretPosition_ + moveLength_;
     record.addText = text;
 
     RichEditorChangeValue changeValue(OPERATION_REASON_MAP.find(operationType)->second);
@@ -5962,6 +5960,7 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
     bool allowContentChange = BeforeChangeText(changeValue, record, RecordType::INSERT);
     if (shouldCommitInput && previewTextRecord_.IsValid()) {
         FinishTextPreviewInner();
+        record.beforeCaretPosition = caretPosition_;
     }
     bool allowImeInput = isIME ? BeforeIMEInsertValue(text) : true;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d, needReplacePreviewText=%{public}d",
@@ -5969,6 +5968,7 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
     bool allowPreviewText = previewTextRecord_.needReplacePreviewText;
     bool isAllowInsert = (allowContentChange && allowImeInput) || allowPreviewText;
     if (!isAllowInsert) {
+        previewInputRecord_.Reset();
         undoManager_->ClearPreviewInputRecord();
 #if defined(IOS_PLATFORM)
         if (compose_.IsValid() && (record.addText.value_or(u"").length() > 0 || unmarkText_)) {
@@ -5993,6 +5993,10 @@ void RichEditorPattern::DeleteSelectionOrPreviewText(
     }
     if (isSelector) {
         DeleteByRange(record, textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+        if (!shouldCommitInput) {
+            previewInputRecord_.deleteText = record->deleteText;
+            previewInputRecord_.beforeCaretPosition = rangeStart.start;
+        }
         ResetSelection();
     } else if (previewTextRecord_.needReplacePreviewText || previewTextRecord_.needReplaceText) {
         DeleteByRange(record, previewTextRecord_.replacedRange.start, previewTextRecord_.replacedRange.end);
@@ -7034,6 +7038,7 @@ void RichEditorPattern::ClearOperationRecords()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ClearOperationRecords");
     undoManager_->ClearUndoRedoRecords();
+    previewInputRecord_.Reset();
     ClearRedoOperationRecords();
     if (operationRecords_.empty()) {
         return;
@@ -7049,6 +7054,18 @@ void RichEditorPattern::ClearRedoOperationRecords()
     redoOperationRecords_.clear();
 }
 
+void RichEditorPattern::AddInsertOperationRecord(OperationRecord& record)
+{
+    if (previewInputRecord_.deleteText) {
+        record.deleteText = previewInputRecord_.deleteText;
+    }
+    if (previewInputRecord_.beforeCaretPosition != -1) {
+        record.beforeCaretPosition = previewInputRecord_.beforeCaretPosition;
+    }
+    previewInputRecord_.Reset();
+    AddOperationRecord(record);
+}
+
 void RichEditorPattern::AddOperationRecord(const OperationRecord& record)
 {
     if (operationRecords_.size() >= RECORD_MAX_LENGTH) {
@@ -7058,6 +7075,7 @@ void RichEditorPattern::AddOperationRecord(const OperationRecord& record)
         }
         operationRecords_.erase(operationRecords_.begin());
     }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddOperationRecord record:%{public}s", record.ToString().c_str());
     operationRecords_.emplace_back(record);
 }
 
@@ -7098,7 +7116,7 @@ void RichEditorPattern::HandleOnUndoAction()
     redoOperationRecords_.push_back(value);
     CloseSelectOverlay();
     ResetSelection();
-    if (value.addText.has_value() && value.deleteCaretPostion != -1) {
+    if (value.addText.has_value() && value.deleteCaretPosition != -1) {
         UndoDrag(value);
         AfterContentChange(changeValue);
         return;
@@ -7135,7 +7153,7 @@ void RichEditorPattern::HandleOnRedoAction()
     RichEditorChangeValue changeValue(TextChangeReason::REDO);
     CHECK_NULL_VOID(BeforeChangeText(changeValue, value, RecordType::REDO));
     redoOperationRecords_.pop_back();
-    if (value.addText.has_value() && value.deleteCaretPostion != -1) {
+    if (value.addText.has_value() && value.deleteCaretPosition != -1) {
         RedoDrag(value);
         AfterContentChange(changeValue);
         return;
@@ -7918,6 +7936,7 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
     if (!selectOverlay_->HasRenderTransform()) {
         localOffset = Offset(globalOffset.GetX() - paintOffset.GetX(), globalOffset.GetY() - paintOffset.GetY());
     }
+    AdjustMouseLocalOffset(localOffset);
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     if (dataDetectorAdapter_->pressedByLeftMouse_) {
         dataDetectorAdapter_->pressedByLeftMouse_ = false;
@@ -7933,6 +7952,12 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::AdjustMouseLocalOffset(Offset& offset)
+{
+    CHECK_NULL_VOID(GreatNotEqual(offset.GetY(), richTextRect_.Bottom()));
+    offset.SetX(richTextRect_.Right());
 }
 
 void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
@@ -7981,8 +8006,9 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
         return;
     }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    auto localOffset = info.GetLocalLocation();
+    AdjustMouseLocalOffset(localOffset);
+    Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
     int32_t position = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
     if (shiftFlag_) {
         HandleShiftSelect(position);
@@ -8002,7 +8028,7 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     }
     UseHostToUpdateTextFieldManager();
     MoveCaretAndStartFocus(textOffset);
-    CalcCaretInfoByClick(info.GetLocalLocation());
+    CalcCaretInfoByClick(localOffset);
 }
 
 void RichEditorPattern::HandleShiftSelect(int32_t position)
@@ -9406,6 +9432,7 @@ float RichEditorPattern::GetLineHeight() const
 
 size_t RichEditorPattern::GetLineCount() const
 {
+    CHECK_NULL_RETURN(!spans_.empty() || NeedShowPlaceholder(), 0);
     return paragraphs_.GetLineCount();
 }
 
@@ -10341,6 +10368,8 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);
     json->PutExtAttr("barState", static_cast<int32_t>(GetBarDisplayMode()), filter);
     json->PutExtAttr("enableKeyboardOnFocus", needToRequestKeyboardOnFocus_ ? "true" : "false", filter);
+    auto undoStyle = isStyledUndoSupported_ ? OHOS::Ace::UndoStyle::KEEP_STYLE : OHOS::Ace::UndoStyle::CLEAR_STYLE;
+    json->PutExtAttr("undoStyle", static_cast<int32_t>(undoStyle), filter);
 }
 
 void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const
@@ -10501,7 +10530,7 @@ RectF RichEditorPattern::CreateNewLineRect(const int32_t position, const bool do
     return rect;  
 }
 
-bool RichEditorPattern::NeedShowPlaceholder()
+bool RichEditorPattern::NeedShowPlaceholder() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -10741,7 +10770,7 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::u16string& inse
 
 void RichEditorPattern::UndoDrag(const OperationRecord& record)
 {
-    if (!record.addText.has_value() || record.deleteCaretPostion == -1) {
+    if (!record.addText.has_value() || record.deleteCaretPosition == -1) {
         return;
     }
     const auto& str = record.addText.value();
@@ -10749,20 +10778,20 @@ void RichEditorPattern::UndoDrag(const OperationRecord& record)
     DeleteForward(record.beforeCaretPosition, length);
 
     lastCaretPosition_ = caretPosition_;
-    caretPosition_ = record.deleteCaretPostion;
+    caretPosition_ = record.deleteCaretPosition;
     InsertValueOperation(str, nullptr, OperationType::DEFAULT);
 }
 
 void RichEditorPattern::RedoDrag(const OperationRecord& record)
 {
-    if (!record.addText.has_value() || record.deleteCaretPostion == -1) {
+    if (!record.addText.has_value() || record.deleteCaretPosition == -1) {
         return;
     }
     RichEditorChangeValue changeValue(TextChangeReason::REDO);
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::REDO));
     const auto& str = record.addText.value();
     int32_t length = static_cast<int32_t>(str.length());
-    DeleteForward(record.deleteCaretPostion, length);
+    DeleteForward(record.deleteCaretPosition, length);
     lastCaretPosition_ = caretPosition_;
     caretPosition_ = record.beforeCaretPosition;
     InsertValueOperation(str, nullptr, OperationType::DRAG);
@@ -11462,10 +11491,10 @@ void RichEditorPattern::BeforeUndo(
     RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record)
 {
     innerPosition = record.afterCaretPosition;
-    if (record.addText.has_value() && record.deleteCaretPostion != -1) { // UndoDrag
+    if (record.addText.has_value() && record.deleteCaretPosition != -1) { // UndoDrag
         GetDeletedSpan(changeValue, innerPosition, record.addText.value_or(u"").length(),
             RichEditorDeleteDirection::FORWARD);
-        innerPosition = record.deleteCaretPostion;
+        innerPosition = record.deleteCaretPosition;
         GetReplacedSpan(changeValue, innerPosition, record.addText.value(), innerPosition, std::nullopt, std::nullopt);
     } else if (record.addText.has_value() && record.deleteText.has_value()) {
         GetDeletedSpan(changeValue, innerPosition, record.addText.value_or(u"").length(),
@@ -11485,8 +11514,8 @@ void RichEditorPattern::BeforeRedo(
     RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record)
 {
     innerPosition = record.beforeCaretPosition - record.addText.value_or(u"").length();
-    if (record.addText.has_value() && record.deleteCaretPostion != -1) { // RedoDrag
-        innerPosition = record.deleteCaretPostion;
+    if (record.addText.has_value() && record.deleteCaretPosition != -1) { // RedoDrag
+        innerPosition = record.deleteCaretPosition;
         GetDeletedSpan(changeValue, innerPosition, record.addText.value_or(u"").length(),
             RichEditorDeleteDirection::FORWARD);
         innerPosition = record.beforeCaretPosition;

@@ -50,6 +50,7 @@ void ListItemGroupResetDivider(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     const V2::ItemDivider divider;
     ListItemGroupModelNG::SetDivider(frameNode, divider);
+    ListItemGroupModelNG::SetDividerColorByUser(frameNode, false);
 }
 
 void ListItemGroupSetHeader(ArkUINodeHandle node, ArkUINodeHandle header)
@@ -175,6 +176,38 @@ ArkUINodeAdapterHandle GetListItemGroupNodeAdapter(ArkUINodeHandle node)
     return NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(node);
 }
 
+void ParseResObjDividerStrokeWidth(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListItemGroupModelNG::ParseResObjDividerStrokeWidth(frameNode, AceType::Claim(resourceObj));
+}
+
+void ParseResObjDividerColor(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListItemGroupModelNG::ParseResObjDividerColor(frameNode, AceType::Claim(resourceObj));
+}
+
+void ParseResObjDividerStartMargin(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListItemGroupModelNG::ParseResObjDividerStartMargin(frameNode, AceType::Claim(resourceObj));
+}
+
+void ParseResObjDividerEndMargin(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListItemGroupModelNG::ParseResObjDividerEndMargin(frameNode, AceType::Claim(resourceObj));
+}
+
 namespace NodeModifier {
 const ArkUIListItemGroupModifier* GetListItemGroupModifier()
 {
@@ -196,6 +229,10 @@ const ArkUIListItemGroupModifier* GetListItemGroupModifier()
         .setListItemGroupNodeAdapter = SetListItemGroupNodeAdapter,
         .resetListItemGroupNodeAdapter = ResetListItemGroupNodeAdapter,
         .getListItemGroupNodeAdapter = GetListItemGroupNodeAdapter,
+        .parseResObjDividerStrokeWidth = ParseResObjDividerStrokeWidth,
+        .parseResObjDividerColor = ParseResObjDividerColor,
+        .parseResObjDividerStartMargin = ParseResObjDividerStartMargin,
+        .parseResObjDividerEndMargin = ParseResObjDividerEndMargin,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

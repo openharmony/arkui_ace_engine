@@ -104,8 +104,8 @@ constexpr float IMAGE_SENSITIVE_RADIUS = 80.0f;
 constexpr double IMAGE_SENSITIVE_SATURATION = 1.0;
 constexpr double IMAGE_SENSITIVE_BRIGHTNESS = 1.08;
 constexpr uint32_t MAX_SRC_LENGTH = 120; // prevent the Base64 image format from too long.
-constexpr int IMAGE_LOAD_FAIL = 0;
-constexpr int IMAGE_LOAD_SUCCESS = 1;
+constexpr int32_t IMAGE_LOAD_FAIL = 0;
+constexpr int32_t IMAGE_LOAD_SUCCESS = 1;
 
 ImagePattern::ImagePattern()
 {
@@ -419,14 +419,14 @@ void ImagePattern::ApplyAIModificationsToImage()
     }
 }
 
-void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int state)
+void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t state)
 {
     auto accessibilityId = host->GetAccessibilityId();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto type = loadingCtx_->GetSourceInfo().GetSrcType();
     std::string srcType = GetSrcTypeToString(type);
-    std::pair<int, int> size(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    std::pair<int32_t, int32_t> size(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
     ImagePerf::GetPerfMonitor()->EndRecordImageLoadStat(accessibilityId, srcType, size, state);
 }
 
@@ -1783,9 +1783,7 @@ inline void ImagePattern::DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderP
     auto fillColor = renderProp->GetSvgFillColor();
     if (fillColor.has_value()) {
         auto color = fillColor.value();
-        DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
-    } else {
-        DumpLog::GetInstance().AddDesc("fillColor: Null");
+        DumpLog::GetInstance().AddDesc(std::string("fillColor_value: ").append(color.ToSvgFillColorKey()));
     }
 }
 

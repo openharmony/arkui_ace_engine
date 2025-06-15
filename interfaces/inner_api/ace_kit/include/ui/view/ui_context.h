@@ -55,6 +55,8 @@ public:
     // API version
     virtual int32_t GetApiTargetVersion() = 0;
     virtual bool GreatOrEqualTargetAPIVersion(int32_t version) = 0;
+    virtual int32_t GetContainerModalTitleHeight() = 0;
+    virtual int32_t GetContainerModalButtonsWidth() = 0;
 };
 
 }

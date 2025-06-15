@@ -121,7 +121,7 @@ void BadgePattern::DumpInfo()
     auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
     auto badgeFontSize = layoutProperty->GetBadgeFontSize();
-    auto badgePosition = layoutProperty->GetBadgePositionString(layoutProperty->GetBadgePositionValue());
+    auto badgePosition = layoutProperty->GetBadgePosition();
     auto badgeColor = layoutProperty->GetBadgeColor();
     auto badgeFontWeight = layoutProperty->GetBadgeFontWeight();
     auto badgeBorderColor = layoutProperty->GetBadgeBorderColor();
@@ -139,15 +139,32 @@ void BadgePattern::DumpInfo()
             DumpLog::GetInstance().AddDesc(std::string("badgeValue: ").append(badgeValue.value()));
         }
     }
-    DumpLog::GetInstance().AddDesc(std::string("badgePosition: ").append(badgePosition));
-    DumpLog::GetInstance().AddDesc(std::string("badgeTextColor: ").append(badgeTextColor.value().ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("circleSize: ").append(std::to_string(circleSize->ConvertToPx())));
-    DumpLog::GetInstance().AddDesc(std::string("badgeFontSize: ").append(badgeFontSize.value().ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("badgeColor: ").append(badgeColor.value().ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("badgeFontWeight: ")
-        .append(V2::ConvertWrapFontWeightToStirng(badgeFontWeight.value())));
-    DumpLog::GetInstance().AddDesc(std::string("badgeBorderColor: ").append(badgeBorderColor.value().ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("badgeBorderWidth: ").append(badgeBorderWidth.value().ToString()));
+    if (badgePosition.has_value()) {
+        auto badgePositionString = layoutProperty->GetBadgePositionString(badgePosition.value());
+        DumpLog::GetInstance().AddDesc(std::string("badgePosition: ").append(badgePositionString));
+    }
+    if (badgeTextColor.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("badgeTextColor: ").append(badgeTextColor.value().ToString()));
+    }
+    if (circleSize.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("circleSize: ").append(std::to_string(circleSize->ConvertToPx())));
+    }
+    if (badgeFontSize.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("badgeFontSize: ").append(badgeFontSize.value().ToString()));
+    }
+    if (badgeColor.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("badgeColor: ").append(badgeColor.value().ToString()));
+    }
+    if (badgeFontWeight.has_value()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("badgeFontWeight: ").append(V2::ConvertWrapFontWeightToStirng(badgeFontWeight.value())));
+    }
+    if (badgeBorderColor.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("badgeBorderColor: ").append(badgeBorderColor.value().ToString()));
+    }
+    if (badgeBorderWidth.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("badgeBorderWidth: ").append(badgeBorderWidth.value().ToString()));
+    }
 }
 
 void BadgePattern::DumpInfo(std::unique_ptr<JsonValue>& json)

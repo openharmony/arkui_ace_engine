@@ -79,11 +79,11 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest001, TestSize.Level1)
 
     RefPtr<ResourceObject> intObj = AceType::MakeRefPtr<ResourceObject>(1, 10007,
         resObjParamsList, "", "", 100000);
-    EXPECT_FALSE(ResourceParseUtils::ParseResResource(intObj, dimension));
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(intObj, dimension));
 
     RefPtr<ResourceObject> floatObj = AceType::MakeRefPtr<ResourceObject>(1, 10002,
         resObjParamsList, "", "", 100000);
-    EXPECT_FALSE(ResourceParseUtils::ParseResResource(floatObj, dimension));
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(floatObj, dimension));
 }
 
 /**
@@ -146,5 +146,21 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest002, TestSize.Level1)
 
     Dimension dimension;
     EXPECT_FALSE(ResourceParseUtils::ConvertFromResObjNG(resObj, dimension));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest003
+ * @tc.desc: Test resourceParseUtils.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest003, TestSize.Level1)
+{
+    std::vector<ResourceObjectParams> resObjParamsList;
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithParams = AceType::MakeRefPtr<ResourceObject>(-1, -1,
+        resObjParamsList, "", "", 100000);
+    CalcDimension caclDimension;
+    EXPECT_FALSE(ResourceParseUtils::ParseResResource(resObjWithParams, caclDimension));
 }
 } // namespace OHOS::Ace

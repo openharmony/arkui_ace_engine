@@ -30,7 +30,7 @@
 namespace OHOS::Ace {
 constexpr int32_t DUMP_START_NUMBER = 4;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
-constexpr int64_t EVENT_CLEAR_DURATION = 1000;
+constexpr int64_t EVENT_CLEAR_DURATION = 2000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
 constexpr int32_t MIN_DUMP_SIZE = 1;
 constexpr int32_t MAX_DUMP_SIZE = 5;
@@ -161,18 +161,18 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
             frameNode->GetInspectorIdValue(""), frameNode->GetGeometryNode()->GetFrameRect().ToString(),
             frameNode->GetDepth() };
     }
-    std::string resultInfo = std::string("fingerId: ").append(std::to_string(touchPoint.id));
+    std::string resultInfo = std::string("fId: ").append(std::to_string(touchPoint.id));
     for (const auto& item : touchTestResultInfo) {
-        resultInfo.append("{ ").append("tag: ").append(item.second.tag);
+        resultInfo.append("{ ").append("T: ").append(item.second.tag);
 #ifndef IS_RELEASE_VERSION
-        resultInfo.append(", inspectorId: ")
+        resultInfo.append(", iId: ")
             .append(item.second.inspectorId)
-            .append(", frameRect: ")
+            .append(", R: ")
             .append(item.second.frameRect);
 #endif
-        resultInfo.append(", depth: ").append(std::to_string(item.second.depth)).append(" };");
+        resultInfo.append(", D: ").append(std::to_string(item.second.depth)).append(" };");
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "ITK Id:%{public}d, TTHNI:%{public}s",
         touchPoint.touchEventId, resultInfo.c_str());
     if (touchTestResultInfo.empty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "Touch test result is empty.");
@@ -311,14 +311,14 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
             group->AddHittedRecognizerType(hittedRecognizerInfo);
         }
     }
-    std::string hittedRecognizerTypeInfo = std::string("InputTracking id:");
-    hittedRecognizerTypeInfo.append(std::to_string(touchEventId)).append(", touch test hitted recognizer type info: ");
+    std::string hittedRecognizerTypeInfo = std::string("ITK Id:");
+    hittedRecognizerTypeInfo.append(std::to_string(touchEventId)).append(", TTHRTI: ");
     for (const auto& item : hittedRecognizerInfo) {
-        hittedRecognizerTypeInfo.append("recognizer type ").append(item.first).append(" node info:");
+        hittedRecognizerTypeInfo.append("T ").append(item.first).append(" info:");
         for (const auto& nodeInfo : item.second) {
-            hittedRecognizerTypeInfo.append(" { ").append("tag: ").append(nodeInfo.tag);
+            hittedRecognizerTypeInfo.append(" { ").append("T: ").append(nodeInfo.tag);
 #ifndef IS_RELEASE_VERSION
-            hittedRecognizerTypeInfo.append(", inspectorId: ").append(nodeInfo.inspectorId);
+            hittedRecognizerTypeInfo.append(", iId: ").append(nodeInfo.inspectorId);
 #endif
             hittedRecognizerTypeInfo.append(" };");
         }
@@ -2082,7 +2082,7 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
 {
     if (logImmediately) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "Consumed new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
+            "Consumed id:%{public}d, last id:%{public}d", eventId,
             lastConsumedEvent_.eventId);
         return;
     }
@@ -2091,9 +2091,7 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
     if (lastConsumedEvent_.lastLogTimeStamp != 0 &&
         (currentTime - lastConsumedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "Consumed new event id=%{public}d has been more than a second since the last one event "
-            "markProcessed "
-            "in ace_container, lastEventInfo: id:%{public}d",
+            "Consumed id:%{public}d more than 2 second, lastEvent id:%{public}d",
             eventId, lastConsumedEvent_.eventId);
         lastLogTimeStamp = currentTime;
     }

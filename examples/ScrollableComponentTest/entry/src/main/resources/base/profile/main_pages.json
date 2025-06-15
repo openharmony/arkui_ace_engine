@@ -62,6 +62,7 @@
     "pages/Scroll/InfiniteScrolling",
     "pages/Scroll/CustomSnap",
     "pages/Scroll/NestedScrollBar",
-    "pages/Scroll/RecycleView/Index"
+    "pages/Scroll/RecycleView/Index",
+    "pages/Scroll/ScrollNode"
   ]
 }

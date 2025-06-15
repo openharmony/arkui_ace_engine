@@ -1157,11 +1157,13 @@ void SubwindowManager::ShowActionMenu(
     }
 }
 
-void SubwindowManager::CloseDialog(int32_t instanceId)
+void SubwindowManager::CloseDialog(int32_t parentInstanceId)
 {
-    auto subwindow = GetDialogSubwindow(instanceId);
-    if (!subwindow) {
-        auto subwindows = RemoveSubwindowMapByInstanceId(instanceId);
+    auto subwindow = GetDialogSubwindow(parentInstanceId);
+    // Triggered when the main window is destroyed
+    auto isSubwindow = parentInstanceId >= MIN_SUBCONTAINER_ID && parentInstanceId < MIN_PLUGIN_SUBCONTAINER_ID;
+    if (!subwindow && !isSubwindow) {
+        auto subwindows = RemoveSubwindowMapByInstanceId(parentInstanceId);
         for (const auto& window : subwindows) {
             CHECK_NULL_CONTINUE(window);
             if (!window->Close()) {
@@ -1170,8 +1172,9 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
         }
         return;
     }
-    auto subContainerId = GetSubContainerId(instanceId);
+    auto subContainerId = GetSubContainerId(parentInstanceId);
     if (subContainerId > -1) {
+        CHECK_NULL_VOID(subwindow);
         subwindow->CloseDialog(subContainerId);
     }
 }
@@ -1730,7 +1733,11 @@ const std::vector<RefPtr<Subwindow>> SubwindowManager::RemoveSubwindowMapByInsta
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     std::vector<RefPtr<Subwindow>> subwindows;
     for (auto it = subwindowMap_.begin(); it != subwindowMap_.end();) {
-        if (it->first.instanceId == instanceId) {
+        // Only close subwindows reused with dialog
+        auto isDialogTypeWindow = it->first.windowType == SubwindowType::TYPE_MENU ||
+                                  it->first.windowType == SubwindowType::TYPE_POPUP ||
+                                  it->first.windowType == SubwindowType::TYPE_DIALOG;
+        if (it->first.instanceId == instanceId && isDialogTypeWindow) {
             subwindows.push_back(it->second);
             it = subwindowMap_.erase(it);
         } else {

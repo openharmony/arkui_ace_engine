@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 
 #include "base/log/log.h"
+#include "core/common/udmf/data_load_params.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
@@ -136,6 +137,7 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("startDataLoading", &JsDragEvent::StartDataLoading);
     JSClass<JsDragEvent>::CustomMethod("getDisplayId", &JsDragEvent::GetDisplayId);
     JSClass<JsDragEvent>::CustomMethod("enableInternalDropAnimation", &JsDragEvent::EnableInternalDropAnimation);
+    JSClass<JsDragEvent>::CustomMethod("setDataLoadParams", &JsDragEvent::SetDataLoadParams);
     JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
 }
 
@@ -228,6 +230,26 @@ void JsDragEvent::SetData(const JSCallbackInfo& args)
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
     CHECK_NULL_VOID(udData);
     dragEvent_->SetData(udData);
+}
+
+void JsDragEvent::SetDataLoadParams(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+    CHECK_NULL_VOID(dragEvent_);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    ScopeRAII scope(env);
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    RefPtr<DataLoadParams> udDataLoadParams = UdmfClient::GetInstance()->TransformDataLoadParams(env, nativeValue);
+    CHECK_NULL_VOID(udDataLoadParams);
+    dragEvent_->SetDataLoadParams(udDataLoadParams);
 }
 
 void JsDragEvent::StartDataLoading(const JSCallbackInfo& args)

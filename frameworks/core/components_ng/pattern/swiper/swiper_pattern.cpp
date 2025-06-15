@@ -1310,8 +1310,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         indexsInAnimation_.clear();
     }
 
-    UpdateLayoutRange(GetAxis(), isInit);
-
     const auto& paddingProperty = props->GetPaddingProperty();
     jumpOnChange_ = false;
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
@@ -1898,7 +1896,6 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
-    RequestJump(index);
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -1975,9 +1972,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     if (hasTabsAncestor_ && NeedFastAnimation()) {
         FastAnimation(targetIndex);
     }
-    if (RequestFillToTarget(targetIndex)) {
-        targetIndex_ = targetIndex;
-    } else {} // postpone targetIndex_ to next frame
+    targetIndex_ = targetIndex;
     UpdateTabBarAnimationDuration(index);
     if (GetDuration() == 0 || !isVisible_) {
         SwipeToWithoutAnimation(index);
@@ -2943,7 +2938,6 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
-    UpdateOffset(-currentDelta_);
     HandleSwiperCustomAnimation(-currentDelta_);
     MarkDirtyNodeSelf();
 }
@@ -4164,7 +4158,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
         const auto& turnPageRateCallback = swiper->swiperController_->GetTurnPageRateCallback();
         auto firstItem = swiper->GetFirstItemInfoInVisibleArea();
         auto translateLength = firstItem.second.endPos - firstItem.second.startPos;
-        if (turnPageRateCallback && !NearZero(translateLength)) {
+        if (turnPageRateCallback && !NearZero(translateLength) && swiper->propertyAnimationIsRunning_) {
             turnPageRateCallback(firstItem.first, (-firstItem.second.startPos - value) / translateLength);
         }
     });
@@ -4886,7 +4880,7 @@ int32_t SwiperPattern::TotalCount() const
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, 1);
     auto displayCount = props->GetDisplayCount().value_or(1);
-    auto totalCount = ArkoalaLazyEnabled() ? GetTotalChildCount() : RealTotalCount();
+    auto totalCount = RealTotalCount();
     if (IsSwipeByGroup() && displayCount != 0) {
         totalCount =
             static_cast<int32_t>(std::ceil(static_cast<float>(totalCount) / static_cast<float>(displayCount))) *

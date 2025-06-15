@@ -1337,6 +1337,11 @@ void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
     // cross platform is not support now;
 }
 
+void WebPattern::OnCssDisplayChangeEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     // cross platform is not support now;
@@ -1370,6 +1375,11 @@ void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
 }
 
 void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition)
 {
     // cross platform is not support now;
 }

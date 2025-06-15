@@ -608,7 +608,8 @@ Dimension ButtonModelNG::GetFontSize(FrameNode* frameNode)
 Ace::FontWeight ButtonModelNG::GetFontWeight(FrameNode* frameNode)
 {
     Ace::FontWeight value = Ace::FontWeight::NORMAL;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, FontWeight, value, frameNode, Ace::FontWeight::NORMAL);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ButtonLayoutProperty, FontWeight, value, frameNode, Ace::FontWeight::NORMAL);
     return value;
 }
 

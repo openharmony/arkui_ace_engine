@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -54,8 +53,8 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public ScrollablePattern, public LinearLazyContainer {
-    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern, LinearLazyContainer);
+class ListPattern : public ScrollablePattern {
+    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 
 public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
@@ -455,6 +454,8 @@ public:
     }
 
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdateDefaultColor();
 
     void SetDraggingIndex(int32_t index)
     {
@@ -524,8 +525,6 @@ protected:
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
-    void UpdateOffsetHelper(float lastDelta);
-
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -613,15 +612,13 @@ private:
     void ReportOnItemListEvent(const std::string& event);
     void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
-    bool ScrollToLastFocusIndex(KeyCode keyCode);
+    bool ScrollToLastFocusIndex(const KeyEvent& event);
     bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
     bool IsInViewport(int32_t index) const;
     void FireFocus();
     void FireFocusInListItemGroup();
-    void ProcessFocusEvent(const KeyEvent& event, bool indexChanged);
+    void ProcessFocusEvent(bool indexChanged);
     void RequestFocusForItem();
-    bool needTriggerFocus_ = false;
-    bool triggerFocus_ = false;
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
     float prevStartOffset_ = 0.f;
@@ -681,6 +678,7 @@ private:
 
     bool prevMeasureBreak_ = false;
     int32_t draggingIndex_ = -1;
+    bool heightEstimated_ = false;
 };
 } // namespace OHOS::Ace::NG
 

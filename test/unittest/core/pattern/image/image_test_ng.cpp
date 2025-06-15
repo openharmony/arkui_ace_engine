@@ -781,6 +781,59 @@ HWTEST_F(ImageTestNg, ImageFillColor002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImageFillColor003
+ * @tc.desc: Verify the functionality of setting and resetting the fill color for an Image component.
+ *           Ensure that the fill color can be modified and correctly reflected in the render properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageFillColor003, TestSize.Level1)
+{
+    // Create an ImageModelNG instance and finalize its setup in the ViewStackProcessor.
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr); // Ensure the FrameNode is created successfully.
+
+    // Verify that the FrameNode tag matches the expected IMAGE_ETS_TAG.
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+
+    // Obtain the ImageRenderProperty associated with the FrameNode.
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr); // Ensure the render property is valid.
+
+    ViewStackProcessor::GetInstance()->Push(element);
+    // Test resetting the image fill color.
+    image.ResetImageFill();
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), false); // Fill color should not exist after reset.
+
+    // Test setting the image fill color to black.
+    auto fillColor = Color::BLACK;
+    fillColor.SetColorSpace(ColorSpace::SRGB);
+    image.SetImageFill(fillColor);
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), true); // Fill color should be set.
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), fillColor); // Verify the fill color is fillColor.
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value().GetColorSpace(),
+        ColorSpace::SRGB); // Verify the color space is SRGB.
+    // Test updating the image fill color to blue.
+    fillColor.SetColorSpace(ColorSpace::DISPLAY_P3); // Change color space to DISPLAY_P3
+    image.SetImageFill(fillColor);
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), true);              // Fill color should still exist.
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), fillColor); // Verify the fill color is fillColor.
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value().GetColorSpace(),
+        ColorSpace::DISPLAY_P3); // Verify the color space is DISPLAY_P3.
+
+    // Test resetting the image fill color again.
+    image.ResetImageFill();
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), false); // Fill color should not exist after reset.
+}
+
+/**
  * @tc.name: ImageCreator004
  * @tc.desc: Verify that CreateFrameNode reset.
  * @tc.type: FUNC
@@ -2340,5 +2393,21 @@ HWTEST_F(ImageTestNg, TestReportPerfData001, TestSize.Level1)
     auto mockImagePerf = reinterpret_cast<MockImagePerf*>(MockImagePerf::GetPerfMonitor());
     EXPECT_CALL(*mockImagePerf, EndRecordImageLoadStat(_, _, _, _)).Times(AtLeast(1));
     imagePattern->ReportPerfData(frameNode, 1);
+}
+
+/**
+ * @tc.name: TestReportPerfData002
+ * @tc.desc: Test ReportPerfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestReportPerfData002, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto mockImagePerf = reinterpret_cast<MockImagePerf*>(MockImagePerf::GetPerfMonitor());
+    EXPECT_CALL(*mockImagePerf, StartRecordImageLoadStat(_)).Times(AtLeast(1));
+    imagePattern->LoadImage(ImageSourceInfo(""), false);
 }
 } // namespace OHOS::Ace::NG

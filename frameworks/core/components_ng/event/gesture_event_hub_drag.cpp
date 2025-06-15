@@ -598,6 +598,7 @@ bool GestureEventHub::IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInf
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
+    isRestoreDrag_ = false;
     TAG_LOGD(AceLogTag::ACE_DRAG, "Start handle onDragStart.");
     auto frameNode = GetFrameNode();
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -653,6 +654,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->ResetBundleInfo();
     if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::READY) {
+        isRestoreDrag_ = true;
         DoOnDragStartHandling(info, frameNode, dragDropInfo, event, dragPreviewInfo, pipeline);
     } else {
         dragDropManager->SetDelayDragCallBack(continueFunc);
@@ -880,24 +882,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         return;
     }
     std::string udKey;
-    auto unifiedData = dragEvent->GetData();
-    if (unifiedData) {
-        DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
-    }
-    int32_t recordsSize = GetBadgeNumber(unifiedData);
-    auto ret = SetDragData(unifiedData, udKey);
-    if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
-        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
-    }
-
     std::map<std::string, int64_t> summary;
     std::map<std::string, int64_t> detailedSummary;
-    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
-    if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
-    }
-    dragDropManager->SetSummaryMap(summary);
+    int32_t ret = -1;
+    auto unifiedData = dragEvent->GetData();
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    int32_t recordsSize = GetBadgeNumber(unifiedData);
     RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
     if (pixelMap) {
         SetPixelMap(pixelMap);
@@ -991,10 +981,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     auto dragMoveLastPoint = dragDropManager->GetDragMoveLastPointByCurrentPointer(info.GetPointerId());
+    auto screenX = isRestoreDrag_ ? info.GetScreenLocation().GetX() : dragMoveLastPoint.GetScreenX();
+    auto screenY = isRestoreDrag_ ? info.GetScreenLocation().GetY() : dragMoveLastPoint.GetScreenY();
+
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        dragMoveLastPoint.GetScreenX(), dragMoveLastPoint.GetScreenY(), info.GetTargetDisplayId(),
-        windowId, true, false, summary, false, detailedSummary };
+        screenX, screenY, info.GetTargetDisplayId(), windowId, true, false, summary, false, detailedSummary };
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && (info.GetSourceTool() == SourceTool::MOUSE) &&
         (info.GetSourceDevice() == SourceType::TOUCH)) {
         dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);
@@ -1218,13 +1210,6 @@ void GestureEventHub::HandleOnDragCancel()
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
-}
-
-int32_t GestureEventHub::SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey)
-{
-    CHECK_NULL_RETURN(unifiedData, -1);
-    ACE_SCOPED_TRACE("drag: set drag data to udmf");
-    return UdmfClient::GetInstance()->SetData(unifiedData, udKey);
 }
 
 OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)

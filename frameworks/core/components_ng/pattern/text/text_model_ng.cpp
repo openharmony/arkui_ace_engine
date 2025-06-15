@@ -220,6 +220,23 @@ void TextModelNG::ResetTextColor(FrameNode* frameNode)
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        for (auto& shadow : value) {
+            Shadow& shadowValue = const_cast<Shadow&>(shadow);
+            shadowValue.ReloadResources();
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value, frameNode);
+    };
+    pattern->AddResObj("textShadow", resObj, std::move(updateFunc));
 }
 
 void TextModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -490,6 +507,19 @@ void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextDetectConfig(textDetectConfig);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [textDetectConfig, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        auto textPattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        TextDetectConfig& textDetectConfigValue = const_cast<TextDetectConfig&>(textDetectConfig);
+        textDetectConfigValue.ReloadResources();
+        textPattern->SetTextDetectConfig(textDetectConfig);
+    };
+    textPattern->AddResObj("dataDetectorConfig", resObj, std::move(updateFunc));
 }
 
 void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold)
@@ -659,10 +689,34 @@ void TextModelNG::SetCopyOption(FrameNode* frameNode, const std::optional<CopyOp
 
 void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::optional<std::vector<Shadow>>& value)
 {
-    if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value.value(), frameNode);
-    } else {
+    if (!value) {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, frameNode);
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value.value(), frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto index = 0;
+    for (auto& shadow : value.value()) {
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto key = "shadow_" + std::to_string(index);
+        auto&& updateFunc = [shadow, weak = AceType::WeakClaim(frameNode), index]
+            (const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            Shadow& shadowValue = const_cast<Shadow&>(shadow);
+            shadowValue.ReloadResources();
+            auto origArr = layoutProperty->GetTextShadow();
+            if (origArr.has_value() && GreatNotEqual(origArr.value().size(), index)) {
+                auto origArrVal = origArr.value();
+                origArrVal[index] = shadowValue;
+                layoutProperty->UpdateTextShadow(origArrVal);
+            }
+        };
+        pattern->AddResObj(key, resObj, std::move(updateFunc));
+        index ++;
     }
 }
 
@@ -1313,6 +1367,20 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConf
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextDetectConfig(textDetectConfig);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto key = "textDetectorConfig";
+    auto&& updateFunc = [textDetectConfig, weak = AceType::WeakClaim(frameNode)]
+        (const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto textPattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        TextDetectConfig& textDetectConfigVal = const_cast<TextDetectConfig&>(textDetectConfig);
+        textDetectConfigVal.ReloadResources();
+        textPattern->SetTextDetectConfig(textDetectConfig);
+    };
+    textPattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
@@ -1484,6 +1552,11 @@ bool TextModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
 void TextModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient);
+}
+
+void TextModelNG::ResetGradientShaderStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle);
 }
 
 void TextModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)

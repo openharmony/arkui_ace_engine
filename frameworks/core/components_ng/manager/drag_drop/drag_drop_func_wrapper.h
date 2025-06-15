@@ -131,6 +131,10 @@ public:
     static void GetThumbnailPixelMapForCustomNodeSync(
         const RefPtr<GestureEventHub>& gestureHub, PixelMapFinishCallback pixelMapCallback);
     static float GetPixelMapScale(const RefPtr<FrameNode>& frameNode);
+    static void ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, std::string& udKey,
+        std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary, int32_t& ret);
+    static void EnvelopedDataLoadParams(
+        std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::string& udKey);
 
 private:
     static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);

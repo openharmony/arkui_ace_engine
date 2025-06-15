@@ -26,6 +26,12 @@ static std::string g_setReturnStatus = "";
 const std::string STATUS_TRUE = "true";
 static std::string g_setComponentType = "";
 const std::string STATUS_FALSE = "false";
+std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
+    { "existhtmlElementIdOther", "existSurfaceIdOther" } };
+std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
+    { "existSurfaceIdOther", "existhtmlElementIdOther" } };
+std::map<std::string, int64_t> surfaceToWebAccessibilityMap = { { "existSurfaceId", 123 },
+    { "existSurfaceIdOther", 456 } };
 class MockNWebAccessibilityNodeInfoOnlyForReturn : public NWeb::NWebAccessibilityNodeInfo {
 public:
     std::string GetHint() override
@@ -675,6 +681,7 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
 void WebDelegate::UpdateOverlayScrollbarEnabled(bool isEnabled) {}
 void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled) {}
 void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) {}
+void WebDelegate::UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) {}
 void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition) {}
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag) {}
 void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
@@ -971,7 +978,34 @@ bool WebDelegate::GetPendingSizeStatus()
 {
     return false;
 }
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter) {}
+void WebDelegate::HandleAccessibilityHoverEvent(
+    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time) {}
+
+std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
+{
+    auto it = htmlElementToSurfaceMap.find(htmlElementId);
+    if (it != htmlElementToSurfaceMap.end()) {
+        return it->second;
+    }
+    return "";
+}
+std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceId)
+{
+    auto it = surfaceToHtmlElementMap.find(surfaceId);
+    if (it != surfaceToHtmlElementMap.end()) {
+        return it->second;
+    }
+    return "";
+}
+
+int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
+{
+    auto it = surfaceToWebAccessibilityMap.find(surfaceId);
+    if (it != surfaceToWebAccessibilityMap.end()) {
+        return it->second;
+    }
+    return -1;
+}
 void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr) {}
 void WebDelegate::AutofillCancel(const std::string& fillContent) {}
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)

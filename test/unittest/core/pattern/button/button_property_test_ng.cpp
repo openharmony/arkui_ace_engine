@@ -76,8 +76,8 @@ struct CreateWithPara createWithPara = { std::make_optional(true), std::make_opt
     std::make_optional(true), std::make_optional(BUTTON_TYPE_CAPSULE_VALUE), std::make_optional(true), std::nullopt,
     std::nullopt, std::nullopt };
 struct CreateWithPara createWithParaByRoundedRect = { std::make_optional(true), std::make_optional(CREATE_VALUE),
-    std::make_optional(true), std::make_optional(BUTTON_TYPE_ROUNDED_RECTANGLE_VALUE), std::make_optional(true), std::nullopt,
-    std::nullopt, std::nullopt };
+    std::make_optional(true), std::make_optional(BUTTON_TYPE_ROUNDED_RECTANGLE_VALUE), std::make_optional(true),
+    std::nullopt, std::nullopt, std::nullopt };
 } // namespace
 
 struct TestProperty {

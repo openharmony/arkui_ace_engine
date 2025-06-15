@@ -754,6 +754,7 @@ public:
     void OnTextOverflowChanged();
 
     void MarkDirtyNodeRender();
+    void MarkDirtyNodeMeasure();
     void ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode);
     void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
     void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
@@ -799,6 +800,12 @@ public:
             magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
         }
         return magnifierController_;
+    }
+
+    void UnRegisterResource(const std::string& key) override;
+    void EmplaceSymbolColorIndex(int32_t index)
+    {
+        symbolFontColorResObjIndexArr.emplace_back(index);
     }
 
     std::string GetCaretColor() const;
@@ -959,7 +966,6 @@ protected:
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
     virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
-    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     void HandleSpanStringTouchEvent(TouchEventInfo& info);
     void ShowAIEntityPreviewMenuTimer();
     bool enabled_ = true;
@@ -988,6 +994,7 @@ protected:
     RefPtr<TextContentModifier> contentMod_;
     RefPtr<TextOverlayModifier> overlayMod_;
     CopyOptions copyOption_ = CopyOptions::None;
+    std::vector<int32_t> symbolFontColorResObjIndexArr;
 
     std::u16string textForDisplay_;
     std::string paintInfo_ = "NA";
@@ -1024,6 +1031,7 @@ protected:
     virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
     bool hasUrlSpan_ = false;
     WeakPtr<PipelineContext> pipeline_;
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);

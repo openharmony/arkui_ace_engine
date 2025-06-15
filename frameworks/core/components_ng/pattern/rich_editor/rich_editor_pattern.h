@@ -182,12 +182,34 @@ public:
     ~RichEditorPattern() override;
 
     struct OperationRecord {
-        OperationRecord() : beforeCaretPosition(-1), afterCaretPosition(-1), deleteCaretPostion(-1) {}
+        OperationRecord() : beforeCaretPosition(-1), afterCaretPosition(-1), deleteCaretPosition(-1) {}
         std::optional<std::u16string> addText;
         std::optional<std::u16string> deleteText;
         int32_t beforeCaretPosition;
         int32_t afterCaretPosition;
-        int32_t deleteCaretPostion;
+        int32_t deleteCaretPosition;
+
+        void Reset()
+        {
+            beforeCaretPosition = -1;
+            afterCaretPosition = -1;
+            deleteCaretPosition = -1;
+            addText = std::nullopt;
+            deleteText = std::nullopt;
+        }
+
+        std::string ToString() const
+        {
+            auto jsonValue = JsonUtil::Create(true);
+            JSON_STRING_PUT_INT(jsonValue, beforeCaretPosition);
+            JSON_STRING_PUT_INT(jsonValue, afterCaretPosition);
+            JSON_STRING_PUT_INT(jsonValue, deleteCaretPosition);
+            auto addLength = static_cast<int32_t>(addText.value_or(u"").length());
+            auto deleteLength = static_cast<int32_t>(deleteText.value_or(u"").length());
+            JSON_STRING_PUT_INT(jsonValue, addLength);
+            JSON_STRING_PUT_INT(jsonValue, deleteLength);
+            return jsonValue->ToString();
+        }
     };
 
     struct PreviewTextRecord {
@@ -643,6 +665,7 @@ public:
     }
     void ClearOperationRecords();
     void ClearRedoOperationRecords();
+    void AddInsertOperationRecord(OperationRecord& record);
     void AddOperationRecord(const OperationRecord& record);
     void UpdateShiftFlag(const KeyEvent& keyEvent)override;
     bool HandleOnEscape() override;
@@ -1413,6 +1436,7 @@ private:
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButtonMove(const MouseInfo& info);
+    void AdjustMouseLocalOffset(Offset& offset);
     void HandleMouseSelect(const Offset& localOffset);
     void HandleMouseLeftButtonPress(const MouseInfo& info);
     void HandleShiftSelect(int32_t position);
@@ -1467,27 +1491,6 @@ private:
     void ReplacePlaceholderWithCustomSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void ReplacePlaceholderWithSymbolSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void ReplacePlaceholderWithImageSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
-    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto dragDropManager = context->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    }
-
-    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto dragDropManager = context->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->RemoveDragFrameNode(frameNode->GetId());
-    }
 
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
@@ -1704,7 +1707,7 @@ private:
     void SetIsEnableSubWindowMenu();
     void OnReportRichEditorEvent(const std::string& event);
     void AsyncHandleOnCopyStyledStringHtml(RefPtr<SpanString>& subSpanString);
-    bool NeedShowPlaceholder();
+    bool NeedShowPlaceholder() const;
     bool IsSelectAll() override;
 #ifdef CROSS_PLATFORM
     bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
@@ -1757,6 +1760,7 @@ private:
 
     // still in progress
     RichEditorParagraphManager paragraphs_;
+    OperationRecord previewInputRecord_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
     std::list<WeakPtr<ImageSpanNode>> hoverableNodes;

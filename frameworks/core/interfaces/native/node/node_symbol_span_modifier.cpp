@@ -15,6 +15,7 @@
 #include "frameworks/core/interfaces/native/node/node_symbol_span_modifier.h"
 
 #include "frameworks/core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "frameworks/core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,9 +45,14 @@ void ResetSymbolSpanFontColor(ArkUINodeHandle node)
     Color fontColor = theme->GetTextStyle().GetTextColor();
     std::vector<Color> colorArray = { fontColor };
     SymbolSpanModelNG::SetFontColor(frameNode, colorArray);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto spanNode = AceType::DynamicCast<NG::SpanNode>(frameNode);
+        CHECK_NULL_VOID(spanNode);
+        spanNode->UnregisterResource("symbolColor");
+    }
 }
 
-void SetSymbolSpanFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit)
+void SetSymbolSpanFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit, void* fontSizeRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -59,7 +65,9 @@ void SetSymbolSpanFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_I
         CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
         SymbolSpanModelNG::SetFontSize(frameNode, fontSize);
     } else {
-        SymbolSpanModelNG::SetFontSize(frameNode, Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+        auto fontSizeVal = Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit));
+        SymbolSpanModelNG::SetFontSize(frameNode, fontSizeVal);
+        NodeModifier::ProcessResourceObj<CalcDimension>(frameNode, "fontSize", fontSizeVal, fontSizeRawPtr);
     }
 }
 
@@ -71,6 +79,11 @@ void ResetSymbolSpanFontSize(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     SymbolSpanModelNG::SetFontSize(frameNode, fontSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto spanNode = AceType::DynamicCast<NG::SpanNode>(frameNode);
+        CHECK_NULL_VOID(spanNode);
+        spanNode->UnregisterResource("fontSize");
+    }
 }
 
 void SetSymbolSpanFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr weight)
@@ -183,5 +196,21 @@ const CJUISymbolSpanModifier* GetCJUISymbolSpanModifier()
 
     return &modifier;
 }
+
+template<typename T>
+void ProcessResourceObj(UINode* uinode, std::string key, T value, void* objRawPtr)
+{
+    CHECK_NULL_VOID(uinode);
+    auto spanNode = AceType::DynamicCast<NG::SpanNode>(uinode);
+    CHECK_NULL_VOID(spanNode);
+    if (SystemProperties::ConfigChangePerform() && objRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(objRawPtr));
+        spanNode->RegisterResource<T>(key, resObj, value);
+    } else {
+        spanNode->UnregisterResource(key);
+    }
+}
+
+template void ProcessResourceObj<CalcDimension>(UINode* uinode, std::string key, CalcDimension value, void* objRawPtr);
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

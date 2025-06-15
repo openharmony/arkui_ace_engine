@@ -219,11 +219,17 @@ void ResetWaterFlowNestedScroll(ArkUINodeHandle node)
     WaterFlowModelNG::SetNestedScroll(frameNode, nestedOpt);
 }
 
-void SetWaterFlowFriction(ArkUINodeHandle node, ArkUI_Float32 friction)
+void SetWaterFlowFriction(ArkUINodeHandle node, ArkUI_Float32 friction, void* frictionRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, friction);
+
+    if (SystemProperties::ConfigChangePerform() && frictionRawPtr) {
+        auto* friction = reinterpret_cast<ResourceObject*>(frictionRawPtr);
+        auto frictionResObj = AceType::Claim(friction);
+        WaterFlowModelNG::ParseResObjFriction(frameNode, frictionResObj);
+    }
 }
 
 void ResetWaterFlowFriction(ArkUINodeHandle node)
@@ -231,6 +237,9 @@ void ResetWaterFlowFriction(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
+    if (SystemProperties::ConfigChangePerform()) {
+        WaterFlowModelNG::ParseResObjFriction(frameNode, nullptr);
+    }
 }
 
 void SetEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)

@@ -48,6 +48,7 @@ public:
     RefPtr<DialogTheme> dialogTheme_;
     RefPtr<PickerTheme> pickerThem_;
     RefPtr<ButtonTheme> buttonTheme_;
+    RefPtr<CalendarTheme> calendarTheme_;
 };
 
 void CalendarPickerResourceTest::SetUpTestCase()
@@ -68,6 +69,7 @@ void CalendarPickerResourceTest::SetUp()
     dialogTheme_ = AceType::MakeRefPtr<DialogTheme>();
     pickerThem_ = MockThemeDefault::GetPickerTheme();
     buttonTheme_ = AceType::MakeRefPtr<ButtonTheme>();
+    calendarTheme_ = AceType::MakeRefPtr<CalendarTheme>();
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -95,6 +97,8 @@ RefPtr<Theme> CalendarPickerResourceTest::GetThemeByType(ThemeType type)
         return pickerThem_;
     } else if (type == ButtonTheme::TypeId()) {
         return buttonTheme_;
+    } else if (type == CalendarTheme::TypeId()) {
+        return calendarTheme_;
     } else {
         return nullptr;
     }
