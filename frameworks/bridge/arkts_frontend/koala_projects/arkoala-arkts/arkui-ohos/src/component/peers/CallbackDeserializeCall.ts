@@ -72,13 +72,16 @@ import { Callback_TimePickerResult_Void, TimePickerResult, OnTimePickerChangeCal
 import { Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageErrorCallback, ImageError } from "./../image"
 import { WithThemeAttribute, WithThemeInterface, WithThemeOptions } from "./../withTheme"
 import { Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./../arkui-wrapper-builder"
+import { CheckedCallback } from "./../radioops"
 import { CustomNodeBuilder } from "./../customBuilder"
 import { ErrorCallback } from "./../ohos.base"
 import { BusinessError } from "#external"
 import { GetItemMainSizeByIndex } from "./../waterFlow"
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, TextTimerAttribute_onTimer_event_type } from "./../type-replacements"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
+import { IsOnCallback } from "./../toggleops"
 import { LocationButtonCallback, LocationButtonOnClickResult } from "./../locationButton"
+import { MenuSelectedCallback } from "./../menuitemops"
 import { NavExtender_OnUpdateStack } from "./../navigationExtender"
 import { OnCheckboxGroupChangeCallback, CheckboxGroupResult } from "./../checkboxgroup"
 import { OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam } from "./../folderStack"
@@ -90,9 +93,14 @@ import { OnRatingChangeCallback } from "./../rating"
 import { PageTransitionCallback, RouteType } from "./../pageTransition"
 import { PasteButtonCallback, PasteButtonOnClickResult } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData } from "./../pluginComponent"
+import { RatingCallback } from "./../ratingops"
 import { SaveButtonCallback, SaveButtonOnClickResult } from "./../saveButton"
 import { SearchValueCallback } from "./../searchops"
 import { TextFieldValueCallback } from "./../textfieldops"
+import { SelectAllCallback } from "./../checkboxgroupops"
+import { SelectCallback } from "./../checkboxops"
+import { SelectSelectedCallback, SelectValueCallback } from "./../selectops"
+import { ValueCallback } from "./../sliderops"
 import { SelectedCallback } from "./../griditemops"
 import { ShowSideBarCallback, SideBarWidthCallback } from "./../sidebarcontainerops"
 import { NavBarWidthCallback } from "./../navigationops"
@@ -2251,6 +2259,82 @@ export function deserializeAndCallSearchValueCallback(thisDeserializer: Deserial
     let value : string = (thisDeserializer.readString() as string)
     _call(value)
 }
+export function deserializeAndCallCheckedCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as CheckedCallback)
+    let checked : boolean = thisDeserializer.readBoolean()
+    _call(checked)
+}
+export function deserializeAndCallIsOnCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as IsOnCallback)
+    let isOn : boolean = thisDeserializer.readBoolean()
+    _call(isOn)
+}
+export function deserializeAndCallMenuSelectedCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as MenuSelectedCallback)
+    let selected : boolean = thisDeserializer.readBoolean()
+    _call(selected)
+}
+export function deserializeAndCallRatingCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as RatingCallback)
+    let rating : number = (thisDeserializer.readNumber() as number)
+    _call(rating)
+}
+export function deserializeAndCallSelectAllCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as SelectAllCallback)
+    let selectAll : boolean = thisDeserializer.readBoolean()
+    _call(selectAll)
+}
+export function deserializeAndCallSelectCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as SelectCallback)
+    let select : boolean = thisDeserializer.readBoolean()
+    _call(select)
+}
+export function deserializeAndCallSelectSelectedCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as SelectSelectedCallback)
+    const selected_buf_selector : int32 = thisDeserializer.readInt8()
+    let selected_buf : number | Resource | undefined
+    if (selected_buf_selector == 0) {
+        selected_buf = (thisDeserializer.readNumber() as number)
+    }
+    else if (selected_buf_selector == 1) {
+        selected_buf = thisDeserializer.readResource()
+    }
+    else {
+        throw new Error("One of the branches for selected_buf has to be chosen through deserialisation.")
+    }
+    let selected : number | Resource = (selected_buf as number | Resource)
+    _call(selected)
+}
+export function deserializeAndCallSelectValueCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as SelectValueCallback)
+    const value_buf_selector : int32 = thisDeserializer.readInt8()
+    let value_buf : string | Resource | undefined
+    if (value_buf_selector == 0) {
+        value_buf = (thisDeserializer.readString() as string)
+    }
+    else if (value_buf_selector == 1) {
+        value_buf = thisDeserializer.readResource()
+    }
+    else {
+        throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
+    }
+    let value : ResourceStr = (value_buf as string | Resource)
+    _call(value)
+}
+export function deserializeAndCallValueCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ValueCallback)
+    let value : number = (thisDeserializer.readNumber() as number)
+    _call(value)
+}
 export function deserializeAndCallSelectedCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as SelectedCallback)
@@ -2857,6 +2941,15 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -721521596/*CallbackKind.Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallScrollOnWillScrollCallback(thisDeserializer);
         case 1717691617/*CallbackKind.Kind_SearchSubmitCallback*/: return deserializeAndCallSearchSubmitCallback(thisDeserializer);
         case 2049289694/*CallbackKind.Kind_SearchValueCallback*/: return deserializeAndCallSearchValueCallback(thisDeserializer);
+        case -1767915684/*CallbackKind.Kind_CheckedCallback*/: return deserializeAndCallCheckedCallback(thisDeserializer);
+        case 1809395840/*CallbackKind.Kind_IsOnCallback*/: return deserializeAndCallIsOnCallback(thisDeserializer);
+        case -1805198399/*CallbackKind.Kind_MenuSelectedCallback*/: return deserializeAndCallMenuSelectedCallback(thisDeserializer);
+        case 2100427644/*CallbackKind.Kind_RatingCallback*/: return deserializeAndCallRatingCallback(thisDeserializer);
+        case 706621298/*CallbackKind.Kind_SelectAllCallback*/: return deserializeAndCallSelectAllCallback(thisDeserializer);
+        case -237409101/*CallbackKind.Kind_SelectCallback*/: return deserializeAndCallSelectCallback(thisDeserializer);
+        case 1591979130/*CallbackKind.Kind_SelectSelectedCallback*/: return deserializeAndCallSelectSelectedCallback(thisDeserializer);
+        case -802444552/*CallbackKind.Kind_SelectValueCallback*/: return deserializeAndCallSelectValueCallback(thisDeserializer);
+        case -1882252848/*CallbackKind.Kind_ValueCallback*/: return deserializeAndCallValueCallback(thisDeserializer);
         case -1480175598/*CallbackKind.Kind_SelectedCallback*/: return deserializeAndCallSelectedCallback(thisDeserializer);
         case -250780276/*CallbackKind.Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer);
         case 63936248/*CallbackKind.Kind_ShowCallback*/: return deserializeAndCallShowCallback(thisDeserializer);

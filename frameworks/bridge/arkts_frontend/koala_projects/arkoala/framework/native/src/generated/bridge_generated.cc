@@ -35184,6 +35184,90 @@ Ark_NativePointer impl_NavigationOps_registerNavBarWidthCallback(Ark_NativePoint
         return GetAccessors()->getNavigationOpsAccessor()->registerNavBarWidthCallback(node, (const Ark_Length*)&value, (const NavBarWidthCallback*)&callback_value);
 }
 KOALA_INTEROP_DIRECT_3(NavigationOps_registerNavBarWidthCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RadioOps_registerCheckedCallback(Ark_NativePointer node, Ark_Boolean isChecked, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        CheckedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean checked)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CheckedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean checked)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CheckedCallback))))};;
+        return GetAccessors()->getRadioOpsAccessor()->registerCheckedCallback(node, isChecked, (const CheckedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(RadioOps_registerCheckedCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RatingOps_registerRatingCallback(Ark_NativePointer node, KInteropNumber rating, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        RatingCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number rating)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_RatingCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number rating)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_RatingCallback))))};;
+        return GetAccessors()->getRatingOpsAccessor()->registerRatingCallback(node, (const Ark_Number*) (&rating), (const RatingCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(RatingOps_registerRatingCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SelectOps_registerSelectedCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 numCount_value_buf_selector = thisDeserializer.readInt8();
+        Ark_Union_Number_Resource numCount_value_buf = {};
+        numCount_value_buf.selector = numCount_value_buf_selector;
+        if (numCount_value_buf_selector == 0) {
+            numCount_value_buf.selector = 0;
+            numCount_value_buf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        else if (numCount_value_buf_selector == 1) {
+            numCount_value_buf.selector = 1;
+            numCount_value_buf.value1 = thisDeserializer.readResource();
+        }
+        else {
+            INTEROP_FATAL("One of the branches for numCount_value_buf has to be chosen through deserialisation.");
+        }
+        Ark_Union_Number_Resource numCount_value = static_cast<Ark_Union_Number_Resource>(numCount_value_buf);;
+        SelectSelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_Number_Resource selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectSelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_Number_Resource selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectSelectedCallback))))};;
+        return GetAccessors()->getSelectOpsAccessor()->registerSelectedCallback(node, (const Ark_Union_Number_Resource*)&numCount_value, (const SelectSelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(SelectOps_registerSelectedCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SelectOps_registerValueCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 resStr_value_buf_selector = thisDeserializer.readInt8();
+        Ark_ResourceStr resStr_value_buf = {};
+        resStr_value_buf.selector = resStr_value_buf_selector;
+        if (resStr_value_buf_selector == 0) {
+            resStr_value_buf.selector = 0;
+            resStr_value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (resStr_value_buf_selector == 1) {
+            resStr_value_buf.selector = 1;
+            resStr_value_buf.value1 = thisDeserializer.readResource();
+        }
+        else {
+            INTEROP_FATAL("One of the branches for resStr_value_buf has to be chosen through deserialisation.");
+        }
+        Ark_ResourceStr resStr_value = static_cast<Ark_ResourceStr>(resStr_value_buf);;
+        SelectValueCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectValueCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectValueCallback))))};;
+        return GetAccessors()->getSelectOpsAccessor()->registerValueCallback(node, (const Ark_ResourceStr*)&resStr_value, (const SelectValueCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(SelectOps_registerValueCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SliderOps_registerValueCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        ValueCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ValueCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ValueCallback))))};;
+        return GetAccessors()->getSliderOpsAccessor()->registerValueCallback(node, (const Ark_Number*) (&value), (const ValueCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(SliderOps_registerValueCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_CheckboxGroupOps_registerSelectAllCallback(Ark_NativePointer node, Ark_Boolean isAllSelected, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        SelectAllCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selectAll)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectAllCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selectAll)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectAllCallback))))};;
+        return GetAccessors()->getCheckboxGroupOpsAccessor()->registerSelectAllCallback(node, isAllSelected, (const SelectAllCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(CheckboxGroupOps_registerSelectAllCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_CheckboxOps_registerSelectCallback(Ark_NativePointer node, Ark_Boolean isSelected, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        SelectCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean select)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean select)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectCallback))))};;
+        return GetAccessors()->getCheckboxOpsAccessor()->registerSelectCallback(node, isSelected, (const SelectCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(CheckboxOps_registerSelectCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_MenuItemOps_registerSelectedCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        MenuSelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_MenuSelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_MenuSelectedCallback))))};;
+        return GetAccessors()->getMenuItemOpsAccessor()->registerSelectedCallback(node, value, (const MenuSelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(MenuItemOps_registerSelectedCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ToggleOps_registerIsOnCallback(Ark_NativePointer node, Ark_Boolean isOn, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        IsOnCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean isOn)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_IsOnCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean isOn)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_IsOnCallback))))};;
+        return GetAccessors()->getToggleOpsAccessor()->registerIsOnCallback(node, isOn, (const IsOnCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(ToggleOps_registerIsOnCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
 void impl_NavExtender_setUpdateStackCallback(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         NavExtender_OnUpdateStack callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String name)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavExtender_OnUpdateStack)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String name)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavExtender_OnUpdateStack))))};;

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
@@ -30,6 +30,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor } from "./units"
+import { RadioOpsHandWritten } from "./../handwritten"
 
 export class ArkRadioPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -158,7 +159,7 @@ export interface RadioStyle {
 export type RadioInterface = (options: RadioOptions) => RadioAttribute;
 export type OnRadioChangeCallback = (isChecked: boolean) => void;
 export interface RadioAttribute extends CommonMethod {
-    checked(value: boolean | undefined): this
+    checked(value: boolean | Bindable<boolean> | undefined): this
     onChange(value: ((isVisible: boolean) => void) | undefined | OnRadioChangeCallback | undefined): this
     radioStyle(value: RadioStyle | undefined): this
     contentModifier(value: ContentModifier | undefined): this
@@ -169,7 +170,7 @@ export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribut
     onChange_value?: ((isVisible: boolean) => void) | undefined
     radioStyle_value?: RadioStyle
     contentModifier_value?: ContentModifier | undefined
-    public checked(value: boolean | undefined): this {
+    public checked(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
     public onChange(value: ((isVisible: boolean) => void) | undefined | OnRadioChangeCallback | undefined): this {
@@ -202,8 +203,8 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         }
         return this
     }
-    public checked(value: boolean | undefined): this {
-        if (this.checkPriority("checked")) {
+    public checked(value: boolean | Bindable<boolean> | undefined): this {
+        if (this.checkPriority("checked") && (typeof value === "boolean" || typeof value === "undefined")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (boolean | undefined)
@@ -217,6 +218,7 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
             }
             throw new Error("Can not select appropriate overload")
         }
+        RadioOpsHandWritten.hookRadioAttributeCheckedImpl(this.getPeer().peer.ptr, (value as Bindable<boolean>));
         return this
     }
     public onChange(value: ((isVisible: boolean) => void) | undefined | OnRadioChangeCallback | undefined): this {
