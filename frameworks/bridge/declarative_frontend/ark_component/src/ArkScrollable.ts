@@ -109,6 +109,20 @@ class ScrollBarMarginModifier extends ModifierWithKey<ScrollBarMargin> {
   }
 }
 
+class onWillStopDraggingModifier extends ModifierWithKey<(velocity: number) => void> {
+  constructor(value: (velocity: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onWillStopDragging');
+  applyPeer(node: KNode, reset: boolean): void { 
+    if (reset) {
+      getUINativeModule().scrollable.resetOnWillStopDragging(node);
+    } else {
+      getUINativeModule().scrollable.setOnWillStopDragging(node, this.value);
+    }
+  }
+}
+
 class OnReachEndModifier extends ModifierWithKey<() => void> {
     constructor(value: () => void) {
         super(value);

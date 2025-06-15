@@ -559,3 +559,7 @@ globalThis.WaterFlow.onDidScroll = function (value: (xOffset: number, yOffset: n
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().waterFlow.setOnDidScroll(nodePtr, value);
 };
+globalThis.WaterFlow.onWillStopDragging = function (value: (velocity: number) => void) {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+};

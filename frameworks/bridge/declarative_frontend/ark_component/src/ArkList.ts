@@ -927,3 +927,7 @@ globalThis.List.onDidScroll = function (value: (xOffset: number, yOffset: number
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().list.setOnDidScroll(nodePtr, value);
 };
+globalThis.List.onWillStopDragging = function (value: (velocity: number) => void) {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+};

@@ -537,3 +537,7 @@ globalThis.Scroll.onReachEnd = function (value: () => void): void {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scrollable.setOnReachEnd(nodePtr, value);
 };
+globalThis.Scroll.onWillStopDragging = function (value: (velocity: number) => void) {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+};
