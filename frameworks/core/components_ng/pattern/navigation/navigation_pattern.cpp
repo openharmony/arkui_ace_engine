@@ -4852,6 +4852,8 @@ void NavigationPattern::SetToolbarManagerNavigationMode(NavigationMode mode)
     auto navigationMode = toolbarManager_->GetNavigationMode();
     if (navigationMode != mode) {
         toolbarManager_->SetNavigationMode(mode);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "update navigationMode successful, new mode: %{public}d",
+            static_cast<int>(mode));
     }
 }
 
