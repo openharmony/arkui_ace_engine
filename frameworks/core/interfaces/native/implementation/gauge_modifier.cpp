@@ -168,7 +168,11 @@ void ValueImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GaugeModelStatic::SetValue(frameNode, Converter::OptConvert<float>(*value));
+    auto convValue = Converter::OptConvert<float>(*value);
+    if (!convValue) {
+        return;
+    }
+    GaugeModelStatic::SetValue(frameNode, convValue);
 }
 void StartAngleImpl(Ark_NativePointer node,
                     const Opt_Number* value)

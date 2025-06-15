@@ -182,15 +182,15 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (TypeChecker.isFontWeight(value_value)) {
+            if (TypeChecker.isFontWeight(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as FontWeight
                 thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_value_1))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
             }
             else if (RuntimeType.STRING == value_value_type) {
                 thisSerializer.writeInt8(2 as int32)
