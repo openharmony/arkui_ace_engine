@@ -1557,12 +1557,12 @@ void AssignCast(std::optional<GestureJudgeResult> &dst, const Ark_GestureJudgeRe
 void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
 {
     dst.id = ArkValue<Ark_Number>(src.fingerId_);
-    dst.globalX = ArkValue<Ark_Number>(src.globalLocation_.GetX());
-    dst.globalY = ArkValue<Ark_Number>(src.globalLocation_.GetY());
-    dst.localX = ArkValue<Ark_Number>(src.localLocation_.GetX());
-    dst.localY = ArkValue<Ark_Number>(src.localLocation_.GetY());
-    dst.displayX = ArkValue<Ark_Number>(src.screenLocation_.GetX());
-    dst.displayY = ArkValue<Ark_Number>(src.screenLocation_.GetY());
+    dst.globalX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetX()));
+    dst.globalY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetY()));
+    dst.localX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
+    dst.localY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
+    dst.displayX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetX()));
+    dst.displayY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetY()));
 }
 
 template<>

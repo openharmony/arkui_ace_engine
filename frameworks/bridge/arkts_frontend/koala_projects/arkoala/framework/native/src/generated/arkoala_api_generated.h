@@ -5212,13 +5212,13 @@ typedef struct Opt_PageFlipMode {
 } Opt_PageFlipMode;
 typedef enum Ark_PanDirection {
     ARK_PAN_DIRECTION_NONE = 0,
-    ARK_PAN_DIRECTION_HORIZONTAL = 1,
-    ARK_PAN_DIRECTION_LEFT = 2,
-    ARK_PAN_DIRECTION_RIGHT = 3,
-    ARK_PAN_DIRECTION_VERTICAL = 4,
-    ARK_PAN_DIRECTION_UP = 5,
-    ARK_PAN_DIRECTION_DOWN = 6,
-    ARK_PAN_DIRECTION_ALL = 7,
+    ARK_PAN_DIRECTION_HORIZONTAL = 3,
+    ARK_PAN_DIRECTION_LEFT = 1,
+    ARK_PAN_DIRECTION_RIGHT = 2,
+    ARK_PAN_DIRECTION_VERTICAL = 12,
+    ARK_PAN_DIRECTION_UP = 4,
+    ARK_PAN_DIRECTION_DOWN = 8,
+    ARK_PAN_DIRECTION_ALL = 15,
 } Ark_PanDirection;
 typedef struct Opt_PanDirection {
     Ark_Tag tag;

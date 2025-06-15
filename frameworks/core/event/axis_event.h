@@ -126,10 +126,6 @@ public:
     void SetAction(AxisAction action);
     AxisAction GetAction() const;
     int32_t GetScrollStep() const;
-    void SetVerticalAxis(float axis);
-    float GetVerticalAxis() const;
-    void SetHorizontalAxis(float axis);
-    float GetHorizontalAxis() const;
     void SetPinchAxisScale(float scale);
     float GetPinchAxisScale() const;
     void SetRotateAxisAngle(float angle);
@@ -147,8 +143,6 @@ public:
 private:
     AxisAction action_ = AxisAction::NONE;
     int32_t scrollStep_ = 0;
-    float verticalAxis_ = 0.0;
-    float horizontalAxis_ = 0.0;
     float pinchAxisScale_ = 0.0;
     float rotateAxisAngle_ = 0.0;
     bool isRotationEvent_ = false;

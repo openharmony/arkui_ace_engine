@@ -441,12 +441,12 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth().ConvertToVp());
     area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight().ConvertToVp());
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX());
-    position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY());
+    position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX().ConvertToVp());
+    position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY().ConvertToVp());
     area.position = Converter::ArkValue<Ark_Position>(position);
     Ark_Position globPosition;
-    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX());
-    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
+    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX().ConvertToVp());
+    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY().ConvertToVp());
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
     dst.id = Converter::ArkValue<Opt_String>(src.id);
