@@ -263,4 +263,28 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest004, TestSize.Level1)
     ResourceManager::GetInstance().UpdateColorMode(colorMode);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
 }
+
+/**
+ * @tc.name: ResourceManagerTest005
+ * @tc.desc: Test resourceManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceManagerTest, ResourceManagerTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bundleName and moduleName.
+     * @tc.steps: step2. create ResourceObject
+     * @tc.steps: step3. create ResourceAdapter
+     * @tc.steps: step4. IsResourceAdapterRecord
+     * @tc.expect: true.
+     */
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    auto resAdapterCreate = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject, true);
+    auto result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    EXPECT_TRUE(result);
+    ResourceManager::GetInstance().Reset();
+    ResourceManager::GetInstance().resourceAdapters_.clear();
+}
 } // namespace OHOS::Ace
