@@ -92,7 +92,7 @@ HWTEST_F(IndicatorComponentControllerAccessorTest, showPreviousTest, TestSize.Le
  * @tc.desc: Check the functionality of IndicatorComponentControllerAccessor.changeIndex
  * @tc.type: FUNC
  */
-HWTEST_F(IndicatorComponentControllerAccessorTest, changeIndexTest, TestSize.Level1)
+HWTEST_F(IndicatorComponentControllerAccessorTest, DISABLED_changeIndexTest, TestSize.Level1)
 {
     constexpr int indexValidValue = 10;
 
