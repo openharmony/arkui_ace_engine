@@ -99,6 +99,7 @@ bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
 bool g_isResourceDecoupling = true;
+bool g_isConfigChangePerform = false;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
@@ -291,7 +292,7 @@ bool SystemProperties::GetResourceDecoupling()
 
 bool SystemProperties::ConfigChangePerform()
 {
-    return false;
+    return g_isConfigChangePerform;
 }
 
 int32_t SystemProperties::GetDragDropFrameworkStatus()

@@ -16,6 +16,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/unittest/core/rosen/rosen_render_context_test.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -1158,4 +1159,27 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew043, TestSize.Level1)
     auto spherizeDegree = stagingProperties.GetSpherizeDegree();
     EXPECT_NEAR(spherizeDegree, 10.0f, 0.01f);
 }
+
+/**
+ * @tc.name: RosenRenderContextTestNew044
+ * @tc.desc: UpdateBackBlurStyle().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew044, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    g_isConfigChangePerform = true;
+    BlurStyleOption blur;
+    blur.blurStyle = BlurStyle::NO_MATERIAL;
+    SysOptions sysOptions;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    rosenRenderContext->UpdateBackBlurStyle(blur, sysOptions);
+    std::string blurStyleStr = pattern->GetResCacheMapByKey("foregroundBlurStyle.blurStyle");
+    EXPECT_EQ(blurStyleStr, "");
+    g_isConfigChangePerform = false;
+}
+
 } // namespace OHOS::Ace::NG
