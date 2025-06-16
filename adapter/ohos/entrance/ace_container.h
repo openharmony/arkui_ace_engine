@@ -823,6 +823,12 @@ public:
         return uiWindow_->IsWaterfallModeEnabled();
     }
 
+    bool IsPcOrFreeMultiWindowCapability() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->IsPcOrFreeMultiWindowCapabilityEnabled();
+    }
+
     Rect GetUIExtensionHostWindowRect() override
     {
         CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
