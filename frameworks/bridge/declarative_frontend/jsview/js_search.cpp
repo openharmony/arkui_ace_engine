@@ -340,6 +340,7 @@ void JSSearch::SetSearchButtonOptions(const JSCallbackInfo& info)
     if (info.Length() < 2 || !info[1]->IsObject()) { // 2 : args num
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetButtonFontSize());
         SearchModel::GetInstance()->ResetSearchButtonFontColor();
+        return;
     }
     
     auto param = JSRef<JSObject>::Cast(info[1]);
