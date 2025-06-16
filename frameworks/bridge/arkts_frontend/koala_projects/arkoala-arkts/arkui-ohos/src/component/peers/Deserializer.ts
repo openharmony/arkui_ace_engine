@@ -76,7 +76,7 @@ import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offse
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { AnimatedDrawableDescriptor, AnimatedDrawableDescriptorInternal, DrawableDescriptor, DrawableDescriptorInternal, AnimationOptions, LayeredDrawableDescriptor, LayeredDrawableDescriptorInternal, PixelMapDrawableDescriptor, PixelMapDrawableDescriptorInternal } from "./../arkui-drawabledescriptor"
 import { PixelMap, PixelMapInternal } from "./../arkui-pixelmap"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
@@ -10139,17 +10139,17 @@ export class Deserializer extends DeserializerBase {
         const moduleName_result : string = (valueDeserializer.readString() as string)
         const id_result : number = (valueDeserializer.readNumber() as number)
         const params_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let params_buf : Array<Object> | undefined
+        let params_buf : Array<Object | undefined> | undefined
         if ((RuntimeType.UNDEFINED) != (params_buf_runtimeType))
         {
             const params_buf__length : int32 = valueDeserializer.readInt32()
-            let params_buf_ : Array<Object> = new Array<Object>(params_buf__length)
+            let params_buf_ : Array<Object | undefined> = new Array<Object | undefined>(params_buf__length)
             for (let params_buf__i = 0; params_buf__i < params_buf__length; params_buf__i++) {
                 params_buf_[params_buf__i] = (valueDeserializer.readString() as string)
             }
             params_buf = params_buf_
         }
-        const params_result : Array<Object> | undefined = params_buf
+        const params_result : Array<Object | undefined> | undefined = params_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let type_buf : number | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))

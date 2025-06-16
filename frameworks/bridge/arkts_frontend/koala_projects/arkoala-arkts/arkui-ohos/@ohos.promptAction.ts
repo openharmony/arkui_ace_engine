@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { Alignment } from "arkui/component/enums"
 import { ResourceColor, Offset } from "arkui/component/units"
 import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType } from "arkui/component/common"
