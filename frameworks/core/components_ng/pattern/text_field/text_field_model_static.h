@@ -95,6 +95,7 @@ public:
     static void SetShowPasswordIcon(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetShowUnderline(FrameNode* frameNode, const std::optional<bool>& showUnderLine);
     static void SetSelectAllValue(FrameNode* frameNode, const std::optional<bool>& isSelectAllValue);
+    static void SetDefaultCancelIcon(FrameNode* frameNode);
 
 private:
 
