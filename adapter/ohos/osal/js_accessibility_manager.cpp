@@ -1521,6 +1521,7 @@ void UpdateAccessibilityTextValueInfo(
     } else {
         nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
     }
+    nodeInfo.SetOriginalText(accessibilityProperty->GetText());
 }
 
 void UpdateElementInfoPageIdWithTreeId(Accessibility::AccessibilityElementInfo& info, int32_t treeId)
@@ -1796,6 +1797,7 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
 {
     CHECK_NULL_VOID(node);
     nodeInfo.SetContent(node->GetContent());
+    nodeInfo.SetOriginalText(node->GetContent());
     nodeInfo.SetAccessibilityText(node->GetContent());
     RangeInfo rangeInfo(node->GetRangeInfoMin(), node->GetRangeInfoMax(), node->GetRangeInfoCurrent());
     nodeInfo.SetRange(rangeInfo);
@@ -1816,7 +1818,6 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
 
     nodeInfo.SetBelongTreeId(treeId);
     nodeInfo.SetParentWindowId(parentWebWindowId_);
-
     GridInfo gridInfo(node->GetGridRows(), node->GetGridColumns(), node->GetGridSelectedMode());
     nodeInfo.SetGrid(gridInfo);
 
@@ -3012,6 +3013,7 @@ void JsAccessibilityManager::DumpCommonPropertyNG(const AccessibilityElementInfo
     DumpLog::GetInstance().AddDesc("component type: ", nodeInfo.GetComponentType());
     DumpLog::GetInstance().AddDesc("accessibilityCustomRole: " + nodeInfo.GetCustomComponentType());
     DumpLog::GetInstance().AddDesc("text: ", nodeInfo.GetContent());
+    DumpLog::GetInstance().AddDesc("originText: ", nodeInfo.GetOriginalText());
     DumpLog::GetInstance().AddDesc("window id: " + std::to_string(nodeInfo.GetWindowId()));
     DumpRectNG(nodeInfo.GetRectInScreen());
 
