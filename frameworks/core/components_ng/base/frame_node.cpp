@@ -4114,6 +4114,11 @@ RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const s
     return iter->second;
 }
 
+bool FrameNode::HasAnimatableProperty(const std::string& propertyName) const
+{
+    return nodeAnimatablePropertyMap_.find(propertyName) != nodeAnimatablePropertyMap_.end();
+}
+
 RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);

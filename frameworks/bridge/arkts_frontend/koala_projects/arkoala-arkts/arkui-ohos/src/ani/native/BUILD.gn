@@ -25,6 +25,7 @@ ohos_shared_library("arkoala_native_ani") {
   include_dirs = [ "./" ]
 
   sources = [
+    "animation/animation_ani_impl.cpp",
     "common/common_module.cpp",
     "componentSnapshot/componentSnapshot_module.cpp",
     "content_slot/content_slot_module.cpp",

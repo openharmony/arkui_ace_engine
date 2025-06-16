@@ -131,18 +131,22 @@ template("ace_core_interfaces_native_node") {
     ]
 
     sources += [
+      "ani/ani_utils.cpp",
+      "ani/animation_ani_modifier.cpp",
       "ani/common_ani_modifier.cpp",
       "ani/component_snapshot_ani_modifier.cpp",
       "ani/content_slot_ani_modifier.cpp",
+      "ani/custom_node_ani_modifier.cpp",
       "ani/drag_ani_modifier.cpp",
       "ani/image_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
       "ani/web_ani_modifier.cpp",
-      "ani/custom_node_ani_modifier.cpp",
       "ani/waterflow_ani_modifier.cpp",
     ]
     if (build_ohos_sdk) {
       sources -= [
+        "ani/ani_utils.cpp",
+        "ani/animation_ani_modifier.cpp",
         "ani/common_ani_modifier.cpp",
         "ani/node_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
@@ -206,7 +210,13 @@ template("ace_core_interfaces_native_node") {
     external_deps = [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
+      "runtime_core:ani",
     ]
+    if (build_ohos_sdk) {
+      external_deps -= [
+        "runtime_core:ani",
+      ]
+    }
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]

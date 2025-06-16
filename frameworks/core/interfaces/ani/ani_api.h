@@ -38,6 +38,7 @@ typedef struct __ani_env ani_env;
 typedef int32_t ani_int;
 typedef int64_t ani_long;
 typedef class __ani_fn_object *ani_fn_object;
+typedef class __ani_string* ani_string;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
@@ -97,6 +98,13 @@ struct ArkUIAniComponentSnapshotModifier {
     std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
     OHOS::Ace::NG::SnapshotParam param);
 };
+struct ArkUIAniAnimationModifier {
+    bool (*hasAnimatableProperty)(ani_env* env, ArkUINodeHandle node, ani_string name);
+    void (*updateAnimatableProperty)(
+        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property);
+    void (*createAnimatableProperty)(
+        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property, ani_fn_object callback);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -108,6 +116,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
+    const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

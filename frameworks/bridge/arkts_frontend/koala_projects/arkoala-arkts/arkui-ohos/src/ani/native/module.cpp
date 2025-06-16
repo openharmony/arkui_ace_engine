@@ -16,6 +16,7 @@
 #include <array>
 
 #include "ani.h"
+#include "animation/animation_ani_impl.h"
 #include "common/common_module.h"
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
@@ -175,6 +176,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ComponentSnapshot_createFromBuilderWithPromise",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithPromise)
+        },
+        ani_native_function {
+            "_Animation_SetOrCreateAnimatableProperty",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetOrCreateAnimatableProperty)
         },
     };
 
