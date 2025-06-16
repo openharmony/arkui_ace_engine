@@ -93,6 +93,7 @@ public:
         return !HasRenderTransform();
     }
     std::optional<Color> GetHandleColor() override;
+    void BeforeOnPrepareMenu() override;
 
 protected:
     bool AllowTranslate() override;

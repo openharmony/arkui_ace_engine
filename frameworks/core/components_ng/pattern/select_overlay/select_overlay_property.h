@@ -40,6 +40,7 @@ struct OnMenuItemCallback {
     OnMenuItemClickCallback onMenuItemClick;
     OnPrepareMenuCallback onPrepareMenuCallback;
     std::function<void(int32_t&, int32_t&)> textRangeCallback;
+    std::function<void()> beforeOnPrepareMenuCallback;
 };
 
 struct SelectHandlePaintInfo {
