@@ -22,6 +22,21 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+void UpdateRowPadding(const RefPtr<FrameNode>& row)
+{
+    CHECK_NULL_VOID(row);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto padding = CalcLength(theme->GetMenuItemHorIntervalPadding());
+
+    auto layoutProps = row->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdatePadding(PaddingProperty { padding, padding, std::nullopt, std::nullopt, std::nullopt,
+        std::nullopt });
+}
+} // namespace
     
 RefPtr<FrameNode> MenuItemGroupViewStatic::CreateFrameNode(int32_t nodeId)
 {
