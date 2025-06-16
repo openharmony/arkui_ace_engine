@@ -1235,6 +1235,43 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Le
 }
 
 /**
+ * @tc.name: DeleteTextDecorationType
+ * @tc.desc: Test deleteDecorationType of DecorationSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, DeleteTextDecorationType, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a spanString and AddSpan
+     * @tc.expected: The SpanString and style should be successfully created and applied
+     */
+    std::string buffer;
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({ TextDecoration::UNDERLINE, TextDecoration::OVERLINE }), Color::RED,
+        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1);
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    buffer.clear();
+    buffer = decorationSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+
+    /**
+     * @tc.steps2:remove overline to decorationSpan
+     * @tc.expected: The decorationSpan types removed Overline ,size equal 1
+     */
+    decorationSpan->RemoveTextDecorationType(TextDecoration::OVERLINE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationTypes().size(), 1);
+
+    /**
+     * @tc.steps3:remove none to decorationSpan
+     * @tc.expected: The decorationSpan types can remove None, size equal 1
+     */
+    decorationSpan->RemoveTextDecorationType(TextDecoration::NONE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationTypes().size(), 1);
+}
+
+/**
  * @tc.name: HandleOnPaste001
  * @tc.desc: test HandleOnPaste
  * @tc.type: FUNC
