@@ -25,7 +25,7 @@ namespace {
 void UpdateRowPadding(const RefPtr<FrameNode>& row)
 {
     CHECK_NULL_VOID(row);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = row->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -60,7 +60,7 @@ void MenuItemGroupViewStatic::SetHeader(FrameNode* frameNode, const std::optiona
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateContent(header.value_or(""));
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -93,7 +93,7 @@ void MenuItemGroupViewStatic::SetFooter(FrameNode* frameNode, const std::optiona
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateContent(footer.value_or(""));
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
