@@ -1800,6 +1800,7 @@ HWTEST_F(ViewAbstractModelTestNg, SetToolbarBuilder001, TestSize.Level1)
     viewAbstractModelNG.SetToolbarBuilder(nullptr);
     bool ret = mainNode->removeToolbarItemCallbacks_.size() > 0;
     EXPECT_FALSE(ret);
+    rootNode->RemoveChild(containerModalNode);
 }
 
 /**
@@ -1829,21 +1830,17 @@ HWTEST_F(ViewAbstractModelTestNg, SetToolbarBuilder002, TestSize.Level1)
 
     auto builderFunc = []() -> RefPtr<UINode> {
         auto* stack = ViewStackProcessor::GetInstance();
-        CHECK_NULL_RETURN(stack, nullptr);
         auto frameNode = FrameNode::GetOrCreateFrameNode(
             V2::TOOLBAR_ETS_TAG, 11, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-        CHECK_NULL_RETURN(frameNode, nullptr);
-        stack->Push(frameNode);
-        auto childFrameNode = FrameNode::GetOrCreateFrameNode(
-            V2::TOOLBARITEM_ETS_TAG, 22, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-        CHECK_NULL_RETURN(childFrameNode, nullptr);
-        stack->Push(childFrameNode);
-        frameNode->AddChild(childFrameNode);
-        return frameNode;
+        if (stack) {
+            stack->Push(frameNode);
+        }
+        return frameNode ? frameNode : nullptr;
     };
     viewAbstractModelNG.SetToolbarBuilder(std::move(builderFunc));
     bool ret = mainNode->removeToolbarItemCallbacks_.size() > 0;
     EXPECT_TRUE(ret);
+    rootNode->RemoveChild(containerModalNode);
 }
 
 /**
