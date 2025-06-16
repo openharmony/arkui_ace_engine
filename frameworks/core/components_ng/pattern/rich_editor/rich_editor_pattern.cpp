@@ -9288,6 +9288,7 @@ float RichEditorPattern::GetLineHeight() const
 
 size_t RichEditorPattern::GetLineCount() const
 {
+    CHECK_NULL_RETURN(!spans_.empty() || NeedShowPlaceholder(), 0);
     return paragraphs_.GetLineCount();
 }
 
@@ -10384,7 +10385,7 @@ RectF RichEditorPattern::CreateNewLineRect(const int32_t position, const bool do
     return rect;  
 }
 
-bool RichEditorPattern::NeedShowPlaceholder()
+bool RichEditorPattern::NeedShowPlaceholder() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
