@@ -3994,11 +3994,19 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
     menuWrapperPattern->SetIsOpenMenu(true);
+    NG::OffsetF menuPosition { menuParam.positionOffset.GetX(), menuParam.positionOffset.GetY() };
+    if (menuParam.isAnchorPosition) {
+        NG::OffsetF targetNodePosition = targetNode->GetPositionToWindowWithTransform();
+        menuPosition = { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX() +
+                        targetNodePosition.GetX(),
+                        menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() +
+                        targetNodePosition.GetY() };
+    }
     if (menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
-        SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuParam.positionOffset);
+        SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuPosition);
         return ERROR_CODE_NO_ERROR;
     }
-    overlayManager->ShowMenu(targetNode->GetId(), menuParam.positionOffset, wrapperNode);
+    overlayManager->ShowMenu(targetNode->GetId(), menuPosition, wrapperNode);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4023,6 +4031,21 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
     wrapperPattern->SetMenuParam(menuParam);
     MenuView::UpdateMenuParam(menuWrapperNode, menu, menuParam);
     MenuView::UpdateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
+    if (menuParam.isAnchorPosition) {
+        auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+        if (menuProperty) {
+            auto target = ElementRegister::GetInstance()->
+                GetSpecificItemById<NG::FrameNode>(wrapperPattern->GetTargetId());
+            CHECK_NULL_RETURN(target, ERROR_CODE_INTERNAL_ERROR);
+            NG::OffsetF targetNodePosition = target->GetPositionToWindowWithTransform();
+            NG::OffsetF menuPosition = { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX() +
+                                         targetNodePosition.GetX(),
+                                         menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() +
+                                         targetNodePosition.GetY() };
+            menuProperty->UpdateMenuOffset(menuPosition);
+            menuProperty->ResetMenuPlacement();
+        }
+    }
     auto pipeline = menuWrapperNode->GetContextRefPtr();
     if (pipeline) {
         wrapperPattern->SetForceUpdateEmbeddedMenu(true);
