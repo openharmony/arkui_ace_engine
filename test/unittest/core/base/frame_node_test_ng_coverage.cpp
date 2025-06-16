@@ -1567,6 +1567,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCalculateOffsetRelativeToWindow01, TestSize.L
      * @tc.steps: step2. set Offset.
      */
     parentNode->GetGeometryNode()->SetFrameOffset(OffsetF(1.1, 2.3));
+    frameNode->GetGeometryNode()->SetSelfAdjust(RectF(1.0, 1.0, 0.0, 0.0));
     frameNode->GetGeometryNode()->SetFrameOffset(OffsetF(3.2, 4.1));
     frameNode2->GetGeometryNode()->SetFrameOffset(OffsetF(5.3, 6.3));
 
@@ -1574,7 +1575,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCalculateOffsetRelativeToWindow01, TestSize.L
      * @tc.steps: step3. call the function CalculateOffsetRelativeToWindow and create TIMESTAMP_1 cache.
      * @tc.expected: expect res is frameNode offset + parentNode offset
      */
-    EXPECT_EQ(frameNode->CalculateOffsetRelativeToWindow(TIMESTAMP_1), OffsetF(4.3, 6.4));
+    EXPECT_EQ(frameNode->CalculateOffsetRelativeToWindow(TIMESTAMP_1), OffsetF(5.3, 7.4));
  
     /**
      * @tc.steps: step4. call the function CalculateOffsetRelativeToWindow and create TIMESTAMP_1 cache.
@@ -1582,14 +1583,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCalculateOffsetRelativeToWindow01, TestSize.L
      */
 
     parentNode->GetGeometryNode()->SetFrameOffset(OffsetF(2.1, 3.3));
-    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_1), OffsetF(9.6, 12.7));
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_1), OffsetF(10.6, 13.7));
 
 
     /**
      * @tc.steps: step5. call the function CalculateOffsetRelativeToWindow TIMESTAMP_2.
      * @tc.expected: expect res is frameNode2 offset + framenode offset + parentNode offset
      */
-    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_2), OffsetF(10.6, 13.7));
+    EXPECT_EQ(frameNode2->CalculateOffsetRelativeToWindow(TIMESTAMP_2), OffsetF(11.6, 14.7));
 }
 
 /**

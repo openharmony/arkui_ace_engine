@@ -1733,7 +1733,7 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t area
 #endif
     if (eventHub_ && (eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
-        auto currFrameRect = geometryNode_->GetFrameRect();
+        auto currFrameRect = GetFrameRectWithSafeArea();
         if (renderContext_ && renderContext_->GetPositionProperty()) {
             if (renderContext_->GetPositionProperty()->HasPosition()) {
                 auto renderPosition = ContextPositionConvertToPX(
@@ -5586,7 +5586,7 @@ OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp
 
 OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag, int32_t areaChangeMinDepth)
 {
-    auto currOffset = geometryNode_->GetFrameOffset();
+    auto currOffset = GetFrameRectWithSafeArea().GetOffset();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
             auto renderPosition =
