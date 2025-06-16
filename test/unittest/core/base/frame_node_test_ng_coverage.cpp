@@ -2823,4 +2823,46 @@ HWTEST_F(FrameNodeTestNg, OnLayoutFinish001, TestSize.Level1)
     EXPECT_EQ(frameNode->renderContext_->GetOuterBorderRadius()->radiusTopRight.value().Value(), 20.0f);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: OnLayoutFinish002
+ * @tc.desc: Test frameNode OnLayoutFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, OnLayoutFinish002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnLayoutFinish.
+     * @tc.expected: expect BorderRadius radiusTopLeft is 20, OuterBorderRadius radiusTopRight is 20
+     * and result return true.
+     */
+    auto context = AceType::MakeRefPtr<PipelineContext>();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto geometryTransition = AceType::MakeRefPtr<GeometryTransition>("active");
+    layoutProperty->geometryTransition_ = geometryTransition;
+    frameNode->layoutProperty_ = layoutProperty;
+    frameNode->isActive_ = true;
+    Dimension radius(20.0f);
+    Dimension dimension(20.0f);
+    BorderRadiusProperty borderRadiusProperty;
+    BorderRadiusProperty outerBorderRadiusProperty;
+    borderRadiusProperty.radiusTopLeft = radius;
+    outerBorderRadiusProperty.radiusTopRight = dimension;
+    frameNode->renderContext_->UpdateBorderRadius(borderRadiusProperty);
+    frameNode->renderContext_->UpdateOuterBorderRadius(outerBorderRadiusProperty);
+    bool needSyncRsNode = true;
+    DirtySwapConfig config;
+    auto result = frameNode->OnLayoutFinish(needSyncRsNode, config);
+    frameNode->context_ = nullptr;
+    EXPECT_EQ(frameNode->renderContext_->GetBorderRadius()->radiusTopLeft.value().Value(), 20.0f);
+    EXPECT_EQ(frameNode->renderContext_->GetOuterBorderRadius()->radiusTopRight.value().Value(), 20.0f);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
