@@ -235,6 +235,39 @@ HWTEST_F(WebPatternTestNgSupplement, getZoomOffset_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleScaleGestureChange_001
+ * @tc.desc: HandleScaleGestureChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, HandleScaleGestureChange_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    GestureEvent event;
+    event.SetScale(0);
+    webPattern->zoomStatus_ = 3;
+    webPattern->zoomErrorCount_ = 5;
+    webPattern->preScale_ = 1.0;
+    webPattern->zoomOutSwitch_ = false;
+    webPattern->startPageScale_ = 5.0;
+
+    webPattern->HandleScaleGestureChange(event);
+    EXPECT_EQ(webPattern->zoomErrorCount_, 5);
+    EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
  * @tc.name: JavaScriptOnDocumentStart001
  * @tc.desc: JavaScriptOnDocumentStart.
  * @tc.type: FUNC
