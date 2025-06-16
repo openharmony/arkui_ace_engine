@@ -42,7 +42,7 @@ import { FocusBoxStyle, FocusPriority } from "../../component/focus"
 import { TransformationMatrix } from "../../component/arkui-common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
 import { ComponentContent } from "../../component/arkui-custom"
-import { BlendMode } from "../../component/arkui-drawing"
+import { BlendMode } from "../../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
