@@ -2020,13 +2020,13 @@ HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
     Matrix4 matrix4(INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1,
         INDEX_0, INDEX_100, INDEX_0, INDEX_0, INDEX_1);
     rosenRenderContext->OnTransform3DMatrixUpdate(matrix4);
-    auto perspectiveValue = rosenRenderContext->transformMatrixModifier_->perspectiveValue.get()->Get();
-    auto xyTranslateValue = rosenRenderContext->transformMatrixModifier_->translateXYValue.get()->Get();
-    auto translateZValue = rosenRenderContext->transformMatrixModifier_->translateZValue.get()->Get();
-    auto scaleXYValue = rosenRenderContext->transformMatrixModifier_->scaleXYValue.get()->Get();
-    auto scaleZValue = rosenRenderContext->transformMatrixModifier_->scaleZValue.get()->Get();
-    auto skewValue = rosenRenderContext->transformMatrixModifier_->skewValue.get()->Get();
-    auto quaternionValue = rosenRenderContext->transformMatrixModifier_->quaternionValue.get()->Get();
+    auto perspectiveValue = rosenRenderContext->transformModifier_->perspectiveValue.get()->Get();
+    auto xyTranslateValue = rosenRenderContext->transformModifier_->translateXYValue.get()->Get();
+    auto translateZValue = rosenRenderContext->transformModifier_->translateZValue.get()->Get();
+    auto scaleXYValue = rosenRenderContext->transformModifier_->scaleXYValue.get()->Get();
+    auto scaleZValue = rosenRenderContext->transformModifier_->scaleZValue.get()->Get();
+    auto skewValue = rosenRenderContext->transformModifier_->skewValue.get()->Get();
+    auto quaternionValue = rosenRenderContext->transformModifier_->quaternionValue.get()->Get();
     EXPECT_NE(perspectiveValue[0], 0);
     EXPECT_EQ(perspectiveValue[1], 0);
     EXPECT_EQ(perspectiveValue[2], 0);
