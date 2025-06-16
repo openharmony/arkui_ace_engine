@@ -381,7 +381,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, SetSubSpans001, TestSize.Level1)
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->spans_.push_back(spanItem1);
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
-    richEditorPattern->SetSubSpans(spanString, 1, 1);
+    richEditorPattern->SetSubSpans(spanString, 1, 1, spanString->spans_);
     EXPECT_EQ(spanString->spans_.size(), 0);
 }
 
