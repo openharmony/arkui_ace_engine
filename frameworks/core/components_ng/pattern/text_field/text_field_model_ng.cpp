@@ -200,60 +200,11 @@ void TextFieldModelNG::SetUserUnderlineColor(UserUnderlineColor userColor)
     pattern->SetUserUnderlineColor(userColor);
 }
 
-void TextFieldModelNG::SetTypingUnderlineColor(const Color& normalColor)
-{
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetTypingUnderlineColor(normalColor);
-}
-
-void TextFieldModelNG::ResetTypingUnderlineColor()
-{
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetTypingUnderlineColor();
-}
-
 void TextFieldModelNG::SetNormalUnderlineColor(const Color& normalColor)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNormalUnderlineColor(normalColor);
-}
-
-void TextFieldModelNG::ResetNormalUnderlineColor()
-{
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetNormalUnderlineColor();
-}
-
-void TextFieldModelNG::SetErrorUnderlineColor(const Color& normalColor)
-{
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetErrorUnderlineColor(normalColor);
-}
-
-void TextFieldModelNG::ResetErrorUnderlineColor()
-{
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetErrorUnderlineColor();
-}
-
-void TextFieldModelNG::SetDisableUnderlineColor(const Color& normalColor)
-{
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetDisableUnderlineColor(normalColor);
-}
-
-void TextFieldModelNG::ResetDisableUnderlineColor()
-{
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetDisableUnderlineColor();
 }
 
 void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode)
@@ -895,16 +846,14 @@ void TextFieldModelNG::SetMargin()
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin);
 }
 
-void TextFieldModelNG::SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp, bool hasRegist)
+void TextFieldModelNG::SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
 {
     if (tmp) {
         SetDefaultPadding();
         return;
     }
-    if (!hasRegist) {
-        NG::ViewAbstract::SetPadding(newPadding);
-        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding);
-    }
+    NG::ViewAbstract::SetPadding(newPadding);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();

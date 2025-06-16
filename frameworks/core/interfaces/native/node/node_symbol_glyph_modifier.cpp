@@ -64,14 +64,9 @@ void ResetFontColor(ArkUINodeHandle node)
     Color fontColor = theme->GetTextStyle().GetTextColor();
     std::vector<Color> colorArray = { fontColor };
     SymbolModelNG::SetFontColor(frameNode, colorArray);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("symbolColor");
-    }
 }
 
-void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit, void* fontSizeRawPtr)
+void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -84,9 +79,7 @@ void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit,
         CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
         SymbolModelNG::SetFontSize(frameNode, fontSize);
     } else {
-        auto fontSizeVal = Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit));
-        SymbolModelNG::SetFontSize(frameNode, fontSizeVal);
-        NodeModifier::ProcessResourceObj<CalcDimension>(frameNode, "FontSize", fontSizeVal, fontSizeRawPtr);
+        SymbolModelNG::SetFontSize(frameNode, Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit)));
     }
 }
 
@@ -98,11 +91,6 @@ void ResetFontSize(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     SymbolModelNG::SetFontSize(frameNode, fontSize);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("FontSize");
-    }
 }
 
 void SetFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr weight)
@@ -184,7 +172,7 @@ void UpdateSymbolEffect(ArkUINodeHandle node, ArkUI_Uint32 symbolEffectType, Ark
     SymbolModelNG::UpdateSymbolEffect(frameNode, symbolEffectType, isActive, isTxtActiveSource);
 }
 
-void SetMinFontScale(ArkUINodeHandle node, ArkUI_Float32 minFontScale, void* scaleRawPtr)
+void SetMinFontScale(ArkUINodeHandle node, ArkUI_Float32 minFontScale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -197,7 +185,6 @@ void SetMinFontScale(ArkUINodeHandle node, ArkUI_Float32 minFontScale, void* sca
         return;
     }
     SymbolModelNG::SetMinFontScale(frameNode, minFontScale);
-    NodeModifier::ProcessResourceObj<float>(frameNode, "MinFontScale", minFontScale, scaleRawPtr);
 }
 
 void ResetMinFontScale(ArkUINodeHandle node)
@@ -205,14 +192,9 @@ void ResetMinFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SymbolModelNG::SetMinFontScale(frameNode, 1.0f);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("MinFontScale");
-    }
 }
 
-void SetMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 maxFontScale, void* scaleRawPtr)
+void SetMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 maxFontScale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -221,7 +203,6 @@ void SetMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 maxFontScale, void* sca
         return;
     }
     SymbolModelNG::SetMaxFontScale(frameNode, maxFontScale);
-    NodeModifier::ProcessResourceObj<float>(frameNode, "MaxFontScale", maxFontScale, scaleRawPtr);
 }
 
 void ResetMaxFontScale(ArkUINodeHandle node)
@@ -229,11 +210,6 @@ void ResetMaxFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SymbolModelNG::SetMaxFontScale(frameNode, 1.0f);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("MaxFontScale");
-    }
 }
 }
 
@@ -293,20 +269,6 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
-}
-
-template<typename T>
-void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && objRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(objRawPtr));
-        pattern->RegisterResource<T>(key, resObj, value);
-    } else {
-        pattern->UnRegisterResource(key);
-    }
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

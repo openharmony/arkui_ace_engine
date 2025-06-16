@@ -20,7 +20,6 @@
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "frameworks/core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -46,22 +45,14 @@ ArkUINativeModuleValue SymbolSpanBridge::SetFontColor(ArkUIRuntimeCallInfo* runt
     auto length = array->Length(vm);
 
     std::vector<ArkUI_Uint32> colorArray;
-    std::vector<Color> colorArr;
-    std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
     for (uint32_t index = 0; index < length; index++) {
         Local<JSValueRef> value = panda::ArrayRef::GetValueAt(vm, array, index);
         Color color;
-        RefPtr<ResourceObject> resObj;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, value, color, resObj)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, value, color)) {
             colorArray.emplace_back(color.GetValue());
-            colorArr.emplace_back(color);
         } else {
             colorArray.clear();
             break;
-        }
-        if (SystemProperties::ConfigChangePerform() && resObj) {
-            std::pair<int32_t, RefPtr<ResourceObject>> pair(index, resObj);
-            resObjArr.push_back(pair);
         }
     }
     if (static_cast<uint32_t>(length) == colorArray.size() && (static_cast<uint32_t>(length) & 1)) {
@@ -71,16 +62,6 @@ ArkUINativeModuleValue SymbolSpanBridge::SetFontColor(ArkUIRuntimeCallInfo* runt
     }
     GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanFontColor(
         nativeNode, colorArray.data(), colorArray.size());
-    auto* uiNode = reinterpret_cast<UINode*>(nativeNode);
-    CHECK_NULL_RETURN(uiNode, panda::JSValueRef::Undefined(vm));
-    auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
-    CHECK_NULL_RETURN(spanNode, panda::JSValueRef::Undefined(vm));
-    if (!resObjArr.empty()) {
-        spanNode->RegisterSymbolFontColorResource("symbolColor",
-            colorArr, resObjArr);
-    } else {
-        spanNode->UnregisterResource("symbolColor");
-    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -104,12 +85,11 @@ ArkUINativeModuleValue SymbolSpanBridge::SetFontSize(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, resObj, false)) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false)) {
         GetArkUINodeModifiers()->getSymbolSpanModifier()->resetSymbolSpanFontSize(nativeNode);
     } else {
         GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanFontSize(
-            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), AceType::RawPtr(resObj));
+            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }

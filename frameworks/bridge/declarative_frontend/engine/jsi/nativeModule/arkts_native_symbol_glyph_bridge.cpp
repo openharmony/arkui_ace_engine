@@ -48,39 +48,17 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
     auto length = array->Length(vm);
 
     std::vector<ArkUI_Uint32> colorArray;
-    std::vector<Color> colorArr;
-    std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
     for (uint32_t index = 0; index < length; index++) {
         Local<JSValueRef> value = panda::ArrayRef::GetValueAt(vm, array, index);
         Color color;
-        RefPtr<ResourceObject> resObj;
-        if (!ArkTSUtils::ParseJsSymbolColorAlpha(vm, value, color, resObj)) {
+        if (!ArkTSUtils::ParseJsSymbolColorAlpha(vm, value, color)) {
             colorArray.clear();
             break;
         }
         colorArray.emplace_back(color.GetValue());
-        colorArr.emplace_back(color);
-        if (SystemProperties::ConfigChangePerform() && resObj) {
-            std::pair<int32_t, RefPtr<ResourceObject>> pair(index, resObj);
-            resObjArr.push_back(pair);
-        }
     }
 
     GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontColor(nativeNode, colorArray.data(), colorArray.size());
-
-    if (SystemProperties::ConfigChangePerform()) {
-        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
-        if (!resObjArr.empty()) {
-            SymbolModel::GetInstance()->RegisterSymbolFontColorResource("symbolColor",
-                colorArr, resObjArr);
-        } else {
-            pattern->UnRegisterResource("symbolColor");
-        }
-    }
-
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -104,12 +82,11 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontSize(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    RefPtr<ResourceObject> fontSizeResObj;
-    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, fontSizeResObj, false)) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false)) {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->resetFontSize(nativeNode);
     } else {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontSize(
-            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), AceType::RawPtr(fontSizeResObj));
+            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -285,10 +262,9 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetMinFontScale(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double minFontScale = 0.0;
-    RefPtr<ResourceObject> resourceObject;
-    if (ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale, resourceObject)) {
+    if (ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale)) {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setMinFontScale(nativeNode,
-            static_cast<float>(minFontScale), AceType::RawPtr(resourceObject));
+            static_cast<float>(minFontScale));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -313,10 +289,9 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double maxFontScale = 0.0;
-    RefPtr<ResourceObject> resourceObject;
-    if (ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale, resourceObject)) {
+    if (ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale)) {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setMaxFontScale(nativeNode,
-            static_cast<float>(maxFontScale), AceType::RawPtr(resourceObject));
+            static_cast<float>(maxFontScale));
     }
     return panda::JSValueRef::Undefined(vm);
 }

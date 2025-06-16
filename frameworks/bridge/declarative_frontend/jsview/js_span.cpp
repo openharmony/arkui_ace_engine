@@ -29,7 +29,6 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
-#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -43,7 +42,6 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
@@ -75,64 +73,8 @@ namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 
 } // namespace
-
-void JSSpan::RegisterSpanFontInfo(const JSCallbackInfo& info, Font& font)
-{
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsObject()) {
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
-
-    auto fontSize = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::SIZE));
-    CalcDimension size;
-    RefPtr<ResourceObject> fontSizeResObj;
-    bool ret = ParseJsDimensionFpNG(fontSize, size, fontSizeResObj, false);
-    if (ret && size.IsNonNegative()) {
-        font.fontSize = size;
-    }
-    if (fontSizeResObj) {
-        RegisterSpanResource<CalcDimension>("fontSize", fontSizeResObj, size);
-    } else {
-        UnregisterSpanResource("fontSize");
-    }
-
-    std::string weight;
-    auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
-    if (!fontWeight->IsNull()) {
-        int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-        ParseJsInt32(fontWeight, variableFontWeight);
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            JSContainerBase::ParseJsString(fontWeight, weight);
-        }
-        font.fontWeight = ConvertStrToFontWeight(weight);
-    }
-
-    UnregisterSpanResource("fontFamily");
-    auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
-    if (!fontFamily->IsNull()) {
-        std::vector<std::string> fontFamilies;
-        RefPtr<ResourceObject> fontFamiliesResObj;
-        bool ret = ParseJsFontFamilies(fontFamily, fontFamilies, fontFamiliesResObj);
-        if (ret) {
-            font.fontFamilies = fontFamilies;
-        }
-        if (fontFamiliesResObj) {
-            RegisterSpanResource<std::vector<std::string>>("fontFamily",
-                fontFamiliesResObj, font.fontFamilies);
-        }
-    }
-
-    auto style = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE));
-    if (!style->IsNull() || style->IsNumber()) {
-        font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
-    }
-}
 
 void JSSpan::SetFont(const JSCallbackInfo& info)
 {
@@ -145,11 +87,7 @@ void JSSpan::SetFont(const JSCallbackInfo& info)
         return;
     }
     Font font;
-    if (SystemProperties::ConfigChangePerform()) {
-        RegisterSpanFontInfo(info, font);
-    } else {
-        JSText::GetFontInfo(info, font);
-    }
+    JSText::GetFontInfo(info, font);
     SpanModel::GetInstance()->SetFont(font);
 }
 
@@ -159,14 +97,8 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension fontSize;
-    RefPtr<ResourceObject> resObj;
-    UnregisterSpanResource("fontSize");
-    if (!ParseJsDimensionFpNG(info[0], fontSize, resObj, false) || fontSize.IsNegative()) {
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false) || fontSize.IsNegative()) {
         SpanModel::GetInstance()->ResetFontSize();
-        return;
-    }
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterSpanResource<CalcDimension>("fontSize", resObj, fontSize);
         return;
     }
     SpanModel::GetInstance()->SetFontSize(fontSize);
@@ -177,18 +109,12 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    UnregisterSpanResource("fontWeight");
-    RefPtr<ResourceObject> resObj;
-    std::string fontWeight;
     JSRef<JSVal> args = info[0];
+    std::string fontWeight;
     if (args->IsNumber()) {
         fontWeight = args->ToString();
     } else {
-        ParseJsString(args, fontWeight, resObj);
-    }
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterSpanResource<FontWeight>("fontWeight", resObj, ConvertStrToFontWeight(fontWeight));
-        return;
+        ParseJsString(args, fontWeight);
     }
     SpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 }
@@ -196,19 +122,13 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
 {
     Color textColor;
-    RefPtr<ResourceObject> resObj;
-    UnregisterSpanResource("fontColor");
     auto infoZero = info[0];
     if (infoZero->IsUndefined() || infoZero->IsNull()) {
         SpanModel::GetInstance()->ResetTextColor();
         return;
     }
-    if (!ParseJsColor(info[0], textColor, resObj)) {
+    if (!ParseJsColor(infoZero, textColor)) {
         SpanModel::GetInstance()->ResetTextColor();
-        return;
-    }
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterSpanResource<Color>("fontColor", resObj, textColor);
         return;
     }
     SpanModel::GetInstance()->SetTextColor(textColor);
@@ -229,15 +149,9 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    UnregisterSpanResource("fontFamily");
-    RefPtr<ResourceObject> resObj;
     std::vector<std::string> fontFamilies;
-    bool ret = ParseJsFontFamilies(info[0], fontFamilies, resObj);
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterSpanResource<std::vector<std::string>>("fontFamily", resObj, fontFamilies);
-        return;
-    }
-    if (!ret) {
+    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
+        SpanModel::GetInstance()->ResetFontFamily();
         return;
     }
     SpanModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -249,15 +163,9 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
         return;
     }
     CalcDimension value;
-    RefPtr<ResourceObject> resObj;
-    UnregisterSpanResource("letterSpacing");
-    if (!ParseJsDimensionFpNG(info[0], value, resObj, false)) {
+    if (!ParseJsDimensionFpNG(info[0], value, false)) {
         value.Reset();
         SpanModel::GetInstance()->SetLetterSpacing(value);
-        return;
-    }
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterSpanResource<CalcDimension>("letterSpacing", resObj, value);
         return;
     }
     SpanModel::GetInstance()->SetLetterSpacing(value);
@@ -292,7 +200,9 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
         SpanModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
         return;
     }
-    CHECK_NULL_VOID(info[0]->IsObject());
+    if (!info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeValue = obj->GetProperty("type");
     JSRef<JSVal> colorValue = obj->GetProperty("color");
@@ -315,9 +225,6 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     }
     std::optional<Color> colorVal;
     Color result;
-
-    RegisterDecorationColorResource(colorValue);
-
     if (ParseJsColor(colorValue, result)) {
         colorVal = result;
     } else {
@@ -342,21 +249,6 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     }
     SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     SpanModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
-}
-
-void JSSpan::RegisterDecorationColorResource(JSRef<JSVal>& colorValue)
-{
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
-    Color result;
-    RefPtr<ResourceObject> resObj;
-    ParseJsColor(colorValue, result, resObj);
-    if (resObj) {
-        RegisterSpanResource<Color>("decorationColor", resObj, result);
-    } else {
-        UnregisterSpanResource("decorationColor");
-    }
 }
 
 void JSSpan::JsOnClick(const JSCallbackInfo& info)
@@ -424,19 +316,13 @@ void JSSpan::JsRemoteMessage(const JSCallbackInfo& info)
 void JSSpan::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    RefPtr<ResourceObject> resObj;
-    UnregisterSpanResource("lineHeight");
-    if (!ParseJsDimensionFpNG(info[0], value, resObj)) {
+    if (!ParseJsDimensionFpNG(info[0], value)) {
         value.Reset();
         SpanModel::GetInstance()->SetLineHeight(value);
         return;
     }
     if (value.IsNegative()) {
         value.Reset();
-    }
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterSpanResource<CalcDimension>("lineHeight", resObj, value);
-        return;
     }
     SpanModel::GetInstance()->SetLineHeight(value);
 }
@@ -533,40 +419,10 @@ void JSSpan::JSBind(BindingTarget globalObj)
 void JSSpan::Create(const JSCallbackInfo& info)
 {
     std::u16string label;
-    RefPtr<ResourceObject> resObj;
     if (info.Length() > 0) {
-        ParseJsString(info[0], label, resObj);
-    }
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        SpanModel::GetInstance()->Create(label, resObj);
-        return;
-    } else {
-        UnregisterSpanResource("value");
+        ParseJsString(info[0], label);
     }
     SpanModel::GetInstance()->Create(label);
-}
-
-template<typename T>
-void JSSpan::RegisterSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
-{
-    auto uiNode = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
-    CHECK_NULL_VOID(uiNode);
-    auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
-    if (spanNode) {
-        spanNode->RegisterResource<T>(key, resObj, value);
-        return;
-    }
-}
-
-void JSSpan::UnregisterSpanResource(const std::string& key)
-{
-    auto uiNode = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
-    CHECK_NULL_VOID(uiNode);
-    auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
-    if (spanNode) {
-        spanNode->UnregisterResource(key);
-        return;
-    }
 }
 
 } // namespace OHOS::Ace::Framework

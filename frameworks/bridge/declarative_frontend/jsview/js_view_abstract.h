@@ -63,8 +63,6 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
-static std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> DEFAULT_RESOURCE_PAIR_ARRAY;
-
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 struct LocalizedCalcDimension {
@@ -680,13 +678,8 @@ public:
     static void GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
     static void GetBorderRadiusResObj(const char* key, JSRef<JSObject>& object, CalcDimension& radius,
         RefPtr<ResourceObject>& resObj);
-    static void RegisterTextBackgroundStyleResource(TextBackgroundStyle& textBackgroundStyle,
-        RefPtr<ResourceObject>& resObjTopLeft, RefPtr<ResourceObject>& resObjTopRight,
-        RefPtr<ResourceObject>& resObjBottomLeft, RefPtr<ResourceObject>& resObjBottomRight);
     static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
         CalcDimension& bottomLeft, CalcDimension& bottomRight);
-    static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
-        CalcDimension& bottomLeft, CalcDimension& bottomRight, TextBackgroundStyle& textBackgroundStyle);
     static void JsPointLight(const JSCallbackInfo& info);
 
     template<typename T>
@@ -789,9 +782,7 @@ public:
         const JSRef<JSVal>& jsValue, uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
     static void ParseJsSymbolCustomFamilyNames(std::vector<std::string>& customFamilyNames,
         const JSRef<JSVal>& jsValue);
-    static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result,
-        bool enableResourceUpdate = false,
-        std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr = DEFAULT_RESOURCE_PAIR_ARRAY);
+    static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result);
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);

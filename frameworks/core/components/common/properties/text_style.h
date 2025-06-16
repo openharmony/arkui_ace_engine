@@ -352,13 +352,6 @@ struct PlaceholderRun {
     }
 };
 
-enum class BorderRadiusIndex {
-    TOPLEFT = 0,
-    TOPRIGHT = 1,
-    BOTTOMLEFT = 2,
-    BOTTOMRIGHT = 3
-};
-
 struct TextBackgroundStyle {
     std::optional<Color> backgroundColor;
     std::optional<NG::BorderRadiusProperty> backgroundRadius;
@@ -381,29 +374,6 @@ struct TextBackgroundStyle {
         return backgroundColor == value.backgroundColor && backgroundRadius == value.backgroundRadius &&
                (!bothNeedCompareGroupId || groupId == value.groupId);
     }
-
-    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
-        std::function<void(const RefPtr<ResourceObject>&, TextBackgroundStyle&)>&& updateFunc)
-    {
-        if (resObj == nullptr || !updateFunc) {
-            return;
-        }
-        textBackgroundStyleResMap_[key] = { resObj, std::move(updateFunc) };
-    }
-
-    void ReloadResources()
-    {
-        for (const auto& [key, resourceUpdater] : textBackgroundStyleResMap_) {
-            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
-        }
-    }
-
-    struct ResourceUpdater {
-        RefPtr<ResourceObject> obj;
-        std::function<void(const RefPtr<ResourceObject>&, TextBackgroundStyle&)> updateFunc;
-    };
-
-    std::unordered_map<std::string, ResourceUpdater> textBackgroundStyleResMap_;
 };
 enum class TextStyleAttribute {
     RE_CREATE = -1,

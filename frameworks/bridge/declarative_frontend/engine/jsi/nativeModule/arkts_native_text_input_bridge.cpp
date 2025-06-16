@@ -111,12 +111,10 @@ ArkUINativeModuleValue TextInputBridge::SetCaretColor(ArkUIRuntimeCallInfo *runt
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputCaretColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -198,12 +196,10 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderColor(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputPlaceholderColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPlaceholderColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPlaceholderColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -589,28 +585,25 @@ ArkUINativeModuleValue TextInputBridge::SetCaretStyle(ArkUIRuntimeCallInfo *runt
     auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, panda::JSValueRef::Undefined(vm));
     CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
-    RefPtr<ResourceObject> widthObject;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, caretWidthArg, caretWidth, widthObject, false) ||
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, caretWidthArg, caretWidth, false) ||
             LessNotEqual(caretWidth.Value(), 0.0)) {
         caretWidth = textFieldTheme->GetCursorWidth();
     }
     Color color;
     uint32_t caretColor;
-    RefPtr<ResourceObject> colorObject;
     if (!caretColorArg->IsUndefined()) {
-        if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color)) {
             caretColor = color.GetValue();
         } else {
             caretColor = textFieldTheme->GetCursorColor().GetValue();
         }
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaret(
-            nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), AceType::RawPtr(widthObject));
+            nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()));
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(
-        nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor,
-        AceType::RawPtr(widthObject), AceType::RawPtr(colorObject));
+        nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -750,15 +743,11 @@ ArkUINativeModuleValue TextInputBridge::SetTextInputFontWeight(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string weight;
-    RefPtr<ResourceObject> resourceObject;
-    if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) &&
-        ArkTSUtils::ParseJsString(vm, secondArg, weight, resourceObject)) {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontWeightStr(
-            nativeNode, weight.c_str(), AceType::RawPtr(resourceObject));
+    if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) && ArkTSUtils::ParseJsString(vm, secondArg, weight)) {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontWeightStr(nativeNode, weight.c_str());
     } else if (secondArg->IsNumber()) {
         weight = std::to_string(secondArg->Int32Value(vm));
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontWeightStr(
-            nativeNode, weight.c_str(), nullptr);
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontWeightStr(nativeNode, weight.c_str());
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputFontWeight(nativeNode);
     }
@@ -788,8 +777,7 @@ ArkUINativeModuleValue TextInputBridge::SetFontSize(ArkUIRuntimeCallInfo *runtim
 
     CalcDimension fontSize;
     ArkUILengthType value{ nullptr, 0.0, static_cast<int8_t>(DimensionUnit::FP) };
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, fontSize, DimensionUnit::FP, resourceObject, false)) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, fontSize, DimensionUnit::FP, false)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputFontSize(nativeNode);
     } else {
         value.unit = static_cast<int8_t>(fontSize.Unit());
@@ -798,8 +786,7 @@ ArkUINativeModuleValue TextInputBridge::SetFontSize(ArkUIRuntimeCallInfo *runtim
         } else {
             value.number = fontSize.Value();
         }
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontSize(
-            nativeNode, &value, AceType::RawPtr(resourceObject));
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontSize(nativeNode, &value);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -859,15 +846,14 @@ ArkUINativeModuleValue TextInputBridge::SetSelectedBackgroundColor(ArkUIRuntimeC
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputSelectedBackgroundColor(nativeNode);
     } else {
         if (color.GetAlpha() == DEFAULT_ALPHA) {
             color = color.ChangeOpacity(DEFAULT_OPACITY);
         }
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputSelectedBackgroundColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+            nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -893,13 +879,12 @@ ArkUINativeModuleValue TextInputBridge::SetShowError(ArkUIRuntimeCallInfo *runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool visible = false;
     std::string error;
-    RefPtr<ResourceObject> resourceObject;
-    if (ArkTSUtils::ParseJsString(vm, secondArg, error, resourceObject)) {
+    if (ArkTSUtils::ParseJsString(vm, secondArg, error)) {
         visible = true;
     }
 
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputShowError(nativeNode, error.c_str(),
-        static_cast<uint32_t>(visible), AceType::RawPtr(resourceObject));
+        static_cast<uint32_t>(visible));
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -928,8 +913,7 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ArkUILengthType length{ nullptr, DEFAULT_FONT_SIZE, static_cast<int8_t>(DimensionUnit::FP) };
     CalcDimension size(DEFAULT_FONT_SIZE, DimensionUnit::FP);
-    RefPtr<ResourceObject> fontSizeObject;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, jsSize, size, fontSizeObject) || size.Unit() == DimensionUnit::PERCENT) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, jsSize, size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
         if (theme != nullptr) {
             size = theme->GetFontSize();
@@ -962,8 +946,7 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
     placeholderFont.weight = weight.c_str();
     placeholderFont.style = style;
     std::vector<std::string> fontFamilies;
-    RefPtr<ResourceObject> fontFamiliesObj;
-    bool isSuccess = !ArkTSUtils::ParseJsFontFamilies(vm, jsFamily, fontFamilies, fontFamiliesObj);
+    bool isSuccess = !ArkTSUtils::ParseJsFontFamilies(vm, jsFamily, fontFamilies);
     auto families = std::make_unique<char* []>(fontFamilies.size());
     if (isSuccess) {
         placeholderFont.fontFamilies = nullptr;
@@ -977,7 +960,7 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
     }
     
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPlaceholderFont(
-        nativeNode, &placeholderFont, AceType::RawPtr(fontSizeObject), AceType::RawPtr(fontFamiliesObj));
+        nativeNode, &placeholderFont);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1001,12 +984,10 @@ ArkUINativeModuleValue TextInputBridge::SetFontColor(ArkUIRuntimeCallInfo *runti
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputFontColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1064,8 +1045,7 @@ ArkUINativeModuleValue TextInputBridge::SetFontFamily(ArkUIRuntimeCallInfo *runt
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<std::string> fontFamilies;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsFontFamilies(vm, secondArg, fontFamilies, resourceObject)) {
+    if (!ArkTSUtils::ParseJsFontFamilies(vm, secondArg, fontFamilies)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputFontFamily(nativeNode);
     } else {
         auto families = std::make_unique<char* []>(fontFamilies.size());
@@ -1073,7 +1053,7 @@ ArkUINativeModuleValue TextInputBridge::SetFontFamily(ArkUIRuntimeCallInfo *runt
             families[i] = const_cast<char*>(fontFamilies.at(i).c_str());
         }
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontFamily(nativeNode,
-            const_cast<const char**>(families.get()), fontFamilies.size(), AceType::RawPtr(resourceObject));
+            const_cast<const char**>(families.get()), fontFamilies.size());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1140,14 +1120,13 @@ ArkUINativeModuleValue TextInputBridge::SetDecoration(ArkUIRuntimeCallInfo* runt
     if (secondArg->IsInt()) {
         textInputDecoration = secondArg->Int32Value(vm);
     }
-    RefPtr<ResourceObject> resourceObject;
-    ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK, resourceObject);
+    ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK);
     int32_t textDecorationStyle = static_cast<int32_t>(DEFAULT_DECORATION_STYLE);
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputDecoration(
-        nativeNode, textInputDecoration, color.GetValue(), textDecorationStyle, AceType::RawPtr(resourceObject));
+        nativeNode, textInputDecoration, color.GetValue(), textDecorationStyle);
     return panda::JSValueRef::Undefined(vm);
 }
  
@@ -1171,12 +1150,11 @@ ArkUINativeModuleValue TextInputBridge::SetLetterSpacing(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension value;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, resourceObject, false)) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, false)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputLetterSpacing(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputLetterSpacing(
-            nativeNode, value.Value(), static_cast<int>(value.Unit()), AceType::RawPtr(resourceObject));
+            nativeNode, value.Value(), static_cast<int>(value.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1201,15 +1179,14 @@ ArkUINativeModuleValue TextInputBridge::SetLineHeight(ArkUIRuntimeCallInfo* runt
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension value;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, resourceObject, true)) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, true)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputLineHeight(nativeNode);
     } else {
         if (value.IsNegative()) {
             value.Reset();
         }
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputLineHeight(
-            nativeNode, value.Value(), static_cast<int>(value.Unit()), AceType::RawPtr(resourceObject));
+            nativeNode, value.Value(), static_cast<int>(value.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1299,43 +1276,33 @@ ArkUINativeModuleValue TextInputBridge::SetUnderlineColor(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> errorArg = runtimeCallInfo->GetCallArgRef(4); // 4: error value
     Local<JSValueRef> disableArg = runtimeCallInfo->GetCallArgRef(5); // 5: disable value
     Color underlineColor;
-    RefPtr<ResourceObject> normalObject;
-    if (!underlineColorArg->IsUndefined() &&
-        ArkTSUtils::ParseJsColorAlpha(vm, underlineColorArg, underlineColor, normalObject)) {
+    if (!underlineColorArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, underlineColorArg, underlineColor)) {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputNormalUnderlineColor(
-            nativeNode, underlineColor.GetValue(), AceType::RawPtr(normalObject));
+            nativeNode, underlineColor.GetValue());
     } else if (!normalArg->IsUndefined() || !typingArg->IsUndefined() ||
          !errorArg->IsUndefined() || !disableArg->IsUndefined()) {
         UserUnderlineColor userColor = UserUnderlineColor();
         Color typingColor;
-        RefPtr<ResourceObject> typingObject;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, typingArg, typingColor, typingObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, typingArg, typingColor)) {
             userColor.typing = typingColor;
         }
         Color normalColor;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, normalArg, normalColor, normalObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, normalArg, normalColor)) {
             userColor.normal = normalColor;
         }
         Color errorColor;
-        RefPtr<ResourceObject> errorObject;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, errorArg, errorColor, errorObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, errorArg, errorColor)) {
             userColor.error = errorColor;
         }
         Color disableColor;
-        RefPtr<ResourceObject> disableObject;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, disableArg, disableColor, disableObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, disableArg, disableColor)) {
             userColor.disable = disableColor;
         }
         ArkUI_Uint32 values[ARG_GROUP_LENGTH];
         ArkUI_Bool hasValues[ARG_GROUP_LENGTH];
         prepareUnderlineColorValues(values, hasValues, userColor, ARG_GROUP_LENGTH);
-        ArkUIUserUnderlineColorRes resObj;
-        resObj.typingColorObj = AceType::RawPtr(typingObject);
-        resObj.normalColorObj = AceType::RawPtr(normalObject);
-        resObj.errorColorObj = AceType::RawPtr(errorObject);
-        resObj.disableColorObj = AceType::RawPtr(disableObject);
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(
-            nativeNode, values, hasValues, ARG_GROUP_LENGTH, &resObj);
+            nativeNode, values, hasValues, ARG_GROUP_LENGTH);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputUserUnderlineColor(nativeNode);
     }
@@ -1366,15 +1333,14 @@ ArkUINativeModuleValue TextInputBridge::SetMinFontSize(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     auto theme = pipelineContext->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, resourceObject, false)) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, false)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputAdaptMinFontSize(nativeNode);
     } else {
         if (value.IsNegative()) {
             value = theme->GetTextStyle().GetAdaptMinFontSize();
         }
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputAdaptMinFontSize(
-            nativeNode, value.Value(), static_cast<int32_t>(value.Unit()), AceType::RawPtr(resourceObject));
+            nativeNode, value.Value(), static_cast<int32_t>(value.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1403,15 +1369,14 @@ ArkUINativeModuleValue TextInputBridge::SetMaxFontSize(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     auto theme = pipelineContext->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, resourceObject, false)) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, false)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputAdaptMaxFontSize(nativeNode);
     } else {
         if (value.IsNegative()) {
             value = theme->GetTextStyle().GetAdaptMaxFontSize();
         }
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputAdaptMaxFontSize(
-            nativeNode, value.Value(), static_cast<int32_t>(value.Unit()), AceType::RawPtr(resourceObject));
+            nativeNode, value.Value(), static_cast<int32_t>(value.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1425,8 +1390,7 @@ ArkUINativeModuleValue TextInputBridge::SetMinFontScale(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double minFontScale;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale, resourceObject)) {
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale)) {
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessOrEqual(minFontScale, 0.0f)) {
@@ -1435,7 +1399,7 @@ ArkUINativeModuleValue TextInputBridge::SetMinFontScale(ArkUIRuntimeCallInfo* ru
         minFontScale = 1.0f;
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputMinFontScale(
-        nativeNode, static_cast<float>(minFontScale), AceType::RawPtr(resourceObject));
+        nativeNode, static_cast<float>(minFontScale));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1459,15 +1423,14 @@ ArkUINativeModuleValue TextInputBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double maxFontScale;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale, resourceObject)) {
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale)) {
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessOrEqual(maxFontScale, 1.0f)) {
         maxFontScale = 1.0f;
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputMaxFontScale(
-        nativeNode, static_cast<float>(maxFontScale), AceType::RawPtr(resourceObject));
+        nativeNode, static_cast<float>(maxFontScale));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1619,13 +1582,12 @@ ArkUINativeModuleValue TextInputBridge::SetTextIndent(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension indent;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, indent, DimensionUnit::VP, resourceObject, true)) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, indent, DimensionUnit::VP, true)) {
         indent.Reset();
     }
     
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputTextIndent(
-        nativeNode, indent.Value(), static_cast<int8_t>(indent.Unit()), AceType::RawPtr(resourceObject));
+        nativeNode, indent.Value(), static_cast<int8_t>(indent.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1722,9 +1684,8 @@ void TextInputBridge::SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo
     auto srcArg = iconParam->GetProperty("src");
 
     CalcDimension iconSize;
-    RefPtr<ResourceObject> sizeObject;
     if (!sizeArg->IsUndefined() && !sizeArg->IsNull() &&
-        Framework::JSViewAbstract::ParseJsDimensionVpNG(sizeArg, iconSize, sizeObject, false)) {
+        Framework::JSViewAbstract::ParseJsDimensionVpNG(sizeArg, iconSize, false)) {
         if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
             iconSize = theme->GetCancelIconSize();
         }
@@ -1734,29 +1695,23 @@ void TextInputBridge::SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo
 
     Color value;
     uint32_t color;
-    RefPtr<ResourceObject> colorObject;
     if (!colorArg->IsUndefined() && !colorArg->IsNull() &&
-        Framework::JSViewAbstract::ParseJsColor(colorArg, value, colorObject)) {
+        Framework::JSViewAbstract::ParseJsColor(colorArg, value)) {
         color = value.GetValue();
     } else {
         color = theme->GetCancelButtonIconColor().GetValue();
     }
 
     std::string srcStr;
-    RefPtr<ResourceObject> srcObject;
     if (srcArg->IsUndefined() || srcArg->IsNull() ||
-        !Framework::JSViewAbstract::ParseJsMedia(srcArg, srcStr, srcObject)) {
+        !Framework::JSViewAbstract::ParseJsMedia(srcArg, srcStr)) {
         srcStr = "";
     }
 
     struct ArkUISizeType size = { static_cast<ArkUI_Float32>(iconSize.Value()),
         static_cast<int8_t>(iconSize.Unit()), nullptr };
-    ArkUIImageIconRes cancelButtonImageObj;
-    cancelButtonImageObj.sizeObj = AceType::RawPtr(sizeObject);
-    cancelButtonImageObj.colorObj = AceType::RawPtr(colorObject);
-    cancelButtonImageObj.srcObj = AceType::RawPtr(srcObject);
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCancelButton(nativeNode,
-        style, &size, color, srcStr.c_str(), &cancelButtonImageObj);
+        style, &size, color, srcStr.c_str());
 }
 
 ArkUINativeModuleValue TextInputBridge::ResetCancelButton(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -2286,7 +2241,7 @@ ArkUINativeModuleValue TextInputBridge::SetPadding(ArkUIRuntimeCallInfo *runtime
     CalcDimension rightDimen(0, DimensionUnit::VP);
     CalcDimension bottomDimen(0, DimensionUnit::VP);
     CalcDimension leftDimen(0, DimensionUnit::VP);
-    ArkUIPaddingRes paddingRes;
+
     bool isLengthMetrics = false;
     if (secondArg->IsObject(vm)) {
         isLengthMetrics |= ParseLocalizedPadding(vm, secondArg, topDimen, top);
@@ -2307,26 +2262,15 @@ ArkUINativeModuleValue TextInputBridge::SetPadding(ArkUIRuntimeCallInfo *runtime
             &top,
             isRightToLeft ? &left : &right,
             &bottom,
-            isRightToLeft ? &right : &left,
-            &paddingRes);
+            isRightToLeft ? &right : &left);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    RefPtr<ResourceObject> topResObject;
-    RefPtr<ResourceObject> rightResObject;
-    RefPtr<ResourceObject> bottomResObject;
-    RefPtr<ResourceObject> leftResObject;
-    ArkTSUtils::ParsePadding(vm, secondArg, topDimen, top, topResObject);
-    ArkTSUtils::ParsePadding(vm, thirdArg, rightDimen, right, rightResObject);
-    ArkTSUtils::ParsePadding(vm, forthArg, bottomDimen, bottom, bottomResObject);
-    ArkTSUtils::ParsePadding(vm, fifthArg, leftDimen, left, leftResObject);
-
-    paddingRes.topObj = AceType::RawPtr(topResObject);
-    paddingRes.rightObj = AceType::RawPtr(rightResObject);
-    paddingRes.bottomObj = AceType::RawPtr(bottomResObject);
-    paddingRes.leftObj = AceType::RawPtr(leftResObject);
-    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPadding(
-        nativeNode, &top, &right, &bottom, &left, &paddingRes);
+    ArkTSUtils::ParsePadding(vm, secondArg, topDimen, top);
+    ArkTSUtils::ParsePadding(vm, thirdArg, rightDimen, right);
+    ArkTSUtils::ParsePadding(vm, forthArg, bottomDimen, bottom);
+    ArkTSUtils::ParsePadding(vm, fifthArg, leftDimen, left);
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPadding(nativeNode, &top, &right, &bottom, &left);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2379,12 +2323,11 @@ ArkUINativeModuleValue TextInputBridge::SetBackgroundColor(ArkUIRuntimeCallInfo 
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputBackgroundColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputBackgroundColorWithColorSpace(
-            nativeNode, color.GetValue(), color.GetColorSpace(), AceType::RawPtr(resourceObject));
+            nativeNode, color.GetValue(), color.GetColorSpace());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -2412,15 +2355,10 @@ ArkUINativeModuleValue TextInputBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeC
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
 
-    ArkUIPaddingRes marginRes;
-    RefPtr<ResourceObject> topResObject;
-    RefPtr<ResourceObject> rightResObject;
-    RefPtr<ResourceObject> bottomResObject;
-    RefPtr<ResourceObject> leftResObject;
-    ArkUISizeType top = ArkTSUtils::ParseJsToArkUISize(vm, secondArg, topResObject);
-    ArkUISizeType right = ArkTSUtils::ParseJsToArkUISize(vm, thirdArg, rightResObject);
-    ArkUISizeType bottom = ArkTSUtils::ParseJsToArkUISize(vm, forthArg, bottomResObject);
-    ArkUISizeType left = ArkTSUtils::ParseJsToArkUISize(vm, fifthArg, leftResObject);
+    ArkUISizeType top = ArkTSUtils::ParseJsToArkUISize(vm, secondArg);
+    ArkUISizeType right = ArkTSUtils::ParseJsToArkUISize(vm, thirdArg);
+    ArkUISizeType bottom = ArkTSUtils::ParseJsToArkUISize(vm, forthArg);
+    ArkUISizeType left = ArkTSUtils::ParseJsToArkUISize(vm, fifthArg);
 
     CalcDimension topDimen(0, DimensionUnit::VP);
     CalcDimension rightDimen(0, DimensionUnit::VP);
@@ -2446,16 +2384,11 @@ ArkUINativeModuleValue TextInputBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeC
             &top,
             isRightToLeft ? &left : &right,
             &bottom,
-            isRightToLeft ? &right : &left,
-            &marginRes);
+            isRightToLeft ? &right : &left);
         return panda::JSValueRef::Undefined(vm);
     }
-    marginRes.topObj = AceType::RawPtr(topResObject);
-    marginRes.rightObj = AceType::RawPtr(rightResObject);
-    marginRes.bottomObj = AceType::RawPtr(bottomResObject);
-    marginRes.leftObj = AceType::RawPtr(leftResObject);
-    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputMargin(
-        nativeNode, &top, &right, &bottom, &left, &marginRes);
+
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputMargin(nativeNode, &top, &right, &bottom, &left);
     return panda::JSValueRef::Undefined(vm);
 }
 

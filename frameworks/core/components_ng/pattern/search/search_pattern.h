@@ -183,30 +183,6 @@ public:
     float GetMaxFontScale();
     float GetMinFontScale();
     void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config);
-    void OnColorModeChange(uint32_t colorMode) override;
-    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
-    void UpdatePlaceholderResource(const std::u16string& value);
-    void UpdateTextResource(const std::u16string& value);
-    void UpdateSearchButtonValueResource(const std::string value);
-    void UpdateSearchButtonFontSizeResource(const Dimension& value);
-    void UpdateSearchButtonFontColorResource(const Color& value);
-    void UpdateFontColorResource(const Color& value);
-    void UpdateCaretColorResource(const Color& value);
-    void UpdateCaretWidthResource(const Dimension& value);
-    void UpdatePlaceholderColorResource(const Color& value);
-    void UpdatePlaceholderFontSizeResource(const Dimension& value);
-    void UpdateDecorationColorResource(const Color& value);
-    void UpdateMinFontSizeResource(const Dimension& value);
-    void UpdateMaxFontSizeResource(const Dimension& value);
-    void UpdateLetterSpacingResource(const Dimension& value);
-    void UpdateLineHeightResource(const Dimension& value);
-    void UpdateMinFontScaleResource(const float value);
-    void UpdateMaxFontScaleResource(const float value);
-    void UpdateSelectedBackgroundColorResource(const Color& value);
-    void UpdateTextIndentResource(const Dimension& value);
-    void UpdateInputFilterResource(const std::string& value);
-    void UpdateFontSizeResource(const Dimension& value);
-    void UpdateBorderResource() override;
 
 private:
     void OnModifyDone() override;

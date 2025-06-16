@@ -42,7 +42,7 @@ constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr int32_t DEFAULT_CARET_POSITION = 0;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 
-void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr)
+void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -53,15 +53,6 @@ void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value
     font.fontStyle = static_cast<OHOS::Ace::FontStyle>(value->fontStyle);
 
     SearchModelNG::SetTextFont(frameNode, font);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("fontSize", resObj,
-        Dimension(value->fontSizeNumber, static_cast<DimensionUnit>(value->fontSizeUnit)));
-    } else {
-        pattern->UnRegisterResource("fontSize");
-    }
 }
 
 void ResetSearchTextFont(ArkUINodeHandle node)
@@ -73,26 +64,13 @@ void ResetSearchTextFont(ArkUINodeHandle node)
     font.fontWeight = DEFAULT_FONT_WEIGHT;
     font.fontStyle = DEFAULT_FONT_STYLE;
     SearchModelNG::SetTextFont(frameNode, font);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("fontSize");
-    }
 }
 
-void SetSearchPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetSearchPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetPlaceholderColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("placeholderColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("placeholderColor");
-    }
 }
 
 void ResetSearchPlaceholderColor(ArkUINodeHandle node)
@@ -100,11 +78,6 @@ void ResetSearchPlaceholderColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::ResetPlaceholderColor(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("placeholderColor");
-    }
 }
 
 void SetSearchSelectionMenuHidden(ArkUINodeHandle node, ArkUI_Uint32 selectionMenuHidden)
@@ -121,28 +94,12 @@ void ResetSearchSelectionMenuHidden(ArkUINodeHandle node)
     SearchModelNG::SetSelectionMenuHidden(frameNode, DEFAULT_SELECTION_MENU_HIDDEN);
 }
 
-void SetSearchCaretStyle(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit, ArkUI_Uint32 caretColor,
-                         void* widthRawPtr, void* colorRawPtr)
+void SetSearchCaretStyle(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit, ArkUI_Uint32 caretColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCaretWidth(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
     SearchModelNG::SetCaretColor(frameNode, Color(caretColor));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && widthRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(widthRawPtr));
-        pattern->RegisterResource<CalcDimension>("caretWidth", resObj,
-        Dimension(number, static_cast<DimensionUnit>(unit)));
-    } else {
-        pattern->UnRegisterResource("caretWidth");
-    }
-    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-        pattern->RegisterResource<Color>("caretColor", resObj, Color(caretColor));
-    } else {
-        pattern->UnRegisterResource("caretColor");
-    }
 }
 
 void ResetSearchCaretStyle(ArkUINodeHandle node)
@@ -154,12 +111,6 @@ void ResetSearchCaretStyle(ArkUINodeHandle node)
     CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
     SearchModelNG::SetCaretWidth(frameNode, Dimension(caretWidth.Value(), caretWidth.Unit()));
     SearchModelNG::ResetCaretColor(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("caretWidth");
-        pattern->UnRegisterResource("caretColor");
-    }
 }
 
 void SetSearchTextAlign(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -177,8 +128,8 @@ void ResetSearchTextAlign(ArkUINodeHandle node)
     SearchModelNG::SetTextAlign(frameNode, TextAlign::START);
 }
 
-void SetSearchCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
-                           ArkUI_Uint32 color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes)
+void SetSearchCancelButton(ArkUINodeHandle node,
+    ArkUI_Int32 style, const struct ArkUISizeType* size, ArkUI_Uint32 color, ArkUI_CharPtr src)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -186,27 +137,6 @@ void SetSearchCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct
     NG::IconOptions cancelIconOptions = NG::IconOptions(
         Color(color), Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
     SearchModelNG::SetCancelImageIcon(frameNode, cancelIconOptions);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->sizeObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->sizeObj));
-        pattern->RegisterResource<CalcDimension>("cancelButtonIconSize", resObj,
-        Dimension(size->value, static_cast<DimensionUnit>(size->unit)));
-    } else {
-        pattern->UnRegisterResource("cancelButtonIconSize");
-    }
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("cancelButtonIconColor");
-    }
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->srcObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->srcObj));
-        pattern->RegisterResource<std::string>("cancelButtonIconSrc", resObj, std::string(src));
-    } else {
-        pattern->UnRegisterResource("cancelButtonIconSrc");
-    }
 }
 
 void ResetSearchCancelButton(ArkUINodeHandle node)
@@ -214,13 +144,6 @@ void ResetSearchCancelButton(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, DEFAULT_CANCEL_BUTTON_STYLE);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("cancelButtonIconSize");
-        pattern->UnRegisterResource("cancelButtonIconColor");
-        pattern->UnRegisterResource("cancelButtonIconSrc");
-    }
 }
 
 void SetSearchEnableKeyboardOnFocus(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -237,7 +160,7 @@ void ResetSearchEnableKeyboardOnFocus(ArkUINodeHandle node)
     SearchModelNG::RequestKeyboardOnFocus(frameNode, true);
 }
 
-void SetSearchPlaceholderFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr)
+void SetSearchPlaceholderFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -248,15 +171,6 @@ void SetSearchPlaceholderFont(ArkUINodeHandle node, const struct ArkUIFontStruct
     font.fontStyle = static_cast<OHOS::Ace::FontStyle>(value->fontStyle);
 
     SearchModelNG::SetPlaceholderFont(frameNode, font);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("placeholderFontSize", resObj,
-        Dimension(value->fontSizeNumber, static_cast<DimensionUnit>(value->fontSizeUnit)));
-    } else {
-        pattern->UnRegisterResource("placeholderFontSize");
-    }
 }
 
 void ResetSearchPlaceholderFont(ArkUINodeHandle node)
@@ -268,15 +182,9 @@ void ResetSearchPlaceholderFont(ArkUINodeHandle node)
     font.fontWeight = DEFAULT_FONT_WEIGHT;
     font.fontStyle = DEFAULT_FONT_STYLE;
     SearchModelNG::SetPlaceholderFont(frameNode, font);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("placeholderFontSize");
-    }
 }
 
-void SetSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsStruct* value,
-    ArkUIImageIconRes* imageIconRes)
+void SetSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -288,27 +196,6 @@ void SetSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsStru
     NG::IconOptions cancelInconOptions = NG::IconOptions(
         iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)), std::string(value->src), "", "");
     SearchModelNG::SetSearchImageIcon(frameNode, cancelInconOptions);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->sizeObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->sizeObj));
-        pattern->RegisterResource<CalcDimension>("searchIconSize", resObj,
-        Dimension(value->value, static_cast<DimensionUnit>(value->unit)));
-    } else {
-        pattern->UnRegisterResource("searchIconSize");
-    }
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("searchIconColor", resObj, iconColor);
-    } else {
-        pattern->UnRegisterResource("searchIconColor");
-    }
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->srcObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->srcObj));
-        pattern->RegisterResource<std::string>("searchIconSrc", resObj, std::string(value->src));
-    } else {
-        pattern->UnRegisterResource("searchIconSrc");
-    }
 }
 
 void ResetSearchSearchIcon(ArkUINodeHandle node)
@@ -316,17 +203,9 @@ void ResetSearchSearchIcon(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetSearchSrcPath(frameNode, "");
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("searchIconSize");
-        pattern->UnRegisterResource("searchIconColor");
-        pattern->UnRegisterResource("searchIconSrc");
-    }
 }
 
-void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value,
-                           ArkUIImageIconRes* imageIconRes)
+void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -335,27 +214,6 @@ void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonO
         static_cast<DimensionUnit>(value->sizeUnit)));
     SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor));
     SearchModelNG::SetSearchButtonAutoDisable(frameNode, value->autoDisable);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->sizeObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->sizeObj));
-        pattern->RegisterResource<CalcDimension>("searchButtonFontSize", resObj,
-        CalcDimension(value->sizeValue, static_cast<DimensionUnit>(value->sizeUnit)));
-    } else {
-        pattern->UnRegisterResource("searchButtonFontSize");
-    }
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("searchButtonFontColor", resObj, Color(value->fontColor));
-    } else {
-        pattern->UnRegisterResource("searchButtonFontColor");
-    }
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->srcObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->srcObj));
-        pattern->RegisterResource<std::string>("searchButtonValue", resObj, value->value);
-    } else {
-        pattern->UnRegisterResource("searchButtonValue");
-    }
 }
 
 void ResetSearchSearchButton(ArkUINodeHandle node)
@@ -363,28 +221,13 @@ void ResetSearchSearchButton(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetSearchButton(frameNode, "");
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("searchButtonFontSize");
-        pattern->UnRegisterResource("searchButtonFontColor");
-        pattern->UnRegisterResource("searchButtonValue");
-    }
 }
 
-void SetSearchFontColor(ArkUINodeHandle node, ArkUI_Uint32 value, void* resRawPtr)
+void SetSearchFontColor(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextColor(frameNode, Color(value));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("fontColor", resObj, Color(value));
-    } else {
-        pattern->UnRegisterResource("fontColor");
-    }
 }
 
 void ResetSearchFontColor(ArkUINodeHandle node)
@@ -392,11 +235,6 @@ void ResetSearchFontColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::ResetTextColor(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("fontColor");
-    }
 }
 
 void SetSearchCopyOption(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -474,22 +312,13 @@ void ResetSearchInspectorId(ArkUINodeHandle node)
     SearchModelNG::SetId(frameNode, "");
 }
 
-void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
-    ArkUI_Int32 style, void* resRawPtr)
+void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     SearchModelNG::SetTextDecorationColor(frameNode, Color(color));
     SearchModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("decorationColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("decorationColor");
-    }
 }
 
 void ResetSearchDecoration(ArkUINodeHandle node)
@@ -499,26 +328,13 @@ void ResetSearchDecoration(ArkUINodeHandle node)
     SearchModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     SearchModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     SearchModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("decorationColor");
-    }
 }
 
-void SetSearchLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)
+void SetSearchLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetLetterSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("letterSpacing", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("letterSpacing");
-    }
 }
 
 void ResetSearchLetterSpacing(ArkUINodeHandle node)
@@ -528,25 +344,12 @@ void ResetSearchLetterSpacing(ArkUINodeHandle node)
     CalcDimension value;
     value.Reset();
     SearchModelNG::SetLetterSpacing(frameNode, value);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("letterSpacing");
-    }
 }
-void SetSearchLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)
+void SetSearchLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetLineHeight(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("lineHeight", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("lineHeight");
-    }
 }
 void ResetSearchLineHeight(ArkUINodeHandle node)
 {
@@ -555,11 +358,6 @@ void ResetSearchLineHeight(ArkUINodeHandle node)
     CalcDimension value;
     value.Reset();
     SearchModelNG::SetLineHeight(frameNode, value);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("lineHeight");
-    }
 }
 
 void SetSearchHalfLeading(ArkUINodeHandle node, ArkUI_Uint32 halfLeading)
@@ -577,19 +375,11 @@ void ResetSearchHalfLeading(ArkUINodeHandle node)
     SearchModelNG::SetHalfLeading(frameNode, value);
 }
 
-void SetSearchAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)
+void SetSearchAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetAdaptMinFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("minFontSize", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("minFontSize");
-    }
 }
 
 void ResetSearchAdaptMinFontSize(ArkUINodeHandle node)
@@ -602,26 +392,13 @@ void ResetSearchAdaptMinFontSize(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CalcDimension minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
     SearchModelNG::SetAdaptMinFontSize(frameNode, minFontSize);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("minFontSize");
-    }
 }
 
-void SetSearchAdaptMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)
+void SetSearchAdaptMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetAdaptMaxFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("maxFontSize", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("maxFontSize");
-    }
 }
 
 void ResetSearchAdaptMaxFontSize(ArkUINodeHandle node)
@@ -634,14 +411,9 @@ void ResetSearchAdaptMaxFontSize(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
     SearchModelNG::SetAdaptMaxFontSize(frameNode, maxFontSize);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("maxFontSize");
-    }
 }
 
-void SetSearchSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetSearchSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -651,14 +423,6 @@ void SetSearchSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, 
         selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
     }
     SearchModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("selectedBackgroundColor", resObj, selectedColor);
-    } else {
-        pattern->UnRegisterResource("selectedBackgroundColor");
-    }
 }
 
 void ResetSearchSelectedBackgroundColor(ArkUINodeHandle node)
@@ -666,27 +430,13 @@ void ResetSearchSelectedBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::ResetSelectedBackgroundColor(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("selectedBackgroundColor");
-    }
 }
 
-void SetSearchTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resRawPtr)
+void SetSearchTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("textIndent", resObj,
-        Dimension(number, static_cast<DimensionUnit>(unit)));
-    } else {
-        pattern->UnRegisterResource("textIndent");
-    }
 }
 
 void ResetSearchTextIndent(ArkUINodeHandle node)
@@ -694,11 +444,6 @@ void ResetSearchTextIndent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("textIndent");
-    }
 }
 
 void SetSearchMaxLength(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1124,19 +869,11 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     SearchModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
 }
 
-void SetSearchMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* resRawPtr)
+void SetSearchMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetMinFontScale(frameNode, number);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<float>("minFontScale", resObj, number);
-    } else {
-        pattern->UnRegisterResource("minFontScale");
-    }
 }
 
 void ResetSearchMinFontScale(ArkUINodeHandle node)
@@ -1144,26 +881,13 @@ void ResetSearchMinFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("minFontScale");
-    }
 }
 
-void SetSearchMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* resRawPtr)
+void SetSearchMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetMaxFontScale(frameNode, number);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<float>("maxFontScale", resObj, number);
-    } else {
-        pattern->UnRegisterResource("maxFontScale");
-    }
 }
 
 void ResetSearchMaxFontScale(ArkUINodeHandle node)
@@ -1171,11 +895,6 @@ void ResetSearchMaxFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("maxFontScale");
-    }
 }
 
 void SetSearchEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)

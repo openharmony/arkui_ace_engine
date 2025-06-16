@@ -51,9 +51,7 @@ void ResetHyperlinkColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(themeManager);
     auto hyperlinkTheme = themeManager->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(hyperlinkTheme);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("Color");
+
     HyperlinkModelNG::SetColor(frameNode, Color(hyperlinkTheme->GetTextColor()));
 }
 

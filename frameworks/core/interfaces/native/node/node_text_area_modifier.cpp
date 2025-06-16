@@ -106,19 +106,11 @@ void SetTextAreaMinLines(ArkUINodeHandle node, ArkUI_Uint32 minLine)
     TextFieldModelNG::SetMinLines(frameNode, minLine);
 }
 
-void SetTextAreaMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* resRawPtr)
+void SetTextAreaMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMinFontScale(frameNode, number);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<float>("minFontScale", resObj, number);
-    } else {
-        pattern->UnRegisterResource("minFontScale");
-    }
 }
 
 void ResetTextAreaMinFontScale(ArkUINodeHandle node)
@@ -126,26 +118,13 @@ void ResetTextAreaMinFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("minFontScale");
-    }
 }
 
-void SetTextAreaMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* resRawPtr)
+void SetTextAreaMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxFontScale(frameNode, number);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<float>("maxFontScale", resObj, number);
-    } else {
-        pattern->UnRegisterResource("maxFontScale");
-    }
 }
 
 void ResetTextAreaMaxFontScale(ArkUINodeHandle node)
@@ -153,11 +132,6 @@ void ResetTextAreaMaxFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("maxFontScale");
-    }
 }
 
 void ResetTextAreaMaxLines(ArkUINodeHandle node)
@@ -189,19 +163,11 @@ void ResetTextAreaCopyOption(ArkUINodeHandle node)
     TextFieldModelNG::SetCopyOption(frameNode, DEFAULT_COPY_OPTIONS_VALUE);
 }
 
-void SetTextAreaPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetTextAreaPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetPlaceholderColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("placeholderColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("placeholderColor");
-    }
 }
 
 void ResetTextAreaPlaceholderColor(ArkUINodeHandle node)
@@ -209,11 +175,6 @@ void ResetTextAreaPlaceholderColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetPlaceholderColor(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("placeholderColor");
-    }
 }
 
 void SetTextAreaTextAlign(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -232,20 +193,18 @@ void ResetTextAreaTextAlign(ArkUINodeHandle node)
 }
 
 void SetTextAreaPlaceholderFont(ArkUINodeHandle node, const struct ArkUIResourceLength *size, ArkUI_CharPtr weight,
-    ArkUI_CharPtr family, ArkUI_Int32 style, void* fontSizeRawPtr, void* fontfamilyRawPtr)
+    ArkUI_CharPtr family, ArkUI_Int32 style)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-    CalcDimension fontSize;
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->unit);
     if (size->unit >= 0) {
         if (unitEnum == DimensionUnit::CALC) {
-            fontSize = CalcDimension(size->string, DimensionUnit::CALC);
+            font.fontSize = CalcDimension(size->string, DimensionUnit::CALC);
         } else {
-            fontSize = CalcDimension(size->value, unitEnum);
+            font.fontSize = CalcDimension(size->value, unitEnum);
         }
-        font.fontSize = fontSize;
     } else {
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -274,20 +233,6 @@ void SetTextAreaPlaceholderFont(ArkUINodeHandle node, const struct ArkUIResource
         font.fontStyle = DEFAULT_FONT_STYLE;
     }
     TextFieldModelNG::SetPlaceholderFont(frameNode, font);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && fontSizeRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontSizeRawPtr));
-        pattern->RegisterResource<CalcDimension>("placeholderFontSize", resObj, fontSize);
-    } else {
-        pattern->UnRegisterResource("placeholderFontSize");
-    }
-    if (SystemProperties::ConfigChangePerform() && fontfamilyRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontfamilyRawPtr));
-        pattern->RegisterResource<std::vector<std::string>>("placeholderFontfamily", resObj, font.fontFamilies);
-    } else {
-        pattern->UnRegisterResource("placeholderFontfamily");
-    }
 }
 
 void SetTextAreaPlaceholderFontEnum(ArkUINodeHandle node, const struct ArkUIResourceLength* size, ArkUI_Int32 weight,
@@ -349,12 +294,6 @@ void ResetTextAreaPlaceholderFont(ArkUINodeHandle node)
     fontFamilies.emplace_back(std::string(DEFAULT_FONT_FAMILY));
     font.fontFamilies = fontFamilies;
     TextFieldModelNG::SetPlaceholderFont(frameNode, font);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("placeholderFontSize");
-        pattern->UnRegisterResource("placeholderFontfamily");
-    }
 }
 
 void SetTextAreaBarState(ArkUINodeHandle node, ArkUI_Uint32 barStateValue)
@@ -386,21 +325,13 @@ void ResetTextAreaEnableKeyboardOnFocus(ArkUINodeHandle node)
     TextFieldModelNG::RequestKeyboardOnFocus(frameNode, DEFAULT_KEY_BOARD_VALUE);
 }
 
-void SetTextAreaFontFamily(ArkUINodeHandle node, ArkUI_CharPtr fontFamily, void* resRawPtr)
+void SetTextAreaFontFamily(ArkUINodeHandle node, ArkUI_CharPtr fontFamily)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<std::string> fontFamilies;
     fontFamilies = Framework::ConvertStrToFontFamilies(std::string(fontFamily));
     TextFieldModelNG::SetFontFamily(frameNode, fontFamilies);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<std::vector<std::string>>("fontFamily", resObj, fontFamilies);
-    } else {
-        pattern->UnRegisterResource("fontFamily");
-    }
 }
 
 void ResetTextAreaFontFamily(ArkUINodeHandle node)
@@ -410,11 +341,6 @@ void ResetTextAreaFontFamily(ArkUINodeHandle node)
     std::vector<std::string> fontFamilies;
     fontFamilies.emplace_back(std::string(DEFAULT_FONT_FAMILY));
     TextFieldModelNG::SetFontFamily(frameNode, fontFamilies);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("placeholderFontfamily");
-    }
 }
 
 void SetTextAreaShowCounter(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -431,19 +357,11 @@ void ResetTextAreaShowCounter(ArkUINodeHandle node)
     TextFieldModelNG::SetShowCounter(frameNode, false);
 }
 
-void SetTextAreaCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
+void SetTextAreaCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetCaretColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-        pattern->RegisterResource<Color>("caretColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("caretColor");
-    }
 }
 
 void ResetTextAreaCaretColor(ArkUINodeHandle node)
@@ -451,11 +369,6 @@ void ResetTextAreaCaretColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetCaretColor(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("caretColor");
-    }
 }
 
 void SetTextAreaMaxLength(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -472,19 +385,11 @@ void ResetTextAreaMaxLength(ArkUINodeHandle node)
     TextFieldModelNG::ResetMaxLength(frameNode);
 }
 
-void SetTextAreaFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetTextAreaFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("fontColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("fontColor");
-    }
 }
 
 void ResetTextAreaFontColor(ArkUINodeHandle node)
@@ -492,11 +397,6 @@ void ResetTextAreaFontColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetTextColor(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("fontColor");
-    }
 }
 
 void SetTextAreaFontStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -513,19 +413,11 @@ void ResetTextAreaFontStyle(ArkUINodeHandle node)
     TextFieldModelNG::SetFontStyle(frameNode, OHOS::Ace::FontStyle::NORMAL);
 }
 
-void SetTextAreaFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr fontWeight, void* fontWeightRawPtr)
+void SetTextAreaFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr fontWeight)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeight));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && fontWeightRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontWeightRawPtr));
-        pattern->RegisterResource<std::string>("fontWeight", resObj, fontWeight);
-    } else {
-        pattern->UnRegisterResource("fontWeight");
-    }
 }
 
 void SetTextAreaFontWeight(ArkUINodeHandle node, ArkUI_Int32 fontWeight)
@@ -540,32 +432,17 @@ void ResetTextAreaFontWeight(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetFontWeight(frameNode, OHOS::Ace::FontWeight::NORMAL);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("fontWeight");
-    }
 }
 
-void SetTextAreaFontSize(ArkUINodeHandle node, const struct ArkUIResourceLength *size, void* resRawPtr)
+void SetTextAreaFontSize(ArkUINodeHandle node, const struct ArkUIResourceLength *size)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->unit);
-    CalcDimension fontSize;
     if (unitEnum == DimensionUnit::CALC) {
-        fontSize = CalcDimension(size->string, DimensionUnit::CALC);
+        TextFieldModelNG::SetFontSize(frameNode, CalcDimension(size->string, DimensionUnit::CALC));
     } else {
-        fontSize = CalcDimension(size->value, unitEnum);
-    }
-    TextFieldModelNG::SetFontSize(frameNode, fontSize);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("fontSize", resObj, fontSize);
-    } else {
-        pattern->UnRegisterResource("fontSize");
+        TextFieldModelNG::SetFontSize(frameNode, CalcDimension(size->value, unitEnum));
     }
 }
 
@@ -578,11 +455,6 @@ void ResetTextAreaFontSize(ArkUINodeHandle node)
     auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     TextFieldModelNG::SetFontSize(frameNode, Dimension(theme->GetFontSize()));
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("fontSize");
-    }
 }
 
 void SetCounterType(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -688,23 +560,14 @@ ArkUI_Bool GetTextAreaEditing(ArkUINodeHandle node)
     return TextFieldModelNG::GetTextFieldEditing(frameNode);
 }
 
-void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color, void* resRawPtr)
+void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("backgroundColor");
-    }
 }
 
-void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color,
-    ArkUI_Int32 colorSpace, void* resRawPtr)
+void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -722,11 +585,6 @@ void ResetTextAreaBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetBackgroundColor(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("backgroundColor");
-    }
 }
 
 void SetTextAreaType(ArkUINodeHandle node, ArkUI_Int32 type)
@@ -792,22 +650,13 @@ ArkUI_Uint32 GetTextAreaMinLines(ArkUINodeHandle node)
     return TextFieldModelNG::GetMinLines(frameNode);
 }
 
-void SetTextAreaDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
-    ArkUI_Int32 style, void* resRawPtr)
+void SetTextAreaDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     TextFieldModelNG::SetTextDecorationColor(frameNode, Color(color));
     TextFieldModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("decorationColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("decorationColor");
-    }
 }
 
 void ResetTextAreaDecoration(ArkUINodeHandle node)
@@ -817,26 +666,13 @@ void ResetTextAreaDecoration(ArkUINodeHandle node)
     TextFieldModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     TextFieldModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     TextFieldModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("decorationColor");
-    }
 }
 
-void SetTextAreaLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)
+void SetTextAreaLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetLetterSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("letterSpacing", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("letterSpacing");
-    }
 }
 
 void ResetTextAreaLetterSpacing(ArkUINodeHandle node)
@@ -846,11 +682,6 @@ void ResetTextAreaLetterSpacing(ArkUINodeHandle node)
     CalcDimension value;
     value.Reset();
     TextFieldModelNG::SetLetterSpacing(frameNode, value);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("letterSpacing");
-    }
 }
 
 ArkUI_Float32 GetTextAreaLetterSpacing(ArkUINodeHandle node)
@@ -860,21 +691,12 @@ ArkUI_Float32 GetTextAreaLetterSpacing(ArkUINodeHandle node)
     return TextFieldModelNG::GetLetterSpacing(frameNode).ConvertToFp();
 }
 
-void SetTextAreaLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)
+void SetTextAreaLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetLineHeight(frameNode,
         CalcDimension(LessNotEqual(value, 0.0f) ? 0.0f : value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("lineHeight", resObj,
-        CalcDimension(LessNotEqual(value, 0.0f) ? 0.0f : value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("lineHeight");
-    }
 }
 
 void ResetTextAreaLineHeight(ArkUINodeHandle node)
@@ -884,11 +706,6 @@ void ResetTextAreaLineHeight(ArkUINodeHandle node)
     CalcDimension value;
     value.Reset();
     TextFieldModelNG::SetLineHeight(frameNode, value);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("lineHeight");
-    }
 }
 
 void SetTextAreaHalfLeading(ArkUINodeHandle node, ArkUI_Uint32 halfLeading)
@@ -954,19 +771,11 @@ void ResetTextAreaWordBreak(ArkUINodeHandle node)
     TextFieldModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
 }
 
-void SetTextAreaAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)
+void SetTextAreaAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetAdaptMinFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("minFontSize", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("minFontSize");
-    }
 }
 
 void ResetTextAreaAdaptMinFontSize(ArkUINodeHandle node)
@@ -979,26 +788,13 @@ void ResetTextAreaAdaptMinFontSize(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CalcDimension minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
     TextFieldModelNG::SetAdaptMinFontSize(frameNode, minFontSize);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("minFontSize");
-    }
 }
 
-void SetTextAreaAdaptMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)
+void SetTextAreaAdaptMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetAdaptMaxFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("maxFontSize", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("maxFontSize");
-    }
 }
 
 void ResetTextAreaAdaptMaxFontSize(ArkUINodeHandle node)
@@ -1011,11 +807,6 @@ void ResetTextAreaAdaptMaxFontSize(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
     TextFieldModelNG::SetAdaptMaxFontSize(frameNode, maxFontSize);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("maxFontSize");
-    }
 }
 
 void SetTextAreaHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1039,7 +830,7 @@ ArkUI_Bool GetTextAreaSelectionMenuHidden(ArkUINodeHandle node)
     return TextFieldModelNG::GetSelectionMenuHidden(frameNode);
 }
 
-void SetTextAreaSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetTextAreaSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1049,14 +840,6 @@ void SetTextAreaSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color
         selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
     }
     TextFieldModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("selectedBackgroundColor", resObj, selectedColor);
-    } else {
-        pattern->UnRegisterResource("selectedBackgroundColor");
-    }
 }
 
 void ResetTextAreaSelectedBackgroundColor(ArkUINodeHandle node)
@@ -1074,32 +857,18 @@ void ResetTextAreaSelectedBackgroundColor(ArkUINodeHandle node)
         selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
     }
     TextFieldModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("selectedBackgroundColor");
-    }
 }
 
-void SetTextAreaCaret(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)
+void SetTextAreaCaret(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CaretStyle caretStyle;
     caretStyle.caretWidth = CalcDimension(value, (DimensionUnit)unit);
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("caretWidth", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("caretWidth");
-    }
 }
 
-void SetTextAreaCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Uint32 caretColor,
-                           void* widthRawPtr, void* colorRawPtr)
+void SetTextAreaCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Uint32 caretColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1107,20 +876,6 @@ void SetTextAreaCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int3
     caretStyle.caretWidth = CalcDimension(value, (DimensionUnit)unit);
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
     TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && widthRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(widthRawPtr));
-        pattern->RegisterResource<CalcDimension>("caretWidth", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("caretWidth");
-    }
-    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-        pattern->RegisterResource<Color>("caretColor", resObj, Color(caretColor));
-    } else {
-        pattern->UnRegisterResource("caretColor");
-    }
 }
 
 void ResetTextAreaCaretStyle(ArkUINodeHandle node)
@@ -1135,12 +890,6 @@ void ResetTextAreaCaretStyle(ArkUINodeHandle node)
     uint32_t caretColor = theme->GetCursorColor().GetValue();
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
     TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("caretWidth");
-        pattern->UnRegisterResource("caretColor");
-    }
 }
 
 void SetTextAreaTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1158,20 +907,11 @@ void ResetTextAreaTextOverflow(ArkUINodeHandle node)
     TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::DEFAULT);
 }
 
-void SetTextAreaTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resRawPtr)
+void SetTextAreaTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("textIndent", resObj,
-            Dimension(number, static_cast<DimensionUnit>(unit)));
-    } else {
-        pattern->UnRegisterResource("textIndent");
-    }
 }
 
 void ResetTextAreaTextIndent(ArkUINodeHandle node)
@@ -1179,11 +919,6 @@ void ResetTextAreaTextIndent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("textIndent");
-    }
 }
 
 void SetTextAreaLineSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines)
@@ -1245,44 +980,8 @@ ArkUI_Int32 GetgetTextAreaMaxLines(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return TextFieldModelNG::GetMaxLines(frameNode);
 }
-
-void RegisterPaddingResource(FrameNode* frameNode, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
-    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* paddingRes)
-{
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && paddingRes && paddingRes->topObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(paddingRes->topObj));
-        pattern->RegisterResource<CalcDimension>("paddingTop", resObj,
-        CalcDimension(top->value, static_cast<DimensionUnit>(top->unit)));
-    } else {
-        pattern->UnRegisterResource("paddingTop");
-    }
-    if (SystemProperties::ConfigChangePerform() && paddingRes && paddingRes->bottomObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(paddingRes->bottomObj));
-        pattern->RegisterResource<CalcDimension>("paddingBottom", resObj,
-        CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit)));
-    } else {
-        pattern->UnRegisterResource("paddingBottom");
-    }
-    if (SystemProperties::ConfigChangePerform() && paddingRes && paddingRes->leftObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(paddingRes->leftObj));
-        pattern->RegisterResource<CalcDimension>("paddingLeft", resObj,
-        CalcDimension(left->value, static_cast<DimensionUnit>(left->unit)));
-    } else {
-        pattern->UnRegisterResource("paddingLeft");
-    }
-    if (SystemProperties::ConfigChangePerform() && paddingRes && paddingRes->rightObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(paddingRes->rightObj));
-        pattern->RegisterResource<CalcDimension>("paddingRight", resObj,
-        CalcDimension(right->value, static_cast<DimensionUnit>(right->unit)));
-    } else {
-        pattern->UnRegisterResource("paddingRight");
-    }
-}
-
 void SetTextAreaPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
-    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* paddingRes)
+    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1316,7 +1015,6 @@ void SetTextAreaPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, c
     paddings.left = std::optional<CalcLength>(leftDimen);
     paddings.right = std::optional<CalcLength>(rightDimen);
     TextFieldModelNG::SetPadding(frameNode, paddings);
-    RegisterPaddingResource(frameNode, top, right, bottom, left, paddingRes);
 }
 
 void ResetTextAreaPadding(ArkUINodeHandle node)
@@ -1334,14 +1032,6 @@ void ResetTextAreaPadding(ArkUINodeHandle node)
     paddings.left = NG::CalcLength(textFieldPadding.Left());
     paddings.right = NG::CalcLength(textFieldPadding.Right());
     TextFieldModelNG::SetPadding(frameNode, paddings);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("paddingTop");
-        pattern->UnRegisterResource("paddingBottom");
-        pattern->UnRegisterResource("paddingLeft");
-        pattern->UnRegisterResource("paddingRight");
-    }
 }
 
 void SetTextAreaOnChange(ArkUINodeHandle node, void* callback)
@@ -1908,43 +1598,8 @@ void ResetTextAreaBorderRadius(ArkUINodeHandle node)
     TextFieldModelNG::SetBorderRadius(frameNode, borderRadius);
 }
 
-void RegisterMarginResource(FrameNode* frameNode, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
-    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes)
-{
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && marginRes && marginRes->topObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->topObj));
-        pattern->RegisterResource<CalcDimension>("marginTop", resObj,
-        CalcDimension(top->value, static_cast<DimensionUnit>(top->unit)));
-    } else {
-        pattern->UnRegisterResource("marginTop");
-    }
-    if (SystemProperties::ConfigChangePerform() && marginRes && marginRes->bottomObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->bottomObj));
-        pattern->RegisterResource<CalcDimension>("marginBottom", resObj,
-        CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit)));
-    } else {
-        pattern->UnRegisterResource("marginBottom");
-    }
-    if (SystemProperties::ConfigChangePerform() && marginRes && marginRes->leftObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->leftObj));
-        pattern->RegisterResource<CalcDimension>("marginLeft", resObj,
-        CalcDimension(left->value, static_cast<DimensionUnit>(left->unit)));
-    } else {
-        pattern->UnRegisterResource("marginLeft");
-    }
-    if (SystemProperties::ConfigChangePerform() && marginRes && marginRes->rightObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->rightObj));
-        pattern->RegisterResource<CalcDimension>("marginRight", resObj,
-        CalcDimension(right->value, static_cast<DimensionUnit>(right->unit)));
-    } else {
-        pattern->UnRegisterResource("marginRight");
-    }
-}
-
 void SetTextAreaMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
-    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes)
+    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1978,7 +1633,6 @@ void SetTextAreaMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, co
     paddings.left = std::optional<CalcLength>(leftDimen);
     paddings.right = std::optional<CalcLength>(rightDimen);
     TextFieldModelNG::SetMargin(frameNode, paddings);
-    RegisterMarginResource(frameNode, top, right, bottom, left, marginRes);
 }
 
 void ResetTextAreaMargin(ArkUINodeHandle node)
@@ -1991,14 +1645,6 @@ void ResetTextAreaMargin(ArkUINodeHandle node)
     paddings.left = NG::CalcLength(0.0);
     paddings.right = NG::CalcLength(0.0);
     TextFieldModelNG::SetMargin(frameNode, paddings);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("marginTop");
-        pattern->UnRegisterResource("marginBottom");
-        pattern->UnRegisterResource("marginLeft");
-        pattern->UnRegisterResource("marginRight");
-    }
 }
 
 void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit)

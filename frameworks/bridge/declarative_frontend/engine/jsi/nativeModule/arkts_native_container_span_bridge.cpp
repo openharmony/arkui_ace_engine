@@ -32,17 +32,13 @@ ArkUINativeModuleValue ContainerSpanBridge::SetTextBackgroundStyle(ArkUIRuntimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    std::shared_ptr<TextBackgroundStyle> style = std::make_shared<TextBackgroundStyle>();
-    RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getContainerSpanModifier()->resetContainerSpanTextBackgroundStyle(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
+    } else {
+        ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, BORDER_RADIUS_START_INDEX);
+        GetArkUINodeModifiers()->getContainerSpanModifier()->setContainerSpanTextBackgroundStyle(nativeNode,
+            color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()));
     }
-    ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, BORDER_RADIUS_START_INDEX,
-        style);
-    ArkTSUtils::SetTextBackgroundStyle(style, color, colorResObj, radiusArray.data(), valueUnits.data());
-    GetArkUINodeModifiers()->getContainerSpanModifier()->setContainerSpanTextBackgroundStyle(nativeNode,
-        color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()));
     return panda::JSValueRef::Undefined(vm);
 }
 

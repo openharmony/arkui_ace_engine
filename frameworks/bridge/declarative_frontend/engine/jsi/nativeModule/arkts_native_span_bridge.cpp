@@ -22,8 +22,6 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -41,10 +39,32 @@ constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
+void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
+    std::vector<ArkUI_Int32>& units, int32_t argsIndex)
+{
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<CalcDimension> topLeftOptional;
+    std::optional<CalcDimension> topRightOptional;
+    std::optional<CalcDimension> bottomLeftOptional;
+    std::optional<CalcDimension> bottomRightOptional;
+
+    ArkTSUtils::ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, topRightArgs, topRightOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+
+    ArkTSUtils::PushOuterBorderDimensionVector(topLeftOptional, values, units);
+    ArkTSUtils::PushOuterBorderDimensionVector(topRightOptional, values, units);
+    ArkTSUtils::PushOuterBorderDimensionVector(bottomLeftOptional, values, units);
+    ArkTSUtils::PushOuterBorderDimensionVector(bottomRightOptional, values, units);
+}
+
 bool ParseTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length,
-    std::vector<ArkUITextShadowStruct>& textShadowArray,
-    std::vector<RefPtr<ResourceObject>>& radiusResArr, std::vector<RefPtr<ResourceObject>>& colorResArr,
-    std::vector<RefPtr<ResourceObject>>& offsetXResArr, std::vector<RefPtr<ResourceObject>>& offsetYResArr)
+    std::vector<ArkUITextShadowStruct>& textShadowArray)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, false);
@@ -60,17 +80,16 @@ bool ParseTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length,
     auto offsetXArray = std::make_unique<double[]>(length);
     auto offsetYArray = std::make_unique<double[]>(length);
     auto fillArray = std::make_unique<uint32_t[]>(length);
-
-    bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, radiusArg, radiusArray.get(), length,
-        ArkTSUtils::parseShadowRadiusWithResObj, radiusResArr);
-    bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(vm, typeArg, typeArray.get(), length,
-        ArkTSUtils::parseShadowType);
-    bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, colorArg, colorArray.get(), length,
-        ArkTSUtils::parseShadowColorWithResObj, colorResArr);
-    bool offsetXParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, offsetXArg, offsetXArray.get(), length,
-        ArkTSUtils::parseShadowOffsetWithResObj, offsetXResArr);
-    bool offsetYParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, offsetYArg, offsetYArray.get(), length,
-        ArkTSUtils::parseShadowOffsetWithResObj, offsetYResArr);
+    bool radiusParseResult =
+        ArkTSUtils::ParseArray<double>(vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadius);
+    bool typeParseResult =
+        ArkTSUtils::ParseArray<uint32_t>(vm, typeArg, typeArray.get(), length, ArkTSUtils::parseShadowType);
+    bool colorParseResult =
+        ArkTSUtils::ParseArray<uint32_t>(vm, colorArg, colorArray.get(), length, ArkTSUtils::parseShadowColor);
+    bool offsetXParseResult =
+        ArkTSUtils::ParseArray<double>(vm, offsetXArg, offsetXArray.get(), length, ArkTSUtils::parseShadowOffset);
+    bool offsetYParseResult =
+        ArkTSUtils::ParseArray<double>(vm, offsetYArg, offsetYArray.get(), length, ArkTSUtils::parseShadowOffset);
     bool fillParseResult =
         ArkTSUtils::ParseArray<uint32_t>(vm, fillArg, fillArray.get(), length, ArkTSUtils::parseShadowFill);
     if (!radiusParseResult || !colorParseResult || !offsetXParseResult || !offsetYParseResult || !fillParseResult ||
@@ -145,18 +164,17 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::string weight = DEFAULT_FONT_WEIGHT;
-    RefPtr<ResourceObject> resObj;
     if (!secondArg->IsNull()) {
         if (secondArg->IsNumber()) {
             weight = std::to_string(secondArg->Int32Value(vm));
         } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) &&
-            (!(ArkTSUtils::ParseJsString(vm, secondArg, weight, resObj)))) {
+            (!(ArkTSUtils::ParseJsString(vm, secondArg, weight)))) {
             return panda::JSValueRef::Undefined(vm);
         }
     }
 
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,
-        static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), AceType::RawPtr(resObj));
+        static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -180,12 +198,11 @@ ArkUINativeModuleValue SpanBridge::SetLineHeight(ArkUIRuntimeCallInfo *runtimeCa
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension lineHeight(0.0, DimensionUnit::PX);
-    RefPtr<ResourceObject> lineHeightObj;
-    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, lineHeight, lineHeightObj) || lineHeight.IsNegative()) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, lineHeight) || lineHeight.IsNegative()) {
         lineHeight.Reset();
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanLineHeight(
-        nativeNode, lineHeight.Value(), static_cast<int8_t>(lineHeight.Unit()), AceType::RawPtr(lineHeightObj));
+        nativeNode, lineHeight.Value(), static_cast<int8_t>(lineHeight.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -245,13 +262,12 @@ ArkUINativeModuleValue SpanBridge::SetFontSize(ArkUIRuntimeCallInfo *runtimeCall
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    RefPtr<ResourceObject> fontSizeResObj;
-    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, fontSizeResObj, false) || fontSize.IsNegative()) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false) || fontSize.IsNegative()) {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontSize(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontSize(nativeNode, fontSize.Value(),
-        static_cast<int8_t>(fontSize.Unit()), AceType::RawPtr(fontSizeResObj));
+        static_cast<int8_t>(fontSize.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -276,8 +292,7 @@ ArkUINativeModuleValue SpanBridge::SetFontFamily(ArkUIRuntimeCallInfo *runtimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<std::string> fontFamilies;
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsFontFamilies(vm, secondArg, fontFamilies, resourceObject)) {
+    if (!ArkTSUtils::ParseJsFontFamilies(vm, secondArg, fontFamilies)) {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontFamily(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -286,7 +301,7 @@ ArkUINativeModuleValue SpanBridge::SetFontFamily(ArkUIRuntimeCallInfo *runtimeCa
         families[i] = const_cast<char *>(fontFamilies.at(i).c_str());
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontFamily(nativeNode,
-        const_cast<const char **>(families.get()), fontFamilies.size(), AceType::RawPtr(resourceObject));
+        const_cast<const char **>(families.get()), fontFamilies.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -320,8 +335,7 @@ ArkUINativeModuleValue SpanBridge::SetDecoration(ArkUIRuntimeCallInfo *runtimeCa
     if (secondArg->IsInt()) {
         textDecoration = secondArg->Int32Value(vm);
     }
-    RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, resourceObject)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color)) {
         color = DEFAULT_DECORATION_COLOR;
     }
     if (fourthArg->IsInt()) {
@@ -332,8 +346,7 @@ ArkUINativeModuleValue SpanBridge::SetDecoration(ArkUIRuntimeCallInfo *runtimeCa
     }
     lineThicknessScale = lineThicknessScale < 0 ? 1.0 : lineThicknessScale;
     GetArkUINodeModifiers()->getSpanModifier()->setSpanDecoration(
-        nativeNode, textDecoration, color.GetValue(), AceType::RawPtr(resourceObject),
-        style, static_cast<float>(lineThicknessScale));
+        nativeNode, textDecoration, color.GetValue(), style, static_cast<float>(lineThicknessScale));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -360,13 +373,11 @@ ArkUINativeModuleValue SpanBridge::SetFontColor(ArkUIRuntimeCallInfo *runtimeCal
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
     Color textColor = theme->GetTextStyle().GetTextColor();
-    RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor, colorResObj)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor)) {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getSpanModifier()->setSpanFontColor(
-        nativeNode, textColor.GetValue(), AceType::RawPtr(colorResObj));
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanFontColor(nativeNode, textColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -392,16 +403,13 @@ ArkUINativeModuleValue SpanBridge::SetLetterSpacing(ArkUIRuntimeCallInfo *runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     struct ArkUIStringAndFloat letterSpacingValue = { 0.0, nullptr };
     std::string tempValueStr = "";
-    RefPtr<ResourceObject> resObj;
     if (secondArg->IsNumber()) {
         letterSpacingValue.value = secondArg->ToNumber(vm)->Value();
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue,
-            AceType::RawPtr(resObj));
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
     } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) &&
-        ArkTSUtils::ParseJsString(vm, secondArg, tempValueStr, resObj)) {
+        ArkTSUtils::ParseJsString(vm, secondArg, tempValueStr)) {
         letterSpacingValue.valueStr = tempValueStr.c_str();
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue,
-            AceType::RawPtr(resObj));
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
     } else {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanLetterSpacing(nativeNode);
     }
@@ -463,10 +471,9 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
     auto theme = GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     CalcDimension fontSize;
-    RefPtr<ResourceObject> fontSizeObj;
-    if (ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, fontSizeObj) && !fontSize.IsNegative()) {
+    if (ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, false) && !fontSize.IsNegative()) {
         GetArkUINodeModifiers()->getSpanModifier()->setSpanFontSize(
-            nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()), AceType::RawPtr(fontSizeObj));
+            nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
     } else {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontSize(nativeNode);
     }
@@ -481,7 +488,7 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
             weight = weightArg->ToString(vm)->ToString(vm);
         }
         GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(
-            nativeNode, static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), nullptr);
+            nativeNode, static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)));
     }
     if (styleArg->IsInt()) {
         int32_t style = styleArg->Int32Value(vm);
@@ -494,15 +501,14 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontStyle(nativeNode);
     }
     std::vector<std::string> fontFamilies;
-    RefPtr<ResourceObject> fontFamiliesObject;
-    if (ArkTSUtils::ParseJsFontFamilies(vm, familyArg, fontFamilies, fontFamiliesObject)) {
+    if (ArkTSUtils::ParseJsFontFamilies(vm, familyArg, fontFamilies)) {
         uint32_t familyLength = fontFamilies.size();
         auto families = std::make_unique<const char* []>(familyLength);
         for (uint32_t i = 0; i < fontFamilies.size(); i++) {
             families[i] = fontFamilies[i].c_str();
         }
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanFontFamily(nativeNode,
-            const_cast<const char**>(families.get()), fontFamilies.size(), AceType::RawPtr(fontFamiliesObject));
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanFontFamily(
+            nativeNode, const_cast<const char**>(families.get()), fontFamilies.size());
     } else {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontFamily(nativeNode);
     }
@@ -530,16 +536,12 @@ ArkUINativeModuleValue SpanBridge::SetTextBackgroundStyle(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    std::shared_ptr<TextBackgroundStyle> style = std::make_shared<TextBackgroundStyle>();
-    RefPtr<ResourceObject> colorResObj;
-    if (!(ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj))) {
+    if (!(ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color))) {
         color = Color::TRANSPARENT;
     }
-    ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2, style);
-    ArkTSUtils::SetTextBackgroundStyle(style, color, colorResObj, radiusArray.data(), valueUnits.data());
+    ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2); // Border Radius args start index
     GetArkUINodeModifiers()->getSpanModifier()->setSpanTextBackgroundStyle(
-        nativeNode, color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()),
-        style.get());
+        nativeNode, color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -567,14 +569,8 @@ ArkUINativeModuleValue SpanBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     }
     length = lengthArg->Uint32Value(vm);
     std::vector<ArkUITextShadowStruct> textShadowArray;
-    std::vector<RefPtr<ResourceObject>> radiusResArr;
-    std::vector<RefPtr<ResourceObject>> colorResArr;
-    std::vector<RefPtr<ResourceObject>> offsetXResArr;
-    std::vector<RefPtr<ResourceObject>> offsetYResArr;
-    ParseTextShadow(runtimeCallInfo, length, textShadowArray, radiusResArr, colorResArr, offsetXResArr, offsetYResArr);
-    GetArkUINodeModifiers()->getSpanModifier()->setTextShadow(nativeNode, textShadowArray.data(), length,
-        static_cast<void*>(&radiusResArr), static_cast<void*>(&colorResArr),
-        static_cast<void*>(&offsetXResArr), static_cast<void*>(&offsetYResArr));
+    ParseTextShadow(runtimeCallInfo, length, textShadowArray);
+    GetArkUINodeModifiers()->getSpanModifier()->setTextShadow(nativeNode, textShadowArray.data(), length);
     return panda::JSValueRef::Undefined(vm);
 }
 

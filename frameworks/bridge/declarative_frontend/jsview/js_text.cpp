@@ -170,8 +170,8 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
         std::vector<std::string> fontFamilies;
         RefPtr<ResourceObject> fontFamiliesResObj;
+        font.fontFamilies = fontFamilies;
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies, fontFamiliesResObj)) {
-            font.fontFamilies = fontFamilies;
             if (SystemProperties::ConfigChangePerform() && fontFamiliesResObj) {
                 RegisterResource<std::vector<std::string>>(
                     "FontFamily", fontFamiliesResObj, fontFamilies);
@@ -204,6 +204,8 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
+ 
+ 
     }
     UnRegisterResource("FontSize");
     TextModel::GetInstance()->SetFontSize(fontSize);
@@ -634,20 +636,11 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    RefPtr<ResourceObject> resObj;
-    if (!ParseJsDimensionFpNG(args, value, resObj, false)) {
+    if (!ParseJsDimensionFpNG(args, value, false)) {
         value.Reset();
         TextModel::GetInstance()->SetLetterSpacing(value);
         return;
-    } else if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
-        return;
     }
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
-        return;
-    }
-    UnRegisterResource("LetterSpacing");
     TextModel::GetInstance()->SetLetterSpacing(value);
 }
 

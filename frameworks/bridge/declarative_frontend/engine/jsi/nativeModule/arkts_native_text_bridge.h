@@ -124,8 +124,7 @@ public:
 
 private:
     static void ParseAIEntityColorAndPreview(
-        ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig,
-        RefPtr<ResourceObject>& colorResObj, RefPtr<ResourceObject>& decColorResObj);
+        ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig);
 };
 } // namespace OHOS::Ace::NG
 
