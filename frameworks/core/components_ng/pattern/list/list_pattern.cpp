@@ -685,8 +685,8 @@ void ListPattern::SetLayoutAlgorithmParams(
     CHECK_NULL_VOID(listLayoutProperty);
     if (childrenSize_) {
         listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
-        listLayoutAlgorithm->SetListPositionMap(posMap_);
     }
+    listLayoutAlgorithm->SetListPositionMap(posMap_);
     SetLayoutAlgorithmJumpAlign(listLayoutAlgorithm, listLayoutProperty);
     if (targetIndex_) {
         listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());

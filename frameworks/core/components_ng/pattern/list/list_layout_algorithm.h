@@ -680,6 +680,9 @@ private:
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
+    std::pair<int32_t, float> FindIndexAndDeltaInPosMap(float delta) const;
+    bool CanUseInfoInPosMap(int32_t index, float delta) const;
+
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignEnd();
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
