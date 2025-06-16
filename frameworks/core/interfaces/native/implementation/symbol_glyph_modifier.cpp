@@ -22,6 +22,69 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Ace {
+enum class TextFontWeight {
+    W100 = 0,
+    W200,
+    W300,
+    W400,
+    W500,
+    W600,
+    W700,
+    W800,
+    W900,
+    BOLD,
+    NORMAL,
+    BOLDER,
+    LIGHTER,
+    MEDIUM,
+    REGULAR,
+};
+}
+namespace OHOS::Ace::NG::Converter {
+
+template<>
+void AssignCast(std::optional<TextFontWeight>& dst, const Ark_FontWeight& src)
+{
+    switch (src) {
+        case ARK_FONT_WEIGHT_LIGHTER: dst = TextFontWeight::LIGHTER; break;
+        case ARK_FONT_WEIGHT_NORMAL: dst = TextFontWeight::NORMAL; break;
+        case ARK_FONT_WEIGHT_REGULAR: dst = TextFontWeight::REGULAR; break;
+        case ARK_FONT_WEIGHT_MEDIUM: dst = TextFontWeight::MEDIUM; break;
+        case ARK_FONT_WEIGHT_BOLD: dst = TextFontWeight::BOLD; break;
+        case ARK_FONT_WEIGHT_BOLDER: dst = TextFontWeight::BOLDER; break;
+        default: LOGE("Unexpected enum value in Ark_FontWeight: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextFontWeight>& dst, const Ark_Number& src)
+{
+    auto intVal = src.i32;
+    if (intVal >= 0) {
+        auto strVal = std::to_string(intVal);
+        std::optional<Ace::FontWeight> fontWeight;
+        if (auto [parseOk, val] = StringUtils::ParseFontWeight(strVal); parseOk) {
+            fontWeight = val;
+        }
+        if (fontWeight.has_value()) {
+            dst = static_cast<TextFontWeight>(fontWeight.value());
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextFontWeight>& dst, const Ark_String& src)
+{
+    std::optional<Ace::FontWeight> fontWeight;
+    if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
+        fontWeight = val;
+    }
+    if (fontWeight.has_value()) {
+        dst = static_cast<TextFontWeight>(fontWeight.value());
+    }
+}
+}
 namespace OHOS::Ace::NG::GeneratedModifier {
 constexpr float SCALE_LIMIT = 1.f;
 namespace SymbolGlyphModifier {
@@ -81,8 +144,12 @@ void FontWeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
-    SymbolModelStatic::SetFontWeight(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TextFontWeight>(*value);
+    std::optional<Ace::FontWeight> fontWeightValue;
+    if (convValue.has_value()) {
+        fontWeightValue = static_cast<Ace::FontWeight>(convValue.value());
+    }
+    SymbolModelStatic::SetFontWeight(frameNode, fontWeightValue);
 }
 void EffectStrategyImpl(Ark_NativePointer node,
                         const Opt_SymbolEffectStrategy* value)
