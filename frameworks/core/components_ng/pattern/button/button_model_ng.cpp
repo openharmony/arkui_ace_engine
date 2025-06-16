@@ -463,13 +463,9 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     textLayoutProperty->UpdateAdaptFontSizeStep(Dimension(1.0, DimensionUnit::FP));
 }
 
-void ButtonModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
+void ButtonModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
 {
-    if (fontSize) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
@@ -479,51 +475,30 @@ void ButtonModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimens
     textLayoutProperty->ResetAdaptMaxFontSize();
 }
 
-void ButtonModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>& fontWeight)
+void ButtonModelNG::SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight)
 {
-    if (fontWeight) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, fontWeight.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, fontWeight, frameNode);
 }
 
-void ButtonModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& fontStyle)
+void ButtonModelNG::SetFontStyle(FrameNode* frameNode, const Ace::FontStyle& fontStyle)
 {
-    if (fontStyle) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, fontStyle.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, fontStyle, frameNode);
 }
 
-void ButtonModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamily)
+void ButtonModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& fontFamily)
 {
-    if (fontFamily && fontFamily->size() > 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, fontFamily.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, fontFamily, frameNode);
 }
 
-void ButtonModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& textColor)
+void ButtonModelNG::SetFontColor(FrameNode* frameNode, const Color& textColor)
 {
-    if (textColor) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor.value(), frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor, frameNode);
 }
 
-void ButtonModelNG::SetType(FrameNode* frameNode, const std::optional<int> value)
+void ButtonModelNG::SetType(FrameNode* frameNode, const int value)
 {
-    if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, static_cast<ButtonType>(value.value()), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, static_cast<ButtonType>(value), frameNode);
 }
 
 void ButtonModelNG::SetStateEffect(FrameNode* frameNode, const bool stateEffect)
@@ -534,48 +509,52 @@ void ButtonModelNG::SetStateEffect(FrameNode* frameNode, const bool stateEffect)
     buttonEventHub->SetStateEffect(stateEffect);
 }
 
-void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const std::optional<ButtonParameters>& buttonParameters)
+void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters)
 {
-    if (buttonParameters && buttonParameters->textOverflow.has_value()) {
+    if (buttonParameters.textOverflow.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            ButtonLayoutProperty, TextOverflow, buttonParameters->textOverflow.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextOverflow, frameNode);
+            ButtonLayoutProperty, TextOverflow, buttonParameters.textOverflow.value(), frameNode);
     }
-    if (buttonParameters && buttonParameters->maxLines.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines,
-            buttonParameters->maxLines.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, frameNode);
+    if (buttonParameters.maxLines.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, buttonParameters.maxLines.value(), frameNode);
     }
-    if (buttonParameters && buttonParameters->minFontSize.has_value()) {
+    if (buttonParameters.minFontSize.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            ButtonLayoutProperty, MinFontSize, buttonParameters->minFontSize.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontSize, frameNode);
+            ButtonLayoutProperty, MinFontSize, buttonParameters.minFontSize.value(), frameNode);
     }
-    if (buttonParameters && buttonParameters->maxFontSize.has_value()) {
+    if (buttonParameters.maxFontSize.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            ButtonLayoutProperty, MaxFontSize, buttonParameters->maxFontSize.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontSize, frameNode);
+            ButtonLayoutProperty, MaxFontSize, buttonParameters.maxFontSize.value(), frameNode);
     }
-    if (buttonParameters && buttonParameters->heightAdaptivePolicy.has_value()) {
+    if (buttonParameters.heightAdaptivePolicy.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters->heightAdaptivePolicy.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, HeightAdaptivePolicy, frameNode);
+            ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters.heightAdaptivePolicy.value(), frameNode);
     }
-    if (buttonParameters) {
-        SetFontSize(frameNode, buttonParameters->fontSize);
-        SetFontWeight(frameNode, buttonParameters->fontWeight);
-        SetFontFamily(frameNode, buttonParameters->fontFamily);
-        SetFontStyle(frameNode, buttonParameters->fontStyle);
-    } else {
-        SetFontSize(frameNode, std::nullopt);
-        SetFontWeight(frameNode, std::nullopt);
-        SetFontFamily(frameNode, std::nullopt);
-        SetFontStyle(frameNode, std::nullopt);
+    if (buttonParameters.fontSize.has_value()) {
+        auto fontSize = buttonParameters.fontSize.value();
+        if (GreatOrEqual(fontSize.Value(), 0.0)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize, frameNode);
+        } else {
+            auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            auto context = PipelineBase::GetCurrentContextSafely();
+            CHECK_NULL_VOID(context);
+            auto buttonTheme = context->GetTheme<ButtonTheme>();
+            CHECK_NULL_VOID(buttonTheme);
+            auto themeFontSize = buttonTheme->GetTextSize(layoutProperty->GetControlSizeValue(ControlSize::NORMAL));
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, themeFontSize, frameNode);
+        }
+    }
+    if (buttonParameters.fontWeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, FontWeight, buttonParameters.fontWeight.value(), frameNode);
+    }
+    if (buttonParameters.fontFamily.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, FontFamily, buttonParameters.fontFamily.value(), frameNode);
+    }
+    if (buttonParameters.fontStyle.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, buttonParameters.fontStyle.value(), frameNode);
     }
 }
 
