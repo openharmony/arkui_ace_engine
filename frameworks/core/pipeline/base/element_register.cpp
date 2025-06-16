@@ -300,8 +300,10 @@ void ElementRegister::UnregisterEmbedNode(const uint64_t surfaceId, const WeakPt
 WeakPtr<NG::FrameNode> ElementRegister::GetEmbedNodeBySurfaceId(const uint64_t surfaceId)
 {
     auto it = surfaceIdEmbedNodeMap_.find(surfaceId);
-    LOGD("[GetEmbedNodeBySurfaceId] surfaceId: %{private}" PRId64 ", result: %{private}s", surfaceId,
-        (it == surfaceIdEmbedNodeMap_.end()) ? "false" : "true");
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("[GetEmbedNodeBySurfaceId] surfaceId: %{public}" PRId64 ", result: %{public}s", surfaceId,
+            (it == surfaceIdEmbedNodeMap_.end()) ? "false" : "true");
+    }
     return (it == surfaceIdEmbedNodeMap_.end()) ? nullptr : it->second;
 }
 
@@ -313,8 +315,10 @@ bool ElementRegister::IsEmbedNode(NG::FrameNode* node)
 uint64_t ElementRegister::GetSurfaceIdByEmbedNode(NG::FrameNode* node)
 {
     auto it = embedNodeSurfaceIdMap_.find(node);
-    LOGD("[GetSurfaceIdByEmbedNode] frameNodeId: %{private}d, surfaceId: %{private}" PRId64 "",
-        (node == nullptr ? -1 : node->GetId()), (it == embedNodeSurfaceIdMap_.end()) ? 0U : (it->second));
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("[GetSurfaceIdByEmbedNode] frameNodeId: %{public}d, surfaceId: %{public}" PRId64 "",
+            (node == nullptr ? -1 : node->GetId()), (it == embedNodeSurfaceIdMap_.end()) ? 0U : (it->second));
+    }
     return (it == embedNodeSurfaceIdMap_.end()) ? 0U : it->second;
 }
 } // namespace OHOS::Ace
