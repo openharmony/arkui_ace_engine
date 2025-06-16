@@ -117,10 +117,6 @@ private:
     static void RegisterCanvasAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterVideoAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterStepperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterListAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterListItemAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterSwiperAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterIndicatorComponentAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

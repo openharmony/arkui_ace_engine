@@ -143,23 +143,6 @@ globalThis.AlphabetIndexer.attributeModifier = function (modifier: ArkComponent)
   });
 };
 
-globalThis.AlphabetIndexer.onSelected = function (value: (index: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().alphabetIndexer.setOnSelected(nodePtr, value);
-};
-globalThis.AlphabetIndexer.onSelect = function (value: (index: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().alphabetIndexer.setOnSelect(nodePtr, value);
-};
-globalThis.AlphabetIndexer.onRequestPopupData = function (value: (index: number) => string[]): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().alphabetIndexer.setOnRequestPopupData(nodePtr, value);
-};
-globalThis.AlphabetIndexer.onPopupSelect = function (value: (index: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().alphabetIndexer.setOnPopupSelect(nodePtr, value);
-};
-
 class PopupItemFontModifier extends ModifierWithKey<Font> {
   constructor(value: Font) {
     super(value);

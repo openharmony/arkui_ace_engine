@@ -526,39 +526,6 @@ globalThis.WaterFlow.attributeModifier = function (modifier: ArkComponent): void
   });
 };
 
-globalThis.WaterFlow.onReachStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnReachStart(nodePtr, value);
-};
-globalThis.WaterFlow.onReachEnd = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnReachEnd(nodePtr, value);
-};
-globalThis.WaterFlow.onScrollFrameBegin = function (value: (offset: number, state: ScrollState) => { offsetRemain: number; }): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnScrollFrameBegin(nodePtr, value);
-};
-globalThis.WaterFlow.onScrollStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnScrollStart(nodePtr, value);
-};
-globalThis.WaterFlow.onScrollStop = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnScrollStop(nodePtr, value);
-};
-globalThis.WaterFlow.onScrollIndex = function (value: (first: number, last: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnScrollIndex(nodePtr, value);
-};
-globalThis.WaterFlow.onWillScroll = function (value: (xOffset: number, yOffset: number,
-  scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnWillScroll(nodePtr, value);
-};
-globalThis.WaterFlow.onDidScroll = function (value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnDidScroll(nodePtr, value);
-};
 globalThis.WaterFlow.onWillStopDragging = function (value: (velocity: number) => void) {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);

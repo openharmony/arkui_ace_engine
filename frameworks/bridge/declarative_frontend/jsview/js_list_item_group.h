@@ -32,8 +32,8 @@ public:
     static void SetChildrenMainSize(const JSCallbackInfo& args);
     static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj);
     static bool ParseHeaderAndFooterContent(const JSRef<JSVal>& contentParam, bool isHeader);
-    static bool SetHeaderBuilder(const panda::ecmascript::EcmaVM* vm, const JSRef<JSObject>& obj);
-    static bool SetFooterBuilder(const panda::ecmascript::EcmaVM* vm, const JSRef<JSObject>& obj);
+    static bool SetHeaderBuilder(const JSRef<JSObject>& obj);
+    static bool SetFooterBuilder(const JSRef<JSObject>& obj);
     static V2::ListItemGroupStyle GetListItemGroupStyle(const JSCallbackInfo& args);
 };
 

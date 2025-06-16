@@ -91,7 +91,8 @@ ArkUINativeModuleValue ListItemBridge::SetSwipeAction(ArkUIRuntimeCallInfo* runt
         GetArkUINodeModifiers()->getListItemModifier()->resetListItemSwipeAction(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    JSListItem::ParseSwiperAction(Framework::JSRef<Framework::JSObject>::Cast(info[1]), frameNode);
+    JSListItem::ParseSwiperAction(Framework::JSRef<Framework::JSObject>::Cast(info[1]),
+        info.GetExecutionContext(), frameNode);
 
     return panda::JSValueRef::Undefined(vm);
 }
