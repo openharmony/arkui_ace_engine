@@ -14,7 +14,7 @@
  */
 
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable } from '../decorator';
+import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable, UIUtils } from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { WatchFuncType, WatchIdType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
@@ -66,7 +66,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(newValue)) {
+        if (this.backing_.set(UIUtils.makeObserved(newValue as Object) as T)) {
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec

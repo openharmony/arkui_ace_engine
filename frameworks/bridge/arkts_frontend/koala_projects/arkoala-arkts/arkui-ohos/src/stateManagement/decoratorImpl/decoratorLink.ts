@@ -82,7 +82,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             this.registerWatchForObservedObjectChanges(newValue);
             // a @Link set  truggers a meta.fireChange on the source XXXDecoratedVariable
             // set also get above.
-            this.sourceSet_!(newValue);
+            this.sourceSet_!(newValue); // makeObserved should be called in source
         }
     }
 }

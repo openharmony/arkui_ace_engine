@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IStateMgmtFactory } from '../decorator';
+import { IStateMgmtFactory, UIUtils } from '../decorator';
 import {
     IStateDecoratedVariable,
     ILinkDecoratedVariable,
@@ -49,11 +49,11 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         return new SubscribedWatches();
     }
     makeState<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IStateDecoratedVariable<T> {
-        return new StateDecoratedVariable<T>(owningView, varName, initValue, watchFunc);
+        return new StateDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
     }
 
     makeProp<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IPropDecoratedVariable<T> {
-        return new PropDecoratedVariable<T>(owningView, varName, initValue, watchFunc);
+        return new PropDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
     }
 
     makeLink<T>(owningView: ExtendableComponent, varName: string, source: LinkSourceType<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
@@ -141,12 +141,12 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     }
 
     makeObjectLink<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IObjectLinkDecoratedVariable<T> {
-        return new ObjectLinkDecoratedVariable<T>(owningView, varName, initValue, watchFunc);
+        return new ObjectLinkDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
     }
 
     makeProvide<T>(owningView: ExtendableComponent, varName: string, provideAlias: string,
         initValue: T, allowOverride: boolean, watchFunc?: WatchFuncType): IProvideDecoratedVariable<T> {
-        return new ProvideDecoratedVariable<T>(owningView, varName, provideAlias, initValue, allowOverride, watchFunc);
+        return new ProvideDecoratedVariable<T>(owningView, varName, provideAlias, UIUtils.makeObserved(initValue as Object) as T, allowOverride, watchFunc);
     }
 
     makeConsume<T>(owningView: ExtendableComponent, varName: string, provideAlias: string,
@@ -156,12 +156,12 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
 
     makeStorageProp<T>(owningView: ExtendableComponent, propName: string, varName: string,
         initValue: T, watchFunc?: WatchFuncType): IStoragePropDecoratedVariable<T> {
-        return new StoragePropDecoratedVariable<T>(owningView, propName, varName, initValue, watchFunc);
+        return new StoragePropDecoratedVariable<T>(owningView, propName, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
     }
 
     makeStorageLink<T>(owningView: ExtendableComponent, propName: string, varName: string,
         initValue: T, watchFunc?: WatchFuncType): IStorageLinkDecoratedVariable<T> {
-        return new StorageLinkDecoratedVariable<T>(owningView, propName, varName, initValue, watchFunc);
+        return new StorageLinkDecoratedVariable<T>(owningView, propName, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
     }
 
 }
