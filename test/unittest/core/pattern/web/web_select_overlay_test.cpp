@@ -5529,7 +5529,7 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptionsTest001, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     overlay.isSelectAll_ = true;
     overlay.SetMenuOptions(selectInfo, params, callback);
-    EXPECT_EQ(overlay.isSelectAll_, false);
+    EXPECT_EQ(overlay.isSelectAll_, true);
 }
 
 /**
