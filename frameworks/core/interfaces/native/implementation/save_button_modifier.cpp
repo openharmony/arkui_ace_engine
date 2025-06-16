@@ -50,6 +50,7 @@ void AssignCast(std::optional<SaveButtonSaveDescription>& dst, const Ark_SaveDes
         case ARK_SAVE_DESCRIPTION_EXPORT_TO_GALLERY: dst = SaveButtonSaveDescription::EXPORT_TO_GALLERY; break;
         case ARK_SAVE_DESCRIPTION_QUICK_SAVE_TO_GALLERY: dst = SaveButtonSaveDescription::QUICK_SAVE_TO_GALLERY; break;
         case ARK_SAVE_DESCRIPTION_RESAVE_TO_GALLERY: dst = SaveButtonSaveDescription::RESAVE_TO_GALLERY; break;
+        case ARK_SAVE_DESCRIPTION_SAVE_ALL: dst = SaveButtonSaveDescription::SAVE_ALL; break;
         default: LOGE("Unexpected enum value in Ark_SaveDescription: %{public}d", src);
     }
 }
