@@ -925,7 +925,8 @@ void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t 
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
-    delegate->RemoveSnapshotFrameNode();
+    int delayTime = 650; // 650为根据LCP和FCP时差估算的经验值
+    delegate->RemoveSnapshotFrameNode(delayTime);
 }
 
 void WebClientImpl::OnFirstMeaningfulPaint(
@@ -936,7 +937,6 @@ void WebClientImpl::OnFirstMeaningfulPaint(
     CHECK_NULL_VOID(details);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnFirstMeaningfulPaint(details);
-    delegate->RemoveSnapshotFrameNode();
 }
 
 void WebClientImpl::OnLargestContentfulPaint(

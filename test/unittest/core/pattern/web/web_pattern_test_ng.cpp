@@ -3172,8 +3172,8 @@ HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     MockPipelineContext::SetUp();
-    EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/web_frame_123456.png"), true);
-    std::string snapshotPath = "/data/storage/el2/base/cache/web/web_frame_123456.png";
+    EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png"), true);
+    std::string snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png";
     webPattern->CreateSnapshotImageFrameNode(snapshotPath);
     webPattern->RemoveSnapshotFrameNode();
     webPattern->RemoveSnapshotFrameNode();

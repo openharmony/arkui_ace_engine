@@ -810,11 +810,14 @@ RefPtr<FrameNode> WebPattern::CreatePreviewImageFrameNode(bool isImage)
 void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CreateSnapshotImageFrameNode");
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "blankless already create snapshot image node!");
+        return;
+    }
     if (!IsSnapshotPathValid(snapshotPath)) {
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot path is invalid!");
         return;
     }
-    RemoveSnapshotFrameNode();
     snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto snapshotNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -848,11 +851,11 @@ void WebPattern::RemoveSnapshotFrameNode()
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "RemoveSnapshotFrameNode");
     auto snapshotNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value());
+    snapshotImageNodeId_.reset();
     CHECK_NULL_VOID(snapshotNode);
     auto parent = snapshotNode->GetParent();
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(snapshotNode);
-    snapshotImageNodeId_.reset();
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -1272,6 +1275,10 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void WebPattern::HandleFlingMove(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle fling move!");
+        return;
+    }
     if ((event.GetInputEventType() == InputEventType::AXIS) &&
         (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
         CHECK_NULL_VOID(delegate_);
@@ -1290,6 +1297,10 @@ void WebPattern::HandleFlingMove(const GestureEvent& event)
 
 void WebPattern::HandleDragMove(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle drag move!");
+        return;
+    }
     if (event.GetInputEventType() == InputEventType::AXIS) {
         CHECK_NULL_VOID(delegate_);
         auto localLocation = event.GetLocalLocation();
@@ -1446,6 +1457,10 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
 
 void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle scale gesture change!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     double curScale = event.GetScale();
@@ -1577,6 +1592,10 @@ double WebPattern::GetNewOriginScale(double originScale) const
 
 void WebPattern::HandleScaleGestureStart(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle scale gesture start!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     double scale = event.GetScale();
@@ -1593,6 +1612,10 @@ void WebPattern::HandleScaleGestureStart(const GestureEvent& event)
 
 void WebPattern::HandleScaleGestureEnd(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle scale gesture end!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     double scale = event.GetScale();
@@ -1609,6 +1632,10 @@ void WebPattern::HandleScaleGestureEnd(const GestureEvent& event)
 
 void WebPattern::HandleScaleGestureCancel(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle scale gesture cancel!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     double scale = event.GetScale();
@@ -1692,6 +1719,10 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle touch event!");
+        return;
+    }
     touchEventInfo_ = info;
     const auto& changedPoint = info.GetChangedTouches().front();
     if (changedPoint.GetTouchType() == TouchType::DOWN ||
@@ -1721,6 +1752,10 @@ void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle mouse event!");
+        return;
+    }
     if (info.GetAction() != MouseAction::MOVE) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "WebPattern::HandleMouseEvent, web id %{public}d, Action %{public}d, Button %{public}d",
@@ -1745,6 +1780,9 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        return;
+    }
     if (mouseEventDeviceId_ != info.GetDeviceId()) {
         mouseEventDeviceId_ = info.GetDeviceId();
     }
@@ -1962,6 +2000,10 @@ bool WebPattern::GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo)
 
 NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle on drag start!");
+        return NG::DragDropInfo();
+    }
     isDragging_ = true;
     isReceivedArkDrag_ = true;
     isDragStartFromWeb_ = true;
@@ -2025,6 +2067,10 @@ void WebPattern::OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, 
 
 void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle on drag move!");
+        return;
+    }
     if (!isDragging_) {
         return;
     }
@@ -2307,6 +2353,10 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void WebPattern::HandleDragStart(int32_t x, int32_t y)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle drag start!");
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_WEB,
         "HandleDragStart DragDrop event actionStart, isDragStartFromWeb_:%{public}d, isMouseEvent_:%{public}d",
         (int)isDragStartFromWeb_, (int)isMouseEvent_);
@@ -2340,6 +2390,10 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
 
 void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle on drag enter!");
+        return;
+    }
     if (!delegate_) {
         return;
     }
@@ -2426,6 +2480,9 @@ void WebPattern::ResetDragStateValue()
 
 void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        return;
+    }
     ResetDragStateValue();
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
@@ -2482,6 +2539,10 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 
 void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle on drag leave!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
     isW3cDragEvent_ = false;
@@ -2499,6 +2560,10 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 
 void WebPattern::HandleDragEnd(int32_t x, int32_t y)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle drag end!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     isDragging_ = false;
