@@ -63,6 +63,12 @@ abstract class ViewPU extends PUV2ViewBase
 
   private delayRecycleNodeRerenderDeep: boolean = false;
 
+  // store the current key -> consume, which has the default value
+  public defaultConsume_: Map<string, SynchedPropertyTwoWayPU<any>> = new Map<string, SynchedPropertyTwoWayPU<any>>();
+
+  // store the current key -> consume, which has reconnect to the provide
+  public reconnectConsume_: Map<string, SynchedPropertyTwoWayPU<any>> = new Map<string, SynchedPropertyTwoWayPU<any>>();
+
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -621,7 +627,9 @@ abstract class ViewPU extends PUV2ViewBase
     if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
   */
   public findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
-    return this.providedVars_.get(providedPropName) || (this.parent_ && this.parent_.findProvidePU(providedPropName));
+    return this.providedVars_.get(providedPropName) || (this.parent_ && 
+      (this.parent_ instanceof ViewPU && this.parent_ instanceof JSBuilderNode) &&
+      this.parent_.findProvidePU(providedPropName));
   }
 
   /**
@@ -655,9 +663,79 @@ abstract class ViewPU extends PUV2ViewBase
       stateMgmtConsole.debug(`The @Consume is instance of ${result.constructor.name}`);
       return result;
     };
-    return providedVarStore.createSync(factory) as ObservedPropertyAbstractPU<T>;
+    let consumeVal = providedVarStore.createSync(factory) as SynchedPropertyTwoWayPU<T>;
+    if (providedVarStore.__isFake_ObservedPropertyAbstract_Internal()) {
+      this.defaultConsume_.set(providedPropName, consumeVal);
+    }
+    return consumeVal;
   }
 
+  public reconnectToConsume(): void {
+    this.defaultConsume_.forEach((value: SynchedPropertyObjectTwoWayPU<any>, providedPropName: string) => {
+      let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU(providedPropName);
+      if (providedVarStore) {
+        stateMgmtConsole.debug(`${value.debugInfo} connected to the provide ${providedVarStore.debugInfo()}`);
+        // store the consume reconnect to provide
+        this.reconnectConsume_.set(providedPropName, value);
+        value.resetSource(providedVarStore);
+        value.getDependencies().forEach((id: number) => {
+          this.UpdateElement(id);
+        })
+      }
+    })
+  }
+
+  public disconnectedConsume(): void {
+    for (const [key, value] of this.reconnectConsume_) {
+      // try to findProvide again
+      // need to set Parent undefine first
+      const provide = this.findProvidePU(key);
+      // if provide is undefined, the provide and consume connection is broken
+      // reset consume to default value.
+      if (!provide) {
+        value.resetFakeSource();
+        value.getDependencies().forEach((id: number) => {
+          this.UpdateElement(id);
+        })
+        this.reconnectConsume_.delete(key);
+      }
+    }
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (!(child instanceof ViewPU) || child.reconnectConsume_.size === 0) {
+        return;
+      }
+      child.disconnectedConsume();
+    })
+  }
+
+  /**
+   * Method invoked by buildNodes, when buildNode attach to buildNode, and buildNode will find if it is under
+   * view, which mean if it is in main tree.
+   * If so, the buildNode will invoke the view its buildNodes children update
+   * @param providedPropName children buildNodes which have new nodes attached
+   */
+  public notifyBuildNodesUpdateAttached(buildNodes: Array<ViewBuildNodeBase>) {
+    buildNodes.forEach((buildNode: ViewBuildNodeBase) => {
+      if (buildNode && buildNode instanceof ViewBuildNodeBase) {
+        buildNode.propagateToChildrenToConnected();
+      }
+    })
+  }
+
+  /**
+   * Method invoked by buildNodes, when buildNode detach from buildNode, and buildNode will find if it is under
+   * view, which mean if it is in main tree.
+   * If so, the buildNode will invoke the view its buildNodes children update
+   * @param providedPropName children buildNodes which have nodes detached
+   */
+  public notifyBuildNodesUpdateDetach(buildNodes: Array<ViewBuildNodeBase>) {
+    buildNodes.forEach((buildNode: ViewBuildNodeBase) => {
+      if (buildNode && buildNode instanceof ViewBuildNodeBase) {
+        buildNode.propagateToChildrenToDisconnected();
+      }
+    })
+  }
 
   /**
    * given the elmtId of a child or child of child within this custom component

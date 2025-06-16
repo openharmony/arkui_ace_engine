@@ -162,6 +162,10 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return this.dependentElmtIdsByProperty_.hasDependencies();
   }
 
+  public getDependencies(): Set<number> {
+    return this.dependentElmtIdsByProperty_.getAllPropertyDependencies();
+  }
+
   /* for @Prop value from source we need to generate a @State
      that observes when this value changes. This ObservedPropertyPU
      sits inside SynchedPropertyOneWayPU.

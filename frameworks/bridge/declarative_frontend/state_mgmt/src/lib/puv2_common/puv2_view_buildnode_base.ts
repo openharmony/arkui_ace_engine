@@ -22,6 +22,7 @@
  * ViewBuildNodeBase is the common base class of PUV2ViewBase and BaseNode
  * The common methods for state management and BuilderNode are implemented in this base class.
  */
+declare class JSBuilderNode {};
 abstract class ViewBuildNodeBase {
     protected isView_: boolean;
     protected childrenWeakrefMap_ = new Map<number, WeakRef<IView>>();
@@ -83,6 +84,7 @@ abstract class ViewBuildNodeBase {
     }
     /**
      * Adds a child BuilderNode to this view
+     * Invoke by buildNode when it attach to the view.
      * @param child - The child node to add
      * @returns True if added successfully, false if ID already exists
      */
@@ -92,10 +94,38 @@ abstract class ViewBuildNodeBase {
             return false;
         }
         this.builderNodeWeakrefMap_.set(child.id__(), new WeakRef(child));
+        // recursively check children for buildNode and view
+        // if it has the default consume needs to reconnect the provide
+        child.propagateToChildrenToConnected();
         return true;
     }
+
     /**
-     * Removes a child BuilderNode from this view by elmtId
+     * Recursively check all the buildNode and View children
+     * if it has the default consume, need to check if it has the new provide can be connected
+     * Invoke by buildNode when it attach to the view.
+     */
+    propagateToChildrenToConnected() {
+        if (this.builderNodeWeakrefMap_.size === 0 && this.childrenWeakrefMap_.size === 0) {
+            return;
+        }
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child instanceof ViewPU && child.defaultConsume_.size > 0) {
+                child.reconnectToConsume();
+                child.propagateToChildrenToConnected();
+            }
+        })
+        this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child instanceof ViewBuildNodeBase) {
+                child.propagateToChildrenToConnected();
+            }
+        })
+    }
+    /**
+     * Removes a child BuilderNode from this view by elmtId.
+     * Invoke by buildNode when it detaches to the view.
      * @param elmtId - The ID of the child node to remove
      */
     public removeChildBuilderNode(elmtId: number): void {
@@ -103,7 +133,38 @@ abstract class ViewBuildNodeBase {
             stateMgmtConsole.warn(`${this.debugInfo__()}: removeChildBuilderNode(${elmtId}) no child with this elmtId. Internal error!`);
             return;
         }
+
+        const buildNode: ViewBuildNodeBase = this.builderNodeWeakrefMap_.get(elmtId)?.deref();
+        // recursively check children for buildNode and view
+        // if it has the default consume needs to reconnect the provide
+        if (buildNode) {
+            buildNode.propagateToChildrenToDisconnected();
+        }
         this.builderNodeWeakrefMap_.delete(elmtId);
+    }
+
+    /**
+     * Recursively check all the buildNode and View children
+     * if it has the reconnected consume, 
+     * Invoke by buildNode when it attach to the view.
+     */
+    public propagateToChildrenToDisconnected(): void {
+        if (this.builderNodeWeakrefMap_.size === 0 && this.childrenWeakrefMap_.size === 0) {
+            return;
+        }
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child instanceof ViewPU && child.reconnectConsume_.size > 0) {
+                child.disconnectedConsume();
+                child.propagateToChildrenToDisconnected();
+            }
+        })
+        this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child instanceof ViewBuildNodeBase) {
+                child.propagateToChildrenToDisconnected();
+            }
+        })
     }
 
     protected purgeDeletedElmtIds(): void {

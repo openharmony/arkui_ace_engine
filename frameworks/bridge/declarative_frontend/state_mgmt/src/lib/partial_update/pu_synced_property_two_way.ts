@@ -24,6 +24,9 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   implements PeerChangeEventReceiverPU<C>, ObservedObjectEventsPUReceiver<C> {
 
   private source_: ObservedPropertyObjectAbstract<C>;
+  
+  private fakeSourceBackUp_: ObservedPropertyObjectAbstract<C>;
+  private reconnectedToProvide_: boolean = false;
 
 
   constructor(source: ObservedPropertyObjectAbstract<C>,
@@ -59,6 +62,22 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   private isStorageLinkProp(): boolean {
     return (this.source_ && this.source_ instanceof ObservedPropertyAbstract && (!(this.source_ instanceof ObservedPropertyAbstractPU)));
+  }
+
+  public get fakeSourceBackUp() : ObservedPropertyObjectAbstract<C> {
+    return this.fakeSourceBackUp_;
+  }
+
+  public set fakeSourceBackUp(val: ObservedPropertyObjectAbstract<C>) {
+    this.fakeSourceBackUp_ = val;
+  }
+
+  public get reconnectedToProvide() : boolean {
+    return this.reconnectedToProvide_;
+  }
+
+  public set reconnectedToProvide(val: boolean) {
+    this.reconnectedToProvide_ = val;
   }
 
   private setObject(newValue: C): void {
@@ -166,6 +185,23 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
       }
     }
     stateMgmtProfiler.end();
+  }
+
+  public resetSource(newSource: ObservedPropertyObjectAbstract<C>) {
+    this.fakeSourceBackUp_ = this.source_;
+    this.source_ = newSource;
+    this.source_.addSubscriber(this);
+    this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
+  }
+
+  public resetFakeSource() {
+    if (!this.fakeSourceBackUp_) {
+      stateMgmtConsole.warn(`${this.debugInfo()} does not have the fake source backup, need to check the build node does not amount to parent ever`)
+      return;
+    }
+    this.source_ = this.fakeSourceBackUp_;
+    this.source_.addSubscriber(this);
+    this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
   }
 }
 
