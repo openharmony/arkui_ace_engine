@@ -15,7 +15,7 @@
 
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { WatchFuncType } from '../decorator';
+import { UIUtils, WatchFuncType } from '../decorator';
 import { IProvideDecoratedVariable } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
@@ -48,7 +48,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(newValue)) {
+        if (this.backing_.set(UIUtils.makeObserved(newValue as Object) as T)) {
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
             this.execWatchFuncs();

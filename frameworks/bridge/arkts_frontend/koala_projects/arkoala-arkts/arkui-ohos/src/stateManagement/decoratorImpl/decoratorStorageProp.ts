@@ -53,6 +53,6 @@ export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(newValue);
-        this.asProp!.set(newValue as NullableObject);
+        this.asProp!.set(newValue as NullableObject); // makeObserved should be called in Prop.set
     }
 }

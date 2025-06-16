@@ -17,7 +17,7 @@ import { DecoratedV1VariableBase } from './decoratorBase';
 import { propDeepCopy } from '@koalaui/common';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { ExtendableComponent } from '../../component/extendableComponent';
-import { IPropDecoratedVariable } from '../decorator';
+import { IPropDecoratedVariable, UIUtils } from '../decorator';
 import { WatchFuncType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { DecoratorBackingValue } from '../base/backingValue';
@@ -91,7 +91,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
 
-            if (this.__localValue.set(newValue)) {
+            if (this.__localValue.set(UIUtils.makeObserved(newValue as Object) as T)) {
                 this.execWatchFuncs();
             }
         }
@@ -107,7 +107,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
             this.__soruceValue.setSilently(newValue);
             StateUpdateLoop.add(() => {
-                if (this.__localValue.set(deepCopy<T>(newValue))) {
+                if (this.__localValue.set(UIUtils.makeObserved(deepCopy<T>(newValue) as Object) as T)) {
                     this.execWatchFuncs();
                 }
             });
@@ -120,7 +120,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
             this.__soruceValue.setSilently(newValue);
-            this.__localValue.set(deepCopy<T>(newValue));
+            this.__localValue.set(UIUtils.makeObserved(deepCopy<T>(newValue) as Object) as T);
             this.execWatchFuncs();
         }
     }

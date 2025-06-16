@@ -67,4 +67,7 @@ export class StateMgmtTool {
     static createProxy<T extends Object>(value: T): T {
         return value;
     }
+    static isObjectLiteral<T extends Object>(value: T): boolean {
+        return true;
+    }
 }

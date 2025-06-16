@@ -18,7 +18,7 @@
 import { DecoratedV1VariableBase } from './decoratorBase';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { ExtendableComponent } from '../../component/extendableComponent';
-import { IObjectLinkDecoratedVariable } from '../decorator';
+import { IObjectLinkDecoratedVariable, UIUtils } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { ObserveSingleton } from '../base/observeSingleton';
@@ -71,7 +71,7 @@ export class ObjectLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             return;
         }
         StateUpdateLoop.add(() => {
-            if (this.backing_.set(newValue)) {
+            if (this.backing_.set(UIUtils.makeObserved(newValue as Object) as T)) {
                 this.unregisterWatchFromObservedObjectChanges(value);
                 this.registerWatchForObservedObjectChanges(newValue);
                 this.execWatchFuncs();

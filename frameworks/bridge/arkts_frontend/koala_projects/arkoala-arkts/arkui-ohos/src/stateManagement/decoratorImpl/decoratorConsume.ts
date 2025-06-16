@@ -49,7 +49,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         if (value !== newValue) {
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
-            this.sourceProvide_!.set(newValue);
+            this.sourceProvide_!.set(newValue); // makeObserved should be called in source
         }
     }
 }

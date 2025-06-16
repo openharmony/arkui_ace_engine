@@ -17,6 +17,7 @@ import { ObserveSingleton } from './base/observeSingleton';
 import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { ExtendableComponent } from '../component/extendableComponent';
+import { uiUtils } from './base/uiUtilsImpl';
 
 export interface IDecoratedVariable {
     readonly varName: string;
@@ -127,4 +128,10 @@ export interface AbstractProperty<T> extends IDecoratedMutableVariable<T> {
 
 export interface SubscribedAbstractProperty<T> extends AbstractProperty<T> {
     aboutToBeDeleted(): void;
+}
+
+export class UIUtils {
+    static makeObserved<T>(source: T): T {
+        return uiUtils.makeObserved(source as Object) as T;
+    }
 }

@@ -14,7 +14,7 @@
  */
 
 import { NullableObject } from '../base/types';
-import { AbstractProperty, SubscribedAbstractProperty } from '../decorator';
+import { AbstractProperty, SubscribedAbstractProperty, UIUtils } from '../decorator';
 
 import { __MkPropReturnType, StateDecoratedVariable } from '../decoratorImpl/decoratorState';
 import { LinkDecoratedVariable } from '../decoratorImpl/decoratorLink';
@@ -82,7 +82,7 @@ export class LocalStorage {
     }
 
     public set<T>(propName: string, newValue: T): boolean {
-        const p: StateDecoratedVariable<NullableObject> | undefined = 
+        const p: StateDecoratedVariable<NullableObject> | undefined =
             this.storage_.get(propName);
         if (p === undefined) {
             return false;
@@ -102,7 +102,7 @@ export class LocalStorage {
     }
 
     private addNewPropertyInternal<T>(propName: string, value: T): StateDecoratedVariable<NullableObject> {
-        const newProp = new StateDecoratedVariable<NullableObject>(null, propName, value as NullableObject);
+        const newProp = new StateDecoratedVariable<NullableObject>(null, propName, UIUtils.makeObserved(value as NullableObject) as NullableObject);
         this.storage_.set(propName, newProp);
         return newProp;
     }
@@ -115,7 +115,7 @@ export class LocalStorage {
         let ref = this.linkInternalAbstractProperty(propName, p!);
         return ref as AbstractProperty<NullableObject> as AbstractProperty<T>;
     }
-    
+
     public setAndRef<T>(propName: string, defaultValue: T): AbstractProperty<T> {
         let p: StateDecoratedVariable<NullableObject> | undefined = this.storage_.get(propName);
         if (p === undefined) {
@@ -132,7 +132,7 @@ export class LocalStorage {
         }
         return this.linkInternalAbstractProperty(propName, p!) as SubscribedAbstractProperty<T>;
     }
-    
+
     public setAndLink<T>(propName: string, defaultValue: T): SubscribedAbstractProperty<T> {
         let p: StateDecoratedVariable<NullableObject> | undefined = this.storage_.get(propName);
         if (p === undefined) {
@@ -140,7 +140,7 @@ export class LocalStorage {
         }
         return this.linkInternalAbstractProperty(propName, p!) as SubscribedAbstractProperty<T>;
     }
-    
+
     public createLink<T>(propName: string, defaultValue: T): LinkDecoratedVariable<NullableObject> {
         let p: StateDecoratedVariable<NullableObject> | undefined = this.storage_.get(propName);
         if (p === undefined) {
@@ -149,7 +149,7 @@ export class LocalStorage {
         return this.linkInternal(propName, p!)!;
     }
 
-    private linkInternalAbstractProperty<T>(propName: string, p: StateDecoratedVariable<T>): 
+    private linkInternalAbstractProperty<T>(propName: string, p: StateDecoratedVariable<T>):
         SubscribedAbstractProperty<T> {
         return this.linkInternal(propName, p!) as SubscribedAbstractProperty<T>;
     }
@@ -193,7 +193,7 @@ export class LocalStorage {
         return this.propInternal(propName, p);
     }
 
-    private propInternalAbstractProperty<T>(propName: string, p: StateDecoratedVariable<T>): 
+    private propInternalAbstractProperty<T>(propName: string, p: StateDecoratedVariable<T>):
         SubscribedAbstractProperty<T> {
         return this.propInternal(propName, p!) as SubscribedAbstractProperty<T>;
     }
@@ -201,7 +201,7 @@ export class LocalStorage {
     private propInternal<T>(propName: string, p: StateDecoratedVariable<T>): PropDecoratedVariable<T> {
         const result: __MkPropReturnType<T> = p.mkProp(propName);
         const prop = result.prop;
-        
+
         const id = this.nextLinkPropId++;
         let reg = this.linkFinalisationRegistrations_.get(propName);
         if (reg === undefined) {
@@ -244,5 +244,5 @@ export class LocalStorage {
         this.storage_.clear();
         this.linkFinalisationRegistrations_.clear();
         return true;
-    }    
+    }
 }
