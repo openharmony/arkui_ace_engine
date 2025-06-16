@@ -213,7 +213,7 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
             pageJson->Put("components", componentsJson);
         }
     }
-    LOGI("9901 pageJson: %(public)s", pageJson->ToString().c_str());
+    LOGI("9901 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -274,7 +274,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
             }
         }
     }
-    LOGI("9903 pageJson: %(public)s", pageJson->ToString().c_str());
+    LOGI("9903 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -306,7 +306,7 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(
             pageJson->Put("components", componentsJson);
         }
     }
-    LOGI("9904 pageJson: %(public)s", pageJson->ToString().c_str());
+    LOGI("9904 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -338,7 +338,7 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
             pageJson->Put("components", componentsJson);
         }
     }
-    LOGI("9905 pageJson: %(public)s", pageJson->ToString().c_str());
+    LOGI("9905 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
