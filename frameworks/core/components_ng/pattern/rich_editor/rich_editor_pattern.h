@@ -418,7 +418,8 @@ public:
     {
         HandleSysScaleChanged();
         return MakeRefPtr<RichEditorLayoutAlgorithm>(
-            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder(), GetAISpanMap());
+            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder(),
+            AISpanLayoutInfo{ GetAISpanMap(), NeedShowAIDetect() });
     }
 
     void HandleSysScaleChanged()

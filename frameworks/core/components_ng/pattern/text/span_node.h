@@ -302,7 +302,7 @@ public:
     int32_t selectedEnd = -1;
     bool needReLayoutParagraph = false;
     bool needReLayout = false;
-    bool hasAISpanResult = false;
+    int32_t aiSpanResultCount = 0;
     // used for Span uiNode
     bool needReCreateParagraph_ = true;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
