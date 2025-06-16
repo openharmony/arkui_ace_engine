@@ -646,7 +646,7 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     CHECK_NULL_VOID(destPageInfo);
     auto destFullPath = destPageInfo->GetFullPath();
 
-    ResSchedReport::GetInstance().HandlePageTransition(GetPagePath(srcPage), destPageInfo->GetPagePath(), "Rounter");
+    ResSchedReport::GetInstance().HandlePageTransition(srcFullPath, destFullPath, "Router");
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 

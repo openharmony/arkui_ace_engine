@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -22,6 +23,7 @@
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -232,7 +234,11 @@ void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
 
 void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
+    int32_t count = cachedCount;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
 }
 
@@ -571,7 +577,11 @@ void ListModelNG::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
 
 void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount, frameNode);
+    int32_t count = cachedCount;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count, frameNode);
 }
 
 void ListModelNG::SetShowCached(FrameNode* frameNode, bool show)

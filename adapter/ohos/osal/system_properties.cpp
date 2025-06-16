@@ -693,6 +693,7 @@ int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_I
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
+bool SystemProperties::whiteBlockEnabled_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -857,6 +858,7 @@ void SystemProperties::InitDeviceInfo(
     formSharedImageCacheThreshold_ =
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
     syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
+    whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -1318,5 +1320,25 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
 int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
+}
+
+bool SystemProperties::IsWhiteBlockEnabled()
+{
+    return whiteBlockEnabled_;
+}
+
+bool SystemProperties::IsWhiteBlockIdleChange()
+{
+    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock.idle", "0") == "1";
+}
+
+int32_t SystemProperties::GetWhiteBlockIndexValue()
+{
+    return std::stoi(OHOS::system::GetParameter("persist.resourceschedule.whiteblock.index", "0"));
+}
+
+int32_t SystemProperties::GetWhiteBlockCacheCountValue()
+{
+    return std::stoi(OHOS::system::GetParameter("persist.resourceschedule.whiteblock.cachedcount", "0"));
 }
 } // namespace OHOS::Ace
