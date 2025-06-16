@@ -51,9 +51,11 @@
         ],
         "https://gitee.com/arkuistatemgmt": [
             "https://gitee.com/seaside_wu",
+            "https://gitee.com/shiyu_huang",
             "https://gitee.com/lixingchi1",
             "https://gitee.com/s10021109",
             "https://gitee.com/lihong67",
+            "https://gitee.com/jiyujia926",
             "https://gitee.com/guido_grassel"
         ],
         "https://gitee.com/arkuiscroll": [
@@ -266,6 +268,14 @@
         },
         "https://gitee.com/seaside_wu": {
             "info": "[公共能力/预览 wuhaibin]",
+            "group": "https://gitee.com/arkuistatemgmt"
+        },
+        "https://gitee.com/shiyu_huang": {
+            "info": "[前端公共 huangshiyu]",
+            "group": "https://gitee.com/arkuistatemgmt"
+        },
+        "https://gitee.com/jiyujia926": {
+            "info": "[状态管理 jiyujia]",
             "group": "https://gitee.com/arkuistatemgmt"
         },
         "https://gitee.com/lihong67": {
