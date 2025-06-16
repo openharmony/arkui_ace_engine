@@ -162,6 +162,9 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager001, TestSize.Level1)
     accessibilityProperty->SetUserRangeMinValue(1);
     accessibilityProperty->SetUserRangeMaxValue(10);
     accessibilityProperty->SetAccessibilityLevel("yes");
+    accessibilityProperty->SetUserCurrentValue(5);
+    accessibilityProperty->SetUserMinValue(1);
+    accessibilityProperty->SetUserMaxValue(10);
     jsAccessibilityManager->UpdateAccessibilityElementInfo(frameNode, nodeInfo);
 
     /**
@@ -1490,8 +1493,8 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager029, TestSize.Level1)
      * @tc.steps: step4. test GetCurrentWindowPages with IsSplitMode false
      */
     EXPECT_CALL(*stageManager, IsSplitMode()).WillOnce(Return(false));
-    EXPECT_CALL(*stageManager, GetLastPageWithTransition()).Times(1)
-        .WillOnce(Return(frameNode3));
+    EXPECT_CALL(*stageManager, GetLastPageWithTransition()).Times(2)
+        .WillRepeatedly(Return(frameNode3));
     jsAccessibilityManager->GetCurrentWindowPages(context, pageNodes, pagePaths);
     ASSERT_EQ(pageNodes.size(), 3);
 }
@@ -2440,6 +2443,89 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager043, TestSize.Level1)
     accessibilityProperty->SetAccessibilityFocusState(false);
     jsAccessibilityManager->UpdateVirtualNodeFocus();
     EXPECT_EQ(accessibilityProperty->isAccessibilityFocused_, true);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager044
+ * @tc.desc: Test UpdateVirtualNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    std::list<AccessibilityElementInfo> infos;
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    /**
+     * @tc.steps: step2. test UpdateVirtualNodeInfo
+     */
+    jsAccessibilityManager->UpdateVirtualNodeInfo(infos, nodeInfo, frameNode, commonProperty, context);
+    EXPECT_TRUE(infos.empty());
+}
+
+/**
+ * @tc.name: JsAccessibilityManager045
+ * @tc.desc: Test UpdateChildrenNodeInCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    std::list<AccessibilityElementInfo> infos;
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    /**
+     * @tc.steps: step2. test UpdateChildrenNodeInCache
+     */
+    Framework::SearchParameter searchParam;
+    std::list<AccessibilityElementInfo> infosSecond;
+    std::list<RefPtr<NG::FrameNode>> children;
+    jsAccessibilityManager->UpdateChildrenNodeInCache(infosSecond, commonProperty,
+        context, searchParam, children);
+    EXPECT_TRUE(infosSecond.empty());
+    
+    children.emplace_back(frameNode);
+    jsAccessibilityManager->UpdateChildrenNodeInCache(infosSecond, commonProperty,
+        context, searchParam, children);
+    EXPECT_EQ(infosSecond.size(), 1);
+    
+    auto vNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+    auto vChildNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    vNode->AddChild(vChildNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityLevel("yes");
+    accessibilityProperty->SetAccessibilityGroup(false);
+    accessibilityProperty->SaveAccessibilityVirtualNode(vNode);
+    commonProperty.isReduceMode = true;
+    std::list<AccessibilityElementInfo> infosThird;
+    jsAccessibilityManager->UpdateChildrenNodeInCache(infosThird, commonProperty,
+        context, searchParam, children);
+    EXPECT_EQ(infosSecond.size(), 1);
 }
 
 #ifdef WEB_SUPPORTED

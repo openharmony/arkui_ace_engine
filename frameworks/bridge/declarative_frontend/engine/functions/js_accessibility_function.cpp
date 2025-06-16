@@ -33,7 +33,7 @@ AccessibilityActionInterceptResult JsAccessibilityActionInterceptFunction::Execu
 
 void JsAccessibilityHoverTransparentFunction::Execute(TouchEventInfo& info)
 {
-    JSRef<JSVal> param = JSRef<JSObject>::Cast(JsTouchFunction::CreateJSEventInfo(info));
+    JSRef<JSVal> param = JsTouchFunction::CreateJSEventInfo(info);
     JsFunction::ExecuteJS(1, &param);
 }
 
