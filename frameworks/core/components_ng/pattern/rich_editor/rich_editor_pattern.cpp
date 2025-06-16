@@ -6511,7 +6511,7 @@ void RichEditorPattern::DeleteContent(int32_t length)
 
 void RichEditorPattern::DeleteToMaxLength(std::optional<int32_t> length)
 {
-    if (length.value_or(INT_MAX) >= GetTextContentLength()) {
+    if (length.value_or(INT_MAX) >= GetTextContentLength() || length.value_or(INT_MAX) <= 0) {
         return;
     }
     int32_t textContentLength = GetTextContentLength();
