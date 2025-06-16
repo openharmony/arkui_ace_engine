@@ -111,6 +111,11 @@ export interface ComputableState<Value> extends Disposable, State<Value> {
      * If value will be recomputed on access.
      */
     readonly recomputeNeeded: boolean
+
+    /**
+      * force a complete rerender / update by executing all update functions
+      */
+    forceCompleteRerender(): void
 }
 
 /**
@@ -197,6 +202,7 @@ interface ManagedState extends Disposable {
 }
 
 interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
+    forceCompleteRerender():void
     hasDependencies(): boolean
     readonly id: KoalaCallsiteKey
     readonly node: IncrementalNode | undefined
@@ -893,6 +899,15 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             if (child?.once)
                 continue
             child?.invalidateOnReuse()
+        }
+    }
+
+    forceCompleteRerender(): void {
+        this.recomputeNeeded = true
+        for (let child = this.child; child; child = child?.next) {
+            if (child?.once)
+                continue
+            child?.forceCompleteRerender()
         }
     }
 

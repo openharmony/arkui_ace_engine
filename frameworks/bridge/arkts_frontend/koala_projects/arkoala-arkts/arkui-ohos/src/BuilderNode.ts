@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -249,6 +249,13 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public updateConfiguration(): void {
+        const old = GlobalStateManager.GetLocalManager();
+        GlobalStateManager.SetLocalManager(this.__manager);
+        this.__rootStage?.forceCompleteRerender();
+        this.__manager?.syncChanges();
+        this.__manager?.updateSnapshot();
+        this.__rootStage?.value;
+        GlobalStateManager.SetLocalManager(old);
     }
 
     public getValidNodePtr(): KPointer | undefined {
@@ -263,6 +270,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private disposeAll(): void {
         super.disposeNode();
         this.__rootStage?.dispose();
+        this.__manager.reset();
     }
 
     public dispose(): void {

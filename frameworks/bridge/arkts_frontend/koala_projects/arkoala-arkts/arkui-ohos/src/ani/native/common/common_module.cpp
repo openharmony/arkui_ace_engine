@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include "common_module.h"
+
+#include <memory>
 
 #include "load.h"
 
@@ -87,7 +88,8 @@ void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr
     }
     modifier->getArkUIAniDrawModifier()->invalidate(env, ptr);
 }
-ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id){
+ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id)
+{
     auto nodeId = reinterpret_cast<ArkUI_Int32>(id);
     ani_long nativeObj {};
     const auto* modifier = GetNodeAniModifier();
