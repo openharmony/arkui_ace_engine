@@ -26,11 +26,11 @@ class ArkUIObjectFinalizationRegisterProxy {
 }
 
 // provide for jsMemoryWatch to register callback function for ArkUI
-function registerArkUIObjLifeCycleCallback(callback: (obj: {hash: number, name: string, msg: string}) => void) {
+function registerArkUIObjectLifeCycleCallback(callback: (obj: {hash: number, name: string, msg: string}) => void): void {
     ArkUIObjectFinalizationRegisterProxy.callbackFunc_ = callback;
 }
 
 // unregister the callbackFunc_ func
-function unregisterArkUIObjLifeCycleCallback() {
+function unregisterArkUIObjectLifeCycleCallback(): void {
     ArkUIObjectFinalizationRegisterProxy.callbackFunc_ = undefined;
 }
