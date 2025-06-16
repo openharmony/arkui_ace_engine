@@ -23053,15 +23053,15 @@ export class Serializer extends SerializerBase {
             const value_styledValue_10  = value_styledValue as CustomSpan
             valueSerializer.writeCustomSpan(value_styledValue_10)
         }
-        else if (RuntimeType.OBJECT == value_styledValue_type) {
-            valueSerializer.writeInt8(11 as int32)
-            const value_styledValue_11  = value_styledValue as UserDataSpan
-            valueSerializer.writeUserDataSpan(value_styledValue_11)
-        }
         else if (TypeChecker.isBackgroundColorStyle(value_styledValue, false)) {
             valueSerializer.writeInt8(12 as int32)
             const value_styledValue_12  = value_styledValue as BackgroundColorStyle
             valueSerializer.writeBackgroundColorStyle(value_styledValue_12)
+        }
+        else if (RuntimeType.OBJECT == value_styledValue_type) {
+            valueSerializer.writeInt8(11 as int32)
+            const value_styledValue_11  = value_styledValue as UserDataSpan
+            valueSerializer.writeUserDataSpan(value_styledValue_11)
         }
     }
     writeTextDataDetectorConfig(value: TextDataDetectorConfig): void {

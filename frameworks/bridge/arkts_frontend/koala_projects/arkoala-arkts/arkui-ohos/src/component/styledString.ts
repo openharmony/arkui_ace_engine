@@ -47,9 +47,7 @@ export class StyledString implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get length(): number {
-        return this.getLength()
-    }
+    length: number = 0
     static ctor_styledstring(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -89,6 +87,7 @@ export class StyledString implements MaterializedBase {
         {
             const ctorPtr : KPointer = StyledString.ctor_styledstring((value)!, styles)
             this.peer = new Finalizable(ctorPtr, StyledString.getFinalizer())
+            this.length = this.getLength()
         }
     }
     static getFinalizer(): KPointer {
@@ -148,9 +147,16 @@ export class StyledString implements MaterializedBase {
             const styledKey_value  = (styledKey as StyledStringKey)
             thisSerializer.writeInt32(TypeChecker.StyledStringKey_ToNumeric(styledKey_value))
         }
-        const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length())
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>;
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<SpanStyle> = new Array<SpanStyle>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -376,9 +382,7 @@ export class BaselineOffsetStyle implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get baselineOffset(): number {
-        return this.getBaselineOffset()
-    }
+    baselineOffset: number = 0
     static ctor_baselineoffsetstyle(value: LengthMetrics): KPointer {
         const retval  = ArkUIGeneratedNativeModule._BaselineOffsetStyle_ctor(toPeerPtr(value))
         return retval
@@ -388,6 +392,7 @@ export class BaselineOffsetStyle implements MaterializedBase {
         {
             const ctorPtr : KPointer = BaselineOffsetStyle.ctor_baselineoffsetstyle((value)!)
             this.peer = new Finalizable(ctorPtr, BaselineOffsetStyle.getFinalizer())
+            this.baselineOffset = this.getBaselineOffset();
         }
     }
     static getFinalizer(): KPointer {
