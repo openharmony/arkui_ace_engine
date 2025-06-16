@@ -120,6 +120,7 @@ private:
         tapDeadlineTimer_.Cancel();
         currentTouchPointsNum_ = 0;
         responseRegionBuffer_.clear();
+        localMatrix_.clear();
     }
 
     void HandleOverdueDeadline();

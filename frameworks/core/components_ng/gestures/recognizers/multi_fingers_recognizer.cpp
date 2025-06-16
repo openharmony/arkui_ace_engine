@@ -69,7 +69,7 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
             continue;
         }
         PointF localPoint(point.second.x, point.second.y);
-        NGGestureRecognizer::Transform(
+        TransformForRecognizer(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
         FingerInfo fingerInfo = { point.second.originalId, point.second.operatingHand, point.second.GetOffset(),
             Offset(localPoint.GetX(), localPoint.GetY()),

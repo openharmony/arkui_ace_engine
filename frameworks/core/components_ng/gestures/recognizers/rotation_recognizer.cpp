@@ -56,6 +56,12 @@ void RotationRecognizer::OnAccepted()
         node ? node->GetTag().c_str() : "null");
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     SendCallbackMsg(onActionStart_);
     isNeedResetVoluntarily_ = false;
 }
@@ -350,6 +356,7 @@ void RotationRecognizer::OnResetStatus()
     resultAngle_ = 0.0;
     lastAngle_ = 0.0;
     angleSignChanged_ = false;
+    localMatrix_.clear();
 }
 
 void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
