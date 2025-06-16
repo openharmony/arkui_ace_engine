@@ -222,19 +222,17 @@ void JSFontSpan::ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font)
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
+    CalcDimension width = theme->GetTextStyle().GetStrokeWidth();
     if (obj->HasProperty("strokeWidth")) {
         auto strokeWidth = obj->GetProperty("strokeWidth");
-        CalcDimension width = theme->GetTextStyle().GetStrokeWidth();
         if (!strokeWidth->IsNull() && strokeWidth->IsObject()) {
             auto strokeWidthTmp = ParseLengthMetrics(strokeWidth, false);
             if (strokeWidthTmp.Unit() != DimensionUnit::PERCENT) {
                 width = strokeWidthTmp;
             }
         }
-        font.strokeWidth = width;
-    } else {
-        font.strokeWidth = theme->GetTextStyle().GetStrokeWidth();
     }
+    font.strokeWidth = width;
 }
 
 void JSFontSpan::GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color)
