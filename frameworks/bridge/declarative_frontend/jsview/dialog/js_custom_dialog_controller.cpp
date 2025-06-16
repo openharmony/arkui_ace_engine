@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -219,23 +219,20 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         }
 
         // Process cancel function.
-        auto vm = info.GetVm();
         JSRef<JSVal> cancelCallback = constructorArg->GetProperty("cancel");
         if (!cancelCallback->IsUndefined() && cancelCallback->IsFunction()) {
             auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             auto jsCancelFunction = AceType::MakeRefPtr<JsWeakFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
-            auto jsFunc = JSRef<JSFunc>::Cast(cancelCallback);
-            auto func = jsFunc->GetLocalHandle();
             instance->jsCancelFunction_ = jsCancelFunction;
 
-            auto onCancel = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-                panda::LocalScope pandaScope(vm);
-                panda::TryCatch trycatch(vm);
+            auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsCancelFunction),
+                                node = frameNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("onCancel");
                 auto pipelineContext = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(pipelineContext);
                 pipelineContext->UpdateCurrentActiveNode(node);
-                func->Call(vm, func.ToLocal(), nullptr, 0);
+                func->Execute();
             };
             instance->dialogProperties_.onCancel = onCancel;
         }
@@ -329,17 +326,18 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             }
         }
 
+        auto execContext = info.GetExecutionContext();
         // Parse openAnimation.
         auto openAnimationValue = constructorArg->GetProperty("openAnimation");
         AnimationOption openAnimation;
-        if (ParseAnimation(vm, openAnimationValue, openAnimation)) {
+        if (ParseAnimation(execContext, openAnimationValue, openAnimation)) {
             instance->dialogProperties_.openAnimation = openAnimation;
         }
 
         // Parse closeAnimation.
         auto closeAnimationValue = constructorArg->GetProperty("closeAnimation");
         AnimationOption closeAnimation;
-        if (ParseAnimation(vm, closeAnimationValue, closeAnimation)) {
+        if (ParseAnimation(execContext, closeAnimationValue, closeAnimation)) {
             instance->dialogProperties_.closeAnimation = closeAnimation;
         }
 
@@ -497,7 +495,7 @@ void JSCustomDialogController::JsGetState(const JSCallbackInfo& info)
 }
 
 bool JSCustomDialogController::ParseAnimation(
-    const panda::ecmascript::EcmaVM* vm, const JsiRef<JsiValue>& animationValue, AnimationOption& result)
+    const JsiExecutionContext& execContext, const JsiRef<JsiValue>& animationValue, AnimationOption& result)
 {
     if (animationValue->IsNull() || !animationValue->IsObject()) {
         return false;
@@ -543,16 +541,14 @@ bool JSCustomDialogController::ParseAnimation(
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto jsFunc = JSRef<JSFunc>::Cast(onFinish);
-        auto func = jsFunc->GetLocalHandle();
-        onFinishEvent = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CustomDialog.onFinish");
             auto pipelineContext = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         result.SetOnFinishEvent(onFinishEvent);
     }

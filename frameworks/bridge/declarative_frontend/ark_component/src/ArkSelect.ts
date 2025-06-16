@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -794,9 +794,4 @@ globalThis.Select.menuItemContentModifier = function (modifier): void {
     return new ArkSelectComponent(nativeNode);
   });
   component.menuItemContentModifier(modifier);
-};
-
-globalThis.Select.onSelect = function (value: (index: number, value: string) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().select.setOnSelect(nodePtr, value);
 };
