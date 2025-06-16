@@ -22,11 +22,13 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { Alignment } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkStackNode } from '../handwritten/modifiers/ArkStackNode';
+import { ArkStackAttributeSet, StackModifier } from '../StackModifier';
 
 export class ArkStackPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -95,6 +97,31 @@ export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribut
         }
 }
 export class ArkStackComponent extends ArkCommonMethodComponent implements StackAttribute {
+
+    protected _modifierHost: ArkStackNode | undefined;
+    setModifierHost(value: ArkStackNode): void {
+        this._modifierHost = value;
+    }
+    getModifierHost(): ArkStackNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkStackNode();
+            this._modifierHost!.setPeer(this.getPeer());
+        }
+        return this._modifierHost!;
+    }
+    getAttributeSet(): ArkStackAttributeSet  {
+        return this.getPeer()._attributeSet as ArkStackAttributeSet;
+    }
+
+    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
+        let isCommonModifier: boolean = modifier instanceof StackModifier;
+        if (isCommonModifier) {
+            let commonModifier = modifier as object as StackModifier;
+            this.getPeer()._attributeSet = commonModifier.attributeSet;
+        } else if (this.getPeer()._attributeSet == null) {
+            this.getPeer()._attributeSet = new ArkStackAttributeSet();
+        }
+    }
     getPeer(): ArkStackPeer {
         return (this.peer as ArkStackPeer)
     }
