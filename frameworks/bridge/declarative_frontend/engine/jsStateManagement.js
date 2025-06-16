@@ -239,6 +239,22 @@ class UIUtils {
   static enableV2Compatibility(source) {
     return UIUtils.uiUtilsImpl_.enableV2Compatibility(source);
   }
+
+  /**
+   * Make data binding either read-only or mutable.
+   * Supports both simple getters for read-only data and getter-setter pairs for mutable data.
+
+   * @param {() => T} getter - A function that returns the current value of type T.
+   * @param {(newValue: T) => void} [setter] - (Optional) A function to set a new value of type T. If provided, a MutableBinding is created.
+   * @returns {Binding<T> | MutableBinding<T>} A Binding<T> if no setter is provided, otherwise a MutableBinding<T>.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   * @since 20
+   */
+  static makeBinding(getter, setter) {
+    return UIUtils.uiUtilsImpl_.makeBinding(getter, setter);
+  }
 }
 
 UIUtils.uiUtilsImpl_ = UIUtilsImpl.instance();
