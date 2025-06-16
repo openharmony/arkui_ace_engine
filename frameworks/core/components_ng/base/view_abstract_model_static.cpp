@@ -657,6 +657,21 @@ void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
 }
 
+void ViewAbstractModelStatic::DisableOnAccessibilityHover(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAccessibilityHover();
+}
+
+void ViewAbstractModelStatic::SetOnAccessibilityHover(FrameNode* frameNode,
+    OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAccessibilityHoverEvent(std::move(onAccessibilityHoverEventFunc));
+}
+
 void ViewAbstractModelStatic::SetBloom(FrameNode *frameNode, const std::optional<float>& value,
     const RefPtr<ThemeConstants>& themeConstants)
 {
