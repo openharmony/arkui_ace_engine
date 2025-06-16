@@ -773,6 +773,27 @@ ArkUI_Bool GetListStackFromEnd(ArkUINodeHandle node)
     return ListModelNG::GetListStackFromEnd(frameNode);
 }
 
+void SetListSyncLoad(ArkUINodeHandle node, ArkUI_Bool enabled)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSyncLoad(frameNode, enabled);
+}
+
+void ResetListSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSyncLoad(frameNode, true);
+}
+
+ArkUI_Bool GetListSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return ListModelNG::GetListSyncLoad(frameNode);
+}
+
 void SetListFadingEdge(
     ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
 {
@@ -933,6 +954,9 @@ const ArkUIListModifier* GetListModifier()
         .setListStackFromEnd = SetListStackFromEnd,
         .resetListStackFromEnd = ResetListStackFromEnd,
         .getListStackFromEnd = GetListStackFromEnd,
+        .setListSyncLoad = SetListSyncLoad,
+        .resetListSyncLoad = ResetListSyncLoad,
+        .getListSyncLoad = GetListSyncLoad,
         .setListFadingEdge = SetListFadingEdge,
         .resetListFadingEdge = ResetListFadingEdge,
         .setShowCached = SetShowCached,

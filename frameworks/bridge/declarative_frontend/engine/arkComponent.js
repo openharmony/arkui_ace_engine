@@ -33571,6 +33571,19 @@ class ListStackFromEndModifier extends ModifierWithKey {
   }
 }
 ListStackFromEndModifier.identity = Symbol('listStackFromEnd');
+class ListSyncLoadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListSyncLoad(node);
+    } else {
+      getUINativeModule().list.setListSyncLoad(node, this.value);
+    }
+  }
+}
+ListSyncLoadModifier.identity = Symbol('listSyncLoad');
 class ListNestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -34046,6 +34059,11 @@ class ArkListComponent extends ArkScrollable {
   }
   stackFromEnd(value) {
     modifierWithKey(this._modifiersWithKeys, ListStackFromEndModifier.identity, ListStackFromEndModifier, value);
+    return this;
+  }
+  syncLoad(value) {
+    modifierWithKey(this._modifiersWithKeys, ListSyncLoadModifier.identity,
+      ListSyncLoadModifier, value);
     return this;
   }
   clip(value) {
