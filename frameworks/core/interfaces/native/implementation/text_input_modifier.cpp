@@ -577,6 +577,7 @@ void CancelButton0Impl(Ark_NativePointer node,
     TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
     TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
     if (!optIconOptions) {
+        TextFieldModelStatic::SetDefaultCancelIcon(frameNode);
         return;
     }
     // set icon size
