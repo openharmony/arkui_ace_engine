@@ -513,6 +513,11 @@ public:
     void SetCursorPositionResult(const int32_t cursorPosition, const int32_t requestId) override
     {
     }
+
+    void SetSearchElementInfoBySpecificPropertyResult(const std::list<AccessibilityElementInfo> &infos,
+        const std::list<AccessibilityElementInfo> &treeInfos, const int32_t requestId) override
+    {
+    }
 };
 
 void DumpHandleAction(

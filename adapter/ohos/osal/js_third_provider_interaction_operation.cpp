@@ -260,6 +260,15 @@ void JsThirdProviderInteractionOperation::SetSearchElementInfoByAccessibilityIdR
         }, TaskExecutor::TaskType::BACKGROUND, "SearchElementInfoByAccessibilityId");
 }
 
+void JsThirdProviderInteractionOperation::SearchElementInfoBySpecificProperty(const int64_t elementId,
+    const SpecificPropertyParam &param, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback)
+{
+    std::list<AccessibilityElementInfo> infos;
+    std::list<AccessibilityElementInfo> treeInfos;
+    callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+}
+
 void JsThirdProviderInteractionOperation::SearchElementInfosByText(
     const int64_t elementId, const std::string& text, const int32_t requestId,
     Accessibility::AccessibilityElementOperatorCallback& callback)
