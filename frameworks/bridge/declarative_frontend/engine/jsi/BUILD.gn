@@ -438,10 +438,12 @@ template("declarative_js_engine_ark") {
       public_deps = [ "//foundation/arkui/napi:ace_napi" ]
       include_dirs += [ "//commonlibrary/c_utils/base/include" ]
     } else {
-      external_deps += [
-        "ets_runtime:libark_jsruntime",
-        "napi:ace_napi",
-      ]
+      external_deps += [ "napi:ace_napi" ]
+      if (defined(ark_hybrid) && ark_hybrid) {
+        external_deps += [ "runtime_core:libarkruntime" ]
+      } else {
+        external_deps += [ "ets_runtime:libark_jsruntime" ]
+      }
     }
 
     if (defined(config.build_for_preview) && config.build_for_preview) {
