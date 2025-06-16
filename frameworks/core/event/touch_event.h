@@ -22,6 +22,7 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/event/target_component.h"
 #include "core/event/ace_events.h"
@@ -81,6 +82,18 @@ struct TouchPoint final {
         if (sourceTool == SourceTool::PEN) {
             originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
             id = id + originalId;
+        }
+    }
+
+    int32_t GetOriginalReCovertId() const
+    {
+        if (!AceApplicationInfo::GetInstance().GetTouchPadIdChanged()) {
+            return originalId;
+        }
+        if (sourceTool == SourceTool::PEN) {
+            return originalId - TOUCH_TOOL_BASE_ID - static_cast<int32_t>(sourceTool);
+        } else {
+            return originalId;
         }
     }
 };
@@ -434,6 +447,18 @@ struct TouchEvent final : public PointerEvent {
         if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
             id = id + TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
             originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+        }
+    }
+
+    int32_t GetOriginalReCovertId() const
+    {
+        if (!AceApplicationInfo::GetInstance().GetTouchPadIdChanged()) {
+            return originalId;
+        }
+        if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
+            return originalId - TOUCH_TOOL_BASE_ID - static_cast<int32_t>(sourceTool);
+        } else {
+            return originalId;
         }
     }
 
