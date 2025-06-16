@@ -40,6 +40,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "bridge/declarative_frontend/jsview/js_search.h"
+#include "bridge/declarative_frontend/jsview/js_textfield.h"
 
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -1363,6 +1365,25 @@ void JSViewContext::SetEnableSwipeBack(const JSCallbackInfo& info)
     pipelineContext->SetEnableSwipeBack(info[0]->ToBoolean());
 }
 
+void JSViewContext::JSSetKeyboardAppearanceConfig(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    auto nodeTag = frameNode->GetTag();
+    if (nodeTag == V2::TEXTINPUT_ETS_TAG) {
+        JSTextField::SetKeyboardAppearanceConfig(info);
+    } else if (nodeTag == V2::SEARCH_ETS_TAG) {
+        JSSearch::SetKeyboardAppearanceConfig(info);
+    }
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -1388,6 +1409,7 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod(
         "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
     JSClass<JSViewContext>::StaticMethod("enableSwipeBack", JSViewContext::SetEnableSwipeBack);
+    JSClass<JSViewContext>::StaticMethod("setKeyboardAppearanceConfig", JSViewContext::JSSetKeyboardAppearanceConfig);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

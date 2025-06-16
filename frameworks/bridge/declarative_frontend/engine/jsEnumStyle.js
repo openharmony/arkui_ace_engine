@@ -4052,3 +4052,15 @@ let DragSpringLoadingState;
   DragSpringLoadingState.END = 2;
   DragSpringLoadingState.CANCEL = 3;
 })(DragSpringLoadingState || (DragSpringLoadingState = {}));
+
+let KeyboardGradientMode;
+(function (KeyboardGradientMode) {
+  KeyboardGradientMode[KeyboardGradientMode.NONE = 0] = 'NONE';
+  KeyboardGradientMode[KeyboardGradientMode.LINEAR_GRADIENT = 1] = 'LINEAR_GRADIENT';
+})(KeyboardGradientMode || (KeyboardGradientMode = {}));
+
+let KeyboardFluidLightMode;
+(function (KeyboardFluidLightMode) {
+  KeyboardFluidLightMode[KeyboardFluidLightMode.NONE = 0] = 'NONE';
+  KeyboardFluidLightMode[KeyboardFluidLightMode.BACKGROUND_FLUID_LIGHT = 1] = 'BACKGROUND_FLUID_LIGHT';
+})(KeyboardFluidLightMode || (KeyboardFluidLightMode = {}));

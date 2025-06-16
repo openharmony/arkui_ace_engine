@@ -63,6 +63,10 @@ struct ChangeValueInfo {
     std::u16string oldContent;
     PreviewText oldPreviewText;
 };
+
+struct IMEClient {
+    int32_t nodeId = -1;
+};
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -415,6 +419,18 @@ public:
         }
     }
 
+    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func)
+    {
+        onWillAttachIME_ = std::move(func);
+    }
+
+    void FireOnWillAttachIME(const IMEClient& info)
+    {
+        if (onWillAttachIME_) {
+            onWillAttachIME_(info);
+        }
+    }
+
 private:
     std::optional<std::u16string> lastValue_;
     PreviewText lastPreviewText_ {};
@@ -446,6 +462,8 @@ private:
     std::function<void(const InsertValueInfo&)> onDidInsertValueEvent_;
     std::function<bool(const DeleteValueInfo&)> onWillDeleteEvent_;
     std::function<void(const DeleteValueInfo&)> onDidDeleteEvent_;
+
+    std::function<void(const IMEClient&)> onWillAttachIME_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldEventHub);
 };
 

@@ -141,6 +141,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("strokeWidth", &JSTextField::SetStrokeWidth);
     JSClass<JSTextInput>::StaticMethod("strokeColor", &JSTextField::SetStrokeColor);
     JSClass<JSTextInput>::StaticMethod("enableAutoSpacing", &JSTextField::SetEnableAutoSpacing);
+    JSClass<JSTextInput>::StaticMethod("onWillAttachIME", &JSTextField::SetOnWillAttachIME);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
