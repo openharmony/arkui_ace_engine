@@ -134,7 +134,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
-    if (child->GetParent() == this) {
+    if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
             return;
@@ -226,7 +226,7 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
-    if (child->GetParent() == this) {
+    if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
             LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
@@ -252,7 +252,7 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
-    if (child->GetParent() == this) {
+    if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
             LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
@@ -335,7 +335,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         return children_.end();
     }
     TraversingCheck(*iter);
-    (*iter)->SetParent(nullptr, false);
+    (*iter)->SetAncestor(nullptr);
     auto result = children_.erase(iter);
     return result;
 }
@@ -421,7 +421,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
             AddDisappearingChild(child, index, branchId);
         }
         if (isNotV2IfNode) {
-            child->SetParent(nullptr, false);
+            child->SetAncestor(nullptr);
         }
         ++index;
     }
@@ -503,6 +503,7 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 
 void UINode::ResetParent()
 {
+    ancestor_.Reset();
     parent_.Reset();
     depth_ = -1;
     UpdateThemeScopeId(0);
@@ -640,7 +641,7 @@ void UINode::RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<U
         auto iter = std::find(children.begin(), children.end(), child);
         if (iter != children.end()) {
             parent->TraversingCheck(*iter);
-            (*iter)->SetParent(nullptr, false);
+            (*iter)->SetAncestor(nullptr);
             children.erase(iter);
         }
     }
@@ -1245,7 +1246,7 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
             std::advance(insertIter, index);
             allChildren.insert(insertIter, disappearingChild);
         }
-        disappearingChild->SetParent(WeakClaim(this), false);
+        disappearingChild->SetAncestor(WeakClaim(this));
     }
     for (const auto& child : allChildren) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
@@ -1273,7 +1274,7 @@ void UINode::GenerateOneDepthVisibleFrameWithOffset(
             std::advance(insertIter, index);
             allChildren.insert(insertIter, disappearingChild);
         }
-        disappearingChild->SetParent(WeakClaim(this), false);
+        disappearingChild->SetAncestor(WeakClaim(this));
     }
     for (const auto& child : allChildren) {
         child->OnGenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
@@ -1861,7 +1862,7 @@ void UINode::CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, s
             child->CollectReservedChildren(reservedElmtId);
         }
         if (isEntry) {
-            child->SetParent(nullptr, false);
+            child->SetAncestor(nullptr);
         }
     }
     if (isEntry) {
@@ -1896,7 +1897,7 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
             CollectRemovedChild(child, removedElmtId);
         }
         if (isEntry) {
-            child->SetParent(nullptr, false);
+            child->SetAncestor(nullptr);
         }
     }
     if (isEntry) {
@@ -2029,6 +2030,7 @@ void UINode::SetParent(const WeakPtr<UINode>& parent, bool needDetect)
         return;
     }
     parent_ = parent;
+    ancestor_ = parent;
 }
 
 int32_t UINode::GetThemeScopeId() const
@@ -2165,5 +2167,15 @@ bool UINode::LessThanAPITargetVersion(PlatformVersion version) const
         return apiVersion_ < static_cast<int32_t>(version);
     }
     return context_->LessThanAPITargetVersion(version);
+}
+
+RefPtr<UINode> UINode::GetAncestor() const
+{
+    return ancestor_.Upgrade();
+}
+
+void UINode::SetAncestor(const WeakPtr<UINode>& parent)
+{
+    ancestor_ = parent;
 }
 } // namespace OHOS::Ace::NG
