@@ -121,13 +121,14 @@ std::tuple<std::string, int32_t, int32_t> EngineHelper::GetPositionOnJsCode()
     std::string stack;
     CHECK_NULL_RETURN(jsEngine, std::make_tuple("", 0, 0));
     jsEngine->GetStackTrace(stack);
-    std::regex reg("([^:]+):(\\d+):(\\d+)");
+    std::regex reg("([^|]+)\\|([^|]+)\\|[^|]+\\|([^:]+):(\\d+):(\\d+)");
     std::smatch match;
     if (std::regex_search(stack, match, reg)) {
+        std::string filePath = match[2].str() + "/" + match[3].str();
         return {
-            match[1].str(),
-            StringUtils::StringToInt(match[2].str()),
-            StringUtils::StringToInt(match[3].str())
+            filePath,
+            StringUtils::StringToInt(match[4].str()),
+            StringUtils::StringToInt(match[5].str())
         };
     }
     return {"", 0, 0 };
