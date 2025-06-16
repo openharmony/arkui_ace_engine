@@ -2131,6 +2131,19 @@ class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey {
   }
 }
 OnGestureRecognizerJudgeBeginModifier.identity = Symbol('onGestureRecognizerJudgeBegin');
+class OnTouchTestDoneModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnTouchTestDone(node);
+    } else {
+      getUINativeModule().common.setOnTouchTestDone(node, this.value);
+    }
+  }
+}
+OnGestureRecognizerJudgeBeginModifier.identity = Symbol('onOnTouchTestDone');
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3793,6 +3806,11 @@ class ArkComponent {
   onGestureRecognizerJudgeBegin(callback) {
     this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
+    return this;
+  }
+  onTouchTestDone(callback) {
+    this._onTouchTestDone = callback;
+    modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback) {

@@ -8128,6 +8128,10 @@ ArkUI_Int32 SetOnTouchTestDoneCallback(ArkUINodeHandle node, void* userData,
     if (!frameNode) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    if (!touchTestDone) {
+        ViewAbstract::SetOnTouchTestDone(frameNode, nullptr);
+        return ERROR_CODE_NO_ERROR;
+    }
     auto callback = [node, userData, touchTestDone](const std::shared_ptr<BaseGestureEvent>& event,
                         const std::list<RefPtr<NGGestureRecognizer>>& recognizers) {
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
