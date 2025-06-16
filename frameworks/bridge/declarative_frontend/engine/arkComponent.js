@@ -7761,62 +7761,6 @@ if (globalThis.Grid !== undefined) {
       return new modifierJS.GridModifier(nativePtr, classType);
     });
   };
-  globalThis.Grid.onScrollBarUpdate = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnScrollBarUpdate(nodePtr, value);
-  };
-  globalThis.Grid.onItemDragEnter = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnItemDragEnter(nodePtr, value);
-  };
-  globalThis.Grid.onItemDragMove = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnItemDragMove(nodePtr, value);
-  };
-  globalThis.Grid.onItemDragLeave = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnItemDragLeave(nodePtr, value);
-  };
-  globalThis.Grid.onItemDragStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnItemDragStart(nodePtr, value);
-  };
-  globalThis.Grid.onItemDrop = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnItemDrop(nodePtr, value);
-  };
-  globalThis.Grid.onReachStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnReachStart(nodePtr, value);
-  };
-  globalThis.Grid.onReachEnd = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnReachEnd(nodePtr, value);
-  };
-  globalThis.Grid.onScrollStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnScrollStart(nodePtr, value);
-  };
-  globalThis.Grid.onScrollStop = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnScrollStop(nodePtr, value);
-  };
-  globalThis.Grid.onScrollIndex = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnScrollIndex(nodePtr, value);
-  };
-  globalThis.Grid.onScrollFrameBegin = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnScrollFrameBegin(nodePtr, value);
-  };
-  globalThis.Grid.onWillScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnWillScroll(nodePtr, value);
-  };
-  globalThis.Grid.onDidScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().grid.setOnDidScroll(nodePtr, value);
-  };
   globalThis.Grid.onWillStopDragging = function (value) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
@@ -10473,10 +10417,6 @@ if (globalThis.LinearIndicator !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.LinearIndicatorModifier(nativePtr, classType);
     });
-  };
-  globalThis.LinearIndicator.onChange = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().linearIndicator.setOnChange(nodePtr, value);
   };
 }
 
@@ -20812,18 +20752,6 @@ if (globalThis.Refresh !== undefined) {
       return new modifierJS.RefreshModifier(nativePtr, classType);
     });
   };
-  globalThis.Refresh.onStateChange = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().refresh.setOnStateChange(nodePtr, value);
-  };
-  globalThis.Refresh.onRefreshing = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().refresh.setOnRefreshing(nodePtr, value);
-  };
-  globalThis.Refresh.onOffsetChange = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().refresh.setOnOffsetChange(nodePtr, value);
-  };
 }
 
 /// <reference path='./import.ts' />
@@ -21279,42 +21207,6 @@ if (globalThis.Scroll !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.ScrollModifier(nativePtr, classType);
     });
-  };
-  globalThis.Scroll.onScrollFrameBegin = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scroll.setScrollOnScrollFrameBegin(nodePtr, value);
-  };
-  globalThis.Scroll.onWillScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scroll.setScrollOnWillScroll(nodePtr, value);
-  };
-  globalThis.Scroll.onDidScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scroll.setScrollOnDidScroll(nodePtr, value);
-  };
-  globalThis.Scroll.onScrollEdge = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scroll.setScrollOnScrollEdge(nodePtr, value);
-  };
-  globalThis.Scroll.onScrollEnd = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scroll.setScrollOnScrollEnd(nodePtr, value);
-  };
-  globalThis.Scroll.onScrollStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scroll.setScrollOnScrollStart(nodePtr, value);
-  };
-  globalThis.Scroll.onScrollStop = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scroll.setScrollOnScrollStop(nodePtr, value);
-  };
-  globalThis.Scroll.onReachStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scrollable.setOnReachStart(nodePtr, value);
-  };
-  globalThis.Scroll.onReachEnd = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().scrollable.setOnReachEnd(nodePtr, value);
   };
   globalThis.Scroll.onWillStopDragging = function (value) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
@@ -26788,22 +26680,6 @@ if (globalThis.AlphabetIndexer !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.AlphabetIndexerModifier(nativePtr, classType);
     });
-  };
-  globalThis.AlphabetIndexer.onSelected = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().alphabetIndexer.setOnSelected(nodePtr, value);
-  };
-  globalThis.AlphabetIndexer.onSelect = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().alphabetIndexer.setOnSelect(nodePtr, value);
-  };
-  globalThis.AlphabetIndexer.onRequestPopupData = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().alphabetIndexer.setOnRequestPopupData(nodePtr, value);
-  };
-  globalThis.AlphabetIndexer.onPopupSelect = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().alphabetIndexer.setOnPopupSelect(nodePtr, value);
   };
 }
 
@@ -33215,10 +33091,6 @@ if (globalThis.GridItem !== undefined) {
       return new modifierJS.GridItemModifier(nativePtr, classType);
     });
   };
-  globalThis.GridItem.onSelect = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().gridItem.setGridItemOnSelected(nodePtr, value);
-  };
 }
 
 /// <reference path='./import.ts' />
@@ -34150,66 +34022,6 @@ if (globalThis.List !== undefined) {
       return new modifierJS.ListModifier(nativePtr, classType);
     });
   };
-  globalThis.List.onReachStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnReachStart(nodePtr, value);
-  };
-  globalThis.List.onReachEnd = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnReachEnd(nodePtr, value);
-  };
-  globalThis.List.onScrollStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnScrollStart(nodePtr, value);
-  };
-  globalThis.List.onScrollStop = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnScrollStop(nodePtr, value);
-  };
-  globalThis.List.onItemMove = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnItemMove(nodePtr, value);
-  };
-  globalThis.List.onScrollIndex = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnScrollIndex(nodePtr, value);
-  };
-  globalThis.List.onScrollVisibleContentChange = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnScrollVisibleContentChange(nodePtr, value);
-  };
-  globalThis.List.onScrollFrameBegin = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnScrollFrameBegin(nodePtr, value);
-  };
-  globalThis.List.onItemDragStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnItemDragStart(nodePtr, value);
-  };
-  globalThis.List.onItemDragEnter = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnItemDragEnter(nodePtr, value);
-  };
-  globalThis.List.onItemDragMove = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnItemDragMove(nodePtr, value);
-  };
-  globalThis.List.onItemDragLeave = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnItemDragLeave(nodePtr, value);
-  };
-  globalThis.List.onItemDrop = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnItemDrop(nodePtr, value);
-  };
-  globalThis.List.onWillScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnWillScroll(nodePtr, value);
-  };
-  globalThis.List.onDidScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().list.setOnDidScroll(nodePtr, value);
-  };
   globalThis.List.onWillStopDragging = function (value) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
@@ -34340,10 +34152,6 @@ if (globalThis.ListItem !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.ListItemModifier(nativePtr, classType);
     });
-  };
-  globalThis.ListItem.onSelect = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().listItem.setOnSelect(nodePtr, value);
   };
 }
 
@@ -35388,42 +35196,6 @@ if (globalThis.Swiper !== undefined) {
       return new modifierJS.SwiperModifier(nativePtr, classType);
     });
   };
-  globalThis.Swiper.onChange = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().swiper.setSwiperOnChange(nodePtr, value);
-  };
-  globalThis.Swiper.onAnimationStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().swiper.setSwiperOnAnimationStart(nodePtr, value);
-  };
-  globalThis.Swiper.onAnimationEnd = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().swiper.setSwiperOnAnimationEnd(nodePtr, value);
-  };
-  globalThis.Swiper.onGestureSwipe = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().swiper.setSwiperOnGestureSwipe(nodePtr, value);
-  };
-  globalThis.Swiper.customContentTransition = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().swiper.setSwiperCustomContentTransition(nodePtr, value);
-  };
-  globalThis.Swiper.onSelected = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().swiper.setSwiperOnSelected(nodePtr, value);
-  };
-  globalThis.Swiper.onUnselected = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().swiper.setSwiperOnUnselected(nodePtr, value);
-  };
-  globalThis.Swiper.onContentDidScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().swiper.setSwiperOnContentDidScroll(nodePtr, value);
-  };
-  globalThis.Swiper.onContentWillScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().swiper.setSwiperOnContentWillScroll(nodePtr, value);
-  };
 }
 
 class IndicatorComponentInitialIndexModifier extends ModifierWithKey {
@@ -35651,10 +35423,6 @@ if (globalThis.IndicatorComponent !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.IndicatorComponentModifier(nativePtr, classType);
     });
-  };
-  globalThis.IndicatorComponent.onChange = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().indicatorComponent.setOnChange(nodePtr, value);
   };
 }
 
@@ -36492,42 +36260,6 @@ if (globalThis.Tabs !== undefined) {
       return new modifierJS.TabsModifier(nativePtr, classType);
     });
   };
-  globalThis.Tabs.onChange = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabs.setTabsOnChange(nodePtr, value);
-  };
-  globalThis.Tabs.onTabBarClick = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabs.setTabsOnTabBarClick(nodePtr, value);
-  };
-  globalThis.Tabs.onSelected = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabs.setTabsOnSelected(nodePtr, value);
-  };
-  globalThis.Tabs.onUnselected = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabs.setTabOnUnselected(nodePtr, value);
-  };
-  globalThis.Tabs.onAnimationStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabs.setTabsOnAnimationStart(nodePtr, value);
-  };
-  globalThis.Tabs.onAnimationEnd = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabs.setTabsOnAnimationEnd(nodePtr, value);
-  };
-  globalThis.Tabs.onGestureSwipe = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabs.setTabsOnGestureSwipe(nodePtr, value);
-  };
-  globalThis.Tabs.customContentTransition = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabs.setTabsCustomContentTransition(nodePtr, value);
-  };
-  globalThis.Tabs.onContentWillChange = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabs.setTabsOnContentWillChange(nodePtr, value);
-  };
 }
 
 /// <reference path='./import.ts' />
@@ -36664,14 +36396,6 @@ if (globalThis.TabContent !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.TabContentModifier(nativePtr, classType);
     });
-  };
-  globalThis.TabContent.onWillShow = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabContent.setTabContentOnWillShow(nodePtr, value);
-  };
-  globalThis.TabContent.onWillHide = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().tabContent.setTabContentOnWillHide(nodePtr, value);
   };
 }
 
@@ -37186,38 +36910,6 @@ if (globalThis.WaterFlow !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.WaterFlowModifier(nativePtr, classType);
     });
-  };
-  globalThis.WaterFlow.onReachStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().waterFlow.setOnReachStart(nodePtr, value);
-  };
-  globalThis.WaterFlow.onReachEnd = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().waterFlow.setOnReachEnd(nodePtr, value);
-  };
-  globalThis.WaterFlow.onScrollFrameBegin = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().waterFlow.setOnScrollFrameBegin(nodePtr, value);
-  };
-  globalThis.WaterFlow.onScrollStart = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().waterFlow.setOnScrollStart(nodePtr, value);
-  };
-  globalThis.WaterFlow.onScrollStop = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().waterFlow.setOnScrollStop(nodePtr, value);
-  };
-  globalThis.WaterFlow.onScrollIndex = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().waterFlow.setOnScrollIndex(nodePtr, value);
-  };
-  globalThis.WaterFlow.onWillScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().waterFlow.setOnWillScroll(nodePtr, value);
-  };
-  globalThis.WaterFlow.onDidScroll = function (value) {
-    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().waterFlow.setOnDidScroll(nodePtr, value);
   };
   globalThis.WaterFlow.onWillStopDragging = function (value) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();

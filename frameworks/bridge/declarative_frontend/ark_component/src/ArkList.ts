@@ -884,67 +884,6 @@ globalThis.List.attributeModifier = function (modifier: ArkComponent): void {
   });
 };
 
-globalThis.List.onReachStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnReachStart(nodePtr, value);
-};
-globalThis.List.onReachEnd = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnReachEnd(nodePtr, value);
-};
-globalThis.List.onScrollStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnScrollStart(nodePtr, value);
-};
-globalThis.List.onScrollStop = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnScrollStop(nodePtr, value);
-};
-globalThis.List.onItemMove = function (value: (from: number, to: number) => boolean): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnItemMove(nodePtr, value);
-};
-globalThis.List.onScrollIndex = function (value: (start: number, end: number, center: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnScrollIndex(nodePtr, value);
-};
-globalThis.List.onScrollVisibleContentChange = function (value: OnScrollVisibleContentChangeCallback): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnScrollVisibleContentChange(nodePtr, value);
-};
-globalThis.List.onScrollFrameBegin = function (value: (offset: number, state: ScrollState) => { offsetRemain: number; }): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnScrollFrameBegin(nodePtr, value);
-};
-globalThis.List.onItemDragStart = function (value: (event: ItemDragInfo, itemIndex: number) => void | (() => any)): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnItemDragStart(nodePtr, value);
-};
-globalThis.List.onItemDragEnter = function (value: (event: ItemDragInfo) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnItemDragEnter(nodePtr, value);
-};
-globalThis.List.onItemDragMove = function (value: (event: ItemDragInfo, itemIndex: number, insertIndex: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnItemDragMove(nodePtr, value);
-};
-globalThis.List.onItemDragLeave = function (value: (event: ItemDragInfo, itemIndex: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnItemDragLeave(nodePtr, value);
-};
-globalThis.List.onItemDrop = function (value: (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnItemDrop(nodePtr, value);
-};
-globalThis.List.onWillScroll = function (value: (xOffset: number, yOffset: number,
-  scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnWillScroll(nodePtr, value);
-};
-globalThis.List.onDidScroll = function (value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().list.setOnDidScroll(nodePtr, value);
-};
 globalThis.List.onWillStopDragging = function (value: (velocity: number) => void) {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);

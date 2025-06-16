@@ -1100,32 +1100,26 @@ ArkUINativeModuleValue ListBridge::SetOnItemDragStart(ArkUIRuntimeCallInfo* runt
 
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
     std::function<RefPtr<AceType>(const ItemDragInfo&, int32_t)> callback =
-        [vm, frameNode, func = std::move(jsOnDragFunc)](
+        [vm, frameNode, func = std::move(jsOnDragFunc), execCtx = info.GetExecutionContext()](
             const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<AceType> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
 
-        auto result = func->ItemDragStartExecute(dragInfo, itemIndex);
-        auto ret = result->GetLocalHandle();
-        panda::Local<panda::FunctionRef> builderFuncRef;
-        if (ret->IsFunction(vm)) {
-            builderFuncRef = ret->ToObject(vm);
-        } else if (ret->IsObject(vm)) {
-            auto builderObj = JSRef<JSObject>::Make(ret);
-            auto builder = builderObj->GetProperty("builder");
-            if (!builder->IsFunction()) {
-                return nullptr;
-            }
-            builderFuncRef = builder->GetLocalHandle()->ToObject(vm);
-        } else {
+        auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
+        if (!ret->IsFunction()) {
+            return nullptr;
+        }
+
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(ret));
+        if (!builderFunc) {
             return nullptr;
         }
         // use another VSP instance while executing the builder function
         ViewStackModel::GetInstance()->NewScope();
         {
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-            auto builderFunc = panda::CopyableGlobal(vm, builderFuncRef);
-            builderFunc->Call(vm, builderFunc.ToLocal(), nullptr, 0);
+            builderFunc->Execute();
         }
         return ViewStackModel::GetInstance()->Finish();
     };
@@ -1148,8 +1142,10 @@ ArkUINativeModuleValue ListBridge::SetOnItemDragEnter(ArkUIRuntimeCallInfo* runt
     }
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
-    std::function<void(const ItemDragInfo&)> callback = [vm, frameNode, func = std::move(jsOnDragFunc)](
+    std::function<void(const ItemDragInfo&)> callback = [vm, frameNode, func = std::move(jsOnDragFunc),
+                                                      execCtx = info.GetExecutionContext()](
                                                       const ItemDragInfo& dragInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
 
@@ -1176,8 +1172,9 @@ ArkUINativeModuleValue ListBridge::SetOnItemDragMove(ArkUIRuntimeCallInfo* runti
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
     std::function<void(const ItemDragInfo&, int32_t, int32_t)> callback =
-        [vm, frameNode, func = std::move(jsOnDragFunc)](
+        [vm, frameNode, func = std::move(jsOnDragFunc), execCtx = info.GetExecutionContext()](
             const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
 

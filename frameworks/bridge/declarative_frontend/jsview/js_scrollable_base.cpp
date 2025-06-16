@@ -29,6 +29,58 @@ void JSScrollableBase::JSFlingSpeedLimit(const JSCallbackInfo& info)
     NG::ScrollableModelNG::SetMaxFlingSpeed(max);
 }
 
+void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
+{
+    if (args.Length() <= 0) {
+        return;
+    }
+    if (args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const CalcDimension& scrollOffset, const ScrollState& scrollState,
+                            ScrollSource scrollSource) {
+            auto params = ConvertToJSValues(scrollOffset, scrollState, scrollSource);
+            ScrollFrameResult scrollRes { .offset = scrollOffset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
+        };
+        NG::ScrollableModelNG::SetOnWillScroll(std::move(onScroll));
+    } else {
+        NG::ScrollableModelNG::SetOnWillScroll(nullptr);
+    }
+}
+
+void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
+{
+    if (args.Length() <= 0) {
+        return;
+    }
+    if (args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(scrollOffset, scrollState);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        NG::ScrollableModelNG::SetOnDidScroll(std::move(onScroll));
+    } else {
+        NG::ScrollableModelNG::SetOnDidScroll(nullptr);
+    }
+}
+
 void JSScrollableBase::SetFadingEdge(const JSCallbackInfo& info)
 {
     bool fadingEdge = false;
@@ -69,6 +121,8 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSScrollableBase>::Declare("JSContainerBase");
     JSClass<JSScrollableBase>::StaticMethod("flingSpeedLimit", &JSScrollableBase::JSFlingSpeedLimit, opt);
+    JSClass<JSScrollableBase>::StaticMethod("onWillScroll", &JSScrollableBase::JsOnWillScroll);
+    JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
     JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
