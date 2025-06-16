@@ -1776,10 +1776,11 @@ bool JSViewAbstract::ParseSheetIsShow(const JSCallbackInfo& info, const std::str
     std::function<void(const std::string&)>& callback)
 {
     bool isShow = false;
-    if (info[0]->IsBoolean()) {
-        isShow = info[0]->ToBoolean();
-    } else if (info[0]->IsObject()) {
-        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+    auto tmpInfo = info[0];
+    if (tmpInfo->IsBoolean()) {
+        isShow = tmpInfo->ToBoolean();
+    } else if (tmpInfo->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(tmpInfo);
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
         callback = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "changeEvent");
