@@ -1952,7 +1952,7 @@ void BackgroundImagePositionImpl(Ark_NativePointer node,
     }
     bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
     bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
-    // ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
+    ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 void BackgroundEffect0Impl(Ark_NativePointer node,
                            const Opt_BackgroundEffectOptions* value)
@@ -1982,7 +1982,7 @@ void BackgroundImageResizableImpl(Ark_NativePointer node,
     ImageResizableSlice convValue {};
     convValue = Converter::OptConvert<ImageResizableSlice>(optValue->slice).value_or(convValue);
     // lattice .. This parameter does not take effect for the backgroundImageResizable API.
-    // ViewAbstract::SetBackgroundImageResizableSlice(frameNode, convValue);
+    ViewAbstract::SetBackgroundImageResizableSlice(frameNode, convValue);
 }
 void ForegroundEffectImpl(Ark_NativePointer node,
                           const Opt_ForegroundEffectOptions* value)
@@ -2614,9 +2614,9 @@ void OnDigitalCrownImpl(Ark_NativePointer node,
             };
             callback.Invoke(crownEvent);
         };
-        // ViewAbstract::SetOnCrownEvent(frameNode, std::move(onDigitalCrown));
+        ViewAbstract::SetOnCrownEvent(frameNode, std::move(onDigitalCrown));
     } else {
-        // ViewAbstract::DisableOnCrownEvent(frameNode);
+        ViewAbstract::DisableOnCrownEvent(frameNode);
     }
 #endif
 }
@@ -2627,7 +2627,7 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+        ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
         return;
     } else {
         auto weakNode = AceType::WeakClaim(frameNode);
@@ -2638,7 +2638,7 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
-        // ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
+        ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
     }
 }
 void OnKeyEventDispatchImpl(Ark_NativePointer node,
@@ -3375,7 +3375,7 @@ void VisibilityImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetVisibility(frameNode, convValue.value());
+    ViewAbstract::SetVisibility(frameNode, convValue.value());
 }
 void FlexGrowImpl(Ark_NativePointer node,
                   const Opt_Number* value)
@@ -3702,7 +3702,7 @@ void OnDragEnterImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    // ViewAbstract::SetOnDragEnter(frameNode, std::move(onDragEnter));
+    ViewAbstract::SetOnDragEnter(frameNode, std::move(onDragEnter));
 }
 void OnDragMoveImpl(Ark_NativePointer node,
                     const Opt_Callback_DragEvent_String_Void* value)
@@ -3720,7 +3720,7 @@ void OnDragMoveImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    // ViewAbstract::SetOnDragMove(frameNode, std::move(onDragMove));
+    ViewAbstract::SetOnDragMove(frameNode, std::move(onDragMove));
 }
 void OnDragLeaveImpl(Ark_NativePointer node,
                      const Opt_Callback_DragEvent_String_Void* value)
@@ -3738,7 +3738,7 @@ void OnDragLeaveImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    // ViewAbstract::SetOnDragLeave(frameNode, std::move(onDragLeave));
+    ViewAbstract::SetOnDragLeave(frameNode, std::move(onDragLeave));
 }
 void OnDrop0Impl(Ark_NativePointer node,
                  const Opt_Callback_DragEvent_String_Void* value)
@@ -3756,7 +3756,7 @@ void OnDrop0Impl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    // ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
+    ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
 }
 void OnDrop1Impl(Ark_NativePointer node,
                  const Opt_OnDragEventCallback* eventCallback,
@@ -3784,15 +3784,15 @@ void OnDragEndImpl(Ark_NativePointer node,
         std::string extraParams = "";
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    // ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
+    ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
 }
 void AllowDropImpl(Ark_NativePointer node,
                    const Opt_Array_UniformDataType* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto allowDrop = Converter::OptConvertPtr<std::set<std::string>>(value);
-    // ViewAbstract::SetAllowDrop(frameNode, allowDrop);
+    auto allowDrop = value ? Converter::OptConvert<std::set<std::string>>(*value) : std::nullopt;
+    ViewAbstractModelStatic::SetAllowDrop(frameNode, allowDrop);
 }
 void DraggableImpl(Ark_NativePointer node,
                    const Opt_Boolean* value)
@@ -3804,48 +3804,48 @@ void DraggableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetDraggable(frameNode, *convValue);
+    ViewAbstract::SetDraggable(frameNode, *convValue);
 }
 void DragPreview0Impl(Ark_NativePointer node,
                       const Opt_Union_CustomBuilder_DragItemInfo_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // Converter::VisitUnionPtr(value,
-    //     [frameNode](const Ark_String& val) {
-    //         // ViewAbstract::SetDragPreview(frameNode,
-    //             // DragDropInfo { .inspectorId = Converter::Convert<std::string>(val) });
-    //     },
-    //     [node, frameNode](const CustomNodeBuilder& val) {
-    //         CallbackHelper(val).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-    //             // ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode });
-    //             // }, node);
-    //     },
-    //     [node, frameNode](const Ark_DragItemInfo& value) {
-    //         auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
-    //         DragDropInfo dragDropInfo {
-    //             .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
-    //             .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string())
-    //         };
-    //         // if (builder) {
-    //         //     // CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
-    //         //     //     const RefPtr<UINode>& uiNode) {
-    //         //     //     DragDropInfo info;
-    //         //     //     info.customNode = uiNode;
-    //         //     //     info.pixelMap = dragDropInfo.pixelMap;
-    //         //     //     info.extraInfo = dragDropInfo.extraInfo;
-    //         //     //      ViewAbstract::SetDragPreview(frameNode, info);
-    //         //     //     }, node);
-    //         // } else {
-    //         //     // ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
-    //         //         // .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
-    //         //         // .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string()) });
-    //         // }
-    //     },
-    //     [frameNode]() {
-    //         std::optional<DragDropInfo> empty = std::nullopt;
-    //         // ViewAbstract::SetDragPreview(frameNode, empty);
-    //     });
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Converter::VisitUnionPtr(value,
+        [frameNode](const Ark_String& val) {
+            ViewAbstract::SetDragPreview(frameNode,
+                DragDropInfo { .inspectorId = Converter::Convert<std::string>(val) });
+        },
+        [node, frameNode](const CustomNodeBuilder& val) {
+            CallbackHelper(val).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode });
+                }, node);
+        },
+        [node, frameNode](const Ark_DragItemInfo& value) {
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            DragDropInfo dragDropInfo {
+                .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
+                .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string())
+            };
+            if (builder) {
+                CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
+                    const RefPtr<UINode>& uiNode) {
+                    DragDropInfo info;
+                    info.customNode = uiNode;
+                    info.pixelMap = dragDropInfo.pixelMap;
+                    info.extraInfo = dragDropInfo.extraInfo;
+                     ViewAbstract::SetDragPreview(frameNode, info);
+                    }, node);
+            } else {
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
+                    .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
+                    .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string()) });
+            }
+        },
+        [frameNode]() {
+            std::optional<DragDropInfo> empty = std::nullopt;
+            ViewAbstractModelStatic::SetDragPreview(frameNode, empty);
+        });
 }
 void DragPreview1Impl(Ark_NativePointer node,
                       const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
@@ -3870,7 +3870,7 @@ void OnPreDragImpl(Ark_NativePointer node,
     auto onPreDrag = [callback = CallbackHelper(*optValue)](const PreDragStatus info) {
         callback.Invoke(Converter::ArkValue<Ark_PreDragStatus>(info));
     };
-    // ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
+    ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
 }
 void LinearGradient0Impl(Ark_NativePointer node,
                          const Opt_LinearGradientOptions* value)
@@ -4137,7 +4137,7 @@ void RestoreIdImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetRestoreId(frameNode, *convValue);
+    ViewAbstract::SetRestoreId(frameNode, *convValue);
 }
 void SphericalEffect0Impl(Ark_NativePointer node,
                           const Opt_Number* value)
@@ -4435,7 +4435,7 @@ void ObscuredImpl(Ark_NativePointer node,
             vec.emplace_back(reason.value());
         }
     }
-    // ViewAbstract::SetObscured(frameNode, vec);
+    ViewAbstract::SetObscured(frameNode, vec);
 }
 void ReuseIdImpl(Ark_NativePointer node,
                  const Opt_String* value)
@@ -4718,22 +4718,23 @@ void BackgroundImpl(Ark_NativePointer node,
                     const Opt_CustomNodeBuilder* builder,
                     const Opt_Literal_Alignment_align* options)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto optAlign = Converter::OptConvertPtr<Alignment>(options);
-    // auto optBuilder = Converter::GetOptPtr(builder);
-    // if (!optBuilder) {
-    //     // TODO: Reset value
-    //     return;
-    // }
-    // CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
-    //     CHECK_NULL_VOID(uiNode);
-    //     auto builder = [uiNode]() -> RefPtr<UINode> {
-    //         return uiNode;
-    //     };
-        // ViewAbstractModelNG::BindBackground(frameNode, builder, optAlign);
-        // }, node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optAlign = Converter::OptConvertPtr<Alignment>(options);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        // TODO: Reset value
+        return;
+    }
+    CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto builder = [uiNode]() -> RefPtr<UINode> {
+                return uiNode;
+            };
+            ViewAbstractModelStatic::BindBackground(frameNode, builder, optAlign);
+        }, node);
 }
+
 void BackgroundImage0Impl(Ark_NativePointer node,
                           const Opt_Union_ResourceStr_PixelMap* src,
                           const Opt_ImageRepeat* repeat)
@@ -4742,10 +4743,10 @@ void BackgroundImage0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
 
     std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
-    // ViewAbstract::SetBackgroundImage(frameNode, sourceInfo);
+    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
 
-    auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(repeat);
-    // ViewAbstract::SetBackgroundImageRepeat(frameNode, imageRepeat);
+    auto imageRepeat = repeat ? Converter::OptConvert<ImageRepeat>(*repeat) : std::nullopt;
+    ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat);
 }
 void BackgroundImage1Impl(Ark_NativePointer node,
                           const Opt_Union_ResourceStr_PixelMap* src,
@@ -4827,9 +4828,9 @@ void FocusScopeId1Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto convIsGroupValue = Converter::OptConvertPtr<bool>(isGroup);
-    auto convArrowStepOutValue = Converter::OptConvertPtr<bool>(arrowStepOut);
-    // ViewAbstract::SetFocusScopeId(frameNode, *convIdValue, convIsGroupValue, convArrowStepOutValue);
+    auto convIsGroupValue = isGroup ? Converter::OptConvert<bool>(*isGroup) : std::nullopt;
+    auto convArrowStepOutValue = arrowStepOut ? Converter::OptConvert<bool>(*arrowStepOut) : std::nullopt;
+    ViewAbstractModelStatic::SetFocusScopeId(frameNode, *convIdValue, convIsGroupValue, convArrowStepOutValue);
 }
 void FocusScopePriorityImpl(Ark_NativePointer node,
                             const Opt_String* scopeId,
@@ -5021,38 +5022,40 @@ void DragPreviewOptionsImpl(Ark_NativePointer node,
         }
     }
     LOGE("CommonMethodModifier::DragPreviewOptionsImpl Ark_ImageModifier is not supported yet.");
-    // ViewAbstract::SetDragPreviewOptions(frameNode, *previewOption);
+    ViewAbstract::SetDragPreviewOptions(frameNode, *previewOption);
 }
 void OverlayImpl(Ark_NativePointer node,
                  const Opt_Union_String_CustomBuilder_ComponentContent* value,
                  const Opt_OverlayOptions* options)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // OverlayOptions overlay { .align = Alignment::TOP_LEFT};
-    // overlay = Converter::OptConvertPtr<OverlayOptions>(options).value_or(overlay);
-    // Converter::VisitUnionPtr(value,
-    //     [frameNode, &overlay](const Ark_String& src) {
-    //         overlay.content = Converter::Convert<std::string>(src);
-    //         // ViewAbstract::SetOverlay(frameNode, overlay);
-    //     },
-    //     [node, frameNode, overlay](const CustomNodeBuilder& builder) {
-    //         CallbackHelper(builder).BuildAsync([overlay, frameNode](const RefPtr<UINode>& uiNode) {
-    //             auto builderFunc = [frameNode, uiNode]() {
-    //                 PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-    //                 ViewStackProcessor::GetInstance()->Push(uiNode);
-    //             };
-    //             // ViewAbstract::SetOverlayBuilder(
-    //             //     frameNode, std::move(builderFunc), overlay.align, overlay.x, overlay.y);
-    //             // }, node);
-    //     },
-    //     [](const Ark_ComponentContent& src) {
-    //         LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
-    //     },
-    //     []() {
-    //         LOGE("OverlayImpl(): Invalid union argument");
-    //     });
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    OverlayOptions overlay { .align = Alignment::TOP_LEFT };
+    overlay = Converter::OptConvertPtr<OverlayOptions>(options).value_or(overlay);
+    Converter::VisitUnionPtr(value,
+        [frameNode, &overlay](const Ark_String& src) {
+            overlay.content = Converter::Convert<std::string>(src);
+            ViewAbstract::SetOverlay(frameNode, overlay);
+        },
+        [node, frameNode, overlay](const CustomNodeBuilder& builder) {
+            CallbackHelper(builder).BuildAsync([overlay, frameNode](const RefPtr<UINode>& uiNode) {
+                auto builderFunc = [frameNode, uiNode]() {
+                    PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                    ViewStackProcessor::GetInstance()->Push(uiNode);
+                };
+                ViewAbstract::SetOverlayBuilder(
+                    std::move(builderFunc), overlay.align, overlay.x, overlay.y);
+                }, node);
+        },
+        [](const Ark_ComponentContent& src) {
+            LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
+        },
+        []() {
+            LOGE("OverlayImpl(): Invalid union argument");
+        }
+    );
 }
+
 void BlendMode0Impl(Ark_NativePointer node,
                     const Opt_BlendMode* value,
                     const Opt_BlendApplyType* type)

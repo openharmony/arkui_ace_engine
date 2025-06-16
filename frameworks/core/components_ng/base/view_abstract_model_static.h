@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <utility>
+#include "view_abstract.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/vector.h"
@@ -248,7 +249,10 @@ public:
     static void SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
     static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
     static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
-
+    static void SetAllowDrop(FrameNode* frameNode, const std::optional<std::set<std::string>>& allowDrop);
+    static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
+    static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
     static void RegisterContextMenuKeyEvent(

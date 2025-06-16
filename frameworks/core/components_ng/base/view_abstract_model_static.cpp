@@ -1422,4 +1422,45 @@ void ViewAbstractModelStatic::SetOuterBorderStyle(FrameNode* frameNode, const Bo
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderStyle, value, frameNode);
 }
+
+void ViewAbstractModelStatic::SetAllowDrop(FrameNode* frameNode,
+    const std::optional<std::set<std::string>>& allowDrop)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDisallowDropForcedly(!allowDrop.has_value());
+    frameNode->SetAllowDrop(allowDrop.value_or(std::set<std::string>{}));
+}
+
+void ViewAbstractModelStatic::SetDragPreview(FrameNode* frameNode,
+    const std::optional<DragDropInfo>& DragDropInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (DragDropInfo.has_value()) {
+        frameNode->SetDragPreview(DragDropInfo.value());
+    } else {
+        //Reset
+        NG::DragDropInfo dragPreviewInfo;
+        frameNode->SetDragPreview(dragPreviewInfo);
+    }
+}
+
+void ViewAbstractModelStatic::SetBackgroundImage(FrameNode* frameNode,
+    const std::optional<ImageSourceInfo>& src)
+{
+    if (src) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImage, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
+    const std::optional<ImageRepeat>& imageRepeat)
+{
+    if (imageRepeat) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageRepeat, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG
