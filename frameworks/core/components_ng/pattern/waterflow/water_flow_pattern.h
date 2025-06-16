@@ -226,6 +226,11 @@ public:
         return true;
     }
 
+    void InvalidatedOffset()
+    {
+        layoutInfo_->InvalidatedOffset();
+    }
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

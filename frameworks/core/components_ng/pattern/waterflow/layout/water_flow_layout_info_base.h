@@ -205,6 +205,8 @@ public:
         return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
     }
 
+    virtual void InvalidatedOffset() = 0;
+
     bool itemStart_ = false;
     /**
      * @brief last item is partially in viewport.
