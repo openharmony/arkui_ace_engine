@@ -109,9 +109,9 @@ bool IndicatorModelStatic::GetLoop(FrameNode* frameNode)
     return value;
 }
 
-int32_t  IndicatorModelStatic::GetCount(FrameNode* frameNode)
+int32_t IndicatorModelStatic::GetCount(FrameNode* frameNode)
 {
-    int32_t  value = 0;
+    int32_t value = 0;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperIndicatorLayoutProperty, Count, value, frameNode, value);
     return value;
 }
