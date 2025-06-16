@@ -233,6 +233,7 @@ HWTEST_F(NavigationManagerTestNg, GetNavigationInfo004, TestSize.Level1)
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
     navigationPattern->SetNavigationStack(std::move(navigationStack));
+    ASSERT_NE(navigationPattern->GetNavigationStack(), nullptr);
     auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
     customNode->SetNavigationNode(AceType::WeakClaim(AceType::RawPtr(navigationGroupNode)));
 

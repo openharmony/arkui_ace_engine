@@ -85,6 +85,7 @@ static constexpr uint32_t SUCCESSFUL = 4;
 static constexpr uint32_t FAILED = 5;
 
 constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
+constexpr char NAVDESTINATION_UPDATE_BY_UNIQUEID[] = "navDestinationUpdateByUniqueId";
 constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
 constexpr char SCROLL_EVENT[] = "scrollEvent";
 constexpr char DENSITY_UPDATE[] = "densityUpdate";
@@ -370,6 +371,7 @@ ObserverProcess::ObserverProcess()
 {
     registerProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationRegister },
+        { NAVDESTINATION_UPDATE_BY_UNIQUEID, &ObserverProcess::ProcessNavigationRegisterByUniqueId },
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityRegister },
@@ -387,6 +389,7 @@ ObserverProcess::ObserverProcess()
     };
     unregisterProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
+        { NAVDESTINATION_UPDATE_BY_UNIQUEID, &ObserverProcess::ProcessNavigationUnRegisterByUniqueId },
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventUnRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageUnRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityUnRegister },
@@ -463,6 +466,19 @@ napi_value ObserverProcess::ProcessNavigationRegister(napi_env env, napi_callbac
         }
     }
 
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessNavigationRegisterByUniqueId(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isNavigationHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFunc(&UIObserver::HandleNavigationStateChange);
+        isNavigationHandleFuncSetted_ = true;
+    }
+
     if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number) &&
         MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
         int32_t navigationUniqueId;
@@ -502,6 +518,14 @@ napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callb
             UIObserver::UnRegisterNavigationCallback(id, argv[PARAM_INDEX_TWO]);
         }
     }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessNavigationUnRegisterByUniqueId(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number)) {
         int32_t navigationUniqueId;
