@@ -21,6 +21,7 @@ import pointer from '@ohos.multimodalInput.pointer'
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 
 export * from "@ohos.base"
+export * from "@ohos.arkui.drawableDescriptor"
 
 export type PixelMap = image.PixelMap
 export type AbilityWant = _Want

@@ -15,7 +15,7 @@
 #include "componentSnapshot_module.h"
 
 #include "load.h"
-#include "log.h"
+#include "log/log.h"
 #include "base/error/error_code.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"

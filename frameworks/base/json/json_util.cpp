@@ -587,6 +587,11 @@ std::unique_ptr<JsonValue> JsonUtil::ParseJsonData(const char* data, const char*
     return std::make_unique<JsonValue>(cJSON_ParseWithOpts(data, parseEnd, true), true);
 }
 
+std::unique_ptr<JsonValue> JsonUtil::ParseJsonDataWithLength(const char* data, size_t len)
+{
+    return std::make_unique<JsonValue>(cJSON_ParseWithLength(data, len), true);
+}
+
 std::unique_ptr<JsonValue> JsonUtil::ParseJsonString(const std::string& content, const char** parseEnd)
 {
     return ParseJsonData(content.c_str(), parseEnd);

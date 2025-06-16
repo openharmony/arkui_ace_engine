@@ -295,6 +295,10 @@ template("ace_core_source_set") {
 
       # text
       "text/text_emoji_processor.cpp",
+
+      # drawable
+      "drawable/layered_drawable_descriptor.cpp",
+      "drawable/pixel_map_drawable_descriptor.cpp",
     ]
 
     if (platform == "ohos" || platform == "ohos_ng") {

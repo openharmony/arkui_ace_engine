@@ -74,7 +74,6 @@ import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../w
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
 import { Resource } from "global.resource"
-import { AnimatedDrawableDescriptor, AnimatedDrawableDescriptorInternal, DrawableDescriptor, DrawableDescriptorInternal, AnimationOptions, LayeredDrawableDescriptor, LayeredDrawableDescriptorInternal, PixelMapDrawableDescriptor, PixelMapDrawableDescriptorInternal } from "./../arkui-drawabledescriptor"
 import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
@@ -212,10 +211,6 @@ export class Serializer extends SerializerBase {
     }
     writeAlphabetIndexerAttribute(value: AlphabetIndexerAttribute): void {
     }
-    writeAnimatedDrawableDescriptor(value: AnimatedDrawableDescriptor): void {
-        let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
     writeBaseShape(value: BaseShape): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
@@ -287,10 +282,6 @@ export class Serializer extends SerializerBase {
         valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDragEvent(value: DragEvent): void {
-        let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    writeDrawableDescriptor(value: DrawableDescriptor): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
@@ -392,10 +383,6 @@ export class Serializer extends SerializerBase {
         valueSerializer.writePointer(toPeerPtr(value))
     }
     writeJsResult(value: JsResult): void {
-        let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    writeLayeredDrawableDescriptor(value: LayeredDrawableDescriptor): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
@@ -603,10 +590,6 @@ export class Serializer extends SerializerBase {
         valueSerializer.writePointer(toPeerPtr(value))
     }
     writePixelMap(value: PixelMap): void {
-        let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    writePixelMapDrawableDescriptor(value: PixelMapDrawableDescriptor): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
@@ -1215,25 +1198,6 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isBindableNumber(value_value_value)) {
                 valueSerializer.writeInt8(1 as int32)
             }
-        }
-    }
-    writeAnimationOptions(value: AnimationOptions): void {
-        let valueSerializer : Serializer = this
-        const value_duration  = value.duration
-        let value_duration_type : int32 = RuntimeType.UNDEFINED
-        value_duration_type = runtimeType(value_duration)
-        valueSerializer.writeInt8(value_duration_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_duration_type)) {
-            const value_duration_value  = value_duration!
-            valueSerializer.writeNumber(value_duration_value)
-        }
-        const value_iterations  = value.iterations
-        let value_iterations_type : int32 = RuntimeType.UNDEFINED
-        value_iterations_type = runtimeType(value_iterations)
-        valueSerializer.writeInt8(value_iterations_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_iterations_type)) {
-            const value_iterations_value  = value_iterations!
-            valueSerializer.writeNumber(value_iterations_value)
         }
     }
     writeAppearSymbolEffect(value: AppearSymbolEffect): void {

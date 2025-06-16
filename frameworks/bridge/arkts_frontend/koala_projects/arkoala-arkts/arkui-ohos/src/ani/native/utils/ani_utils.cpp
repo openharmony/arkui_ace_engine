@@ -17,8 +17,6 @@
 
 #include <string>
 
-#include "base/log/log_wrapper.h"
-
 namespace OHOS::Ace::Ani {
 ani_object AniUtils::CreateDouble(ani_env *env, double value)
 {
@@ -43,26 +41,21 @@ bool AniUtils::CheckType(ani_env *env, ani_object obj, const std::string& type)
     ani_boolean isUndefined;
     ani_status status = ANI_OK;
     if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
-        LOGE("Reference_IsUndefined failed when CheckType, status: %{public}d", status);
         return false;
     }
     if (isUndefined) {
-        LOGE("Obj is Undefined when CheckType");
         return false;
     }
 
     ani_class cls;
     status = env->FindClass(type.c_str(), &cls);
     if (status != ANI_OK) {
-        LOGE("FindClass failed when CheckType, status: %{public}d, type: %{public}s",
-            status, type.c_str());
         return false;
     }
 
     ani_boolean isType;
     env->Object_InstanceOf(obj, cls, &isType);
     if (!isType) {
-        LOGE("obj InstanceOf failed when CheckType, type: %{public}s", type.c_str());
         return false;
     }
 
@@ -74,7 +67,6 @@ bool AniUtils::GetIntByName(ani_env *env, ani_object param, const char *name, in
     ani_int res;
     ani_status status = env->Object_GetFieldByName_Int(param, name, &res);
     if (status != ANI_OK) {
-        LOGE("GetFieldByName_Int failed, name: %{public}s", name);
         return false;
     }
 
@@ -87,8 +79,6 @@ bool AniUtils::GetBoolOrUndefined(ani_env *env, ani_object param, const char *na
     ani_status status = ANI_ERROR;
     ani_boolean res;
     if ((status = env->Object_GetFieldByName_Boolean(param, name, &res)) != ANI_OK) {
-        LOGE("GetFieldByName_Boolean failed, status: %{public}d, name: %{public}s",
-            status, name);
         return false;
     }
 
