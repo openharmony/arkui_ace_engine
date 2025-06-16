@@ -377,11 +377,6 @@ void DynamicComponentRendererImpl::SetUIContentJsContext()
             CHECK_NULL_VOID(aceContainer);
             aceContainer->SetJsContextWithDeserialize(data);
         }, TaskExecutor::TaskType::UI, "WorkerSetJsContextWithDeserialize");
-    auto container = Container::GetContainer(uiContent_->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
-    CHECK_NULL_VOID(aceContainer);
-    aceContainer->SetJsContext(jsContext);
 }
 
 void DynamicComponentRendererImpl::RegisterErrorEventHandler()
