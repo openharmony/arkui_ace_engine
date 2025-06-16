@@ -29,7 +29,7 @@ import { ArkCommonMethodPeer, CommonMethod, MultiShadowOptions, ArkCommonMethodC
 import { ResourceColor, Length } from "./units"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Color } from "./enums"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 export class LinearGradientInternal {

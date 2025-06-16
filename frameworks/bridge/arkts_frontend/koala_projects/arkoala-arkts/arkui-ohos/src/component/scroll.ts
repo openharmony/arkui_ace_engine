@@ -19,7 +19,7 @@
 import { Edge, Axis, ScrollSource, BarState, Color, EdgeEffect, Curve } from "./enums"
 import { Length, VoidCallback, Dimension } from "./units"
 import { RectResult, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"

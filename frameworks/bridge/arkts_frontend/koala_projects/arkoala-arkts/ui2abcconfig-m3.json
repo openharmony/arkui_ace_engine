@@ -62,9 +62,6 @@
             "@ohos/mediaquery": [
                 "@ohos.mediaquery.ets"
             ],
-            "global/resource": [
-                "global/resource/resource.ets"
-            ],
             "@ohos/router": [
                 "@ohos.router.ets"
             ],

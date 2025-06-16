@@ -18,7 +18,7 @@
 // import { ArkCommonMethodComponent } from "./component/ArkCommon"
 // import { ArkNavigationPeer } from "./peers/ArkNavigationPeer"
 // import { SystemBarStyle, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationOperation, NavigationMode, ToolbarItem, NavigationTitleOptions, NavigationToolbarOptions, NavigationTitleMode, NavContentInfo, NavigationAnimatedTransition, NavBarPosition } from "./component/navigation"
-// import { Resource } from "global/resource";
+// import { Resource } from "global.resource";
 // import { CustomBuilder, SymbolGlyphModifier, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 // import { Length, ResourceStr, Dimension } from "./component/units"
 // import { NavPathStack } from "./component/navigation"

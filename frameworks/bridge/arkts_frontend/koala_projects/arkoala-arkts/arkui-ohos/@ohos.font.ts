@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 
 export namespace font {
