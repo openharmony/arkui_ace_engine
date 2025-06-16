@@ -73,6 +73,7 @@ void ModalPresentationPattern::BeforeCreateLayoutWrapper()
         modalNodeLayoutProperty->UpdateSafeAreaInsets(inset);
         return;
     }
+    modalNodeLayoutProperty->ResetSafeAreaPadding();
     ContentRootPattern::BeforeCreateLayoutWrapper();
 }
 } // namespace OHOS::Ace::NG

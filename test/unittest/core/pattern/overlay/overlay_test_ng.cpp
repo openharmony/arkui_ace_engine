@@ -2752,9 +2752,12 @@ HWTEST_F(OverlayTestNg, BeforeCreateLayoutWrapperTest001, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     topModalPattern->SetEnableSafeArea(true);
     topModalPattern->BeforeCreateLayoutWrapper();
+    auto modalNodeLayoutProperty = topModalNode->GetLayoutProperty();
+    EXPECT_NE(modalNodeLayoutProperty->safeAreaPadding_, nullptr);
     EXPECT_TRUE(topModalPattern->enableSafeArea_);
     topModalPattern->SetEnableSafeArea(false);
     topModalPattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(modalNodeLayoutProperty->safeAreaPadding_, nullptr);
     EXPECT_FALSE(topModalPattern->enableSafeArea_);
 }
 } // namespace OHOS::Ace::NG
