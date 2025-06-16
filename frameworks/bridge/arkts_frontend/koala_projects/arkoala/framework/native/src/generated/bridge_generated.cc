@@ -35476,9 +35476,22 @@ KOALA_INTEROP_DIRECT_V2(AlertDialog_show, KSerializerBuffer, int32_t)
 void impl_PromptAction_showToast(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         Ark_ShowToastOptions value_value = thisDeserializer.readShowToastOptions();;
-        GetAccessors()->getPromptActionAccessor()->showToast((const Ark_ShowToastOptions*)&value_value);
+        GetAccessors()->getPromptActionAccessor()->showToast((const Ark_ShowToastOptions*)&value_value, nullptr);
 }
 KOALA_INTEROP_DIRECT_V2(PromptAction_showToast, KSerializerBuffer, int32_t)
+void impl_PromptAction_openToast(KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_ShowToastOptions value_value = thisDeserializer.readShowToastOptions();;
+    Callback_Number_Void callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};
+    GetAccessors()->getPromptActionAccessor()->showToast((const Ark_ShowToastOptions*)&value_value, (const Callback_Number_Void*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_V2(PromptAction_openToast, KSerializerBuffer, int32_t)
+void impl_PromptAction_closeToast(KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber toastId) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Callback_Number_Void callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};
+    GetAccessors()->getPromptActionAccessor()->closeToast((const Ark_Number*) (&toastId), (const Callback_Number_Void*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_V3(PromptAction_closeToast, KSerializerBuffer, int32_t, KInteropNumber)
 Ark_NativePointer impl_SpringProp_ctor(KInteropNumber mass, KInteropNumber stiffness, KInteropNumber damping) {
         return GetAccessors()->getSpringPropAccessor()->ctor((const Ark_Number*) (&mass), (const Ark_Number*) (&stiffness), (const Ark_Number*) (&damping));
 }

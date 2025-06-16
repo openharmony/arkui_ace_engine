@@ -214,6 +214,10 @@ public:
         detachState_ = t;
     }
 
+    // ArkTS 1.2
+    void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) override;
+    void CloseToastStatic(const int32_t toastId, std::function<void(int32_t)>&& callback) override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -288,6 +292,12 @@ private:
     std::mutex eventRunnerMutex_;
     MenuWindowState attachState_ = MenuWindowState::DEFAULT;
     MenuWindowState detachState_ = MenuWindowState::DEFAULT;
+
+    // ArkTS 1.2
+    void ShowToastForAbilityStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    void ShowToastForServiceStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    std::function<void()> GetInitToastDelayTaskStatic(const NG::ToastInfo& toastInfo,
+        std::function<void(int32_t)>&& callback);
 };
 
 class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {

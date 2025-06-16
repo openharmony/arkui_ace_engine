@@ -14557,7 +14557,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // AlertDialogAccessor
     namespace PromptActionAccessor {
-    void ShowToastImpl(const Ark_ShowToastOptions* value)
+    void ShowToastImpl(const Ark_ShowToastOptions* value,
+                       const Callback_Number_Void* callback_value)
+    {
+    }
+    void CloseToastImpl(const Ark_Number* toastId,
+                       const Callback_Number_Void* callback_value)
     {
     }
     } // PromptActionAccessor
@@ -22041,6 +22046,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIPromptActionAccessor PromptActionAccessorImpl {
             PromptActionAccessor::ShowToastImpl,
+            PromptActionAccessor::CloseToastImpl,
         };
         return &PromptActionAccessorImpl;
     }

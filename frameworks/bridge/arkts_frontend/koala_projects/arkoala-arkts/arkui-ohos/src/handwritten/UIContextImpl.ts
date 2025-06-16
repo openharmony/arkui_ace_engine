@@ -328,6 +328,19 @@ export class PromptActionImpl extends PromptAction {
         promptAction.showToast(options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+
+    openToast(options: promptAction.ShowToastOptions): Promise<number> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let promise = promptAction.openToast(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return promise;
+    }
+
+    closeToast(toastId: number): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        promptAction.closeToast(toastId);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 export class CursorControllerImpl extends CursorController {

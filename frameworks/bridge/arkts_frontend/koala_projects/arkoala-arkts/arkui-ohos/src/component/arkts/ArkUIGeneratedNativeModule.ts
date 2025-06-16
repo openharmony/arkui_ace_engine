@@ -4664,6 +4664,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PromptAction_showToast(thisArray: KSerializerBuffer, thisLength: int32): undefined
     @ani.unsafe.Direct
+    native static _PromptAction_openToast(thisArray: KSerializerBuffer, thisLength: int32): undefined
+    @ani.unsafe.Direct
+    native static _PromptAction_closeToast(thisArray: KSerializerBuffer, thisLength: int32, toastId: number): undefined
+    @ani.unsafe.Direct
     native static _SpringProp_ctor(mass: number, stiffness: number, damping: number): KPointer
     @ani.unsafe.Direct
     native static _SpringProp_getFinalizer(): KPointer

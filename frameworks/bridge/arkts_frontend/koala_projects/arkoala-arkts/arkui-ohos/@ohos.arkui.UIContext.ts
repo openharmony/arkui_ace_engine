@@ -193,6 +193,14 @@ export class PromptAction {
     showToast(options: promptAction.ShowToastOptions): void {
         throw Error("showToast not implemented in PromptAction!")
     }
+
+    openToast(options: promptAction.ShowToastOptions): Promise<number> {
+        throw Error("openToast not implemented in PromptAction!")
+    }
+
+    closeToast(toast: number): void {
+        throw Error("closeToast not implemented in PromptAction!")
+    }
 }
 
 export class CursorController {

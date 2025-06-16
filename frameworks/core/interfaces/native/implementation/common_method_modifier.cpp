@@ -21,6 +21,9 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/layout/grid_layout_info.h"
+#include "core/components/common/properties/shadow.h"
+#include "core/components/popup/popup_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -150,14 +153,14 @@ auto g_onWillDismissPopup = [](
         },
         [&popupParam](const Callback_DismissPopupAction_Void& value) {
             auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
-                // Ark_DismissPopupAction parameter;
-                // auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
-                //     static_cast<BindSheetDismissReason>(reason));
-                // parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
-                //     .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-                // const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
-                // parameter.dismiss = keeper.ArkValue();
-                // arkCallback.Invoke(parameter);
+                Ark_DismissPopupAction parameter;
+                auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
+                    static_cast<BindSheetDismissReason>(reason));
+                parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
+                    .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
+                const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
+                parameter.dismiss = keeper.ArkValue();
+                arkCallback.Invoke(parameter);
             };
             popupParam->SetOnWillDismiss(std::move(callback));
             popupParam->SetInteractiveDismiss(true);
@@ -204,7 +207,49 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (popupBackgroundColor.has_value()) {
         popupParam->SetBackgroundColor(popupBackgroundColor.value());
     }
-    popupParam->SetHasAction(Converter::OptConvert<bool>(src.autoCancel).value_or(popupParam->HasAction()));
+    auto autoCancel = Converter::OptConvert<bool>(src.autoCancel);
+    if (autoCancel.has_value()) {
+        popupParam->SetHasAction(!autoCancel.value());
+    }
+};
+
+auto g_getPopupDefaultShadow = []() -> ShadowStyle {
+    auto shadowStyle = ShadowStyle::OuterDefaultMD;
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, shadowStyle);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, shadowStyle);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, shadowStyle);
+    return popupTheme->GetPopupShadowStyle();
+};
+
+auto g_getShadowFromTheme = [](ShadowStyle shadowStyle, Shadow& shadow) -> bool {
+    auto colorMode = Container::CurrentColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+};
+
+auto g_setPopupDefaultBlurStyle = [](RefPtr<PopupParam>& popupParam) {
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
+    auto blurStyle = static_cast<BlurStyle>(popupTheme->GetPopupBackgroundBlurStyle());
+    popupParam->SetBlurStyle(blurStyle);
 };
 
 auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& popupParam) {
@@ -234,10 +279,17 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
     auto shadowOpt = Converter::OptConvert<Shadow>(src.shadow);
     if (shadowOpt.has_value()) {
         popupParam->SetShadow(shadowOpt.value());
+    } else {
+        auto defaultPopupShadowStyle = g_getPopupDefaultShadow();
+        Shadow shadow;
+        g_getShadowFromTheme(defaultPopupShadowStyle, shadow);
+        popupParam->SetShadow(shadow);
     }
     auto popupBackgroundBlurStyleOpt = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle);
     if (popupBackgroundBlurStyleOpt.has_value()) {
         popupParam->SetBlurStyle(popupBackgroundBlurStyleOpt.value());
+    } else {
+        g_setPopupDefaultBlurStyle(popupParam);
     }
     auto targetSpaceOpt = Converter::OptConvert<CalcDimension>(src.targetSpace);
     if (targetSpaceOpt.has_value()) {
@@ -5112,44 +5164,44 @@ void BindPopupImpl(Ark_NativePointer node,
                    const Opt_Boolean* show,
                    const Opt_Union_PopupOptions_CustomPopupOptions* popup)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto optShow = Converter::OptConvert<bool>(*show);
-    // Converter::VisitUnion(*popup,
-    //     [frameNode, optShow](const Ark_PopupOptions& value) {
-    //         auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
-    //         CHECK_NULL_VOID(popupParam);
-    //         g_onWillDismissPopup(value.onWillDismiss, popupParam);
-    //         if (optShow) {
-    //             popupParam->SetIsShow(*optShow);
-    //         }
-    //        ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
-    //     },
-    //     [frameNode, node, optShow](const Ark_CustomPopupOptions& value) {
-    //         auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
-    //         CHECK_NULL_VOID(popupParam);
-    //         g_onWillDismissPopup(value.onWillDismiss, popupParam);
-    //         if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
-    //             if (optShow) {
-    //                 popupParam->SetIsShow(*optShow);
-    //             }
-    //             CallbackHelper(value.builder).BuildAsync([frameNode, popupParam](const RefPtr<UINode>& uiNode) {
-    //                 ViewAbstractModelStatic::BindPopup(frameNode, popupParam, uiNode);
-    //                 }, node);
-    //         } else {
-    //             if (optShow) {
-    //                 popupParam->SetIsShow(*optShow);
-    //             }
-    //             ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
-    //         }
-    //     },
-    //     [frameNode, optShow]() {
-    //         auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    //         if (optShow) {
-    //             popupParam->SetIsShow(*optShow);
-    //         }
-    //         ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
-    //     });
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optShow = Converter::OptConvert<bool>(*show);
+    Converter::VisitUnion(*popup,
+        [frameNode, optShow](const Ark_PopupOptions& value) {
+            auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
+            CHECK_NULL_VOID(popupParam);
+            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+            if (optShow) {
+                popupParam->SetIsShow(*optShow);
+            }
+           ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
+        },
+        [frameNode, node, optShow](const Ark_CustomPopupOptions& value) {
+            auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
+            CHECK_NULL_VOID(popupParam);
+            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+            if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
+                if (optShow) {
+                    popupParam->SetIsShow(*optShow);
+                }
+                CallbackHelper(value.builder).BuildAsync([frameNode, popupParam](const RefPtr<UINode>& uiNode) {
+                    ViewAbstractModelStatic::BindPopup(frameNode, popupParam, uiNode);
+                    }, node);
+            } else {
+                if (optShow) {
+                    popupParam->SetIsShow(*optShow);
+                }
+                ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
+            }
+        },
+        [frameNode, optShow]() {
+            auto popupParam = AceType::MakeRefPtr<PopupParam>();
+            if (optShow) {
+                popupParam->SetIsShow(*optShow);
+            }
+            ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
+        });
 }
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,

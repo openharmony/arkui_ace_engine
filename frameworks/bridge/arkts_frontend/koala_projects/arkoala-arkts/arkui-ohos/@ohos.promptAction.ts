@@ -19,6 +19,7 @@ import { ResourceColor, Offset } from "arkui/component/units"
 import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType } from "arkui/component/common"
 import { Serializer } from "arkui/component/peers/Serializer"
 import { ArkUIGeneratedNativeModule } from "#components"
+import { BusinessError } from "#external"
 
 namespace promptAction {
     export interface ShowToastOptions {
@@ -46,6 +47,37 @@ namespace promptAction {
         const thisSerializer : Serializer = Serializer.hold();
         thisSerializer.writeShowToastOptions(value);
         ArkUIGeneratedNativeModule._PromptAction_showToast(thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
+
+    export function openToast(value: ShowToastOptions): Promise<number> {
+        const thisSerializer : Serializer = Serializer.hold();
+        thisSerializer.writeShowToastOptions(value);
+        const promise = new Promise<number>((resolve, reject) => {
+            const callback = (value: number) => {
+                if (value < 0) {
+                    const error: BusinessError = ({code: Math.abs(value), message: ''});
+                    reject(error);
+                } else {
+                    resolve(value!);
+                }
+            }
+            thisSerializer.holdAndWriteCallback(callback);
+        });
+        ArkUIGeneratedNativeModule._PromptAction_openToast(thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+        return promise;
+    }
+
+    export function closeToast(id: number): void {
+        const thisSerializer : Serializer = Serializer.hold();
+        const callback = (value: number) => {
+            const error: BusinessError = ({code: value, message: ''});
+            throw error;
+        }
+        thisSerializer.holdAndWriteCallback(callback);
+        ArkUIGeneratedNativeModule._PromptAction_closeToast(
+            thisSerializer.asBuffer(), thisSerializer.length(), id);
         thisSerializer.release();
     }
 }

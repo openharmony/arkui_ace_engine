@@ -128,6 +128,8 @@ public:
     MOCK_METHOD1(HideSheetSubWindow, void(int32_t containerId));
     MOCK_METHOD0(GetAttachState, MenuWindowState());
     MOCK_METHOD0(GetDetachState, MenuWindowState());
+    MOCK_METHOD2(ShowToastStatic, void(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD2(CloseToastStatic, void(int32_t toastId, std::function<void(int32_t)>&& callback));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

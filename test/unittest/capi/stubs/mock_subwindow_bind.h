@@ -144,6 +144,9 @@ public:
     {
         return MenuWindowState::DEFAULT;
     }
+
+    MOCK_METHOD2(ShowToastStatic, void(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD2(CloseToastStatic, void(int32_t toastId, std::function<void(int32_t)>&& callback));
 };
 } // namespace OHOS::Ace::NG
 
