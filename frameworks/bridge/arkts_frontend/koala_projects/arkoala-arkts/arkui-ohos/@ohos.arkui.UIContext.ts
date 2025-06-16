@@ -320,13 +320,13 @@ export class UIObserver {
         return this.observerImpl;
     }
 
-    public on(type: string, callback:Callback<uiObserver.DensityInfo>): void {
-        if (type == 'densityUpdate') {
-            this.observerImpl!.on('densityUpdate', callback);
+    public on(type: string, callback: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.on(type, callback);
         }
     }
 
-    public off(type: string, callback?: (() => void) | undefined): void {
+    public off(type: string, callback?: ((param: object) => void)): void {
         if (this.observerImpl) {
             this.observerImpl!.off(type, callback);
         }
