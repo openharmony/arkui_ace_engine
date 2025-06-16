@@ -245,6 +245,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     ani_class appClass;
     EntryLoader entryLoader(url, env);
 
+    pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
+
     if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
         LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
         return UIContentErrorCode::INVALID_URL;
@@ -257,12 +259,10 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
         return UIContentErrorCode::INVALID_URL;
     }
 
-    std::string appUrl = "ComExampleTrivialApplication"; // TODO: use passed in url and params
-    std::string appParams = "ArkTSLoaderParam";
     ani_string aniUrl;
-    env->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
+    env->String_NewUTF8(url.c_str(), url.size(), &aniUrl);
     ani_string aniParams;
-    env->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
+    env->String_NewUTF8(params.c_str(), params.size(), &aniParams);
 
     ani_ref appLocal;
     ani_ref optionalEntry;
@@ -366,6 +366,54 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
         return result;
     }
     return result;
+}
+
+void* ArktsFrontend::PushExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo);
+    return pageNode.GetRawPtr();
+}
+
+void* ArktsFrontend::ReplaceExtender(
+    const std::string& url, const std::string& params, std::function<void()>&& finishCallback)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(finishCallback));
+    return pageNode.GetRawPtr();
+}
+
+void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo);
+    return pageNode.GetRawPtr();
+}
+
+void ArktsFrontend::BackExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    pageRouterManager_->BackWithTarget(routerPageInfo);
+}
+
+void ArktsFrontend::ClearExtender()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->Clear();
 }
 
 void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)

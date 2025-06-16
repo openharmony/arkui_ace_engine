@@ -31,6 +31,7 @@ import { Deserializer } from "./component/peers/Deserializer"
 import { StateUpdateLoop } from "./stateManagement"
 import { Routed } from "./handwritten/Router"
 import { updateLazyItems } from "./handwritten/LazyForEachImpl"
+import router from "@ohos/router"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { createStateManager } from "@koalaui/runtime"
 import { UIContextImpl, ContextRecord } from "arkui/handwritten/UIContextImpl"
@@ -149,7 +150,6 @@ function registerSyncCallbackProcessor() {
 
 export class Application {
     private manager: StateManager | undefined = undefined
-    private rootState: ComputableState<PeerNode> | undefined = undefined
     private timer: MutableState<int64> | undefined = undefined
     private currentCrash: Object | undefined = undefined
     private enableDumpTree = false
@@ -157,13 +157,17 @@ export class Application {
     private userView?: UserView
     private entryPoint?: EntryPoint
     private moduleName: string
+    private startUrl: string
+    private startParam: string
 
     private withLog = false
     private useNativeLog = true
 
-    constructor(useNativeLog: boolean, moduleName: string, userView?: UserView, entryPoint?: EntryPoint) {
+    constructor(useNativeLog: boolean, moduleName: string, startUrl: string, startParam: string, userView?: UserView, entryPoint?: EntryPoint) {
         this.useNativeLog = useNativeLog
         this.moduleName = moduleName
+        this.startUrl = startUrl
+        this.startParam = startParam
         this.userView = userView
         this.entryPoint = entryPoint
     }
@@ -171,25 +175,21 @@ export class Application {
     static createMemoRootState(manager: StateManager,
         /** @memo */
         builder: UserViewBuilder,
-        moduleName: string
-    ): ComputableState<PeerNode> {
+        moduleName: string,
+        initUrl: string
+    ): void {
         const peer = PeerNode.generateRootPeer()
-        return manager.updatableNode<PeerNode>(peer, (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
-            memoEntry<void>(context, 0, () => {
-                InteropNativeModule._NativeLog("AceRouter:createMemoRootState set Routed")
-                Routed(builder, moduleName)
-            })
-            manager.frozen = frozen
-        })
+        // init router module
+        Routed(builder, moduleName, peer, initUrl)
+        let routerOption: router.RouterOptions = {url: initUrl}
+        router.runPage(routerOption, builder)
     }
 
     private computeRoot(): PeerNode {
         // let handle = ArkUINativeModule._SystemAPI_StartFrame()
         let result: PeerNode
         try {
-            result = this.rootState!.value
+            result = router.getStateRoot().value
         } finally {
             // ArkUINativeModule._SystemAPI_EndFrame(handle)
         }
@@ -216,7 +216,7 @@ export class Application {
             } else {
                 throw new Error("Invalid EntryPoint")
             }
-            this.rootState = Application.createMemoRootState(this.manager!, builder, this.moduleName)
+            Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
             InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
             root = this.computeRoot()
             InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
@@ -251,16 +251,18 @@ export class Application {
 
     private updateState() {
         // NativeModule._NativeLog("ARKTS: updateState")
-        this.updateStates(this.manager!, this.rootState!)
+        let rootState = router.getStateRoot();
+        this.updateStates(this.manager!, rootState)
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
-            this.updateStates(this.manager!, this.rootState!)
+            this.updateStates(this.manager!, rootState)
         }
         // Here we request to draw a frame and call custom components callbacks.
-        let root = this.rootState!.value
-        ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr)
-        // Call callbacks and sync
-        callScheduledCallbacks()
+        let root = rootState.value;
+        if (root.peer.ptr) {
+            ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr);
+            callScheduledCallbacks();
+        }
     }
 
     updateStates(manager: StateManager, root: ComputableState<PeerNode>) {
@@ -317,7 +319,10 @@ export class Application {
             try {
                 this.timer!.value = Date.now() as int64
                 this.loopIteration2(arg0, arg1) // loop iteration without callbacks execution
-                if (this.enableDumpTree) dumpTree(this.rootState!.value)
+                if (this.enableDumpTree) {
+                    let rootState = router.getStateRoot();
+                    dumpTree(rootState.value)
+                }
             } catch (error) {
                 if (error instanceof Error) {
                     InteropNativeModule._NativeLog(`ArkTS Application.enter error name: ${error.name} message: ${error.message}`);
@@ -398,7 +403,7 @@ export class Application {
         return "0"
     }
 
-    static createApplication(appUrl: string, params: string, useNativeLog: boolean, moduleName: string, userView?: UserView, entryPoint?: EntryPoint): Application {
+    static createApplication(startUrl: string, startParams: string, useNativeLog: boolean, moduleName: string, userView?: UserView, entryPoint?: EntryPoint): Application {
         if (!userView && !entryPoint) {
             throw new Error(`Invalid EntryPoint`)
         }
@@ -407,7 +412,7 @@ export class Application {
         registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
         registerSyncCallbackProcessor()
-        return new Application(useNativeLog, moduleName, userView, entryPoint)
+        return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
     }
 }
 

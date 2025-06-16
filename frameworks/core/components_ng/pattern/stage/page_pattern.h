@@ -64,6 +64,18 @@ public:
         return true;
     }
 
+    // For ArkTS1.2
+    void SetOnNodeDisposeCallback(std::function<void()>&& disposeCallback)
+    {
+        disposeCallback_ = std::move(disposeCallback);
+    }
+
+    void FireOnNodeDisposeCallback()
+    {
+        CHECK_NULL_VOID(disposeCallback_);
+        disposeCallback_();
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -366,6 +378,7 @@ protected:
     RefPtr<OverlayManager> overlayManager_;
 
     OnNewParamCallback onNewParam_;
+    std::function<void()> disposeCallback_;
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> onBackPressed_;

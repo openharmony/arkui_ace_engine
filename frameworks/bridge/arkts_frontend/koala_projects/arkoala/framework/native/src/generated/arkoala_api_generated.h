@@ -27224,6 +27224,15 @@ typedef struct GENERATED_ArkUIPromptActionAccessor {
     void (*showToast)(const Ark_ShowToastOptions* value);
 } GENERATED_ArkUIPromptActionAccessor;
 
+typedef struct GENERATED_ArkUIRouterExtenderAccessor {
+    Ark_NativePointer (*push)(const Ark_String* url);
+    Ark_NativePointer (*replace)(const Ark_String* url, const Opt_Callback_Void* finishCallback);
+    void (*moveCommonUnderPageNode)(Ark_NativePointer commonNode, Ark_NativePointer pageNode);
+    void (*back)();
+    Ark_NativePointer (*runPage)(const Ark_String* url);
+    void (*clear)();
+} GENERATED_ArkUIRouterExtenderAccessor;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_API_VERSION above for binary
@@ -27574,6 +27583,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILinearIndicatorControllerAccessor* (*getLinearIndicatorControllerAccessor)();
     const GENERATED_ArkUIGlobalScopeAccessor* (*getGlobalScopeAccessor)();
     const GENERATED_ArkUIPromptActionAccessor* (*getPromptActionAccessor)();
+    const GENERATED_ArkUIRouterExtenderAccessor* (*getRouterExtenderAccessor)();
 } GENERATED_ArkUIAccessors;
 
 typedef struct GENERATED_ArkUIGraphicsAPI {

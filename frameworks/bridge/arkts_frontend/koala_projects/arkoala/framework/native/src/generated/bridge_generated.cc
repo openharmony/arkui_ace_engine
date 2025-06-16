@@ -44547,6 +44547,40 @@ Ark_Boolean impl_GlobalScope_focusControl_requestFocus(const KStringPtr& value) 
         return GetAccessors()->getGlobalScopeAccessor()->focusControl_requestFocus((const Ark_String*) (&value));
 }
 KOALA_INTEROP_1(GlobalScope_focusControl_requestFocus, Ark_Boolean, KStringPtr)
+Ark_NativePointer impl_RouterExtender_RouterPush1attribute(const KStringPtr& value) {
+        return GetAccessors()->getRouterExtenderAccessor()->push((const Ark_String*)(&value));
+}
+KOALA_INTEROP_1(RouterExtender_RouterPush1attribute, Ark_NativePointer, KStringPtr)
+Ark_NativePointer impl_RouterExtender_RouterReplace1attribute(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto url = static_cast<Ark_String>(thisDeserializer.readString());
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Callback_Void value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};
+        }
+        Opt_Callback_Void value_value = value_value_buf;
+        return GetAccessors()->getRouterExtenderAccessor()->replace((const Ark_String*)(&url) ,(const Opt_Callback_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_2(RouterExtender_RouterReplace1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_RouterExtender_MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pageNode) {
+        return GetAccessors()->getRouterExtenderAccessor()->moveCommonUnderPageNode(commonNode, pageNode);
+}
+KOALA_INTEROP_DIRECT_V2(RouterExtender_MoveCommonUnderPageNode, Ark_NativePointer, Ark_NativePointer)
+void impl_RouterExtender_RouterBack0attribute() {
+        return GetAccessors()->getRouterExtenderAccessor()->back();
+}
+KOALA_INTEROP_DIRECT_V0(RouterExtender_RouterBack0attribute)
+Ark_NativePointer impl_RouterExtender_RouterRunPage(const KStringPtr& value) {
+        return GetAccessors()->getRouterExtenderAccessor()->runPage((const Ark_String*)(&value));
+}
+KOALA_INTEROP_1(RouterExtender_RouterRunPage, Ark_NativePointer, KStringPtr)
+void impl_RouterExtender_RouterClear() {
+        GetAccessors()->getRouterExtenderAccessor()->clear();
+}
+KOALA_INTEROP_DIRECT_V0(RouterExtender_RouterClear)
 Ark_Int64 impl_UIStateGet(Ark_NativePointer thisPtr) {
         return GetNodeModifiers()->getUIStateModifier()->getUIState(thisPtr);
 }

@@ -84,12 +84,37 @@ export class Router {
         throw Error("pushUrl not implemented in Router!")
     }
 
+    public replaceUrl(options: router.RouterOptions): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            router.replaceUrl(options)
+        });
+    }
+
     public back(options?:router.RouterOptions): void {
         throw Error("back not implemented in Router!")
     }
 
     public clear(): void {
         throw Error("clear not implemented in Router!")
+    }
+    public getLength(): string {
+        return router.getLength();
+    }
+
+    public getParams(): Object {
+        return router.getParams();
+    }
+
+    public getState(): router.RouterState {
+        return router.getState();
+    }
+
+    public getStateByIndex(index: number): router.RouterState | undefined {
+        return router.getStateByIndex(index);
+    }
+
+    public getStateByUrl(url: string): Array<router.RouterState> {
+        return router.getStateByUrl(url);
     }
 }
 
