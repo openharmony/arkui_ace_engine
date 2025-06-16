@@ -398,6 +398,7 @@ struct ArkUIDragEvent {
     char* bundleName;
     bool isRemoteDev;
     ArkUI_Int32 displayId;
+    void* dataLoadParams;
 };
 
 struct ArkUIFocusAxisEvent {
