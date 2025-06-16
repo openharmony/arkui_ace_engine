@@ -49,14 +49,8 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     TAG_LOGI(
         AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
     // If the developer wants to keep editing, editing will not stop
-    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        if (event.IsKeepEditable()) {
-            return;
-        }
-    } else {
-        if (event.IsKeepEditable() || action == TextInputAction::NEW_LINE) {
-            return;
-        }
+    if (event.IsKeepEditable()) {
+        return;
     }
     HandleCloseKeyboard(forceCloseKeyboard);
 }
