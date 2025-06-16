@@ -5,9 +5,8 @@ export declare namespace uiObserver {
     type Callback<T,V = void> = (data: T) => V
       
     export interface UIObserver {
-        on(type: string, callback: () => void): void;
-        on(type:'densityUpdate',callback:Callback<DensityInfo>): void;
-        off(type: string, callback?: () => void): void;
+        on(type: string, callback: object): void;
+        off(type: string, callback?: object): void;
     }
     export function createUIObserver(id: number): UIObserver;
 }

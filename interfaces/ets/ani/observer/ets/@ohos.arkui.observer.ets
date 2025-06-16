@@ -22,9 +22,8 @@
     }
     export default interface UIObserver
     {
-        on(type: string, callback: ()=>void) : void;
-        on(type: 'densityUpdate', callback: Callback<DensityInfo>): void;
-        off(type: string, callback?: ()=>void) : void;
+        on(type: string, callback: object) : void;
+        off(type: string, callback?: object) : void;
     }
     
     class UIObserverImpl implements UIObserver
@@ -37,8 +36,7 @@
             }
         }
         
-        public native on(type: string, callback: ()=>void) : void;
-        public native on(type: 'densityUpdate', callback: Callback<DensityInfo>): void;
-        public native off(type: string, callback?: ()=>void) : void;
+        public native on(type: string, callback: object) : void;
+        public native off(type: string, callback?: object) : void;
     }
  }
