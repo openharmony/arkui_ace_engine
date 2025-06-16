@@ -29,6 +29,7 @@ public:
         isDefaultBadgeSize_ = isDefaultBadgeSize;
     };
     void CreateWithResourceObj(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters);
+    void CreateWithResourceObjFlag(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters);
     void ProcessBadgeValue(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBadgeTextColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBadgeColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);

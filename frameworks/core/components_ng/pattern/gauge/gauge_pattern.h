@@ -174,6 +174,7 @@ public:
         const std::string& moduleName, bool isFirstLoad = false);
     void UpdateIndicatorSpace(const CalcDimension& space, bool isFirstLoad = false);
     void OnColorModeChange(uint32_t colorMode) override;
+    void OnColorConfigurationUpdate() override;
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;

@@ -22,6 +22,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -77,6 +78,13 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
             frameNode->RemoveChildAtIndex(0);
         }
         eventHub->SetHoverEffect(HoverEffectType::NONE);
+    }
+
+    auto pros = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    if (pros) {
+        pros->ResetCapsuleStyleFontColorSetByUser();
+        pros->ResetCapsuleStyleSetByUser();
+        pros->ResetGradientColorSetByUser();
     }
 }
 
@@ -891,54 +899,13 @@ void ProgressModelNG::SetModifierInitiatedBgColor(FrameNode* frameNode, bool val
     pattern->IsModifierInitiatedBgColor(value);
 }
 
-void ProgressModelNG::CreateWithResourceObj(JsProgressResourceType type, const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetProgressColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (type == JsProgressResourceType::COLOR) {
-        SetProgressColor(resObj);
-    } else if (type == JsProgressResourceType::LSStrokeWidth) {
-        SetLSStrokeWidth(resObj);
-    } else if (type == JsProgressResourceType::LSSweepingEffect) {
-        SetLSSweepingEffect(resObj);
-    } else if (type == JsProgressResourceType::LSStrokeRadius) {
-        SetLSStrokeRadius(resObj);
-    } else if (type == JsProgressResourceType::SmoothEffect) {
-        SetSmoothResEffect(resObj);
-    } else if (type == JsProgressResourceType::RingStrokeWidth) {
-        SetRingStrokeWidth(resObj);
-    } else if (type == JsProgressResourceType::RingShadow) {
-        SetRingShadow(resObj);
-    } else if (type == JsProgressResourceType::RingStatus) {
-        SetRingStatus(resObj);
-    } else if (type == JsProgressResourceType::RingSweepingEffect) {
-        SetRingSweepingEffect(resObj);
-    } else if (type == JsProgressResourceType::CapsuleBorderWidth) {
-        SetCapsuleBorderWidth(resObj);
-    } else if (type == JsProgressResourceType::CapsuleBorderColor) {
-        SetCapsuleBorderColor(resObj);
-    } else if (type == JsProgressResourceType::CapsuleSweepingEffect) {
-        SetCapsuleSweepingEffect(resObj);
-    } else if (type == JsProgressResourceType::ShowDefaultPercentage) {
-        SetShowDefaultPercentage(resObj);
-    } else if (type == JsProgressResourceType::FontColor) {
-        SetFontColorResource(resObj);
-    } else if (type == JsProgressResourceType::BackgroundColor) {
-        SetBackgroundColorResource(resObj);
-    } else if (type == JsProgressResourceType::FontWeight) {
-        SetFontWeightResource(resObj);
-    } else if (type == JsProgressResourceType::PSStrokeWidth) {
-        SetRSStrokeWidth(resObj);
-    } else if (type == JsProgressResourceType::PSScaleWidth) {
-        SetRSScaleWidth(resObj);
-    } else if (type == JsProgressResourceType::Text) {
-        SetTextResource(resObj);
-    }
-}
-
-void ProgressModelNG::SetProgressColor(const RefPtr<ResourceObject>& resObj)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     std::string key = "progress.color";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key, weak = AceType::WeakClaim(frameNode)](
                             const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto frameNode = weak.Upgrade();
@@ -950,11 +917,15 @@ void ProgressModelNG::SetProgressColor(const RefPtr<ResourceObject>& resObj)
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
+            auto pops = frameNode->GetPaintProperty<ProgressPaintProperty>();
+            CHECK_NULL_VOID(pops);
+            const auto& type = pops->GetProgressType();
             auto progressTheme = pipeline->GetTheme<ProgressTheme>();
             CHECK_NULL_VOID(progressTheme);
             endColor = progressTheme->GetRingProgressEndSideColor();
             beginColor = progressTheme->GetRingProgressBeginSideColor();
-            result = progressTheme->GetTrackSelectedColor();
+            result = (type == ProgressType::CAPSULE) ? progressTheme->GetCapsuleParseFailedSelectColor()
+                                                     : progressTheme->GetTrackParseFailedSelectedColor();
 
         } else {
             endColor = result;
@@ -972,17 +943,17 @@ void ProgressModelNG::SetProgressColor(const RefPtr<ResourceObject>& resObj)
         pattern->UpdateGradientColor(gradient, isFirstLoad);
         pattern->UpdateColor(result, isFirstLoad);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetLSStrokeWidth(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetLSStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     std::string key = "progress.strokeWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1002,17 +973,17 @@ void ProgressModelNG::SetLSStrokeWidth(const RefPtr<ResourceObject>& resObj)
         }
         SetStrokeWidth(AceType::RawPtr(node), width);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetLSSweepingEffect(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetLSSweepingEffect(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     std::string key = "progress.sweepingEffect";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resourceObj, bool isFirstLoad = false) {
         auto hostNode = pattern->GetHost();
         CHECK_NULL_VOID(hostNode);
@@ -1022,17 +993,17 @@ void ProgressModelNG::SetLSSweepingEffect(const RefPtr<ResourceObject>& resObj)
         }
         SetLinearSweepingEffect(AceType::RawPtr(hostNode), value);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetLSStrokeRadius(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetLSStrokeRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     std::string key = "progress.strokeRadius";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto hostNode = pattern->GetHost();
         CHECK_NULL_VOID(hostNode);
@@ -1045,17 +1016,17 @@ void ProgressModelNG::SetLSStrokeRadius(const RefPtr<ResourceObject>& resObj)
             SetStrokeRadius(AceType::RawPtr(hostNode), radius);
         }
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetSmoothResEffect(const RefPtr<ResourceObject>& resourceObject)
+void ProgressModelNG::SetSmoothResEffect(FrameNode* frameNode, const RefPtr<ResourceObject>& resourceObject)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     std::string key = "progress.smoothEffect";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resourceObject);
     auto updateFunction = [pattern, key](const RefPtr<ResourceObject>& resourceObject, bool isFirstLoad = false) {
         auto hostNode = pattern->GetHost();
         CHECK_NULL_VOID(hostNode);
@@ -1065,18 +1036,18 @@ void ProgressModelNG::SetSmoothResEffect(const RefPtr<ResourceObject>& resourceO
         }
         SetSmoothEffect(AceType::RawPtr(hostNode), smoothEffectEnabled);
     };
-    updateFunction(resourceObject, true);
     pattern->AddResObj(key, resourceObject, std::move(updateFunction));
 }
 
-void ProgressModelNG::SetRingStrokeWidth(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetRingStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
 
     const std::string key = "progress.ring.strokeWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& resourceObj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1097,18 +1068,18 @@ void ProgressModelNG::SetRingStrokeWidth(const RefPtr<ResourceObject>& resObj)
         }
         SetStrokeWidth(AceType::RawPtr(node), strokeWidth);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetRingShadow(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetRingShadow(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
 
     const std::string key = "progress.ring.shadow";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1119,17 +1090,17 @@ void ProgressModelNG::SetRingShadow(const RefPtr<ResourceObject>& resObj)
             SetPaintShadow(AceType::RawPtr(node), false);
         }
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetRingStatus(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetRingStatus(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     const std::string key = "progress.ring.status";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1141,18 +1112,18 @@ void ProgressModelNG::SetRingStatus(const RefPtr<ResourceObject>& resObj)
         }
         SetProgressStatus(AceType::RawPtr(node), status);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetRingSweepingEffect(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetRingSweepingEffect(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
 
     const std::string key = "progress.ring.sweepingEffect";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1162,17 +1133,17 @@ void ProgressModelNG::SetRingSweepingEffect(const RefPtr<ResourceObject>& resObj
         }
         SetRingSweepingEffect(AceType::RawPtr(node), enable);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetCapsuleBorderWidth(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetCapsuleBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     const std::string key = "progress.capsule.borderWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1188,18 +1159,18 @@ void ProgressModelNG::SetCapsuleBorderWidth(const RefPtr<ResourceObject>& resObj
         }
         SetBorderWidth(AceType::RawPtr(node), width);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetCapsuleBorderColor(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetCapsuleBorderColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
 
     const std::string resourceKey = "progress.capsule.borderColor";
+    pattern->RemoveResObj(resourceKey);
+    CHECK_NULL_VOID(resObj);
     auto updateResourceFunction = [pattern, resourceKey](
                                       const RefPtr<ResourceObject>& resourceObject, bool isFirstLoad = false) {
         auto hostNode = pattern->GetHost();
@@ -1216,19 +1187,18 @@ void ProgressModelNG::SetCapsuleBorderColor(const RefPtr<ResourceObject>& resObj
             SetBorderColor(AceType::RawPtr(hostNode), progressTheme->GetBorderColor());
         }
     };
-    updateResourceFunction(resObj, true);
     pattern->AddResObj(resourceKey, resObj, std::move(updateResourceFunction));
 }
 
-void ProgressModelNG::SetCapsuleSweepingEffect(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetCapsuleSweepingEffect(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
-
     const std::string key = "progress.capsule.sweepingEffect";
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj,  bool isFirstLoad = false) {
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         bool enableScanEffect = false;
@@ -1237,18 +1207,17 @@ void ProgressModelNG::SetCapsuleSweepingEffect(const RefPtr<ResourceObject>& res
         }
         SetSweepingEffect(AceType::RawPtr(node), enableScanEffect);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetShowDefaultPercentage(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetShowDefaultPercentage(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
-
     const std::string key = "progress.capsule.showDefaultPercentage";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1258,19 +1227,18 @@ void ProgressModelNG::SetShowDefaultPercentage(const RefPtr<ResourceObject>& res
         }
         SetShowText(AceType::RawPtr(node), show);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetFontColorResource(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetFontColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
-
     const std::string key = "progress.fontColor";
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj,  bool isFirstLoad = false) {
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         Color color;
@@ -1284,18 +1252,17 @@ void ProgressModelNG::SetFontColorResource(const RefPtr<ResourceObject>& resObj)
             SetFontColor(AceType::RawPtr(node), theme->GetTextStyle().GetTextColor());
         }
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetBackgroundColorResource(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetBackgroundColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
-
     const std::string key = "progress.backgroundColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1316,18 +1283,18 @@ void ProgressModelNG::SetBackgroundColorResource(const RefPtr<ResourceObject>& r
             SetBackgroundColor(AceType::RawPtr(node), bg);
         }
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetFontWeightResource(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetFontWeightResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
 
     const std::string key = "progress.fontWeight";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1343,17 +1310,16 @@ void ProgressModelNG::SetFontWeightResource(const RefPtr<ResourceObject>& resObj
             SetFontWeight(AceType::RawPtr(node), theme->GetTextStyle().GetFontWeight());
         }
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
-
-void ProgressModelNG::SetRSStrokeWidth(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetRSStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     std::string key = "progress.style.strokeWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1373,17 +1339,17 @@ void ProgressModelNG::SetRSStrokeWidth(const RefPtr<ResourceObject>& resObj)
         }
         SetStrokeWidth(AceType::RawPtr(node), width);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetRSScaleWidth(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetRSScaleWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     std::string key = "progress.style.scaleWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1391,6 +1357,10 @@ void ProgressModelNG::SetRSScaleWidth(const RefPtr<ResourceObject>& resObj)
         CHECK_NULL_VOID(pipeline);
         auto progressTheme = pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(progressTheme);
+        auto progressPaintProperty = node->GetLayoutProperty<NG::ProgressLayoutProperty>();
+        CHECK_NULL_VOID(progressPaintProperty);
+        auto strokeWidthDimension =
+            progressPaintProperty->GetStrokeWidth().value_or(progressTheme->GetTrackThickness());
         CalcDimension width;
         bool parseOK = false;
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -1398,22 +1368,23 @@ void ProgressModelNG::SetRSScaleWidth(const RefPtr<ResourceObject>& resObj)
         } else {
             parseOK = ResourceParseUtils::ParseResDimensionVp(resObj, width);
         }
-        if (!parseOK || LessOrEqual(width.Value(), 0.0f) || width.Unit() == DimensionUnit::PERCENT) {
+        if (!parseOK || LessOrEqual(width.Value(), 0.0f) || (width.Value() > strokeWidthDimension.Value()) ||
+            width.Unit() == DimensionUnit::PERCENT) {
             width = progressTheme->GetScaleWidth();
         }
         SetScaleWidth(AceType::RawPtr(node), width);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-void ProgressModelNG::SetTextResource(const RefPtr<ResourceObject>& resObj)
+void ProgressModelNG::SetTextResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     const std::string key = "progress.text";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
@@ -1424,7 +1395,138 @@ void ProgressModelNG::SetTextResource(const RefPtr<ResourceObject>& resObj)
             SetText(AceType::RawPtr(node), std::nullopt);
         }
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ProgressModelNG::SetFontSizeResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "progress.fontSize";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto node = pattern->GetHost();
+        CHECK_NULL_VOID(node);
+        CalcDimension fontSize;
+        bool sizeState = false;
+        sizeState = ResourceParseUtils::ParseResDimensionNG(obj, fontSize, DimensionUnit::FP);
+        if (!sizeState || LessNotEqual(fontSize.Value(), 0.0f) || fontSize.Unit() == DimensionUnit::PERCENT) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+            CHECK_NULL_VOID(progressTheme);
+            fontSize = progressTheme->GetTextSize();
+        }
+        SetFontSize(AceType::RawPtr(node), fontSize);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ProgressModelNG::SetCapsuleStyleFontColor(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, CapsuleStyleFontColorSetByUser, value);
+}
+
+void ProgressModelNG::SetCapsuleStyle(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, CapsuleStyleSetByUser, value);
+}
+
+void ProgressModelNG::SetGradientColorByUser(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, GradientColorSetByUser, value);
+}
+
+void ProgressModelNG::SetGradientColorByUser(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, GradientColorSetByUser, value, frameNode);
+}
+
+void ProgressModelNG::CreateWithResourceObj(JsProgressResourceType type, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, type, resObj);
+}
+
+void ProgressModelNG::CreateLSOrRingOrCapsuleWithResourceObj(
+    FrameNode* frameNode, JsProgressResourceType type, const RefPtr<ResourceObject>& resObj)
+{
+    switch (type) {
+        case JsProgressResourceType::LSStrokeWidth:
+            SetLSStrokeWidth(frameNode, resObj);
+            break;
+        case JsProgressResourceType::LSSweepingEffect:
+            SetLSSweepingEffect(frameNode, resObj);
+            break;
+        case JsProgressResourceType::LSStrokeRadius:
+            SetLSStrokeRadius(frameNode, resObj);
+            break;
+        case JsProgressResourceType::RingStrokeWidth:
+            SetRingStrokeWidth(frameNode, resObj);
+            break;
+        case JsProgressResourceType::RingShadow:
+            SetRingShadow(frameNode, resObj);
+            break;
+        case JsProgressResourceType::RingStatus:
+            SetRingStatus(frameNode, resObj);
+            break;
+        case JsProgressResourceType::RingSweepingEffect:
+            SetRingSweepingEffect(frameNode, resObj);
+            break;
+        case JsProgressResourceType::CapsuleBorderWidth:
+            SetCapsuleBorderWidth(frameNode, resObj);
+            break;
+        case JsProgressResourceType::CapsuleBorderColor:
+            SetCapsuleBorderColor(frameNode, resObj);
+            break;
+        case JsProgressResourceType::CapsuleSweepingEffect:
+            SetCapsuleSweepingEffect(frameNode, resObj);
+            break;
+        default:
+            break;
+    }
+}
+
+void ProgressModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, JsProgressResourceType type, const RefPtr<ResourceObject>& resObj)
+{
+    switch (type) {
+        case JsProgressResourceType::COLOR:
+            SetProgressColor(frameNode, resObj);
+            break;
+        case JsProgressResourceType::SmoothEffect:
+            SetSmoothResEffect(frameNode, resObj);
+            break;
+        case JsProgressResourceType::ShowDefaultPercentage:
+            SetShowDefaultPercentage(frameNode, resObj);
+            break;
+        case JsProgressResourceType::FontColor:
+            SetFontColorResource(frameNode, resObj);
+            break;
+        case JsProgressResourceType::BackgroundColor:
+            SetBackgroundColorResource(frameNode, resObj);
+            break;
+        case JsProgressResourceType::FontWeight:
+            SetFontWeightResource(frameNode, resObj);
+            break;
+        case JsProgressResourceType::PSStrokeWidth:
+            SetRSStrokeWidth(frameNode, resObj);
+            break;
+        case JsProgressResourceType::PSScaleWidth:
+            SetRSScaleWidth(frameNode, resObj);
+            break;
+        case JsProgressResourceType::Text:
+            SetTextResource(frameNode, resObj);
+            break;
+        case JsProgressResourceType::FontSize:
+            SetFontSizeResource(frameNode, resObj);
+            break;
+        default:
+            CreateLSOrRingOrCapsuleWithResourceObj(frameNode, type, resObj);
+            break;
+    }
 }
 } // namespace OHOS::Ace::NG

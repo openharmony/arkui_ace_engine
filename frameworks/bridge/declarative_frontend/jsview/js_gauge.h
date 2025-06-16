@@ -38,7 +38,7 @@ public:
 private:
     static void SetGradientColors(const JSCallbackInfo& info);
     static void ConvertGradientColor(const JsiRef<JsiValue>& itemParam,
-        std::vector<OHOS::Ace::NG::ColorStopArray>& colors, OHOS::Ace::NG::GaugeType& type);
+        std::vector<OHOS::Ace::NG::ColorStopArray>& colors, OHOS::Ace::NG::GaugeType& type, bool& useJsLinearGradient);
     static void ConvertResourceColor(
         const JsiRef<JsiValue>& itemParam, std::vector<OHOS::Ace::NG::ColorStopArray>& colors);
     static void SortColorStopOffset(std::vector<NG::ColorStopArray>& colors);

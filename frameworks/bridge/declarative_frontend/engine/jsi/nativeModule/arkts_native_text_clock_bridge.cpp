@@ -84,7 +84,8 @@ ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     std::string format;
-    ArkTSUtils::ParseJsString(vm, formatArg, format);
+    RefPtr<ResourceObject> formatResObj;
+    ArkTSUtils::ParseJsString(vm, formatArg, format, formatResObj);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (0 == format.length() || DEFAULT_STR == format) {
@@ -92,7 +93,8 @@ ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeC
     } else if (!StringUtils::IsAscii(format) && Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         nodeModifiers->getTextClockModifier()->resetFormat(nativeNode);
     } else {
-        nodeModifiers->getTextClockModifier()->setFormat(nativeNode, format.c_str());
+        auto formatRawPtr = AceType::RawPtr(formatResObj);
+        nodeModifiers->getTextClockModifier()->setFormatRes(nativeNode, format.c_str(), formatRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -119,12 +121,14 @@ ArkUINativeModuleValue TextClockBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
+    RefPtr<ResourceObject> fontColorResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color, fontColorResObj)) {
         nodeModifiers->getTextClockModifier()->resetFontColor(nativeNode);
     } else {
-        nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
+        auto fontColorRawPtr = AceType::RawPtr(fontColorResObj);
+        nodeModifiers->getTextClockModifier()->setFontColorRes(nativeNode, color.GetValue(), fontColorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -151,14 +155,16 @@ ArkUINativeModuleValue TextClockBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
+    RefPtr<ResourceObject> fontSizeResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, fontSize, DimensionUnit::FP, false)
-        || fontSize.Value() < 0 || fontSize.Unit() == DimensionUnit::PERCENT) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, fontSize, DimensionUnit::FP, fontSizeResObj, false) ||
+        fontSize.Value() < 0 || fontSize.Unit() == DimensionUnit::PERCENT) {
         nodeModifiers->getTextClockModifier()->resetFontSize(nativeNode);
     } else {
-        nodeModifiers->getTextClockModifier()->setFontSize(
-            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
+        auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+        nodeModifiers->getTextClockModifier()->setFontSizeRes(
+            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), fontSizeRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -221,16 +227,18 @@ ArkUINativeModuleValue TextClockBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     std::string fontWeight;
+    RefPtr<ResourceObject> fontWeightResObj;
     if (!fontWeightArg->IsNull()) {
         if (fontWeightArg->IsNumber()) {
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
-        } else if (fontWeightArg->IsString(vm)) {
-            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontWeightArg, fontWeight, fontWeightResObj);
         }
     }
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getTextClockModifier()->setFontWeight(nativeNode, fontWeight.c_str());
+    auto fontWeightRawPtr = AceType::RawPtr(fontWeightResObj);
+    nodeModifiers->getTextClockModifier()->setFontWeightRes(nativeNode, fontWeight.c_str(), fontWeightRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -257,13 +265,15 @@ ArkUINativeModuleValue TextClockBridge::SetFontFamily(ArkUIRuntimeCallInfo* runt
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     std::string fontFamilyStr;
+    RefPtr<ResourceObject> fontFamilyResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamilyStr)) {
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamilyStr, fontFamilyResObj)) {
         nodeModifiers->getTextClockModifier()->resetFontFamily(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    nodeModifiers->getTextClockModifier()->setFontFamily(nativeNode, fontFamilyStr.c_str());
+    auto fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
+    nodeModifiers->getTextClockModifier()->setFontFamilyRes(nativeNode, fontFamilyStr.c_str(), fontFamilyRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -331,16 +341,20 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     auto offsetXArray = std::make_unique<double[]>(length);
     auto offsetYArray = std::make_unique<double[]>(length);
     auto fillArray = std::make_unique<uint32_t[]>(length);
-    bool radiusParseResult = ArkTSUtils::ParseArray<double>(
-        vm, runtimeCallInfo->GetCallArgRef(NUM_1), radiusArray.get(), length, ArkTSUtils::parseShadowRadius);
+    std::vector<RefPtr<ResourceObject>> radiusResObjArray;
+    std::vector<RefPtr<ResourceObject>> colorResObjArray;
+    std::vector<RefPtr<ResourceObject>> offsetXResObjArray;
+    std::vector<RefPtr<ResourceObject>> offsetYResObjArray;
+    bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_1),
+        radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResObjArray);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_2), typeArray.get(), length, ArkTSUtils::parseShadowType);
-    bool colorParseResult = ArkTSUtils::ParseArray<uint32_t>(
-        vm, runtimeCallInfo->GetCallArgRef(NUM_3), colorArray.get(), length, ArkTSUtils::parseShadowColor);
-    bool offsetXParseResult = ArkTSUtils::ParseArray<double>(
-        vm, runtimeCallInfo->GetCallArgRef(NUM_4), offsetXArray.get(), length, ArkTSUtils::parseShadowOffset);
-    bool offsetYParseResult = ArkTSUtils::ParseArray<double>(
-        vm, runtimeCallInfo->GetCallArgRef(NUM_5), offsetYArray.get(), length, ArkTSUtils::parseShadowOffset);
+    bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, runtimeCallInfo->GetCallArgRef(NUM_3),
+        colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResObjArray);
+    bool offsetXParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_4),
+        offsetXArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetXResObjArray);
+    bool offsetYParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_5),
+        offsetYArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetYResObjArray);
     bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_6), fillArray.get(), length, ArkTSUtils::parseShadowFill);
     if (!radiusParseResult || !colorParseResult || !offsetXParseResult ||
@@ -348,18 +362,16 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     auto textShadowArray = std::make_unique<ArkUITextShadowStruct[]>(length);
-    CHECK_NULL_RETURN(textShadowArray.get(), panda::JSValueRef::Undefined(vm));
+    auto textShadowResArray = std::make_unique<ArkUITextShadowResStruct[]>(length);
+    CHECK_NULL_RETURN(textShadowArray && textShadowResArray, panda::JSValueRef::Undefined(vm));
     for (uint32_t i = 0; i < length; i++) {
-        textShadowArray[i].radius = radiusArray[i];
-        textShadowArray[i].type = typeArray[i];
-        textShadowArray[i].color = colorArray[i];
-        textShadowArray[i].offsetX = offsetXArray[i];
-        textShadowArray[i].offsetY = offsetYArray[i];
-        textShadowArray[i].fill = fillArray[i];
+        textShadowArray[i] = { radiusArray[i], typeArray[i], colorArray[i], offsetXArray[i], offsetYArray[i],
+            fillArray[i] };
+        textShadowResArray[i] = { AceType::RawPtr(radiusResObjArray[i]), AceType::RawPtr(colorResObjArray[i]),
+            AceType::RawPtr(offsetXResObjArray[i]), AceType::RawPtr(offsetYResObjArray[i]) };
     }
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getTextClockModifier()->setTextShadow(nativeNode, textShadowArray.get(), length);
+    GetArkUINodeModifiers()->getTextClockModifier()->setTextShadowRes(
+        nativeNode, textShadowArray.get(), textShadowResArray.get(), length);
     return panda::JSValueRef::Undefined(vm);
 }
 

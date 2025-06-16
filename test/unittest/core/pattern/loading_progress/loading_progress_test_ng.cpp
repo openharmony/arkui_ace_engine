@@ -1241,4 +1241,38 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameRateRangeTest001, TestSize.L
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
 }
+
+/**
+ * @tc.name: LoadingProgressUpdateColorTest002
+ * @tc.desc: Test LoadingProgress color update property.
+ * @tc.type: FUNCC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create loading progress and get pattern
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get related properties and objects
+     */
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    pipelineContext->SetIsSystemColorChange(true);
+    Color systemColor = Color::RED;
+    loadingProgressPattern->UpdateColor(systemColor, false);
+    EXPECT_EQ(paintProperty->GetColor().value(), systemColor);
+    EXPECT_EQ(renderContext->GetForegroundColor().value(), systemColor);
+}
 } // namespace OHOS::Ace::NG

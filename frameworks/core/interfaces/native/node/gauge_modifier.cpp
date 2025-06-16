@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/gauge_modifier.h"
 
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr float MIN_VALUE = 0.0f;
@@ -72,11 +73,71 @@ void SetGaugeStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit
     GaugeModelNG::SetGaugeStrokeWidth(frameNode, Dimension(value, unitEnum));
 }
 
+void SetGaugeStrokeWidthPtr(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit, void* strokeWidthRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    GaugeModelNG::SetGaugeStrokeWidth(frameNode, Dimension(value, unitEnum));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* strokeWidth = reinterpret_cast<ResourceObject*>(strokeWidthRawPtr);
+        auto strokeWidthResObj = AceType::Claim(strokeWidth);
+        GaugeModelNG::CreateWithResourceObj(frameNode, GaugeResourceType::STROKE_WIDTH, strokeWidthResObj);
+    }
+}
+
 void ResetGaugeStrokeWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetGaugeStrokeWidth(frameNode, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
+    if (SystemProperties::ConfigChangePerform()) {
+        GaugeModelNG::CreateWithResourceObj(frameNode, GaugeResourceType::STROKE_WIDTH, nullptr);
+    }
+}
+
+void ShadowOptionsUpdateFunc(
+    NG::GaugeShadowOptions& shadowOptions, void* radiusRawPtr, void* offsetXRawPtr, void* offsetYRawPtr)
+{
+    if (SystemProperties::ConfigChangePerform() && radiusRawPtr) {
+        auto* radius = reinterpret_cast<ResourceObject*>(radiusRawPtr);
+        auto radiusResObj = AceType::Claim(radius);
+        auto&& radiusUpdateFunc = [](const RefPtr<ResourceObject>& resObj, NG::GaugeShadowOptions& shadowOptions) {
+            double radius = 0.0;
+            if (ResourceParseUtils::ParseResDouble(resObj, radius) && !NonPositive(radius)) {
+                shadowOptions.radius = radius;
+            } else {
+                shadowOptions.radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
+            }
+        };
+        shadowOptions.AddResource("gauge.shadow.radius", radiusResObj, std::move(radiusUpdateFunc));
+    }
+    if (SystemProperties::ConfigChangePerform() && offsetXRawPtr) {
+        auto* offsetX = reinterpret_cast<ResourceObject*>(offsetXRawPtr);
+        auto offsetXResObj = AceType::Claim(offsetX);
+        auto&& offsetXUpdateFunc = [](const RefPtr<ResourceObject>& resObj, NG::GaugeShadowOptions& shadowOptions) {
+            double offsetX = 0.0;
+            if (ResourceParseUtils::ParseResDouble(resObj, offsetX)) {
+                shadowOptions.offsetX = offsetX;
+            } else {
+                shadowOptions.offsetX = NG::DEFAULT_GAUGE_SHADOW_OFFSETX;
+            }
+        };
+        shadowOptions.AddResource("gauge.shadow.offsetX", offsetXResObj, std::move(offsetXUpdateFunc));
+    }
+    if (SystemProperties::ConfigChangePerform() && offsetYRawPtr) {
+        auto* offsetY = reinterpret_cast<ResourceObject*>(offsetYRawPtr);
+        auto offsetYResObj = AceType::Claim(offsetY);
+        auto&& offsetYUpdateFunc = [](const RefPtr<ResourceObject>& resObj, NG::GaugeShadowOptions& shadowOptions) {
+            double offsetY = 0.0;
+            if (ResourceParseUtils::ParseResDouble(resObj, offsetY)) {
+                shadowOptions.offsetY = offsetY;
+            } else {
+                shadowOptions.offsetY = NG::DEFAULT_GAUGE_SHADOW_OFFSETY;
+            }
+        };
+        shadowOptions.AddResource("gauge.shadow.offsetY", offsetYResObj, std::move(offsetYUpdateFunc));
+    }
 }
 
 void SetShadowOptions(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY,
@@ -89,6 +150,21 @@ void SetShadowOptions(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 
     shadowOptions.offsetX = offsetX;
     shadowOptions.offsetY = offsetY;
     shadowOptions.isShadowVisible = isShadowVisible;
+    GaugeModelNG::SetShadowOptions(frameNode, shadowOptions);
+}
+
+void SetShadowOptionsPtr(
+    ArkUINodeHandle node, ArkUIGaugeShadowOptions& shadow, ArkUIShadowOptionsResource& shadowOptionsResource)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::GaugeShadowOptions shadowOptions;
+    shadowOptions.radius = shadow.radius;
+    shadowOptions.offsetX = shadow.offsetX;
+    shadowOptions.offsetY = shadow.offsetY;
+    shadowOptions.isShadowVisible = shadow.isShadowVisible;
+    ShadowOptionsUpdateFunc(shadowOptions, shadowOptionsResource.radiusRawPtr, shadowOptionsResource.offsetXRawPtr,
+        shadowOptionsResource.offsetYRawPtr);
     GaugeModelNG::SetShadowOptions(frameNode, shadowOptions);
 }
 
@@ -105,6 +181,7 @@ void SetIsShowIndicator(ArkUINodeHandle node, ArkUI_Bool isShowIndicator)
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetIsShowIndicator(frameNode, isShowIndicator);
 }
+
 void SetIndicatorIconPath(ArkUINodeHandle node, const char* iconPath, const char* bundleName, const char* moduleName)
 
 {
@@ -125,11 +202,40 @@ void SetIndicatorIconPath(ArkUINodeHandle node, const char* iconPath, const char
     GaugeModelNG::SetIndicatorIconPath(frameNode, iconPathStr, bundleNameStr, moduleNameStr);
 }
 
+void SetIndicatorIconPathPtr(
+    ArkUINodeHandle node, const char* iconPath, const char* bundleName, const char* moduleName, void* iconPathRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string iconPathStr;
+    std::string bundleNameStr;
+    std::string moduleNameStr;
+    if (iconPath != nullptr) {
+        iconPathStr = iconPath;
+    }
+    if (bundleName != nullptr) {
+        bundleNameStr = bundleName;
+    }
+    if (moduleName != nullptr) {
+        moduleNameStr = moduleName;
+    }
+    GaugeModelNG::SetIndicatorIconPath(frameNode, iconPathStr, bundleNameStr, moduleNameStr);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* iconPathResObjRaw = reinterpret_cast<ResourceObject*>(iconPathRawPtr);
+        auto iconPathResObj = AceType::Claim(iconPathResObjRaw);
+        GaugeModelNG::CreateWithResourceObj(frameNode, GaugeResourceType::INDICATOR_ICON, iconPathResObj);
+    }
+}
+
 void ResetIndicatorIconPath(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::ResetIndicatorIconPath(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GaugeModelNG::CreateWithResourceObj(frameNode, GaugeResourceType::INDICATOR_ICON, nullptr);
+    }
 }
 
 void SetIndicatorSpace(ArkUINodeHandle node, const char* spaceStrValue, ArkUI_Float32 spaceValue, int32_t spaceUnit)
@@ -150,11 +256,39 @@ void SetIndicatorSpace(ArkUINodeHandle node, const char* spaceStrValue, ArkUI_Fl
     GaugeModelNG::SetIndicatorSpace(frameNode, space);
 }
 
+void SetIndicatorSpacePtr(
+    ArkUINodeHandle node, const char* spaceStrValue, ArkUI_Float32 spaceValue, int32_t spaceUnit, void* spaceRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension space;
+    auto spaceUnitValue = static_cast<DimensionUnit>(spaceUnit);
+    if (spaceUnitValue == DimensionUnit::CALC) {
+        std::string valueStr;
+        if (spaceStrValue != nullptr) {
+            valueStr = spaceStrValue;
+        }
+        space = CalcDimension(valueStr, spaceUnitValue);
+    } else {
+        space = CalcDimension(spaceValue, spaceUnitValue);
+    }
+    GaugeModelNG::SetIndicatorSpace(frameNode, space);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* spaceResObj = reinterpret_cast<ResourceObject*>(spaceRawPtr);
+        auto spaceResObjPtr = AceType::Claim(spaceResObj);
+        GaugeModelNG::CreateWithResourceObj(frameNode, GaugeResourceType::INDICATOR_SPACE, spaceResObjPtr);
+    }
+}
+
 void ResetIndicatorSpace(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::ResetIndicatorSpace(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GaugeModelNG::CreateWithResourceObj(frameNode, GaugeResourceType::INDICATOR_SPACE, nullptr);
+    }
 }
 
 void SetColors(ArkUINodeHandle node, const uint32_t* colors, const ArkUI_Float32* weight, uint32_t length)
@@ -220,13 +354,20 @@ void SetGradientColors(ArkUINodeHandle node, const struct ArkUIGradientType* gra
         }
         ColorStopArray colorStop(gradient->gradientLength[i]);
         for (uint32_t j = 0; j < gradient->gradientLength[i]; j++, pos++) {
-            colorStop.at(j) = std::make_pair(Color(gradient->color[pos]),
-                Dimension(gradient->offset[pos].number, static_cast<DimensionUnit>(gradient->offset[pos].unit)));
+            auto color = static_cast<Color>(gradient->color[pos]);
+            if (gradient->colorResourceId != nullptr && pos >= 0 && pos < gradient->length) {
+                color.SetResourceId(gradient->colorResourceId[pos]);
+            }
+            colorStop.at(j) = std::make_pair(
+                color, Dimension(gradient->offset[pos].number, static_cast<DimensionUnit>(gradient->offset[pos].unit)));
         }
         colors.at(i) = colorStop;
     }
     GaugeType type = static_cast<GaugeType>(gradient->type);
     SortColorStopByOffset(colors);
+    if (SystemProperties::ConfigChangePerform()) {
+        GaugeModelNG::SetUseGradient(frameNode, gradient->isGradientColor);
+    }
     GaugeModelNG::SetGradientColors(frameNode, colors, weight, type);
 }
 
@@ -249,13 +390,17 @@ const ArkUIGaugeModifier* GetGaugeModifier()
         .setGaugeEndAngle = SetGaugeEndAngle,
         .resetGaugeEndAngle = ResetGaugeEndAngle,
         .setGaugeStrokeWidth = SetGaugeStrokeWidth,
+        .setGaugeStrokeWidthPtr = SetGaugeStrokeWidthPtr,
         .resetGaugeStrokeWidth = ResetGaugeStrokeWidth,
         .setShadowOptions = SetShadowOptions,
+        .setShadowOptionsPtr = SetShadowOptionsPtr,
         .resetShadowOptions = ResetShadowOptions,
         .setIsShowIndicator = SetIsShowIndicator,
         .setIndicatorIconPath = SetIndicatorIconPath,
+        .setIndicatorIconPathPtr = SetIndicatorIconPathPtr,
         .resetIndicatorIconPath = ResetIndicatorIconPath,
         .setIndicatorSpace = SetIndicatorSpace,
+        .setIndicatorSpacePtr = SetIndicatorSpacePtr,
         .resetIndicatorSpace = ResetIndicatorSpace,
         .setColors = SetColors,
         .resetColors = ResetColors,
@@ -278,13 +423,17 @@ const CJUIGaugeModifier* GetCJUIGaugeModifier()
         .setGaugeEndAngle = SetGaugeEndAngle,
         .resetGaugeEndAngle = ResetGaugeEndAngle,
         .setGaugeStrokeWidth = SetGaugeStrokeWidth,
+        .setGaugeStrokeWidthPtr = SetGaugeStrokeWidthPtr,
         .resetGaugeStrokeWidth = ResetGaugeStrokeWidth,
         .setShadowOptions = SetShadowOptions,
+        .setShadowOptionsPtr = SetShadowOptionsPtr,
         .resetShadowOptions = ResetShadowOptions,
         .setIsShowIndicator = SetIsShowIndicator,
         .setIndicatorIconPath = SetIndicatorIconPath,
+        .setIndicatorIconPathPtr = SetIndicatorIconPathPtr,
         .resetIndicatorIconPath = ResetIndicatorIconPath,
         .setIndicatorSpace = SetIndicatorSpace,
+        .setIndicatorSpacePtr = SetIndicatorSpacePtr,
         .resetIndicatorSpace = ResetIndicatorSpace,
         .setColors = SetColors,
         .resetColors = ResetColors,

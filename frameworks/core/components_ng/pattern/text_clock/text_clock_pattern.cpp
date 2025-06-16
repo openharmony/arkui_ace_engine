@@ -893,6 +893,26 @@ void TextClockPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("isStart: ", isStart_ ? "true" : "false");
 }
 
+void TextClockPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextClockTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(pops);
+    
+    if (!pops->HasTextColorSetByUser() || (pops->HasTextColorSetByUser() && !pops->GetTextColorSetByUserValue())) {
+        UpdateTextClockColor(theme->GetTextStyleClock().GetTextColor(), false);
+    }
+}
+
 void TextClockPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     Pattern::ToJsonValue(json, filter);
@@ -923,21 +943,22 @@ void TextClockPattern::OnColorModeChange(uint32_t colorMode)
     }
 }
 
-void TextClockPattern::UpdateTextClockColor(const Color& color)
+void TextClockPattern::UpdateTextClockColor(const Color& color, bool isFirstLoad)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
-    if (layoutProperty) {
-        layoutProperty->UpdateTextColor(color);
-    }
+    CHECK_NULL_VOID(layoutProperty);
     auto renderContext = host->GetRenderContext();
-    if (renderContext) {
+    CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        layoutProperty->UpdateTextColor(color);
         renderContext->UpdateForegroundColor(color);
         renderContext->ResetForegroundColorStrategy();
         renderContext->UpdateForegroundColorFlag(true);
     }
-
 }
 
 void TextClockPattern::UpdateTextClockFontSize(const CalcDimension& fontSize)
@@ -957,4 +978,13 @@ void TextClockPattern::UpdateTextClockFontFamily(const std::vector<std::string>&
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateFontFamily(fontFamilies);
 } 
+
+void TextClockPattern::UpdateTextClockFormat(const std::string& format)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateFormat(format);
+}
 } // namespace OHOS::Ace::NG

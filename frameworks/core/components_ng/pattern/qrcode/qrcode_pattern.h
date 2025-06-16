@@ -64,6 +64,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     float qrCodeSize_ = 0.0f;

@@ -26,19 +26,25 @@ public:
     void SetPatternComplete(NG::PatternLockCompleteEvent&& onComplete) override;
     void SetDotConnect(std::function<void(int32_t)>&& onDotConnect) override;
     void SetSelectedColor(const Color& selectedColor) override;
+    void SetSelectedColorByUser(bool isByuserSet) override;
     void SetAutoReset(bool isAutoReset) override;
     void SetPathColor(const Color& pathColor) override;
+    void SetPathColorByUser(bool isByuserSet) override;
     void SetActiveColor(const Color& activeColor) override;
+    void SetActiveColorByUser(bool isByuserSet) override;
     void SetRegularColor(const Color& regularColor) override;
+    void SetRegularColorByUser(bool isByuserSet) override;
     void SetCircleRadius(const Dimension& radius) override;
     void SetSideLength(const Dimension& sideLength) override;
     void SetStrokeWidth(const Dimension& lineWidth) override;
     void SetActiveCircleColor(const Color& activeCircleColor) override;
+    void SetActiveCircleColorByUser(bool isByuserSet) override;
     void SetActiveCircleRadius(const Dimension& activeCircleRadius) override;
     void SetEnableWaveEffect(bool enableWaveEffect) override;
     void SetEnableForeground(bool enableForeground) override;
     void SetSkipUnselectedPoint(bool isSkipUnselectedPoint) override;
-    void CreateWithResourceObj(JsResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObj(
+        PatternLockResourceType PatternLockResourceType, const RefPtr<ResourceObject>& resObj) override;
 
     static void SetActiveColor(FrameNode* frameNode, const Color& activeColor);
     static void SetCircleRadius(FrameNode* frameNode, const Dimension& radius);
@@ -55,6 +61,15 @@ public:
     static void SetSkipUnselectedPoint(FrameNode* frameNode, bool isSkipUnselectedPoint);
     static void SetPatternComplete(FrameNode* frameNode, NG::PatternLockCompleteEvent&& onComplete);
     static void SetDotConnect(FrameNode* frameNode, std::function<void(int32_t)>&& onDotConnect);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, PatternLockResourceType PatternLockResourceType, const RefPtr<ResourceObject>& resObj);
+    static void HandleSelectedColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandlePathColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleActiveColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleRegularColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleCircleRadiusResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSideLengthResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleActiveCircleColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 
 } // namespace OHOS::Ace::NG

@@ -189,7 +189,7 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
     if (pixmap) {
         ImageModelNG::SetInitialPixelMap(reinterpret_cast<FrameNode*>(nativeNode), pixmap);
     } else {
-        nodeModifiers->getImageModifier()->setImageShowSrc(
+        nodeModifiers->getImageModifier()->setImageShowSrcRes(
             nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), (resId == -1), srcRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -794,7 +794,7 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
     ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getImageModifier()->setAlt(
+    nodeModifiers->getImageModifier()->setAltRes(
         nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }

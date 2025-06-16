@@ -78,6 +78,7 @@ public:
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override {}
     bool GetIsAnimation() override;
     void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override {};
+    void SetImageFillSetByUser(bool value) override {};
 };
 
 } // namespace OHOS::Ace::Framework
