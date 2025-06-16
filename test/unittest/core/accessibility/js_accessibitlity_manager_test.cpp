@@ -984,6 +984,7 @@ HWTEST_F(JsAccessibilityManagerTest, SingleHandTransformTest001, TestSize.Level1
     ASSERT_NE(pipelineContext, nullptr);
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
     ASSERT_NE(container, nullptr);
+    container->uIContentType_ = UIContentType::PREVIEW_UI_EXTENSION;
 
     /**
      * @tc.steps: step2. test SetSingleHandTransform & GetSingleHandTransform
