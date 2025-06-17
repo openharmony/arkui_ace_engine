@@ -351,7 +351,7 @@ void SetIndicator(FrameNode* frameNode, const Ark_IndicatorComponentController& 
     auto controller = src;
     CHECK_NULL_VOID(controller);
     controller->SetSwiperNodeBySwiper(OHOS::Ace::AceType::Claim(frameNode));
-    SwiperModelNG::SetBindIndicator(frameNode, true);
+    SwiperModelStatic::SetBindIndicator(frameNode, true);
 }
 } // namespace
 void Indicator0Impl(Ark_NativePointer node,
