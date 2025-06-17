@@ -1166,6 +1166,10 @@ class FrameNode extends Disposable {
         const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
         return { x: position[0], y: position[1] };
     }
+    getGlobalPositionOnDisplay() {
+        const position = getUINativeModule().frameNode.getGlobalPositionOnDisplay(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
     getPositionToParentWithTransform() {
         const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getNodePtr());
         return { x: position[0], y: position[1] };

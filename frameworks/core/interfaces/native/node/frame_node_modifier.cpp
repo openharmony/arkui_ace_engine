@@ -300,6 +300,20 @@ void GetPositionToWindow(ArkUINodeHandle node, ArkUI_Float32 (*windowOffset)[2],
     }
 }
 
+void GetGlobalPositionOnDisplay(ArkUINodeHandle node, ArkUI_Float32 (*globalDisplayPosition)[2], ArkUI_Bool useVp)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetGlobalPositionOnDisplay();
+    if (useVp) {
+        (*globalDisplayPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        (*globalDisplayPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+    } else {
+        (*globalDisplayPosition)[0] = offset.GetX();
+        (*globalDisplayPosition)[1] = offset.GetY();
+    }
+}
+
 void GetPositionToParentWithTransform(ArkUINodeHandle node, ArkUI_Float32 (*parentPosition)[2], ArkUI_Bool useVp)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
@@ -998,6 +1012,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getPositionToParent = GetPositionToParent,
         .getPositionToScreen = GetPositionToScreen,
         .getPositionToWindow = GetPositionToWindow,
+        .getGlobalPositionOnDisplay = GetGlobalPositionOnDisplay,
         .getPositionToParentWithTransform = GetPositionToParentWithTransform,
         .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
         .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,
@@ -1083,6 +1098,7 @@ const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
         .getPositionToParent = GetPositionToParent,
         .getPositionToScreen = GetPositionToScreen,
         .getPositionToWindow = GetPositionToWindow,
+        .getGlobalPositionOnDisplay = GetGlobalPositionOnDisplay,
         .getPositionToParentWithTransform = GetPositionToParentWithTransform,
         .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
         .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,

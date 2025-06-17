@@ -3062,6 +3062,15 @@ void AceContainer::InitWindowCallback()
         rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
         return rect;
     });
+
+    pipelineContext_->SetGetGlobalDisplayWindowRectImpl([window = uiWindow_]() -> Rect {
+        Rect rect;
+        CHECK_NULL_RETURN(window, rect);
+        auto globalDisplayWindowRect = window->GetGlobalDisplayRect();
+        rect.SetRect(globalDisplayWindowRect.posX_, globalDisplayWindowRect.posY_, globalDisplayWindowRect.width_,
+            globalDisplayWindowRect.height_);
+        return rect;
+    });
 }
 
 NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(

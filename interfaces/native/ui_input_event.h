@@ -463,55 +463,53 @@ float OH_ArkUI_PointerEvent_GetDisplayY(const ArkUI_UIInputEvent* event);
 float OH_ArkUI_PointerEvent_GetDisplayYByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
 
 /**
- * @brief Obtains the X coordinate relative to the global display from a directional input
- * event (such as a touch event, mouse event, or axis event). Only the pointer-likely event can be
- * obtained the position information from.
+ * @brief Obtains the X coordinate relative to global display from a pointer event (such as a touch, mouse,
+ * or axis event).
+ * Position information can only be obtained from UI input events.
  *
- * @param event Indicates the pointer to the UI input event.
- * @return Returns the X coordinate relative to the global display.
- * returns <b>0</b> if any parameter error occurs, such as one event passed which does not own position information.
+ * @param event Pointer to the current UI input event.
+ * @return float X coordinate relative to the global display. <b>0</b> is returned if any parameter error occurs
+ * (for example, if the event does not contain position information).
  * @since 20
  */
 float OH_ArkUI_PointerEvent_GetGlobalDisplayX(const ArkUI_UIInputEvent* event);
 
 /**
- * @brief Obtains the X coordinate relative to the global display from a directional input
- * event (such as a touch event, mouse event, or axis event) for the given pointer index.
- * Only the pointer events can be obtained the position information from, and for mouse and axis events,
- * default 0.0f always be returned when the given pointerIndex is bigger than 0.
+ * @brief Obtains the X coordinate of a specific contact point relative to global display from a pointer event
+ * (such as a touch, mouse, or axis event).
+ * Position information can only be obtained from UI input events. For mouse and axis events, if the provided
+ * <b>pointerIndex</b> is greater than 0, this API always returns the default value <b>0.0f</b>.
  *
- * @param event Indicates the pointer to the current UI input event.
- * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
- *    Value may be from 0 (the first pointer that is down) to {@link OH_ArkUI_PointerEvent_GetPointerCount()}-1.
- * @return Returns the X coordinate relative to the global display.
- * returns <b>0.0f</b> if any parameter error occurs.
+ * @param event Pointer to the current UI input event.
+ * @param pointerIndex Index of the target touch point in the multi-touch data list.
+ *Value range: [0, @link OH_ArkUI_PointerEvent_GetPointerCount() - 1]
+ * @return float X coordinate relative to the global display; <b>0.0f</b> if any parameter error occurs.
  * @since 20
  */
 float OH_ArkUI_PointerEvent_GetGlobalDisplayXByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
 
 /**
- * @brief Obtains the Y coordinate relative to the global display from a directional input
- * event (such as a touch event, mouse event, or axis event). Only the pointer-likely event can be
- * obtained the position information from.
+ * @brief Obtains the Y coordinate relative to global display from a pointer event (such as a touch, mouse,
+ * or axis event).
+ * Position information can only be obtained from pointer-like events.
  *
- * @param event Indicates the pointer to the UI input event.
- * @return Returns the Y coordinate relative to the global display.
- * returns <b>0</b> if any parameter error occurs, such as one event passed which does not own position information.
+ * @param event Pointer to the current UI input event.
+ * @return float Y coordinate relative to the global display; <b>0</b> if any parameter error occurs
+ * (for example, if the event does not contain position information).
  * @since 20
  */
 float OH_ArkUI_PointerEvent_GetGlobalDisplayY(const ArkUI_UIInputEvent* event);
 
 /**
- * @brief Obtains the Y coordinate relative to the global display from a directional input
- * event (such as a touch event, mouse event, or axis event) for the given pointer index.
- * Only the pointer events can be obtained the position information from, and for mouse and axis events,
- * default 0.0f always be returned when the given pointerIndex is bigger than 0.
+ * @brief Obtains the Y coordinate of a specific contact point relative to global display from a pointer event
+ * (such as a touch, mouse, or axis event).
+ * Position information can only be obtained from UI input events. For mouse and axis events, if the provided
+ * <b>pointerIndex</b> is greater than 0, this API always returns the default value <b>0.0f</b>.
  *
- * @param event Indicates the pointer to the current UI input event.
- * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
- *    Value may be from 0 (the first pointer that is down) to {@link OH_ArkUI_PointerEvent_GetPointerCount()}-1.
- * @return Returns the Y coordinate relative to the global display.
- * returns <b>0.0f</b> if any parameter error occurs.
+ * @param event Pointer to the current UI input event.
+ * @param pointerIndex Index of the target touch point in the multi-touch data list.
+ *Value range: [0, @link OH_ArkUI_PointerEvent_GetPointerCount() - 1]
+ * @return float Y coordinate relative to the global display; <b>0.0f</b> if any parameter error occurs.
  * @since 20
  */
 float OH_ArkUI_PointerEvent_GetGlobalDisplayYByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
@@ -746,38 +744,34 @@ float OH_ArkUI_PointerEvent_GetHistoryDisplayY(
     const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex);
 
 /**
- * @brief Obtains the X coordinate of a specific touch point in a historical event relative to global display
- * from a directional input event (such as a touch event, mouse event, or axis event) for the given pointer index
- * and the given history index.
- * Only the pointer events can be obtained the position information from, and for mouse and axis events,
- * default 0.0f always be returned when the given pointerIndex is bigger than 0.
+ * @brief Obtains the X coordinate relative to the global display for a specific touch point from historical events,
+ * based on the given pointer index and history index of an input event (such as a touch, mouse, or axis event).
+ * Position information can only be obtained from UI input events. For mouse and axis events, if the provided
+ * <b>pointerIndex</b> is greater than 0, this API always returns the default value <b>0.0f</b>.
  *
- * @param event Indicates the pointer to the current UI input event.
- * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
- *    Value may be from 0 (the first pointer that is down) to {@link OH_ArkUI_PointerEvent_GetPointerCount()}-1.
- * @param historyIndex Indicates which historical value to return, must be less than
- *    {@link #OH_ArkUI_PointerEvent_GetHistorySize}.
- * @return Returns the X coordinate relative to the global display.
- * returns <b>0.0f</b> if any parameter error occurs.
+ * @param event Pointer to the current UI input event.
+ * @param pointerIndex Index of the target touch point in the multi-touch data list.
+ *Value range: [0, @link OH_ArkUI_PointerEvent_GetPointerCount() - 1]
+ * @param historyIndex Index of the historical value to return. It must be less than
+ * {@link #OH_ArkUI_PointerEvent_GetHistorySize}.
+ * @return float X coordinate relative to the global display; <b>0.0f</b> if any parameter error occurs.
  * @since 20
  */
 float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(
     const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex);
 
 /**
- * @brief Obtains the Y coordinate of a specific touch point in a historical event relative to global display
- * from a directional input event (such as a touch event, mouse event, or axis event) for the given pointer index
- * and the given history index.
- * Only the pointer events can be obtained the position information from, and for mouse and axis events,
- * default 0.0f always be returned when the given pointerIndex is bigger than 0.
+ * @brief Obtains the Y coordinate relative to the global display for a specific touch point from historical events,
+ * based on the given pointer index and history index of an input event (such as a touch, mouse, or axis event).
+ * Position information can only be obtained from UI input events. For mouse and axis events, if the provided
+ * <b>pointerIndex</b> is greater than 0, this API always returns the default value <b>0.0f</b>.
  *
- * @param event Indicates the pointer to the current UI input event.
- * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
- *    Value may be from 0 (the first pointer that is down) to {@link OH_ArkUI_PointerEvent_GetPointerCount()}-1.
- * @param historyIndex Indicates which historical value to return, must be less than
- *    {@link #OH_ArkUI_PointerEvent_GetHistorySize}.
- * @return Returns the Y coordinate relative to the global display.
- * returns <b>0.0f</b> if any parameter error occurs.
+ * @param event Pointer to the current UI input event.
+ * @param pointerIndex Index of the target touch point in the multi-touch data list.
+ *Value range: [0, @link OH_ArkUI_PointerEvent_GetPointerCount() - 1]
+ * @param historyIndex Index of the historical value to return. It must be less than
+ * {@link #OH_ArkUI_PointerEvent_GetHistorySize}.
+ * @return float Y coordinate relative to the global display; <b>0.0f</b> if any parameter error occurs.
  * @since 20
  */
 float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(

@@ -3690,18 +3690,38 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
 // ex. textInput component wrap offset relative to screen into a config and send to ime framework
 OffsetF FrameNode::GetPositionToScreen()
 {
-    auto offsetCurrent = GetOffsetRelativeToWindow();
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto offsetCurrent = GetFinalOffsetRelativeToWindow(pipelineContext);
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
+    return offset;
+}
+
+// returns a node's collected offset(see GetOffsetRelativeToWindow)
+// with offset of window to globalDisplay
+// ex. textInput component wrap offset relative to globalDisplay into a config and send to ime framework
+OffsetF FrameNode::GetGlobalPositionOnDisplay()
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto offsetCurrent = GetFinalOffsetRelativeToWindow(pipelineContext);
+    auto globalDisplayWindowOffset = pipelineContext->GetGlobalDisplayWindowRect().GetOffset();
+    OffsetF offset(globalDisplayWindowOffset.GetX() + offsetCurrent.GetX(),
+        globalDisplayWindowOffset.GetY() + offsetCurrent.GetY());
+    return offset;
+}
+
+OffsetF FrameNode::GetFinalOffsetRelativeToWindow(PipelineContext* pipelineContext)
+{
+    auto offsetCurrent = GetOffsetRelativeToWindow();
     auto windowManager = pipelineContext->GetWindowManager();
     auto container = Container::CurrentSafely();
     if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         auto windowScale = container->GetWindowScale();
         offsetCurrent = offsetCurrent * windowScale;
     }
-    OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
-    return offset;
+    return offsetCurrent;
 }
 
 // returns a node's offset relative to parent and consider graphic transform rotate properties

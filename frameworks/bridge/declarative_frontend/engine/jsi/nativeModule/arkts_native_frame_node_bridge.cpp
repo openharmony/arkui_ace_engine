@@ -47,6 +47,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t INDEX_OF_INTERVAL = 4;
 constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
 constexpr int DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
+constexpr int32_t SIZE_OF_ARRAY = 2;
 
 bool ParseFloatArray(const EcmaVM* vm, const panda::Local<panda::ArrayRef>& array, std::vector<float>& outArray)
 {
@@ -1311,6 +1312,23 @@ ArkUINativeModuleValue FrameNodeBridge::GetPositionToScreen(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(screenPosition, panda::JSValueRef::Undefined(vm));
     Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, screenPosition[0]));
     Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, screenPosition[1]));
+    return valueArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetGlobalPositionOnDisplay(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, SIZE_OF_ARRAY);
+    ArkUI_Float32 globalDisplayPosition[SIZE_OF_ARRAY];
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getGlobalPositionOnDisplay(
+        nativeNode, &globalDisplayPosition, true);
+    CHECK_NULL_RETURN(globalDisplayPosition, panda::JSValueRef::Undefined(vm));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, globalDisplayPosition[0]));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, globalDisplayPosition[1]));
     return valueArray;
 }
 
