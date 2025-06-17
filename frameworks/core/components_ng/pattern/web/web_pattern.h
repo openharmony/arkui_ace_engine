@@ -834,6 +834,7 @@ public:
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
     void SendPipEvent(int delegateId, int childId, int frameRoutingId, int event);
     void SetDefaultBackgroundColor();
+    bool CheckVisible();
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;

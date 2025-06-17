@@ -8034,6 +8034,31 @@ void WebPattern::SendPipEvent(int delegateId, int childId, int frameRoutingId, i
     }
 }
 
+bool WebPattern::CheckVisible()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+
+    if (!host->IsActive() || !host->IsVisible()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckVisible host is inactive or invisible");
+        return false;
+    }
+
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        if (parent->IsWindowBoundary()) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckVisible IsWindowBoundary is true");
+            return true;
+        }
+        if (!parent->IsActive() || !parent->IsVisible()) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckVisible parent is inactive or invisible");
+            return false;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return true;
+}
+
 bool WebPattern::Pip(int status,
     int delegateId, int childId, int frameRoutingId, int width, int height)
 {
