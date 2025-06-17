@@ -28,6 +28,34 @@ void EffectComponentPattern::AlwaysSnapshot(bool enable) const
     context->SetAlwaysSnapshot(enable);
 }
 
+bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipiline = host->GetContext();
+    CHECK_NULL_RETURN(pipiline, false);
+    pipiline->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        const auto& size = geometryNode->GetFrameSize();
+        if (size.IsPositive()) {
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();
+            CHECK_NULL_VOID(rsNode);
+            // rsNode->SetCompositeLayer("CompositeComponent");
+        }
+        return;
+    });
+
+    return false;
+}
+
 void EffectComponentPattern::SetIndependentLayer(bool independentLayer)
 {
     independentLayer_ = independentLayer;

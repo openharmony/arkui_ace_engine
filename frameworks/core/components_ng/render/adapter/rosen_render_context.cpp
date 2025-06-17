@@ -509,7 +509,6 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
                 .isTextureExportNode = isTextureExportNode };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-            // rsNode_->SetCompositeLayer("CompositeComponent");
             break;
         }
         case ContextType::INCREMENTAL_CANVAS: {
