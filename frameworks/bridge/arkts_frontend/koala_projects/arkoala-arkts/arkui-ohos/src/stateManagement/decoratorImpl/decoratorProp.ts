@@ -17,13 +17,14 @@ import { DecoratedV1VariableBase } from './decoratorBase';
 import { propDeepCopy } from '@koalaui/common';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { ExtendableComponent } from '../../component/extendableComponent';
-import { IPropDecoratedVariable, UIUtils } from '../decorator';
+import { IPropDecoratedVariable } from '../decorator';
 import { WatchFuncType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { DecoratorBackingValue } from '../base/backingValue';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { UIUtils } from '../utils';
 /** 
 * implementation of V1 @Prop
 *
