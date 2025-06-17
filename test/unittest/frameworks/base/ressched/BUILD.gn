@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-group("frameworks_unittest") {
-  testonly = true
-  deps = [
-    "base/ressched:ressched_report_test",
-    "core/common:container_scope_test",
+ohos_unittest("ressched_report_test") {
+  module_out_path = frameworks_test_output_path
+  sources = [
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/base/mock_ressched_report.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "ressched_report_test.cpp",
   ]
+
+  external_deps = [ "googletest:gmock_main" ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
