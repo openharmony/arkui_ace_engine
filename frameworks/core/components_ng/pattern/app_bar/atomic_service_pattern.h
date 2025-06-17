@@ -65,6 +65,7 @@ public:
     std::optional<bool> settedColorMode = std::nullopt;
     ACE_FORCE_EXPORT static void RegisterBeforeCreateLayoutBuilder(
         std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder);
+    void OnBackPressedCallback() override;
 
 private:
     void UpdateLayoutMargin();

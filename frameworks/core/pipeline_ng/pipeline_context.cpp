@@ -2743,6 +2743,26 @@ bool PipelineContext::OnBackPressed()
         LOGI("router consumed backpressed event");
         return true;
     }
+
+    taskExecutor_->PostSyncTask(
+        [weakPipelineContext = WeakClaim(this), &result]() {
+            auto context = weakPipelineContext.Upgrade();
+            CHECK_NULL_VOID(context);
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto appBar = container->GetAppBar();
+            CHECK_NULL_VOID(appBar);
+            auto atomicServicePattern = appBar->GetAtomicServicePattern();
+            CHECK_NULL_VOID(atomicServicePattern);
+            atomicServicePattern->OnBackPressedCallback();
+            result = true;
+        },
+        TaskExecutor::TaskType::UI, "ArkUIBackPressedAppBar");
+
+    if (result) {
+        LOGI("appbar consumed backpressed event");
+        return true;
+    }
     return false;
 }
 
