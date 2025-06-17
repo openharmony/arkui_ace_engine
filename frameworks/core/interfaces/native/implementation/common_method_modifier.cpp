@@ -2030,17 +2030,13 @@ void Opacity0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto result = Converter::OptConvertPtr<float>(value);
-    if (result) {
-        // TODO: Reset value
-        ViewAbstract::SetOpacity(frameNode, result.value());
-    }
+    auto result = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    ViewAbstractModelStatic::SetOpacity(frameNode, result);
 }
 void Opacity1Impl(Ark_NativePointer node,
                   const Opt_Union_Number_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    Opacity0Impl(node, value);
 }
 void BorderImpl(Ark_NativePointer node,
                 const Opt_BorderOptions* value)
@@ -3187,8 +3183,7 @@ void Scale0Impl(Ark_NativePointer node,
 void Scale1Impl(Ark_NativePointer node,
                 const Opt_ScaleOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    Scale0Impl(node, value);
 }
 void GridSpanImpl(Ark_NativePointer node,
                   const Opt_Number* value)
