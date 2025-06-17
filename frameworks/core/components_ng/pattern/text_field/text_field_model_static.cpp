@@ -179,6 +179,10 @@ void TextFieldModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, cons
 
 void TextFieldModelStatic::SetMaxViewLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
 {
+    if (valueOpt.has_value() && valueOpt.value() <= 0) {
+        TextFieldModelNG::SetMaxViewLines(frameNode, MAX_LINES);
+        return;
+    }
     TextFieldModelNG::SetMaxViewLines(frameNode, valueOpt.value_or(MAX_LINES));
 }
 
