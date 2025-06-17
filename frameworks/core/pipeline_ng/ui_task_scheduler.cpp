@@ -148,7 +148,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 
     // Priority task creation
     int64_t time = 0;
+#ifndef IS_RELEASE_VERSION
     int64_t duration = 0;
+#endif
     for (auto&& node : dirtyLayoutNodesSet) {
         // need to check the node is destroying or not before CreateLayoutTask
         if (!node || node->IsInDestroying()) {
@@ -160,7 +162,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         if (frameInfo_ != nullptr) {
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
+#ifndef IS_RELEASE_VERSION
         duration += time;
+#endif
     }
 
     while (!ignoreLayoutSafeAreaBundles_.empty()) {
