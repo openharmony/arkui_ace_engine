@@ -24,8 +24,10 @@ void OnLoadFontFinished(const Rosen::FontCollection* collection, const std::stri
         return;
     }
     auto loadFinishCallback = FontCollection::Current()->GetLoadFontFinishCallback();
-    if (loadFinishCallback) {
-        loadFinishCallback(name);
+    for (const auto& callback : loadFinishCallback) {
+        if (callback) {
+            callback(name);
+        }
     }
 }
 
@@ -36,8 +38,10 @@ void OnUnLoadFontFinished(const Rosen::FontCollection* collection, const std::st
         return;
     }
     auto unLoadFinishCallback = FontCollection::Current()->GetUnloadFontFinishCallback();
-    if (unLoadFinishCallback) {
-        unLoadFinishCallback(name);
+    for (const auto& callback : unLoadFinishCallback) {
+        if (callback) {
+            callback(name);
+        }
     }
 }
 }
