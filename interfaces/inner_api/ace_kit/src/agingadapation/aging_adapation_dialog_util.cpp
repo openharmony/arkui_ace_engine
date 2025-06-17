@@ -14,7 +14,7 @@
  */
 
 #include "ui/base/agingadapation/aging_adapation_dialog_util.h"
-
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/utils/utils.h"
