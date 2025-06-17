@@ -8472,4 +8472,26 @@ void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& cond
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebBypassVsyncCondition");
 }
+
+void WebDelegate::UpdateSingleHandleVisible(bool isVisible)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->UpdateSingleHandleVisible(isVisible);
+}
+
+bool WebDelegate::ShowMagnifier()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    webPattern->OnShowMagnifier();
+    return true;
+}
+
+bool WebDelegate::HideMagnifier()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    webPattern->OnHideMagnifier();
+    return true;
+}
 } // namespace OHOS::Ace
