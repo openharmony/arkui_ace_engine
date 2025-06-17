@@ -612,6 +612,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         if (isSaveingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshotPixelMap id: %{public}d", snapshotPixelMap->GetUniqueId());
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
             snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
