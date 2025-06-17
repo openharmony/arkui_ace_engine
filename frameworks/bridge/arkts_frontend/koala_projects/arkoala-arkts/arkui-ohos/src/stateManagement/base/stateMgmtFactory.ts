@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IStateMgmtFactory, UIUtils } from '../decorator';
+import { IStateMgmtFactory } from '../decorator';
 import {
     IStateDecoratedVariable,
     ILinkDecoratedVariable,
@@ -40,6 +40,7 @@ import { StoragePropDecoratedVariable } from '../decoratorImpl/decoratorStorageP
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
+import { UIUtils } from '../utils';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {

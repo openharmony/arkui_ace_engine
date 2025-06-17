@@ -14,7 +14,7 @@
  */
 
 import { NullableObject } from '../base/types';
-import { AbstractProperty, SubscribedAbstractProperty, UIUtils } from '../decorator';
+import { AbstractProperty, SubscribedAbstractProperty } from '../decorator';
 
 import { __MkPropReturnType, StateDecoratedVariable } from '../decoratorImpl/decoratorState';
 import { LinkDecoratedVariable } from '../decoratorImpl/decoratorLink';
@@ -22,6 +22,7 @@ import { PropDecoratedVariable } from '../decoratorImpl/decoratorProp';
 import { WatchFuncType, WatchIdType } from '../decorator';
 
 import { int32 } from '@koalaui/common';
+import { UIUtils } from '../utils';
 
 type StorageLinkPropIdType = int32;
 

@@ -14,7 +14,7 @@
  */
 
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable, UIUtils } from '../decorator';
+import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable } from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { WatchFuncType, WatchIdType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
@@ -25,6 +25,7 @@ import { PropDecoratedVariable } from './decoratorProp';
 import { WatchFunc } from './decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { NullableObject } from '../base/types';
+import { UIUtils } from '../utils';
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
     watchId: WatchIdType;
