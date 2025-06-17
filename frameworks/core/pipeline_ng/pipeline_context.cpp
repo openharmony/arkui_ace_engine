@@ -4838,6 +4838,9 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
 
     if (action == DragEventAction::DRAG_EVENT_OUT || action == DragEventAction::DRAG_EVENT_END ||
         action == DragEventAction::DRAG_EVENT_PULL_THROW || action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->UnregisterTouchDelegate(pointerEvent.pointerId);
+        }
         lastDragTime_ = GetTimeFromExternalTimer();
         CompensatePointerMoveEvent(pointerEvent, node);
         manager->HandleDragEvent(pointerEvent, action, node);
