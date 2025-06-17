@@ -696,12 +696,13 @@ HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto callback = [](Ark_Int32 nodeId) {
+    auto callback = [](Ark_VMContext context, const Ark_Int32 resourceId) {
         checkEvent = {
-            .nodeId = nodeId,
+            .nodeId = resourceId,
         };
     };
-    auto arkCalback = Converter::ArkValue<Callback_Void>(callback, frameNode->GetId());
+    const int32_t contextId = 123;
+    auto arkCalback = Converter::ArkValue<Callback_Void>(callback, contextId);
     auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCalback);
 
     std::vector<Ark_ModifierKey> modifiers = {
@@ -730,7 +731,7 @@ HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
         EXPECT_NE(action, nullptr);
         action();
         EXPECT_TRUE(checkEvent.has_value());
-        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+        EXPECT_EQ(checkEvent->nodeId, contextId);
     }
 }
 }

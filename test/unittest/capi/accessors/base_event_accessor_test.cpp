@@ -215,7 +215,7 @@ HWTEST_F(BaseEventAccessorTest, GetSourceTest, TestSize.Level1)
     const std::vector<std::pair<SourceType, Ark_SourceType>> TEST_PLAN = {
         { SourceType::NONE, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
         { SourceType::MOUSE, Ark_SourceType::ARK_SOURCE_TYPE_MOUSE },
-        { SourceType::KEYBOARD, static_cast<Ark_SourceType>(-1) },
+        { SourceType::KEYBOARD, Ark_SourceType::ARK_SOURCE_TYPE_KEYBOARD },
         { SourceType::TOUCH, Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN },
         { SourceType::TOUCH_PAD, static_cast<Ark_SourceType>(-1) }
     };
